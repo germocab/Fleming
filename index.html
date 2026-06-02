@@ -277,7 +277,7 @@
   /* ─── ASSIGNMENT CARD ─── */
   .assignment-card {
     background: var(--surface);
-    border-radius: 30px;
+    border-radius: 18px;
     padding: 1rem 1rem 1rem 1.2rem;
     margin-bottom: 0.6rem;
     cursor: pointer;
@@ -733,12 +733,14 @@
       <div class="page-header">
         <div>
           <div class="page-header-title">Administración</div>
-          <div class="page-header-sub">Gestiona asignaciones y territorios</div>
+          <div class="page-header-sub">Gestiona asignaciones, territorios, conductores y casas</div>
         </div>
       </div>
       <div class="admin-tabs">
         <button class="admin-tab active" onclick="switchAdminTab('assignments')">Asignaciones</button>
         <button class="admin-tab" onclick="switchAdminTab('territories')">Territorios</button>
+        <button class="admin-tab" onclick="switchAdminTab('conductores')">Conductores</button>
+        <button class="admin-tab" onclick="switchAdminTab('casas')">Casas</button>
       </div>
       <div class="admin-section active" id="admin-assignments">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
@@ -753,6 +755,20 @@
           <button class="btn-secondary" onclick="openTerritoryModal()">+ Nuevo</button>
         </div>
         <div id="admin-territories-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+      </div>
+      <div class="admin-section" id="admin-conductores">
+        <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
+          <span style="flex:1;font-size:0.95rem;font-weight:700">Conductores</span>
+          <button class="btn-secondary" onclick="openConductorModal()">+ Nuevo</button>
+        </div>
+        <div id="admin-conductores-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+      </div>
+      <div class="admin-section" id="admin-casas">
+        <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
+          <span style="flex:1;font-size:0.95rem;font-weight:700">Casas registradas</span>
+          <button class="btn-secondary" onclick="openCasaModal()">+ Nueva</button>
+        </div>
+        <div id="admin-casas-list"><div class="loader-wrap"><div class="loader"></div></div></div>
       </div>
     </div>
   </div>
@@ -805,10 +821,19 @@
         <div class="form-group2"><label class="form-label2">Fecha</label><input type="date" class="form-input" id="as-date"></div>
         <div class="form-group2"><label class="form-label2">Hora</label><input type="time" class="form-input" id="as-time"></div>
       </div>
-      <div class="form-group2"><label class="form-label2">Dirección</label><input type="text" class="form-input" id="as-address" placeholder="Ej: Tres Marías 1633"></div>
-      <div class="form-group2"><label class="form-label2">Casa / Referencia</label><input type="text" class="form-input" id="as-house" placeholder="Ej: Casa de Julia Perez"></div>
+      <div class="form-group2">
+        <label class="form-label2">Casa</label>
+        <select class="form-select" id="as-casa-select">
+          <option value="">Sin casa asignada</option>
+        </select>
+      </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-        <div class="form-group2"><label class="form-label2">Conductor</label><input type="text" class="form-input" id="as-conductor" placeholder="Nombre del conductor"></div>
+        <div class="form-group2">
+          <label class="form-label2">Conductor</label>
+          <select class="form-select" id="as-conductor-select">
+            <option value="">Sin conductor</option>
+          </select>
+        </div>
         <div class="form-group2"><label class="form-label2">Modalidad</label>
           <select class="form-select" id="as-type">
             <option value="presencial">Presencial</option>
@@ -871,6 +896,56 @@
   </div>
 </div>
 
+<!-- CONDUCTOR MODAL (admin) -->
+<div class="modal-overlay" id="conductor-modal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <div class="modal-title" id="cond-modal-title">Nuevo Conductor</div>
+      <button class="modal-close" onclick="closeConductorModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="form-group2"><label class="form-label2">Nombre</label><input type="text" class="form-input" id="cond-nombre" placeholder="Ej: Tomás"></div>
+        <div class="form-group2"><label class="form-label2">Apellido</label><input type="text" class="form-input" id="cond-apellido" placeholder="Ej: Vergara"></div>
+      </div>
+      <div class="form-group2">
+        <label class="form-label2">Teléfono</label>
+        <input type="tel" class="form-input" id="cond-telefono" placeholder="Ej: +56 9 1234 5678">
+      </div>
+      <div style="display:flex;gap:10px;margin-top:1.1rem;justify-content:flex-end">
+        <button class="btn-secondary" onclick="closeConductorModal()">Cancelar</button>
+        <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="saveConductor()" id="save-cond-btn">Guardar</button>
+      </div>
+      <div class="auth-error" id="cond-error"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CASA MODAL (admin) -->
+<div class="modal-overlay" id="casa-modal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <div class="modal-title" id="casa-modal-title">Nueva Casa</div>
+      <button class="modal-close" onclick="closeCasaModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group2">
+        <label class="form-label2">Dirección</label>
+        <input type="text" class="form-input" id="casa-direccion" placeholder="Ej: Tres Marías 1633">
+      </div>
+      <div class="form-group2">
+        <label class="form-label2">Amo de casa</label>
+        <input type="text" class="form-input" id="casa-amo" placeholder="Ej: Julia Pérez">
+      </div>
+      <div style="display:flex;gap:10px;margin-top:1.1rem;justify-content:flex-end">
+        <button class="btn-secondary" onclick="closeCasaModal()">Cancelar</button>
+        <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="saveCasa()" id="save-casa-btn">Guardar</button>
+      </div>
+      <div class="auth-error" id="casa-error"></div>
+    </div>
+  </div>
+</div>
+
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
@@ -885,8 +960,12 @@ let currentUser = null;
 let currentRole = 'viewer';
 let assignments = [];
 let territories = [];
+let conductores = [];
+let casas = [];
 let editingAssignmentId = null;
 let editingTerritoryId = null;
+let editingConductorId = null;
+let editingCasaId = null;
 let noPasarCount = 0;
 let pendingMapBase64 = null;
 let currentMainTab = 'predicacion';
@@ -1030,7 +1109,8 @@ function showPage(name) {
 }
 
 function switchAdminTab(tab) {
-  document.querySelectorAll('.admin-tab').forEach((t,i) => t.classList.toggle('active', ['assignments','territories'][i] === tab));
+  const tabs = ['assignments','territories','conductores','casas'];
+  document.querySelectorAll('.admin-tab').forEach((t,i) => t.classList.toggle('active', tabs[i] === tab));
   document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
   document.getElementById('admin-' + tab).classList.add('active');
 }
@@ -1042,6 +1122,15 @@ async function loadSchedule() {
   assignments = aData || [];
   const { data: tData } = await sb.from('territories').select('*').order('number');
   territories = tData || [];
+  // Also refresh conductores and casas if they were loaded
+  if (conductores.length || casas.length) {
+    const [{ data: cData }, { data: hData }] = await Promise.all([
+      sb.from('conductores').select('*').order('apellido').order('nombre'),
+      sb.from('casas').select('*').order('direccion'),
+    ]);
+    conductores = cData || [];
+    casas = hData || [];
+  }
   renderSchedule();
 }
 
@@ -1153,9 +1242,19 @@ function viewAssignment(id) {
   const actions = document.getElementById('detail-actions');
   const callBtn = document.getElementById('detail-call-btn');
   const mapBtn  = document.getElementById('detail-map-btn');
-  if (a.type === 'zoom') { callBtn.textContent = 'Abrir Zoom'; }
-  else if (a.type === 'cartas') { callBtn.textContent = 'Ver detalles'; }
-  else { callBtn.textContent = 'Llamar'; }
+  if (a.type === 'zoom') { callBtn.textContent = 'Abrir Zoom'; callBtn.onclick = null; }
+  else if (a.type === 'cartas') { callBtn.textContent = 'Ver detalles'; callBtn.onclick = null; }
+  else {
+    callBtn.textContent = 'Llamar';
+    if (a.phone) {
+      callBtn.onclick = () => window.location.href = 'tel:' + a.phone.replace(/\s/g,'');
+      callBtn.style.opacity = '1';
+    } else {
+      callBtn.onclick = null;
+      callBtn.style.opacity = '0.45';
+      callBtn.title = 'Sin teléfono registrado';
+    }
+  }
   mapBtn.textContent = 'Cómo llegar';
 
   // No Pasar
@@ -1186,8 +1285,16 @@ function handleOverlayClick(e) {
 // ─── ADMIN DATA ───
 async function loadAdminData() {
   await loadSchedule();
+  const [{ data: cData }, { data: hData }] = await Promise.all([
+    sb.from('conductores').select('*').order('apellido').order('nombre'),
+    sb.from('casas').select('*').order('direccion'),
+  ]);
+  conductores = cData || [];
+  casas = hData || [];
   renderAdminAssignments();
   renderAdminTerritories();
+  renderAdminConductores();
+  renderAdminCasas();
 }
 
 function renderAdminAssignments() {
@@ -1249,30 +1356,46 @@ function openAssignmentModal(a) {
   document.getElementById('assignment-modal-title').textContent = a ? 'Editar Asignación' : 'Nueva Asignación';
   document.getElementById('as-date').value = a?.date || '';
   document.getElementById('as-time').value = a?.time || '';
-  document.getElementById('as-address').value = a?.address || '';
-  document.getElementById('as-house').value = a?.house || '';
-  document.getElementById('as-conductor').value = a?.conductor || '';
   document.getElementById('as-type').value = a?.type || 'presencial';
   document.getElementById('as-notes').value = a?.notes || '';
+
+  // Populate conductores select
+  const selConductor = document.getElementById('as-conductor-select');
+  selConductor.innerHTML = '<option value="">Sin conductor</option>' +
+    conductores.map(c => `<option value="${c.id}"${a?.conductor_id===c.id?' selected':''}>${c.nombre} ${c.apellido}</option>`).join('');
+
+  // Populate casas select
+  const selCasa = document.getElementById('as-casa-select');
+  selCasa.innerHTML = '<option value="">Sin casa asignada</option>' +
+    casas.map(h => `<option value="${h.id}"${a?.casa_id===h.id?' selected':''}>${h.direccion}${h.amo?' (${h.amo})':''}</option>`).join('');
+
   // Populate territories
-  const sel = document.getElementById('as-territory');
-  sel.innerHTML = '<option value="">Sin territorio</option>' +
+  const selTer = document.getElementById('as-territory');
+  selTer.innerHTML = '<option value="">Sin territorio</option>' +
     territories.map(t => `<option value="${t.id}"${a?.territory_id===t.id?' selected':''}>${t.number}${t.name?' — '+t.name:''}</option>`).join('');
+
   document.getElementById('as-error').style.display = 'none';
   document.getElementById('assignment-modal').classList.add('open');
 }
 function closeAssignmentModal() { document.getElementById('assignment-modal').classList.remove('open'); editingAssignmentId = null; }
 function editAssignment(id) { openAssignmentModal(assignments.find(a=>a.id===id)); }
 async function saveAssignment() {
+  const conductorId = document.getElementById('as-conductor-select').value || null;
+  const casaId = document.getElementById('as-casa-select').value || null;
+  const conductor = conductorId ? conductores.find(c=>c.id===conductorId) : null;
+  const casa = casaId ? casas.find(h=>h.id===casaId) : null;
   const payload = {
     date: document.getElementById('as-date').value,
     time: document.getElementById('as-time').value,
-    address: document.getElementById('as-address').value.trim(),
-    house: document.getElementById('as-house').value.trim(),
-    conductor: document.getElementById('as-conductor').value.trim(),
+    address: casa?.direccion || '',
+    house: casa?.amo || '',
+    conductor: conductor ? `${conductor.nombre} ${conductor.apellido}` : '',
+    conductor_id: conductorId,
+    casa_id: casaId,
     type: document.getElementById('as-type').value,
     territory_id: document.getElementById('as-territory').value || null,
     notes: document.getElementById('as-notes').value.trim(),
+    phone: conductor?.telefono || null,
   };
   if (!payload.date || !payload.time) { showError('as-error','Fecha y hora son requeridos'); return; }
   const btn = document.getElementById('save-as-btn');
@@ -1388,6 +1511,124 @@ async function deleteTerritory(id) {
   showToast('Territorio eliminado','success');
   const {data} = await sb.from('territories').select('*').order('number');
   territories = data || []; renderAdminTerritories();
+}
+
+// ─── CONDUCTORES CRUD ───
+function renderAdminConductores() {
+  const container = document.getElementById('admin-conductores-list');
+  if (!conductores.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><h4>Sin conductores</h4><p>Agrega el primer conductor</p></div>`;
+    return;
+  }
+  container.innerHTML = conductores.map(c => `
+    <div class="list-item">
+      <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#007AFF,#5ac8fa);display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:700;color:white;flex-shrink:0">${(c.nombre[0]||'')+(c.apellido[0]||'')}</div>
+      <div class="list-item-main">
+        <div class="list-item-title">${c.nombre} ${c.apellido}</div>
+        <div class="list-item-sub">${c.telefono||'Sin teléfono'}</div>
+      </div>
+      <div class="list-item-actions">
+        <button class="btn-sm" onclick="editConductor('${c.id}')">Editar</button>
+        <button class="btn-danger" onclick="deleteConductor('${c.id}')"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+    </div>`).join('');
+}
+
+function openConductorModal(c) {
+  editingConductorId = c ? c.id : null;
+  document.getElementById('cond-modal-title').textContent = c ? 'Editar Conductor' : 'Nuevo Conductor';
+  document.getElementById('cond-nombre').value = c?.nombre || '';
+  document.getElementById('cond-apellido').value = c?.apellido || '';
+  document.getElementById('cond-telefono').value = c?.telefono || '';
+  document.getElementById('cond-error').style.display = 'none';
+  document.getElementById('conductor-modal').classList.add('open');
+}
+function closeConductorModal() { document.getElementById('conductor-modal').classList.remove('open'); editingConductorId = null; }
+function editConductor(id) { openConductorModal(conductores.find(c=>c.id===id)); }
+async function saveConductor() {
+  const nombre = document.getElementById('cond-nombre').value.trim();
+  const apellido = document.getElementById('cond-apellido').value.trim();
+  const telefono = document.getElementById('cond-telefono').value.trim();
+  if (!nombre || !apellido) { showError('cond-error','Nombre y apellido son requeridos'); return; }
+  const btn = document.getElementById('save-cond-btn');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  let error;
+  if (editingConductorId) { ({error} = await sb.from('conductores').update({nombre,apellido,telefono}).eq('id',editingConductorId)); }
+  else { ({error} = await sb.from('conductores').insert({nombre,apellido,telefono})); }
+  btn.disabled = false; btn.textContent = 'Guardar';
+  if (error) { showError('cond-error', error.message); return; }
+  showToast(editingConductorId?'Conductor actualizado':'Conductor creado','success');
+  closeConductorModal();
+  const {data} = await sb.from('conductores').select('*').order('apellido').order('nombre');
+  conductores = data || [];
+  renderAdminConductores();
+}
+async function deleteConductor(id) {
+  if (!confirm('¿Eliminar este conductor?')) return;
+  const {error} = await sb.from('conductores').delete().eq('id',id);
+  if (error) { showToast('Error al eliminar','error'); return; }
+  showToast('Conductor eliminado','success');
+  const {data} = await sb.from('conductores').select('*').order('apellido').order('nombre');
+  conductores = data || []; renderAdminConductores();
+}
+
+// ─── CASAS CRUD ───
+function renderAdminCasas() {
+  const container = document.getElementById('admin-casas-list');
+  if (!casas.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><h4>Sin casas registradas</h4><p>Agrega la primera casa</p></div>`;
+    return;
+  }
+  container.innerHTML = casas.map(h => `
+    <div class="list-item">
+      <div style="width:38px;height:38px;border-radius:10px;background:var(--surface3);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <div class="list-item-main">
+        <div class="list-item-title">${h.direccion}</div>
+        <div class="list-item-sub">${h.amo||'Sin amo de casa registrado'}</div>
+      </div>
+      <div class="list-item-actions">
+        <button class="btn-sm" onclick="editCasa('${h.id}')">Editar</button>
+        <button class="btn-danger" onclick="deleteCasa('${h.id}')"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+    </div>`).join('');
+}
+
+function openCasaModal(h) {
+  editingCasaId = h ? h.id : null;
+  document.getElementById('casa-modal-title').textContent = h ? 'Editar Casa' : 'Nueva Casa';
+  document.getElementById('casa-direccion').value = h?.direccion || '';
+  document.getElementById('casa-amo').value = h?.amo || '';
+  document.getElementById('casa-error').style.display = 'none';
+  document.getElementById('casa-modal').classList.add('open');
+}
+function closeCasaModal() { document.getElementById('casa-modal').classList.remove('open'); editingCasaId = null; }
+function editCasa(id) { openCasaModal(casas.find(h=>h.id===id)); }
+async function saveCasa() {
+  const direccion = document.getElementById('casa-direccion').value.trim();
+  const amo = document.getElementById('casa-amo').value.trim();
+  if (!direccion) { showError('casa-error','La dirección es requerida'); return; }
+  const btn = document.getElementById('save-casa-btn');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  let error;
+  if (editingCasaId) { ({error} = await sb.from('casas').update({direccion,amo}).eq('id',editingCasaId)); }
+  else { ({error} = await sb.from('casas').insert({direccion,amo})); }
+  btn.disabled = false; btn.textContent = 'Guardar';
+  if (error) { showError('casa-error', error.message); return; }
+  showToast(editingCasaId?'Casa actualizada':'Casa creada','success');
+  closeCasaModal();
+  const {data} = await sb.from('casas').select('*').order('direccion');
+  casas = data || [];
+  renderAdminCasas();
+}
+async function deleteCasa(id) {
+  if (!confirm('¿Eliminar esta casa?')) return;
+  const {error} = await sb.from('casas').delete().eq('id',id);
+  if (error) { showToast('Error al eliminar','error'); return; }
+  showToast('Casa eliminada','success');
+  const {data} = await sb.from('casas').select('*').order('direccion');
+  casas = data || []; renderAdminCasas();
 }
 
 // ─── HELPERS ───
