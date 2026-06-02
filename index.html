@@ -1256,6 +1256,13 @@ function viewAssignment(id) {
     }
   }
   mapBtn.textContent = 'Cómo llegar';
+  if (a.address) {
+    mapBtn.onclick = () => window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(a.address), '_blank');
+    mapBtn.style.opacity = '1';
+  } else {
+    mapBtn.onclick = null;
+    mapBtn.style.opacity = '0.45';
+  }
 
   // No Pasar
   const noPasarSec  = document.getElementById('detail-no-pasar-section');
