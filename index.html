@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Congregación Fleming</title>
 
-<!-- PWA / Icons -->
 <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
@@ -19,7 +18,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  /* ─── TERRITORY COLOR PALETTE ─── */
   :root {
     --ter-1: #22c55e; --ter-1-bg: rgba(34,197,94,0.15);
     --ter-2: #3b82f6; --ter-2-bg: rgba(59,130,246,0.15);
@@ -32,7 +30,6 @@
     --ter-9: #f97316; --ter-9-bg: rgba(249,115,22,0.15);
     --ter-0: #64748b; --ter-0-bg: rgba(100,116,139,0.15);
 
-    /* Light theme */
     --bg: #f2f2f7;
     --surface: #ffffff;
     --surface2: #f8f8fa;
@@ -96,7 +93,6 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* ─── AUTH ─── */
   #auth-screen {
     display: flex; align-items: center; justify-content: center;
     min-height: 100vh; padding: 1rem; background: var(--bg);
@@ -148,10 +144,8 @@
     border-radius: var(--radius-sm); font-size: 0.84rem; color: var(--red); display: none;
   }
 
-  /* ─── APP SHELL ─── */
   #app { display: none; flex-direction: column; min-height: 100vh; }
 
-  /* ─── TOP NAV ─── */
   .topnav {
     display: flex; align-items: center;
     padding: 0 1.25rem; height: 72px;
@@ -161,7 +155,6 @@
   }
   .nav-spacer { flex: 1; }
 
-  /* ─── SEGMENT CONTROL — estilo prototipo: pill azul activo ─── */
   .main-segment {
     display: flex; background: var(--surface3);
     border-radius: 26px; padding: 4px; gap: 0;
@@ -179,7 +172,6 @@
     box-shadow: 0 2px 12px rgba(0,122,255,0.4);
   }
 
-  /* Nav right side */
   .nav-icons { display: flex; align-items: center; gap: 10px; }
   .nav-icon-btn {
     width: 42px; height: 42px; border-radius: 50%;
@@ -190,7 +182,6 @@
   .nav-icon-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .nav-icon-btn:hover { background: var(--surface2); }
 
-  /* Options dropdown (3 dots) */
   .options-wrap { position: relative; }
   .options-dropdown {
     position: absolute; top: calc(100% + 10px); right: 0;
@@ -228,7 +219,6 @@
   .dropdown-item.danger { color: var(--red); }
   .dropdown-item.danger:hover { background: rgba(255,59,48,0.07); }
 
-  /* theme toggle row inside dropdown */
   .dropdown-theme-row {
     display: flex; align-items: center; justify-content: space-between;
     padding: 0.55rem 0.85rem; border-radius: 10px;
@@ -251,7 +241,6 @@
 
   .dropdown-divider { height: 1px; background: var(--border); margin: 4px 0; }
 
-  /* ─── SUB TABS ─── */
   .sub-tabs-wrap {
     background: var(--nav-bg); backdrop-filter: blur(20px) saturate(180%);
     border-bottom: 1px solid var(--border);
@@ -268,7 +257,6 @@
   }
   .sub-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
 
-  /* ─── MAIN CONTENT ─── */
   .main-content {
     flex: 1; padding: 1.25rem; max-width: 860px; margin: 0 auto; width: 100%;
   }
@@ -277,15 +265,13 @@
   .page.active { display: block; animation: fadeIn 0.25s ease; }
   @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
 
-  /* ─── DATE SECTIONS ─── */
   .date-section { margin-bottom: 1.75rem; }
   .date-section-header {
-    font-size: 1.05rem; font-weight: 700;
+    font-size: 1.15rem; font-weight: 700;
     margin-bottom: 0.85rem; color: var(--text);
     letter-spacing: -0.01em;
   }
 
-  /* ─── ASSIGNMENT CARD ─── */
   .assignment-card {
     background: var(--surface);
     border-radius: 30px;
@@ -317,7 +303,6 @@
   }
   .card-time-chip svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
 
-  /* Type badges */
   .type-chip {
     display: inline-flex; align-items: center; gap: 4px;
     padding: 2px 8px; border-radius: 6px;
@@ -329,7 +314,6 @@
   .chip-cartas { background: rgba(90,200,250,0.15); color: #5ac8fa; }
   .chip-presencial { background: var(--accent-light); color: var(--accent); }
 
-  /* Territory badge (right side) */
   .ter-badge {
     width: 48px; height: 48px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
@@ -339,7 +323,6 @@
   .ter-badge.has-icon {
     background: transparent;
   }
-  /* Phone icon badge */
   .ter-badge-icon {
     width: 48px; height: 48px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
@@ -347,7 +330,6 @@
   }
   .ter-badge-icon svg { width: 24px; height: 24px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; }
 
-  /* ─── TERRITORY COLORS ─── */
   .ter-color-0 { background: #64748b; }
   .ter-color-1 { background: #22c55e; }
   .ter-color-2 { background: #3b82f6; }
@@ -359,12 +341,10 @@
   .ter-color-8 { background: #84cc16; }
   .ter-color-9 { background: #f97316; }
 
-  /* Zoom badge */
   .zoom-badge { background: linear-gradient(135deg, #00b4d8, #0077b6); }
   .phone-badge { background: linear-gradient(135deg, #ff9500, #ff6b00); }
   .cartas-badge { background: linear-gradient(135deg, #5ac8fa, #007AFF); }
 
-  /* ─── DETAIL VIEW (slide-in panel) ─── */
   .detail-overlay {
     display: none; position: fixed; inset: 0;
     background: var(--modal-overlay-bg); backdrop-filter: blur(10px);
@@ -443,7 +423,6 @@
   }
   .detail-map-wrap img { width: 100%; display: block; max-height: 260px; object-fit: contain; }
 
-  /* ─── IMAGE LIGHTBOX ─── */
   .img-lightbox {
     display: none; position: fixed; inset: 0; z-index: 999;
     background: rgba(0,0,0,0.92); backdrop-filter: blur(12px);
@@ -480,7 +459,6 @@
   }
   .no-pasar-item::before { content: '·'; font-size: 1.2rem; color: var(--text3); flex-shrink: 0; }
 
-  /* ─── ADMIN ─── */
   .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem; }
   .page-header-title { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; }
   .page-header-sub { font-size: 0.84rem; color: var(--text3); margin-top: 2px; }
@@ -495,7 +473,6 @@
   .admin-section { display: none; }
   .admin-section.active { display: block; }
 
-  /* Forms */
   .form-group2 { display: flex; flex-direction: column; gap: 5px; margin-bottom: 0.85rem; }
   .form-label2 { font-size: 0.78rem; font-weight: 600; color: var(--text3); }
   .form-select {
@@ -513,7 +490,6 @@
   }
   .form-textarea:focus { border-color: var(--accent); }
 
-  /* Modals */
   .modal-overlay {
     display: none; position: fixed; inset: 0;
     background: var(--modal-overlay-bg); backdrop-filter: blur(8px);
@@ -542,7 +518,6 @@
   .modal-close svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
   .modal-body { padding: 1.25rem; }
 
-  /* Buttons */
   .btn-secondary {
     padding: 0.6rem 1.1rem; background: var(--surface2); border: 1px solid var(--border);
     border-radius: var(--radius-sm); color: var(--text); font-family: var(--font);
@@ -562,7 +537,6 @@
   }
   .btn-sm:hover { background: var(--surface2); }
 
-  /* List items for admin */
   .list-item {
     display: flex; align-items: center; gap: 12px; padding: 0.85rem 1rem;
     background: var(--surface); border: 1px solid var(--border);
@@ -573,7 +547,6 @@
   .list-item-sub { font-size: 0.76rem; color: var(--text3); margin-top: 1px; }
   .list-item-actions { display: flex; gap: 6px; }
 
-  /* Image upload */
   .img-upload-area {
     border: 2px dashed var(--border-active); border-radius: var(--radius);
     padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s;
@@ -592,7 +565,6 @@
     font-size: 0.73rem; font-weight: 600; padding: 4px 10px; cursor: pointer; font-family: var(--font);
   }
 
-  /* Empty / loaders */
   .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem 1rem; color: var(--text3); text-align: center; }
   .empty-state-icon { margin-bottom: 1rem; opacity: 0.35; }
   .empty-state-icon svg { width: 40px; height: 40px; stroke: var(--text3); fill: none; stroke-width: 1.5; stroke-linecap: round; }
@@ -609,7 +581,6 @@
   .toast.error { color: var(--red); background: rgba(255,59,48,0.08); border-color: rgba(255,59,48,0.25); }
   @keyframes toastIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 
-  /* Coming soon panels */
   .coming-soon-panel {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     min-height: 260px; text-align: center; color: var(--text3);
@@ -621,7 +592,6 @@
   .coming-soon-icon { margin-bottom: 0.5rem; opacity: 0.4; }
   .coming-soon-icon svg { width: 40px; height: 40px; stroke: var(--text2); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 
-  /* Filter row for schedule */
   .filter-row { display: flex; gap: 8px; margin-bottom: 1.25rem; flex-wrap: wrap; align-items: center; }
   .date-input {
     padding: 5px 12px; background: var(--surface); border: 1px solid var(--border);
@@ -631,13 +601,11 @@
   .date-input:focus { border-color: var(--accent); }
   :root[data-theme="dark"] .date-input::-webkit-calendar-picker-indicator { filter: invert(1) opacity(0.4); }
 
-  /* Section divider in modal */
   .section-divider { height: 1px; background: var(--border); margin: 1rem 0; }
 </style>
 </head>
 <body>
 
-<!-- AUTH SCREEN -->
 <div id="auth-screen">
   <div class="auth-card">
     <div class="auth-logo">
@@ -668,13 +636,10 @@
   </div>
 </div>
 
-<!-- APP SHELL -->
 <div id="app">
-  <!-- TOP NAV -->
   <nav class="topnav">
     <div class="nav-spacer"></div>
 
-    <!-- Main segment: Predicación / Reuniones — centrado -->
     <div class="main-segment">
       <button class="main-seg-btn active" onclick="switchMainTab('predicacion',this)">Predicación</button>
       <button class="main-seg-btn" onclick="switchMainTab('reuniones',this)">Reuniones</button>
@@ -683,17 +648,14 @@
     <div class="nav-spacer"></div>
 
     <div class="nav-icons">
-      <!-- Bell -->
       <button class="nav-icon-btn" title="Notificaciones">
         <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       </button>
-      <!-- Options (3 dots) -->
       <div class="options-wrap">
         <button class="nav-icon-btn" title="Opciones" onclick="toggleOptionsMenu()">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.2" fill="currentColor" stroke="none"/></svg>
         </button>
         <div class="options-dropdown" id="options-dropdown">
-          <!-- User info -->
           <div class="options-user-info">
             <div class="options-avatar" id="user-avatar">?</div>
             <div>
@@ -701,19 +663,16 @@
               <div class="options-user-role" id="dropdown-role">—</div>
             </div>
           </div>
-          <!-- Theme toggle -->
           <button class="dropdown-item" onclick="toggleTheme();closeOptionsMenu()">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
             <span id="theme-btn-label">Modo oscuro</span>
           </button>
           <div class="dropdown-divider"></div>
-          <!-- Admin -->
           <button class="dropdown-item" id="admin-dropdown-btn" onclick="showPage('admin');closeOptionsMenu()" style="display:none">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             Administrar
           </button>
           <div class="dropdown-divider"></div>
-          <!-- Logout -->
           <button class="dropdown-item danger" onclick="doLogout()">
             <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             Cerrar sesión
@@ -723,13 +682,10 @@
     </div>
   </nav>
 
-  <!-- SUB TABS -->
   <div class="sub-tabs-wrap" id="sub-tabs-wrap">
-    <!-- filled dynamically -->
   </div>
 
   <div class="main-content">
-    <!-- SCHEDULE PAGE -->
     <div class="page active" id="page-schedule">
       <div id="sub-content-casa" class="sub-page active-sub">
         <div id="schedule-content"><div class="loader-wrap"><div class="loader"></div></div></div>
@@ -750,7 +706,6 @@
       </div>
     </div>
 
-    <!-- REUNIONES PAGE -->
     <div class="page" id="page-reuniones">
       <div class="coming-soon-panel">
         <div class="coming-soon-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
@@ -759,7 +714,6 @@
       </div>
     </div>
 
-    <!-- ADMIN PAGE -->
     <div class="page" id="page-admin">
       <div class="page-header">
         <div>
@@ -805,7 +759,6 @@
   </div>
 </div>
 
-<!-- DETAIL PANEL -->
 <div class="detail-overlay" id="detail-overlay" onclick="handleOverlayClick(event)">
   <div class="detail-panel" id="detail-panel">
     <div class="detail-handle"></div>
@@ -840,7 +793,6 @@
   </div>
 </div>
 
-<!-- ASSIGNMENT MODAL (admin) -->
 <div class="modal-overlay" id="assignment-modal">
   <div class="modal">
     <div class="modal-header">
@@ -887,7 +839,6 @@
   </div>
 </div>
 
-<!-- TERRITORY EDIT MODAL (admin) -->
 <div class="modal-overlay" id="territory-edit-modal">
   <div class="modal" style="max-width:600px">
     <div class="modal-header">
@@ -927,7 +878,6 @@
   </div>
 </div>
 
-<!-- CONDUCTOR MODAL (admin) -->
 <div class="modal-overlay" id="conductor-modal">
   <div class="modal" style="max-width:480px">
     <div class="modal-header">
@@ -952,7 +902,6 @@
   </div>
 </div>
 
-<!-- CASA MODAL (admin) -->
 <div class="modal-overlay" id="casa-modal">
   <div class="modal" style="max-width:480px">
     <div class="modal-header">
@@ -977,7 +926,6 @@
   </div>
 </div>
 
-<!-- IMAGE LIGHTBOX -->
 <div class="img-lightbox" id="img-lightbox" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">
     <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -1010,12 +958,10 @@ let pendingMapBase64 = null;
 let currentMainTab = 'predicacion';
 let currentSubTab  = 'casa';
 
-// ─── TERRITORY COLOR MAPPING ───
 const TER_COLORS = ['#64748b','#22c55e','#3b82f6','#a855f7','#f59e0b','#ef4444','#06b6d4','#ec4899','#84cc16','#f97316'];
 function getTerColor(num) { return TER_COLORS[num % TER_COLORS.length]; }
 function getTerColorClass(num) { return 'ter-color-' + (num % 10); }
 
-// ─── THEME ───
 function initTheme() {
   const saved = localStorage.getItem('fleming_theme') || 'light';
   applyTheme(saved);
@@ -1030,12 +976,10 @@ function toggleTheme() {
   applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
 }
 
-// ─── SESSION ───
 function saveSession(u) { sessionStorage.setItem('fleming_user', JSON.stringify(u)); }
 function loadSession() { try { return JSON.parse(sessionStorage.getItem('fleming_user')); } catch { return null; } }
 function clearSession() { sessionStorage.removeItem('fleming_user'); }
 
-// ─── INIT ───
 async function init() {
   initTheme();
   const saved = loadSession();
@@ -1054,7 +998,6 @@ function enterApp() {
   document.getElementById('dropdown-role').textContent = currentRole === 'admin' ? 'Administrador' : 'Visitante';
 
   if (currentRole === 'admin') {
-    // admin-nav-btn removed
     document.getElementById('admin-dropdown-btn').style.display = '';
   }
 
@@ -1062,7 +1005,6 @@ function enterApp() {
   loadSchedule();
 }
 
-// ─── AUTH ───
 function doAccess() {
   const first = document.getElementById('auth-first').value.trim();
   const last  = document.getElementById('auth-last').value.trim();
@@ -1086,7 +1028,6 @@ function doLogout() {
   document.getElementById('auth-screen').style.display = 'flex';
 }
 
-// ─── MAIN TAB SWITCHING ───
 const SUB_TABS = {
   predicacion: [
     { id: 'casa',    label: 'De casa en casa' },
@@ -1126,17 +1067,14 @@ function switchSubTab(tabId) {
       SUB_TABS[currentMainTab].find(t=>t.id===tabId)?.label.split(' ')[0]
     ));
   });
-  // re-render buttons with active
   renderSubTabs(currentMainTab);
 
-  // show/hide sub content
   ['casa','carritos','grupos'].forEach(id => {
     const el = document.getElementById('sub-content-' + id);
     if (el) el.style.display = id === tabId ? '' : 'none';
   });
 }
 
-// ─── PAGE NAVIGATION ───
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const p = document.getElementById('page-' + name);
@@ -1151,7 +1089,6 @@ function switchAdminTab(tab) {
   document.getElementById('admin-' + tab).classList.add('active');
 }
 
-// ─── LOAD DATA ───
 async function loadSchedule() {
   document.getElementById('schedule-content').innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
   const { data: aData } = await sb.from('assignments').select('*, territories(id,number,name,map_data,no_pasar)').order('date').order('time');
@@ -1170,7 +1107,6 @@ async function loadSchedule() {
   renderSchedule();
 }
 
-// ─── RENDER SCHEDULE ───
 function renderSchedule() {
   const container = document.getElementById('schedule-content');
   if (!assignments.length) {
@@ -1193,7 +1129,6 @@ function renderSchedule() {
       const ter = a.territories;
       const timeStr = a.time ? a.time.substring(0,5) : '--:--';
 
-      // Type-specific right badge
       let rightBadge = '';
       if (a.type === 'zoom') {
         rightBadge = `<div class="ter-badge-icon zoom-badge">
@@ -1212,7 +1147,6 @@ function renderSchedule() {
         rightBadge = `<div class="ter-badge" style="background:${color}">${ter.number}</div>`;
       }
 
-      // Type chip
       let typeChip = '';
       if (a.type === 'zoom') typeChip = `<span class="type-chip chip-zoom">Zoom</span>`;
       else if (a.type === 'telefono') typeChip = `<span class="type-chip chip-phone">Teléfono</span>`;
@@ -1238,7 +1172,6 @@ function renderSchedule() {
   container.innerHTML = html;
 }
 
-// ─── VIEW ASSIGNMENT DETAIL ───
 function viewAssignment(id) {
   const a = assignments.find(x => x.id === id);
   if (!a) return;
@@ -1252,7 +1185,6 @@ function viewAssignment(id) {
   document.getElementById('detail-address').textContent = [a.address, a.house].filter(Boolean).join('\n');
   document.getElementById('detail-conductor').textContent = a.conductor || '';
 
-  // Right badge in detail
   const badge = document.getElementById('detail-ter-badge');
   if (ter) {
     badge.textContent = ter.number;
@@ -1264,7 +1196,6 @@ function viewAssignment(id) {
     badge.style.display = 'none';
   }
 
-  // Map
   const mapWrap = document.getElementById('detail-map-wrap');
   const mapImg  = document.getElementById('detail-map-img');
   if (ter && ter.map_data) {
@@ -1276,7 +1207,6 @@ function viewAssignment(id) {
     mapWrap.onclick = null;
   }
 
-  // Actions: show call button only for phone type
   const actions = document.getElementById('detail-actions');
   const callBtn = document.getElementById('detail-call-btn');
   const mapBtn  = document.getElementById('detail-map-btn');
@@ -1302,7 +1232,6 @@ function viewAssignment(id) {
     mapBtn.style.opacity = '0.45';
   }
 
-  // No Pasar
   const noPasarSec  = document.getElementById('detail-no-pasar-section');
   const noPasarList = document.getElementById('detail-no-pasar-list');
   if (ter && ter.no_pasar) {
@@ -1327,7 +1256,6 @@ function handleOverlayClick(e) {
   if (e.target === document.getElementById('detail-overlay')) closeDetail();
 }
 
-// ─── ADMIN DATA ───
 async function loadAdminData() {
   await loadSchedule();
   const [{ data: cData }, { data: hData }] = await Promise.all([
@@ -1395,7 +1323,6 @@ function renderAdminTerritories() {
   }).join('');
 }
 
-// ─── ASSIGNMENT CRUD ───
 function openAssignmentModal(a) {
   editingAssignmentId = a ? a.id : null;
   document.getElementById('assignment-modal-title').textContent = a ? 'Editar Asignación' : 'Nueva Asignación';
@@ -1404,17 +1331,14 @@ function openAssignmentModal(a) {
   document.getElementById('as-type').value = a?.type || 'presencial';
   document.getElementById('as-notes').value = a?.notes || '';
 
-  // Populate conductores select
   const selConductor = document.getElementById('as-conductor-select');
   selConductor.innerHTML = '<option value="">Sin conductor</option>' +
     conductores.map(c => `<option value="${c.id}"${a?.conductor_id===c.id?' selected':''}>${c.nombre} ${c.apellido}</option>`).join('');
 
-  // Populate casas select
   const selCasa = document.getElementById('as-casa-select');
   selCasa.innerHTML = '<option value="">Sin casa asignada</option>' +
     casas.map(h => `<option value="${h.id}"${a?.casa_id===h.id?' selected':''}>${h.direccion}${h.amo?' (${h.amo})':''}</option>`).join('');
 
-  // Populate territories
   const selTer = document.getElementById('as-territory');
   selTer.innerHTML = '<option value="">Sin territorio</option>' +
     territories.map(t => `<option value="${t.id}"${a?.territory_id===t.id?' selected':''}>${t.number}${t.name?' — '+t.name:''}</option>`).join('');
@@ -1463,7 +1387,6 @@ async function deleteAssignment(id) {
   await loadSchedule(); renderAdminAssignments();
 }
 
-// ─── TERRITORY CRUD ───
 function openTerritoryModal(t) {
   editingTerritoryId = t ? t.id : null;
   document.getElementById('ter-modal-title').textContent = t ? 'Editar Territorio' : 'Nuevo Territorio';
@@ -1558,7 +1481,6 @@ async function deleteTerritory(id) {
   territories = data || []; renderAdminTerritories();
 }
 
-// ─── CONDUCTORES CRUD ───
 function renderAdminConductores() {
   const container = document.getElementById('admin-conductores-list');
   if (!conductores.length) {
@@ -1617,7 +1539,6 @@ async function deleteConductor(id) {
   conductores = data || []; renderAdminConductores();
 }
 
-// ─── CASAS CRUD ───
 function renderAdminCasas() {
   const container = document.getElementById('admin-casas-list');
   if (!casas.length) {
@@ -1676,7 +1597,6 @@ async function deleteCasa(id) {
   casas = data || []; renderAdminCasas();
 }
 
-// ─── HELPERS ───
 function showError(id, msg) { const el=document.getElementById(id); el.style.display='block'; el.textContent=msg; }
 function showToast(msg, type='') {
   const wrap = document.getElementById('toast-wrap');
@@ -1696,13 +1616,10 @@ function closeLightbox() {
 
 function toggleOptionsMenu() { document.getElementById('options-dropdown').classList.toggle('open'); }
 function closeOptionsMenu() { document.getElementById('options-dropdown').classList.remove('open'); }
-// Keep old alias for logout references
 function closeProfileMenu() { closeOptionsMenu(); }
 
-// Sync theme on init
 const _origApplyTheme = applyTheme;
 
-// Close overlays on outside click
 document.addEventListener('click', e => {
   if (!e.target.closest('.options-wrap')) closeOptionsMenu();
 });
