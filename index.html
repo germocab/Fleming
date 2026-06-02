@@ -8,37 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  /* ─── DARK THEME (default) ─── */
+  /* ─── LIGHT THEME (default) ─── */
   :root {
-    --bg: #0e0f14;
-    --surface: #16181f;
-    --surface2: #1e2029;
-    --surface3: #252733;
-    --border: rgba(255,255,255,0.07);
-    --border-active: rgba(255,255,255,0.15);
-    --accent: #6c8aff;
-    --accent2: #a78bfa;
-    --accent-glow: rgba(108,138,255,0.3);
-    --green: #34d399;
-    --orange: #f59e0b;
-    --red: #f87171;
-    --text: #f0f1f5;
-    --text2: #9ca0b0;
-    --text3: #5a5f72;
-    --radius: 14px;
-    --radius-sm: 8px;
-    --shadow: 0 4px 24px rgba(0,0,0,0.5);
-    --shadow-lg: 0 12px 48px rgba(0,0,0,0.6);
-    --font: 'Plus Jakarta Sans', sans-serif;
-    --font-display: 'Fraunces', serif;
-    --nav-bg: rgba(22,24,31,0.92);
-    --modal-overlay-bg: rgba(0,0,0,0.7);
-    --img-bg: #1a2e1a;
-    --noise-opacity: 0.4;
-  }
-
-  /* ─── LIGHT THEME ─── */
-  :root[data-theme="light"] {
     --bg: #f4f5f8;
     --surface: #ffffff;
     --surface2: #f0f1f6;
@@ -54,12 +25,41 @@
     --text: #111827;
     --text2: #4b5563;
     --text3: #9ca3af;
+    --radius: 14px;
+    --radius-sm: 8px;
     --shadow: 0 4px 24px rgba(0,0,0,0.08);
     --shadow-lg: 0 12px 48px rgba(0,0,0,0.12);
+    --font: 'Plus Jakarta Sans', sans-serif;
+    --font-display: 'Fraunces', serif;
     --nav-bg: rgba(255,255,255,0.92);
     --modal-overlay-bg: rgba(0,0,0,0.4);
     --img-bg: #e8f5e8;
     --noise-opacity: 0.15;
+  }
+
+  /* ─── DARK THEME ─── */
+  :root[data-theme="dark"] {
+    --bg: #0e0f14;
+    --surface: #16181f;
+    --surface2: #1e2029;
+    --surface3: #252733;
+    --border: rgba(255,255,255,0.07);
+    --border-active: rgba(255,255,255,0.15);
+    --accent: #6c8aff;
+    --accent2: #a78bfa;
+    --accent-glow: rgba(108,138,255,0.3);
+    --green: #34d399;
+    --orange: #f59e0b;
+    --red: #f87171;
+    --text: #f0f1f5;
+    --text2: #9ca0b0;
+    --text3: #5a5f72;
+    --shadow: 0 4px 24px rgba(0,0,0,0.5);
+    --shadow-lg: 0 12px 48px rgba(0,0,0,0.6);
+    --nav-bg: rgba(22,24,31,0.92);
+    --modal-overlay-bg: rgba(0,0,0,0.7);
+    --img-bg: #1a2e1a;
+    --noise-opacity: 0.4;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -242,8 +242,8 @@
     border-radius:20px;color:var(--text);font-family:var(--font);font-size:0.8rem;outline:none;font-weight:600;
   }
   .date-input:focus { border-color:var(--accent); }
-  .date-input::-webkit-calendar-picker-indicator { filter:invert(0.5) opacity(0.6); }
-  :root[data-theme="light"] .date-input::-webkit-calendar-picker-indicator { filter:none;opacity:0.5; }
+  .date-input::-webkit-calendar-picker-indicator { filter:none;opacity:0.5; }
+  :root[data-theme="dark"] .date-input::-webkit-calendar-picker-indicator { filter:invert(1) opacity(0.4); }
 
   /* DATE SECTIONS */
   .date-section { margin-bottom:2rem; }
@@ -475,16 +475,10 @@
       </div>
       <div class="auth-logo-text">
         <h1>Congr. Fleming</h1>
-        <span>Predicación · Gestión</span>
       </div>
     </div>
     <h2 class="auth-title">Bienvenido</h2>
-    <p class="auth-sub">Ingresa tu nombre y la contraseña correspondiente.</p>
-
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="tab-viewer" onclick="switchAuthTab('viewer')">Visitante</button>
-      <button class="auth-tab" id="tab-admin" onclick="switchAuthTab('admin')">Administrador</button>
-    </div>
+    <p class="auth-sub">Ingresa tu nombre y contraseña para acceder.</p>
 
     <div class="form-group">
       <label class="form-label">Nombre</label>
@@ -498,7 +492,6 @@
       <label class="form-label">Contraseña</label>
       <input type="password" class="form-input" id="auth-pass" placeholder="••••••••••••">
     </div>
-    <div class="auth-hint" id="auth-hint">Contraseña compartida para visitantes: <strong>Fleming2026</strong></div>
     <button class="btn-primary" style="margin-top:1rem" onclick="doAccess()" id="access-btn">Ingresar</button>
     <div class="auth-error" id="auth-error"></div>
   </div>
@@ -558,13 +551,6 @@
           <div class="page-header-title">Predicación de casa en casa</div>
           <div class="page-header-sub" id="schedule-sub">Asignaciones programadas</div>
         </div>
-      </div>
-      <div class="filter-row">
-        <span class="filter-label">Filtrar:</span>
-        <button class="filter-btn active" id="fb-all" onclick="setFilter('all',this)">Todos</button>
-        <button class="filter-btn" id="fb-today" onclick="setFilter('today',this)">Hoy</button>
-        <button class="filter-btn" id="fb-week" onclick="setFilter('week',this)">Esta semana</button>
-        <input type="date" class="date-input" id="date-filter-input" onchange="setFilter('date',this)">
       </div>
       <div id="schedule-content"><div class="loader-wrap"><div class="loader"></div></div></div>
     </div>
@@ -763,16 +749,14 @@ let currentUser = null; // { name, role }
 let currentRole = 'viewer';
 let assignments = [];
 let territories = [];
-let currentFilter = 'all';
 let editingAssignmentId = null;
 let editingTerritoryId = null;
 let noPasarCount = 0;
 let pendingMapBase64 = null;
-let currentAuthTab = 'viewer';
 
 // ─── THEME ───
 function initTheme() {
-  const saved = localStorage.getItem('fleming_theme') || 'dark';
+  const saved = localStorage.getItem('fleming_theme') || 'light';
   applyTheme(saved);
 }
 function applyTheme(theme) {
@@ -780,13 +764,13 @@ function applyTheme(theme) {
   const moon = document.getElementById('theme-icon-moon');
   const sun  = document.getElementById('theme-icon-sun');
   if (moon && sun) {
-    moon.style.display = theme === 'dark' ? 'block' : 'none';
-    sun.style.display  = theme === 'light' ? 'block' : 'none';
+    moon.style.display = theme === 'light' ? 'block' : 'none';
+    sun.style.display  = theme === 'dark'  ? 'block' : 'none';
   }
   localStorage.setItem('fleming_theme', theme);
 }
 function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const current = document.documentElement.getAttribute('data-theme') || 'light';
   applyTheme(current === 'dark' ? 'light' : 'dark');
 }
 
@@ -838,17 +822,6 @@ function enterApp() {
 }
 
 // ─── AUTH ───
-function switchAuthTab(tab) {
-  currentAuthTab = tab;
-  document.getElementById('tab-viewer').classList.toggle('active', tab === 'viewer');
-  document.getElementById('tab-admin').classList.toggle('active', tab === 'admin');
-  const hint = document.getElementById('auth-hint');
-  hint.innerHTML = tab === 'viewer'
-    ? 'Contraseña compartida para visitantes: <strong>Fleming2026</strong>'
-    : 'Contraseña especial para administradores.';
-  document.getElementById('auth-error').style.display = 'none';
-}
-
 function doAccess() {
   const first = document.getElementById('auth-first').value.trim();
   const last  = document.getElementById('auth-last').value.trim();
@@ -859,12 +832,12 @@ function doAccess() {
   if (!first || !last) { errEl.style.display='block'; errEl.textContent='Por favor ingresa tu nombre y apellido.'; return; }
   if (!pass)           { errEl.style.display='block'; errEl.textContent='Ingresa la contraseña.'; return; }
 
-  const role = currentAuthTab;
-  const expectedPass = role === 'admin' ? PASS_ADMIN : PASS_VIEWER;
-
-  if (pass !== expectedPass) {
+  let role = null;
+  if (pass === PASS_ADMIN)  role = 'admin';
+  else if (pass === PASS_VIEWER) role = 'viewer';
+  else {
     errEl.style.display='block';
-    errEl.textContent = role === 'admin' ? 'Contraseña de administrador incorrecta.' : 'Contraseña incorrecta.';
+    errEl.textContent='Contraseña incorrecta.';
     return;
   }
 
@@ -901,14 +874,6 @@ function switchAdminTab(tab) {
   document.getElementById('admin-' + tab).classList.add('active');
 }
 
-// ─── FILTER ───
-function setFilter(f, btn) {
-  currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  if (btn && f !== 'date') btn.classList.add('active');
-  renderSchedule();
-}
-
 // ─── LOAD DATA ───
 async function loadSchedule() {
   document.getElementById('schedule-content').innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
@@ -921,19 +886,7 @@ async function loadSchedule() {
 
 function renderSchedule() {
   const container = document.getElementById('schedule-content');
-  let filtered = [...assignments];
-  const todayStr = new Date().toISOString().split('T')[0];
-  const today = new Date(todayStr + 'T00:00:00');
-
-  if (currentFilter === 'today') {
-    filtered = filtered.filter(a => a.date === todayStr);
-  } else if (currentFilter === 'week') {
-    const weekEnd = new Date(today); weekEnd.setDate(today.getDate() + 7);
-    filtered = filtered.filter(a => { const d = new Date(a.date+'T00:00:00'); return d >= today && d <= weekEnd; });
-  } else if (currentFilter === 'date') {
-    const dv = document.getElementById('date-filter-input').value;
-    if (dv) filtered = filtered.filter(a => a.date === dv);
-  }
+  const filtered = [...assignments];
 
   document.getElementById('schedule-sub').textContent = filtered.length + ' asignación' + (filtered.length!==1?'es':'');
 
