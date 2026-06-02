@@ -428,9 +428,34 @@
     background: var(--surface2); border-radius: var(--radius);
     overflow: hidden; min-height: 160px;
     display: flex; align-items: center; justify-content: center;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border); cursor: zoom-in;
   }
   .detail-map-wrap img { width: 100%; display: block; max-height: 260px; object-fit: contain; }
+
+  /* ─── IMAGE LIGHTBOX ─── */
+  .img-lightbox {
+    display: none; position: fixed; inset: 0; z-index: 999;
+    background: rgba(0,0,0,0.92); backdrop-filter: blur(12px);
+    align-items: center; justify-content: center;
+    cursor: zoom-out;
+  }
+  .img-lightbox.open { display: flex; animation: fadeIn 0.2s ease; }
+  .img-lightbox img {
+    max-width: 96vw; max-height: 92vh;
+    object-fit: contain; border-radius: 12px;
+    box-shadow: 0 8px 60px rgba(0,0,0,0.7);
+    animation: lightboxIn 0.25s cubic-bezier(0.16,1,0.3,1);
+  }
+  @keyframes lightboxIn { from{opacity:0;transform:scale(0.92)} to{opacity:1;transform:scale(1)} }
+  .lightbox-close {
+    position: fixed; top: 1.25rem; right: 1.25rem;
+    width: 40px; height: 40px; border-radius: 50%;
+    background: rgba(255,255,255,0.15); border: none;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: white; backdrop-filter: blur(8px); transition: background 0.2s;
+  }
+  .lightbox-close:hover { background: rgba(255,255,255,0.25); }
+  .lightbox-close svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
 
   .no-pasar-section { padding: 0 1.25rem 1.25rem; }
   .no-pasar-title {
@@ -664,17 +689,11 @@
               <div class="options-user-role" id="dropdown-role">—</div>
             </div>
           </div>
-          <!-- Theme toggle row -->
-          <div class="dropdown-theme-row">
-            <span>
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-              Apariencia
-            </span>
-            <div class="theme-pill">
-              <button class="theme-pill-btn active" id="pill-light" onclick="setTheme('light')" title="Claro">☀️</button>
-              <button class="theme-pill-btn" id="pill-dark" onclick="setTheme('dark')" title="Oscuro">🌙</button>
-            </div>
-          </div>
+          <!-- Theme toggle -->
+          <button class="dropdown-item" onclick="toggleTheme();closeOptionsMenu()">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <span id="theme-btn-label">Modo oscuro</span>
+          </button>
           <div class="dropdown-divider"></div>
           <!-- Admin -->
           <button class="dropdown-item" id="admin-dropdown-btn" onclick="showPage('admin');closeOptionsMenu()" style="display:none">
@@ -946,6 +965,14 @@
   </div>
 </div>
 
+<!-- IMAGE LIGHTBOX -->
+<div class="img-lightbox" id="img-lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">
+    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <img id="lightbox-img" src="" alt="Mapa del territorio">
+</div>
+
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
@@ -984,11 +1011,8 @@ function initTheme() {
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('fleming_theme', theme);
-  // sync pills if they exist
-  const pl = document.getElementById('pill-light');
-  const pd = document.getElementById('pill-dark');
-  if (pl) pl.classList.toggle('active', theme === 'light');
-  if (pd) pd.classList.toggle('active', theme === 'dark');
+  const label = document.getElementById('theme-btn-label');
+  if (label) label.textContent = theme === 'dark' ? 'Modo claro' : 'Modo oscuro';
 }
 function toggleTheme() {
   applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
@@ -1234,8 +1258,10 @@ function viewAssignment(id) {
   if (ter && ter.map_data) {
     mapImg.src = ter.map_data;
     mapWrap.style.display = '';
+    mapWrap.onclick = () => openLightbox(ter.map_data);
   } else {
     mapWrap.style.display = 'none';
+    mapWrap.onclick = null;
   }
 
   // Actions: show call button only for phone type
@@ -1646,18 +1672,22 @@ function showToast(msg, type='') {
   t.className = 'toast ' + type; t.textContent = msg;
   wrap.appendChild(t); setTimeout(() => t.remove(), 3200);
 }
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('img-lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('img-lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
 function toggleOptionsMenu() { document.getElementById('options-dropdown').classList.toggle('open'); }
 function closeOptionsMenu() { document.getElementById('options-dropdown').classList.remove('open'); }
 // Keep old alias for logout references
 function closeProfileMenu() { closeOptionsMenu(); }
 
-function setTheme(theme) {
-  applyTheme(theme);
-  document.getElementById('pill-light').classList.toggle('active', theme === 'light');
-  document.getElementById('pill-dark').classList.toggle('active', theme === 'dark');
-}
-
-// Sync theme pills on init
+// Sync theme on init
 const _origApplyTheme = applyTheme;
 
 // Close overlays on outside click
@@ -1668,6 +1698,7 @@ document.querySelectorAll('.modal-overlay').forEach(o => {
   o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
 });
 document.getElementById('auth-pass').addEventListener('keydown', e => { if (e.key==='Enter') doAccess(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 
 init();
 </script>
