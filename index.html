@@ -618,6 +618,116 @@
 
   .section-divider { height: 1px; background: var(--border); margin: 1rem 0; }
 
+
+  /* ── Users panel modal ── */
+  .users-panel-overlay {
+    display: none; position: fixed; inset: 0;
+    background: var(--modal-overlay-bg); backdrop-filter: blur(8px);
+    z-index: 400; align-items: flex-end; justify-content: center; padding: 0;
+  }
+  .users-panel-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+  @media(min-width: 640px) {
+    .users-panel-overlay { align-items: center; padding: 1rem; }
+    .users-panel { border-radius: 20px; animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1); max-width: 560px; }
+  }
+  .users-panel {
+    background: var(--surface); width: 100%; max-width: 560px;
+    max-height: 92vh; overflow-y: auto;
+    border-radius: 20px 20px 0 0;
+    box-shadow: var(--shadow-lg);
+    animation: slideUpPanel 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+  .users-panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.1rem 1.25rem; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--surface); z-index: 1;
+  }
+  .users-panel-title { font-size: 1.05rem; font-weight: 700; }
+  .users-panel-body { padding: 1.1rem 1.25rem; }
+
+  .user-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 0.8rem 0.9rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); margin-bottom: 0.5rem;
+    transition: border-color 0.15s;
+  }
+  .user-row:hover { border-color: var(--border-active); }
+  .user-row-avatar {
+    width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700; color: white;
+  }
+  .user-row-info { flex: 1; min-width: 0; }
+  .user-row-name { font-size: 0.88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-row-meta { font-size: 0.74rem; color: var(--text3); margin-top: 1px; }
+  .user-row-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+
+  .role-badge-pill {
+    display: inline-flex; align-items: center;
+    padding: 3px 9px; border-radius: 20px;
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+  .role-badge-admin     { background: rgba(0,122,255,0.12); color: var(--accent); border: 1px solid rgba(0,122,255,0.25); }
+  .role-badge-semiadmin { background: rgba(168,85,247,0.12); color: #a855f7;      border: 1px solid rgba(168,85,247,0.25); }
+  .role-badge-viewer    { background: var(--surface3);        color: var(--text3); border: 1px solid var(--border); }
+
+  .role-select-inline {
+    padding: 4px 8px; font-size: 0.78rem; font-weight: 600;
+    background: var(--surface3); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text2); font-family: var(--font);
+    outline: none; cursor: pointer; transition: border-color 0.15s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238e8e93' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 7px center; padding-right: 22px;
+  }
+  .role-select-inline:focus { border-color: var(--accent); }
+
+  .task-textarea {
+    width: 100%; padding: 0.55rem 0.75rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-xs); color: var(--text);
+    font-family: var(--font); font-size: 0.82rem; outline: none;
+    resize: none; min-height: 56px; line-height: 1.45;
+    transition: border-color 0.2s;
+  }
+  .task-textarea:focus { border-color: var(--accent); }
+  .task-textarea::placeholder { color: var(--text3); }
+
+  .user-expand {
+    padding: 0.75rem 0.9rem 0.85rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-top: none; border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    margin-top: -6px; margin-bottom: 0.5rem;
+  }
+  .user-expand-label { font-size: 0.74rem; font-weight: 600; color: var(--text3); margin-bottom: 5px; }
+
+  .revoke-btn {
+    padding: 0.38rem 0.85rem;
+    background: rgba(255,59,48,0.08); border: 1px solid rgba(255,59,48,0.2);
+    border-radius: 8px; color: var(--red); font-family: var(--font);
+    font-size: 0.76rem; font-weight: 700; cursor: pointer; transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .revoke-btn:hover { background: rgba(255,59,48,0.15); }
+
+  .promote-btn {
+    padding: 0.38rem 0.85rem;
+    background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.25);
+    border-radius: 8px; color: #a855f7; font-family: var(--font);
+    font-size: 0.76rem; font-weight: 700; cursor: pointer; transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .promote-btn:hover { background: rgba(168,85,247,0.18); }
+
+  .users-empty {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 2rem; color: var(--text3); text-align: center; gap: 6px;
+  }
+  .users-empty svg { width: 36px; height: 36px; stroke: var(--text3); fill: none; stroke-width: 1.5; stroke-linecap: round; opacity: 0.4; margin-bottom: 4px; }
+  .users-empty p { font-size: 0.84rem; }
+
   /* ── Territory grid ── */
   .ter-grid {
     display: grid;
@@ -753,7 +863,7 @@
         <div class="options-dropdown" id="options-dropdown">
           <div class="options-user-info">
             <div class="options-avatar" id="user-avatar">?</div>
-            <div>
+            <div style="min-width:0;flex:1">
               <div class="options-user-name" id="dropdown-name">—</div>
               <div class="options-user-role" id="dropdown-role">—</div>
             </div>
@@ -766,6 +876,10 @@
           <button class="dropdown-item" id="admin-dropdown-btn" onclick="showPage('admin');closeOptionsMenu()" style="display:none">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             Administrar
+          </button>
+          <button class="dropdown-item" id="users-panel-btn" onclick="openUsersPanel();closeOptionsMenu()" style="display:none">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Usuarios
           </button>
           <div class="dropdown-divider"></div>
           <button class="dropdown-item danger" onclick="doLogout()">
@@ -1021,6 +1135,21 @@
   </div>
 </div>
 
+
+<div class="users-panel-overlay" id="users-panel-overlay" onclick="handleUsersPanelOverlayClick(event)">
+  <div class="users-panel" id="users-panel">
+    <div class="users-panel-header">
+      <span class="users-panel-title">Usuarios activos</span>
+      <button class="modal-close" onclick="closeUsersPanel()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="users-panel-body" id="users-panel-body">
+      <div class="loader-wrap"><div class="loader"></div></div>
+    </div>
+  </div>
+</div>
+
 <div class="img-lightbox" id="img-lightbox" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">
     <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -1090,13 +1219,31 @@ function enterApp() {
   const initials = currentUser.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
   document.getElementById('user-avatar').textContent = initials;
   document.getElementById('dropdown-name').textContent = currentUser.name;
-  document.getElementById('dropdown-role').textContent = currentRole === 'admin' ? 'Administrador' : 'Visitante';
+
+  registerUserSession(currentUser.name, currentRole);
+
+  // Update UI based on final role (registerUserSession may have updated currentRole)
+  const roleLabelsMap = { admin:'Administrador', semiadmin:'SemiAdmin', viewer:'Visitante' };
+  document.getElementById('dropdown-role').textContent = roleLabelsMap[currentRole] || 'Visitante';
 
   const adminBtn = document.getElementById('admin-dropdown-btn');
-  adminBtn.style.display = currentRole === 'admin' ? '' : 'none';
+  adminBtn.style.display = ['admin','semiadmin'].includes(currentRole) ? '' : 'none';
+  const usersBtn = document.getElementById('users-panel-btn');
+  if (usersBtn) usersBtn.style.display = currentRole === 'admin' ? '' : 'none';
 
   renderSubTabs('predicacion');
   loadSchedule();
+
+  // Show assigned task in dropdown for semiadmin
+  const taskEl = document.getElementById('dropdown-task');
+  if (taskEl) {
+    if (currentRole === 'semiadmin') {
+      loadUsers();
+      const me = activeUsers.find(u => u.name === currentUser.name);
+      if (me && me.task) { taskEl.textContent = 'ud83dudccb ' + me.task; taskEl.style.display = ''; }
+      else { taskEl.style.display = 'none'; }
+    } else { taskEl.style.display = 'none'; }
+  }
 }
 
 function doAccess() {
@@ -1107,8 +1254,18 @@ function doAccess() {
   errEl.style.display = 'none';
   if (!first || !last) { errEl.style.display='block'; errEl.textContent='Ingresa tu nombre y apellido.'; return; }
   if (!pass)           { errEl.style.display='block'; errEl.textContent='Ingresa la contraseña.'; return; }
-  let role = pass === PASS_ADMIN ? 'admin' : pass === PASS_VIEWER ? 'viewer' : null;
-  if (!role) { errEl.style.display='block'; errEl.textContent='Contraseña incorrecta.'; return; }
+  let baseRole = pass === PASS_ADMIN ? 'admin' : pass === PASS_VIEWER ? 'viewer' : null;
+  if (!baseRole) { errEl.style.display='block'; errEl.textContent='Contraseña incorrecta.'; return; }
+
+  // If logging in as viewer, check if an admin has promoted this user to semiadmin
+  let role = baseRole;
+  if (baseRole === 'viewer') {
+    loadUsers();
+    const fullName = first + ' ' + last;
+    const stored = activeUsers.find(u => u.name.toLowerCase() === fullName.toLowerCase());
+    if (stored && stored.role === 'semiadmin') role = 'semiadmin';
+  }
+
   currentUser = { name: first + ' ' + last, role };
   currentRole = role;
   saveSession(currentUser);
@@ -1170,7 +1327,7 @@ function switchSubTab(tabId) {
 }
 
 function showPage(name) {
-  if (name === 'admin' && currentRole !== 'admin') {
+  if (name === 'admin' && !['admin','semiadmin'].includes(currentRole)) {
     showToast('No tienes permisos para acceder a esta sección.', 'error');
     return;
   }
@@ -1435,7 +1592,7 @@ function renderAdminTerritories() {
 }
 
 function openAssignmentModal(a) {
-  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
+  if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   editingAssignmentId = a ? a.id : null;
   document.getElementById('assignment-modal-title').textContent = a ? 'Editar Asignación' : 'Nueva Asignación';
   document.getElementById('as-date').value = a?.date || '';
@@ -1461,7 +1618,7 @@ function openAssignmentModal(a) {
 function closeAssignmentModal() { document.getElementById('assignment-modal').classList.remove('open'); editingAssignmentId = null; }
 function editAssignment(id) { openAssignmentModal(assignments.find(a=>a.id===id)); }
 async function saveAssignment() {
-  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
+  if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   const conductorId = document.getElementById('as-conductor-select').value || null;
   const casaId = document.getElementById('as-casa-select').value || null;
   const conductor = conductorId ? conductores.find(c=>c.id===conductorId) : null;
@@ -1493,7 +1650,7 @@ async function saveAssignment() {
   renderAdminAssignments();
 }
 async function deleteAssignment(id) {
-  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
+  if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   if (!confirm('¿Eliminar esta asignación?')) return;
   const {error} = await sb.from('assignments').delete().eq('id',id);
   if (error) { showToast('Error al eliminar','error'); return; }
@@ -1502,7 +1659,7 @@ async function deleteAssignment(id) {
 }
 
 function openTerritoryModal(t) {
-  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
+  if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   editingTerritoryId = t ? t.id : null;
   document.getElementById('ter-modal-title').textContent = t ? 'Editar Territorio' : 'Nuevo Territorio';
   document.getElementById('ter-num').value = t?.number || '';
@@ -1567,7 +1724,7 @@ function addNoPasarInput(val = '') {
   document.getElementById('no-pasar-inputs').appendChild(div);
 }
 async function saveTerritory() {
-  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
+  if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   const number = parseInt(document.getElementById('ter-num').value);
   const name   = document.getElementById('ter-name').value.trim();
   if (!number) { showError('ter-error','El número de territorio es requerido'); return; }
@@ -1589,7 +1746,7 @@ async function saveTerritory() {
   await loadSchedule();
 }
 async function deleteTerritory(id) {
-  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
+  if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   if (!confirm('¿Eliminar este territorio?')) return;
   const {error} = await sb.from('territories').delete().eq('id',id);
   if (error) { showToast('Error al eliminar','error'); return; }
@@ -1619,7 +1776,7 @@ function renderAdminConductores() {
 }
 
 function openConductorModal(c) {
-  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
+  if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   editingConductorId = c ? c.id : null;
   document.getElementById('cond-modal-title').textContent = c ? 'Editar Conductor' : 'Nuevo Conductor';
   document.getElementById('cond-nombre').value = c?.nombre || '';
@@ -1631,7 +1788,7 @@ function openConductorModal(c) {
 function closeConductorModal() { document.getElementById('conductor-modal').classList.remove('open'); editingConductorId = null; }
 function editConductor(id) { openConductorModal(conductores.find(c=>c.id===id)); }
 async function saveConductor() {
-  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
+  if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   const nombre = document.getElementById('cond-nombre').value.trim();
   const apellido = document.getElementById('cond-apellido').value.trim();
   const telefono = document.getElementById('cond-telefono').value.trim();
@@ -1650,7 +1807,7 @@ async function saveConductor() {
   renderAdminConductores();
 }
 async function deleteConductor(id) {
-  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
+  if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   if (!confirm('¿Eliminar este conductor?')) return;
   const {error} = await sb.from('conductores').delete().eq('id',id);
   if (error) { showToast('Error al eliminar','error'); return; }
@@ -1682,7 +1839,7 @@ function renderAdminCasas() {
 }
 
 function openCasaModal(h) {
-  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
+  if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   editingCasaId = h ? h.id : null;
   document.getElementById('casa-modal-title').textContent = h ? 'Editar Casa' : 'Nueva Casa';
   document.getElementById('casa-direccion').value = h?.direccion || '';
@@ -1693,7 +1850,7 @@ function openCasaModal(h) {
 function closeCasaModal() { document.getElementById('casa-modal').classList.remove('open'); editingCasaId = null; }
 function editCasa(id) { openCasaModal(casas.find(h=>h.id===id)); }
 async function saveCasa() {
-  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
+  if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   const direccion = document.getElementById('casa-direccion').value.trim();
   const amo = document.getElementById('casa-amo').value.trim();
   if (!direccion) { showError('casa-error','La dirección es requerida'); return; }
@@ -1711,7 +1868,7 @@ async function saveCasa() {
   renderAdminCasas();
 }
 async function deleteCasa(id) {
-  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
+  if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   if (!confirm('¿Eliminar esta casa?')) return;
   const {error} = await sb.from('casas').delete().eq('id',id);
   if (error) { showToast('Error al eliminar','error'); return; }
@@ -1720,6 +1877,161 @@ async function deleteCasa(id) {
   casas = data || []; renderAdminCasas();
 }
 
+
+// ── Users panel ──────────────────────────────────────────────────────────────
+let activeUsers = []; // { id, name, role, task, joinedAt }
+let expandedUserId = null;
+
+function saveUsers() { localStorage.setItem('fleming_users', JSON.stringify(activeUsers)); }
+function loadUsers()  {
+  try { activeUsers = JSON.parse(localStorage.getItem('fleming_users')) || []; }
+  catch { activeUsers = []; }
+}
+
+function openUsersPanel() {
+  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
+  loadUsers();
+  renderUsersPanel();
+  document.getElementById('users-panel-overlay').classList.add('open');
+}
+function closeUsersPanel() {
+  document.getElementById('users-panel-overlay').classList.remove('open');
+  expandedUserId = null;
+}
+function handleUsersPanelOverlayClick(e) {
+  if (e.target === document.getElementById('users-panel-overlay')) closeUsersPanel();
+}
+
+const USER_COLORS = ['#22c55e','#3b82f6','#a855f7','#f59e0b','#ef4444','#06b6d4','#ec4899','#84cc16','#f97316','#64748b'];
+function userColor(name) {
+  let h = 0; for (let i=0; i<name.length; i++) h = (h*31 + name.charCodeAt(i)) & 0xffff;
+  return USER_COLORS[h % USER_COLORS.length];
+}
+function userInitials(name) { return name.trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
+
+const ROLE_LABELS = { viewer:'Visitante', semiadmin:'SemiAdmin', admin:'Administrador' };
+
+function renderUsersPanel() {
+  const body = document.getElementById('users-panel-body');
+  if (!activeUsers.length) {
+    body.innerHTML = `<div class="users-empty">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <p>Ningún usuario ha iniciado sesión todavía.<br>Aparecerán aquí cuando ingresen a la plataforma.</p>
+    </div>`;
+    return;
+  }
+
+  body.innerHTML = activeUsers.map(u => {
+    const col = userColor(u.name);
+    const inits = userInitials(u.name);
+    const roleBadgeCls = u.role === 'admin' ? 'role-badge-admin' : u.role === 'semiadmin' ? 'role-badge-semiadmin' : 'role-badge-viewer';
+    const roleLabel = ROLE_LABELS[u.role] || u.role;
+    const isExpanded = expandedUserId === u.id;
+    const since = u.joinedAt ? new Date(u.joinedAt).toLocaleDateString('es-CL',{day:'numeric',month:'short'}) : '—';
+    const isCurrentUser = currentUser && u.name === currentUser.name;
+
+    const mainRow = `<div class="user-row" style="border-radius:${isExpanded?'var(--radius-sm) var(--radius-sm) 0 0':'var(--radius-sm)'}; margin-bottom:${isExpanded?'0':'0.5rem'}">
+      <div class="user-row-avatar" style="background:${col}">${inits}</div>
+      <div class="user-row-info">
+        <div class="user-row-name">${u.name}${isCurrentUser?' <span style=\"font-size:0.68rem;color:var(--text3);font-weight:500\">(tú)</span>':''}</div>
+        <div class="user-row-meta">Desde ${since}</div>
+      </div>
+      <div class="user-row-actions">
+        <span class="role-badge-pill ${roleBadgeCls}">${roleLabel}</span>
+        ${!isCurrentUser ? `<button class="btn-sm" onclick="toggleExpandUser('${u.id}')" style="font-size:0.72rem;padding:0.3rem 0.7rem">${isExpanded?'▲':'▼'}</button>` : ''}
+      </div>
+    </div>`;
+
+    const expandRow = isExpanded ? `<div class="user-expand">
+      <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">
+        <div style="flex:1;min-width:140px">
+          <div class="user-expand-label">Rol</div>
+          <select class="role-select-inline" id="role-sel-${u.id}" onchange="changeUserRole('${u.id}',this.value)">
+            <option value="viewer"    ${u.role==='viewer'    ?'selected':''}>Visitante</option>
+            <option value="semiadmin" ${u.role==='semiadmin' ?'selected':''}>SemiAdmin</option>
+          </select>
+        </div>
+        <div style="flex:2;min-width:160px">
+          <div class="user-expand-label">Responsabilidades asignadas</div>
+          <textarea class="task-textarea" id="task-${u.id}" placeholder="Ej: Subir territorios nuevos, actualizar asignaciones…">${u.task||''}</textarea>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end">
+        <button class="revoke-btn" onclick="revokeUser('${u.id}')">Revocar acceso</button>
+        <button class="promote-btn" onclick="saveUserChanges('${u.id}')">Guardar cambios</button>
+      </div>
+    </div>` : '';
+
+    return mainRow + expandRow;
+  }).join('');
+}
+
+function toggleExpandUser(uid) {
+  expandedUserId = expandedUserId === uid ? null : uid;
+  renderUsersPanel();
+}
+
+function changeUserRole(uid, newRole) {
+  const u = activeUsers.find(x=>x.id===uid);
+  if (u) { u.role = newRole; }
+}
+
+function saveUserChanges(uid) {
+  const roleSel = document.getElementById('role-sel-'+uid);
+  const taskEl  = document.getElementById('task-'+uid);
+  const u = activeUsers.find(x=>x.id===uid);
+  if (!u) return;
+  u.role = roleSel ? roleSel.value : u.role;
+  u.task = taskEl  ? taskEl.value.trim() : u.task;
+  saveUsers();
+  // If the affected user is currently logged in, update their session role too
+  if (currentUser && u.name === currentUser.name) {
+    currentRole = u.role;
+    currentUser.role = u.role;
+    saveSession(currentUser);
+  }
+  expandedUserId = null;
+  renderUsersPanel();
+  showToast('Cambios guardados','success');
+}
+
+function revokeUser(uid) {
+  const u = activeUsers.find(x=>x.id===uid);
+  if (!u) return;
+  if (!confirm(`¿Revocar el acceso de ${u.name}? Podrá volver a ingresar con la contraseña de visitante.`)) return;
+  // downgrade to viewer and collapse
+  u.role = 'viewer';
+  u.task = '';
+  saveUsers();
+  expandedUserId = null;
+  renderUsersPanel();
+  showToast(`Acceso de ${u.name.split(' ')[0]} revocado`,'success');
+}
+
+function registerUserSession(name, role) {
+  loadUsers();
+  const existing = activeUsers.find(u => u.name === name);
+  if (existing) {
+    // If the stored role differs from the session role, the admin changed it —
+    // adopt the stored role UNLESS the user logged in as admin (never overwrite admin).
+    if (currentRole !== 'admin' && existing.role !== currentRole) {
+      currentRole = existing.role;
+      currentUser.role = existing.role;
+      saveSession(currentUser);
+    }
+    return;
+  }
+  const newUser = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+    name,
+    role,
+    task: '',
+    joinedAt: new Date().toISOString(),
+  };
+  activeUsers.push(newUser);
+  saveUsers();
+}
+// ─────────────────────────────────────────────────────────────────────────────
 function showError(id, msg) { const el=document.getElementById(id); el.style.display='block'; el.textContent=msg; }
 function showToast(msg, type='') {
   const wrap = document.getElementById('toast-wrap');
