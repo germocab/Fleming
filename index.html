@@ -1771,7 +1771,7 @@ function renderAdminTerritories() {
 }
 
 function openAssignmentModal(a) {
-  if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   editingAssignmentId = a ? a.id : null;
   document.getElementById('assignment-modal-title').textContent = a ? 'Editar Asignación' : 'Nueva Asignación';
   document.getElementById('as-date').value = a?.date || '';
@@ -1797,7 +1797,7 @@ function openAssignmentModal(a) {
 function closeAssignmentModal() { document.getElementById('assignment-modal').classList.remove('open'); editingAssignmentId = null; }
 function editAssignment(id) { openAssignmentModal(assignments.find(a=>a.id===id)); }
 async function saveAssignment() {
-  if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   const conductorId = document.getElementById('as-conductor-select').value || null;
   const casaId = document.getElementById('as-casa-select').value || null;
   const conductor = conductorId ? conductores.find(c=>c.id===conductorId) : null;
@@ -1829,7 +1829,7 @@ async function saveAssignment() {
   renderAdminAssignments();
 }
 async function deleteAssignment(id) {
-  if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   if (!confirm('¿Eliminar esta asignación?')) return;
   const {error} = await sb.from('assignments').delete().eq('id',id);
   if (error) { showToast('Error al eliminar','error'); return; }
@@ -1838,7 +1838,7 @@ async function deleteAssignment(id) {
 }
 
 function openTerritoryModal(t) {
-  if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   editingTerritoryId = t ? t.id : null;
   document.getElementById('ter-modal-title').textContent = t ? 'Editar Territorio' : 'Nuevo Territorio';
   document.getElementById('ter-num').value = t?.number || '';
@@ -1910,7 +1910,7 @@ function addNoPasarInput(addr = '', date = '') {
   document.getElementById('no-pasar-inputs').appendChild(div);
 }
 async function saveTerritory() {
-  if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   const number = parseInt(document.getElementById('ter-num').value);
   if (!number) { showError('ter-error','El número de territorio es requerido'); return; }
   // Collect no_pasar as array of {addr, date} objects
@@ -1937,7 +1937,7 @@ async function saveTerritory() {
   await loadSchedule();
 }
 async function deleteTerritory(id) {
-  if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   if (!confirm('¿Eliminar este territorio?')) return;
   const {error} = await sb.from('territories').delete().eq('id',id);
   if (error) { showToast('Error al eliminar','error'); return; }
@@ -1967,7 +1967,7 @@ function renderAdminConductores() {
 }
 
 function openConductorModal(c) {
-  if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   editingConductorId = c ? c.id : null;
   document.getElementById('cond-modal-title').textContent = c ? 'Editar Conductor' : 'Nuevo Conductor';
   document.getElementById('cond-nombre').value = c?.nombre || '';
@@ -1979,7 +1979,7 @@ function openConductorModal(c) {
 function closeConductorModal() { document.getElementById('conductor-modal').classList.remove('open'); editingConductorId = null; }
 function editConductor(id) { openConductorModal(conductores.find(c=>c.id===id)); }
 async function saveConductor() {
-  if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   const nombre = document.getElementById('cond-nombre').value.trim();
   const apellido = document.getElementById('cond-apellido').value.trim();
   const telefono = document.getElementById('cond-telefono').value.trim();
@@ -1998,7 +1998,7 @@ async function saveConductor() {
   renderAdminConductores();
 }
 async function deleteConductor(id) {
-  if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   if (!confirm('¿Eliminar este conductor?')) return;
   const {error} = await sb.from('conductores').delete().eq('id',id);
   if (error) { showToast('Error al eliminar','error'); return; }
@@ -2030,7 +2030,7 @@ function renderAdminCasas() {
 }
 
 function openCasaModal(h) {
-  if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   editingCasaId = h ? h.id : null;
   document.getElementById('casa-modal-title').textContent = h ? 'Editar Casa' : 'Nueva Casa';
   document.getElementById('casa-direccion').value = h?.direccion || '';
@@ -2041,7 +2041,7 @@ function openCasaModal(h) {
 function closeCasaModal() { document.getElementById('casa-modal').classList.remove('open'); editingCasaId = null; }
 function editCasa(id) { openCasaModal(casas.find(h=>h.id===id)); }
 async function saveCasa() {
-  if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   const direccion = document.getElementById('casa-direccion').value.trim();
   const amo = document.getElementById('casa-amo').value.trim();
   if (!direccion) { showError('casa-error','La dirección es requerida'); return; }
@@ -2059,7 +2059,7 @@ async function saveCasa() {
   renderAdminCasas();
 }
 async function deleteCasa(id) {
-  if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   if (!confirm('¿Eliminar esta casa?')) return;
   const {error} = await sb.from('casas').delete().eq('id',id);
   if (error) { showToast('Error al eliminar','error'); return; }
@@ -2079,7 +2079,7 @@ async function loadUsers() {
 }
 
 async function openUsersPanel() {
-  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   document.getElementById('users-panel-overlay').classList.add('open');
   document.getElementById('users-panel-body').innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
   await loadUsers();
