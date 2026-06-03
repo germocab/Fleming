@@ -1152,6 +1152,11 @@
             <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             Cerrar sesión
           </button>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item" onclick="debugPush();closeOptionsMenu()" style="color:var(--orange)">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Probar notificación
+          </button>
         </div>
       </div>
     </div>
@@ -1578,49 +1583,125 @@ async function init() {
 const VAPID_PUBLIC_KEY = 'BFXRwXhKI8hAYbdDpF863mHqRfnVBqKxbbxYxKRcNWatl--2UXaiBs9lA6BdrLIaxNOZ6KxRv4qbj9I6rVGiboY';
 
 async function subscribeToPush() {
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-    console.warn('Push no soportado en este navegador.');
-    return;
+  // 1. Verificar soporte básico
+  if (!('serviceWorker' in navigator)) {
+    console.warn('[Push] Service Worker no soportado.'); return;
   }
-  try {
-    // Esperar a que el SW esté activo
-    const registration = await navigator.serviceWorker.ready;
+  if (!('PushManager' in window)) {
+    console.warn('[Push] PushManager no soportado.'); return;
+  }
 
-    // Pedir permiso primero (necesario en iOS Safari y Android Chrome)
+  try {
+    // 2. Obtener el SW registration — con timeout de seguridad
+    let registration = null;
+    try {
+      // Primero intentar con el SW ya registrado
+      registration = await Promise.race([
+        navigator.serviceWorker.ready,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('SW timeout')), 8000))
+      ]);
+    } catch (e) {
+      // Si falla (timeout o error), intentar registrar manualmente
+      console.warn('[Push] serviceWorker.ready tardó, registrando manualmente...', e.message);
+      registration = await navigator.serviceWorker.register('sw.js');
+      // Esperar a que el SW se active
+      await new Promise(resolve => {
+        if (registration.active) { resolve(); return; }
+        const worker = registration.installing || registration.waiting;
+        if (worker) {
+          worker.addEventListener('statechange', function handler() {
+            if (this.state === 'activated') { worker.removeEventListener('statechange', handler); resolve(); }
+          });
+        } else { resolve(); }
+      });
+    }
+
+    if (!registration) {
+      console.warn('[Push] No se pudo obtener el SW registration.'); return;
+    }
+
+    // 3. Pedir permiso de notificaciones
     let permission = Notification.permission;
     if (permission === 'default') {
       permission = await Notification.requestPermission();
     }
     if (permission !== 'granted') {
-      console.warn('Permiso de notificaciones denegado.');
-      return;
+      console.warn('[Push] Permiso denegado:', permission); return;
     }
 
-    // Ver si ya hay una suscripción válida
+    // 4. Obtener o crear suscripción push
     let sub = await registration.pushManager.getSubscription();
 
-    if (!sub) {
+    if (sub) {
+      // Ya hay suscripción — igual re-guardar por si cambió el usuario
+      console.log('[Push] Suscripción existente encontrada, actualizando en BD...');
+    } else {
+      console.log('[Push] Creando nueva suscripción...');
       sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
       });
     }
 
-    // Guardar/actualizar en Supabase
-    if (sub && currentUser) {
+    if (!sub) {
+      console.warn('[Push] No se pudo crear la suscripción.'); return;
+    }
+
+    // 5. Guardar en Supabase
+    if (currentUser) {
       const subJson = JSON.stringify(sub.toJSON ? sub.toJSON() : sub);
-      await sb.from('push_subscriptions').upsert(
+      const { error } = await sb.from('push_subscriptions').upsert(
         { user_name: currentUser.name, subscription: subJson },
         { onConflict: 'user_name' }
       );
-      console.log('Suscripción push guardada ✓');
+      if (error) {
+        console.error('[Push] Error guardando suscripción:', error.message);
+      } else {
+        console.log('[Push] Suscripción guardada en Supabase ✓ para:', currentUser.name);
+      }
     }
   } catch (error) {
-    console.error('Error al suscribir a push:', error);
+    console.error('[Push] Error en subscribeToPush:', error.name, error.message);
   }
 }
 
-// Convierte la clave VAPID de base64url a Uint8Array (requerido por pushManager.subscribe)
+// ── Debug push (botón temporal para diagnosticar) ────────────────────────────
+async function debugPush() {
+  const steps = [];
+  const log = (msg, ok = true) => { steps.push((ok ? '✓' : '✗') + ' ' + msg); };
+
+  log('SW soportado: ' + ('serviceWorker' in navigator), 'serviceWorker' in navigator);
+  log('PushManager soportado: ' + ('PushManager' in window), 'PushManager' in window);
+  log('Permiso actual: ' + Notification.permission, Notification.permission === 'granted');
+
+  try {
+    const reg = await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise((_, r) => setTimeout(() => r(new Error('timeout 5s')), 5000))
+    ]);
+    log('SW activo: ' + reg.active?.state);
+
+    const sub = await reg.pushManager.getSubscription();
+    log('Suscripción en browser: ' + (sub ? 'SÍ existe' : 'NO existe — se intentará crear'), !!sub);
+
+    if (!sub) {
+      await subscribeToPush();
+      const sub2 = await reg.pushManager.getSubscription();
+      log('Suscripción tras intentar crear: ' + (sub2 ? 'SÍ' : 'FALLÓ'), !!sub2);
+    }
+
+    const { data, error } = await sb.from('push_subscriptions')
+      .select('user_name, created_at').eq('user_name', currentUser?.name ?? '');
+    if (error) log('Error BD: ' + error.message, false);
+    else log('Fila en push_subscriptions: ' + (data?.length ? 'SÍ (' + data[0].user_name + ')' : 'NO — no se guardó'), data?.length > 0);
+
+  } catch(e) {
+    log('Error: ' + e.message, false);
+  }
+
+  alert('=== DEBUG PUSH ===\n' + steps.join('\n'));
+}
+
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
