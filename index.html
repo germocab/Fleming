@@ -1690,10 +1690,18 @@ async function debugPush() {
       log('Suscripción tras intentar crear: ' + (sub2 ? 'SÍ' : 'FALLÓ'), !!sub2);
     }
 
-    const { data, error } = await sb.from('push_subscriptions')
-      .select('user_name, created_at').eq('user_name', currentUser?.name ?? '');
-    if (error) log('Error BD: ' + error.message, false);
-    else log('Fila en push_subscriptions: ' + (data?.length ? 'SÍ (' + data[0].user_name + ')' : 'NO — no se guardó'), data?.length > 0);
+    // Intentar insert directo para ver el error exacto
+    const subObj = await reg.pushManager.getSubscription();
+    const subJson = subObj ? JSON.stringify(subObj.toJSON ? subObj.toJSON() : subObj) : null;
+    const { error: insertError } = await sb.from('push_subscriptions').upsert(
+      { user_name: currentUser?.name ?? 'test', subscription: subJson },
+      { onConflict: 'user_name' }
+    );
+    if (insertError) {
+      log('Error al guardar: [' + insertError.code + '] ' + insertError.message + ' — ' + (insertError.hint || insertError.details || ''), false);
+    } else {
+      log('Guardado en push_subscriptions ✓', true);
+    }
 
   } catch(e) {
     log('Error: ' + e.message, false);
