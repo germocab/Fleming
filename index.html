@@ -672,6 +672,7 @@
   .role-badge-admin     { background: rgba(0,122,255,0.12); color: var(--accent); border: 1px solid rgba(0,122,255,0.25); }
   .role-badge-semiadmin { background: rgba(168,85,247,0.12); color: #a855f7;      border: 1px solid rgba(168,85,247,0.25); }
   .role-badge-viewer    { background: var(--surface3);        color: var(--text3); border: 1px solid var(--border); }
+  .role-badge-dev       { background: rgba(255,149,0,0.12);   color: var(--orange); border: 1px solid rgba(255,149,0,0.35); }
 
   .role-select-inline {
     padding: 4px 8px; font-size: 0.78rem; font-weight: 600;
@@ -1311,6 +1312,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const PASS_VIEWER = 'Fleming2026';
 const PASS_ADMIN  = 'FlemingAdmin2026.!';
+const PASS_DEV    = 'FlemingDEV2026.!!';
 
 let currentUser = null;
 let currentRole = 'viewer';
@@ -1369,13 +1371,15 @@ async function enterApp() {
   await registerUserSession(currentUser.name, currentRole);
 
   // Update UI based on final role
-  const roleLabelsMap = { admin:'Administrador', semiadmin:'SemiAdmin', viewer:'Visitante' };
-  document.getElementById('dropdown-role').textContent = roleLabelsMap[currentRole] || 'Visitante';
+  const roleLabelsMap = { dev:'DEV', admin:'Administrador', semiadmin:'SemiAdmin', viewer:'Visitante' };
+  const roleEl = document.getElementById('dropdown-role');
+  roleEl.textContent = roleLabelsMap[currentRole] || 'Visitante';
+  roleEl.style.color = currentRole === 'dev' ? 'var(--orange)' : currentRole === 'admin' ? 'var(--accent)' : currentRole === 'semiadmin' ? '#a855f7' : '';
 
   const adminBtn = document.getElementById('admin-dropdown-btn');
-  adminBtn.style.display = ['admin','semiadmin'].includes(currentRole) ? '' : 'none';
+  adminBtn.style.display = ['dev','admin','semiadmin'].includes(currentRole) ? '' : 'none';
   const usersBtn = document.getElementById('users-panel-btn');
-  if (usersBtn) usersBtn.style.display = currentRole === 'admin' ? '' : 'none';
+  if (usersBtn) usersBtn.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
 
   renderSubTabs('predicacion');
   loadSchedule();
@@ -1399,12 +1403,12 @@ async function doAccess() {
   errEl.style.display = 'none';
   if (!first || !last) { errEl.style.display='block'; errEl.textContent='Ingresa tu nombre y apellido.'; return; }
   if (!pass)           { errEl.style.display='block'; errEl.textContent='Ingresa la contraseña.'; return; }
-  let baseRole = pass === PASS_ADMIN ? 'admin' : pass === PASS_VIEWER ? 'viewer' : null;
+  let baseRole = pass === PASS_DEV ? 'dev' : pass === PASS_ADMIN ? 'admin' : pass === PASS_VIEWER ? 'viewer' : null;
   if (!baseRole) { errEl.style.display='block'; errEl.textContent='Contraseña incorrecta.'; return; }
 
   if (btn) { btn.disabled = true; btn.textContent = 'Entrando…'; }
 
-  // If logging in as viewer, check Supabase for a semiadmin promotion
+  // If logging in as viewer, check Supabase for a semiadmin/admin promotion
   let role = baseRole;
   if (baseRole === 'viewer') {
     const fullName = first + ' ' + last;
@@ -1412,7 +1416,7 @@ async function doAccess() {
       .select('role')
       .ilike('name', fullName)
       .single();
-    if (stored && stored.role === 'semiadmin') role = 'semiadmin';
+    if (stored && ['semiadmin','admin'].includes(stored.role)) role = stored.role;
   }
 
   if (btn) { btn.disabled = false; btn.textContent = 'Ingresar'; }
@@ -1479,7 +1483,7 @@ function switchSubTab(tabId) {
 }
 
 function showPage(name) {
-  if (name === 'admin' && !['admin','semiadmin'].includes(currentRole)) {
+  if (name === 'admin' && !['dev','admin','semiadmin'].includes(currentRole)) {
     showToast('No tienes permisos para acceder a esta sección.', 'error');
     return;
   }
@@ -2096,7 +2100,7 @@ function userColor(name) {
 }
 function userInitials(name) { return name.trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
 
-const ROLE_LABELS = { viewer:'Visitante', semiadmin:'SemiAdmin', admin:'Administrador' };
+const ROLE_LABELS = { dev:'DEV', viewer:'Visitante', semiadmin:'SemiAdmin', admin:'Administrador' };
 
 function renderUsersPanel() {
   const body = document.getElementById('users-panel-body');
@@ -2108,10 +2112,12 @@ function renderUsersPanel() {
     return;
   }
 
+  const isDev = currentRole === 'dev';
+
   body.innerHTML = activeUsers.map(u => {
     const col = userColor(u.name);
     const inits = userInitials(u.name);
-    const roleBadgeCls = u.role === 'admin' ? 'role-badge-admin' : u.role === 'semiadmin' ? 'role-badge-semiadmin' : 'role-badge-viewer';
+    const roleBadgeCls = u.role === 'dev' ? 'role-badge-dev' : u.role === 'admin' ? 'role-badge-admin' : u.role === 'semiadmin' ? 'role-badge-semiadmin' : 'role-badge-viewer';
     const roleLabel = ROLE_LABELS[u.role] || u.role;
     const isExpanded = expandedUserId === u.id;
     const lastActive = u.last_seen || u.joined_at;
@@ -2124,11 +2130,19 @@ function renderUsersPanel() {
       return d.toLocaleDateString('es-CL',{day:'numeric',month:'short'});
     })() : '—';
     const isCurrentUser = currentUser && u.name === currentUser.name;
+    // DEV users don't appear in platform_users, so u.role is never 'dev' here
+    // Non-dev admins can only promote up to semiadmin
+    const roleOptions = isDev
+      ? `<option value="viewer"    ${u.role==='viewer'    ?'selected':''}>Visitante</option>
+         <option value="semiadmin" ${u.role==='semiadmin' ?'selected':''}>SemiAdmin</option>
+         <option value="admin"     ${u.role==='admin'     ?'selected':''}>Administrador</option>`
+      : `<option value="viewer"    ${u.role==='viewer'    ?'selected':''}>Visitante</option>
+         <option value="semiadmin" ${u.role==='semiadmin' ?'selected':''}>SemiAdmin</option>`;
 
     const mainRow = `<div class="user-row" style="border-radius:${isExpanded?'var(--radius-sm) var(--radius-sm) 0 0':'var(--radius-sm)'}; margin-bottom:${isExpanded?'0':'0.5rem'}">
       <div class="user-row-avatar" style="background:${col}">${inits}</div>
       <div class="user-row-info">
-        <div class="user-row-name">${u.name}${isCurrentUser?' <span style=\"font-size:0.68rem;color:var(--text3);font-weight:500\">(tú)</span>':''}</div>
+        <div class="user-row-name">${u.name}${isCurrentUser?' <span style="font-size:0.68rem;color:var(--text3);font-weight:500">(tú)</span>':''}</div>
         <div class="user-row-meta">Activo ${since}</div>
       </div>
       <div class="user-row-actions">
@@ -2142,8 +2156,7 @@ function renderUsersPanel() {
         <div style="flex:1;min-width:140px">
           <div class="user-expand-label">Rol</div>
           <select class="role-select-inline" id="role-sel-${u.id}" onchange="changeUserRole('${u.id}',this.value)">
-            <option value="viewer"    ${u.role==='viewer'    ?'selected':''}>Visitante</option>
-            <option value="semiadmin" ${u.role==='semiadmin' ?'selected':''}>SemiAdmin</option>
+            ${roleOptions}
           </select>
         </div>
         <div style="flex:2;min-width:160px">
@@ -2210,6 +2223,8 @@ async function revokeUser(uid) {
 
 async function registerUserSession(name, role) {
   const now = new Date().toISOString();
+  // DEV never registers in platform_users — stays local only
+  if (role === 'dev') return;
 
   // Check if user already exists in Supabase
   const { data: existing } = await sb.from('platform_users')
@@ -2218,8 +2233,8 @@ async function registerUserSession(name, role) {
   if (existing) {
     // User exists: only update last_seen, never overwrite role/task set by admin
     await sb.from('platform_users').update({ last_seen: now }).eq('id', existing.id);
-    // If admin changed this user's role, adopt it (never overwrite admin session)
-    if (currentRole !== 'admin' && existing.role !== currentRole) {
+    // If admin/dev changed this user's role, adopt it (never overwrite admin/dev session)
+    if (!['admin','dev'].includes(currentRole) && existing.role !== currentRole) {
       currentRole = existing.role;
       currentUser.role = existing.role;
       saveSession(currentUser);
