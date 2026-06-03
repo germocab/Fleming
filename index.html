@@ -169,13 +169,12 @@
     position: sticky; top: 0; z-index: 100;
   }
   .nav-spacer { flex: 1; }
-
-  /* Always center the toggle absolutely so nav-icons don't push it off-center */
-  .main-segment {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+  /* Give the left spacer the same min-width as the right icon group so the toggle is truly centered */
+  .nav-spacer:first-child { min-width: 94px; }
+  @media (max-width: 639px) {
+    .nav-spacer:first-child { min-width: 42px; }
   }
+  .nav-icons { flex-shrink: 0; }
 
   .main-segment {
     display: flex; background: var(--surface3);
