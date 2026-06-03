@@ -68,3 +68,56 @@ self.addEventListener('notificationclick', function(event) {
     clients.openWindow('/') // Abre la webapp al hacer clic
   );
 });
+
+// ── Service Worker — Congregación Fleming ────────────────────────────────────
+// Maneja notificaciones push recibidas desde el servidor (Edge Function de Supabase).
+
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', e => e.waitUntil(clients.claim()));
+
+// ── Recibir un push del servidor ─────────────────────────────────────────────
+self.addEventListener('push', event => {
+  let data = { title: 'Congregación Fleming', body: 'Hay una actualización nueva.' };
+
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch {
+      data.body = event.data.text();
+    }
+  }
+
+  const options = {
+    body: data.body || '',
+    icon: '/android-chrome-192x192.png',
+    badge: '/icons/favicon-32x32.png',
+    vibrate: [150, 50, 150],
+    data: { url: data.url || '/' },
+    // Agrupa notificaciones de la misma fuente para no inundar
+    tag: 'fleming-notif',
+    renotify: true,
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'Congregación Fleming', options)
+  );
+});
+
+// ── Al tocar la notificación: abrir/enfocar la app ───────────────────────────
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const targetUrl = (event.notification.data && event.notification.data.url) || '/';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+      // Si ya hay una ventana abierta, enfocarla
+      for (const client of windowClients) {
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      // Si no hay ventana, abrir una nueva
+      if (clients.openWindow) return clients.openWindow(targetUrl);
+    })
+  );
+});
