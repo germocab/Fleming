@@ -194,32 +194,22 @@
   }
 
   @media (max-width: 639px) {
+    /* En mobile: layout flex en vez de grid — toggle a la izquierda, iconos a la derecha */
     .topnav {
-      padding: 0 0.75rem;
-      height: 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 1rem;
+      height: 64px;
       overflow: hidden;
     }
-    .main-segment {
-      padding: 3px;
-      border-radius: 18px;
-    }
+    .nav-spacer { display: none; }
+    /* Toggle: tamaño intermedio — más pequeño que desktop pero no tanto */
     .main-seg-btn {
-      padding: 6px 12px;
-      font-size: 0.78rem;
-      border-radius: 15px;
+      padding: 7px 16px;
+      font-size: 0.82rem;
     }
-    .main-seg-btn.active {
-      box-shadow: 0 1px 6px rgba(0,122,255,0.3);
-    }
-    .nav-icon-btn {
-      width: 34px;
-      height: 34px;
-    }
-    .nav-icon-btn svg {
-      width: 16px;
-      height: 16px;
-    }
-    .nav-icons { gap: 4px; }
+    /* Iconos: vuelven a su tamaño original */
   }
   .nav-icon-btn {
     width: 42px; height: 42px; border-radius: 50%;
