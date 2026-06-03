@@ -996,6 +996,70 @@
   .full-map-preview-wrap.visible { display: block; }
   .full-map-preview-wrap img { width: 100%; display: block; max-height: 220px; object-fit: contain; }
   .full-map-admin-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ── Admin fullscreen mode ─────────────────────────────────── */
+  #page-admin {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: var(--bg);
+    overflow-y: auto;
+    flex-direction: column;
+  }
+  #page-admin.active {
+    display: flex;
+  }
+  .admin-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.25rem;
+    height: 64px;
+    background: var(--nav-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    flex-shrink: 0;
+  }
+  .admin-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--accent);
+    font-family: var(--font);
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 6px 0;
+    transition: opacity 0.2s;
+  }
+  .admin-back-btn:hover { opacity: 0.72; }
+  .admin-back-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+  .admin-topbar-title {
+    font-size: 1rem;
+    font-weight: 700;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+  .admin-topbar-right {
+    display: flex;
+    align-items: center;
+  }
+  .admin-body {
+    padding: 1.5rem 1.25rem;
+    flex: 1;
+  }
+  @media (max-width: 639px) {
+    .admin-topbar { height: 56px; padding: 0 1rem; }
+  }
+
 </style>
 </head>
 <body>
@@ -1126,7 +1190,43 @@
       </div>
     </div>
 
-    <div class="page" id="page-admin">
+    <div id="page-admin">
+      <div class="admin-topbar">
+        <button class="admin-back-btn" onclick="closeAdminPage()">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          Inicio
+        </button>
+        <span class="admin-topbar-title">Administración</span>
+        <div class="admin-topbar-right options-wrap">
+          <button class="nav-icon-btn" title="Opciones" onclick="toggleOptionsMenu()">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.2" fill="currentColor" stroke="none"/></svg>
+          </button>
+          <div class="options-dropdown" id="options-dropdown-admin">
+            <div class="options-user-info">
+              <div class="options-avatar" id="user-avatar-admin">?</div>
+              <div style="min-width:0;flex:1">
+                <div class="options-user-name" id="dropdown-name-admin">—</div>
+                <div class="options-user-role" id="dropdown-role-admin">—</div>
+              </div>
+            </div>
+            <button class="dropdown-item" onclick="toggleTheme();closeAdminOptionsMenu()">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+              <span id="theme-btn-label-admin">Modo oscuro</span>
+            </button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" id="users-panel-btn-admin" onclick="openUsersPanel();closeAdminOptionsMenu()" style="display:none">
+              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              Usuarios
+            </button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item danger" onclick="doLogout()">
+              <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="admin-body">
       <div class="page-header">
         <div>
           <div class="page-header-title">Administración</div>
@@ -1191,7 +1291,8 @@
         </div>
         <div id="admin-casas-list"><div class="loader-wrap"><div class="loader"></div></div></div>
       </div>
-    </div>
+      </div><!-- /.admin-body -->
+    </div><!-- /#page-admin -->
   </div>
 </div>
 
@@ -1588,14 +1689,21 @@ function switchSubTab(tabId) {
 }
 
 function showPage(name) {
-  if (name === 'admin' && !['dev','admin','semiadmin'].includes(currentRole)) {
-    showToast('No tienes permisos para acceder a esta sección.', 'error');
+  if (name === 'admin') {
+    if (!['dev','admin','semiadmin'].includes(currentRole)) {
+      showToast('No tienes permisos para acceder a esta sección.', 'error');
+      return;
+    }
+    // Open admin as a fullscreen overlay — independent of main nav
+    document.getElementById('page-admin').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    syncAdminDropdown();
+    loadAdminData();
     return;
   }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const p = document.getElementById('page-' + name);
   if (p) p.classList.add('active');
-  if (name === 'admin') loadAdminData();
 }
 
 async function switchAdminTab(tab) {
@@ -2689,10 +2797,34 @@ function toggleOptionsMenu() { document.getElementById('options-dropdown').class
 function closeOptionsMenu() { document.getElementById('options-dropdown').classList.remove('open'); }
 function closeProfileMenu() { closeOptionsMenu(); }
 
+function closeAdminOptionsMenu() { document.getElementById('options-dropdown-admin').classList.remove('open'); }
+function closeAdminPage() {
+  document.getElementById('page-admin').classList.remove('active');
+  document.body.style.overflow = '';
+  closeAdminOptionsMenu();
+}
+
+function syncAdminDropdown() {
+  const initials = currentUser ? currentUser.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase() : '?';
+  const adminAvatar  = document.getElementById('user-avatar-admin');
+  const adminName    = document.getElementById('dropdown-name-admin');
+  const adminRole    = document.getElementById('dropdown-role-admin');
+  const usersAdminBtn = document.getElementById('users-panel-btn-admin');
+  if (adminAvatar) adminAvatar.textContent = initials;
+  if (adminName)   adminName.textContent = currentUser ? currentUser.name : '—';
+  if (adminRole) {
+    const roleLabelsMap = { dev:'DEV', admin:'Administrador', semiadmin:'SemiAdmin', viewer:'Visitante' };
+    adminRole.textContent = roleLabelsMap[currentRole] || 'Visitante';
+  }
+  if (usersAdminBtn) usersAdminBtn.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
+  const themeLabel = document.getElementById('theme-btn-label-admin');
+  if (themeLabel) themeLabel.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? 'Modo claro' : 'Modo oscuro';
+}
+
 const _origApplyTheme = applyTheme;
 
 document.addEventListener('click', e => {
-  if (!e.target.closest('.options-wrap')) closeOptionsMenu();
+  if (!e.target.closest('.options-wrap')) { closeOptionsMenu(); closeAdminOptionsMenu(); }
 });
 document.querySelectorAll('.modal-overlay').forEach(o => {
   o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
