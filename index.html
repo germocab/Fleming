@@ -801,6 +801,97 @@
     font-size: 0.8rem; font-weight: 800; color: white;
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
+
+  /* ── Full congregation map button ── */
+  .ter-view-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1rem; flex-wrap: wrap; gap: 10px;
+  }
+  .ter-view-title {
+    font-size: 1.05rem; font-weight: 700; color: var(--text);
+  }
+  .btn-map-full {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 0.55rem 1.1rem;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: 20px;
+    font-family: var(--font); font-size: 0.84rem; font-weight: 600;
+    cursor: pointer; transition: opacity 0.18s, transform 0.1s;
+    box-shadow: 0 2px 10px rgba(0,122,255,0.35);
+    flex-shrink: 0;
+  }
+  .btn-map-full:hover { opacity: 0.88; }
+  .btn-map-full:active { transform: scale(0.97); }
+  .btn-map-full svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ── Full map lightbox (extends existing lightbox) ── */
+  .full-map-lightbox {
+    position: fixed; inset: 0; z-index: 500;
+    background: var(--modal-overlay-bg); backdrop-filter: blur(10px);
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center; padding: 1rem;
+  }
+  .full-map-lightbox.open { display: flex; animation: fadeIn 0.2s ease; }
+  .full-map-lb-header {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; max-width: 900px; margin-bottom: 0.75rem;
+  }
+  .full-map-lb-title {
+    font-size: 1rem; font-weight: 700; color: #fff;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  }
+  .full-map-lb-actions { display: flex; gap: 8px; align-items: center; }
+  .full-map-lb-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 0.45rem 1rem; border-radius: 20px;
+    font-family: var(--font); font-size: 0.8rem; font-weight: 600;
+    cursor: pointer; transition: opacity 0.15s; border: none;
+  }
+  .full-map-lb-btn.download { background: var(--green); color: #fff; }
+  .full-map-lb-btn.close-btn { background: rgba(255,255,255,0.18); color: #fff; border: 1px solid rgba(255,255,255,0.3); }
+  .full-map-lb-btn:hover { opacity: 0.85; }
+  .full-map-lb-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+  .full-map-lb-img-wrap {
+    width: 100%; max-width: 900px; max-height: calc(100vh - 120px);
+    overflow: auto; border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .full-map-lb-img-wrap img {
+    max-width: 100%; display: block; border-radius: var(--radius);
+  }
+
+  /* ── Admin full map card ── */
+  .full-map-admin-card {
+    background: var(--surface);
+    border: 2px dashed var(--border-active);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  .full-map-admin-card.has-map {
+    border-style: solid; border-color: var(--accent); border-width: 1px;
+  }
+  .full-map-admin-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 1rem;
+  }
+  .full-map-admin-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: var(--accent-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .full-map-admin-icon svg { width: 20px; height: 20px; stroke: var(--accent); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .full-map-admin-title { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+  .full-map-admin-sub { font-size: 0.76rem; color: var(--text3); margin-top: 2px; }
+  .full-map-preview-wrap {
+    width: 100%; border-radius: var(--radius-sm); overflow: hidden;
+    background: var(--surface2); margin-bottom: 0.85rem;
+    border: 1px solid var(--border); display: none;
+    position: relative;
+  }
+  .full-map-preview-wrap.visible { display: block; }
+  .full-map-preview-wrap img { width: 100%; display: block; max-height: 220px; object-fit: contain; }
+  .full-map-admin-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 </style>
 </head>
 <body>
@@ -907,6 +998,13 @@
         </div>
       </div>
       <div id="sub-content-territorios" class="sub-page" style="display:none">
+        <div class="ter-view-header">
+          <span class="ter-view-title">Territorios</span>
+          <button class="btn-map-full" id="btn-ver-mapa-completo" onclick="openFullMap()" style="display:none">
+            <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+            Ver mapa completo
+          </button>
+        </div>
         <div id="territories-view-content"></div>
       </div>
 
@@ -952,6 +1050,30 @@
           <span style="flex:1;font-size:0.95rem;font-weight:700">Territorios</span>
           <button class="btn-secondary" onclick="openTerritoryModal()">+ Nuevo</button>
         </div>
+
+        <!-- Tarjeta mapa completo -->
+        <div class="full-map-admin-card" id="full-map-admin-card">
+          <div class="full-map-admin-header">
+            <div class="full-map-admin-icon">
+              <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+            </div>
+            <div>
+              <div class="full-map-admin-title">Mapa completo de la congregación</div>
+              <div class="full-map-admin-sub" id="full-map-admin-sub">Sube un PNG con el mapa general de todos los territorios</div>
+            </div>
+          </div>
+          <div class="full-map-preview-wrap" id="full-map-preview-wrap">
+            <img id="full-map-admin-preview" src="" alt="Mapa completo">
+          </div>
+          <div class="full-map-admin-actions">
+            <button class="btn-secondary" onclick="document.getElementById('full-map-file-input').click()">
+              <span id="full-map-upload-label">Subir mapa PNG</span>
+            </button>
+            <button class="btn-danger" id="full-map-delete-btn" onclick="deleteFullMap()" style="display:none">Eliminar mapa</button>
+            <input type="file" id="full-map-file-input" accept="image/png" style="display:none" onchange="handleFullMapUpload(event)">
+          </div>
+        </div>
+
         <div id="admin-territories-list"><div class="loader-wrap"><div class="loader"></div></div></div>
       </div>
       <div class="admin-section" id="admin-conductores">
@@ -1160,6 +1282,26 @@
   <img id="lightbox-img" src="" alt="Mapa del territorio">
 </div>
 
+<!-- Full congregation map lightbox -->
+<div class="full-map-lightbox" id="full-map-lightbox" onclick="handleFullMapClick(event)">
+  <div class="full-map-lb-header">
+    <span class="full-map-lb-title">🗺 Mapa completo de la congregación</span>
+    <div class="full-map-lb-actions">
+      <button class="full-map-lb-btn download" onclick="downloadFullMap()">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Descargar PNG
+      </button>
+      <button class="full-map-lb-btn close-btn" onclick="closeFullMap()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Cerrar
+      </button>
+    </div>
+  </div>
+  <div class="full-map-lb-img-wrap">
+    <img id="full-map-lb-img" src="" alt="Mapa completo de la congregación">
+  </div>
+</div>
+
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
@@ -1237,6 +1379,7 @@ async function enterApp() {
 
   renderSubTabs('predicacion');
   loadSchedule();
+  loadFullMap();
 
   // Show assigned task in dropdown for semiadmin
   const taskEl = document.getElementById('dropdown-task');
@@ -2217,7 +2360,97 @@ function togglePassVisibility() {
   btn.classList.toggle('visible', show);
   btn.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+// Escape key handled in full map section below
+
+// ── Full congregation map ─────────────────────────────────────────────────────
+async function loadFullMap() {
+  const { data } = await sb.from('platform_config').select('value').eq('key', 'full_congregation_map').single();
+  const src = data ? data.value : null;
+  updateFullMapUI(src);
+}
+
+function updateFullMapUI(src) {
+  const btnView     = document.getElementById('btn-ver-mapa-completo');
+  const adminCard   = document.getElementById('full-map-admin-card');
+  const previewWrap = document.getElementById('full-map-preview-wrap');
+  const previewImg  = document.getElementById('full-map-admin-preview');
+  const deleteBtn   = document.getElementById('full-map-delete-btn');
+  const uploadLabel = document.getElementById('full-map-upload-label');
+  const adminSub    = document.getElementById('full-map-admin-sub');
+
+  if (src) {
+    if (btnView) { btnView.style.display = 'inline-flex'; }
+    document.getElementById('full-map-lb-img').src = src;
+    if (previewWrap) { previewWrap.classList.add('visible'); previewImg.src = src; }
+    if (deleteBtn)   deleteBtn.style.display = '';
+    if (uploadLabel) uploadLabel.textContent = 'Cambiar mapa';
+    if (adminSub)    adminSub.textContent = 'Mapa subido · Visible para todos los usuarios';
+    if (adminCard)   adminCard.classList.add('has-map');
+  } else {
+    if (btnView) btnView.style.display = 'none';
+    if (previewWrap) previewWrap.classList.remove('visible');
+    if (deleteBtn)   deleteBtn.style.display = 'none';
+    if (uploadLabel) uploadLabel.textContent = 'Subir mapa PNG';
+    if (adminSub)    adminSub.textContent = 'Sube un PNG con el mapa general de todos los territorios';
+    if (adminCard)   adminCard.classList.remove('has-map');
+  }
+}
+
+async function handleFullMapUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.type !== 'image/png') { showToast('Solo se aceptan archivos PNG','error'); return; }
+  if (file.size > 6 * 1024 * 1024) { showToast('El archivo es demasiado grande (máx 6 MB)','error'); return; }
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const base64 = e.target.result;
+    const { error } = await sb.from('platform_config')
+      .upsert({ key: 'full_congregation_map', value: base64 }, { onConflict: 'key' });
+    if (error) { showToast('Error al guardar el mapa','error'); return; }
+    updateFullMapUI(base64);
+    showToast('Mapa completo guardado','success');
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+async function deleteFullMap() {
+  if (!confirm('¿Eliminar el mapa completo de la congregación?')) return;
+  const { error } = await sb.from('platform_config').delete().eq('key', 'full_congregation_map');
+  if (error) { showToast('Error al eliminar','error'); return; }
+  updateFullMapUI(null);
+  showToast('Mapa eliminado','success');
+}
+
+function openFullMap() {
+  const src = document.getElementById('full-map-lb-img').src;
+  if (!src || src === window.location.href) return;
+  document.getElementById('full-map-lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeFullMap() {
+  document.getElementById('full-map-lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handleFullMapClick(e) {
+  if (e.target === document.getElementById('full-map-lightbox')) closeFullMap();
+}
+
+function downloadFullMap() {
+  const img = document.getElementById('full-map-lb-img');
+  if (!img.src) return;
+  const a = document.createElement('a');
+  a.href = img.src;
+  a.download = 'mapa-congregacion-fleming.png';
+  a.click();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeLightbox(); closeFullMap(); }
+});
 
 init();
 </script>
