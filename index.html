@@ -82,7 +82,7 @@
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { font-size: 16px; }
+  html { font-size: 16px; overflow-x: hidden; }
   body {
     font-family: var(--font);
     background: var(--bg);
@@ -169,12 +169,13 @@
     position: sticky; top: 0; z-index: 100;
   }
   .nav-spacer { flex: 1; }
-  /* Give the left spacer the same min-width as the right icon group so the toggle is truly centered */
-  .nav-spacer:first-child { min-width: 94px; }
+
   @media (max-width: 639px) {
-    .nav-spacer:first-child { min-width: 42px; }
+    .main-seg-btn {
+      padding: 7px 14px;
+      font-size: 0.8rem;
+    }
   }
-  .nav-icons { flex-shrink: 0; }
 
   .main-segment {
     display: flex; background: var(--surface3);
@@ -193,7 +194,7 @@
     box-shadow: 0 2px 12px rgba(0,122,255,0.4);
   }
 
-  .nav-icons { display: flex; align-items: center; gap: 10px; }
+  .nav-icons { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
   .nav-icon-btn {
     width: 42px; height: 42px; border-radius: 50%;
     background: var(--surface3); border: none; cursor: pointer;
