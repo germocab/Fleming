@@ -2442,16 +2442,31 @@ async function revokeUser(uid) {
   const u = activeUsers.find(x=>x.id===uid);
   if (!u) return;
   if (!confirm(`¿Revocar el acceso de ${u.name}? Podrá volver a ingresar con la contraseña de visitante.`)) return;
+
+  const defaultPerms = { territories: true, assignments: true, conductores: true, casas: true };
+  // Try update with permissions; if column doesn't exist yet, retry without it
+  let { error } = await sb.from('platform_users')
+    .update({ role: 'viewer', task: '', permissions: defaultPerms })
+    .eq('id', u.id);
+
+  if (error) {
+    console.warn('revokeUser (with permissions) failed:', error.message, '— retrying without');
+    const retry = await sb.from('platform_users')
+      .update({ role: 'viewer', task: '' })
+      .eq('id', u.id);
+    if (retry.error) {
+      console.error('revokeUser error:', retry.error);
+      showToast('Error: ' + retry.error.message, 'error');
+      return;
+    }
+  }
+
   u.role = 'viewer';
   u.task = '';
-  u.permissions = { territories: true, assignments: true, conductores: true, casas: true };
-  const { error } = await sb.from('platform_users')
-    .update({ role: 'viewer', task: '', permissions: u.permissions })
-    .eq('id', u.id);
-  if (error) { showToast('Error al revocar','error'); return; }
+  u.permissions = defaultPerms;
   expandedUserId = null;
   renderUsersPanel();
-  showToast(`Acceso de ${u.name.split(' ')[0]} revocado`,'success');
+  showToast(`Acceso de ${u.name.split(' ')[0]} revocado`, 'success');
 }
 
 // ── Permission check helper used elsewhere ────────────────────────────────────
