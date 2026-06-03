@@ -170,20 +170,11 @@
   }
   .nav-spacer { flex: 1; }
 
-  /* Desktop: center toggle absolutely so nav-icons don't push it off-center */
-  @media (min-width: 640px) {
-    .main-segment {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-  }
-
-  /* Mobile: add a small gap between the toggle and the icon buttons */
-  @media (max-width: 639px) {
-    .main-segment {
-      margin-right: 12px;
-    }
+  /* Always center the toggle absolutely so nav-icons don't push it off-center */
+  .main-segment {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
   }
 
   .main-segment {
