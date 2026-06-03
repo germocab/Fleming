@@ -1211,7 +1211,7 @@ async function init() {
   else { document.getElementById('auth-screen').style.display = 'flex'; }
 }
 
-function enterApp() {
+async function enterApp() {
   document.getElementById('auth-screen').style.display = 'none';
   const app = document.getElementById('app');
   app.style.display = 'flex'; app.style.flexDirection = 'column';
@@ -1220,9 +1220,10 @@ function enterApp() {
   document.getElementById('user-avatar').textContent = initials;
   document.getElementById('dropdown-name').textContent = currentUser.name;
 
-  registerUserSession(currentUser.name, currentRole);
+  // Register/update in Supabase — may update currentRole if admin changed it
+  await registerUserSession(currentUser.name, currentRole);
 
-  // Update UI based on final role (registerUserSession may have updated currentRole)
+  // Update UI based on final role
   const roleLabelsMap = { admin:'Administrador', semiadmin:'SemiAdmin', viewer:'Visitante' };
   document.getElementById('dropdown-role').textContent = roleLabelsMap[currentRole] || 'Visitante';
 
@@ -1236,36 +1237,39 @@ function enterApp() {
 
   // Show assigned task in dropdown for semiadmin
   const taskEl = document.getElementById('dropdown-task');
-  if (taskEl) {
-    if (currentRole === 'semiadmin') {
-      loadUsers();
-      const me = activeUsers.find(u => u.name === currentUser.name);
-      if (me && me.task) { taskEl.textContent = 'ud83dudccb ' + me.task; taskEl.style.display = ''; }
-      else { taskEl.style.display = 'none'; }
-    } else { taskEl.style.display = 'none'; }
-  }
+  if (taskEl && currentRole === 'semiadmin') {
+    const { data: me } = await sb.from('platform_users').select('task').eq('name', currentUser.name).single();
+    if (me && me.task) { taskEl.textContent = '📋 ' + me.task; taskEl.style.display = ''; }
+    else { taskEl.style.display = 'none'; }
+  } else if (taskEl) { taskEl.style.display = 'none'; }
 }
 
-function doAccess() {
+async function doAccess() {
   const first = document.getElementById('auth-first').value.trim();
   const last  = document.getElementById('auth-last').value.trim();
   const pass  = document.getElementById('auth-pass').value;
   const errEl = document.getElementById('auth-error');
+  const btn   = document.querySelector('#auth-screen .btn-primary');
   errEl.style.display = 'none';
   if (!first || !last) { errEl.style.display='block'; errEl.textContent='Ingresa tu nombre y apellido.'; return; }
   if (!pass)           { errEl.style.display='block'; errEl.textContent='Ingresa la contraseña.'; return; }
   let baseRole = pass === PASS_ADMIN ? 'admin' : pass === PASS_VIEWER ? 'viewer' : null;
   if (!baseRole) { errEl.style.display='block'; errEl.textContent='Contraseña incorrecta.'; return; }
 
-  // If logging in as viewer, check if an admin has promoted this user to semiadmin
+  if (btn) { btn.disabled = true; btn.textContent = 'Entrando…'; }
+
+  // If logging in as viewer, check Supabase for a semiadmin promotion
   let role = baseRole;
   if (baseRole === 'viewer') {
-    loadUsers();
     const fullName = first + ' ' + last;
-    const stored = activeUsers.find(u => u.name.toLowerCase() === fullName.toLowerCase());
+    const { data: stored } = await sb.from('platform_users')
+      .select('role')
+      .ilike('name', fullName)
+      .single();
     if (stored && stored.role === 'semiadmin') role = 'semiadmin';
   }
 
+  if (btn) { btn.disabled = false; btn.textContent = 'Ingresar'; }
   currentUser = { name: first + ' ' + last, role };
   currentRole = role;
   saveSession(currentUser);
@@ -1879,20 +1883,20 @@ async function deleteCasa(id) {
 
 
 // ── Users panel ──────────────────────────────────────────────────────────────
-let activeUsers = []; // { id, name, role, task, joinedAt }
+let activeUsers = []; // { id, name, role, task, joined_at, last_seen }
 let expandedUserId = null;
 
-function saveUsers() { localStorage.setItem('fleming_users', JSON.stringify(activeUsers)); }
-function loadUsers()  {
-  try { activeUsers = JSON.parse(localStorage.getItem('fleming_users')) || []; }
-  catch { activeUsers = []; }
+async function loadUsers() {
+  const { data, error } = await sb.from('platform_users').select('*').order('last_seen', { ascending: false });
+  activeUsers = data || [];
 }
 
-function openUsersPanel() {
+async function openUsersPanel() {
   if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
-  loadUsers();
-  renderUsersPanel();
   document.getElementById('users-panel-overlay').classList.add('open');
+  document.getElementById('users-panel-body').innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
+  await loadUsers();
+  renderUsersPanel();
 }
 function closeUsersPanel() {
   document.getElementById('users-panel-overlay').classList.remove('open');
@@ -1927,7 +1931,7 @@ function renderUsersPanel() {
     const roleBadgeCls = u.role === 'admin' ? 'role-badge-admin' : u.role === 'semiadmin' ? 'role-badge-semiadmin' : 'role-badge-viewer';
     const roleLabel = ROLE_LABELS[u.role] || u.role;
     const isExpanded = expandedUserId === u.id;
-    const lastActive = u.lastSeen || u.joinedAt;
+    const lastActive = u.last_seen || u.joined_at;
     const since = lastActive ? (() => {
       const d = new Date(lastActive); const now = new Date();
       const mins = Math.round((now - d) / 60000);
@@ -1984,15 +1988,18 @@ function changeUserRole(uid, newRole) {
   if (u) { u.role = newRole; }
 }
 
-function saveUserChanges(uid) {
+async function saveUserChanges(uid) {
   const roleSel = document.getElementById('role-sel-'+uid);
   const taskEl  = document.getElementById('task-'+uid);
   const u = activeUsers.find(x=>x.id===uid);
   if (!u) return;
   u.role = roleSel ? roleSel.value : u.role;
   u.task = taskEl  ? taskEl.value.trim() : u.task;
-  saveUsers();
-  // If the affected user is currently logged in, update their session role too
+  const { error } = await sb.from('platform_users')
+    .update({ role: u.role, task: u.task })
+    .eq('id', u.id);
+  if (error) { showToast('Error al guardar','error'); return; }
+  // If the affected user is the current session user, update their session role too
   if (currentUser && u.name === currentUser.name) {
     currentRole = u.role;
     currentUser.role = u.role;
@@ -2003,45 +2010,42 @@ function saveUserChanges(uid) {
   showToast('Cambios guardados','success');
 }
 
-function revokeUser(uid) {
+async function revokeUser(uid) {
   const u = activeUsers.find(x=>x.id===uid);
   if (!u) return;
   if (!confirm(`¿Revocar el acceso de ${u.name}? Podrá volver a ingresar con la contraseña de visitante.`)) return;
-  // downgrade to viewer and collapse
   u.role = 'viewer';
   u.task = '';
-  saveUsers();
+  const { error } = await sb.from('platform_users')
+    .update({ role: 'viewer', task: '' })
+    .eq('id', u.id);
+  if (error) { showToast('Error al revocar','error'); return; }
   expandedUserId = null;
   renderUsersPanel();
   showToast(`Acceso de ${u.name.split(' ')[0]} revocado`,'success');
 }
 
-function registerUserSession(name, role) {
-  loadUsers();
-  const existing = activeUsers.find(u => u.name === name);
+async function registerUserSession(name, role) {
+  const now = new Date().toISOString();
+
+  // Check if user already exists in Supabase
+  const { data: existing } = await sb.from('platform_users')
+    .select('*').ilike('name', name).single();
+
   if (existing) {
-    // If admin promoted/demoted this user, adopt the stored role (never overwrite admin).
+    // User exists: only update last_seen, never overwrite role/task set by admin
+    await sb.from('platform_users').update({ last_seen: now }).eq('id', existing.id);
+    // If admin changed this user's role, adopt it (never overwrite admin session)
     if (currentRole !== 'admin' && existing.role !== currentRole) {
       currentRole = existing.role;
       currentUser.role = existing.role;
       saveSession(currentUser);
     }
-    // Always refresh lastSeen so admin knows this user is active
-    existing.lastSeen = new Date().toISOString();
-    saveUsers();
-    return;
+  } else {
+    // New user — insert with base role
+    await sb.from('platform_users')
+      .insert({ name, role, task: '', joined_at: now, last_seen: now });
   }
-  // New user — register them
-  const newUser = {
-    id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
-    name,
-    role,
-    task: '',
-    joinedAt: new Date().toISOString(),
-    lastSeen: new Date().toISOString(),
-  };
-  activeUsers.push(newUser);
-  saveUsers();
 }
 // ─────────────────────────────────────────────────────────────────────────────
 function showError(id, msg) { const el=document.getElementById(id); el.style.display='block'; el.textContent=msg; }
