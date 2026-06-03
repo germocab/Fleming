@@ -1208,7 +1208,7 @@
         </button>
         <span class="admin-topbar-title">Administración</span>
         <div class="admin-topbar-right options-wrap">
-          <button class="nav-icon-btn" title="Opciones" onclick="toggleOptionsMenu()">
+          <button class="nav-icon-btn" title="Opciones" onclick="toggleAdminOptionsMenu()">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.2" fill="currentColor" stroke="none"/></svg>
           </button>
           <div class="options-dropdown" id="options-dropdown-admin">
@@ -1575,36 +1575,45 @@ async function init() {
 // ── Push Notifications ───────────────────────────────────────────────────────
 // Reemplaza este valor con tu clave pública VAPID real.
 // Puedes generarla con: npx web-push generate-vapid-keys
-const VAPID_PUBLIC_KEY = 'TU_CLAVE_PUBLICA_VAPID_AQUI';
+const VAPID_PUBLIC_KEY = 'BFXRwXhKI8hAYbdDpF863mHqRfnVBqKxbbxYxKRcNWatl--2UXaiBs9lA6BdrLIaxNOZ6KxRv4qbj9I6rVGiboY';
 
 async function subscribeToPush() {
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
-  // Si no se configuró la clave VAPID, no intentar suscribir (evita error en subscribe())
-  if (!VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY === 'TU_CLAVE_PUBLICA_VAPID_AQUI') {
-    console.warn('Push Notifications: Configura VAPID_PUBLIC_KEY para habilitar notificaciones push.');
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    console.warn('Push no soportado en este navegador.');
     return;
   }
-  
   try {
+    // Esperar a que el SW esté activo
     const registration = await navigator.serviceWorker.ready;
+
+    // Pedir permiso primero (necesario en iOS Safari y Android Chrome)
+    let permission = Notification.permission;
+    if (permission === 'default') {
+      permission = await Notification.requestPermission();
+    }
+    if (permission !== 'granted') {
+      console.warn('Permiso de notificaciones denegado.');
+      return;
+    }
+
+    // Ver si ya hay una suscripción válida
     let sub = await registration.pushManager.getSubscription();
-    
+
     if (!sub) {
-      // No hay suscripción — pedir permiso y suscribir
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') return;
       sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
       });
     }
-    
-    // Guardar/actualizar en Supabase (tanto nueva como existente)
+
+    // Guardar/actualizar en Supabase
     if (sub && currentUser) {
-      await sb.from('push_subscriptions').upsert({
-        user_name: currentUser.name, 
-        subscription: JSON.stringify(sub)
-      }, { onConflict: 'user_name' });
+      const subJson = JSON.stringify(sub.toJSON ? sub.toJSON() : sub);
+      await sb.from('push_subscriptions').upsert(
+        { user_name: currentUser.name, subscription: subJson },
+        { onConflict: 'user_name' }
+      );
+      console.log('Suscripción push guardada ✓');
     }
   } catch (error) {
     console.error('Error al suscribir a push:', error);
@@ -1738,13 +1747,7 @@ function switchMainTab(tab, btn) {
 
 function switchSubTab(tabId) {
   currentSubTab = tabId;
-  // update active
-  document.querySelectorAll('.sub-tab').forEach(b => {
-    b.classList.toggle('active', b.textContent.trim().includes(
-      SUB_TABS[currentMainTab].find(t=>t.id===tabId)?.label.split(' ')[0]
-    ));
-  });
-  renderSubTabs(currentMainTab);
+  renderSubTabs(currentMainTab);   // re-render tabs with correct active state
 
   ['casa','territorios','carritos','grupos'].forEach(id => {
     const el = document.getElementById('sub-content-' + id);
@@ -2923,6 +2926,7 @@ function toggleOptionsMenu() { document.getElementById('options-dropdown').class
 function closeOptionsMenu() { document.getElementById('options-dropdown').classList.remove('open'); }
 function closeProfileMenu() { closeOptionsMenu(); }
 
+function toggleAdminOptionsMenu() { document.getElementById('options-dropdown-admin').classList.toggle('open'); }
 function closeAdminOptionsMenu() { document.getElementById('options-dropdown-admin').classList.remove('open'); }
 function closeAdminPage() {
   document.getElementById('page-admin').classList.remove('active');
@@ -3181,7 +3185,19 @@ async function loadNotifications() {
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      // Forzar actualización si hay una nueva versión disponible
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        if (newWorker) {
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              newWorker.postMessage({ type: 'SKIP_WAITING' });
+            }
+          });
+        }
+      });
+    }).catch(err => console.warn('SW registration failed:', err));
   });
 }
 </script>
