@@ -1469,6 +1469,7 @@ async function enterApp() {
   renderSubTabs('predicacion');
   loadSchedule();
   loadFullMap();
+  startRolePolling();
 
   // Show assigned task in dropdown for semiadmin
   const taskEl = document.getElementById('dropdown-task');
@@ -1512,6 +1513,7 @@ async function doAccess() {
 }
 
 function doLogout() {
+  stopRolePolling();
   clearSession(); currentUser = null; currentRole = 'viewer';
   closeProfileMenu();
   document.getElementById('app').style.display = 'none';
@@ -2485,26 +2487,75 @@ function canAccessModule(permissions, moduleKey) {
 
 async function registerUserSession(name, role) {
   const now = new Date().toISOString();
-  // DEV never registers in platform_users — stays local only
   if (role === 'dev') return;
 
-  // Check if user already exists in Supabase
   const { data: existing } = await sb.from('platform_users')
     .select('*').ilike('name', name).single();
 
   if (existing) {
-    // User exists: only update last_seen, never overwrite role/task set by admin
     await sb.from('platform_users').update({ last_seen: now }).eq('id', existing.id);
-    // If admin/dev changed this user's role, adopt it (never overwrite admin/dev session)
-    if (!['admin','dev'].includes(currentRole) && existing.role !== currentRole) {
+    // Always adopt the role Supabase has — this is the source of truth
+    if (existing.role !== currentRole) {
       currentRole = existing.role;
       currentUser.role = existing.role;
       saveSession(currentUser);
     }
   } else {
-    // New user — insert with base role
     await sb.from('platform_users')
       .insert({ name, role, task: '', joined_at: now, last_seen: now });
+  }
+}
+
+// ── Role sync polling ─────────────────────────────────────────────────────────
+// Every 30s, check if an admin changed this user's role or revoked access.
+// If so, update the session and refresh the UI immediately.
+let _rolePollInterval = null;
+
+function startRolePolling() {
+  if (_rolePollInterval) clearInterval(_rolePollInterval);
+  _rolePollInterval = setInterval(syncRoleFromServer, 30000);
+}
+
+function stopRolePolling() {
+  if (_rolePollInterval) { clearInterval(_rolePollInterval); _rolePollInterval = null; }
+}
+
+async function syncRoleFromServer() {
+  if (!currentUser || currentRole === 'dev') return;
+  try {
+    const { data } = await sb.from('platform_users')
+      .select('role, task, permissions')
+      .ilike('name', currentUser.name)
+      .single();
+    if (!data) return;
+    if (data.role !== currentRole) {
+      const prevRole = currentRole;
+      currentRole = data.role;
+      currentUser.role = data.role;
+      saveSession(currentUser);
+      // Update dropdown role label
+      const roleLabelsMap = { dev:'DEV', admin:'Administrador', semiadmin:'SemiAdmin', viewer:'Visitante' };
+      const roleEl = document.getElementById('dropdown-role');
+      if (roleEl) {
+        roleEl.textContent = roleLabelsMap[currentRole] || 'Visitante';
+        roleEl.style.color = currentRole === 'dev' ? 'var(--orange)' : currentRole === 'admin' ? 'var(--accent)' : currentRole === 'semiadmin' ? '#a855f7' : '';
+      }
+      // Show/hide admin buttons
+      const adminBtn = document.getElementById('admin-dropdown-btn');
+      if (adminBtn) adminBtn.style.display = ['dev','admin','semiadmin'].includes(currentRole) ? '' : 'none';
+      const usersBtn = document.getElementById('users-panel-btn');
+      if (usersBtn) usersBtn.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
+      // If user was on admin page and lost access, kick them out
+      const adminPage = document.getElementById('page-admin');
+      if (adminPage && adminPage.classList.contains('active') && !['dev','admin','semiadmin'].includes(currentRole)) {
+        showPage('schedule');
+        showToast('Tu acceso fue modificado por un administrador.', 'error');
+      } else if (prevRole !== currentRole) {
+        showToast('Tu rol fue actualizado a: ' + (roleLabelsMap[currentRole] || currentRole), '');
+      }
+    }
+  } catch(e) {
+    // Silently ignore network errors during poll
   }
 }
 // ── Territory public view ─────────────────────────────────────────────────────
