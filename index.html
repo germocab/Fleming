@@ -1059,9 +1059,8 @@
       <button class="modal-close" onclick="closeTerritoryEditModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="modal-body">
-      <div style="display:grid;grid-template-columns:1fr 2fr;gap:1rem">
+      <div style="max-width:160px">
         <div class="form-group2"><label class="form-label2">N° Territorio</label><input type="number" class="form-input" id="ter-num" placeholder="Ej: 2" min="1"></div>
-        <div class="form-group2"><label class="form-label2">Nombre / Descripción</label><input type="text" class="form-input" id="ter-name" placeholder="Ej: Sector Espigas Norte"></div>
       </div>
       <div class="form-group2" style="margin-bottom:1.1rem">
         <label class="form-label2">Mapa del territorio</label>
@@ -1501,10 +1500,13 @@ function viewAssignment(id) {
   const noPasarSec  = document.getElementById('detail-no-pasar-section');
   const noPasarList = document.getElementById('detail-no-pasar-list');
   if (ter && ter.no_pasar) {
-    const addrs = Array.isArray(ter.no_pasar) ? ter.no_pasar : JSON.parse(ter.no_pasar);
-    const filtered = addrs.filter(Boolean);
-    if (filtered.length) {
-      noPasarList.innerHTML = filtered.map(addr => `<div class="no-pasar-item">${addr}</div>`).join('');
+    const entries = parseNoPasar(ter.no_pasar);
+    if (entries.length) {
+      noPasarList.innerHTML = entries.map(e => `
+        <div class="no-pasar-item" style="justify-content:space-between">
+          <span>${e.addr}</span>
+          ${e.date ? `<span style="font-size:0.74rem;color:var(--text3);font-weight:500;flex-shrink:0;margin-left:8px">${fmtNpDate(e.date)}</span>` : ''}
+        </div>`).join('');
       noPasarSec.style.display = '';
     } else { noPasarSec.style.display = 'none'; }
   } else { noPasarSec.style.display = 'none'; }
@@ -1570,6 +1572,18 @@ function renderAdminAssignments() {
   }).join('');
 }
 
+// Parse no_pasar entries — handles both {addr,date} objects and legacy plain strings
+function parseNoPasar(raw) {
+  if (!raw) return [];
+  const arr = Array.isArray(raw) ? raw : JSON.parse(raw);
+  return arr.map(e => typeof e === 'object' ? e : { addr: e, date: '' }).filter(e => e.addr);
+}
+function fmtNpDate(d) {
+  if (!d) return '';
+  const [y,m,day] = d.split('-');
+  const MON = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  return `${parseInt(day)} ${MON[parseInt(m)-1]} ${y}`;
+}
 function renderAdminTerritories() {
   const container = document.getElementById('admin-territories-list');
   if (!territories.length) {
@@ -1578,29 +1592,32 @@ function renderAdminTerritories() {
   }
   container.innerHTML = `<div class="ter-grid">` + territories.map(t => {
     const color = getTerColor(t.number);
-    const noPasar = t.no_pasar ? (Array.isArray(t.no_pasar)?t.no_pasar:JSON.parse(t.no_pasar)).filter(Boolean) : [];
+    const noPasar = parseNoPasar(t.no_pasar);
     const npCount = noPasar.length;
     const mapHtml = t.map_data
       ? `<img src="${t.map_data}" alt="Mapa T${t.number}" loading="lazy">`
       : `<div class="ter-grid-map-empty"><svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg><span>Sin mapa</span></div>`;
+    const npPreview = noPasar.slice(0,2).map(e =>
+      `<div style="font-size:0.68rem;color:var(--red);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${e.addr}${e.date ? '<span style="color:var(--text3);font-weight:400"> · '+fmtNpDate(e.date)+'</span>' : ''}</div>`
+    ).join('') + (npCount > 2 ? `<div style="font-size:0.65rem;color:var(--text3)">+${npCount-2} más</div>` : '');
     return `<div class="ter-grid-card">
       <div class="ter-grid-map">
         ${mapHtml}
         <div class="ter-grid-num-badge" style="background:${color}">${t.number}</div>
       </div>
-      <div class="ter-grid-footer">
-        <div class="ter-grid-info">
+      <div class="ter-grid-footer" style="flex-direction:column;align-items:stretch;gap:6px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
           <div class="ter-grid-num">Territorio ${t.number}</div>
-          <div class="ter-grid-np ${npCount > 0 ? 'has-np' : ''}">${npCount > 0 ? `${npCount} dir. no pasar` : 'Sin dir. no pasar'}</div>
+          <div class="ter-grid-actions">
+            <button class="ter-grid-btn" onclick="event.stopPropagation();editTerritory('${t.id}')" title="Editar">
+              <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="ter-grid-btn del" onclick="event.stopPropagation();deleteTerritory('${t.id}')" title="Eliminar">
+              <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            </button>
+          </div>
         </div>
-        <div class="ter-grid-actions">
-          <button class="ter-grid-btn" onclick="event.stopPropagation();editTerritory('${t.id}')" title="Editar">
-            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
-          <button class="ter-grid-btn del" onclick="event.stopPropagation();deleteTerritory('${t.id}')" title="Eliminar">
-            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-          </button>
-        </div>
+        ${npCount > 0 ? `<div style="border-top:1px solid var(--border);padding-top:5px">${npPreview}</div>` : '<div class="ter-grid-np">Sin dir. no pasar</div>'}
       </div>
     </div>`;
   }).join('') + `</div>`;
@@ -1625,7 +1642,7 @@ function openAssignmentModal(a) {
 
   const selTer = document.getElementById('as-territory');
   selTer.innerHTML = '<option value="">Sin territorio</option>' +
-    territories.map(t => `<option value="${t.id}"${a?.territory_id===t.id?' selected':''}>${t.number}${t.name?' — '+t.name:''}</option>`).join('');
+    territories.map(t => `<option value="${t.id}"${a?.territory_id===t.id?' selected':''}>Territorio ${t.number}</option>`).join('');
 
   document.getElementById('as-error').style.display = 'none';
   document.getElementById('assignment-modal').classList.add('open');
@@ -1678,7 +1695,7 @@ function openTerritoryModal(t) {
   editingTerritoryId = t ? t.id : null;
   document.getElementById('ter-modal-title').textContent = t ? 'Editar Territorio' : 'Nuevo Territorio';
   document.getElementById('ter-num').value = t?.number || '';
-  document.getElementById('ter-name').value = t?.name || '';
+
   const area = document.getElementById('img-upload-area');
   const preview = document.getElementById('img-preview');
   const placeholder = document.getElementById('img-placeholder');
@@ -1697,8 +1714,13 @@ function openTerritoryModal(t) {
   const npContainer = document.getElementById('no-pasar-inputs');
   npContainer.innerHTML = '';
   const noPasar = t?.no_pasar ? (Array.isArray(t.no_pasar) ? t.no_pasar : JSON.parse(t.no_pasar)) : [];
-  if (noPasar.filter(Boolean).length) { noPasar.filter(Boolean).forEach(addr => addNoPasarInput(addr)); }
-  else { addNoPasarInput(); }
+  const npFiltered = noPasar.filter(e => e && (typeof e === 'object' ? e.addr : e));
+  if (npFiltered.length) {
+    npFiltered.forEach(e => {
+      if (typeof e === 'object') addNoPasarInput(e.addr || '', e.date || '');
+      else addNoPasarInput(e, ''); // backwards compat with old string entries
+    });
+  } else { addNoPasarInput(); }
   document.getElementById('ter-error').style.display = 'none';
   document.getElementById('territory-edit-modal').classList.add('open');
 }
@@ -1729,25 +1751,32 @@ function handleMapImage(event) {
   };
   reader.readAsDataURL(file);
 }
-function addNoPasarInput(val = '') {
+function addNoPasarInput(addr = '', date = '') {
   noPasarCount++;
+  const n = noPasarCount;
   const div = document.createElement('div');
-  div.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;align-items:center';
-  div.id = 'np-wrap-' + noPasarCount;
-  div.innerHTML = `<input type="text" class="form-input" value="${val.replace(/"/g,'&quot;')}" placeholder="Ej: Nueva Bilbao 8998" style="flex:1">
+  div.style.cssText = 'display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-bottom:8px;align-items:center';
+  div.id = 'np-wrap-' + n;
+  div.innerHTML = `<input type="text" class="form-input" id="np-addr-${n}" value="${addr.replace(/"/g,'&quot;')}" placeholder="Ej: Nueva Bilbao 8998">
+    <input type="date" class="date-input" id="np-date-${n}" value="${date}" style="height:42px;border-radius:var(--radius-sm);padding:0 10px;font-size:0.8rem;background:var(--surface2);border:1px solid var(--border);color:var(--text)">
     <button class="btn-danger" onclick="this.parentElement.remove()" style="flex-shrink:0;padding:0.45rem 0.65rem"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
   document.getElementById('no-pasar-inputs').appendChild(div);
 }
 async function saveTerritory() {
   if (!['admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   const number = parseInt(document.getElementById('ter-num').value);
-  const name   = document.getElementById('ter-name').value.trim();
   if (!number) { showError('ter-error','El número de territorio es requerido'); return; }
-  const npInputs = document.querySelectorAll('#no-pasar-inputs input[type="text"]');
-  const no_pasar = Array.from(npInputs).map(i=>i.value.trim()).filter(Boolean);
+  // Collect no_pasar as array of {addr, date} objects
+  const npWraps = document.querySelectorAll('#no-pasar-inputs [id^="np-wrap-"]');
+  const no_pasar = Array.from(npWraps).map(wrap => {
+    const n = wrap.id.replace('np-wrap-','');
+    const addr = (document.getElementById('np-addr-'+n)?.value || '').trim();
+    const date = (document.getElementById('np-date-'+n)?.value || '').trim();
+    return addr ? { addr, date } : null;
+  }).filter(Boolean);
   const btn = document.getElementById('save-ter-btn');
   btn.disabled = true; btn.textContent = 'Guardando...';
-  const payload = { number, name, no_pasar, map_data: pendingMapBase64 || null };
+  const payload = { number, no_pasar, map_data: pendingMapBase64 || null };
   let error;
   if (editingTerritoryId) { ({error} = await sb.from('territories').update(payload).eq('id',editingTerritoryId)); }
   else { ({error} = await sb.from('territories').insert(payload)); }
@@ -2072,23 +2101,24 @@ function renderTerritoryView() {
   }
   container.innerHTML = `<div class="ter-grid" style="padding-top:0.25rem">` + territories.map(t => {
     const color = getTerColor(t.number);
-    const noPasar = t.no_pasar ? (Array.isArray(t.no_pasar) ? t.no_pasar : JSON.parse(t.no_pasar)).filter(Boolean) : [];
+    const noPasar = parseNoPasar(t.no_pasar);
     const npCount = noPasar.length;
     const mapHtml = t.map_data
       ? `<img src="${t.map_data}" alt="Mapa T${t.number}" loading="lazy">`
       : `<div class="ter-grid-map-empty"><svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg><span>Sin mapa</span></div>`;
+    const npPreview = noPasar.slice(0,2).map(e =>
+      `<div style="font-size:0.68rem;color:var(--red);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${e.addr}${e.date ? '<span style="color:var(--text3);font-weight:400"> · '+fmtNpDate(e.date)+'</span>' : ''}</div>`
+    ).join('') + (npCount > 2 ? `<div style="font-size:0.65rem;color:var(--text3)">+${npCount-2} más</div>` : '');
     return `<div class="ter-grid-card" onclick="viewTerritory('${t.id}')">
       <div class="ter-grid-map">
         ${mapHtml}
         <div class="ter-grid-num-badge" style="background:${color}">${t.number}</div>
       </div>
-      <div class="ter-grid-footer">
-        <div class="ter-grid-info">
-          <div class="ter-grid-num">Territorio ${t.number}${t.name ? `<span style="font-size:0.75rem;font-weight:500;color:var(--text3);margin-left:5px">${t.name}</span>` : ''}</div>
-          <div class="ter-grid-np ${npCount > 0 ? 'has-np' : ''}">
-            ${npCount > 0 ? `${npCount} dir. no pasar` : 'Sin dir. no pasar'}
-          </div>
-        </div>
+      <div class="ter-grid-footer" style="flex-direction:column;align-items:stretch;gap:6px">
+        <div class="ter-grid-num">Territorio ${t.number}</div>
+        ${npCount > 0
+          ? `<div style="border-top:1px solid var(--border);padding-top:5px">${npPreview}</div>`
+          : '<div class="ter-grid-np">Sin dir. no pasar</div>'}
       </div>
     </div>`;
   }).join('') + `</div>`;
@@ -2097,11 +2127,11 @@ function renderTerritoryView() {
 function viewTerritory(id) {
   const t = territories.find(x => x.id === id);
   if (!t) return;
-  const noPasar = t.no_pasar ? (Array.isArray(t.no_pasar) ? t.no_pasar : JSON.parse(t.no_pasar)).filter(Boolean) : [];
+  const noPasar = parseNoPasar(t.no_pasar);
   const color = getTerColor(t.number);
 
   // Header: territory number + name
-  document.getElementById('detail-date-label').textContent = t.name || '';
+  document.getElementById('detail-date-label').textContent = '';
   document.getElementById('detail-time-chip').style.display = 'none';
   const addressEl = document.getElementById('detail-address');
   addressEl.textContent = `Territorio ${t.number}`;
@@ -2129,11 +2159,15 @@ function viewTerritory(id) {
     mapWrap.onclick = null;
   }
 
-  // No pasar
+  // No pasar with dates
   const noPasarSec  = document.getElementById('detail-no-pasar-section');
   const noPasarList = document.getElementById('detail-no-pasar-list');
   if (noPasar.length) {
-    noPasarList.innerHTML = noPasar.map(addr => `<div class="no-pasar-item">${addr}</div>`).join('');
+    noPasarList.innerHTML = noPasar.map(e => `
+      <div class="no-pasar-item" style="justify-content:space-between">
+        <span>${e.addr}</span>
+        ${e.date ? `<span style="font-size:0.74rem;color:var(--text3);font-weight:500;flex-shrink:0;margin-left:8px">${fmtNpDate(e.date)}</span>` : ''}
+      </div>`).join('');
     noPasarSec.style.display = '';
   } else {
     noPasarSec.style.display = 'none';
