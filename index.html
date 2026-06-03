@@ -628,10 +628,10 @@
   .users-panel-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
   @media(min-width: 640px) {
     .users-panel-overlay { align-items: center; padding: 1rem; }
-    .users-panel { border-radius: 20px; animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1); max-width: 560px; }
+    .users-panel { border-radius: 20px; animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1); max-width: 600px; }
   }
   .users-panel {
-    background: var(--surface); width: 100%; max-width: 560px;
+    background: var(--surface); width: 100%; max-width: 600px;
     max-height: 92vh; overflow-y: auto;
     border-radius: 20px 20px 0 0;
     box-shadow: var(--shadow-lg);
@@ -641,32 +641,43 @@
     display: flex; align-items: center; justify-content: space-between;
     padding: 1.1rem 1.25rem; border-bottom: 1px solid var(--border);
     position: sticky; top: 0; background: var(--surface); z-index: 1;
+    backdrop-filter: blur(20px);
   }
+  .users-panel-title-wrap { display: flex; flex-direction: column; }
   .users-panel-title { font-size: 1.05rem; font-weight: 700; }
-  .users-panel-body { padding: 1.1rem 1.25rem; }
+  .users-panel-subtitle { font-size: 0.74rem; color: var(--text3); margin-top: 1px; }
+  .users-panel-body { padding: 1rem 1.1rem 1.25rem; }
 
-  .user-row {
+  /* User card redesign */
+  .user-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 0.65rem;
+    overflow: hidden;
+    transition: box-shadow 0.2s, border-color 0.2s;
+  }
+  .user-card:hover { border-color: var(--border-active); box-shadow: var(--shadow); }
+  .user-card-main {
     display: flex; align-items: center; gap: 12px;
-    padding: 0.8rem 0.9rem;
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: var(--radius-sm); margin-bottom: 0.5rem;
-    transition: border-color 0.15s;
+    padding: 0.85rem 1rem;
+    cursor: default;
   }
-  .user-row:hover { border-color: var(--border-active); }
-  .user-row-avatar {
-    width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  .user-card-avatar {
+    width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
-    font-size: 0.75rem; font-weight: 700; color: white;
+    font-size: 0.82rem; font-weight: 800; color: white;
+    letter-spacing: -0.01em;
   }
-  .user-row-info { flex: 1; min-width: 0; }
-  .user-row-name { font-size: 0.88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .user-row-meta { font-size: 0.74rem; color: var(--text3); margin-top: 1px; }
-  .user-row-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .user-card-info { flex: 1; min-width: 0; }
+  .user-card-name { font-size: 0.92rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.01em; }
+  .user-card-meta { font-size: 0.74rem; color: var(--text3); margin-top: 2px; display: flex; align-items: center; gap: 6px; }
+  .user-card-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
   .role-badge-pill {
     display: inline-flex; align-items: center;
-    padding: 3px 9px; border-radius: 20px;
-    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.03em;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
     white-space: nowrap;
   }
   .role-badge-admin     { background: rgba(0,122,255,0.12); color: var(--accent); border: 1px solid rgba(0,122,255,0.25); }
@@ -674,60 +685,131 @@
   .role-badge-viewer    { background: var(--surface3);        color: var(--text3); border: 1px solid var(--border); }
   .role-badge-dev       { background: rgba(255,149,0,0.12);   color: var(--orange); border: 1px solid rgba(255,149,0,0.35); }
 
+  .user-expand-btn {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--surface3); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text3); transition: all 0.18s; flex-shrink: 0;
+  }
+  .user-expand-btn:hover { background: var(--surface2); color: var(--text2); }
+  .user-expand-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; transition: transform 0.2s; }
+  .user-expand-btn.open svg { transform: rotate(180deg); }
+
+  /* Expand area */
+  .user-expand {
+    padding: 0 1rem 1rem;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+    animation: expandIn 0.18s ease;
+  }
+  @keyframes expandIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+
+  .user-expand-section { margin-top: 0.85rem; }
+  .user-expand-label {
+    font-size: 0.7rem; font-weight: 700; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: 7px; display: flex; align-items: center; gap: 5px;
+  }
+  .user-expand-label svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+
   .role-select-inline {
-    padding: 4px 8px; font-size: 0.78rem; font-weight: 600;
-    background: var(--surface3); border: 1px solid var(--border);
-    border-radius: 8px; color: var(--text2); font-family: var(--font);
-    outline: none; cursor: pointer; transition: border-color 0.15s;
+    padding: 7px 10px; font-size: 0.84rem; font-weight: 600;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text); font-family: var(--font);
+    outline: none; cursor: pointer; transition: border-color 0.15s; width: 100%;
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238e8e93' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 7px center; padding-right: 22px;
+    background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px;
   }
-  .role-select-inline:focus { border-color: var(--accent); }
+  .role-select-inline:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+
+  /* Permissions grid */
+  .perms-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .perm-toggle {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 12px; border-radius: 10px;
+    background: var(--surface); border: 1.5px solid var(--border);
+    cursor: pointer; transition: all 0.18s; user-select: none;
+  }
+  .perm-toggle:hover { border-color: var(--border-active); }
+  .perm-toggle.active { border-color: var(--accent); background: var(--accent-light); }
+  .perm-toggle-label { font-size: 0.8rem; font-weight: 600; color: var(--text2); display: flex; align-items: center; gap: 6px; }
+  .perm-toggle-label svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+  .perm-toggle.active .perm-toggle-label { color: var(--accent); }
+  .perm-check {
+    width: 18px; height: 18px; border-radius: 5px;
+    border: 1.5px solid var(--border); background: var(--surface3);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .perm-toggle.active .perm-check { background: var(--accent); border-color: var(--accent); }
+  .perm-check svg { width: 10px; height: 10px; stroke: white; fill: none; stroke-width: 3; stroke-linecap: round; display: none; }
+  .perm-toggle.active .perm-check svg { display: block; }
 
   .task-textarea {
-    width: 100%; padding: 0.55rem 0.75rem;
+    width: 100%; padding: 0.65rem 0.85rem;
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius-xs); color: var(--text);
-    font-family: var(--font); font-size: 0.82rem; outline: none;
-    resize: none; min-height: 56px; line-height: 1.45;
-    transition: border-color 0.2s;
+    border-radius: 10px; color: var(--text);
+    font-family: var(--font); font-size: 0.84rem; outline: none;
+    resize: none; min-height: 60px; line-height: 1.5;
+    transition: border-color 0.2s, box-shadow 0.2s;
   }
-  .task-textarea:focus { border-color: var(--accent); }
+  .task-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
   .task-textarea::placeholder { color: var(--text3); }
 
-  .user-expand {
-    padding: 0.75rem 0.9rem 0.85rem;
-    background: var(--surface2); border: 1px solid var(--border);
-    border-top: none; border-radius: 0 0 var(--radius-sm) var(--radius-sm);
-    margin-top: -6px; margin-bottom: 0.5rem;
+  .user-expand-actions {
+    display: flex; gap: 8px; margin-top: 1rem; justify-content: space-between; align-items: center;
   }
-  .user-expand-label { font-size: 0.74rem; font-weight: 600; color: var(--text3); margin-bottom: 5px; }
-
   .revoke-btn {
-    padding: 0.38rem 0.85rem;
-    background: rgba(255,59,48,0.08); border: 1px solid rgba(255,59,48,0.2);
-    border-radius: 8px; color: var(--red); font-family: var(--font);
-    font-size: 0.76rem; font-weight: 700; cursor: pointer; transition: all 0.15s;
-    white-space: nowrap;
+    padding: 0.45rem 1rem;
+    background: rgba(255,59,48,0.07); border: 1px solid rgba(255,59,48,0.2);
+    border-radius: 10px; color: var(--red); font-family: var(--font);
+    font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
+    white-space: nowrap; display: flex; align-items: center; gap: 5px;
   }
-  .revoke-btn:hover { background: rgba(255,59,48,0.15); }
+  .revoke-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+  .revoke-btn:hover { background: rgba(255,59,48,0.14); }
 
-  .promote-btn {
-    padding: 0.38rem 0.85rem;
-    background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.25);
-    border-radius: 8px; color: #a855f7; font-family: var(--font);
-    font-size: 0.76rem; font-weight: 700; cursor: pointer; transition: all 0.15s;
+  .save-user-btn {
+    padding: 0.45rem 1.25rem;
+    background: var(--accent); border: none;
+    border-radius: 10px; color: white; font-family: var(--font);
+    font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
     white-space: nowrap;
   }
-  .promote-btn:hover { background: rgba(168,85,247,0.18); }
+  .save-user-btn:hover { opacity: 0.88; }
+
+  .users-count-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent-light); color: var(--accent);
+    font-size: 0.72rem; font-weight: 800; margin-left: 6px;
+  }
 
   .users-empty {
     display: flex; flex-direction: column; align-items: center;
-    padding: 2rem; color: var(--text3); text-align: center; gap: 6px;
+    padding: 2.5rem 1rem; color: var(--text3); text-align: center; gap: 8px;
   }
-  .users-empty svg { width: 36px; height: 36px; stroke: var(--text3); fill: none; stroke-width: 1.5; stroke-linecap: round; opacity: 0.4; margin-bottom: 4px; }
-  .users-empty p { font-size: 0.84rem; }
+  .users-empty-icon {
+    width: 56px; height: 56px; border-radius: 16px;
+    background: var(--surface3); display: flex; align-items: center; justify-content: center;
+    margin-bottom: 4px;
+  }
+  .users-empty-icon svg { width: 26px; height: 26px; stroke: var(--text3); fill: none; stroke-width: 1.5; stroke-linecap: round; opacity: 0.6; }
+  .users-empty p { font-size: 0.84rem; line-height: 1.5; }
+
+  /* Online dot */
+  .online-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green); flex-shrink: 0;
+  }
+  .offline-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--surface3); flex-shrink: 0;
+  }
 
   /* ── Territory grid ── */
   .ter-grid {
@@ -1265,7 +1347,10 @@
 <div class="users-panel-overlay" id="users-panel-overlay" onclick="handleUsersPanelOverlayClick(event)">
   <div class="users-panel" id="users-panel">
     <div class="users-panel-header">
-      <span class="users-panel-title">Usuarios activos</span>
+      <div class="users-panel-title-wrap">
+        <span class="users-panel-title">Usuarios <span class="users-count-badge" id="users-count-badge">0</span></span>
+        <span class="users-panel-subtitle">Gestiona roles y permisos de acceso</span>
+      </div>
       <button class="modal-close" onclick="closeUsersPanel()">
         <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
@@ -1493,11 +1578,50 @@ function showPage(name) {
   if (name === 'admin') loadAdminData();
 }
 
-function switchAdminTab(tab) {
+async function switchAdminTab(tab) {
+  // For semiadmin, check permissions before switching
+  if (currentRole === 'semiadmin') {
+    const perms = await getUserPermissions();
+    const moduleMap = { assignments: 'assignments', territories: 'territories', conductores: 'conductores', casas: 'casas' };
+    const moduleKey = moduleMap[tab];
+    if (moduleKey && !canAccessModule(perms, moduleKey)) {
+      showToast('No tienes permisos para acceder a este módulo.', 'error');
+      return;
+    }
+  }
   const tabs = ['assignments','territories','conductores','casas'];
   document.querySelectorAll('.admin-tab').forEach((t,i) => t.classList.toggle('active', tabs[i] === tab));
   document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
   document.getElementById('admin-' + tab).classList.add('active');
+}
+
+async function applyAdminTabPermissions() {
+  if (!['semiadmin'].includes(currentRole)) return;
+  const perms = await getUserPermissions();
+  if (!perms) return;
+  const tabMap = [
+    { tab: 'assignments', key: 'assignments' },
+    { tab: 'territories', key: 'territories' },
+    { tab: 'conductores', key: 'conductores' },
+    { tab: 'casas',       key: 'casas' },
+  ];
+  const adminTabBtns = document.querySelectorAll('.admin-tab');
+  const tabs = ['assignments','territories','conductores','casas'];
+  adminTabBtns.forEach((btn, i) => {
+    const key = tabs[i];
+    const allowed = canAccessModule(perms, key);
+    btn.style.opacity = allowed ? '' : '0.4';
+    btn.style.pointerEvents = allowed ? '' : 'none';
+    btn.title = allowed ? '' : 'Sin permiso para este módulo';
+  });
+  // Auto-switch to first allowed tab
+  const firstAllowed = tabMap.find(m => canAccessModule(perms, m.key));
+  if (firstAllowed) {
+    const allTabs = ['assignments','territories','conductores','casas'];
+    document.querySelectorAll('.admin-tab').forEach((t,i) => t.classList.toggle('active', allTabs[i] === firstAllowed.tab));
+    document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+    document.getElementById('admin-' + firstAllowed.tab).classList.add('active');
+  }
 }
 
 async function loadSchedule() {
@@ -1687,6 +1811,7 @@ async function loadAdminData() {
   renderAdminTerritories();
   renderAdminConductores();
   renderAdminCasas();
+  await applyAdminTabPermissions();
 }
 
 function renderAdminAssignments() {
@@ -1798,6 +1923,10 @@ function closeAssignmentModal() { document.getElementById('assignment-modal').cl
 function editAssignment(id) { openAssignmentModal(assignments.find(a=>a.id===id)); }
 async function saveAssignment() {
   if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (currentRole === 'semiadmin') {
+    const perms = await getUserPermissions();
+    if (!canAccessModule(perms, 'assignments')) { showToast('No tienes permiso para gestionar Asignaciones.','error'); return; }
+  }
   const conductorId = document.getElementById('as-conductor-select').value || null;
   const casaId = document.getElementById('as-casa-select').value || null;
   const conductor = conductorId ? conductores.find(c=>c.id===conductorId) : null;
@@ -1911,6 +2040,10 @@ function addNoPasarInput(addr = '', date = '') {
 }
 async function saveTerritory() {
   if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (currentRole === 'semiadmin') {
+    const perms = await getUserPermissions();
+    if (!canAccessModule(perms, 'territories')) { showToast('No tienes permiso para gestionar Territorios.','error'); return; }
+  }
   const number = parseInt(document.getElementById('ter-num').value);
   if (!number) { showError('ter-error','El número de territorio es requerido'); return; }
   // Collect no_pasar as array of {addr, date} objects
@@ -2042,6 +2175,10 @@ function closeCasaModal() { document.getElementById('casa-modal').classList.remo
 function editCasa(id) { openCasaModal(casas.find(h=>h.id===id)); }
 async function saveCasa() {
   if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (currentRole === 'semiadmin') {
+    const perms = await getUserPermissions();
+    if (!canAccessModule(perms, 'casas')) { showToast('No tienes permiso para gestionar Casas.','error'); return; }
+  }
   const direccion = document.getElementById('casa-direccion').value.trim();
   const amo = document.getElementById('casa-amo').value.trim();
   if (!direccion) { showError('casa-error','La dirección es requerida'); return; }
@@ -2070,8 +2207,45 @@ async function deleteCasa(id) {
 
 
 // ── Users panel ──────────────────────────────────────────────────────────────
-let activeUsers = []; // { id, name, role, task, joined_at, last_seen }
+let activeUsers = []; // { id, name, role, task, permissions, joined_at, last_seen }
 let expandedUserId = null;
+
+// Permissions definitions
+const PERM_MODULES = [
+  { key: 'territories', label: 'Territorios', icon: '<svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>' },
+  { key: 'assignments', label: 'Asignaciones', icon: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' },
+  { key: 'conductores', label: 'Conductores', icon: '<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' },
+  { key: 'casas',       label: 'Casas',        icon: '<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>' },
+];
+
+function parsePermissions(raw) {
+  // If permissions is stored as JSON string or object, parse it
+  // Default: all modules allowed
+  if (!raw) return { territories: true, assignments: true, conductores: true, casas: true };
+  try {
+    const p = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    return {
+      territories: p.territories !== false,
+      assignments: p.assignments !== false,
+      conductores: p.conductores !== false,
+      casas:       p.casas       !== false,
+    };
+  } catch { return { territories: true, assignments: true, conductores: true, casas: true }; }
+}
+
+// Check if current user can edit permissions of a target user
+function canEditPermissions(targetRole) {
+  if (currentRole === 'dev') return true;       // DEV can edit admin + semiadmin
+  if (currentRole === 'admin' && targetRole === 'semiadmin') return true; // Admin only edits semiadmin
+  return false;
+}
+
+// Check if current user can change role of a target user
+function canChangeRole(targetRole) {
+  if (currentRole === 'dev') return true;       // DEV: any user
+  if (currentRole === 'admin' && targetRole !== 'admin') return true; // Admin: only non-admins
+  return false;
+}
 
 async function loadUsers() {
   const { data, error } = await sb.from('platform_users').select('*').order('last_seen', { ascending: false });
@@ -2104,9 +2278,12 @@ const ROLE_LABELS = { dev:'DEV', viewer:'Visitante', semiadmin:'SemiAdmin', admi
 
 function renderUsersPanel() {
   const body = document.getElementById('users-panel-body');
+  const countBadge = document.getElementById('users-count-badge');
+  if (countBadge) countBadge.textContent = activeUsers.length;
+
   if (!activeUsers.length) {
     body.innerHTML = `<div class="users-empty">
-      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <div class="users-empty-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
       <p>Ningún usuario ha iniciado sesión todavía.<br>Aparecerán aquí cuando ingresen a la plataforma.</p>
     </div>`;
     return;
@@ -2121,56 +2298,89 @@ function renderUsersPanel() {
     const roleLabel = ROLE_LABELS[u.role] || u.role;
     const isExpanded = expandedUserId === u.id;
     const lastActive = u.last_seen || u.joined_at;
+    const minutesAgo = lastActive ? Math.round((new Date() - new Date(lastActive)) / 60000) : 9999;
+    const isOnline = minutesAgo < 10;
     const since = lastActive ? (() => {
-      const d = new Date(lastActive); const now = new Date();
-      const mins = Math.round((now - d) / 60000);
-      if (mins < 2) return 'Ahora mismo';
-      if (mins < 60) return 'Hace ' + mins + ' min';
-      if (mins < 1440) return 'Hace ' + Math.round(mins/60) + 'h';
-      return d.toLocaleDateString('es-CL',{day:'numeric',month:'short'});
+      if (minutesAgo < 2) return 'Ahora mismo';
+      if (minutesAgo < 60) return 'Hace ' + minutesAgo + ' min';
+      if (minutesAgo < 1440) return 'Hace ' + Math.round(minutesAgo/60) + 'h';
+      return new Date(lastActive).toLocaleDateString('es-CL',{day:'numeric',month:'short'});
     })() : '—';
     const isCurrentUser = currentUser && u.name === currentUser.name;
-    // DEV users don't appear in platform_users, so u.role is never 'dev' here
-    // Non-dev admins can only promote up to semiadmin
-    const roleOptions = isDev
-      ? `<option value="viewer"    ${u.role==='viewer'    ?'selected':''}>Visitante</option>
+    const canEdit = !isCurrentUser && canChangeRole(u.role);
+    const perms = parsePermissions(u.permissions);
+
+    // Role select options
+    let roleOptions = '';
+    if (isDev) {
+      roleOptions = `<option value="viewer"    ${u.role==='viewer'    ?'selected':''}>Visitante</option>
          <option value="semiadmin" ${u.role==='semiadmin' ?'selected':''}>SemiAdmin</option>
-         <option value="admin"     ${u.role==='admin'     ?'selected':''}>Administrador</option>`
-      : `<option value="viewer"    ${u.role==='viewer'    ?'selected':''}>Visitante</option>
+         <option value="admin"     ${u.role==='admin'     ?'selected':''}>Administrador</option>`;
+    } else {
+      // Admin: can change viewer <-> semiadmin only
+      roleOptions = `<option value="viewer"    ${u.role==='viewer'    ?'selected':''}>Visitante</option>
          <option value="semiadmin" ${u.role==='semiadmin' ?'selected':''}>SemiAdmin</option>`;
+    }
 
-    const mainRow = `<div class="user-row" style="border-radius:${isExpanded?'var(--radius-sm) var(--radius-sm) 0 0':'var(--radius-sm)'}; margin-bottom:${isExpanded?'0':'0.5rem'}">
-      <div class="user-row-avatar" style="background:${col}">${inits}</div>
-      <div class="user-row-info">
-        <div class="user-row-name">${u.name}${isCurrentUser?' <span style="font-size:0.68rem;color:var(--text3);font-weight:500">(tú)</span>':''}</div>
-        <div class="user-row-meta">Activo ${since}</div>
-      </div>
-      <div class="user-row-actions">
-        <span class="role-badge-pill ${roleBadgeCls}">${roleLabel}</span>
-        ${!isCurrentUser ? `<button class="btn-sm" onclick="toggleExpandUser('${u.id}')" style="font-size:0.72rem;padding:0.3rem 0.7rem">${isExpanded?'▲':'▼'}</button>` : ''}
-      </div>
-    </div>`;
+    // Permissions grid — shown only when target can have permissions edited
+    const showPerms = !isCurrentUser && canEditPermissions(u.role);
+    const permsHtml = showPerms ? `
+      <div class="user-expand-section">
+        <div class="user-expand-label">
+          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Módulos permitidos
+        </div>
+        <div class="perms-grid" id="perms-grid-${u.id}">
+          ${PERM_MODULES.map(m => `
+            <div class="perm-toggle${perms[m.key] ? ' active' : ''}" onclick="togglePerm('${u.id}','${m.key}')" id="perm-${u.id}-${m.key}">
+              <span class="perm-toggle-label">${m.icon}${m.label}</span>
+              <span class="perm-check"><svg viewBox="0 0 12 10"><polyline points="1 5 4.5 8.5 11 1"/></svg></span>
+            </div>`).join('')}
+        </div>
+      </div>` : '';
 
-    const expandRow = isExpanded ? `<div class="user-expand">
-      <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">
-        <div style="flex:1;min-width:140px">
-          <div class="user-expand-label">Rol</div>
+    const expandHtml = isExpanded ? `<div class="user-expand">
+      <div style="display:grid;grid-template-columns:${canEdit?'1fr 1fr':'1fr'};gap:10px;margin-top:0.85rem">
+        ${canEdit ? `<div>
+          <div class="user-expand-label"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Rol</div>
           <select class="role-select-inline" id="role-sel-${u.id}" onchange="changeUserRole('${u.id}',this.value)">
             ${roleOptions}
           </select>
-        </div>
-        <div style="flex:2;min-width:160px">
-          <div class="user-expand-label">Responsabilidades asignadas</div>
-          <textarea class="task-textarea" id="task-${u.id}" placeholder="Ej: Subir territorios nuevos, actualizar asignaciones…">${u.task||''}</textarea>
+        </div>` : ''}
+        <div>
+          <div class="user-expand-label"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Nota / Responsabilidad</div>
+          <textarea class="task-textarea" id="task-${u.id}" placeholder="Ej: Solo maneja territorios…">${u.task||''}</textarea>
         </div>
       </div>
-      <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end">
-        <button class="revoke-btn" onclick="revokeUser('${u.id}')">Revocar acceso</button>
-        <button class="promote-btn" onclick="saveUserChanges('${u.id}')">Guardar cambios</button>
+      ${permsHtml}
+      <div class="user-expand-actions">
+        <button class="revoke-btn" onclick="revokeUser('${u.id}')">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Revocar acceso
+        </button>
+        <button class="save-user-btn" onclick="saveUserChanges('${u.id}')">Guardar cambios</button>
       </div>
     </div>` : '';
 
-    return mainRow + expandRow;
+    return `<div class="user-card" id="user-card-${u.id}">
+      <div class="user-card-main">
+        <div class="user-card-avatar" style="background:${col}">${inits}</div>
+        <div class="user-card-info">
+          <div class="user-card-name">${u.name}${isCurrentUser?' <span style="font-size:0.68rem;color:var(--text3);font-weight:500">(tú)</span>':''}</div>
+          <div class="user-card-meta">
+            <span class="${isOnline?'online-dot':'offline-dot'}"></span>
+            ${since}
+          </div>
+        </div>
+        <div class="user-card-actions">
+          <span class="role-badge-pill ${roleBadgeCls}">${roleLabel}</span>
+          ${!isCurrentUser ? `<button class="user-expand-btn${isExpanded?' open':''}" onclick="toggleExpandUser('${u.id}')" title="${isExpanded?'Cerrar':'Editar usuario'}">
+            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>` : ''}
+        </div>
+      </div>
+      ${expandHtml}
+    </div>`;
   }).join('');
 }
 
@@ -2181,7 +2391,22 @@ function toggleExpandUser(uid) {
 
 function changeUserRole(uid, newRole) {
   const u = activeUsers.find(x=>x.id===uid);
-  if (u) { u.role = newRole; }
+  if (u) {
+    u.role = newRole;
+    // When role changes, re-render to potentially show/hide permissions grid
+    renderUsersPanel();
+  }
+}
+
+function togglePerm(uid, moduleKey) {
+  const u = activeUsers.find(x=>x.id===uid);
+  if (!u) return;
+  const perms = parsePermissions(u.permissions);
+  perms[moduleKey] = !perms[moduleKey];
+  u.permissions = perms;
+  // Update UI immediately without full re-render
+  const el = document.getElementById(`perm-${uid}-${moduleKey}`);
+  if (el) el.classList.toggle('active', perms[moduleKey]);
 }
 
 async function saveUserChanges(uid) {
@@ -2189,13 +2414,20 @@ async function saveUserChanges(uid) {
   const taskEl  = document.getElementById('task-'+uid);
   const u = activeUsers.find(x=>x.id===uid);
   if (!u) return;
-  u.role = roleSel ? roleSel.value : u.role;
-  u.task = taskEl  ? taskEl.value.trim() : u.task;
+  if (roleSel) u.role = roleSel.value;
+  if (taskEl)  u.task = taskEl.value.trim();
+  const perms = parsePermissions(u.permissions);
+
+  const btn = document.querySelector(`#user-card-${uid} .save-user-btn`);
+  if (btn) { btn.disabled = true; btn.textContent = 'Guardando…'; }
+
   const { error } = await sb.from('platform_users')
-    .update({ role: u.role, task: u.task })
+    .update({ role: u.role, task: u.task, permissions: perms })
     .eq('id', u.id);
+
+  if (btn) { btn.disabled = false; btn.textContent = 'Guardar cambios'; }
   if (error) { showToast('Error al guardar','error'); return; }
-  // If the affected user is the current session user, update their session role too
+
   if (currentUser && u.name === currentUser.name) {
     currentRole = u.role;
     currentUser.role = u.role;
@@ -2203,7 +2435,7 @@ async function saveUserChanges(uid) {
   }
   expandedUserId = null;
   renderUsersPanel();
-  showToast('Cambios guardados','success');
+  showToast('Cambios guardados ✓','success');
 }
 
 async function revokeUser(uid) {
@@ -2212,13 +2444,28 @@ async function revokeUser(uid) {
   if (!confirm(`¿Revocar el acceso de ${u.name}? Podrá volver a ingresar con la contraseña de visitante.`)) return;
   u.role = 'viewer';
   u.task = '';
+  u.permissions = { territories: true, assignments: true, conductores: true, casas: true };
   const { error } = await sb.from('platform_users')
-    .update({ role: 'viewer', task: '' })
+    .update({ role: 'viewer', task: '', permissions: u.permissions })
     .eq('id', u.id);
   if (error) { showToast('Error al revocar','error'); return; }
   expandedUserId = null;
   renderUsersPanel();
   showToast(`Acceso de ${u.name.split(' ')[0]} revocado`,'success');
+}
+
+// ── Permission check helper used elsewhere ────────────────────────────────────
+async function getUserPermissions() {
+  if (['dev','admin'].includes(currentRole)) return null; // full access
+  if (currentRole !== 'semiadmin') return null;
+  const { data } = await sb.from('platform_users').select('permissions').eq('name', currentUser.name).single();
+  if (!data) return null;
+  return parsePermissions(data.permissions);
+}
+
+function canAccessModule(permissions, moduleKey) {
+  if (!permissions) return true; // no restrictions = full access
+  return permissions[moduleKey] !== false;
 }
 
 async function registerUserSession(name, role) {
