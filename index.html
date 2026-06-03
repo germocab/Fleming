@@ -1575,11 +1575,18 @@ async function init() {
   else { document.getElementById('auth-screen').style.display = 'flex'; }
 }
 
-// === Pégalo AQUÍ, justo antes de enterApp ===
+// ── Push Notifications ───────────────────────────────────────────────────────
+// Reemplaza este valor con tu clave pública VAPID real.
+// Puedes generarla con: npx web-push generate-vapid-keys
 const VAPID_PUBLIC_KEY = 'TU_CLAVE_PUBLICA_VAPID_AQUI';
 
 async function subscribeToPush() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  // Si no se configuró la clave VAPID, no intentar suscribir (evita error en subscribe())
+  if (!VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY === 'TU_CLAVE_PUBLICA_VAPID_AQUI') {
+    console.warn('Push Notifications: Configura VAPID_PUBLIC_KEY para habilitar notificaciones push.');
+    return;
+  }
   
   try {
     const registration = await navigator.serviceWorker.ready;
@@ -1590,19 +1597,31 @@ async function subscribeToPush() {
       if (permission === 'granted') {
         const sub = await registration.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: VAPID_PUBLIC_KEY
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
         });
         
         // Guarda en Supabase usando el usuario que ya inició sesión
-        await sb.from('push_subscriptions').insert({
+        await sb.from('push_subscriptions').upsert({
           user_name: currentUser.name, 
-          subscription: sub
-        });
+          subscription: JSON.stringify(sub)
+        }, { onConflict: 'user_name' });
       }
     }
   } catch (error) {
     console.error('Error al suscribir a push:', error);
   }
+}
+
+// Convierte la clave VAPID de base64url a Uint8Array (requerido por pushManager.subscribe)
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
 }
   
 async function enterApp() {
@@ -1640,11 +1659,9 @@ async function enterApp() {
     if (me && me.task) { taskEl.textContent = '📋 ' + me.task; taskEl.style.display = ''; }
     else { taskEl.style.display = 'none'; }
   } else if (taskEl) { taskEl.style.display = 'none'; }
-}
 
-  document.getElementById('login-screen').classList.remove('open');
   showToast(`¡Hola, ${currentUser.name}!`, 'success');
-await subscribeToPush(); 
+  await subscribeToPush();
 }
   
 async function doAccess() {
@@ -2140,20 +2157,35 @@ if (editingAssignmentId) {
     const userMessage = prompt("Se detectó un cambio en la asignación. ¿Deseas notificar a los usuarios? Edita el mensaje o cancela:", defaultText);
     
     if (userMessage) {
-      showToast('Enviando notificación...', 'info');
+      showToast('Enviando notificación...', '');
       
-      // Llamamos a tu Edge Function de Supabase
-      fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${SUPABASE_KEY}`
-        },
-        body: JSON.stringify({
-          title: 'Cambio en Asignación',
-          body: userMessage
-        })
-      }).catch(err => console.error('Error al enviar push:', err));
+      // 1. Guarda la notificación en la tabla notifications para que aparezca en la app
+      await sb.from('notifications').insert({
+        title: 'Cambio en Asignación',
+        body: userMessage
+      });
+
+      // 2. Envía el push a suscriptores vía Edge Function
+      try {
+        const resp = await fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SUPABASE_KEY}`
+          },
+          body: JSON.stringify({
+            title: 'Cambio en Asignación',
+            body: userMessage
+          })
+        });
+        if (!resp.ok) {
+          const errText = await resp.text();
+          console.warn('Edge Function respondió con error:', resp.status, errText);
+        }
+      } catch (err) {
+        console.warn('No se pudo enviar push (Edge Function no disponible):', err.message);
+      }
+      showToast('Notificación enviada ✓', 'success');
     }
   }
 }
