@@ -906,6 +906,10 @@
           <p>Las asignaciones de carritos estarán disponibles pronto.</p>
         </div>
       </div>
+      <div id="sub-content-territorios" class="sub-page" style="display:none">
+        <div id="territories-view-content"></div>
+      </div>
+
       <div id="sub-content-grupos" class="sub-page" style="display:none">
         <div class="coming-soon-panel">
           <div class="coming-soon-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
@@ -1285,9 +1289,10 @@ function doLogout() {
 
 const SUB_TABS = {
   predicacion: [
-    { id: 'casa',    label: 'De casa en casa' },
-    { id: 'carritos',label: 'Carritos' },
-    { id: 'grupos',  label: 'Grupos de Serv.' },
+    { id: 'casa',        label: 'De casa en casa' },
+    { id: 'territorios', label: 'Territorios' },
+    { id: 'carritos',    label: 'Carritos' },
+    { id: 'grupos',      label: 'Grupos de Serv.' },
   ],
   reuniones: []
 };
@@ -1324,10 +1329,11 @@ function switchSubTab(tabId) {
   });
   renderSubTabs(currentMainTab);
 
-  ['casa','carritos','grupos'].forEach(id => {
+  ['casa','territorios','carritos','grupos'].forEach(id => {
     const el = document.getElementById('sub-content-' + id);
     if (el) el.style.display = id === tabId ? '' : 'none';
   });
+  if (tabId === 'territorios') renderTerritoryView();
 }
 
 function showPage(name) {
@@ -1354,6 +1360,7 @@ async function loadSchedule() {
   assignments = aData || [];
   const { data: tData } = await sb.from('territories').select('*').order('number');
   territories = tData || [];
+  if (currentSubTab === 'territorios') renderTerritoryView();
   // Also refresh conductores and casas if they were loaded
   if (conductores.length || casas.length) {
     const [{ data: cData }, { data: hData }] = await Promise.all([
@@ -1507,6 +1514,10 @@ function viewAssignment(id) {
 }
 
 function closeDetail() {
+  // Reset any state that viewTerritory may have changed
+  document.getElementById('detail-time-chip').style.display = '';
+  document.getElementById('detail-address').style.fontSize = '';
+  document.getElementById('detail-actions').style.display = '';
   document.getElementById('detail-overlay').classList.remove('open');
   document.body.style.overflow = '';
 }
@@ -2047,6 +2058,91 @@ async function registerUserSession(name, role) {
       .insert({ name, role, task: '', joined_at: now, last_seen: now });
   }
 }
+// ── Territory public view ─────────────────────────────────────────────────────
+function renderTerritoryView() {
+  const container = document.getElementById('territories-view-content');
+  if (!container) return;
+  if (!territories.length) {
+    container.innerHTML = `<div class="empty-state" style="margin-top:2rem">
+      <div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></div>
+      <h4>Sin territorios</h4>
+      <p>Aún no se han subido territorios</p>
+    </div>`;
+    return;
+  }
+  container.innerHTML = `<div class="ter-grid" style="padding-top:0.25rem">` + territories.map(t => {
+    const color = getTerColor(t.number);
+    const noPasar = t.no_pasar ? (Array.isArray(t.no_pasar) ? t.no_pasar : JSON.parse(t.no_pasar)).filter(Boolean) : [];
+    const npCount = noPasar.length;
+    const mapHtml = t.map_data
+      ? `<img src="${t.map_data}" alt="Mapa T${t.number}" loading="lazy">`
+      : `<div class="ter-grid-map-empty"><svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg><span>Sin mapa</span></div>`;
+    return `<div class="ter-grid-card" onclick="viewTerritory('${t.id}')">
+      <div class="ter-grid-map">
+        ${mapHtml}
+        <div class="ter-grid-num-badge" style="background:${color}">${t.number}</div>
+      </div>
+      <div class="ter-grid-footer">
+        <div class="ter-grid-info">
+          <div class="ter-grid-num">Territorio ${t.number}${t.name ? `<span style="font-size:0.75rem;font-weight:500;color:var(--text3);margin-left:5px">${t.name}</span>` : ''}</div>
+          <div class="ter-grid-np ${npCount > 0 ? 'has-np' : ''}">
+            ${npCount > 0 ? `${npCount} dir. no pasar` : 'Sin dir. no pasar'}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('') + `</div>`;
+}
+
+function viewTerritory(id) {
+  const t = territories.find(x => x.id === id);
+  if (!t) return;
+  const noPasar = t.no_pasar ? (Array.isArray(t.no_pasar) ? t.no_pasar : JSON.parse(t.no_pasar)).filter(Boolean) : [];
+  const color = getTerColor(t.number);
+
+  // Header: territory number + name
+  document.getElementById('detail-date-label').textContent = t.name || '';
+  document.getElementById('detail-time-chip').style.display = 'none';
+  const addressEl = document.getElementById('detail-address');
+  addressEl.textContent = `Territorio ${t.number}`;
+  addressEl.style.fontSize = '1.4rem';
+  document.getElementById('detail-conductor').textContent = '';
+
+  // Badge
+  const badge = document.getElementById('detail-ter-badge');
+  badge.textContent = t.number;
+  badge.style.background = color;
+  badge.style.display = 'flex';
+
+  // Hide call/directions buttons — not relevant for a territory
+  document.getElementById('detail-actions').style.display = 'none';
+
+  // Map
+  const mapWrap = document.getElementById('detail-map-wrap');
+  const mapImg  = document.getElementById('detail-map-img');
+  if (t.map_data) {
+    mapImg.src = t.map_data;
+    mapWrap.style.display = '';
+    mapWrap.onclick = () => openLightbox(t.map_data);
+  } else {
+    mapWrap.style.display = 'none';
+    mapWrap.onclick = null;
+  }
+
+  // No pasar
+  const noPasarSec  = document.getElementById('detail-no-pasar-section');
+  const noPasarList = document.getElementById('detail-no-pasar-list');
+  if (noPasar.length) {
+    noPasarList.innerHTML = noPasar.map(addr => `<div class="no-pasar-item">${addr}</div>`).join('');
+    noPasarSec.style.display = '';
+  } else {
+    noPasarSec.style.display = 'none';
+  }
+
+  document.getElementById('detail-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 function showError(id, msg) { const el=document.getElementById(id); el.style.display='block'; el.textContent=msg; }
 function showToast(msg, type='') {
