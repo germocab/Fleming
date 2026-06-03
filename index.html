@@ -2423,12 +2423,25 @@ async function saveUserChanges(uid) {
   const btn = document.querySelector(`#user-card-${uid} .save-user-btn`);
   if (btn) { btn.disabled = true; btn.textContent = 'Guardando…'; }
 
-  const { error } = await sb.from('platform_users')
+  // Try with permissions column; if it doesn't exist yet, retry without it
+  let { error } = await sb.from('platform_users')
     .update({ role: u.role, task: u.task, permissions: perms })
     .eq('id', u.id);
 
+  if (error) {
+    console.warn('saveUserChanges (with permissions) failed:', error.message, '— retrying without');
+    const retry = await sb.from('platform_users')
+      .update({ role: u.role, task: u.task })
+      .eq('id', u.id);
+    error = retry.error;
+  }
+
   if (btn) { btn.disabled = false; btn.textContent = 'Guardar cambios'; }
-  if (error) { showToast('Error al guardar','error'); return; }
+  if (error) {
+    console.error('saveUserChanges error:', error);
+    showToast('Error: ' + error.message, 'error');
+    return;
+  }
 
   if (currentUser && u.name === currentUser.name) {
     currentRole = u.role;
@@ -2437,7 +2450,7 @@ async function saveUserChanges(uid) {
   }
   expandedUserId = null;
   renderUsersPanel();
-  showToast('Cambios guardados ✓','success');
+  showToast('Cambios guardados ✓', 'success');
 }
 
 async function revokeUser(uid) {
