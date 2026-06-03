@@ -1,52 +1,3189 @@
-// ── Service Worker — Congregación Fleming ────────────────────────────────────
-// Maneja notificaciones push recibidas desde el servidor (Edge Function de Supabase).
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Congregación Fleming</title>
 
-self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', e => e.waitUntil(clients.claim()));
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#007AFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Fleming">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --ter-1: #22c55e; --ter-1-bg: rgba(34,197,94,0.15);
+    --ter-2: #3b82f6; --ter-2-bg: rgba(59,130,246,0.15);
+    --ter-3: #a855f7; --ter-3-bg: rgba(168,85,247,0.15);
+    --ter-4: #f59e0b; --ter-4-bg: rgba(245,158,11,0.15);
+    --ter-5: #ef4444; --ter-5-bg: rgba(239,68,68,0.15);
+    --ter-6: #06b6d4; --ter-6-bg: rgba(6,182,212,0.15);
+    --ter-7: #ec4899; --ter-7-bg: rgba(236,72,153,0.15);
+    --ter-8: #84cc16; --ter-8-bg: rgba(132,204,22,0.15);
+    --ter-9: #f97316; --ter-9-bg: rgba(249,115,22,0.15);
+    --ter-0: #64748b; --ter-0-bg: rgba(100,116,139,0.15);
 
-// ── Recibir un push del servidor ─────────────────────────────────────────────
-self.addEventListener('push', event => {
-  let data = { title: 'Congregación Fleming', body: 'Hay una actualización nueva.' };
+    --bg: #f2f2f7;
+    --surface: #ffffff;
+    --surface2: #f8f8fa;
+    --surface3: #ebebf0;
+    --border: rgba(0,0,0,0.09);
+    --border-active: rgba(0,0,0,0.15);
+    --accent: #007AFF;
+    --accent-light: rgba(0,122,255,0.12);
+    --green: #34c759;
+    --green-light: rgba(52,199,89,0.12);
+    --orange: #ff9500;
+    --red: #ff3b30;
+    --text: #000000;
+    --text2: #3c3c43;
+    --text3: #8e8e93;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --radius-xs: 8px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
+    --font: -apple-system, 'SF Pro Display', 'Inter', sans-serif;
+    --nav-bg: rgba(242,242,247,0.85);
+    --modal-overlay-bg: rgba(0,0,0,0.35);
+    --tab-active-bg: #ffffff;
+    --tab-bar-bg: rgba(242,242,247,0.92);
+  }
 
-  if (event.data) {
-    try {
-      data = event.data.json();
-    } catch {
-      data.body = event.data.text();
+  :root[data-theme="dark"] {
+    --bg: #000000;
+    --surface: #1c1c1e;
+    --surface2: #2c2c2e;
+    --surface3: #3a3a3c;
+    --border: rgba(255,255,255,0.08);
+    --border-active: rgba(255,255,255,0.14);
+    --accent: #0a84ff;
+    --accent-light: rgba(10,132,255,0.15);
+    --green: #30d158;
+    --green-light: rgba(48,209,88,0.15);
+    --orange: #ff9f0a;
+    --red: #ff453a;
+    --text: #ffffff;
+    --text2: #ebebf5;
+    --text3: #636366;
+    --shadow: 0 2px 12px rgba(0,0,0,0.5);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.6);
+    --nav-bg: rgba(28,28,30,0.85);
+    --modal-overlay-bg: rgba(0,0,0,0.6);
+    --tab-active-bg: #3a3a3c;
+    --tab-bar-bg: rgba(28,28,30,0.92);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; overflow-x: hidden; max-width: 100vw; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    max-width: 100vw;
+    transition: background 0.3s, color 0.3s;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #auth-screen {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 1rem; background: var(--bg);
+  }
+  .auth-card {
+    background: var(--surface); border-radius: 20px;
+    padding: 2rem; width: 100%; max-width: 380px;
+    box-shadow: var(--shadow-lg);
+    animation: slideUp 0.4s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  .auth-logo {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 1.75rem;
+  }
+  .auth-logo-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .auth-logo-icon svg { width: 24px; height: 24px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .auth-logo-name { font-size: 1.1rem; font-weight: 700; }
+  .auth-logo-sub { font-size: 0.72rem; color: var(--text3); letter-spacing: 0.05em; text-transform: uppercase; }
+  .auth-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
+  .auth-sub { font-size: 0.875rem; color: var(--text3); margin-bottom: 1.5rem; }
+  .form-group { margin-bottom: 0.9rem; }
+  .form-label { font-size: 0.8rem; font-weight: 600; color: var(--text3); margin-bottom: 5px; display: block; letter-spacing: 0.02em; }
+  .form-input {
+    width: 100%; padding: 0.75rem 1rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); color: var(--text);
+    font-family: var(--font); font-size: 0.95rem; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .form-input::placeholder { color: var(--text3); }
+  .btn-primary {
+    width: 100%; padding: 0.875rem;
+    background: var(--accent); border: none; border-radius: var(--radius-sm);
+    color: #fff; font-family: var(--font); font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; transition: opacity 0.2s, transform 0.1s; margin-top: 0.5rem;
+  }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+  .auth-error {
+    margin-top: 0.75rem; padding: 0.7rem 0.9rem;
+    background: rgba(255,59,48,0.08); border: 1px solid rgba(255,59,48,0.2);
+    border-radius: var(--radius-sm); font-size: 0.84rem; color: var(--red); display: none;
+  }
+
+  .pass-wrap { position: relative; }
+  .pass-wrap .form-input { padding-right: 2.75rem; }
+  .pass-toggle {
+    position: absolute; right: 0; top: 0; bottom: 0; width: 2.75rem;
+    display: flex; align-items: center; justify-content: center;
+    background: none; border: none; cursor: pointer;
+    color: var(--text3); transition: color 0.18s;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+  .pass-toggle:hover { color: var(--text2); }
+  .pass-toggle svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+  .pass-toggle .eye-off { display: none; }
+  .pass-toggle.visible .eye-on  { display: none; }
+  .pass-toggle.visible .eye-off { display: block; }
+
+  #app { display: none; flex-direction: column; min-height: 100vh; }
+
+  /* 3-column grid: [left ghost 1fr] [toggle auto] [icons 1fr]
+     Both outer columns get the same 1fr → toggle is always perfectly centered */
+  .topnav {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 0 1.25rem; height: 72px;
+    background: var(--nav-bg); backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .nav-spacer { min-width: 0; } /* left ghost — grid balances it with nav-icons */
+  .nav-icons  { display: flex; align-items: center; gap: 10px; justify-self: end; min-width: 0; }
+
+  .main-segment {
+    display: flex; background: var(--surface3);
+    border-radius: 26px; padding: 4px; gap: 0;
+    flex-shrink: 0;
+  }
+  .main-seg-btn {
+    padding: 9px 24px;
+    border: none; border-radius: 22px;
+    font-family: var(--font); font-size: 0.9rem; font-weight: 600;
+    color: var(--text2); background: transparent;
+    cursor: pointer; transition: all 0.22s; white-space: nowrap;
+  }
+  .main-seg-btn.active {
+    background: var(--accent); color: #fff;
+    box-shadow: 0 2px 12px rgba(0,122,255,0.4);
+  }
+
+  @media (max-width: 639px) {
+    /* En mobile: layout flex en vez de grid — toggle a la izquierda, iconos a la derecha */
+    .topnav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 1rem;
+      height: 64px;
+    }
+    .nav-spacer { display: none; }
+    /* Toggle: tamaño intermedio — más pequeño que desktop pero no tanto */
+    .main-seg-btn {
+      padding: 7px 16px;
+      font-size: 0.82rem;
+    }
+    /* Iconos: vuelven a su tamaño original */
+  }
+  .nav-icon-btn {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: var(--surface3); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text2); transition: all 0.2s; flex-shrink: 0;
+  }
+  .nav-icon-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .nav-icon-btn:hover { background: var(--surface2); }
+
+  .options-wrap { position: relative; }
+  .options-dropdown {
+    position: absolute; top: calc(100% + 10px); right: 0;
+    background: var(--surface); border: 1px solid var(--border-active);
+    border-radius: 16px; padding: 0.5rem;
+    min-width: 210px; box-shadow: var(--shadow-lg);
+    display: none; z-index: 200;
+  }
+  .options-dropdown.open { display: block; animation: fadeDown 0.15s ease; }
+  @keyframes fadeDown { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+
+  .options-user-info {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0.6rem 0.85rem 0.65rem;
+    border-bottom: 1px solid var(--border); margin-bottom: 4px;
+  }
+  .options-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, #007AFF, #5ac8fa);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; font-weight: 700; color: white; flex-shrink: 0;
+  }
+  .options-user-name { font-size: 0.88rem; font-weight: 700; color: var(--text); line-height: 1.2; }
+  .options-user-role { font-size: 0.72rem; color: var(--text3); }
+
+  .dropdown-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0.6rem 0.85rem; border-radius: 10px;
+    font-size: 0.875rem; font-weight: 500; color: var(--text2);
+    cursor: pointer; transition: background 0.15s;
+    border: none; background: none; width: 100%; text-align: left; font-family: var(--font);
+  }
+  .dropdown-item svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .dropdown-item:hover { background: var(--surface2); color: var(--text); }
+  .dropdown-item.danger { color: var(--red); }
+  .dropdown-item.danger:hover { background: rgba(255,59,48,0.07); }
+
+  .dropdown-theme-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.55rem 0.85rem; border-radius: 10px;
+    font-size: 0.875rem; font-weight: 500; color: var(--text2);
+    transition: background 0.15s; cursor: default;
+  }
+  .dropdown-theme-row:hover { background: var(--surface2); }
+  .dropdown-theme-row span { display: flex; align-items: center; gap: 10px; }
+  .dropdown-theme-row svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .theme-pill {
+    display: flex; background: var(--surface3); border-radius: 20px; padding: 2px; gap: 2px;
+  }
+  .theme-pill-btn {
+    width: 28px; height: 22px; border: none; border-radius: 18px;
+    background: transparent; cursor: pointer; font-size: 0.72rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; color: var(--text3);
+  }
+  .theme-pill-btn.active { background: var(--accent); color: white; }
+
+  .dropdown-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+  .sub-tabs-wrap {
+    background: var(--nav-bg); backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid var(--border);
+    padding: 0 1.25rem; position: sticky; top: 72px; z-index: 90;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .sub-tabs-wrap::-webkit-scrollbar { display: none; }
+  .sub-tabs { display: flex; gap: 0; white-space: nowrap; }
+  .sub-tab {
+    padding: 15px 18px; border: none; background: transparent;
+    font-family: var(--font); font-size: 0.92rem; font-weight: 500;
+    color: var(--text3); cursor: pointer;
+    border-bottom: 2px solid transparent; transition: all 0.2s;
+  }
+  .sub-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+  .main-content {
+    flex: 1; padding: 1.25rem; max-width: 860px; margin: 0 auto; width: 100%;
+  }
+
+  .page { display: none; }
+  .page.active { display: block; animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+  .date-section { margin-bottom: 1.75rem; }
+  .date-section-header {
+    font-size: 1.15rem; font-weight: 700;
+    margin-bottom: 0.85rem; color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .assignment-card {
+    background: var(--surface);
+    border-radius: 30px;
+    padding: 1rem 1rem 1rem 1.2rem;
+    margin-bottom: 0.6rem;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    display: flex; align-items: center; gap: 1rem;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    border: 1px solid var(--border);
+    position: relative; overflow: hidden;
+  }
+  .assignment-card:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+  .assignment-card:active { transform: scale(0.985); }
+
+  .card-main { flex: 1; min-width: 0; }
+  .card-address {
+    font-size: 0.94rem; font-weight: 600; color: var(--text);
+    line-height: 1.3; margin-bottom: 1px;
+  }
+  .card-house {
+    font-size: 0.8rem; color: var(--text3); font-weight: 400; margin-bottom: 8px;
+  }
+  .card-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .card-conductor { font-size: 0.82rem; color: var(--text2); font-weight: 400; }
+  .card-time-chip {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 0.8rem; font-weight: 600; color: var(--accent);
+  }
+  .card-time-chip svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
+
+  .type-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 6px;
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.03em;
+  }
+  .type-chip svg { width: 10px; height: 10px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+  .chip-zoom { background: rgba(52,199,89,0.12); color: #34c759; }
+  .chip-phone { background: rgba(255,149,0,0.12); color: #ff9500; }
+  .chip-cartas { background: rgba(90,200,250,0.15); color: #5ac8fa; }
+  .chip-presencial { background: var(--accent-light); color: var(--accent); }
+
+  .ter-badge {
+    width: 48px; height: 48px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; font-weight: 800; color: white;
+    flex-shrink: 0; position: relative; overflow: hidden;
+  }
+  .ter-badge.has-icon {
+    background: transparent;
+  }
+  .ter-badge-icon {
+    width: 48px; height: 48px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .ter-badge-icon svg { width: 24px; height: 24px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; }
+
+  .ter-color-0 { background: #64748b; }
+  .ter-color-1 { background: #22c55e; }
+  .ter-color-2 { background: #3b82f6; }
+  .ter-color-3 { background: #a855f7; }
+  .ter-color-4 { background: #f59e0b; }
+  .ter-color-5 { background: #ef4444; }
+  .ter-color-6 { background: #06b6d4; }
+  .ter-color-7 { background: #ec4899; }
+  .ter-color-8 { background: #84cc16; }
+  .ter-color-9 { background: #f97316; }
+
+  .zoom-badge { background: linear-gradient(135deg, #00b4d8, #0077b6); }
+  .phone-badge { background: linear-gradient(135deg, #ff9500, #ff6b00); }
+  .cartas-badge { background: linear-gradient(135deg, #5ac8fa, #007AFF); }
+
+  .detail-overlay {
+    display: none; position: fixed; inset: 0;
+    background: var(--modal-overlay-bg); backdrop-filter: blur(10px);
+    z-index: 200; align-items: flex-end; justify-content: center;
+  }
+  .detail-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+
+  .detail-panel {
+    background: var(--surface); width: 100%; max-width: 560px;
+    border-radius: 20px 20px 0 0;
+    max-height: 92vh; overflow-y: auto;
+    animation: slideUpPanel 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+  @keyframes slideUpPanel { from{transform:translateY(100%)} to{transform:translateY(0)} }
+
+  @media(min-width: 640px) {
+    .detail-overlay { align-items: center; }
+    .detail-panel {
+      border-radius: 20px; max-height: 88vh;
+      animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1);
     }
   }
 
-  const options = {
-    body: data.body || '',
-    icon: '/android-chrome-192x192.png',
-    badge: '/icons/favicon-32x32.png',
-    vibrate: [150, 50, 150],
-    data: { url: data.url || '/' },
-    // Agrupa notificaciones de la misma fuente para no inundar
-    tag: 'fleming-notif',
-    renotify: true,
-  };
+  .detail-handle { width: 36px; height: 4px; background: var(--surface3); border-radius: 2px; margin: 10px auto 0; }
+  .detail-header-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 1.25rem 0.5rem;
+  }
+  .detail-date-label { font-size: 0.8rem; font-weight: 600; color: var(--text3); letter-spacing: 0.02em; }
+  .detail-close {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--surface3); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; color: var(--text3);
+  }
+  .detail-close svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
 
-  event.waitUntil(
-    self.registration.showNotification(data.title || 'Congregación Fleming', options)
-  );
-});
+  .detail-main-row {
+    display: flex; align-items: flex-start; gap: 1rem;
+    padding: 0.5rem 1.25rem 1rem;
+  }
+  .detail-info { flex: 1; }
+  .detail-time-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 0.8rem; font-weight: 600; color: var(--accent);
+    background: var(--accent-light); padding: 3px 10px; border-radius: 20px;
+    margin-bottom: 6px;
+  }
+  .detail-time-chip svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.2; }
+  .detail-address { font-size: 1.1rem; font-weight: 700; line-height: 1.3; margin-bottom: 4px; }
+  .detail-conductor { font-size: 0.9rem; color: var(--accent); font-weight: 500; }
 
-// ── Al tocar la notificación: abrir/enfocar la app ───────────────────────────
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  const targetUrl = (event.notification.data && event.notification.data.url) || '/';
+  .detail-ter-badge { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800; color: white; flex-shrink: 0; }
 
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
-      // Si ya hay una ventana abierta, enfocarla
-      for (const client of windowClients) {
-        if (client.url.includes(self.location.origin) && 'focus' in client) {
-          return client.focus();
-        }
+  .detail-actions { display: flex; gap: 0.75rem; padding: 0 1.25rem 1rem; }
+  .detail-btn-primary {
+    flex: 1; padding: 0.75rem; border: none; border-radius: 12px;
+    background: var(--accent); color: white;
+    font-family: var(--font); font-size: 0.9rem; font-weight: 700;
+    cursor: pointer; transition: opacity 0.2s;
+  }
+  .detail-btn-primary:hover { opacity: 0.85; }
+  .detail-btn-secondary {
+    flex: 1; padding: 0.75rem; border: none; border-radius: 12px;
+    background: var(--accent-light); color: var(--accent);
+    font-family: var(--font); font-size: 0.9rem; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .detail-btn-secondary:hover { background: rgba(0,122,255,0.2); }
+
+  .detail-map-wrap {
+    margin: 0 1.25rem 1.25rem;
+    background: var(--surface2); border-radius: var(--radius);
+    overflow: hidden; min-height: 160px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border); cursor: zoom-in;
+  }
+  .detail-map-wrap img { width: 100%; display: block; max-height: 260px; object-fit: contain; }
+
+  .img-lightbox {
+    display: none; position: fixed; inset: 0; z-index: 999;
+    background: rgba(0,0,0,0.92); backdrop-filter: blur(12px);
+    align-items: center; justify-content: center;
+    cursor: zoom-out;
+  }
+  .img-lightbox.open { display: flex; animation: fadeIn 0.2s ease; }
+  .img-lightbox img {
+    max-width: 96vw; max-height: 92vh;
+    object-fit: contain; border-radius: 12px;
+    box-shadow: 0 8px 60px rgba(0,0,0,0.7);
+    animation: lightboxIn 0.25s cubic-bezier(0.16,1,0.3,1);
+  }
+  @keyframes lightboxIn { from{opacity:0;transform:scale(0.92)} to{opacity:1;transform:scale(1)} }
+  .lightbox-close {
+    position: fixed; top: 1.25rem; right: 1.25rem;
+    width: 40px; height: 40px; border-radius: 50%;
+    background: rgba(255,255,255,0.15); border: none;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: white; backdrop-filter: blur(8px); transition: background 0.2s;
+  }
+  .lightbox-close:hover { background: rgba(255,255,255,0.25); }
+  .lightbox-close svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+
+  .no-pasar-section { padding: 0 1.25rem 1.25rem; }
+  .no-pasar-title {
+    font-size: 0.875rem; font-weight: 700;
+    margin-bottom: 0.75rem; color: var(--text);
+  }
+  .no-pasar-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.875rem; color: var(--text2);
+    padding: 4px 0;
+  }
+  .no-pasar-item::before { content: '·'; font-size: 1.2rem; color: var(--text3); flex-shrink: 0; }
+
+  .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem; }
+  .page-header-title { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; }
+  .page-header-sub { font-size: 0.84rem; color: var(--text3); margin-top: 2px; }
+  .admin-tabs { display: flex; gap: 6px; margin-bottom: 1.25rem; }
+  .admin-tab {
+    padding: 6px 16px; border-radius: 20px;
+    font-size: 0.82rem; font-weight: 600;
+    border: 1px solid var(--border); background: var(--surface2);
+    color: var(--text2); cursor: pointer; transition: all 0.2s; font-family: var(--font);
+  }
+  .admin-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .admin-section { display: none; }
+  .admin-section.active { display: block; }
+
+  .form-group2 { display: flex; flex-direction: column; gap: 5px; margin-bottom: 0.85rem; }
+  .form-label2 { font-size: 0.78rem; font-weight: 600; color: var(--text3); }
+  .form-select {
+    padding: 0.75rem 1rem; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); color: var(--text); font-family: var(--font); font-size: 0.9rem;
+    outline: none; transition: border-color 0.2s; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238e8e93' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px;
+  }
+  .form-select:focus { border-color: var(--accent); }
+  .form-textarea {
+    padding: 0.75rem 1rem; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); color: var(--text); font-family: var(--font); font-size: 0.9rem;
+    outline: none; transition: border-color 0.2s; resize: vertical; min-height: 80px;
+  }
+  .form-textarea:focus { border-color: var(--accent); }
+
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: var(--modal-overlay-bg); backdrop-filter: blur(8px);
+    z-index: 300; align-items: flex-end; justify-content: center; padding: 0;
+  }
+  .modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+  .modal {
+    background: var(--surface); width: 100%; max-width: 580px;
+    max-height: 92vh; overflow-y: auto; border-radius: 20px 20px 0 0;
+    box-shadow: var(--shadow-lg); animation: slideUpPanel 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+  @media(min-width: 640px) {
+    .modal-overlay { align-items: center; padding: 1rem; }
+    .modal { border-radius: 20px; animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1); }
+  }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.1rem 1.25rem; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--surface); z-index: 1;
+  }
+  .modal-title { font-size: 1.05rem; font-weight: 700; }
+  .modal-close {
+    width: 30px; height: 30px; border-radius: 50%; background: var(--surface3);
+    border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text3);
+  }
+  .modal-close svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+  .modal-body { padding: 1.25rem; }
+
+  .btn-secondary {
+    padding: 0.6rem 1.1rem; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); color: var(--text); font-family: var(--font);
+    font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-secondary:hover { background: var(--surface3); }
+  .btn-danger {
+    padding: 0.5rem 0.85rem; background: rgba(255,59,48,0.08); border: 1px solid rgba(255,59,48,0.2);
+    border-radius: var(--radius-sm); color: var(--red); font-family: var(--font);
+    font-size: 0.8rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .btn-danger svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+  .btn-sm {
+    padding: 0.4rem 0.85rem; background: var(--surface3); border: 1px solid var(--border);
+    border-radius: 6px; color: var(--text2); font-family: var(--font);
+    font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-sm:hover { background: var(--surface2); }
+
+  .list-item {
+    display: flex; align-items: center; gap: 12px; padding: 0.85rem 1rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); margin-bottom: 0.5rem;
+  }
+  .list-item-main { flex: 1; min-width: 0; }
+  .list-item-title { font-size: 0.88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .list-item-sub { font-size: 0.76rem; color: var(--text3); margin-top: 1px; }
+  .list-item-actions { display: flex; gap: 6px; }
+
+  .img-upload-area {
+    border: 2px dashed var(--border-active); border-radius: var(--radius);
+    padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s;
+    background: var(--surface2); position: relative;
+  }
+  .img-upload-area:hover { border-color: var(--accent); }
+  .img-upload-area.has-image { padding: 0; border-style: solid; overflow: hidden; }
+  .img-preview { width: 100%; display: block; max-height: 260px; object-fit: contain; }
+  .img-upload-icon { display: flex; align-items: center; justify-content: center; margin-bottom: 0.5rem; opacity: 0.4; }
+  .img-upload-icon svg { width: 32px; height: 32px; stroke: var(--text2); fill: none; stroke-width: 1.5; stroke-linecap: round; }
+  .img-upload-text { font-size: 0.85rem; color: var(--text2); font-weight: 500; }
+  .img-upload-sub { font-size: 0.75rem; color: var(--text3); margin-top: 4px; }
+  .img-change-btn {
+    position: absolute; bottom: 8px; right: 8px;
+    background: rgba(0,0,0,0.65); border-radius: 8px; color: white;
+    font-size: 0.73rem; font-weight: 600; padding: 4px 10px; cursor: pointer; font-family: var(--font);
+  }
+
+  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem 1rem; color: var(--text3); text-align: center; }
+  .empty-state-icon { margin-bottom: 1rem; opacity: 0.35; }
+  .empty-state-icon svg { width: 40px; height: 40px; stroke: var(--text3); fill: none; stroke-width: 1.5; stroke-linecap: round; }
+  .empty-state h4 { font-size: 1rem; color: var(--text2); margin-bottom: 0.3rem; }
+  .empty-state p { font-size: 0.84rem; }
+
+  .loader-wrap { display: flex; align-items: center; justify-content: center; padding: 3rem; }
+  .loader { width: 32px; height: 32px; border: 2.5px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.75s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .toast-wrap { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
+  .toast { padding: 0.65rem 1.1rem; background: var(--surface3); border: 1px solid var(--border-active); border-radius: 30px; font-size: 0.84rem; font-weight: 600; color: var(--text); box-shadow: var(--shadow); animation: toastIn 0.25s cubic-bezier(0.16,1,0.3,1); white-space: nowrap; }
+  .toast.success { color: var(--green); background: var(--green-light); border-color: rgba(52,199,89,0.3); }
+  .toast.error { color: var(--red); background: rgba(255,59,48,0.08); border-color: rgba(255,59,48,0.25); }
+  @keyframes toastIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  .coming-soon-panel {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 260px; text-align: center; color: var(--text3);
+    background: var(--surface); border-radius: var(--radius); border: 1px dashed var(--border-active);
+    margin-top: 1rem; padding: 2rem;
+  }
+  .coming-soon-panel h3 { font-size: 1.05rem; color: var(--text2); margin-top: 0.75rem; margin-bottom: 0.3rem; }
+  .coming-soon-panel p { font-size: 0.84rem; }
+  .coming-soon-icon { margin-bottom: 0.5rem; opacity: 0.4; }
+  .coming-soon-icon svg { width: 40px; height: 40px; stroke: var(--text2); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+  .filter-row { display: flex; gap: 8px; margin-bottom: 1.25rem; flex-wrap: wrap; align-items: center; }
+  .date-input {
+    padding: 5px 12px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; color: var(--text); font-family: var(--font); font-size: 0.8rem;
+    outline: none; font-weight: 600; cursor: pointer;
+  }
+  .date-input:focus { border-color: var(--accent); }
+  :root[data-theme="dark"] .date-input::-webkit-calendar-picker-indicator { filter: invert(1) opacity(0.4); }
+
+  .section-divider { height: 1px; background: var(--border); margin: 1rem 0; }
+
+
+  /* ── Users panel modal ── */
+  .users-panel-overlay {
+    display: none; position: fixed; inset: 0;
+    background: var(--modal-overlay-bg); backdrop-filter: blur(8px);
+    z-index: 400; align-items: flex-end; justify-content: center; padding: 0;
+  }
+  .users-panel-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+  @media(min-width: 640px) {
+    .users-panel-overlay { align-items: center; padding: 1rem; }
+    .users-panel { border-radius: 20px; animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1); max-width: 600px; }
+  }
+  .users-panel {
+    background: var(--surface); width: 100%; max-width: 600px;
+    max-height: 92vh; overflow-y: auto;
+    border-radius: 20px 20px 0 0;
+    box-shadow: var(--shadow-lg);
+    animation: slideUpPanel 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+  .users-panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.1rem 1.25rem; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--surface); z-index: 1;
+    backdrop-filter: blur(20px);
+  }
+  .users-panel-title-wrap { display: flex; flex-direction: column; }
+  .users-panel-title { font-size: 1.05rem; font-weight: 700; }
+  .users-panel-subtitle { font-size: 0.74rem; color: var(--text3); margin-top: 1px; }
+  .users-panel-body { padding: 1rem 1.1rem 1.25rem; }
+
+  /* User card redesign */
+  .user-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 0.65rem;
+    overflow: hidden;
+    transition: box-shadow 0.2s, border-color 0.2s;
+  }
+  .user-card:hover { border-color: var(--border-active); box-shadow: var(--shadow); }
+  .user-card-main {
+    display: flex; align-items: center; gap: 12px;
+    padding: 0.85rem 1rem;
+    cursor: default;
+  }
+  .user-card-avatar {
+    width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.82rem; font-weight: 800; color: white;
+    letter-spacing: -0.01em;
+  }
+  .user-card-info { flex: 1; min-width: 0; }
+  .user-card-name { font-size: 0.92rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.01em; }
+  .user-card-meta { font-size: 0.74rem; color: var(--text3); margin-top: 2px; display: flex; align-items: center; gap: 6px; }
+  .user-card-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+  .role-badge-pill {
+    display: inline-flex; align-items: center;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .role-badge-admin     { background: rgba(0,122,255,0.12); color: var(--accent); border: 1px solid rgba(0,122,255,0.25); }
+  .role-badge-semiadmin { background: rgba(168,85,247,0.12); color: #a855f7;      border: 1px solid rgba(168,85,247,0.25); }
+  .role-badge-viewer    { background: var(--surface3);        color: var(--text3); border: 1px solid var(--border); }
+  .role-badge-dev       { background: rgba(255,149,0,0.12);   color: var(--orange); border: 1px solid rgba(255,149,0,0.35); }
+
+  .user-expand-btn {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--surface3); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text3); transition: all 0.18s; flex-shrink: 0;
+  }
+  .user-expand-btn:hover { background: var(--surface2); color: var(--text2); }
+  .user-expand-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; transition: transform 0.2s; }
+  .user-expand-btn.open svg { transform: rotate(180deg); }
+
+  /* Expand area */
+  .user-expand {
+    padding: 0 1rem 1rem;
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+    animation: expandIn 0.18s ease;
+  }
+  @keyframes expandIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+
+  .user-expand-section { margin-top: 0.85rem; }
+  .user-expand-label {
+    font-size: 0.7rem; font-weight: 700; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: 7px; display: flex; align-items: center; gap: 5px;
+  }
+  .user-expand-label svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+
+  .role-select-inline {
+    padding: 7px 10px; font-size: 0.84rem; font-weight: 600;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text); font-family: var(--font);
+    outline: none; cursor: pointer; transition: border-color 0.15s; width: 100%;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238e8e93' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px;
+  }
+  .role-select-inline:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+
+  /* Permissions grid */
+  .perms-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .perm-toggle {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 12px; border-radius: 10px;
+    background: var(--surface); border: 1.5px solid var(--border);
+    cursor: pointer; transition: all 0.18s; user-select: none;
+  }
+  .perm-toggle:hover { border-color: var(--border-active); }
+  .perm-toggle.active { border-color: var(--accent); background: var(--accent-light); }
+  .perm-toggle-label { font-size: 0.8rem; font-weight: 600; color: var(--text2); display: flex; align-items: center; gap: 6px; }
+  .perm-toggle-label svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+  .perm-toggle.active .perm-toggle-label { color: var(--accent); }
+  .perm-check {
+    width: 18px; height: 18px; border-radius: 5px;
+    border: 1.5px solid var(--border); background: var(--surface3);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .perm-toggle.active .perm-check { background: var(--accent); border-color: var(--accent); }
+  .perm-check svg { width: 10px; height: 10px; stroke: white; fill: none; stroke-width: 3; stroke-linecap: round; display: none; }
+  .perm-toggle.active .perm-check svg { display: block; }
+
+  .task-textarea {
+    width: 100%; padding: 0.65rem 0.85rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text);
+    font-family: var(--font); font-size: 0.84rem; outline: none;
+    resize: none; min-height: 60px; line-height: 1.5;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .task-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .task-textarea::placeholder { color: var(--text3); }
+
+  .user-expand-actions {
+    display: flex; gap: 8px; margin-top: 1rem; justify-content: space-between; align-items: center;
+  }
+  .revoke-btn {
+    padding: 0.45rem 1rem;
+    background: rgba(255,59,48,0.07); border: 1px solid rgba(255,59,48,0.2);
+    border-radius: 10px; color: var(--red); font-family: var(--font);
+    font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
+    white-space: nowrap; display: flex; align-items: center; gap: 5px;
+  }
+  .revoke-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+  .revoke-btn:hover { background: rgba(255,59,48,0.14); }
+
+  .save-user-btn {
+    padding: 0.45rem 1.25rem;
+    background: var(--accent); border: none;
+    border-radius: 10px; color: white; font-family: var(--font);
+    font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
+    white-space: nowrap;
+  }
+  .save-user-btn:hover { opacity: 0.88; }
+
+  .users-count-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent-light); color: var(--accent);
+    font-size: 0.72rem; font-weight: 800; margin-left: 6px;
+  }
+
+  .users-empty {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 2.5rem 1rem; color: var(--text3); text-align: center; gap: 8px;
+  }
+  .users-empty-icon {
+    width: 56px; height: 56px; border-radius: 16px;
+    background: var(--surface3); display: flex; align-items: center; justify-content: center;
+    margin-bottom: 4px;
+  }
+  .users-empty-icon svg { width: 26px; height: 26px; stroke: var(--text3); fill: none; stroke-width: 1.5; stroke-linecap: round; opacity: 0.6; }
+  .users-empty p { font-size: 0.84rem; line-height: 1.5; }
+
+  /* Online dot */
+  .online-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green); flex-shrink: 0;
+  }
+  .offline-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--surface3); flex-shrink: 0;
+  }
+
+  /* ── Territory grid ── */
+  .ter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+  @media (max-width: 480px) {
+    .ter-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  }
+
+  .ter-grid-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    display: flex; flex-direction: column;
+  }
+  .ter-grid-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: var(--border-active); }
+  .ter-grid-card:active { transform: scale(0.97); }
+
+  .ter-grid-map {
+    width: 100%; aspect-ratio: 4/3;
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; position: relative;
+  }
+  .ter-grid-map img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+  .ter-grid-map-empty {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; opacity: 0.3;
+  }
+  .ter-grid-map-empty svg { width: 28px; height: 28px; stroke: var(--text3); fill: none; stroke-width: 1.5; stroke-linecap: round; }
+  .ter-grid-map-empty span { font-size: 0.68rem; color: var(--text3); font-weight: 500; }
+
+  .ter-grid-footer {
+    padding: 10px 12px;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  }
+  .ter-grid-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+  .ter-grid-num {
+    font-size: 0.95rem; font-weight: 800; color: var(--text); line-height: 1;
+  }
+  .ter-grid-np {
+    font-size: 0.72rem; color: var(--text3); font-weight: 500;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .ter-grid-np.has-np { color: var(--red); font-weight: 600; }
+
+  .ter-grid-actions {
+    display: flex; gap: 5px; flex-shrink: 0;
+  }
+  .ter-grid-btn {
+    width: 28px; height: 28px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+    color: var(--text3);
+  }
+  .ter-grid-btn:hover { background: var(--surface3); color: var(--text); border-color: var(--border-active); }
+  .ter-grid-btn.del:hover { background: rgba(255,59,48,0.1); color: var(--red); border-color: rgba(255,59,48,0.25); }
+  .ter-grid-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
+
+  .ter-grid-num-badge {
+    position: absolute; top: 7px; left: 7px;
+    width: 28px; height: 28px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; font-weight: 800; color: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  /* ── Full congregation map button ── */
+  .ter-view-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1rem; flex-wrap: wrap; gap: 10px;
+  }
+  .ter-view-title {
+    font-size: 1.05rem; font-weight: 700; color: var(--text);
+  }
+  .btn-map-full {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 0.55rem 1.1rem;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: 20px;
+    font-family: var(--font); font-size: 0.84rem; font-weight: 600;
+    cursor: pointer; transition: opacity 0.18s, transform 0.1s;
+    box-shadow: 0 2px 10px rgba(0,122,255,0.35);
+    flex-shrink: 0;
+  }
+  .btn-map-full:hover { opacity: 0.88; }
+  .btn-map-full:active { transform: scale(0.97); }
+  .btn-map-full svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ── Full map lightbox (extends existing lightbox) ── */
+  .full-map-lightbox {
+    position: fixed; inset: 0; z-index: 500;
+    background: var(--modal-overlay-bg); backdrop-filter: blur(10px);
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center; padding: 1rem;
+  }
+  .full-map-lightbox.open { display: flex; animation: fadeIn 0.2s ease; }
+  .full-map-lb-header {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; max-width: 900px; margin-bottom: 0.75rem;
+  }
+  .full-map-lb-title {
+    font-size: 1rem; font-weight: 700; color: #fff;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  }
+  .full-map-lb-actions { display: flex; gap: 8px; align-items: center; }
+  .full-map-lb-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 0.45rem 1rem; border-radius: 20px;
+    font-family: var(--font); font-size: 0.8rem; font-weight: 600;
+    cursor: pointer; transition: opacity 0.15s; border: none;
+  }
+  .full-map-lb-btn.download { background: var(--green); color: #fff; }
+  .full-map-lb-btn.close-btn { background: rgba(255,255,255,0.18); color: #fff; border: 1px solid rgba(255,255,255,0.3); }
+  .full-map-lb-btn:hover { opacity: 0.85; }
+  .full-map-lb-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+  .full-map-lb-img-wrap {
+    width: 100%; max-width: 900px; max-height: calc(100vh - 120px);
+    overflow: auto; border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .full-map-lb-img-wrap img {
+    max-width: 100%; display: block; border-radius: var(--radius);
+  }
+
+  /* ── Admin full map card ── */
+  .full-map-admin-card {
+    background: var(--surface);
+    border: 2px dashed var(--border-active);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  .full-map-admin-card.has-map {
+    border-style: solid; border-color: var(--accent); border-width: 1px;
+  }
+  .full-map-admin-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 1rem;
+  }
+  .full-map-admin-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: var(--accent-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .full-map-admin-icon svg { width: 20px; height: 20px; stroke: var(--accent); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .full-map-admin-title { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+  .full-map-admin-sub { font-size: 0.76rem; color: var(--text3); margin-top: 2px; }
+  .full-map-preview-wrap {
+    width: 100%; border-radius: var(--radius-sm); overflow: hidden;
+    background: var(--surface2); margin-bottom: 0.85rem;
+    border: 1px solid var(--border); display: none;
+    position: relative;
+  }
+  .full-map-preview-wrap.visible { display: block; }
+  .full-map-preview-wrap img { width: 100%; display: block; max-height: 220px; object-fit: contain; }
+  .full-map-admin-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ── Admin fullscreen mode ─────────────────────────────────── */
+  #page-admin {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: var(--bg);
+    overflow-y: auto;
+    flex-direction: column;
+  }
+  #page-admin.active {
+    display: flex;
+  }
+  .admin-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.25rem;
+    height: 64px;
+    background: var(--nav-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    flex-shrink: 0;
+  }
+  .admin-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--accent);
+    font-family: var(--font);
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 6px 0;
+    transition: opacity 0.2s;
+  }
+  .admin-back-btn:hover { opacity: 0.72; }
+  .admin-back-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+  .admin-topbar-title {
+    font-size: 1rem;
+    font-weight: 700;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+  .admin-topbar-right {
+    display: flex;
+    align-items: center;
+  }
+  .admin-body {
+    padding: 1.5rem 1.25rem;
+    flex: 1;
+  }
+  @media (max-width: 639px) {
+    .admin-topbar { height: 56px; padding: 0 1rem; }
+  }
+
+</style>
+</head>
+<body>
+
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">
+        <img src="android-chrome-192x192.png" alt="Fleming" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">
+      </div>
+      <div>
+        <div class="auth-logo-name">Congr. Fleming</div>
+      </div>
+    </div>
+    <h2 class="auth-title">Bienvenido</h2>
+    <p class="auth-sub">Ingresa tus datos para continuar.</p>
+    <div class="form-group">
+      <label class="form-label">Nombre</label>
+      <input type="text" class="form-input" id="auth-first" placeholder="Tu nombre">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Apellido</label>
+      <input type="text" class="form-input" id="auth-last" placeholder="Tu apellido">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Contraseña</label>
+      <div class="pass-wrap">
+        <input type="password" class="form-input" id="auth-pass" placeholder="••••••••••••">
+        <button type="button" class="pass-toggle" id="pass-toggle-btn" onclick="togglePassVisibility()" tabindex="-1" aria-label="Mostrar contraseña">
+          <svg class="eye-on" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg class="eye-off" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+        </button>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="doAccess()" id="access-btn">Ingresar</button>
+    <div class="auth-error" id="auth-error"></div>
+  </div>
+</div>
+
+<div id="app">
+  <nav class="topnav">
+    <div class="nav-spacer"></div>
+
+    <div class="main-segment">
+      <button class="main-seg-btn active" onclick="switchMainTab('predicacion',this)">Predicación</button>
+      <button class="main-seg-btn" onclick="switchMainTab('reuniones',this)">Reuniones</button>
+    </div>
+
+    <div class="nav-icons">
+<div class="options-wrap">
+  <button class="nav-icon-btn" title="Notificaciones" onclick="toggleNotificationsMenu()" style="position:relative">
+    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    <div id="notif-badge" style="display:none;position:absolute;top:6px;right:6px;width:9px;height:9px;background:var(--red);border-radius:50%;border:2px solid var(--surface);pointer-events:none"></div>
+  </button>
+  <div class="options-dropdown" id="notifications-dropdown" style="width: 300px; max-height: 400px; overflow-y: auto;">
+    <div style="padding: 1rem; font-weight: 700; border-bottom: 1px solid var(--border);">Notificaciones</div>
+    <div id="notifications-list">
+      <div class="loader-wrap"><div class="loader"></div></div>
+    </div>
+  </div>
+</div>
+      
+      <div class="options-wrap">
+        <button class="nav-icon-btn" title="Opciones" onclick="toggleOptionsMenu()">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.2" fill="currentColor" stroke="none"/></svg>
+        </button>
+        <div class="options-dropdown" id="options-dropdown">
+          <div class="options-user-info">
+            <div class="options-avatar" id="user-avatar">?</div>
+            <div style="min-width:0;flex:1">
+              <div class="options-user-name" id="dropdown-name">—</div>
+              <div class="options-user-role" id="dropdown-role">—</div>
+            </div>
+          </div>
+          <button class="dropdown-item" onclick="toggleTheme();closeOptionsMenu()">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <span id="theme-btn-label">Modo oscuro</span>
+          </button>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item" id="admin-dropdown-btn" onclick="showPage('admin');closeOptionsMenu()" style="display:none">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Administrar
+          </button>
+          <button class="dropdown-item" id="users-panel-btn" onclick="openUsersPanel();closeOptionsMenu()" style="display:none">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Usuarios
+          </button>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item danger" onclick="doLogout()">
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Cerrar sesión
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="sub-tabs-wrap" id="sub-tabs-wrap">
+  </div>
+
+  <div class="main-content">
+    <div class="page active" id="page-schedule">
+      <div id="sub-content-casa" class="sub-page active-sub">
+        <div id="schedule-content"><div class="loader-wrap"><div class="loader"></div></div></div>
+      </div>
+      <div id="sub-content-carritos" class="sub-page" style="display:none">
+        <div class="coming-soon-panel">
+          <div class="coming-soon-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div>
+          <h3>Carritos</h3>
+          <p>Las asignaciones de carritos estarán disponibles pronto.</p>
+        </div>
+      </div>
+      <div id="sub-content-territorios" class="sub-page" style="display:none">
+        <div class="ter-view-header">
+          <span class="ter-view-title">Territorios</span>
+          <button class="btn-map-full" id="btn-ver-mapa-completo" onclick="openFullMap()" style="display:none">
+            <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+            Ver mapa completo
+          </button>
+        </div>
+        <div id="territories-view-content"></div>
+      </div>
+
+      <div id="sub-content-grupos" class="sub-page" style="display:none">
+        <div class="coming-soon-panel">
+          <div class="coming-soon-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <h3>Grupos de Servicio</h3>
+          <p>Los grupos de servicio estarán disponibles pronto.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-reuniones">
+      <div class="coming-soon-panel">
+        <div class="coming-soon-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <h3>Reuniones</h3>
+        <p>La sección de reuniones estará disponible próximamente.</p>
+      </div>
+    </div>
+
+    <div id="page-admin">
+      <div class="admin-topbar">
+        <button class="admin-back-btn" onclick="closeAdminPage()">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          Inicio
+        </button>
+        <span class="admin-topbar-title">Administración</span>
+        <div class="admin-topbar-right options-wrap">
+          <button class="nav-icon-btn" title="Opciones" onclick="toggleOptionsMenu()">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.2" fill="currentColor" stroke="none"/></svg>
+          </button>
+          <div class="options-dropdown" id="options-dropdown-admin">
+            <div class="options-user-info">
+              <div class="options-avatar" id="user-avatar-admin">?</div>
+              <div style="min-width:0;flex:1">
+                <div class="options-user-name" id="dropdown-name-admin">—</div>
+                <div class="options-user-role" id="dropdown-role-admin">—</div>
+              </div>
+            </div>
+            <button class="dropdown-item" onclick="toggleTheme();closeAdminOptionsMenu()">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+              <span id="theme-btn-label-admin">Modo oscuro</span>
+            </button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" id="users-panel-btn-admin" onclick="openUsersPanel();closeAdminOptionsMenu()" style="display:none">
+              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              Usuarios
+            </button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item danger" onclick="doLogout()">
+              <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="admin-body">
+      <div class="page-header">
+        <div>
+          <div class="page-header-title">Administración</div>
+          <div class="page-header-sub">Gestiona asignaciones, territorios, conductores y casas</div>
+        </div>
+      </div>
+      <div class="admin-tabs">
+        <button class="admin-tab active" onclick="switchAdminTab('assignments')">Asignaciones</button>
+        <button class="admin-tab" onclick="switchAdminTab('territories')">Territorios</button>
+        <button class="admin-tab" onclick="switchAdminTab('conductores')">Conductores</button>
+        <button class="admin-tab" onclick="switchAdminTab('casas')">Casas</button>
+      </div>
+      <div class="admin-section active" id="admin-assignments">
+        <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
+          <span style="flex:1;font-size:0.95rem;font-weight:700">Todas las asignaciones</span>
+          <button class="btn-secondary" onclick="openAssignmentModal()">+ Nueva</button>
+        </div>
+        <div id="admin-assignments-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+      </div>
+      <div class="admin-section" id="admin-territories">
+        <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
+          <span style="flex:1;font-size:0.95rem;font-weight:700">Territorios</span>
+          <button class="btn-secondary" onclick="openTerritoryModal()">+ Nuevo</button>
+        </div>
+
+        <!-- Tarjeta mapa completo -->
+        <div class="full-map-admin-card" id="full-map-admin-card">
+          <div class="full-map-admin-header">
+            <div class="full-map-admin-icon">
+              <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+            </div>
+            <div>
+              <div class="full-map-admin-title">Mapa completo de la congregación</div>
+              <div class="full-map-admin-sub" id="full-map-admin-sub">Sube un PNG con el mapa general de todos los territorios</div>
+            </div>
+          </div>
+          <div class="full-map-preview-wrap" id="full-map-preview-wrap">
+            <img id="full-map-admin-preview" src="" alt="Mapa completo">
+          </div>
+          <div class="full-map-admin-actions">
+            <button class="btn-secondary" onclick="document.getElementById('full-map-file-input').click()">
+              <span id="full-map-upload-label">Subir mapa PNG</span>
+            </button>
+            <button class="btn-danger" id="full-map-delete-btn" onclick="deleteFullMap()" style="display:none">Eliminar mapa</button>
+            <input type="file" id="full-map-file-input" accept="image/png" style="display:none" onchange="handleFullMapUpload(event)">
+          </div>
+        </div>
+
+        <div id="admin-territories-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+      </div>
+      <div class="admin-section" id="admin-conductores">
+        <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
+          <span style="flex:1;font-size:0.95rem;font-weight:700">Conductores</span>
+          <button class="btn-secondary" onclick="openConductorModal()">+ Nuevo</button>
+        </div>
+        <div id="admin-conductores-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+      </div>
+      <div class="admin-section" id="admin-casas">
+        <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
+          <span style="flex:1;font-size:0.95rem;font-weight:700">Casas registradas</span>
+          <button class="btn-secondary" onclick="openCasaModal()">+ Nueva</button>
+        </div>
+        <div id="admin-casas-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+      </div>
+      </div><!-- /.admin-body -->
+    </div><!-- /#page-admin -->
+  </div>
+</div>
+
+<div class="detail-overlay" id="detail-overlay" onclick="handleOverlayClick(event)">
+  <div class="detail-panel" id="detail-panel">
+    <div class="detail-handle"></div>
+    <div class="detail-header-bar">
+      <span class="detail-date-label" id="detail-date-label">—</span>
+      <button class="detail-close" onclick="closeDetail()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="detail-main-row">
+      <div class="detail-info">
+        <div class="detail-time-chip" id="detail-time-chip">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span id="detail-time">—</span>
+        </div>
+        <div class="detail-address" id="detail-address">—</div>
+        <div class="detail-conductor" id="detail-conductor">—</div>
+      </div>
+      <div class="detail-ter-badge" id="detail-ter-badge" style="display:none"></div>
+    </div>
+    <div class="detail-actions" id="detail-actions">
+      <button class="detail-btn-primary" id="detail-call-btn">Llamar</button>
+      <button class="detail-btn-secondary" id="detail-map-btn">Cómo llegar</button>
+    </div>
+    <div class="detail-map-wrap" id="detail-map-wrap" style="display:none">
+      <img id="detail-map-img" alt="Mapa del territorio">
+    </div>
+    <div class="no-pasar-section" id="detail-no-pasar-section" style="display:none">
+      <div class="no-pasar-title">Direcciones No Pasar</div>
+      <div id="detail-no-pasar-list"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="assignment-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="assignment-modal-title">Nueva Asignación</div>
+      <button class="modal-close" onclick="closeAssignmentModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="form-group2"><label class="form-label2">Fecha</label><input type="date" class="form-input" id="as-date"></div>
+        <div class="form-group2"><label class="form-label2">Hora</label><input type="time" class="form-input" id="as-time"></div>
+      </div>
+      <div class="form-group2">
+        <label class="form-label2">Casa</label>
+        <select class="form-select" id="as-casa-select">
+          <option value="">Sin casa asignada</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="form-group2">
+          <label class="form-label2">Conductor</label>
+          <select class="form-select" id="as-conductor-select">
+            <option value="">Sin conductor</option>
+          </select>
+        </div>
+        <div class="form-group2"><label class="form-label2">Modalidad</label>
+          <select class="form-select" id="as-type">
+            <option value="presencial">Presencial</option>
+            <option value="zoom">Por Zoom</option>
+            <option value="telefono">Telefónico</option>
+            <option value="cartas">Cartas</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group2"><label class="form-label2">Territorio</label>
+        <select class="form-select" id="as-territory"><option value="">Sin territorio</option></select>
+      </div>
+      <div class="form-group2"><label class="form-label2">Notas</label><textarea class="form-textarea" id="as-notes" placeholder="Observaciones adicionales..."></textarea></div>
+      <div style="display:flex;gap:10px;margin-top:1.1rem;justify-content:flex-end">
+        <button class="btn-secondary" onclick="closeAssignmentModal()">Cancelar</button>
+        <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="saveAssignment()" id="save-as-btn">Guardar</button>
+      </div>
+      <div class="auth-error" id="as-error"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="territory-edit-modal">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header">
+      <div class="modal-title" id="ter-modal-title">Nuevo Territorio</div>
+      <button class="modal-close" onclick="closeTerritoryEditModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div style="max-width:160px">
+        <div class="form-group2"><label class="form-label2">N° Territorio</label><input type="number" class="form-input" id="ter-num" placeholder="Ej: 2" min="1"></div>
+      </div>
+      <div class="form-group2" style="margin-bottom:1.1rem">
+        <label class="form-label2">Mapa del territorio</label>
+        <div class="img-upload-area" id="img-upload-area" onclick="document.getElementById('ter-map-file').click()">
+          <input type="file" id="ter-map-file" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="handleMapImage(event)">
+          <div id="img-placeholder">
+            <div class="img-upload-icon"><svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></div>
+            <div class="img-upload-text">Haz clic para subir imagen</div>
+            <div class="img-upload-sub">PNG, JPG · Max 4MB</div>
+          </div>
+          <img id="img-preview" class="img-preview" style="display:none" alt="Vista previa">
+          <div class="img-change-btn" id="img-change-btn" style="display:none">Cambiar imagen</div>
+        </div>
+        <div id="img-size-warn" style="font-size:0.74rem;color:var(--red);margin-top:4px;display:none;display:flex;align-items:center;gap:4px"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Se comprimirá automáticamente.</div>
+      </div>
+      <div style="margin-bottom:1.1rem">
+        <div class="form-label2" style="margin-bottom:8px">Direcciones "No Pasar"</div>
+        <div id="no-pasar-inputs"></div>
+        <button class="btn-sm" style="margin-top:6px" onclick="addNoPasarInput()">+ Agregar dirección</button>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:1.1rem;justify-content:flex-end">
+        <button class="btn-secondary" onclick="closeTerritoryEditModal()">Cancelar</button>
+        <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="saveTerritory()" id="save-ter-btn">Guardar</button>
+      </div>
+      <div class="auth-error" id="ter-error"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="conductor-modal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <div class="modal-title" id="cond-modal-title">Nuevo Conductor</div>
+      <button class="modal-close" onclick="closeConductorModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="form-group2"><label class="form-label2">Nombre</label><input type="text" class="form-input" id="cond-nombre" placeholder="Ej: Tomás"></div>
+        <div class="form-group2"><label class="form-label2">Apellido</label><input type="text" class="form-input" id="cond-apellido" placeholder="Ej: Vergara"></div>
+      </div>
+      <div class="form-group2">
+        <label class="form-label2">Teléfono</label>
+        <input type="tel" class="form-input" id="cond-telefono" placeholder="Ej: +56 9 1234 5678">
+      </div>
+      <div style="display:flex;gap:10px;margin-top:1.1rem;justify-content:flex-end">
+        <button class="btn-secondary" onclick="closeConductorModal()">Cancelar</button>
+        <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="saveConductor()" id="save-cond-btn">Guardar</button>
+      </div>
+      <div class="auth-error" id="cond-error"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="casa-modal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <div class="modal-title" id="casa-modal-title">Nueva Casa</div>
+      <button class="modal-close" onclick="closeCasaModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group2">
+        <label class="form-label2">Dirección</label>
+        <input type="text" class="form-input" id="casa-direccion" placeholder="Ej: Tres Marías 1633">
+      </div>
+      <div class="form-group2">
+        <label class="form-label2">Amo de casa</label>
+        <input type="text" class="form-input" id="casa-amo" placeholder="Ej: Julia Pérez">
+      </div>
+      <div style="display:flex;gap:10px;margin-top:1.1rem;justify-content:flex-end">
+        <button class="btn-secondary" onclick="closeCasaModal()">Cancelar</button>
+        <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="saveCasa()" id="save-casa-btn">Guardar</button>
+      </div>
+      <div class="auth-error" id="casa-error"></div>
+    </div>
+  </div>
+</div>
+
+
+<div class="users-panel-overlay" id="users-panel-overlay" onclick="handleUsersPanelOverlayClick(event)">
+  <div class="users-panel" id="users-panel">
+    <div class="users-panel-header">
+      <div class="users-panel-title-wrap">
+        <span class="users-panel-title">Usuarios <span class="users-count-badge" id="users-count-badge">0</span></span>
+        <span class="users-panel-subtitle">Gestiona roles y permisos de acceso</span>
+      </div>
+      <button class="modal-close" onclick="closeUsersPanel()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="users-panel-body" id="users-panel-body">
+      <div class="loader-wrap"><div class="loader"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="img-lightbox" id="img-lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">
+    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <img id="lightbox-img" src="" alt="Mapa del territorio">
+</div>
+
+<!-- Full congregation map lightbox -->
+<div class="full-map-lightbox" id="full-map-lightbox" onclick="handleFullMapClick(event)">
+  <div class="full-map-lb-header">
+    <span class="full-map-lb-title">🗺 Mapa completo de la congregación</span>
+    <div class="full-map-lb-actions">
+      <button class="full-map-lb-btn download" onclick="downloadFullMap()">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Descargar PNG
+      </button>
+      <button class="full-map-lb-btn close-btn" onclick="closeFullMap()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Cerrar
+      </button>
+    </div>
+  </div>
+  <div class="full-map-lb-img-wrap">
+    <img id="full-map-lb-img" src="" alt="Mapa completo de la congregación">
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const PASS_VIEWER = 'Fleming2026';
+const PASS_ADMIN  = 'FlemingAdmin2026.!';
+const PASS_DEV    = 'FlemingDEV2026.!!';
+
+let currentUser = null;
+let currentRole = 'viewer';
+let assignments = [];
+let territories = [];
+let conductores = [];
+let casas = [];
+let editingAssignmentId = null;
+let editingTerritoryId = null;
+let editingConductorId = null;
+let editingCasaId = null;
+let noPasarCount = 0;
+let pendingMapBase64 = null;
+let currentMainTab = 'predicacion';
+let currentSubTab  = 'casa';
+
+const TER_COLORS = ['#64748b','#22c55e','#3b82f6','#a855f7','#f59e0b','#ef4444','#06b6d4','#ec4899','#84cc16','#f97316'];
+function getTerColor(num) { return TER_COLORS[num % TER_COLORS.length]; }
+function getTerColorClass(num) { return 'ter-color-' + (num % 10); }
+
+function initTheme() {
+  const saved = localStorage.getItem('fleming_theme') || 'light';
+  applyTheme(saved);
+}
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('fleming_theme', theme);
+  const label = document.getElementById('theme-btn-label');
+  if (label) label.textContent = theme === 'dark' ? 'Modo claro' : 'Modo oscuro';
+}
+function toggleTheme() {
+  applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
+
+function saveSession(u) { sessionStorage.setItem('fleming_user', JSON.stringify(u)); }
+function loadSession() { try { return JSON.parse(sessionStorage.getItem('fleming_user')); } catch { return null; } }
+function clearSession() { sessionStorage.removeItem('fleming_user'); }
+
+async function init() {
+  initTheme();
+  const saved = loadSession();
+  if (saved) { currentUser = saved; currentRole = saved.role; enterApp(); }
+  else { document.getElementById('auth-screen').style.display = 'flex'; }
+}
+
+// ── Push Notifications ───────────────────────────────────────────────────────
+// Reemplaza este valor con tu clave pública VAPID real.
+// Puedes generarla con: npx web-push generate-vapid-keys
+const VAPID_PUBLIC_KEY = 'TU_CLAVE_PUBLICA_VAPID_AQUI';
+
+async function subscribeToPush() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  // Si no se configuró la clave VAPID, no intentar suscribir (evita error en subscribe())
+  if (!VAPID_PUBLIC_KEY || VAPID_PUBLIC_KEY === 'TU_CLAVE_PUBLICA_VAPID_AQUI') {
+    console.warn('Push Notifications: Configura VAPID_PUBLIC_KEY para habilitar notificaciones push.');
+    return;
+  }
+  
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    let sub = await registration.pushManager.getSubscription();
+    
+    if (!sub) {
+      // No hay suscripción — pedir permiso y suscribir
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') return;
+      sub = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+    }
+    
+    // Guardar/actualizar en Supabase (tanto nueva como existente)
+    if (sub && currentUser) {
+      await sb.from('push_subscriptions').upsert({
+        user_name: currentUser.name, 
+        subscription: JSON.stringify(sub)
+      }, { onConflict: 'user_name' });
+    }
+  } catch (error) {
+    console.error('Error al suscribir a push:', error);
+  }
+}
+
+// Convierte la clave VAPID de base64url a Uint8Array (requerido por pushManager.subscribe)
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+  
+async function enterApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  const app = document.getElementById('app');
+  app.style.display = 'flex'; app.style.flexDirection = 'column';
+
+  const initials = currentUser.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  document.getElementById('user-avatar').textContent = initials;
+  document.getElementById('dropdown-name').textContent = currentUser.name;
+
+  // Register/update in Supabase — may update currentRole if admin changed it
+  await registerUserSession(currentUser.name, currentRole);
+
+  // Update UI based on final role
+  const roleLabelsMap = { dev:'DEV', admin:'Administrador', semiadmin:'SemiAdmin', viewer:'Visitante' };
+  const roleEl = document.getElementById('dropdown-role');
+  roleEl.textContent = roleLabelsMap[currentRole] || 'Visitante';
+  roleEl.style.color = currentRole === 'dev' ? 'var(--orange)' : currentRole === 'admin' ? 'var(--accent)' : currentRole === 'semiadmin' ? '#a855f7' : '';
+
+  const adminBtn = document.getElementById('admin-dropdown-btn');
+  adminBtn.style.display = ['dev','admin','semiadmin'].includes(currentRole) ? '' : 'none';
+  const usersBtn = document.getElementById('users-panel-btn');
+  if (usersBtn) usersBtn.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
+
+  renderSubTabs('predicacion');
+  loadSchedule();
+  loadFullMap();
+  startRolePolling();
+
+  // Show assigned task in dropdown for semiadmin
+  const taskEl = document.getElementById('dropdown-task');
+  if (taskEl && currentRole === 'semiadmin') {
+    const { data: me } = await sb.from('platform_users').select('task').eq('name', currentUser.name).single();
+    if (me && me.task) { taskEl.textContent = '📋 ' + me.task; taskEl.style.display = ''; }
+    else { taskEl.style.display = 'none'; }
+  } else if (taskEl) { taskEl.style.display = 'none'; }
+
+  showToast(`¡Hola, ${currentUser.name}!`, 'success');
+  startNotifPolling();
+  await subscribeToPush();
+}
+  
+async function doAccess() {
+  const first = document.getElementById('auth-first').value.trim();
+  const last  = document.getElementById('auth-last').value.trim();
+  const pass  = document.getElementById('auth-pass').value;
+  const errEl = document.getElementById('auth-error');
+  const btn   = document.querySelector('#auth-screen .btn-primary');
+  errEl.style.display = 'none';
+  if (!first || !last) { errEl.style.display='block'; errEl.textContent='Ingresa tu nombre y apellido.'; return; }
+  if (!pass)           { errEl.style.display='block'; errEl.textContent='Ingresa la contraseña.'; return; }
+  let baseRole = pass === PASS_DEV ? 'dev' : pass === PASS_ADMIN ? 'admin' : pass === PASS_VIEWER ? 'viewer' : null;
+  if (!baseRole) { errEl.style.display='block'; errEl.textContent='Contraseña incorrecta.'; return; }
+
+  if (btn) { btn.disabled = true; btn.textContent = 'Entrando…'; }
+
+  // If logging in as viewer, check Supabase for a semiadmin/admin promotion
+  let role = baseRole;
+  if (baseRole === 'viewer') {
+    const fullName = first + ' ' + last;
+    const { data: stored } = await sb.from('platform_users')
+      .select('role')
+      .ilike('name', fullName)
+      .single();
+    if (stored && ['semiadmin','admin'].includes(stored.role)) role = stored.role;
+  }
+
+  if (btn) { btn.disabled = false; btn.textContent = 'Ingresar'; }
+  currentUser = { name: first + ' ' + last, role };
+  currentRole = role;
+  saveSession(currentUser);
+  enterApp();
+}
+
+function doLogout() {
+  stopRolePolling();
+  clearSession(); currentUser = null; currentRole = 'viewer';
+  closeProfileMenu();
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+}
+
+const SUB_TABS = {
+  predicacion: [
+    { id: 'casa',        label: 'De casa en casa' },
+    { id: 'territorios', label: 'Territorios' },
+    { id: 'carritos',    label: 'Carritos' },
+    { id: 'grupos',      label: 'Grupos de Serv.' },
+  ],
+  reuniones: []
+};
+
+function renderSubTabs(mainTab) {
+  const wrap = document.getElementById('sub-tabs-wrap');
+  const tabs = SUB_TABS[mainTab] || [];
+  if (!tabs.length) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = '<div class="sub-tabs">' +
+    tabs.map(t => `<button class="sub-tab${currentSubTab===t.id?' active':''}" onclick="switchSubTab('${t.id}')">${t.label}</button>`).join('') +
+    '</div>';
+}
+
+function switchMainTab(tab, btn) {
+  currentMainTab = tab;
+  document.querySelectorAll('.main-seg-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSubTabs(tab);
+
+  if (tab === 'predicacion') {
+    showPage('schedule');
+  } else {
+    showPage('reuniones');
+  }
+}
+
+function switchSubTab(tabId) {
+  currentSubTab = tabId;
+  // update active
+  document.querySelectorAll('.sub-tab').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim().includes(
+      SUB_TABS[currentMainTab].find(t=>t.id===tabId)?.label.split(' ')[0]
+    ));
+  });
+  renderSubTabs(currentMainTab);
+
+  ['casa','territorios','carritos','grupos'].forEach(id => {
+    const el = document.getElementById('sub-content-' + id);
+    if (el) el.style.display = id === tabId ? '' : 'none';
+  });
+  if (tabId === 'territorios') renderTerritoryView();
+}
+
+function showPage(name) {
+  if (name === 'admin') {
+    if (!['dev','admin','semiadmin'].includes(currentRole)) {
+      showToast('No tienes permisos para acceder a esta sección.', 'error');
+      return;
+    }
+    // Open admin as a fullscreen overlay — independent of main nav
+    document.getElementById('page-admin').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    syncAdminDropdown();
+    loadAdminData();
+    return;
+  }
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const p = document.getElementById('page-' + name);
+  if (p) p.classList.add('active');
+}
+
+async function switchAdminTab(tab) {
+  // For semiadmin, check permissions before switching
+  if (currentRole === 'semiadmin') {
+    const perms = await getUserPermissions();
+    const moduleMap = { assignments: 'assignments', territories: 'territories', conductores: 'conductores', casas: 'casas' };
+    const moduleKey = moduleMap[tab];
+    if (moduleKey && !canAccessModule(perms, moduleKey)) {
+      showToast('No tienes permisos para acceder a este módulo.', 'error');
+      return;
+    }
+  }
+  const tabs = ['assignments','territories','conductores','casas'];
+  document.querySelectorAll('.admin-tab').forEach((t,i) => t.classList.toggle('active', tabs[i] === tab));
+  document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('admin-' + tab).classList.add('active');
+}
+
+async function applyAdminTabPermissions() {
+  if (!['semiadmin'].includes(currentRole)) return;
+  const perms = await getUserPermissions();
+  if (!perms) return;
+  const tabMap = [
+    { tab: 'assignments', key: 'assignments' },
+    { tab: 'territories', key: 'territories' },
+    { tab: 'conductores', key: 'conductores' },
+    { tab: 'casas',       key: 'casas' },
+  ];
+  const adminTabBtns = document.querySelectorAll('.admin-tab');
+  const tabs = ['assignments','territories','conductores','casas'];
+  adminTabBtns.forEach((btn, i) => {
+    const key = tabs[i];
+    const allowed = canAccessModule(perms, key);
+    btn.style.opacity = allowed ? '' : '0.4';
+    btn.style.pointerEvents = allowed ? '' : 'none';
+    btn.title = allowed ? '' : 'Sin permiso para este módulo';
+  });
+  // Auto-switch to first allowed tab
+  const firstAllowed = tabMap.find(m => canAccessModule(perms, m.key));
+  if (firstAllowed) {
+    const allTabs = ['assignments','territories','conductores','casas'];
+    document.querySelectorAll('.admin-tab').forEach((t,i) => t.classList.toggle('active', allTabs[i] === firstAllowed.tab));
+    document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+    document.getElementById('admin-' + firstAllowed.tab).classList.add('active');
+  }
+}
+
+async function loadSchedule() {
+  document.getElementById('schedule-content').innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
+  const { data: aData } = await sb.from('assignments').select('*, territories(id,number,name,map_data,no_pasar)').order('date').order('time');
+  assignments = aData || [];
+  const { data: tData } = await sb.from('territories').select('*').order('number');
+  territories = tData || [];
+  if (currentSubTab === 'territorios') renderTerritoryView();
+  // Also refresh conductores and casas if they were loaded
+  if (conductores.length || casas.length) {
+    const [{ data: cData }, { data: hData }] = await Promise.all([
+      sb.from('conductores').select('*').order('apellido').order('nombre'),
+      sb.from('casas').select('*').order('direccion'),
+    ]);
+    conductores = cData || [];
+    casas = hData || [];
+  }
+  renderSchedule();
+}
+
+function renderSchedule() {
+  const container = document.getElementById('schedule-content');
+  if (!assignments.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><h4>Sin asignaciones</h4><p>No hay predicaciones programadas</p></div>`;
+    return;
+  }
+
+  const grouped = {};
+  assignments.forEach(a => { if (!grouped[a.date]) grouped[a.date]=[]; grouped[a.date].push(a); });
+
+  const DAY = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const MON = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+  let html = '';
+  Object.keys(grouped).sort().forEach(date => {
+    const d = new Date(date+'T00:00:00');
+    const dateLabel = `${DAY[d.getDay()]} ${d.getDate()} de ${MON[d.getMonth()]}`;
+    html += `<div class="date-section"><div class="date-section-header">${dateLabel}</div>`;
+    grouped[date].forEach(a => {
+      const ter = a.territories;
+      const timeStr = a.time ? a.time.substring(0,5) : '--:--';
+
+      let rightBadge = '';
+      if (a.type === 'zoom') {
+        rightBadge = `<div class="ter-badge-icon zoom-badge">
+          <svg viewBox="0 0 24 24"><rect x="2" y="7" width="15" height="10" rx="2"/><polygon points="17 9 22 6 22 18 17 15"/></svg>
+        </div>`;
+      } else if (a.type === 'telefono') {
+        rightBadge = `<div class="ter-badge-icon phone-badge">
+          <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.35 2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        </div>`;
+      } else if (a.type === 'cartas') {
+        rightBadge = `<div class="ter-badge-icon cartas-badge">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>`;
+      } else if (ter) {
+        const color = getTerColor(ter.number);
+        rightBadge = `<div class="ter-badge" style="background:${color}">${ter.number}</div>`;
       }
-      // Si no hay ventana, abrir una nueva
-      if (clients.openWindow) return clients.openWindow(targetUrl);
-    })
+
+      let typeChip = '';
+      if (a.type === 'zoom') typeChip = `<span class="type-chip chip-zoom">Zoom</span>`;
+      else if (a.type === 'telefono') typeChip = `<span class="type-chip chip-phone">Teléfono</span>`;
+      else if (a.type === 'cartas') typeChip = `<span class="type-chip chip-cartas">Cartas</span>`;
+
+      html += `<div class="assignment-card" onclick="viewAssignment('${a.id}')">
+        <div class="card-main">
+          <div class="card-address">${a.address||'Sin dirección'}${a.house?`<br><span class="card-house">${a.house}</span>`:''}</div>
+          <div class="card-meta">
+            <span class="card-time-chip">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              ${timeStr}hrs
+            </span>
+            <span class="card-conductor">${a.conductor||'Sin conductor'}</span>
+            ${typeChip}
+          </div>
+        </div>
+        ${rightBadge}
+      </div>`;
+    });
+    html += `</div>`;
+  });
+  container.innerHTML = html;
+}
+
+function viewAssignment(id) {
+  const a = assignments.find(x => x.id === id);
+  if (!a) return;
+  const ter = a.territories || territories.find(t => t.id === a.territory_id);
+  const d = new Date(a.date+'T00:00:00');
+  const DAY = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const MON = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+  document.getElementById('detail-date-label').textContent = `${DAY[d.getDay()]} ${d.getDate()} de ${MON[d.getMonth()]}`;
+  document.getElementById('detail-time').textContent = (a.time ? a.time.substring(0,5) : '--:--') + 'hrs';
+  document.getElementById('detail-address').textContent = [a.address, a.house].filter(Boolean).join('\n');
+  document.getElementById('detail-conductor').textContent = a.conductor || '';
+
+  const badge = document.getElementById('detail-ter-badge');
+  if (ter) {
+    badge.textContent = ter.number;
+    badge.style.background = getTerColor(ter.number);
+    badge.style.display = 'flex';
+  } else if (a.type !== 'presencial') {
+    badge.style.display = 'none';
+  } else {
+    badge.style.display = 'none';
+  }
+
+  const mapWrap = document.getElementById('detail-map-wrap');
+  const mapImg  = document.getElementById('detail-map-img');
+  if (ter && ter.map_data) {
+    mapImg.src = ter.map_data;
+    mapWrap.style.display = '';
+    mapWrap.onclick = () => openLightbox(ter.map_data);
+  } else {
+    mapWrap.style.display = 'none';
+    mapWrap.onclick = null;
+  }
+
+  const actions = document.getElementById('detail-actions');
+  const callBtn = document.getElementById('detail-call-btn');
+  const mapBtn  = document.getElementById('detail-map-btn');
+  if (a.type === 'zoom') { callBtn.textContent = 'Abrir Zoom'; callBtn.onclick = null; }
+  else if (a.type === 'cartas') { callBtn.textContent = 'Ver detalles'; callBtn.onclick = null; }
+  else {
+    callBtn.textContent = 'Llamar';
+    if (a.phone) {
+      callBtn.onclick = () => window.location.href = 'tel:' + a.phone.replace(/\s/g,'');
+      callBtn.style.opacity = '1';
+    } else {
+      callBtn.onclick = null;
+      callBtn.style.opacity = '0.45';
+      callBtn.title = 'Sin teléfono registrado';
+    }
+  }
+  mapBtn.textContent = 'Cómo llegar';
+  if (a.address) {
+    mapBtn.onclick = () => window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(a.address), '_blank');
+    mapBtn.style.opacity = '1';
+  } else {
+    mapBtn.onclick = null;
+    mapBtn.style.opacity = '0.45';
+  }
+
+  const noPasarSec  = document.getElementById('detail-no-pasar-section');
+  const noPasarList = document.getElementById('detail-no-pasar-list');
+  if (ter && ter.no_pasar) {
+    const entries = parseNoPasar(ter.no_pasar);
+    if (entries.length) {
+      noPasarList.innerHTML = entries.map(e => `
+        <div class="no-pasar-item" style="justify-content:space-between">
+          <span>${e.addr}</span>
+          ${e.date ? `<span style="font-size:0.74rem;color:var(--text3);font-weight:500;flex-shrink:0;margin-left:8px">${fmtNpDate(e.date)}</span>` : ''}
+        </div>`).join('');
+      noPasarSec.style.display = '';
+    } else { noPasarSec.style.display = 'none'; }
+  } else { noPasarSec.style.display = 'none'; }
+
+  document.getElementById('detail-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail() {
+  // Reset any state that viewTerritory may have changed
+  document.getElementById('detail-time-chip').style.display = '';
+  document.getElementById('detail-address').style.fontSize = '';
+  document.getElementById('detail-actions').style.display = '';
+  document.getElementById('detail-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('detail-overlay')) closeDetail();
+}
+
+async function loadAdminData() {
+  await loadSchedule();
+  const [{ data: cData }, { data: hData }] = await Promise.all([
+    sb.from('conductores').select('*').order('apellido').order('nombre'),
+    sb.from('casas').select('*').order('direccion'),
+  ]);
+  conductores = cData || [];
+  casas = hData || [];
+  renderAdminAssignments();
+  renderAdminTerritories();
+  renderAdminConductores();
+  renderAdminCasas();
+  await applyAdminTabPermissions();
+}
+
+function renderAdminAssignments() {
+  const container = document.getElementById('admin-assignments-list');
+  if (!assignments.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><h4>Sin asignaciones</h4><p>Crea la primera asignación</p></div>`;
+    return;
+  }
+  const sorted = [...assignments].sort((a,b) => (a.date+a.time) < (b.date+b.time) ? 1 : -1);
+  const DAY = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  container.innerHTML = sorted.map(a => {
+    const d = new Date(a.date+'T00:00:00');
+    const dateStr = `${DAY[d.getDay()]} ${d.getDate()}/${d.getMonth()+1}`;
+    const ter = territories.find(t => t.id === a.territory_id);
+    const color = ter ? getTerColor(ter.number) : null;
+    return `<div class="list-item">
+      <div style="width:40px;height:40px;border-radius:8px;background:var(--surface3);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:var(--accent);flex-shrink:0;line-height:1.3">
+        <span>${a.time?a.time.substring(0,5):'--'}</span><span style="color:var(--text3);font-size:0.62rem">${dateStr}</span>
+      </div>
+      <div class="list-item-main">
+        <div class="list-item-title">${a.address||'Sin dirección'}${a.house?' — '+a.house:''}</div>
+        <div class="list-item-sub">${a.conductor||'Sin conductor'}${ter?` · T.${ter.number}`:''}</div>
+      </div>
+      ${ter ? `<div style="width:28px;height:28px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:800;color:white;flex-shrink:0">${ter.number}</div>` : ''}
+      <div class="list-item-actions">
+        <button class="btn-sm" onclick="editAssignment('${a.id}')">Editar</button>
+        <button class="btn-danger" onclick="deleteAssignment('${a.id}')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Parse no_pasar entries — handles both {addr,date} objects and legacy plain strings
+function parseNoPasar(raw) {
+  if (!raw) return [];
+  const arr = Array.isArray(raw) ? raw : JSON.parse(raw);
+  return arr.map(e => typeof e === 'object' ? e : { addr: e, date: '' }).filter(e => e.addr);
+}
+function fmtNpDate(d) {
+  if (!d) return '';
+  const [y,m,day] = d.split('-');
+  const MON = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  return `${parseInt(day)} ${MON[parseInt(m)-1]} ${y}`;
+}
+function renderAdminTerritories() {
+  const container = document.getElementById('admin-territories-list');
+  if (!territories.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></div><h4>Sin territorios</h4><p>Crea el primer territorio</p></div>`;
+    return;
+  }
+  container.innerHTML = `<div class="ter-grid">` + territories.map(t => {
+    const color = getTerColor(t.number);
+    const noPasar = parseNoPasar(t.no_pasar);
+    const npCount = noPasar.length;
+    const mapHtml = t.map_data
+      ? `<img src="${t.map_data}" alt="Mapa T${t.number}" loading="lazy">`
+      : `<div class="ter-grid-map-empty"><svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg><span>Sin mapa</span></div>`;
+    const npPreview = noPasar.slice(0,2).map(e =>
+      `<div style="font-size:0.68rem;color:var(--red);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${e.addr}${e.date ? '<span style="color:var(--text3);font-weight:400"> · '+fmtNpDate(e.date)+'</span>' : ''}</div>`
+    ).join('') + (npCount > 2 ? `<div style="font-size:0.65rem;color:var(--text3)">+${npCount-2} más</div>` : '');
+    return `<div class="ter-grid-card">
+      <div class="ter-grid-map">
+        ${mapHtml}
+        <div class="ter-grid-num-badge" style="background:${color}">${t.number}</div>
+      </div>
+      <div class="ter-grid-footer" style="flex-direction:column;align-items:stretch;gap:6px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div class="ter-grid-num">Territorio ${t.number}</div>
+          <div class="ter-grid-actions">
+            <button class="ter-grid-btn" onclick="event.stopPropagation();editTerritory('${t.id}')" title="Editar">
+              <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="ter-grid-btn del" onclick="event.stopPropagation();deleteTerritory('${t.id}')" title="Eliminar">
+              <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            </button>
+          </div>
+        </div>
+        ${npCount > 0 ? `<div style="border-top:1px solid var(--border);padding-top:5px">${npPreview}</div>` : '<div class="ter-grid-np">Sin dir. no pasar</div>'}
+      </div>
+    </div>`;
+  }).join('') + `</div>`;
+}
+
+function openAssignmentModal(a) {
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  editingAssignmentId = a ? a.id : null;
+  document.getElementById('assignment-modal-title').textContent = a ? 'Editar Asignación' : 'Nueva Asignación';
+  document.getElementById('as-date').value = a?.date || '';
+  document.getElementById('as-time').value = a?.time || '';
+  document.getElementById('as-type').value = a?.type || 'presencial';
+  document.getElementById('as-notes').value = a?.notes || '';
+
+  const selConductor = document.getElementById('as-conductor-select');
+  selConductor.innerHTML = '<option value="">Sin conductor</option>' +
+    conductores.map(c => `<option value="${c.id}"${a?.conductor_id===c.id?' selected':''}>${c.nombre} ${c.apellido}</option>`).join('');
+
+  const selCasa = document.getElementById('as-casa-select');
+  selCasa.innerHTML = '<option value="">Sin casa asignada</option>' +
+    casas.map(h => `<option value="${h.id}"${a?.casa_id===h.id?' selected':''}>${h.direccion}${h.amo?' (${h.amo})':''}</option>`).join('');
+
+  const selTer = document.getElementById('as-territory');
+  selTer.innerHTML = '<option value="">Sin territorio</option>' +
+    territories.map(t => `<option value="${t.id}"${a?.territory_id===t.id?' selected':''}>Territorio ${t.number}</option>`).join('');
+
+  document.getElementById('as-error').style.display = 'none';
+  document.getElementById('assignment-modal').classList.add('open');
+}
+function closeAssignmentModal() { document.getElementById('assignment-modal').classList.remove('open'); editingAssignmentId = null; }
+function editAssignment(id) { openAssignmentModal(assignments.find(a=>a.id===id)); }
+async function saveAssignment() {
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (currentRole === 'semiadmin') {
+    const perms = await getUserPermissions();
+    if (!canAccessModule(perms, 'assignments')) { showToast('No tienes permiso para gestionar Asignaciones.','error'); return; }
+  }
+  const conductorId = document.getElementById('as-conductor-select').value || null;
+  const casaId = document.getElementById('as-casa-select').value || null;
+  const conductor = conductorId ? conductores.find(c=>c.id===conductorId) : null;
+  const casa = casaId ? casas.find(h=>h.id===casaId) : null;
+  const payload = {
+    date: document.getElementById('as-date').value,
+    time: document.getElementById('as-time').value,
+    address: casa?.direccion || '',
+    house: casa?.amo || '',
+    conductor: conductor ? `${conductor.nombre} ${conductor.apellido}` : '',
+    conductor_id: conductorId,
+    casa_id: casaId,
+    type: document.getElementById('as-type').value,
+    territory_id: document.getElementById('as-territory').value || null,
+    notes: document.getElementById('as-notes').value.trim(),
+    phone: conductor?.telefono || null,
+  };
+  if (!payload.date || !payload.time) { showError('as-error','Fecha y hora son requeridos'); return; }
+  const btn = document.getElementById('save-as-btn');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  let error;
+if (editingAssignmentId) { 
+  // 1. Guardamos el estado anterior antes de actualizar
+  const oldAssign = assignments.find(a => a.id === editingAssignmentId);
+  
+  // 2. Actualizamos en la base de datos
+  ({error} = await sb.from('assignments').update(payload).eq('id', editingAssignmentId)); 
+  
+  // 3. Detectamos si cambió cualquier campo relevante para el publicador
+  const hasChanged = !oldAssign || (
+    oldAssign.address      !== payload.address      ||
+    oldAssign.date         !== payload.date         ||
+    oldAssign.time         !== payload.time         ||
+    oldAssign.conductor    !== payload.conductor    ||
+    oldAssign.type         !== payload.type         ||
+    (oldAssign.territory_id || null) !== (payload.territory_id || null)
   );
+
+  if (!error && hasChanged) {
+    const d = new Date(payload.date + 'T00:00:00');
+    const dateStr = d.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
+    const parts = [];
+    if (payload.address) parts.push(`dirección: ${payload.address}`);
+    if (payload.time)    parts.push(`hora: ${payload.time.substring(0,5)}`);
+    if (payload.conductor) parts.push(`conductor: ${payload.conductor}`);
+    const detalle = parts.length ? ` (${parts.join(', ')})` : '';
+    const defaultText = `Se realizó un cambio en la predicación del ${dateStr}${detalle}. Por favor revisar los arreglos actualizados.`;
+
+    const userMessage = prompt("Se detectaron cambios en la asignación. Edita el mensaje o cancela para no notificar:", defaultText);
+    
+    if (userMessage) {
+      showToast('Enviando notificación...', '');
+      
+      // 1. Guarda la notificación en la tabla notifications para que aparezca en la app
+      await sb.from('notifications').insert({
+        title: 'Cambio en Asignación',
+        body: userMessage
+      });
+
+      // 2. Envía el push a suscriptores vía Edge Function
+      try {
+        const resp = await fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SUPABASE_KEY}`
+          },
+          body: JSON.stringify({
+            title: 'Cambio en Asignación',
+            body: userMessage
+          })
+        });
+        if (!resp.ok) {
+          const errText = await resp.text();
+          console.warn('Edge Function respondió con error:', resp.status, errText);
+        }
+      } catch (err) {
+        console.warn('No se pudo enviar push (Edge Function no disponible):', err.message);
+      }
+      showToast('Notificación enviada ✓', 'success');
+    }
+  }
+}
+else { ({error} = await sb.from('assignments').insert(payload)); }
+  btn.disabled = false; btn.textContent = 'Guardar';
+  if (error) { showError('as-error', error.message); return; }
+  showToast(editingAssignmentId?'Asignación actualizada':'Asignación creada','success');
+  closeAssignmentModal();
+  await loadSchedule();
+  renderAdminAssignments();
+}
+async function deleteAssignment(id) {
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!confirm('¿Eliminar esta asignación?')) return;
+  const {error} = await sb.from('assignments').delete().eq('id',id);
+  if (error) { showToast('Error al eliminar','error'); return; }
+  showToast('Asignación eliminada','success');
+  await loadSchedule(); renderAdminAssignments();
+}
+
+function openTerritoryModal(t) {
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  editingTerritoryId = t ? t.id : null;
+  document.getElementById('ter-modal-title').textContent = t ? 'Editar Territorio' : 'Nuevo Territorio';
+  document.getElementById('ter-num').value = t?.number || '';
+
+  const area = document.getElementById('img-upload-area');
+  const preview = document.getElementById('img-preview');
+  const placeholder = document.getElementById('img-placeholder');
+  const changeBtn = document.getElementById('img-change-btn');
+  document.getElementById('ter-map-file').value = '';
+  if (t && t.map_data) {
+    preview.src = t.map_data; preview.style.display = 'block';
+    placeholder.style.display = 'none'; changeBtn.style.display = 'block';
+    area.classList.add('has-image'); pendingMapBase64 = t.map_data;
+  } else {
+    preview.src = ''; preview.style.display = 'none';
+    placeholder.style.display = 'block'; changeBtn.style.display = 'none';
+    area.classList.remove('has-image');
+  }
+  noPasarCount = 0;
+  const npContainer = document.getElementById('no-pasar-inputs');
+  npContainer.innerHTML = '';
+  const noPasar = t?.no_pasar ? (Array.isArray(t.no_pasar) ? t.no_pasar : JSON.parse(t.no_pasar)) : [];
+  const npFiltered = noPasar.filter(e => e && (typeof e === 'object' ? e.addr : e));
+  if (npFiltered.length) {
+    npFiltered.forEach(e => {
+      if (typeof e === 'object') addNoPasarInput(e.addr || '', e.date || '');
+      else addNoPasarInput(e, ''); // backwards compat with old string entries
+    });
+  } else { addNoPasarInput(); }
+  document.getElementById('ter-error').style.display = 'none';
+  document.getElementById('territory-edit-modal').classList.add('open');
+}
+function editTerritory(id) { openTerritoryModal(territories.find(t=>t.id===id)); }
+function closeTerritoryEditModal() { document.getElementById('territory-edit-modal').classList.remove('open'); editingTerritoryId=null; pendingMapBase64=null; }
+function handleMapImage(event) {
+  const file = event.target.files[0]; if (!file) return;
+  const warn = document.getElementById('img-size-warn');
+  warn.style.display = file.size > 4*1024*1024 ? 'block' : 'none';
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img; const maxW = 1200;
+      if (width > maxW) { height = Math.round(height * maxW / width); width = maxW; }
+      const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      const compressed = canvas.toDataURL('image/jpeg', 0.82);
+      pendingMapBase64 = compressed;
+      const preview = document.getElementById('img-preview');
+      preview.src = compressed; preview.style.display = 'block';
+      document.getElementById('img-placeholder').style.display = 'none';
+      document.getElementById('img-change-btn').style.display = 'block';
+      document.getElementById('img-upload-area').classList.add('has-image');
+      warn.style.display = 'none';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function addNoPasarInput(addr = '', date = '') {
+  noPasarCount++;
+  const n = noPasarCount;
+  const div = document.createElement('div');
+  div.style.cssText = 'display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-bottom:8px;align-items:center';
+  div.id = 'np-wrap-' + n;
+  div.innerHTML = `<input type="text" class="form-input" id="np-addr-${n}" value="${addr.replace(/"/g,'&quot;')}" placeholder="Ej: Nueva Bilbao 8998">
+    <input type="date" class="date-input" id="np-date-${n}" value="${date}" style="height:42px;border-radius:var(--radius-sm);padding:0 10px;font-size:0.8rem;background:var(--surface2);border:1px solid var(--border);color:var(--text)">
+    <button class="btn-danger" onclick="this.parentElement.remove()" style="flex-shrink:0;padding:0.45rem 0.65rem"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+  document.getElementById('no-pasar-inputs').appendChild(div);
+}
+async function saveTerritory() {
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (currentRole === 'semiadmin') {
+    const perms = await getUserPermissions();
+    if (!canAccessModule(perms, 'territories')) { showToast('No tienes permiso para gestionar Territorios.','error'); return; }
+  }
+  const number = parseInt(document.getElementById('ter-num').value);
+  if (!number) { showError('ter-error','El número de territorio es requerido'); return; }
+  // Collect no_pasar as array of {addr, date} objects
+  const npWraps = document.querySelectorAll('#no-pasar-inputs [id^="np-wrap-"]');
+  const no_pasar = Array.from(npWraps).map(wrap => {
+    const n = wrap.id.replace('np-wrap-','');
+    const addr = (document.getElementById('np-addr-'+n)?.value || '').trim();
+    const date = (document.getElementById('np-date-'+n)?.value || '').trim();
+    return addr ? { addr, date } : null;
+  }).filter(Boolean);
+  const btn = document.getElementById('save-ter-btn');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  const payload = { number, no_pasar, map_data: pendingMapBase64 || null };
+  let error;
+  if (editingTerritoryId) { ({error} = await sb.from('territories').update(payload).eq('id',editingTerritoryId)); }
+  else { ({error} = await sb.from('territories').insert(payload)); }
+  btn.disabled = false; btn.textContent = 'Guardar';
+  if (error) { showError('ter-error', error.message); return; }
+  showToast(editingTerritoryId?'Territorio actualizado':'Territorio creado','success');
+  closeTerritoryEditModal();
+  const {data} = await sb.from('territories').select('*').order('number');
+  territories = data || [];
+  renderAdminTerritories();
+  await loadSchedule();
+}
+async function deleteTerritory(id) {
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!confirm('¿Eliminar este territorio?')) return;
+  const {error} = await sb.from('territories').delete().eq('id',id);
+  if (error) { showToast('Error al eliminar','error'); return; }
+  showToast('Territorio eliminado','success');
+  const {data} = await sb.from('territories').select('*').order('number');
+  territories = data || []; renderAdminTerritories();
+}
+
+function renderAdminConductores() {
+  const container = document.getElementById('admin-conductores-list');
+  if (!conductores.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><h4>Sin conductores</h4><p>Agrega el primer conductor</p></div>`;
+    return;
+  }
+  container.innerHTML = conductores.map(c => `
+    <div class="list-item">
+      <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#007AFF,#5ac8fa);display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:700;color:white;flex-shrink:0">${(c.nombre[0]||'')+(c.apellido[0]||'')}</div>
+      <div class="list-item-main">
+        <div class="list-item-title">${c.nombre} ${c.apellido}</div>
+        <div class="list-item-sub">${c.telefono||'Sin teléfono'}</div>
+      </div>
+      <div class="list-item-actions">
+        <button class="btn-sm" onclick="editConductor('${c.id}')">Editar</button>
+        <button class="btn-danger" onclick="deleteConductor('${c.id}')"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+    </div>`).join('');
+}
+
+function openConductorModal(c) {
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  editingConductorId = c ? c.id : null;
+  document.getElementById('cond-modal-title').textContent = c ? 'Editar Conductor' : 'Nuevo Conductor';
+  document.getElementById('cond-nombre').value = c?.nombre || '';
+  document.getElementById('cond-apellido').value = c?.apellido || '';
+  document.getElementById('cond-telefono').value = c?.telefono || '';
+  document.getElementById('cond-error').style.display = 'none';
+  document.getElementById('conductor-modal').classList.add('open');
+}
+function closeConductorModal() { document.getElementById('conductor-modal').classList.remove('open'); editingConductorId = null; }
+function editConductor(id) { openConductorModal(conductores.find(c=>c.id===id)); }
+async function saveConductor() {
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  const nombre = document.getElementById('cond-nombre').value.trim();
+  const apellido = document.getElementById('cond-apellido').value.trim();
+  const telefono = document.getElementById('cond-telefono').value.trim();
+  if (!nombre || !apellido) { showError('cond-error','Nombre y apellido son requeridos'); return; }
+  const btn = document.getElementById('save-cond-btn');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  let error;
+  if (editingConductorId) { ({error} = await sb.from('conductores').update({nombre,apellido,telefono}).eq('id',editingConductorId)); }
+  else { ({error} = await sb.from('conductores').insert({nombre,apellido,telefono})); }
+  btn.disabled = false; btn.textContent = 'Guardar';
+  if (error) { showError('cond-error', error.message); return; }
+  showToast(editingConductorId?'Conductor actualizado':'Conductor creado','success');
+  closeConductorModal();
+  const {data} = await sb.from('conductores').select('*').order('apellido').order('nombre');
+  conductores = data || [];
+  renderAdminConductores();
+}
+async function deleteConductor(id) {
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!confirm('¿Eliminar este conductor?')) return;
+  const {error} = await sb.from('conductores').delete().eq('id',id);
+  if (error) { showToast('Error al eliminar','error'); return; }
+  showToast('Conductor eliminado','success');
+  const {data} = await sb.from('conductores').select('*').order('apellido').order('nombre');
+  conductores = data || []; renderAdminConductores();
+}
+
+function renderAdminCasas() {
+  const container = document.getElementById('admin-casas-list');
+  if (!casas.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><h4>Sin casas registradas</h4><p>Agrega la primera casa</p></div>`;
+    return;
+  }
+  container.innerHTML = casas.map(h => `
+    <div class="list-item">
+      <div style="width:38px;height:38px;border-radius:10px;background:var(--surface3);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <div class="list-item-main">
+        <div class="list-item-title">${h.direccion}</div>
+        <div class="list-item-sub">${h.amo||'Sin amo de casa registrado'}</div>
+      </div>
+      <div class="list-item-actions">
+        <button class="btn-sm" onclick="editCasa('${h.id}')">Editar</button>
+        <button class="btn-danger" onclick="deleteCasa('${h.id}')"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+    </div>`).join('');
+}
+
+function openCasaModal(h) {
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  editingCasaId = h ? h.id : null;
+  document.getElementById('casa-modal-title').textContent = h ? 'Editar Casa' : 'Nueva Casa';
+  document.getElementById('casa-direccion').value = h?.direccion || '';
+  document.getElementById('casa-amo').value = h?.amo || '';
+  document.getElementById('casa-error').style.display = 'none';
+  document.getElementById('casa-modal').classList.add('open');
+}
+function closeCasaModal() { document.getElementById('casa-modal').classList.remove('open'); editingCasaId = null; }
+function editCasa(id) { openCasaModal(casas.find(h=>h.id===id)); }
+async function saveCasa() {
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (currentRole === 'semiadmin') {
+    const perms = await getUserPermissions();
+    if (!canAccessModule(perms, 'casas')) { showToast('No tienes permiso para gestionar Casas.','error'); return; }
+  }
+  const direccion = document.getElementById('casa-direccion').value.trim();
+  const amo = document.getElementById('casa-amo').value.trim();
+  if (!direccion) { showError('casa-error','La dirección es requerida'); return; }
+  const btn = document.getElementById('save-casa-btn');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  let error;
+  if (editingCasaId) { ({error} = await sb.from('casas').update({direccion,amo}).eq('id',editingCasaId)); }
+  else { ({error} = await sb.from('casas').insert({direccion,amo})); }
+  btn.disabled = false; btn.textContent = 'Guardar';
+  if (error) { showError('casa-error', error.message); return; }
+  showToast(editingCasaId?'Casa actualizada':'Casa creada','success');
+  closeCasaModal();
+  const {data} = await sb.from('casas').select('*').order('direccion');
+  casas = data || [];
+  renderAdminCasas();
+}
+async function deleteCasa(id) {
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!confirm('¿Eliminar esta casa?')) return;
+  const {error} = await sb.from('casas').delete().eq('id',id);
+  if (error) { showToast('Error al eliminar','error'); return; }
+  showToast('Casa eliminada','success');
+  const {data} = await sb.from('casas').select('*').order('direccion');
+  casas = data || []; renderAdminCasas();
+}
+
+
+// ── Users panel ──────────────────────────────────────────────────────────────
+let activeUsers = []; // { id, name, role, task, permissions, joined_at, last_seen }
+let expandedUserId = null;
+
+// Permissions definitions
+const PERM_MODULES = [
+  { key: 'territories', label: 'Territorios', icon: '<svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>' },
+  { key: 'assignments', label: 'Asignaciones', icon: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' },
+  { key: 'conductores', label: 'Conductores', icon: '<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' },
+  { key: 'casas',       label: 'Casas',        icon: '<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>' },
+];
+
+function parsePermissions(raw) {
+  // If permissions is stored as JSON string or object, parse it
+  // Default: all modules allowed
+  if (!raw) return { territories: true, assignments: true, conductores: true, casas: true };
+  try {
+    const p = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    return {
+      territories: p.territories !== false,
+      assignments: p.assignments !== false,
+      conductores: p.conductores !== false,
+      casas:       p.casas       !== false,
+    };
+  } catch { return { territories: true, assignments: true, conductores: true, casas: true }; }
+}
+
+// Check if current user can edit permissions of a target user
+function canEditPermissions(targetRole) {
+  if (currentRole === 'dev') return true;       // DEV can edit admin + semiadmin
+  if (currentRole === 'admin' && targetRole === 'semiadmin') return true; // Admin only edits semiadmin
+  return false;
+}
+
+// Check if current user can change role of a target user
+function canChangeRole(targetRole) {
+  if (currentRole === 'dev') return true;       // DEV: any user
+  if (currentRole === 'admin' && targetRole !== 'admin') return true; // Admin: only non-admins
+  return false;
+}
+
+async function loadUsers() {
+  const { data, error } = await sb.from('platform_users').select('*').order('last_seen', { ascending: false });
+  activeUsers = data || [];
+}
+
+async function openUsersPanel() {
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  document.getElementById('users-panel-overlay').classList.add('open');
+  document.getElementById('users-panel-body').innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
+  await loadUsers();
+  renderUsersPanel();
+}
+function closeUsersPanel() {
+  document.getElementById('users-panel-overlay').classList.remove('open');
+  expandedUserId = null;
+}
+function handleUsersPanelOverlayClick(e) {
+  if (e.target === document.getElementById('users-panel-overlay')) closeUsersPanel();
+}
+
+const USER_COLORS = ['#22c55e','#3b82f6','#a855f7','#f59e0b','#ef4444','#06b6d4','#ec4899','#84cc16','#f97316','#64748b'];
+function userColor(name) {
+  let h = 0; for (let i=0; i<name.length; i++) h = (h*31 + name.charCodeAt(i)) & 0xffff;
+  return USER_COLORS[h % USER_COLORS.length];
+}
+function userInitials(name) { return name.trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
+
+const ROLE_LABELS = { dev:'DEV', viewer:'Visitante', semiadmin:'SemiAdmin', admin:'Administrador' };
+
+function renderUsersPanel() {
+  const body = document.getElementById('users-panel-body');
+  const countBadge = document.getElementById('users-count-badge');
+  if (countBadge) countBadge.textContent = activeUsers.length;
+
+  if (!activeUsers.length) {
+    body.innerHTML = `<div class="users-empty">
+      <div class="users-empty-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <p>Ningún usuario ha iniciado sesión todavía.<br>Aparecerán aquí cuando ingresen a la plataforma.</p>
+    </div>`;
+    return;
+  }
+
+  const isDev = currentRole === 'dev';
+
+  body.innerHTML = activeUsers.map(u => {
+    const col = userColor(u.name);
+    const inits = userInitials(u.name);
+    const roleBadgeCls = u.role === 'dev' ? 'role-badge-dev' : u.role === 'admin' ? 'role-badge-admin' : u.role === 'semiadmin' ? 'role-badge-semiadmin' : 'role-badge-viewer';
+    const roleLabel = ROLE_LABELS[u.role] || u.role;
+    const isExpanded = expandedUserId === u.id;
+    const lastActive = u.last_seen || u.joined_at;
+    const minutesAgo = lastActive ? Math.round((new Date() - new Date(lastActive)) / 60000) : 9999;
+    const isOnline = minutesAgo < 10;
+    const since = lastActive ? (() => {
+      if (minutesAgo < 2) return 'Ahora mismo';
+      if (minutesAgo < 60) return 'Hace ' + minutesAgo + ' min';
+      if (minutesAgo < 1440) return 'Hace ' + Math.round(minutesAgo/60) + 'h';
+      return new Date(lastActive).toLocaleDateString('es-CL',{day:'numeric',month:'short'});
+    })() : '—';
+    const isCurrentUser = currentUser && u.name === currentUser.name;
+    const canEdit = !isCurrentUser && canChangeRole(u.role);
+    const perms = parsePermissions(u.permissions);
+
+    // Role select options
+    let roleOptions = '';
+    if (isDev) {
+      roleOptions = `<option value="viewer"    ${u.role==='viewer'    ?'selected':''}>Visitante</option>
+         <option value="semiadmin" ${u.role==='semiadmin' ?'selected':''}>SemiAdmin</option>
+         <option value="admin"     ${u.role==='admin'     ?'selected':''}>Administrador</option>`;
+    } else {
+      // Admin: can change viewer <-> semiadmin only
+      roleOptions = `<option value="viewer"    ${u.role==='viewer'    ?'selected':''}>Visitante</option>
+         <option value="semiadmin" ${u.role==='semiadmin' ?'selected':''}>SemiAdmin</option>`;
+    }
+
+    // Permissions grid — shown only when target can have permissions edited
+    const showPerms = !isCurrentUser && canEditPermissions(u.role);
+    const permsHtml = showPerms ? `
+      <div class="user-expand-section">
+        <div class="user-expand-label">
+          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Módulos permitidos
+        </div>
+        <div class="perms-grid" id="perms-grid-${u.id}">
+          ${PERM_MODULES.map(m => `
+            <div class="perm-toggle${perms[m.key] ? ' active' : ''}" onclick="togglePerm('${u.id}','${m.key}')" id="perm-${u.id}-${m.key}">
+              <span class="perm-toggle-label">${m.icon}${m.label}</span>
+              <span class="perm-check"><svg viewBox="0 0 12 10"><polyline points="1 5 4.5 8.5 11 1"/></svg></span>
+            </div>`).join('')}
+        </div>
+      </div>` : '';
+
+    const expandHtml = isExpanded ? `<div class="user-expand">
+      <div style="display:grid;grid-template-columns:${canEdit?'1fr 1fr':'1fr'};gap:10px;margin-top:0.85rem">
+        ${canEdit ? `<div>
+          <div class="user-expand-label"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Rol</div>
+          <select class="role-select-inline" id="role-sel-${u.id}" onchange="changeUserRole('${u.id}',this.value)">
+            ${roleOptions}
+          </select>
+        </div>` : ''}
+        <div>
+          <div class="user-expand-label"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Nota / Responsabilidad</div>
+          <textarea class="task-textarea" id="task-${u.id}" placeholder="Ej: Solo maneja territorios…">${u.task||''}</textarea>
+        </div>
+      </div>
+      ${permsHtml}
+      <div class="user-expand-actions">
+        <button class="revoke-btn" onclick="revokeUser('${u.id}')">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Revocar acceso
+        </button>
+        <button class="save-user-btn" onclick="saveUserChanges('${u.id}')">Guardar cambios</button>
+      </div>
+    </div>` : '';
+
+    return `<div class="user-card" id="user-card-${u.id}">
+      <div class="user-card-main">
+        <div class="user-card-avatar" style="background:${col}">${inits}</div>
+        <div class="user-card-info">
+          <div class="user-card-name">${u.name}${isCurrentUser?' <span style="font-size:0.68rem;color:var(--text3);font-weight:500">(tú)</span>':''}</div>
+          <div class="user-card-meta">
+            <span class="${isOnline?'online-dot':'offline-dot'}"></span>
+            ${since}
+          </div>
+        </div>
+        <div class="user-card-actions">
+          <span class="role-badge-pill ${roleBadgeCls}">${roleLabel}</span>
+          ${!isCurrentUser ? `<button class="user-expand-btn${isExpanded?' open':''}" onclick="toggleExpandUser('${u.id}')" title="${isExpanded?'Cerrar':'Editar usuario'}">
+            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>` : ''}
+        </div>
+      </div>
+      ${expandHtml}
+    </div>`;
+  }).join('');
+}
+
+function toggleExpandUser(uid) {
+  expandedUserId = expandedUserId === uid ? null : uid;
+  renderUsersPanel();
+}
+
+function changeUserRole(uid, newRole) {
+  const u = activeUsers.find(x=>x.id===uid);
+  if (u) {
+    u.role = newRole;
+    // When role changes, re-render to potentially show/hide permissions grid
+    renderUsersPanel();
+  }
+}
+
+function togglePerm(uid, moduleKey) {
+  const u = activeUsers.find(x=>x.id===uid);
+  if (!u) return;
+  const perms = parsePermissions(u.permissions);
+  perms[moduleKey] = !perms[moduleKey];
+  u.permissions = perms;
+  // Update UI immediately without full re-render
+  const el = document.getElementById(`perm-${uid}-${moduleKey}`);
+  if (el) el.classList.toggle('active', perms[moduleKey]);
+}
+
+async function saveUserChanges(uid) {
+  const roleSel = document.getElementById('role-sel-'+uid);
+  const taskEl  = document.getElementById('task-'+uid);
+  const u = activeUsers.find(x=>x.id===uid);
+  if (!u) return;
+  if (roleSel) u.role = roleSel.value;
+  if (taskEl)  u.task = taskEl.value.trim();
+  const perms = parsePermissions(u.permissions);
+
+  const btn = document.querySelector(`#user-card-${uid} .save-user-btn`);
+  if (btn) { btn.disabled = true; btn.textContent = 'Guardando…'; }
+
+  // Try with permissions column; if it doesn't exist yet, retry without it
+  let { error } = await sb.from('platform_users')
+    .update({ role: u.role, task: u.task, permissions: perms })
+    .eq('id', u.id);
+
+  if (error) {
+    console.warn('saveUserChanges (with permissions) failed:', error.message, '— retrying without');
+    const retry = await sb.from('platform_users')
+      .update({ role: u.role, task: u.task })
+      .eq('id', u.id);
+    error = retry.error;
+  }
+
+  if (btn) { btn.disabled = false; btn.textContent = 'Guardar cambios'; }
+  if (error) {
+    console.error('saveUserChanges error:', error);
+    showToast('Error: ' + error.message, 'error');
+    return;
+  }
+
+  if (currentUser && u.name === currentUser.name) {
+    currentRole = u.role;
+    currentUser.role = u.role;
+    saveSession(currentUser);
+  }
+  expandedUserId = null;
+  renderUsersPanel();
+  showToast('Cambios guardados ✓', 'success');
+}
+
+async function revokeUser(uid) {
+  const u = activeUsers.find(x=>x.id===uid);
+  if (!u) return;
+  if (!confirm(`¿Revocar el acceso de ${u.name}? Podrá volver a ingresar con la contraseña de visitante.`)) return;
+
+  const defaultPerms = { territories: true, assignments: true, conductores: true, casas: true };
+  // Try update with permissions; if column doesn't exist yet, retry without it
+  let { error } = await sb.from('platform_users')
+    .update({ role: 'viewer', task: '', permissions: defaultPerms })
+    .eq('id', u.id);
+
+  if (error) {
+    console.warn('revokeUser (with permissions) failed:', error.message, '— retrying without');
+    const retry = await sb.from('platform_users')
+      .update({ role: 'viewer', task: '' })
+      .eq('id', u.id);
+    if (retry.error) {
+      console.error('revokeUser error:', retry.error);
+      showToast('Error: ' + retry.error.message, 'error');
+      return;
+    }
+  }
+
+  u.role = 'viewer';
+  u.task = '';
+  u.permissions = defaultPerms;
+  expandedUserId = null;
+  renderUsersPanel();
+  showToast(`Acceso de ${u.name.split(' ')[0]} revocado`, 'success');
+}
+
+// ── Permission check helper used elsewhere ────────────────────────────────────
+async function getUserPermissions() {
+  if (['dev','admin'].includes(currentRole)) return null; // full access
+  if (currentRole !== 'semiadmin') return null;
+  const { data } = await sb.from('platform_users').select('permissions').eq('name', currentUser.name).single();
+  if (!data) return null;
+  return parsePermissions(data.permissions);
+}
+
+function canAccessModule(permissions, moduleKey) {
+  if (!permissions) return true; // no restrictions = full access
+  return permissions[moduleKey] !== false;
+}
+
+async function registerUserSession(name, role) {
+  const now = new Date().toISOString();
+  if (role === 'dev') return;
+
+  const { data: existing } = await sb.from('platform_users')
+    .select('*').ilike('name', name).single();
+
+  if (existing) {
+    await sb.from('platform_users').update({ last_seen: now }).eq('id', existing.id);
+    // Always adopt the role Supabase has — this is the source of truth
+    if (existing.role !== currentRole) {
+      currentRole = existing.role;
+      currentUser.role = existing.role;
+      saveSession(currentUser);
+    }
+  } else {
+    await sb.from('platform_users')
+      .insert({ name, role, task: '', joined_at: now, last_seen: now });
+  }
+}
+
+// ── Role sync polling ─────────────────────────────────────────────────────────
+// Every 30s, check if an admin changed this user's role or revoked access.
+// If so, update the session and refresh the UI immediately.
+let _rolePollInterval = null;
+
+function startRolePolling() {
+  if (_rolePollInterval) clearInterval(_rolePollInterval);
+  _rolePollInterval = setInterval(syncRoleFromServer, 30000);
+}
+
+function stopRolePolling() {
+  if (_rolePollInterval) { clearInterval(_rolePollInterval); _rolePollInterval = null; }
+}
+
+async function syncRoleFromServer() {
+  if (!currentUser || currentRole === 'dev') return;
+  try {
+    const { data } = await sb.from('platform_users')
+      .select('role, task, permissions')
+      .ilike('name', currentUser.name)
+      .single();
+    if (!data) return;
+    if (data.role !== currentRole) {
+      const prevRole = currentRole;
+      currentRole = data.role;
+      currentUser.role = data.role;
+      saveSession(currentUser);
+      // Update dropdown role label
+      const roleLabelsMap = { dev:'DEV', admin:'Administrador', semiadmin:'SemiAdmin', viewer:'Visitante' };
+      const roleEl = document.getElementById('dropdown-role');
+      if (roleEl) {
+        roleEl.textContent = roleLabelsMap[currentRole] || 'Visitante';
+        roleEl.style.color = currentRole === 'dev' ? 'var(--orange)' : currentRole === 'admin' ? 'var(--accent)' : currentRole === 'semiadmin' ? '#a855f7' : '';
+      }
+      // Show/hide admin buttons
+      const adminBtn = document.getElementById('admin-dropdown-btn');
+      if (adminBtn) adminBtn.style.display = ['dev','admin','semiadmin'].includes(currentRole) ? '' : 'none';
+      const usersBtn = document.getElementById('users-panel-btn');
+      if (usersBtn) usersBtn.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
+      // If user was on admin page and lost access, kick them out
+      const adminPage = document.getElementById('page-admin');
+      if (adminPage && adminPage.classList.contains('active') && !['dev','admin','semiadmin'].includes(currentRole)) {
+        showPage('schedule');
+        showToast('Tu acceso fue modificado por un administrador.', 'error');
+      } else if (prevRole !== currentRole) {
+        showToast('Tu rol fue actualizado a: ' + (roleLabelsMap[currentRole] || currentRole), '');
+      }
+    }
+  } catch(e) {
+    // Silently ignore network errors during poll
+  }
+}
+// ── Territory public view ─────────────────────────────────────────────────────
+function renderTerritoryView() {
+  const container = document.getElementById('territories-view-content');
+  if (!container) return;
+  if (!territories.length) {
+    container.innerHTML = `<div class="empty-state" style="margin-top:2rem">
+      <div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></div>
+      <h4>Sin territorios</h4>
+      <p>Aún no se han subido territorios</p>
+    </div>`;
+    return;
+  }
+  container.innerHTML = `<div class="ter-grid" style="padding-top:0.25rem">` + territories.map(t => {
+    const mapHtml = t.map_data
+      ? `<img src="${t.map_data}" alt="Mapa T${t.number}" loading="lazy">`
+      : `<div class="ter-grid-map-empty"><svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg><span>Sin mapa</span></div>`;
+    return `<div class="ter-grid-card" onclick="viewTerritory('${t.id}')">
+      <div class="ter-grid-map">${mapHtml}</div>
+      <div class="ter-grid-footer">
+        <div class="ter-grid-num">Territorio ${t.number}</div>
+      </div>
+    </div>`;
+  }).join('') + `</div>`;
+}
+
+function viewTerritory(id) {
+  const t = territories.find(x => x.id === id);
+  if (!t) return;
+  const noPasar = parseNoPasar(t.no_pasar);
+  const color = getTerColor(t.number);
+
+  // Header: territory number + name
+  document.getElementById('detail-date-label').textContent = '';
+  document.getElementById('detail-time-chip').style.display = 'none';
+  const addressEl = document.getElementById('detail-address');
+  addressEl.textContent = `Territorio ${t.number}`;
+  addressEl.style.fontSize = '1.4rem';
+  document.getElementById('detail-conductor').textContent = '';
+
+  // Badge
+  const badge = document.getElementById('detail-ter-badge');
+  badge.textContent = t.number;
+  badge.style.background = color;
+  badge.style.display = 'flex';
+
+  // Hide call/directions buttons — not relevant for a territory
+  document.getElementById('detail-actions').style.display = 'none';
+
+  // Map
+  const mapWrap = document.getElementById('detail-map-wrap');
+  const mapImg  = document.getElementById('detail-map-img');
+  if (t.map_data) {
+    mapImg.src = t.map_data;
+    mapWrap.style.display = '';
+    mapWrap.onclick = () => openLightbox(t.map_data);
+  } else {
+    mapWrap.style.display = 'none';
+    mapWrap.onclick = null;
+  }
+
+  // No pasar with dates
+  const noPasarSec  = document.getElementById('detail-no-pasar-section');
+  const noPasarList = document.getElementById('detail-no-pasar-list');
+  if (noPasar.length) {
+    noPasarList.innerHTML = noPasar.map(e => `
+      <div class="no-pasar-item" style="justify-content:space-between">
+        <span>${e.addr}</span>
+        ${e.date ? `<span style="font-size:0.74rem;color:var(--text3);font-weight:500;flex-shrink:0;margin-left:8px">${fmtNpDate(e.date)}</span>` : ''}
+      </div>`).join('');
+    noPasarSec.style.display = '';
+  } else {
+    noPasarSec.style.display = 'none';
+  }
+
+  document.getElementById('detail-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+function showError(id, msg) { const el=document.getElementById(id); el.style.display='block'; el.textContent=msg; }
+function showToast(msg, type='') {
+  const wrap = document.getElementById('toast-wrap');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type; t.textContent = msg;
+  wrap.appendChild(t); setTimeout(() => t.remove(), 3200);
+}
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('img-lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('img-lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function toggleOptionsMenu() { document.getElementById('options-dropdown').classList.toggle('open'); }
+function closeOptionsMenu() { document.getElementById('options-dropdown').classList.remove('open'); }
+function closeProfileMenu() { closeOptionsMenu(); }
+
+function closeAdminOptionsMenu() { document.getElementById('options-dropdown-admin').classList.remove('open'); }
+function closeAdminPage() {
+  document.getElementById('page-admin').classList.remove('active');
+  document.body.style.overflow = '';
+  closeAdminOptionsMenu();
+}
+
+function syncAdminDropdown() {
+  const initials = currentUser ? currentUser.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase() : '?';
+  const adminAvatar  = document.getElementById('user-avatar-admin');
+  const adminName    = document.getElementById('dropdown-name-admin');
+  const adminRole    = document.getElementById('dropdown-role-admin');
+  const usersAdminBtn = document.getElementById('users-panel-btn-admin');
+  if (adminAvatar) adminAvatar.textContent = initials;
+  if (adminName)   adminName.textContent = currentUser ? currentUser.name : '—';
+  if (adminRole) {
+    const roleLabelsMap = { dev:'DEV', admin:'Administrador', semiadmin:'SemiAdmin', viewer:'Visitante' };
+    adminRole.textContent = roleLabelsMap[currentRole] || 'Visitante';
+  }
+  if (usersAdminBtn) usersAdminBtn.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
+  const themeLabel = document.getElementById('theme-btn-label-admin');
+  if (themeLabel) themeLabel.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? 'Modo claro' : 'Modo oscuro';
+}
+
+const _origApplyTheme = applyTheme;
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.options-wrap')) { closeOptionsMenu(); closeAdminOptionsMenu(); }
 });
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+document.getElementById('auth-pass').addEventListener('keydown', e => { if (e.key==='Enter') doAccess(); });
+
+function togglePassVisibility() {
+  const input = document.getElementById('auth-pass');
+  const btn   = document.getElementById('pass-toggle-btn');
+  const show  = input.type === 'password';
+  input.type  = show ? 'text' : 'password';
+  btn.classList.toggle('visible', show);
+  btn.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
+}
+// Escape key handled in full map section below
+
+// ── Full congregation map ─────────────────────────────────────────────────────
+async function loadFullMap() {
+  try {
+    const { data, error } = await sb.from('platform_config')
+      .select('value').eq('key', 'full_congregation_map');
+    if (error) { console.warn('platform_config no disponible:', error.message); return; }
+    const src = (data && data.length > 0) ? data[0].value : null;
+    updateFullMapUI(src);
+  } catch(e) {
+    console.warn('loadFullMap error:', e);
+  }
+}
+
+function updateFullMapUI(src) {
+  const btnView     = document.getElementById('btn-ver-mapa-completo');
+  const adminCard   = document.getElementById('full-map-admin-card');
+  const previewWrap = document.getElementById('full-map-preview-wrap');
+  const previewImg  = document.getElementById('full-map-admin-preview');
+  const deleteBtn   = document.getElementById('full-map-delete-btn');
+  const uploadLabel = document.getElementById('full-map-upload-label');
+  const adminSub    = document.getElementById('full-map-admin-sub');
+
+  if (src) {
+    if (btnView) { btnView.style.display = 'inline-flex'; }
+    const lbImg = document.getElementById('full-map-lb-img');
+    if (lbImg) lbImg.src = src;
+    if (previewWrap) { previewWrap.classList.add('visible'); previewImg.src = src; }
+    if (deleteBtn)   deleteBtn.style.display = '';
+    if (uploadLabel) uploadLabel.textContent = 'Cambiar mapa';
+    if (adminSub)    adminSub.textContent = 'Mapa subido · Visible para todos los usuarios';
+    if (adminCard)   adminCard.classList.add('has-map');
+  } else {
+    if (btnView) btnView.style.display = 'none';
+    if (previewWrap) previewWrap.classList.remove('visible');
+    if (deleteBtn)   deleteBtn.style.display = 'none';
+    if (uploadLabel) uploadLabel.textContent = 'Subir mapa PNG';
+    if (adminSub)    adminSub.textContent = 'Sube un PNG con el mapa general de todos los territorios';
+    if (adminCard)   adminCard.classList.remove('has-map');
+  }
+}
+
+function compressFullMapImage(file, callback) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const MAX = 1800;
+      let w = img.width, h = img.height;
+      if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+        else       { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      // Try quality 0.85 first, then reduce if still too large
+      let quality = 0.85;
+      let result = canvas.toDataURL('image/jpeg', quality);
+      if (result.length > 3 * 1024 * 1024) result = canvas.toDataURL('image/jpeg', 0.65);
+      if (result.length > 3 * 1024 * 1024) result = canvas.toDataURL('image/jpeg', 0.45);
+      callback(result);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function handleFullMapUpload(event) {
+  const file = event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { showToast('Solo se aceptan imágenes','error'); return; }
+
+  const uploadLabel = document.getElementById('full-map-upload-label');
+  if (uploadLabel) uploadLabel.textContent = 'Procesando...';
+  showToast('Procesando imagen…', '');
+
+  compressFullMapImage(file, async (base64) => {
+    // Check if row already exists
+    const { data: existing } = await sb.from('platform_config')
+      .select('key').eq('key', 'full_congregation_map');
+
+    let saveError;
+    if (existing && existing.length > 0) {
+      const { error } = await sb.from('platform_config')
+        .update({ value: base64 }).eq('key', 'full_congregation_map');
+      saveError = error;
+    } else {
+      const { error } = await sb.from('platform_config')
+        .insert({ key: 'full_congregation_map', value: base64 });
+      saveError = error;
+    }
+
+    if (saveError) {
+      console.error('Error guardando mapa:', saveError);
+      showToast('Error: ' + saveError.message, 'error');
+      if (uploadLabel) uploadLabel.textContent = 'Subir mapa PNG';
+      return;
+    }
+    updateFullMapUI(base64);
+    showToast('Mapa completo guardado ✓', 'success');
+  });
+}
+
+async function deleteFullMap() {
+  if (!confirm('¿Eliminar el mapa completo de la congregación?')) return;
+  const { error } = await sb.from('platform_config').delete().eq('key', 'full_congregation_map');
+  if (error) { console.error('deleteFullMap:', error); showToast('Error al eliminar','error'); return; }
+  updateFullMapUI(null);
+  showToast('Mapa eliminado','success');
+}
+
+function openFullMap() {
+  const src = document.getElementById('full-map-lb-img').src;
+  if (!src || src === window.location.href) return;
+  document.getElementById('full-map-lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeFullMap() {
+  document.getElementById('full-map-lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handleFullMapClick(e) {
+  if (e.target === document.getElementById('full-map-lightbox')) closeFullMap();
+}
+
+function downloadFullMap() {
+  const img = document.getElementById('full-map-lb-img');
+  if (!img.src) return;
+  const a = document.createElement('a');
+  a.href = img.src;
+  a.download = 'mapa-congregacion-fleming.png';
+  a.click();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeLightbox(); closeFullMap(); }
+});
+
+init();
+
+// ── Notification badge logic ──────────────────────────────────────────────────
+// Stores the ISO timestamp of the last notification the user has seen.
+function getLastSeenNotifTime() {
+  return localStorage.getItem('fleming_notif_last_seen') || '1970-01-01T00:00:00.000Z';
+}
+function setLastSeenNotifTime(iso) {
+  localStorage.setItem('fleming_notif_last_seen', iso);
+}
+
+async function checkForNewNotifications() {
+  try {
+    const since = getLastSeenNotifTime();
+    const { data } = await sb.from('notifications')
+      .select('id')
+      .gt('created_at', since)
+      .limit(1);
+    const badge = document.getElementById('notif-badge');
+    if (badge) badge.style.display = (data && data.length > 0) ? 'block' : 'none';
+  } catch(e) { /* silently ignore */ }
+}
+
+let _notifPollInterval = null;
+function startNotifPolling() {
+  checkForNewNotifications();
+  if (_notifPollInterval) clearInterval(_notifPollInterval);
+  _notifPollInterval = setInterval(checkForNewNotifications, 60000); // check every 60s
+}
+
+function toggleNotificationsMenu() { 
+  const menu = document.getElementById('notifications-dropdown');
+  menu.classList.toggle('open');
+  if (menu.classList.contains('open')) {
+    loadNotifications();
+    // Mark as seen: record the current time so badge clears
+    setLastSeenNotifTime(new Date().toISOString());
+    const badge = document.getElementById('notif-badge');
+    if (badge) badge.style.display = 'none';
+  }
+}
+
+async function loadNotifications() {
+  const { data } = await sb.from('notifications')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(10);
+    
+  const list = document.getElementById('notifications-list');
+  if (!data || data.length === 0) {
+    list.innerHTML = `<div class="empty-state" style="padding: 2rem 1rem;"><p>No hay notificaciones</p></div>`;
+    return;
+  }
+
+  const lastSeen = getLastSeenNotifTime();
+  list.innerHTML = data.map(n => {
+    const isNew = n.created_at > lastSeen;
+    return `
+    <div style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px; ${isNew ? 'background: var(--accent-light);' : ''}">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size: 0.85rem; font-weight: 700; color: var(--text);">${n.title}</span>
+        ${isNew ? '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0"></span>' : ''}
+      </div>
+      <span style="font-size: 0.8rem; color: var(--text2); line-height: 1.4;">${n.body}</span>
+      <span style="font-size: 0.65rem; color: var(--text3); margin-top: 4px;">${new Date(n.created_at).toLocaleDateString('es-CL', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span>
+    </div>
+  `}).join('');
+}
+  
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
