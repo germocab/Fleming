@@ -196,14 +196,30 @@
   @media (max-width: 639px) {
     .topnav {
       padding: 0 0.75rem;
+      height: 60px;
       overflow: hidden;
     }
     .main-segment {
       padding: 3px;
+      border-radius: 18px;
     }
-    .main-seg-btn { padding: 6px 10px; font-size: 0.75rem; }
-    .nav-icon-btn { width: 36px; height: 36px; }
-    .nav-icons { gap: 6px; }
+    .main-seg-btn {
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      border-radius: 15px;
+    }
+    .main-seg-btn.active {
+      box-shadow: 0 1px 6px rgba(0,122,255,0.3);
+    }
+    .nav-icon-btn {
+      width: 34px;
+      height: 34px;
+    }
+    .nav-icon-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+    .nav-icons { gap: 4px; }
   }
   .nav-icon-btn {
     width: 42px; height: 42px; border-radius: 50%;
