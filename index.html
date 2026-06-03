@@ -144,6 +144,21 @@
     border-radius: var(--radius-sm); font-size: 0.84rem; color: var(--red); display: none;
   }
 
+  .pass-wrap { position: relative; }
+  .pass-wrap .form-input { padding-right: 2.75rem; }
+  .pass-toggle {
+    position: absolute; right: 0; top: 0; bottom: 0; width: 2.75rem;
+    display: flex; align-items: center; justify-content: center;
+    background: none; border: none; cursor: pointer;
+    color: var(--text3); transition: color 0.18s;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+  .pass-toggle:hover { color: var(--text2); }
+  .pass-toggle svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+  .pass-toggle .eye-off { display: none; }
+  .pass-toggle.visible .eye-on  { display: none; }
+  .pass-toggle.visible .eye-off { display: block; }
+
   #app { display: none; flex-direction: column; min-height: 100vh; }
 
   .topnav {
@@ -703,7 +718,13 @@
     </div>
     <div class="form-group">
       <label class="form-label">Contraseña</label>
-      <input type="password" class="form-input" id="auth-pass" placeholder="••••••••••••">
+      <div class="pass-wrap">
+        <input type="password" class="form-input" id="auth-pass" placeholder="••••••••••••">
+        <button type="button" class="pass-toggle" id="pass-toggle-btn" onclick="togglePassVisibility()" tabindex="-1" aria-label="Mostrar contraseña">
+          <svg class="eye-on" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg class="eye-off" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+        </button>
+      </div>
     </div>
     <button class="btn-primary" onclick="doAccess()" id="access-btn">Ingresar</button>
     <div class="auth-error" id="auth-error"></div>
@@ -1071,9 +1092,8 @@ function enterApp() {
   document.getElementById('dropdown-name').textContent = currentUser.name;
   document.getElementById('dropdown-role').textContent = currentRole === 'admin' ? 'Administrador' : 'Visitante';
 
-  if (currentRole === 'admin') {
-    document.getElementById('admin-dropdown-btn').style.display = '';
-  }
+  const adminBtn = document.getElementById('admin-dropdown-btn');
+  adminBtn.style.display = currentRole === 'admin' ? '' : 'none';
 
   renderSubTabs('predicacion');
   loadSchedule();
@@ -1150,6 +1170,10 @@ function switchSubTab(tabId) {
 }
 
 function showPage(name) {
+  if (name === 'admin' && currentRole !== 'admin') {
+    showToast('No tienes permisos para acceder a esta sección.', 'error');
+    return;
+  }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const p = document.getElementById('page-' + name);
   if (p) p.classList.add('active');
@@ -1411,6 +1435,7 @@ function renderAdminTerritories() {
 }
 
 function openAssignmentModal(a) {
+  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
   editingAssignmentId = a ? a.id : null;
   document.getElementById('assignment-modal-title').textContent = a ? 'Editar Asignación' : 'Nueva Asignación';
   document.getElementById('as-date').value = a?.date || '';
@@ -1436,6 +1461,7 @@ function openAssignmentModal(a) {
 function closeAssignmentModal() { document.getElementById('assignment-modal').classList.remove('open'); editingAssignmentId = null; }
 function editAssignment(id) { openAssignmentModal(assignments.find(a=>a.id===id)); }
 async function saveAssignment() {
+  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
   const conductorId = document.getElementById('as-conductor-select').value || null;
   const casaId = document.getElementById('as-casa-select').value || null;
   const conductor = conductorId ? conductores.find(c=>c.id===conductorId) : null;
@@ -1467,6 +1493,7 @@ async function saveAssignment() {
   renderAdminAssignments();
 }
 async function deleteAssignment(id) {
+  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
   if (!confirm('¿Eliminar esta asignación?')) return;
   const {error} = await sb.from('assignments').delete().eq('id',id);
   if (error) { showToast('Error al eliminar','error'); return; }
@@ -1475,6 +1502,7 @@ async function deleteAssignment(id) {
 }
 
 function openTerritoryModal(t) {
+  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
   editingTerritoryId = t ? t.id : null;
   document.getElementById('ter-modal-title').textContent = t ? 'Editar Territorio' : 'Nuevo Territorio';
   document.getElementById('ter-num').value = t?.number || '';
@@ -1539,6 +1567,7 @@ function addNoPasarInput(val = '') {
   document.getElementById('no-pasar-inputs').appendChild(div);
 }
 async function saveTerritory() {
+  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
   const number = parseInt(document.getElementById('ter-num').value);
   const name   = document.getElementById('ter-name').value.trim();
   if (!number) { showError('ter-error','El número de territorio es requerido'); return; }
@@ -1560,6 +1589,7 @@ async function saveTerritory() {
   await loadSchedule();
 }
 async function deleteTerritory(id) {
+  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
   if (!confirm('¿Eliminar este territorio?')) return;
   const {error} = await sb.from('territories').delete().eq('id',id);
   if (error) { showToast('Error al eliminar','error'); return; }
@@ -1589,6 +1619,7 @@ function renderAdminConductores() {
 }
 
 function openConductorModal(c) {
+  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
   editingConductorId = c ? c.id : null;
   document.getElementById('cond-modal-title').textContent = c ? 'Editar Conductor' : 'Nuevo Conductor';
   document.getElementById('cond-nombre').value = c?.nombre || '';
@@ -1600,6 +1631,7 @@ function openConductorModal(c) {
 function closeConductorModal() { document.getElementById('conductor-modal').classList.remove('open'); editingConductorId = null; }
 function editConductor(id) { openConductorModal(conductores.find(c=>c.id===id)); }
 async function saveConductor() {
+  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
   const nombre = document.getElementById('cond-nombre').value.trim();
   const apellido = document.getElementById('cond-apellido').value.trim();
   const telefono = document.getElementById('cond-telefono').value.trim();
@@ -1618,6 +1650,7 @@ async function saveConductor() {
   renderAdminConductores();
 }
 async function deleteConductor(id) {
+  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
   if (!confirm('¿Eliminar este conductor?')) return;
   const {error} = await sb.from('conductores').delete().eq('id',id);
   if (error) { showToast('Error al eliminar','error'); return; }
@@ -1649,6 +1682,7 @@ function renderAdminCasas() {
 }
 
 function openCasaModal(h) {
+  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
   editingCasaId = h ? h.id : null;
   document.getElementById('casa-modal-title').textContent = h ? 'Editar Casa' : 'Nueva Casa';
   document.getElementById('casa-direccion').value = h?.direccion || '';
@@ -1659,6 +1693,7 @@ function openCasaModal(h) {
 function closeCasaModal() { document.getElementById('casa-modal').classList.remove('open'); editingCasaId = null; }
 function editCasa(id) { openCasaModal(casas.find(h=>h.id===id)); }
 async function saveCasa() {
+  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
   const direccion = document.getElementById('casa-direccion').value.trim();
   const amo = document.getElementById('casa-amo').value.trim();
   if (!direccion) { showError('casa-error','La dirección es requerida'); return; }
@@ -1676,6 +1711,7 @@ async function saveCasa() {
   renderAdminCasas();
 }
 async function deleteCasa(id) {
+  if (currentRole !== 'admin') { showToast('Sin permisos.','error'); return; }
   if (!confirm('¿Eliminar esta casa?')) return;
   const {error} = await sb.from('casas').delete().eq('id',id);
   if (error) { showToast('Error al eliminar','error'); return; }
@@ -1714,6 +1750,15 @@ document.querySelectorAll('.modal-overlay').forEach(o => {
   o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
 });
 document.getElementById('auth-pass').addEventListener('keydown', e => { if (e.key==='Enter') doAccess(); });
+
+function togglePassVisibility() {
+  const input = document.getElementById('auth-pass');
+  const btn   = document.getElementById('pass-toggle-btn');
+  const show  = input.type === 'password';
+  input.type  = show ? 'text' : 'password';
+  btn.classList.toggle('visible', show);
+  btn.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
+}
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 
 init();
