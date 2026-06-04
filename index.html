@@ -350,6 +350,18 @@
   .chip-cartas { background: rgba(90,200,250,0.15); color: #5ac8fa; }
   .chip-presencial { background: var(--accent-light); color: var(--accent); }
 
+  .grupo-chip {
+    display: inline-flex; align-items: center;
+    padding: 2px 8px; border-radius: 6px;
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.02em;
+    background: var(--surface3); color: var(--text3);
+    border: 1px solid var(--border);
+  }
+  .grupo-chip.my-group {
+    background: var(--accent-light); color: var(--accent);
+    border-color: rgba(0,122,255,0.25);
+  }
+
   .ter-badge {
     width: 48px; height: 48px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
@@ -1527,8 +1539,15 @@
           </select>
         </div>
       </div>
-      <div class="form-group2"><label class="form-label2">Territorio</label>
-        <select class="form-select" id="as-territory"><option value="">Sin territorio</option></select>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="form-group2"><label class="form-label2">Territorio</label>
+          <select class="form-select" id="as-territory"><option value="">Sin territorio</option></select>
+        </div>
+        <div class="form-group2"><label class="form-label2">Grupo de Servicio</label>
+          <select class="form-select" id="as-grupo">
+            <option value="">Sin grupo</option>
+          </select>
+        </div>
       </div>
       <div class="form-group2"><label class="form-label2">Notas</label><textarea class="form-textarea" id="as-notes" placeholder="Observaciones adicionales..."></textarea></div>
       <div style="display:flex;gap:10px;margin-top:1.1rem;justify-content:flex-end">
@@ -1745,6 +1764,7 @@ const PASS_DEV    = 'FlemingDEV2026.!!';
 
 let currentUser = null;
 let currentRole = 'viewer';
+let currentUserGrupoId = null;  // UUID del grupo al que pertenece el usuario logueado
 let assignments = [];
 let territories = [];
 let conductores = [];
@@ -2156,6 +2176,18 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
   
+async function detectUserGrupo(userName) {
+  // Busca el nombre del usuario (case-insensitive) en grupo_miembros
+  // y retorna el grupo_id si lo encuentra
+  if (!userName) return null;
+  const { data } = await sb.from('grupo_miembros')
+    .select('grupo_id')
+    .ilike('nombre', userName)
+    .limit(1);
+  if (data && data.length > 0) return data[0].grupo_id;
+  return null;
+}
+
 async function enterApp() {
   document.getElementById('auth-screen').style.display = 'none';
   const app = document.getElementById('app');
@@ -2167,6 +2199,11 @@ async function enterApp() {
 
   // Register/update in Supabase — may update currentRole if admin changed it
   await registerUserSession(currentUser.name, currentRole);
+
+  // Detect which service group this user belongs to
+  // Load grupos first so renderSchedule can show group labels
+  await loadGrupos();
+  currentUserGrupoId = await detectUserGrupo(currentUser.name);
 
   // Update UI based on final role
   const roleLabelsMap = { dev:'DEV', admin:'Administrador', semiadmin:'SemiAdmin', viewer:'Visitante' };
@@ -2375,11 +2412,27 @@ function renderSchedule() {
   let html = '';
   Object.keys(grouped).sort().forEach(date => {
     const d = new Date(date+'T00:00:00');
+    const isSaturday = d.getDay() === 6;
     const dateLabel = `${DAY[d.getDay()]} ${d.getDate()} de ${MON[d.getMonth()]}`;
     html += `<div class="date-section"><div class="date-section-header">${dateLabel}</div>`;
-    grouped[date].forEach(a => {
+
+    // On Saturdays: sort so user's group comes first, then rest by time
+    let dayAssignments = [...grouped[date]];
+    if (isSaturday && currentUserGrupoId) {
+      dayAssignments.sort((a, b) => {
+        const aIsMyGroup = a.grupo_id === currentUserGrupoId;
+        const bIsMyGroup = b.grupo_id === currentUserGrupoId;
+        if (aIsMyGroup && !bIsMyGroup) return -1;
+        if (!aIsMyGroup && bIsMyGroup) return 1;
+        return (a.time || '').localeCompare(b.time || '');
+      });
+    }
+
+    dayAssignments.forEach(a => {
       const ter = a.territories;
       const timeStr = a.time ? a.time.substring(0,5) : '--:--';
+      const isMyGroup = isSaturday && currentUserGrupoId && a.grupo_id === currentUserGrupoId;
+      const grupoInfo = a.grupo_id ? grupos.find(g => g.id === a.grupo_id) : null;
 
       let rightBadge = '';
       if (a.type === 'zoom') {
@@ -2404,7 +2457,19 @@ function renderSchedule() {
       else if (a.type === 'telefono') typeChip = `<span class="type-chip chip-phone">Teléfono</span>`;
       else if (a.type === 'cartas') typeChip = `<span class="type-chip chip-cartas">Cartas</span>`;
 
-      html += `<div class="assignment-card" onclick="viewAssignment('${a.id}')">
+      // Group badge chip — shown on all Saturday assignments that have a grupo_id
+      let grupoChip = '';
+      if (isSaturday && grupoInfo) {
+        grupoChip = isMyGroup
+          ? `<span class="grupo-chip my-group">★ Mi Grupo · Grupo ${grupoInfo.numero}</span>`
+          : `<span class="grupo-chip">Grupo ${grupoInfo.numero}</span>`;
+      }
+
+      const cardBorder = isMyGroup
+        ? ' style="border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-light),0 2px 12px rgba(0,122,255,0.12);"'
+        : '';
+
+      html += `<div class="assignment-card"${cardBorder} onclick="viewAssignment('${a.id}')">
         <div class="card-main">
           <div class="card-address">${a.address||'Sin dirección'}${a.house?`<br><span class="card-house">${a.house}</span>`:''}</div>
           <div class="card-meta">
@@ -2414,6 +2479,7 @@ function renderSchedule() {
             </span>
             <span class="card-conductor">${a.conductor||'Sin conductor'}</span>
             ${typeChip}
+            ${grupoChip}
           </div>
         </div>
         ${rightBadge}
@@ -2545,13 +2611,14 @@ function renderAdminAssignments() {
     const dateStr = `${DAY[d.getDay()]} ${d.getDate()}/${d.getMonth()+1}`;
     const ter = territories.find(t => t.id === a.territory_id);
     const color = ter ? getTerColor(ter.number) : null;
+    const grupoInfo = a.grupo_id ? grupos.find(g => g.id === a.grupo_id) : null;
     return `<div class="list-item">
       <div style="width:40px;height:40px;border-radius:8px;background:var(--surface3);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:var(--accent);flex-shrink:0;line-height:1.3">
         <span>${a.time?a.time.substring(0,5):'--'}</span><span style="color:var(--text3);font-size:0.62rem">${dateStr}</span>
       </div>
       <div class="list-item-main">
         <div class="list-item-title">${a.address||'Sin dirección'}${a.house?' — '+a.house:''}</div>
-        <div class="list-item-sub">${a.conductor||'Sin conductor'}${ter?` · T.${ter.number}`:''}</div>
+        <div class="list-item-sub">${a.conductor||'Sin conductor'}${ter?` · T.${ter.number}`:''}${grupoInfo?` · Gr.${grupoInfo.numero}`:''}</div>
       </div>
       ${ter ? `<div style="width:28px;height:28px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:800;color:white;flex-shrink:0">${ter.number}</div>` : ''}
       <div class="list-item-actions">
@@ -2634,6 +2701,10 @@ function openAssignmentModal(a) {
   selTer.innerHTML = '<option value="">Sin territorio</option>' +
     territories.map(t => `<option value="${t.id}"${a?.territory_id===t.id?' selected':''}>Territorio ${t.number}</option>`).join('');
 
+  const selGrupo = document.getElementById('as-grupo');
+  selGrupo.innerHTML = '<option value="">Sin grupo</option>' +
+    grupos.map(g => `<option value="${g.id}"${a?.grupo_id===g.id?' selected':''}>Grupo ${g.numero}</option>`).join('');
+
   document.getElementById('as-error').style.display = 'none';
   document.getElementById('assignment-modal').classList.add('open');
 }
@@ -2659,6 +2730,7 @@ async function saveAssignment() {
     casa_id: casaId,
     type: document.getElementById('as-type').value,
     territory_id: document.getElementById('as-territory').value || null,
+    grupo_id: document.getElementById('as-grupo').value || null,
     notes: document.getElementById('as-notes').value.trim(),
     phone: conductor?.telefono || null,
   };
