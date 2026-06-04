@@ -629,10 +629,11 @@
   .coming-soon-icon svg { width: 40px; height: 40px; stroke: var(--text2); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 
   /* Notifications: dropdown solo en desktop, fullscreen solo en mobile */
-  .notif-desktop-dropdown { display: none !important; }
   @media (min-width: 640px) {
-    .notif-desktop-dropdown { display: block !important; }
     #page-notifications { display: none !important; }
+  }
+  @media (max-width: 639px) {
+    .notif-desktop-dropdown { display: none !important; }
   }
   .notif-card {
     background: var(--surface);
