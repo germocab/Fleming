@@ -57,6 +57,33 @@
     --tab-bar-bg: rgba(242,242,247,0.92);
   }
 
+  /* Auto mode: respects system preference when data-theme="auto" */
+  @media (prefers-color-scheme: dark) {
+    :root[data-theme="auto"] {
+      --bg: #000000;
+      --surface: #1c1c1e;
+      --surface2: #2c2c2e;
+      --surface3: #3a3a3c;
+      --border: rgba(255,255,255,0.08);
+      --border-active: rgba(255,255,255,0.14);
+      --accent: #0a84ff;
+      --accent-light: rgba(10,132,255,0.15);
+      --green: #30d158;
+      --green-light: rgba(48,209,88,0.15);
+      --orange: #ff9f0a;
+      --red: #ff453a;
+      --text: #ffffff;
+      --text2: #ebebf5;
+      --text3: #636366;
+      --shadow: 0 2px 12px rgba(0,0,0,0.5);
+      --shadow-lg: 0 8px 40px rgba(0,0,0,0.6);
+      --nav-bg: rgba(28,28,30,0.85);
+      --modal-overlay-bg: rgba(0,0,0,0.6);
+      --tab-active-bg: #3a3a3c;
+      --tab-bar-bg: rgba(28,28,30,0.92);
+    }
+  }
+
   :root[data-theme="dark"] {
     --bg: #000000;
     --surface: #1c1c1e;
@@ -674,6 +701,9 @@
   }
   .date-input:focus { border-color: var(--accent); }
   :root[data-theme="dark"] .date-input::-webkit-calendar-picker-indicator { filter: invert(1) opacity(0.4); }
+  @media (prefers-color-scheme: dark) {
+    :root[data-theme="auto"] .date-input::-webkit-calendar-picker-indicator { filter: invert(1) opacity(0.4); }
+  }
 
   .section-divider { height: 1px; background: var(--border); margin: 1rem 0; }
 
@@ -1805,17 +1835,43 @@ function getTerColor(num) { return TER_COLORS[num % TER_COLORS.length]; }
 function getTerColorClass(num) { return 'ter-color-' + (num % 10); }
 
 function initTheme() {
-  const saved = localStorage.getItem('fleming_theme') || 'light';
+  const saved = localStorage.getItem('fleming_theme') || 'auto';
   applyTheme(saved);
+  // Listen for system color scheme changes while in auto mode
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (document.documentElement.getAttribute('data-theme') === 'auto') {
+      _updateThemeLabels('auto');
+    }
+  });
+}
+function _themeNextLabel(theme) {
+  // Returns label for what the NEXT click will switch TO
+  if (theme === 'light') return 'Modo oscuro';
+  if (theme === 'dark')  return 'Automático';
+  return 'Modo claro'; // auto → next is light
+}
+function _themeIcon(theme) {
+  if (theme === 'light') return `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+  if (theme === 'dark')  return `<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>`;
+  return `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke-dasharray="2 2"/><path d="M21 12.79A9 9 0 1 1 11.21 3" stroke-dasharray="4 2" opacity="0.4"/></svg>`;
+}
+function _updateThemeLabels(theme) {
+  const nextLabel = _themeNextLabel(theme);
+  ['theme-btn-label','theme-btn-label-admin'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = nextLabel;
+  });
 }
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('fleming_theme', theme);
-  const label = document.getElementById('theme-btn-label');
-  if (label) label.textContent = theme === 'dark' ? 'Modo claro' : 'Modo oscuro';
+  _updateThemeLabels(theme);
 }
 function toggleTheme() {
-  applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  const cur = document.documentElement.getAttribute('data-theme') || 'auto';
+  // Cycle: light → dark → auto → light
+  const next = cur === 'light' ? 'dark' : cur === 'dark' ? 'auto' : 'light';
+  applyTheme(next);
 }
 
 function saveSession(u) { sessionStorage.setItem('fleming_user', JSON.stringify(u)); }
@@ -3512,7 +3568,7 @@ function syncAdminDropdown() {
   }
   if (usersAdminBtn) usersAdminBtn.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
   const themeLabel = document.getElementById('theme-btn-label-admin');
-  if (themeLabel) themeLabel.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? 'Modo claro' : 'Modo oscuro';
+  if (themeLabel) themeLabel.textContent = _themeNextLabel(document.documentElement.getAttribute('data-theme') || 'auto');
 }
 
 const _origApplyTheme = applyTheme;
