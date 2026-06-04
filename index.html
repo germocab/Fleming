@@ -1259,6 +1259,55 @@
   }
 
   /* ── Grupos de Servicio — vista pública ───────────────────────────────────── */
+
+  /* Search bar */
+  .grupos-search-wrap {
+    position: relative;
+    margin-bottom: 1rem;
+  }
+  .grupos-search-icon {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    width: 16px; height: 16px; stroke: var(--text3); fill: none;
+    stroke-width: 2; stroke-linecap: round; pointer-events: none;
+  }
+  .grupos-search-input {
+    width: 100%; padding: 0.65rem 1rem 0.65rem 2.4rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 50px; color: var(--text); font-family: var(--font);
+    font-size: 0.9rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .grupos-search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .grupos-search-input::placeholder { color: var(--text3); }
+  .grupos-search-clear {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    width: 24px; height: 24px; border-radius: 50%; background: var(--surface3);
+    border: none; cursor: pointer; display: none; align-items: center;
+    justify-content: center; color: var(--text3); transition: background 0.15s;
+  }
+  .grupos-search-clear.visible { display: flex; }
+  .grupos-search-clear:hover { background: var(--surface2); }
+  .grupos-search-clear svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+
+  /* Search result highlight */
+  .search-result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    display: flex; align-items: center; gap: 10px;
+    animation: fadeIn 0.18s ease;
+  }
+  .search-result-card .grupo-num-badge { width: 32px; height: 32px; font-size: 0.85rem; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; flex-shrink: 0; }
+  .search-result-info { flex: 1; min-width: 0; }
+  .search-result-name { font-size: 0.92rem; font-weight: 600; color: var(--text); }
+  .search-result-group { font-size: 0.76rem; color: var(--text3); margin-top: 1px; }
+  .search-result-role { font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; }
+  .search-result-role.s { background: var(--accent-light); color: var(--accent); }
+  .search-result-role.a { background: var(--green-light); color: var(--green); }
+  .search-result-role.p { background: rgba(168,85,247,0.12); color: #a855f7; }
+  .search-no-results { text-align: center; padding: 2rem 1rem; color: var(--text3); font-size: 0.875rem; }
+
   .grupos-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -1274,10 +1323,37 @@
     border: 1px solid var(--border);
     box-shadow: var(--shadow);
     overflow: hidden;
-    transition: transform 0.18s, box-shadow 0.18s;
+    transition: box-shadow 0.18s;
   }
-  .grupo-card:active { transform: scale(0.985); }
+
+  /* Dropdown header */
   .grupo-card-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 1rem 1rem 1rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .grupo-card-header:hover { background: var(--surface2); }
+  .grupo-card-toggle {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--surface3); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text3); flex-shrink: 0; transition: background 0.15s;
+    margin-left: auto;
+  }
+  .grupo-card-toggle svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+  .grupo-card.open .grupo-card-toggle svg { transform: rotate(180deg); }
+
+  /* Collapsible body */
+  .grupo-card-body {
+    display: none;
+    border-top: 1px solid var(--border);
+    animation: expandIn 0.2s ease;
+  }
+  .grupo-card.open .grupo-card-body { display: block; }
+
+  .grupo-card-header-old {
     display: flex; align-items: center; gap: 12px;
     padding: 1rem 1rem 0.75rem;
     border-bottom: 1px solid var(--border);
@@ -2236,7 +2312,17 @@ function renderGruposView() {
     </div>`;
     return;
   }
-  container.innerHTML = '<div class="grupos-grid">' + grupos.map(g => {
+
+  const searchBar = `<div class="grupos-search-wrap">
+    <svg class="grupos-search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input class="grupos-search-input" id="grupos-search-input" type="text" placeholder="Buscar persona…" oninput="filterGruposSearch(this.value)" autocomplete="off">
+    <button class="grupos-search-clear" id="grupos-search-clear" onclick="clearGruposSearch()" title="Limpiar">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div id="grupos-search-results" style="display:none"></div>`;
+
+  const gruposHtml = '<div class="grupos-grid" id="grupos-cards-grid">' + grupos.map(g => {
     const super_ = g.miembros.find(m => m.rol === 'superintendente');
     const aux    = g.miembros.find(m => m.rol === 'auxiliar');
     const rest   = g.miembros.filter(m => m.rol === 'miembro');
@@ -2262,18 +2348,85 @@ function renderGruposView() {
         <span class="grupo-member-name">${m.nombre}</span>
         ${m.precursor ? '<span class="precursor-badge">Precursor</span>' : ''}
       </div>`).join('') : `<div class="grupo-empty-members">Sin miembros regulares registrados</div>`;
-    return `<div class="grupo-card">
-      <div class="grupo-card-header">
+    return `<div class="grupo-card" id="grupo-card-pub-${g.id}">
+      <div class="grupo-card-header" onclick="toggleGrupoCard('${g.id}')">
         <div class="grupo-num-badge">${g.numero}</div>
         <div>
           <div class="grupo-card-title">Grupo ${g.numero}</div>
           <div class="grupo-card-count">${g.miembros.length} miembro${g.miembros.length !== 1 ? 's' : ''}</div>
         </div>
+        <button class="grupo-card-toggle" tabindex="-1">
+          <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
       </div>
-      ${leadersHtml}
-      <div class="grupo-members-list">${membersHtml}</div>
+      <div class="grupo-card-body">
+        ${leadersHtml}
+        <div class="grupo-members-list">${membersHtml}</div>
+      </div>
     </div>`;
   }).join('') + '</div>';
+
+  container.innerHTML = searchBar + gruposHtml;
+}
+
+function toggleGrupoCard(gid) {
+  const card = document.getElementById('grupo-card-pub-' + gid);
+  if (card) card.classList.toggle('open');
+}
+
+function filterGruposSearch(query) {
+  const q = query.trim().toLowerCase();
+  const resultsEl = document.getElementById('grupos-search-results');
+  const gridEl    = document.getElementById('grupos-cards-grid');
+  const clearBtn  = document.getElementById('grupos-search-clear');
+
+  if (clearBtn) clearBtn.classList.toggle('visible', q.length > 0);
+
+  if (!q) {
+    if (resultsEl) resultsEl.style.display = 'none';
+    if (gridEl)    gridEl.style.display = '';
+    return;
+  }
+
+  if (gridEl) gridEl.style.display = 'none';
+  if (!resultsEl) return;
+
+  // Collect all members across all groups
+  const matches = [];
+  grupos.forEach(g => {
+    g.miembros.forEach(m => {
+      if (m.nombre.toLowerCase().includes(q)) {
+        matches.push({ miembro: m, grupo: g });
+      }
+    });
+  });
+
+  if (!matches.length) {
+    resultsEl.innerHTML = `<div class="search-no-results">No se encontró ninguna persona con "<strong>${query}</strong>"</div>`;
+  } else {
+    resultsEl.innerHTML = matches.map(({ miembro: m, grupo: g }) => {
+      const rolLabel = m.rol === 'superintendente' ? 'Superintendente' : m.rol === 'auxiliar' ? 'Auxiliar' : 'Miembro';
+      const rolClass = m.rol === 'superintendente' ? 's' : m.rol === 'auxiliar' ? 'a' : '';
+      const precBadge = m.precursor ? `<span class="search-result-role p">Precursor</span>` : '';
+      const rolBadge  = rolClass ? `<span class="search-result-role ${rolClass}">${rolLabel}</span>` : '';
+      return `<div class="search-result-card">
+        <div class="grupo-member-avatar" style="background:${memberColor(m.nombre)};width:36px;height:36px;font-size:0.72rem;border-radius:50%">${memberInitials(m.nombre)}</div>
+        <div class="search-result-info">
+          <div class="search-result-name">${m.nombre}</div>
+          <div class="search-result-group">Grupo ${g.numero}</div>
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end">
+          ${rolBadge}${precBadge}
+        </div>
+      </div>`;
+    }).join('');
+  }
+  resultsEl.style.display = 'block';
+}
+
+function clearGruposSearch() {
+  const input = document.getElementById('grupos-search-input');
+  if (input) { input.value = ''; filterGruposSearch(''); input.focus(); }
 }
 
 function renderAdminGrupos() {
