@@ -3517,7 +3517,7 @@ function syncAdminDropdown() {
 const _origApplyTheme = applyTheme;
 
 document.addEventListener('click', e => {
-  if (!e.target.closest('.options-wrap')) { closeOptionsMenu(); closeAdminOptionsMenu(); }
+  if (!e.target.closest('.options-wrap')) { closeOptionsMenu(); closeAdminOptionsMenu(); document.getElementById('notifications-dropdown')?.classList.remove('open'); }
 });
 document.querySelectorAll('.modal-overlay').forEach(o => {
   o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
