@@ -2630,6 +2630,7 @@ async function enterApp() {
 
   showToast(`¡Hola, ${currentUser.name}!`, 'success');
   startNotifPolling();
+  scheduleMidnightRefresh();
   await subscribeToPush();
 }
   
@@ -2813,7 +2814,7 @@ function renderSchedule() {
   const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
 
   let html = '';
-  Object.keys(grouped).sort().forEach(date => {
+  Object.keys(grouped).sort().filter(date => date >= todayStr).forEach(date => {
     const d = new Date(date+'T00:00:00');
     const isToday = date === todayStr;
     const dayName  = DAY[d.getDay()];
@@ -4189,6 +4190,22 @@ function startNotifPolling() {
   checkForNewNotifications();
   if (_notifPollInterval) clearInterval(_notifPollInterval);
   _notifPollInterval = setInterval(checkForNewNotifications, 60000); // check every 60s
+}
+
+// ── Midnight day-change watcher ───────────────────────────────────────────────
+// Schedules a one-shot timeout that fires exactly at 00:00:00 local time,
+// re-renders the schedule so the "Hoy" featured card updates, then re-schedules
+// itself for the next midnight.
+let _midnightTimeout = null;
+function scheduleMidnightRefresh() {
+  if (_midnightTimeout) clearTimeout(_midnightTimeout);
+  const now = new Date();
+  const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 2); // +2s buffer
+  const msUntilMidnight = nextMidnight - now;
+  _midnightTimeout = setTimeout(() => {
+    renderSchedule();          // re-render with the new "today"
+    scheduleMidnightRefresh(); // schedule again for next midnight
+  }, msUntilMidnight);
 }
 
 function isMobile() { return window.innerWidth < 640; }
