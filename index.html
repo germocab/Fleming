@@ -628,7 +628,12 @@
   .coming-soon-icon { margin-bottom: 0.5rem; opacity: 0.4; }
   .coming-soon-icon svg { width: 40px; height: 40px; stroke: var(--text2); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 
-  /* ── Notifications page ── */
+  /* Notifications: dropdown solo en desktop, fullscreen solo en mobile */
+  .notif-desktop-dropdown { display: none !important; }
+  @media (min-width: 640px) {
+    .notif-desktop-dropdown { display: block !important; }
+    #page-notifications { display: none !important; }
+  }
   .notif-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -1287,10 +1292,20 @@
 
     <div class="nav-icons">
 <div class="options-wrap">
-  <button class="nav-icon-btn" title="Notificaciones" onclick="openNotificationsPage()" style="position:relative">
+  <button class="nav-icon-btn" title="Notificaciones" onclick="toggleNotificationsMenu()" style="position:relative">
     <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
     <div id="notif-badge" style="display:none;position:absolute;top:6px;right:6px;width:9px;height:9px;background:var(--red);border-radius:50%;border:2px solid var(--surface);pointer-events:none"></div>
   </button>
+  <!-- Desktop dropdown (hidden on mobile via CSS) -->
+  <div class="options-dropdown notif-desktop-dropdown" id="notifications-dropdown" style="width:340px;max-height:480px;overflow-y:auto;">
+    <div style="padding:0.85rem 1rem;font-weight:700;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+      <span>Notificaciones</span>
+      <button id="notif-clear-btn-desktop" onclick="deleteAllNotifications()" style="background:none;border:none;font-family:var(--font);font-size:0.75rem;font-weight:600;color:var(--red);cursor:pointer;padding:2px 6px;border-radius:6px;transition:background 0.15s" onmouseover="this.style.background='rgba(255,59,48,0.08)'" onmouseout="this.style.background='none'">Borrar todo</button>
+    </div>
+    <div id="notifications-list-desktop">
+      <div class="loader-wrap"><div class="loader"></div></div>
+    </div>
+  </div>
 </div>
       
       <div class="options-wrap">
@@ -3690,80 +3705,142 @@ function startNotifPolling() {
   _notifPollInterval = setInterval(checkForNewNotifications, 60000); // check every 60s
 }
 
-function toggleNotificationsMenu() { openNotificationsPage(); }
+function isMobile() { return window.innerWidth < 640; }
+
+function toggleNotificationsMenu() {
+  if (isMobile()) {
+    openNotificationsPage();
+  } else {
+    const menu = document.getElementById('notifications-dropdown');
+    menu.classList.toggle('open');
+    if (menu.classList.contains('open')) {
+      setLastSeenNotifTime(new Date().toISOString());
+      const badge = document.getElementById('notif-badge');
+      if (badge) badge.style.display = 'none';
+      loadNotifications('desktop');
+    }
+  }
+}
 
 function openNotificationsPage() {
   const page = document.getElementById('page-notifications');
   page.style.display = 'flex';
-  // Mark as seen
   setLastSeenNotifTime(new Date().toISOString());
   const badge = document.getElementById('notif-badge');
   if (badge) badge.style.display = 'none';
-  loadNotifications();
+  loadNotifications('mobile');
 }
 
 function closeNotificationsPage() {
   document.getElementById('page-notifications').style.display = 'none';
 }
 
-async function loadNotifications() {
+function _notifEmptyHTML(target) {
+  const pad = target === 'desktop' ? 'padding:1.5rem 1rem' : 'margin-top:3rem';
+  return `<div class="empty-state" style="${pad}">
+    <div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+    <h4>Sin notificaciones</h4>
+    <p>No hay notificaciones por ahora</p>
+  </div>`;
+}
+
+async function loadNotifications(target) {
+  // target = 'desktop' | 'mobile' | undefined (refresh both)
+  const targets = target ? [target] : ['desktop', 'mobile'];
+
   const { data } = await sb.from('notifications')
     .select('*')
     .order('created_at', { ascending: false })
     .limit(50);
 
-  const list = document.getElementById('notifications-list');
-  const clearBtn = document.getElementById('notif-clear-btn');
-
-  if (!data || data.length === 0) {
-    if (clearBtn) clearBtn.style.display = 'none';
-    list.innerHTML = `<div class="empty-state" style="margin-top:3rem">
-      <div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-      <h4>Sin notificaciones</h4>
-      <p>No hay notificaciones por ahora</p>
-    </div>`;
-    return;
-  }
-
-  if (clearBtn) clearBtn.style.display = '';
   const lastSeen = getLastSeenNotifTime();
-  list.innerHTML = data.map(n => {
-    const isNew = n.created_at > lastSeen;
-    const dateStr = new Date(n.created_at).toLocaleDateString('es-CL', {
-      weekday: 'short', day: 'numeric', month: 'short',
-      hour: '2-digit', minute: '2-digit'
-    });
-    return `<div class="notif-card${isNew ? ' is-new' : ''}" id="notif-card-${n.id}">
-      <div class="notif-card-header">
-        <div class="notif-card-title-row">
-          ${isNew ? '<div class="notif-card-dot"></div>' : ''}
-          <span class="notif-card-title">${n.title}</span>
-        </div>
-        <button class="notif-delete-btn" title="Eliminar" onclick="deleteNotification('${n.id}')">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <div class="notif-card-body">${n.body}</div>
-      <div class="notif-card-footer">
-        <span class="notif-card-date">${dateStr}</span>
-      </div>
-    </div>`;
-  }).join('');
+  const clearBtnDesktop = document.getElementById('notif-clear-btn-desktop');
+  const clearBtnMobile  = document.getElementById('notif-clear-btn');
+
+  for (const t of targets) {
+    const listEl = document.getElementById(t === 'desktop' ? 'notifications-list-desktop' : 'notifications-list-mobile');
+    if (!listEl) continue;
+
+    if (!data || data.length === 0) {
+      if (t === 'desktop' && clearBtnDesktop) clearBtnDesktop.style.display = 'none';
+      if (t === 'mobile'  && clearBtnMobile)  clearBtnMobile.style.display  = 'none';
+      listEl.innerHTML = _notifEmptyHTML(t);
+      continue;
+    }
+
+    if (t === 'desktop' && clearBtnDesktop) clearBtnDesktop.style.display = '';
+    if (t === 'mobile'  && clearBtnMobile)  clearBtnMobile.style.display  = '';
+
+    if (t === 'desktop') {
+      // Compact dropdown style
+      listEl.innerHTML = data.map(n => {
+        const isNew = n.created_at > lastSeen;
+        const dateStr = new Date(n.created_at).toLocaleDateString('es-CL', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+        return `<div id="notif-d-${n.id}" style="padding:0.75rem 1rem;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:4px;${isNew?'background:var(--accent-light);':''}position:relative">
+          <div style="display:flex;align-items:center;gap:6px;padding-right:24px">
+            <span style="font-size:0.85rem;font-weight:700;color:var(--text)">${n.title}</span>
+            ${isNew?'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0"></span>':''}
+          </div>
+          <span style="font-size:0.8rem;color:var(--text2);line-height:1.4">${n.body}</span>
+          <span style="font-size:0.65rem;color:var(--text3);margin-top:2px">${dateStr}</span>
+          <button onclick="deleteNotification('${n.id}')" title="Eliminar" style="position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text3);padding:0" onmouseover="this.style.background='rgba(255,59,48,0.1)';this.style.color='var(--red)'" onmouseout="this.style.background='none';this.style.color='var(--text3)'">
+            <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>`;
+      }).join('');
+    } else {
+      // Fullscreen card style
+      listEl.innerHTML = data.map(n => {
+        const isNew = n.created_at > lastSeen;
+        const dateStr = new Date(n.created_at).toLocaleDateString('es-CL', {weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+        return `<div class="notif-card${isNew?' is-new':''}" id="notif-m-${n.id}">
+          <div class="notif-card-header">
+            <div class="notif-card-title-row">
+              ${isNew?'<div class="notif-card-dot"></div>':''}
+              <span class="notif-card-title">${n.title}</span>
+            </div>
+            <button class="notif-delete-btn" title="Eliminar" onclick="deleteNotification('${n.id}')">
+              <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+          <div class="notif-card-body">${n.body}</div>
+          <div class="notif-card-footer">
+            <span class="notif-card-date">${dateStr}</span>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }
 }
 
 async function deleteNotification(id) {
-  const card = document.getElementById('notif-card-' + id);
-  if (card) { card.style.opacity = '0.4'; card.style.pointerEvents = 'none'; }
+  // Fade out both desktop and mobile cards if present
+  ['notif-d-', 'notif-m-'].forEach(prefix => {
+    const el = document.getElementById(prefix + id);
+    if (el) { el.style.opacity = '0.35'; el.style.pointerEvents = 'none'; }
+  });
   const { error } = await sb.from('notifications').delete().eq('id', id);
   if (error) {
-    if (card) { card.style.opacity = ''; card.style.pointerEvents = ''; }
-    showToast('Error al eliminar', 'error');
-    return;
+    ['notif-d-', 'notif-m-'].forEach(prefix => {
+      const el = document.getElementById(prefix + id);
+      if (el) { el.style.opacity = ''; el.style.pointerEvents = ''; }
+    });
+    showToast('Error al eliminar', 'error'); return;
   }
-  if (card) card.remove();
-  // If list is now empty, reload to show empty state
-  const list = document.getElementById('notifications-list');
-  if (list && !list.querySelector('.notif-card')) loadNotifications();
+  ['notif-d-', 'notif-m-'].forEach(prefix => {
+    const el = document.getElementById(prefix + id);
+    if (el) el.remove();
+  });
+  // Show empty state if no cards left
+  ['notifications-list-desktop','notifications-list-mobile'].forEach(lid => {
+    const list = document.getElementById(lid);
+    if (list && !list.querySelector('[id^="notif-d-"],[id^="notif-m-"]')) {
+      const t = lid.includes('desktop') ? 'desktop' : 'mobile';
+      list.innerHTML = _notifEmptyHTML(t);
+      const btn = document.getElementById(t === 'desktop' ? 'notif-clear-btn-desktop' : 'notif-clear-btn');
+      if (btn) btn.style.display = 'none';
+    }
+  });
 }
 
 async function deleteAllNotifications() {
@@ -3785,7 +3862,7 @@ async function deleteAllNotifications() {
     <span style="font-size:1rem;font-weight:700;letter-spacing:-0.01em">Notificaciones</span>
     <button id="notif-clear-btn" onclick="deleteAllNotifications()" style="background:none;border:none;font-family:var(--font);font-size:0.8rem;font-weight:600;color:var(--red);cursor:pointer;padding:0.35rem 0.65rem;border-radius:8px;transition:background 0.15s" onmouseover="this.style.background='rgba(255,59,48,0.08)'" onmouseout="this.style.background='none'">Borrar todo</button>
   </nav>
-  <div style="flex:1;overflow-y:auto;padding:1rem;max-width:640px;width:100%;margin:0 auto" id="notifications-list">
+  <div style="flex:1;overflow-y:auto;padding:1rem;max-width:640px;width:100%;margin:0 auto" id="notifications-list-mobile">
     <div class="loader-wrap"><div class="loader"></div></div>
   </div>
 </div>
