@@ -589,14 +589,68 @@
   .no-pasar-section { padding: 0 1.25rem 1.25rem; }
   .no-pasar-title {
     font-size: 0.875rem; font-weight: 700;
-    margin-bottom: 0.75rem; color: var(--text);
+    margin-bottom: 0.6rem; color: var(--text);
   }
   .no-pasar-item {
-    display: flex; align-items: center; gap: 8px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.55rem 0.85rem;
+    margin-bottom: 6px;
     font-size: 0.875rem; color: var(--text2);
-    padding: 4px 0;
+    gap: 8px;
   }
-  .no-pasar-item::before { content: '·'; font-size: 1.2rem; color: var(--text3); flex-shrink: 0; }
+  .no-pasar-item-addr { font-weight: 500; color: var(--text); }
+  .no-pasar-item-date { font-size: 0.72rem; color: var(--text3); font-weight: 500; flex-shrink: 0; }
+
+  /* Suggest no-pasar button */
+  .suggest-np-btn {
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    width: 100%; margin-top: 4px; padding: 0.62rem;
+    background: none; border: 1.5px dashed var(--border-active);
+    border-radius: 10px; cursor: pointer;
+    font-family: var(--font); font-size: 0.84rem; font-weight: 600;
+    color: var(--text3); transition: all 0.18s;
+  }
+  .suggest-np-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .suggest-np-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+  /* Suggest no-pasar inline form */
+  .suggest-np-form {
+    display: none; flex-direction: column; gap: 0.6rem;
+    margin-top: 6px; padding: 0.9rem;
+    background: var(--surface2); border: 1px solid var(--border-active);
+    border-radius: 14px;
+  }
+  .suggest-np-form.open { display: flex; animation: fadeIn 0.18s ease; }
+  .suggest-np-form-title { font-size: 0.82rem; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .suggest-np-input {
+    width: 100%; padding: 0.6rem 0.8rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text);
+    font-family: var(--font); font-size: 0.875rem; outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s;
+  }
+  .suggest-np-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .suggest-np-input::placeholder { color: var(--text3); }
+  .suggest-np-textarea { resize: none; min-height: 64px; }
+  .suggest-np-row { display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; align-items: center; }
+  .suggest-np-actions { display: flex; gap: 0.5rem; margin-top: 2px; }
+  .suggest-np-send {
+    flex: 1; padding: 0.6rem; border: none; border-radius: 8px;
+    background: var(--accent); color: #fff;
+    font-family: var(--font); font-size: 0.84rem; font-weight: 700;
+    cursor: pointer; transition: opacity 0.18s;
+  }
+  .suggest-np-send:hover { opacity: 0.88; }
+  .suggest-np-cancel {
+    padding: 0.6rem 0.9rem; border: none; border-radius: 8px;
+    background: var(--surface3); color: var(--text2);
+    font-family: var(--font); font-size: 0.84rem; font-weight: 600;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .suggest-np-cancel:hover { background: var(--surface3); }
 
   .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem; }
   .page-header-title { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; }
@@ -1674,6 +1728,22 @@
     <div class="no-pasar-section" id="detail-no-pasar-section" style="display:none">
       <div class="no-pasar-title">Direcciones No Pasar</div>
       <div id="detail-no-pasar-list"></div>
+      <button class="suggest-np-btn" id="suggest-np-btn" onclick="toggleSuggestNpForm()">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Sugerir Nuevo No Pasar
+      </button>
+      <div class="suggest-np-form" id="suggest-np-form">
+        <div class="suggest-np-form-title">Sugerir direcci&#xF3;n No Pasar</div>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:0.5rem">
+          <input class="suggest-np-input" id="snp-calle" placeholder="Nombre de la calle" autocomplete="off">
+          <input class="suggest-np-input" id="snp-numero" placeholder="N&#xBA;" autocomplete="off" style="width:72px">
+        </div>
+        <textarea class="suggest-np-input suggest-np-textarea" id="snp-motivo" placeholder="&#xBF;Por qu&#xE9; no pasar? (opcional)"></textarea>
+        <div class="suggest-np-actions">
+          <button class="suggest-np-send" onclick="submitSuggestNp()">Enviar sugerencia</button>
+          <button class="suggest-np-cancel" onclick="toggleSuggestNpForm()">Cancelar</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -2738,25 +2808,70 @@ function viewAssignment(id) {
     const entries = parseNoPasar(ter.no_pasar);
     if (entries.length) {
       noPasarList.innerHTML = entries.map(e => `
-        <div class="no-pasar-item" style="justify-content:space-between">
-          <span>${e.addr}</span>
-          ${e.date ? `<span style="font-size:0.74rem;color:var(--text3);font-weight:500;flex-shrink:0;margin-left:8px">${fmtNpDate(e.date)}</span>` : ''}
+        <div class="no-pasar-item">
+          <span class="no-pasar-item-addr">${e.addr}</span>
+          ${e.date ? `<span class="no-pasar-item-date">${fmtNpDate(e.date)}</span>` : ''}
         </div>`).join('');
-      noPasarSec.style.display = '';
-    } else { noPasarSec.style.display = 'none'; }
-  } else { noPasarSec.style.display = 'none'; }
+    } else { noPasarList.innerHTML = ''; }
+  } else { noPasarList.innerHTML = ''; }
+  noPasarSec.style.display = ter ? '' : 'none';
+  // Store territory id for suggest form
+  noPasarSec.dataset.territoryId = ter ? ter.id : '';
+  noPasarSec.dataset.territoryName = ter ? `Territorio ${ter.number}` : (a.address || '');
 
   document.getElementById('detail-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
-function closeDetail() {
+function toggleSuggestNpForm() {
+  const form = document.getElementById('suggest-np-form');
+  const isOpen = form.classList.toggle('open');
+  if (isOpen) {
+    setTimeout(() => document.getElementById('snp-calle')?.focus(), 80);
+  } else {
+    ['snp-calle','snp-numero','snp-motivo'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  }
+}
+
+async function submitSuggestNp() {
+  const calle  = document.getElementById('snp-calle').value.trim();
+  const numero = document.getElementById('snp-numero').value.trim();
+  const motivo = document.getElementById('snp-motivo').value.trim();
+
+  if (!calle) { document.getElementById('snp-calle').focus(); return; }
+
+  const addr = numero ? `${calle} ${numero}` : calle;
+  const sec  = document.getElementById('detail-no-pasar-section');
+  const terName = sec.dataset.territoryName || 'Territorio';
+  const sender  = currentUser?.name || 'Usuario';
+
+  const title = `Sugerencia No Pasar – ${terName}`;
+  const body  = `${sender} sugiere agregar "${addr}" como No Pasar${motivo ? `.\nMotivo: ${motivo}` : '.'}`;
+
+  const sendBtn = document.querySelector('.suggest-np-send');
+  sendBtn.textContent = 'Enviando…'; sendBtn.disabled = true;
+
+  const { error } = await sb.from('notifications').insert({ title, body });
+
+  sendBtn.textContent = 'Enviar sugerencia'; sendBtn.disabled = false;
+
+  if (error) { showToast('Error al enviar', 'error'); return; }
+
+  showToast('Sugerencia enviada', 'success');
+  toggleSuggestNpForm();
+}
+
+
   // Reset any state that viewTerritory may have changed
   document.getElementById('detail-time-chip').style.display = '';
   document.getElementById('detail-address').style.fontSize = '';
   document.getElementById('detail-actions').style.display = '';
   document.getElementById('detail-overlay').classList.remove('open');
   document.body.style.overflow = '';
+  // Reset suggest form
+  const form = document.getElementById('suggest-np-form');
+  if (form) { form.classList.remove('open'); }
+  ['snp-calle','snp-numero','snp-motivo'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
 }
 
 function handleOverlayClick(e) {
@@ -3661,14 +3776,16 @@ function viewTerritory(id) {
   const noPasarList = document.getElementById('detail-no-pasar-list');
   if (noPasar.length) {
     noPasarList.innerHTML = noPasar.map(e => `
-      <div class="no-pasar-item" style="justify-content:space-between">
-        <span>${e.addr}</span>
-        ${e.date ? `<span style="font-size:0.74rem;color:var(--text3);font-weight:500;flex-shrink:0;margin-left:8px">${fmtNpDate(e.date)}</span>` : ''}
+      <div class="no-pasar-item">
+        <span class="no-pasar-item-addr">${e.addr}</span>
+        ${e.date ? `<span class="no-pasar-item-date">${fmtNpDate(e.date)}</span>` : ''}
       </div>`).join('');
     noPasarSec.style.display = '';
   } else {
     noPasarSec.style.display = 'none';
   }
+  noPasarSec.dataset.territoryId = t.id;
+  noPasarSec.dataset.territoryName = `Territorio ${t.number}`;
 
   document.getElementById('detail-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
