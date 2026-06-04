@@ -2685,6 +2685,11 @@ function renderUsersPanel() {
         </div>
       </div>` : '';
 
+    const canRevoke = !isCurrentUser && (
+      currentRole === 'dev'   ? u.role !== 'dev' :
+      currentRole === 'admin' ? !['dev','admin'].includes(u.role) : false
+    );
+
     const expandHtml = isExpanded ? `<div class="user-expand">
       <div style="display:grid;grid-template-columns:${canEdit?'1fr 1fr':'1fr'};gap:10px;margin-top:0.85rem">
         ${canEdit ? `<div>
@@ -2700,11 +2705,11 @@ function renderUsersPanel() {
       </div>
       ${permsHtml}
       <div class="user-expand-actions">
-        <button class="revoke-btn" onclick="revokeUser('${u.id}')">
+        ${canRevoke ? `<button class="revoke-btn" onclick="revokeUser('${u.id}')">
           <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           Revocar acceso
-        </button>
-        <button class="save-user-btn" onclick="saveUserChanges('${u.id}')">Guardar cambios</button>
+        </button>` : '<span></span>'}
+        ${(canEdit || canRevoke) ? `<button class="save-user-btn" onclick="saveUserChanges('${u.id}')">Guardar cambios</button>` : ''}
       </div>
     </div>` : '';
 
@@ -2767,23 +2772,14 @@ async function saveUserChanges(uid) {
   const btn = document.querySelector(`#user-card-${uid} .save-user-btn`);
   if (btn) { btn.disabled = true; btn.textContent = 'Guardando…'; }
 
-  // Try with permissions column; if it doesn't exist yet, retry without it
-  let { error } = await sb.from('platform_users')
+  const { error } = await sb.from('platform_users')
     .update({ role: u.role, task: u.task, permissions: perms })
     .eq('id', u.id);
-
-  if (error) {
-    console.warn('saveUserChanges (with permissions) failed:', error.message, '— retrying without');
-    const retry = await sb.from('platform_users')
-      .update({ role: u.role, task: u.task })
-      .eq('id', u.id);
-    error = retry.error;
-  }
 
   if (btn) { btn.disabled = false; btn.textContent = 'Guardar cambios'; }
   if (error) {
     console.error('saveUserChanges error:', error);
-    showToast('Error: ' + error.message, 'error');
+    showToast('Error al guardar: ' + error.message, 'error');
     return;
   }
 
@@ -2803,21 +2799,14 @@ async function revokeUser(uid) {
   if (!confirm(`¿Revocar el acceso de ${u.name}? Podrá volver a ingresar con la contraseña de visitante.`)) return;
 
   const defaultPerms = { territories: true, assignments: true, conductores: true, casas: true };
-  // Try update with permissions; if column doesn't exist yet, retry without it
-  let { error } = await sb.from('platform_users')
+  const { error } = await sb.from('platform_users')
     .update({ role: 'viewer', task: '', permissions: defaultPerms })
     .eq('id', u.id);
 
   if (error) {
-    console.warn('revokeUser (with permissions) failed:', error.message, '— retrying without');
-    const retry = await sb.from('platform_users')
-      .update({ role: 'viewer', task: '' })
-      .eq('id', u.id);
-    if (retry.error) {
-      console.error('revokeUser error:', retry.error);
-      showToast('Error: ' + retry.error.message, 'error');
-      return;
-    }
+    console.error('revokeUser error:', error);
+    showToast('Error al revocar: ' + error.message, 'error');
+    return;
   }
 
   u.role = 'viewer';
