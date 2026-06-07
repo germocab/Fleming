@@ -929,64 +929,88 @@
 
 
   /* ── Users panel modal ── */
+  /* ── Users Panel (fullscreen page) ── */
+  /* ── Users Panel fullscreen ─────────────────────────────────────────────── */
   .users-panel-overlay {
     display: none; position: fixed; inset: 0;
-    background: var(--modal-overlay-bg); backdrop-filter: blur(8px);
-    z-index: 400; align-items: flex-end; justify-content: center; padding: 0;
+    background: var(--bg); z-index: 400; flex-direction: column;
   }
   .users-panel-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
-  @media(min-width: 640px) {
-    .users-panel-overlay { align-items: center; padding: 1rem; }
-    .users-panel { border-radius: 20px; animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1); max-width: 600px; }
-  }
-  .users-panel {
-    background: var(--surface); width: 100%; max-width: 600px;
-    max-height: 92vh; overflow-y: auto;
-    border-radius: 20px 20px 0 0;
-    box-shadow: var(--shadow-lg);
-    animation: slideUpPanel 0.3s cubic-bezier(0.16,1,0.3,1);
-  }
-  .users-panel-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 1.1rem 1.25rem; border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; background: var(--surface); z-index: 1;
-    backdrop-filter: blur(20px);
-  }
-  .users-panel-title-wrap { display: flex; flex-direction: column; }
-  .users-panel-title { font-size: 1.05rem; font-weight: 700; }
-  .users-panel-subtitle { font-size: 0.74rem; color: var(--text3); margin-top: 1px; }
-  .users-panel-body { padding: 1rem 1.1rem 1.25rem; }
+  .users-panel { background: var(--bg); width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
 
-  /* User card redesign */
-  .user-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    margin-bottom: 0.65rem;
-    overflow: hidden;
-    transition: box-shadow 0.2s, border-color 0.2s;
-  }
-  .user-card:hover { border-color: var(--border-active); box-shadow: var(--shadow); }
-  .user-card-main {
+  /* Top nav */
+  .users-panel-header {
     display: flex; align-items: center; gap: 12px;
-    padding: 0.85rem 1rem;
-    cursor: default;
+    padding: 0.75rem 1rem; border-bottom: 1px solid var(--border);
+    background: var(--surface); flex-shrink: 0;
+  }
+  .users-panel-back {
+    display: flex; align-items: center; gap: 4px;
+    background: none; border: none; cursor: pointer;
+    color: var(--accent); font-size: 0.95rem; font-weight: 600;
+    font-family: var(--font); padding: 4px 0;
+  }
+  .users-panel-back svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+  .users-panel-title-wrap { flex: 1; }
+  .users-panel-title { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; }
+  .users-panel-subtitle { font-size: 0.74rem; color: var(--text3); margin-top: 1px; }
+  .users-count-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 22px; height: 22px; border-radius: 11px; padding: 0 6px;
+    background: var(--accent); color: #fff;
+    font-size: 0.72rem; font-weight: 800; margin-left: 6px; vertical-align: middle;
+  }
+
+  /* Body */
+  .users-panel-body { flex: 1; overflow-y: auto; padding: 1rem 1rem 4rem; }
+
+  /* Stats strip */
+  .users-stats-strip {
+    display: flex; gap: 10px; margin-bottom: 1.25rem; flex-wrap: wrap;
+  }
+  .users-stat-chip {
+    display: flex; align-items: center; gap: 7px;
+    padding: 8px 14px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 14px;
+    font-size: 0.78rem; font-weight: 600; color: var(--text2);
+  }
+  .users-stat-chip-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* User card — list view */
+  .user-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 18px; margin-bottom: 10px; overflow: hidden;
+    transition: box-shadow 0.2s, border-color 0.2s, transform 0.18s;
+    cursor: pointer;
+  }
+  .user-card:hover { border-color: var(--border-active); box-shadow: var(--shadow); transform: translateY(-1px); }
+  .user-card:active { transform: scale(0.99); }
+  .user-card-main {
+    display: flex; align-items: center; gap: 14px;
+    padding: 1rem 1.1rem;
   }
   .user-card-avatar {
-    width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
+    width: 52px; height: 52px; border-radius: 15px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
-    font-size: 0.82rem; font-weight: 800; color: white;
-    letter-spacing: -0.01em;
+    font-size: 0.95rem; font-weight: 800; color: white;
+    letter-spacing: -0.01em; overflow: hidden; position: relative;
+  }
+  .user-online-ring {
+    position: absolute; bottom: -1px; right: -1px;
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid var(--surface); background: var(--green);
   }
   .user-card-info { flex: 1; min-width: 0; }
-  .user-card-name { font-size: 0.92rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.01em; }
-  .user-card-meta { font-size: 0.74rem; color: var(--text3); margin-top: 2px; display: flex; align-items: center; gap: 6px; }
+  .user-card-name { font-size: 1rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.02em; }
+  .user-card-meta { font-size: 0.74rem; color: var(--text3); margin-top: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .user-card-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .user-card-chevron { width: 18px; height: 18px; stroke: var(--text3); fill: none; stroke-width: 2.5; stroke-linecap: round; flex-shrink: 0; }
 
+  /* Role badge pills */
   .role-badge-pill {
     display: inline-flex; align-items: center;
     padding: 3px 10px; border-radius: 20px;
-    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
     white-space: nowrap;
   }
   .role-badge-admin     { background: rgba(0,122,255,0.12); color: var(--accent); border: 1px solid rgba(0,122,255,0.25); }
@@ -994,32 +1018,107 @@
   .role-badge-viewer    { background: var(--surface3);        color: var(--text3); border: 1px solid var(--border); }
   .role-badge-dev       { background: rgba(255,149,0,0.12);   color: var(--orange); border: 1px solid rgba(255,149,0,0.35); }
 
-  .user-expand-btn {
-    width: 30px; height: 30px; border-radius: 50%;
-    background: var(--surface3); border: none; cursor: pointer;
+  /* ── User Profile fullscreen page ── */
+  #page-user-profile {
+    display: none; position: fixed; inset: 0; z-index: 500;
+    background: var(--bg); flex-direction: column; overflow-y: auto;
+    animation: fadeIn 0.2s ease;
+  }
+  #page-user-profile.open { display: flex; }
+
+  .uprofile-hero {
+    position: relative;
+    background: linear-gradient(160deg, var(--user-accent, var(--accent)) 0%, color-mix(in srgb, var(--user-accent, var(--accent)) 60%, #000) 100%);
+    padding: 4.5rem 1.5rem 2rem; text-align: center; flex-shrink: 0;
+    overflow: hidden;
+  }
+  .uprofile-hero::after {
+    content: ''; position: absolute; inset: 0;
+    background: rgba(0,0,0,0.15);
+  }
+  .uprofile-hero > * { position: relative; z-index: 1; }
+  .uprofile-avatar {
+    width: 90px; height: 90px; border-radius: 25px; margin: 0 auto 0.9rem;
     display: flex; align-items: center; justify-content: center;
-    color: var(--text3); transition: all 0.18s; flex-shrink: 0;
+    font-size: 1.8rem; font-weight: 900; color: #fff;
+    background: rgba(255,255,255,0.25); overflow: hidden;
+    border: 3px solid rgba(255,255,255,0.45);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
   }
-  .user-expand-btn:hover { background: var(--surface2); color: var(--text2); }
-  .user-expand-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; transition: transform 0.2s; }
-  .user-expand-btn.open svg { transform: rotate(180deg); }
+  .uprofile-name { font-size: 1.5rem; font-weight: 900; color: #fff; letter-spacing: -0.03em; text-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  .uprofile-role-badge {
+    display: inline-flex; align-items: center; margin-top: 8px;
+    padding: 4px 14px; border-radius: 20px;
+    background: rgba(255,255,255,0.22); color: #fff;
+    font-size: 0.78rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+    backdrop-filter: blur(4px);
+  }
+  .uprofile-status {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    margin-top: 10px; font-size: 0.8rem; color: rgba(255,255,255,0.8);
+  }
+  .uprofile-status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
 
-  /* Expand area */
-  .user-expand {
-    padding: 0 1rem 1rem;
-    border-top: 1px solid var(--border);
-    background: var(--surface2);
-    animation: expandIn 0.18s ease;
+  .uprofile-body {
+    max-width: 640px; width: 100%; margin: 0 auto;
+    padding: 1.25rem 1.25rem 5rem;
   }
-  @keyframes expandIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+  .uprofile-section {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; margin-bottom: 1.1rem;
+  }
+  .uprofile-section-title {
+    font-size: 0.68rem; font-weight: 700; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.07em;
+    padding: 0.8rem 1rem 0.6rem; border-bottom: 1px solid var(--border);
+  }
+  .uprofile-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); gap: 12px;
+  }
+  .uprofile-row:last-child { border-bottom: none; }
+  .uprofile-row-label { font-size: 0.78rem; color: var(--text3); font-weight: 500; }
+  .uprofile-row-val { font-size: 0.9rem; font-weight: 600; color: var(--text); text-align: right; }
 
-  .user-expand-section { margin-top: 0.85rem; }
-  .user-expand-label {
-    font-size: 0.7rem; font-weight: 700; color: var(--text3);
-    text-transform: uppercase; letter-spacing: 0.06em;
-    margin-bottom: 7px; display: flex; align-items: center; gap: 5px;
+  .uprofile-edit-section {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; margin-bottom: 1.1rem;
   }
-  .user-expand-label svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+  .uprofile-edit-title {
+    font-size: 0.68rem; font-weight: 700; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.07em;
+    padding: 0.8rem 1rem 0.6rem; border-bottom: 1px solid var(--border);
+  }
+  .uprofile-edit-body { padding: 0.85rem 1rem; }
+
+  .uprofile-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 0.5rem; }
+  .uprofile-danger-zone {
+    border: 1px solid rgba(255,59,48,0.25); border-radius: var(--radius);
+    overflow: hidden; margin-bottom: 1.1rem;
+  }
+  .uprofile-danger-title {
+    font-size: 0.68rem; font-weight: 700; color: var(--red);
+    text-transform: uppercase; letter-spacing: 0.07em;
+    padding: 0.8rem 1rem 0.6rem; border-bottom: 1px solid rgba(255,59,48,0.15);
+    background: rgba(255,59,48,0.04);
+  }
+  .uprofile-danger-body { padding: 0.85rem 1rem; display: flex; flex-direction: column; gap: 8px; }
+  .uprofile-danger-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .uprofile-danger-desc { font-size: 0.8rem; color: var(--text3); }
+  .btn-danger-sm {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 0.45rem 1rem; border-radius: 10px;
+    font-family: var(--font); font-size: 0.8rem; font-weight: 700;
+    border: 1px solid rgba(255,59,48,0.3); cursor: pointer;
+    background: rgba(255,59,48,0.07); color: var(--red);
+    white-space: nowrap; flex-shrink: 0; transition: all 0.18s;
+  }
+  .btn-danger-sm:hover { background: rgba(255,59,48,0.14); border-color: rgba(255,59,48,0.5); }
+  .btn-danger-sm svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+
+  /* label chips reuse */
 
   .role-select-inline {
     padding: 7px 10px; font-size: 0.84rem; font-weight: 600;
@@ -1090,13 +1189,6 @@
     white-space: nowrap;
   }
   .save-user-btn:hover { opacity: 0.88; }
-
-  .users-count-badge {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 22px; height: 22px; border-radius: 50%;
-    background: var(--accent-light); color: var(--accent);
-    font-size: 0.72rem; font-weight: 800; margin-left: 6px;
-  }
 
   .users-empty {
     display: flex; flex-direction: column; align-items: center;
@@ -1350,39 +1442,60 @@
 
   /* ── Grupos de Servicio — vista pública ───────────────────────────────────── */
 
-  /* Button grid */
+  /* Button list */
   .grupos-btn-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 12px;
-    padding: 0.5rem 0 2rem;
-  }
-  @media (max-width: 400px) {
-    .grupos-btn-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    display: flex; flex-direction: column; gap: 11px;
+    padding: 0.5rem 0 2.5rem;
   }
   .grupo-btn {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 8px; padding: 1.1rem 0.5rem;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); box-shadow: var(--shadow);
-    cursor: pointer; transition: all 0.18s; position: relative;
-    overflow: hidden;
-  }
-  .grupo-btn:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); border-color: var(--accent); }
-  .grupo-btn:active { transform: scale(0.96); }
-  .grupo-btn-num {
-    width: 48px; height: 48px; border-radius: 50%;
-    background: var(--accent); color: #fff;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.2rem; font-weight: 800;
-    box-shadow: 0 4px 14px rgba(0,122,255,0.35);
-  }
-  .grupo-btn-label { font-size: 0.75rem; font-weight: 600; color: var(--text3); }
-  .grupo-btn-count {
-    position: absolute; top: 8px; right: 8px;
-    background: var(--surface3); color: var(--text3);
-    font-size: 0.6rem; font-weight: 700; padding: 2px 6px;
+    display: flex; align-items: center; gap: 0;
+    padding: 0; border: none;
     border-radius: 20px;
+    cursor: pointer; transition: transform 0.18s, box-shadow 0.18s;
+    position: relative; overflow: hidden; text-align: left; width: 100%;
+    box-shadow: 0 3px 14px rgba(0,0,0,0.09);
+  }
+  .grupo-btn:hover { transform: translateY(-2px) translateX(2px); box-shadow: 0 8px 28px rgba(0,0,0,0.15); }
+  .grupo-btn:active { transform: scale(0.985); }
+  /* Left colored bar */
+  .grupo-btn-bar {
+    width: 7px; align-self: stretch; flex-shrink: 0;
+    background: var(--grupo-color, var(--accent));
+    border-radius: 20px 0 0 20px;
+  }
+  /* Colored icon block */
+  .grupo-btn-icon {
+    width: 56px; height: 56px; border-radius: 15px; flex-shrink: 0;
+    background: var(--grupo-color, var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.45rem; font-weight: 900; color: #fff;
+    margin: 13px 14px 13px 13px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    letter-spacing: -0.03em;
+  }
+  /* White / surface main body */
+  .grupo-btn-body {
+    flex: 1; background: var(--surface);
+    padding: 14px 0 14px 0; align-self: stretch;
+    display: flex; align-items: center; gap: 10px;
+    border-radius: 0 20px 20px 0;
+  }
+  .grupo-btn-info { flex: 1; min-width: 0; }
+  .grupo-btn-label {
+    font-size: 1.05rem; font-weight: 800; color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  .grupo-btn-sublabel { font-size: 0.76rem; color: var(--text3); margin-top: 3px; font-weight: 500; }
+  .grupo-btn-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; margin-right: 16px; flex-shrink: 0; }
+  .grupo-btn-count {
+    font-size: 0.72rem; font-weight: 700; padding: 3px 10px;
+    border-radius: 20px; white-space: nowrap;
+    background: var(--grupo-color, var(--accent));
+    color: #fff; opacity: 0.85;
+  }
+  .grupo-btn-arrow {
+    width: 16px; height: 16px; stroke: var(--text3); fill: none;
+    stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
   }
 
   /* ── Group detail fullscreen page ── */
@@ -2306,21 +2419,47 @@
 </div>
 
 
-<div class="users-panel-overlay" id="users-panel-overlay" onclick="handleUsersPanelOverlayClick(event)">
+<div class="users-panel-overlay" id="users-panel-overlay">
   <div class="users-panel" id="users-panel">
     <div class="users-panel-header">
+      <button class="users-panel-back" onclick="closeUsersPanel()">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Volver
+      </button>
       <div class="users-panel-title-wrap">
         <span class="users-panel-title">Usuarios <span class="users-count-badge" id="users-count-badge">0</span></span>
-        <span class="users-panel-subtitle">Gestiona roles y permisos de acceso</span>
+        <span class="users-panel-subtitle">Gestiona roles y permisos</span>
       </div>
-      <button class="modal-close" onclick="closeUsersPanel()">
-        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
     </div>
     <div class="users-panel-body" id="users-panel-body">
       <div class="loader-wrap"><div class="loader"></div></div>
     </div>
   </div>
+</div>
+
+<!-- ── User Profile fullscreen page ── -->
+<div id="page-user-profile" class="">
+  <nav class="topnav" style="position:sticky;top:0;flex-shrink:0;z-index:10">
+    <button class="admin-back-btn" onclick="closeUserProfilePage()">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      Usuarios
+    </button>
+    <span style="font-size:1rem;font-weight:700">Perfil</span>
+    <div style="width:80px"></div>
+  </nav>
+
+  <!-- Hero -->
+  <div class="uprofile-hero" id="uprofile-hero">
+    <div class="uprofile-avatar" id="uprofile-avatar">—</div>
+    <div class="uprofile-name" id="uprofile-name">—</div>
+    <div class="uprofile-role-badge" id="uprofile-role-badge">—</div>
+    <div class="uprofile-status" id="uprofile-status">
+      <span class="uprofile-status-dot" id="uprofile-status-dot"></span>
+      <span id="uprofile-status-text">—</span>
+    </div>
+  </div>
+
+  <div class="uprofile-body" id="uprofile-body"></div>
 </div>
 
 <div class="img-lightbox" id="img-lightbox" onclick="closeLightbox()">
@@ -2671,12 +2810,32 @@ function renderGruposView() {
   </div>
   <div id="grupos-search-results" style="display:none"></div>`;
 
-  const btnsHtml = '<div class="grupos-btn-grid" id="grupos-cards-grid">' + grupos.map(g => {
+  const GRUPO_COLORS = [
+    '#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6',
+    '#06b6d4','#ec4899','#f97316','#84cc16','#64748b',
+    '#6366f1','#14b8a6','#eab308','#dc2626','#a855f7',
+  ];
+  const btnsHtml = '<div class="grupos-btn-grid" id="grupos-cards-grid">' + grupos.map((g, i) => {
+    const color = GRUPO_COLORS[i % GRUPO_COLORS.length];
+    const super_ = g.miembros.find(m => m.rol === 'superintendente');
+    const aux    = g.miembros.find(m => m.rol === 'auxiliar');
+    const sublabel = super_
+      ? `${super_.nombre.split(' ').slice(0,2).join(' ')}${aux ? '  ·  ' + aux.nombre.split(' ').slice(0,2).join(' ') : ''}`
+      : (aux ? aux.nombre.split(' ').slice(0,2).join(' ') : 'Sin liderazgo asignado');
     const cnt = g.miembros.length;
-    return `<button class="grupo-btn" onclick="openGrupoDetailPage('${g.id}')">
-      <div class="grupo-btn-num">${g.numero}</div>
-      <div class="grupo-btn-label">Grupo ${g.numero}</div>
-      <span class="grupo-btn-count">${cnt}</span>
+    return `<button class="grupo-btn" style="--grupo-color:${color}" onclick="openGrupoDetailPage('${g.id}')">
+      <div class="grupo-btn-bar"></div>
+      <div class="grupo-btn-icon">${g.numero}</div>
+      <div class="grupo-btn-body">
+        <div class="grupo-btn-info">
+          <div class="grupo-btn-label">Grupo ${g.numero}</div>
+          <div class="grupo-btn-sublabel">${sublabel}</div>
+        </div>
+        <div class="grupo-btn-right">
+          <span class="grupo-btn-count">${cnt} miembro${cnt !== 1 ? 's' : ''}</span>
+          <svg class="grupo-btn-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
     </button>`;
   }).join('') + '</div>';
 
@@ -4460,8 +4619,184 @@ function closeUsersPanel() {
   document.getElementById('users-panel-overlay').classList.remove('open');
   expandedUserId = null;
 }
-function handleUsersPanelOverlayClick(e) {
-  if (e.target === document.getElementById('users-panel-overlay')) closeUsersPanel();
+
+// ── User Profile Page ─────────────────────────────────────────────────────────
+let _currentProfileUserId = null;
+
+function openUserProfilePage(uid) {
+  _currentProfileUserId = uid;
+  const u = activeUsers.find(x => x.id === uid);
+  if (!u) return;
+
+  const col = userColor(u.name);
+  const inits = userInitials(u.name);
+  const isDev = currentRole === 'dev';
+  const isCurrentUser = currentUser && u.name === currentUser.name;
+  const canEdit = !isCurrentUser && canChangeRole(u.role);
+
+  const lastActive = u.last_seen || u.joined_at;
+  const minutesAgo = lastActive ? Math.round((new Date() - new Date(lastActive)) / 60000) : 9999;
+  const isOnline = minutesAgo < 10;
+  const since = lastActive ? (() => {
+    if (minutesAgo < 2) return 'Ahora mismo';
+    if (minutesAgo < 60) return 'Hace ' + minutesAgo + ' min';
+    if (minutesAgo < 1440) return 'Hace ' + Math.round(minutesAgo/60) + 'h';
+    return new Date(lastActive).toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'});
+  })() : '—';
+  const joinedStr = u.joined_at ? new Date(u.joined_at).toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'}) : '—';
+
+  const ROLE_LABELS_ES = { dev:'DEV', viewer:'Visitante', semiadmin:'SemiAdmin', admin:'Administrador' };
+  const roleLabel = ROLE_LABELS_ES[u.role] || u.role;
+  const perms = parsePermissions(u.permissions);
+  const uLabels = parseLabels(u.labels);
+
+  // Hero
+  document.getElementById('uprofile-hero').style.setProperty('--user-accent', col);
+  const avatarEl = document.getElementById('uprofile-avatar');
+  avatarEl.style.background = col;
+  avatarEl.innerHTML = u.avatar
+    ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:22px">`
+    : inits;
+  document.getElementById('uprofile-name').textContent = u.name;
+  document.getElementById('uprofile-role-badge').textContent = roleLabel;
+  document.getElementById('uprofile-status-dot').style.background = isOnline ? '#4ade80' : 'rgba(255,255,255,0.4)';
+  document.getElementById('uprofile-status-text').textContent = isOnline ? 'En línea' : `Últ. actividad: ${since}`;
+
+  // Body
+  const labelChipsFull = [
+    uLabels.anciano   ? `<span style="font-size:0.75rem;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(234,179,8,0.12);color:#ca8a04;border:1px solid rgba(234,179,8,0.3)">Anciano</span>` : '',
+    uLabels.siervo    ? `<span style="font-size:0.75rem;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(16,185,129,0.12);color:#059669;border:1px solid rgba(16,185,129,0.3)">Siervo Ministerial</span>` : '',
+    uLabels.precursor ? `<span style="font-size:0.75rem;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(139,92,246,0.12);color:#7c3aed;border:1px solid rgba(139,92,246,0.3)">Precursor</span>` : '',
+  ].filter(Boolean).join('');
+
+  // Permissions text
+  const permNames = { assignments:'Asignaciones', territories:'Territorios', conductores:'Conductores', casas:'Casas', grupos:'Grupos' };
+  const permList = PERM_MODULES.filter(m => perms[m.key]).map(m => m.label).join(', ') || 'Ninguno';
+
+  // Role options
+  let roleOptions = '';
+  if (isDev) {
+    roleOptions = `<option value="viewer" ${u.role==='viewer'?'selected':''}>Visitante</option>
+      <option value="semiadmin" ${u.role==='semiadmin'?'selected':''}>SemiAdmin</option>
+      <option value="admin" ${u.role==='admin'?'selected':''}>Administrador</option>`;
+  } else {
+    roleOptions = `<option value="viewer" ${u.role==='viewer'?'selected':''}>Visitante</option>
+      <option value="semiadmin" ${u.role==='semiadmin'?'selected':''}>SemiAdmin</option>`;
+  }
+
+  const editSection = canEdit ? `
+    <div class="uprofile-edit-section">
+      <div class="uprofile-edit-title">Editar Perfil</div>
+      <div class="uprofile-edit-body">
+        <div class="form-group2">
+          <label class="form-label2">Rol</label>
+          <select class="role-select-inline" id="uprof-role-sel" onchange="changeUserRole('${u.id}',this.value)">${roleOptions}</select>
+        </div>
+        <div class="form-group2" style="margin-top:0.75rem">
+          <label class="form-label2">Nota / Responsabilidad</label>
+          <textarea class="task-textarea" id="uprof-task" placeholder="Ej: Encargado de territorios…">${u.task||''}</textarea>
+        </div>
+
+        ${u.role === 'semiadmin' ? `
+        <div style="margin-top:0.9rem">
+          <div class="form-label2" style="margin-bottom:6px">Módulos permitidos</div>
+          <div class="perms-grid" id="uprof-perms-grid-${u.id}">
+            ${PERM_MODULES.map(m => `
+              <div class="perm-toggle${perms[m.key] ? ' active' : ''}" onclick="togglePerm('${u.id}','${m.key}');renderUserProfilePerms('${u.id}')" id="perm-${u.id}-${m.key}">
+                <span class="perm-toggle-label">${m.icon}${m.label}</span>
+                <span class="perm-check"><svg viewBox="0 0 12 10"><polyline points="1 5 4.5 8.5 11 1"/></svg></span>
+              </div>`).join('')}
+          </div>
+        </div>` : ''}
+
+        <div style="margin-top:0.9rem">
+          <div class="form-label2" style="margin-bottom:6px">Etiquetas</div>
+          <div class="labels-grid">
+            <div class="label-toggle${uLabels.precursor?' active-precursor':''}" onclick="toggleLabel('${u.id}','precursor')" id="lbl-${u.id}-precursor">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Precursor
+            </div>
+            <div class="label-toggle${uLabels.anciano?' active-anciano':''}" onclick="toggleLabel('${u.id}','anciano')" id="lbl-${u.id}-anciano">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Anciano
+            </div>
+            <div class="label-toggle${uLabels.siervo?' active-siervo':''}" onclick="toggleLabel('${u.id}','siervo')" id="lbl-${u.id}-siervo">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Siervo Min.
+            </div>
+          </div>
+        </div>
+
+        <div class="uprofile-actions" style="margin-top:1rem">
+          <button class="btn-primary" style="width:auto;padding:0.6rem 1.5rem" onclick="saveProfileChanges('${u.id}')">Guardar cambios</button>
+          <button class="btn-secondary" onclick="revokeUser('${u.id}')">Revocar acceso</button>
+        </div>
+      </div>
+    </div>` : '';
+
+  const dangerSection = isDev && !isCurrentUser ? `
+    <div class="uprofile-danger-zone">
+      <div class="uprofile-danger-title">Zona de peligro</div>
+      <div class="uprofile-danger-body">
+        <div class="uprofile-danger-row">
+          <div class="uprofile-danger-desc">Elimina esta cuenta de forma permanente. No se podrá deshacer.</div>
+          <button class="btn-danger-sm" onclick="deleteUser('${u.id}','${u.name.replace(/'/g,"\'")}')">
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+            Eliminar cuenta
+          </button>
+        </div>
+      </div>
+    </div>` : '';
+
+  document.getElementById('uprofile-body').innerHTML = `
+    <div class="uprofile-section">
+      <div class="uprofile-section-title">Información</div>
+      <div class="uprofile-row"><span class="uprofile-row-label">Nombre</span><span class="uprofile-row-val">${u.name}</span></div>
+      <div class="uprofile-row"><span class="uprofile-row-label">Rol</span><span class="uprofile-row-val">${roleLabel}</span></div>
+      <div class="uprofile-row"><span class="uprofile-row-label">Registrado</span><span class="uprofile-row-val">${joinedStr}</span></div>
+      <div class="uprofile-row"><span class="uprofile-row-label">Última actividad</span><span class="uprofile-row-val">${since}</span></div>
+      ${u.task ? `<div class="uprofile-row"><span class="uprofile-row-label">Responsabilidad</span><span class="uprofile-row-val">${u.task}</span></div>` : ''}
+    </div>
+    ${labelChipsFull ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.1rem">${labelChipsFull}</div>` : ''}
+    ${editSection}
+    ${dangerSection}
+  `;
+
+  document.getElementById('page-user-profile').classList.add('open');
+}
+
+function closeUserProfilePage() {
+  document.getElementById('page-user-profile').classList.remove('open');
+  _currentProfileUserId = null;
+}
+
+async function saveProfileChanges(uid) {
+  const roleSel = document.getElementById('uprof-role-sel');
+  const taskEl  = document.getElementById('uprof-task');
+  const u = activeUsers.find(x=>x.id===uid);
+  if (!u) return;
+  if (roleSel) u.role = roleSel.value;
+  if (taskEl)  u.task = taskEl.value.trim();
+  const perms = parsePermissions(u.permissions);
+
+  let { error } = await sb.from('platform_users')
+    .update({ role: u.role, task: u.task, permissions: perms, labels: parseLabels(u.labels) })
+    .eq('id', u.id);
+  if (error) {
+    const retry = await sb.from('platform_users').update({ role: u.role, task: u.task, labels: parseLabels(u.labels) }).eq('id', u.id);
+    if (retry.error) { showToast('Error: ' + retry.error.message, 'error'); return; }
+  }
+  if (currentUser && u.name === currentUser.name) { currentRole = u.role; currentUser.role = u.role; saveSession(currentUser); }
+  showToast('Cambios guardados ✓', 'success');
+  closeUserProfilePage();
+  renderUsersPanel();
+}
+
+async function deleteUser(uid, name) {
+  if (!confirm(`¿Eliminar la cuenta de "${name}" de forma permanente? Esta acción no se puede deshacer.`)) return;
+  const { error } = await sb.from('platform_users').delete().eq('id', uid);
+  if (error) { showToast('Error al eliminar: ' + error.message, 'error'); return; }
+  activeUsers = activeUsers.filter(u => u.id !== uid);
+  showToast(`Cuenta de ${name.split(' ')[0]} eliminada`, 'success');
+  closeUserProfilePage();
+  renderUsersPanel();
 }
 
 const USER_COLORS = ['#22c55e','#3b82f6','#a855f7','#f59e0b','#ef4444','#06b6d4','#ec4899','#84cc16','#f97316','#64748b'];
@@ -4479,21 +4814,36 @@ function renderUsersPanel() {
   if (countBadge) countBadge.textContent = activeUsers.length;
 
   if (!activeUsers.length) {
-    body.innerHTML = `<div class="users-empty">
-      <div class="users-empty-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-      <p>Ningún usuario ha iniciado sesión todavía.<br>Aparecerán aquí cuando ingresen a la plataforma.</p>
+    body.innerHTML = `<div class="users-empty" style="text-align:center;padding:3rem 1rem;color:var(--text3)">
+      <svg viewBox="0 0 24 24" style="width:48px;height:48px;stroke:var(--text3);fill:none;stroke-width:1.5;stroke-linecap:round;margin-bottom:1rem;opacity:0.4"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <p>Ningún usuario ha iniciado sesión todavía.</p>
     </div>`;
     return;
   }
 
-  const isDev = currentRole === 'dev';
+  const roleOrder = { dev: 0, admin: 1, semiadmin: 2, viewer: 3 };
+  const sorted = [...activeUsers].sort((a,b) => (roleOrder[a.role]??4) - (roleOrder[b.role]??4));
 
-  body.innerHTML = activeUsers.map(u => {
+  // Stats strip
+  const onlineCount = sorted.filter(u => {
+    const m = u.last_seen ? Math.round((new Date() - new Date(u.last_seen)) / 60000) : 9999;
+    return m < 10;
+  }).length;
+  const byRole = { dev:0, admin:0, semiadmin:0, viewer:0 };
+  sorted.forEach(u => { if (byRole[u.role] !== undefined) byRole[u.role]++; else byRole.viewer++; });
+
+  const stats = `<div class="users-stats-strip">
+    <div class="users-stat-chip"><span class="users-stat-chip-dot" style="background:var(--green)"></span>${onlineCount} en línea</div>
+    ${byRole.admin ? `<div class="users-stat-chip"><span class="users-stat-chip-dot" style="background:var(--accent)"></span>${byRole.admin} admin</div>` : ''}
+    ${byRole.semiadmin ? `<div class="users-stat-chip"><span class="users-stat-chip-dot" style="background:#a855f7"></span>${byRole.semiadmin} semiadmin</div>` : ''}
+    <div class="users-stat-chip"><span class="users-stat-chip-dot" style="background:var(--surface3)"></span>${byRole.viewer} visitante${byRole.viewer!==1?'s':''}</div>
+  </div>`;
+
+  const cards = sorted.map(u => {
     const col = userColor(u.name);
     const inits = userInitials(u.name);
     const roleBadgeCls = u.role === 'dev' ? 'role-badge-dev' : u.role === 'admin' ? 'role-badge-admin' : u.role === 'semiadmin' ? 'role-badge-semiadmin' : 'role-badge-viewer';
     const roleLabel = ROLE_LABELS[u.role] || u.role;
-    const isExpanded = expandedUserId === u.id;
     const lastActive = u.last_seen || u.joined_at;
     const minutesAgo = lastActive ? Math.round((new Date() - new Date(lastActive)) / 60000) : 9999;
     const isOnline = minutesAgo < 10;
@@ -4501,117 +4851,40 @@ function renderUsersPanel() {
       if (minutesAgo < 2) return 'Ahora mismo';
       if (minutesAgo < 60) return 'Hace ' + minutesAgo + ' min';
       if (minutesAgo < 1440) return 'Hace ' + Math.round(minutesAgo/60) + 'h';
-      return new Date(lastActive).toLocaleDateString('es-CL',{day:'numeric',month:'short'});
+      return new Date(lastActive).toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'});
     })() : '—';
-    const isCurrentUser = currentUser && u.name === currentUser.name;
-    const canEdit = !isCurrentUser && canChangeRole(u.role);
-    const perms = parsePermissions(u.permissions);
-
-    // Role select options
-    let roleOptions = '';
-    if (isDev) {
-      roleOptions = `<option value="viewer"    ${u.role==='viewer'    ?'selected':''}>Visitante</option>
-         <option value="semiadmin" ${u.role==='semiadmin' ?'selected':''}>SemiAdmin</option>
-         <option value="admin"     ${u.role==='admin'     ?'selected':''}>Administrador</option>`;
-    } else {
-      // Admin: can change viewer <-> semiadmin only
-      roleOptions = `<option value="viewer"    ${u.role==='viewer'    ?'selected':''}>Visitante</option>
-         <option value="semiadmin" ${u.role==='semiadmin' ?'selected':''}>SemiAdmin</option>`;
-    }
-
-    // Permissions grid — shown only when target can have permissions edited
-    const showPerms = !isCurrentUser && canEditPermissions(u.role);
-    const permsHtml = showPerms ? `
-      <div class="user-expand-section">
-        <div class="user-expand-label">
-          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          Módulos permitidos
-        </div>
-        <div class="perms-grid" id="perms-grid-${u.id}">
-          ${PERM_MODULES.map(m => `
-            <div class="perm-toggle${perms[m.key] ? ' active' : ''}" onclick="togglePerm('${u.id}','${m.key}')" id="perm-${u.id}-${m.key}">
-              <span class="perm-toggle-label">${m.icon}${m.label}</span>
-              <span class="perm-check"><svg viewBox="0 0 12 10"><polyline points="1 5 4.5 8.5 11 1"/></svg></span>
-            </div>`).join('')}
-        </div>
-      </div>` : '';
-
-    // Labels section (only admin/dev can assign)
-    const canAssignLabels = ['dev','admin'].includes(currentRole) && !isCurrentUser;
     const uLabels = parseLabels(u.labels);
-    const labelsHtml = canAssignLabels ? `
-      <div class="user-expand-section">
-        <div class="user-expand-label">
-          <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-          Etiquetas
-        </div>
-        <div class="labels-grid">
-          <div class="label-toggle${uLabels.precursor?' active-precursor':''}" onclick="toggleLabel('${u.id}','precursor')" id="lbl-${u.id}-precursor">
-            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Precursor
-          </div>
-          <div class="label-toggle${uLabels.anciano?' active-anciano':''}" onclick="toggleLabel('${u.id}','anciano')" id="lbl-${u.id}-anciano">
-            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Anciano
-          </div>
-          <div class="label-toggle${uLabels.siervo?' active-siervo':''}" onclick="toggleLabel('${u.id}','siervo')" id="lbl-${u.id}-siervo">
-            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Siervo Min.
-          </div>
-        </div>
-      </div>` : '';
-
-    const expandHtml = isExpanded ? `<div class="user-expand">
-      <div style="display:grid;grid-template-columns:${canEdit?'1fr 1fr':'1fr'};gap:10px;margin-top:0.85rem">
-        ${canEdit ? `<div>
-          <div class="user-expand-label"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Rol</div>
-          <select class="role-select-inline" id="role-sel-${u.id}" onchange="changeUserRole('${u.id}',this.value)">
-            ${roleOptions}
-          </select>
-        </div>` : ''}
-        <div>
-          <div class="user-expand-label"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Nota / Responsabilidad</div>
-          <textarea class="task-textarea" id="task-${u.id}" placeholder="Ej: Solo maneja territorios…">${u.task||''}</textarea>
-        </div>
-      </div>
-      ${permsHtml}
-      ${labelsHtml}
-      <div class="user-expand-actions">
-        <button class="revoke-btn" onclick="revokeUser('${u.id}')">
-          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Revocar acceso
-        </button>
-        <button class="save-user-btn" onclick="saveUserChanges('${u.id}')">Guardar cambios</button>
-      </div>
-    </div>` : '';
-
-    // Avatar: photo or initials
+    const labelChips = [
+      uLabels.anciano   ? `<span style="font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(234,179,8,0.12);color:#ca8a04;border:1px solid rgba(234,179,8,0.3)">Anciano</span>` : '',
+      uLabels.siervo    ? `<span style="font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(16,185,129,0.12);color:#059669;border:1px solid rgba(16,185,129,0.3)">Siervo</span>` : '',
+      uLabels.precursor ? `<span style="font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(139,92,246,0.12);color:#7c3aed;border:1px solid rgba(139,92,246,0.3)">Precursor</span>` : '',
+    ].filter(Boolean).join('');
+    const isCurrentUser = currentUser && u.name === currentUser.name;
     const avatarHtml = u.avatar
-      ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:12px">`
+      ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:15px">`
       : inits;
-
-    return `<div class="user-card" id="user-card-${u.id}">
+    return `<div class="user-card" id="user-card-${u.id}" onclick="openUserProfilePage('${u.id}')">
       <div class="user-card-main">
-        <div class="user-card-avatar" style="background:${col};overflow:hidden">${avatarHtml}</div>
+        <div class="user-card-avatar" style="background:${col};overflow:hidden;position:relative">
+          ${avatarHtml}
+          ${isOnline ? '<span class="user-online-ring"></span>' : ''}
+        </div>
         <div class="user-card-info">
-          <div class="user-card-name">${u.name}${isCurrentUser?' <span style="font-size:0.68rem;color:var(--text3);font-weight:500">(tú)</span>':''}</div>
+          <div class="user-card-name">${u.name}${isCurrentUser ? ' <span style="font-size:0.68rem;color:var(--text3);font-weight:500">(tú)</span>' : ''}</div>
           <div class="user-card-meta">
-            <span class="${isOnline?'online-dot':'offline-dot'}"></span>
-            ${since}
+            <span>${since}</span>
+            ${labelChips}
           </div>
         </div>
         <div class="user-card-actions">
           <span class="role-badge-pill ${roleBadgeCls}">${roleLabel}</span>
-          ${!isCurrentUser ? `<button class="user-expand-btn${isExpanded?' open':''}" onclick="toggleExpandUser('${u.id}')" title="${isExpanded?'Cerrar':'Editar usuario'}">
-            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>` : ''}
+          <svg class="user-card-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
       </div>
-      ${expandHtml}
     </div>`;
   }).join('');
-}
 
-function toggleExpandUser(uid) {
-  expandedUserId = expandedUserId === uid ? null : uid;
-  renderUsersPanel();
+  body.innerHTML = stats + cards;
 }
 
 function changeUserRole(uid, newRole) {
