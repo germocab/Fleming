@@ -952,13 +952,13 @@
   }
   .users-panel-back svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
   .users-panel-title-wrap { flex: 1; }
-  .users-panel-title { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; }
+  .users-panel-title { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; }
   .users-panel-subtitle { font-size: 0.74rem; color: var(--text3); margin-top: 1px; }
+  @media (max-width: 600px) { .users-panel-subtitle { display: none; } }
   .users-count-badge {
-    display: inline-flex; align-items: center; justify-content: center;
-    min-width: 22px; height: 22px; border-radius: 11px; padding: 0 6px;
-    background: var(--accent); color: #fff;
-    font-size: 0.72rem; font-weight: 800; margin-left: 6px; vertical-align: middle;
+    font-size: 0.78rem; font-weight: 600; color: var(--text3);
+    background: var(--surface3); border: 1px solid var(--border);
+    padding: 2px 9px; border-radius: 20px; letter-spacing: 0;
   }
 
   /* Body */
@@ -2427,7 +2427,7 @@
         Volver
       </button>
       <div class="users-panel-title-wrap">
-        <span class="users-panel-title">Usuarios <span class="users-count-badge" id="users-count-badge">0</span></span>
+        <div class="users-panel-title">Usuarios <span class="users-count-badge" id="users-count-badge">0</span></div>
         <span class="users-panel-subtitle">Gestiona roles y permisos</span>
       </div>
     </div>
@@ -4793,6 +4793,19 @@ async function deleteUser(uid, name) {
   if (!confirm(`¿Eliminar la cuenta de "${name}" de forma permanente? Esta acción no se puede deshacer.`)) return;
   const { error } = await sb.from('platform_users').delete().eq('id', uid);
   if (error) { showToast('Error al eliminar: ' + error.message, 'error'); return; }
+
+  // Add to blocklist so the user can't be re-created on next login
+  const key = 'deleted_users_blocklist';
+  const { data: bl } = await sb.from('platform_config').select('value').eq('key', key);
+  let blocked = (bl && bl.length) ? JSON.parse(bl[0].value) : [];
+  if (!blocked.includes(name.toLowerCase())) blocked.push(name.toLowerCase());
+  const val = JSON.stringify(blocked);
+  if (bl && bl.length) {
+    await sb.from('platform_config').update({ value: val }).eq('key', key);
+  } else {
+    await sb.from('platform_config').insert({ key, value: val });
+  }
+
   activeUsers = activeUsers.filter(u => u.id !== uid);
   showToast(`Cuenta de ${name.split(' ')[0]} eliminada`, 'success');
   closeUserProfilePage();
@@ -4997,6 +5010,20 @@ function canAccessModule(permissions, moduleKey) {
 async function registerUserSession(name, role) {
   const now = new Date().toISOString();
   if (role === 'dev') return;
+
+  // Check blocklist — deleted accounts must not be re-created
+  try {
+    const { data: bl } = await sb.from('platform_config').select('value').eq('key', 'deleted_users_blocklist');
+    if (bl && bl.length) {
+      const blocked = JSON.parse(bl[0].value);
+      if (blocked.includes(name.toLowerCase())) {
+        // Force logout — this account was deleted by DEV
+        showToast('Esta cuenta fue eliminada. Contacta al administrador.', 'error');
+        setTimeout(() => doLogout(), 2000);
+        return;
+      }
+    }
+  } catch(e) { /* ignore — proceed normally */ }
 
   const { data: existing } = await sb.from('platform_users')
     .select('*').ilike('name', name).single();
