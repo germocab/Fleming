@@ -2771,9 +2771,9 @@ async function openGrupoDetailPage(gid) {
   // Members
   _renderGrupoDetailMembers(g);
 
-  // Check edit permission
+  // Map: DEV only. Photos & hospitalidad: super/aux/admin/dev
   const canEdit = _canEditGrupoContent(g);
-  document.getElementById('grupo-map-actions').style.display = canEdit ? '' : 'none';
+  document.getElementById('grupo-map-actions').style.display = currentRole === 'dev' ? '' : 'none';
   document.getElementById('grupo-photos-actions').style.display = canEdit ? '' : 'none';
   document.getElementById('grupo-hosp-actions').style.display = canEdit ? '' : 'none';
 
