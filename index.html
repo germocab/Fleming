@@ -1350,6 +1350,165 @@
 
   /* ── Grupos de Servicio — vista pública ───────────────────────────────────── */
 
+  /* Button grid */
+  .grupos-btn-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
+    padding: 0.5rem 0 2rem;
+  }
+  @media (max-width: 400px) {
+    .grupos-btn-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  }
+  .grupo-btn {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; padding: 1.1rem 0.5rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    cursor: pointer; transition: all 0.18s; position: relative;
+    overflow: hidden;
+  }
+  .grupo-btn:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); border-color: var(--accent); }
+  .grupo-btn:active { transform: scale(0.96); }
+  .grupo-btn-num {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; font-weight: 800;
+    box-shadow: 0 4px 14px rgba(0,122,255,0.35);
+  }
+  .grupo-btn-label { font-size: 0.75rem; font-weight: 600; color: var(--text3); }
+  .grupo-btn-count {
+    position: absolute; top: 8px; right: 8px;
+    background: var(--surface3); color: var(--text3);
+    font-size: 0.6rem; font-weight: 700; padding: 2px 6px;
+    border-radius: 20px;
+  }
+
+  /* ── Group detail fullscreen page ── */
+  #page-grupo {
+    display: none; position: fixed; inset: 0; z-index: 260;
+    background: var(--bg); flex-direction: column;
+    overflow-y: auto; animation: fadeIn 0.22s ease;
+  }
+  #page-grupo.open { display: flex; }
+
+  .grupo-detail-hero {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 1.5rem 1.25rem 1.25rem; text-align: center;
+    background: linear-gradient(180deg, var(--accent-light) 0%, transparent 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .grupo-detail-badge {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; font-weight: 800;
+    box-shadow: 0 8px 28px rgba(0,122,255,0.4);
+    margin-bottom: 0.75rem;
+  }
+  .grupo-detail-title { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; }
+  .grupo-detail-sub { font-size: 0.82rem; color: var(--text3); margin-top: 3px; }
+
+  .grupo-detail-body {
+    max-width: 640px; width: 100%; margin: 0 auto;
+    padding: 1.25rem 1.25rem 3rem;
+  }
+
+  .grupo-section {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+    margin-bottom: 1.25rem;
+  }
+  .grupo-section-title {
+    font-size: 0.7rem; font-weight: 700; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    padding: 0.85rem 1rem 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .grupo-member-row-full {
+    display: flex; align-items: center; gap: 12px;
+    padding: 0.7rem 1rem; border-bottom: 1px solid var(--border);
+  }
+  .grupo-member-row-full:last-child { border-bottom: none; }
+  .grupo-member-avatar-md {
+    width: 38px; height: 38px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700; color: #fff; flex-shrink: 0;
+    overflow: hidden;
+  }
+  .grupo-member-info { flex: 1; min-width: 0; }
+  .grupo-member-name-full { font-size: 0.92rem; font-weight: 600; color: var(--text); }
+  .grupo-member-role-label {
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em;
+    padding: 2px 8px; border-radius: 20px; text-transform: uppercase;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .role-super { background: var(--accent-light); color: var(--accent); }
+  .role-aux   { background: var(--green-light);  color: var(--green); }
+  .role-prec  { background: rgba(168,85,247,0.12); color: #a855f7; }
+
+  /* Map section */
+  .grupo-map-wrap {
+    margin: 0.75rem 1rem; border-radius: var(--radius-sm);
+    overflow: hidden; background: var(--surface2);
+    border: 1px solid var(--border);
+    cursor: zoom-in; min-height: 130px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .grupo-map-wrap img { width: 100%; display: block; max-height: 280px; object-fit: contain; }
+  .grupo-map-empty {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 2rem 1rem; color: var(--text3); font-size: 0.82rem; text-align: center;
+  }
+  .grupo-map-empty svg { width: 32px; height: 32px; stroke: var(--text3); fill: none; stroke-width: 1.5; stroke-linecap: round; opacity: 0.5; }
+  .grupo-map-actions { display: flex; gap: 8px; padding: 0 1rem 1rem; flex-wrap: wrap; }
+
+  /* Photos section */
+  .grupo-photos-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px;
+    margin: 0.5rem 1rem 0;
+  }
+  .grupo-photo-thumb {
+    aspect-ratio: 1; border-radius: 6px; overflow: hidden;
+    background: var(--surface2); cursor: pointer; position: relative;
+  }
+  .grupo-photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .grupo-photo-del-btn {
+    position: absolute; top: 3px; right: 3px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(0,0,0,0.55); border: none; cursor: pointer;
+    display: none; align-items: center; justify-content: center;
+    color: #fff;
+  }
+  .grupo-photo-thumb:hover .grupo-photo-del-btn { display: flex; }
+  .grupo-photo-del-btn svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+  .grupo-photos-actions { padding: 0.75rem 1rem; }
+  .grupo-photos-empty { padding: 1rem; text-align: center; color: var(--text3); font-size: 0.82rem; }
+
+  /* Hospitalidad section */
+  .grupo-hosp-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.65rem 1rem; border-bottom: 1px solid var(--border);
+    gap: 8px;
+  }
+  .grupo-hosp-row:last-child { border-bottom: none; }
+  .grupo-hosp-date { font-size: 0.88rem; font-weight: 600; color: var(--text); }
+  .grupo-hosp-who  { font-size: 0.8rem; color: var(--text3); }
+  .grupo-hosp-actions { display: flex; gap: 0.75rem; padding: 0.75rem 1rem; }
+
+  /* Admin map upload in grupo detail (only for super/aux/admin) */
+  .grupo-upload-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 0.45rem 1rem; border-radius: 20px; cursor: pointer;
+    font-family: var(--font); font-size: 0.8rem; font-weight: 600;
+    border: 1.5px dashed var(--border-active); background: none;
+    color: var(--text3); transition: all 0.18s;
+  }
+  .grupo-upload-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .grupo-upload-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+
   /* Search bar */
   .grupos-search-wrap {
     position: relative;
@@ -2512,60 +2671,16 @@ function renderGruposView() {
   </div>
   <div id="grupos-search-results" style="display:none"></div>`;
 
-  const gruposHtml = '<div class="grupos-grid" id="grupos-cards-grid">' + grupos.map(g => {
-    const super_ = g.miembros.find(m => m.rol === 'superintendente');
-    const aux    = g.miembros.find(m => m.rol === 'auxiliar');
-    const rest   = g.miembros.filter(m => m.rol === 'miembro');
-    const leadersHtml = (super_ || aux) ? `<div class="grupo-leaders">
-      ${super_ ? `<div class="grupo-leader-chip superintendent">
-        ${getAvatarForName(super_.nombre)
-          ? `<div class="grupo-leader-icon s" style="overflow:hidden;background:${memberColor(super_.nombre)}"><img src="${getAvatarForName(super_.nombre)}" style="width:100%;height:100%;object-fit:cover"></div>`
-          : `<div class="grupo-leader-icon s">${memberInitials(super_.nombre)}</div>`}
-        <div class="grupo-leader-texts">
-          <div class="grupo-leader-label">Superintendente</div>
-          <div class="grupo-leader-name">${super_.nombre}</div>
-        </div>
-      </div>` : ''}
-      ${aux ? `<div class="grupo-leader-chip auxiliary">
-        ${getAvatarForName(aux.nombre)
-          ? `<div class="grupo-leader-icon a" style="overflow:hidden;background:${memberColor(aux.nombre)}"><img src="${getAvatarForName(aux.nombre)}" style="width:100%;height:100%;object-fit:cover"></div>`
-          : `<div class="grupo-leader-icon a">${memberInitials(aux.nombre)}</div>`}
-        <div class="grupo-leader-texts">
-          <div class="grupo-leader-label">Auxiliar</div>
-          <div class="grupo-leader-name">${aux.nombre}</div>
-        </div>
-      </div>` : ''}
-    </div>` : '';
-    const membersHtml = rest.length ? rest.map(m => `
-      <div class="grupo-member-row">
-        ${buildAvatarHtml(m.nombre, getAvatarForName(m.nombre), 28, '0.62rem')}
-        <span class="grupo-member-name">${m.nombre}</span>
-        ${m.precursor ? '<span class="precursor-badge">Precursor</span>' : ''}
-      </div>`).join('') : `<div class="grupo-empty-members">Sin miembros regulares registrados</div>`;
-    return `<div class="grupo-card" id="grupo-card-pub-${g.id}">
-      <div class="grupo-card-header" onclick="toggleGrupoCard('${g.id}')">
-        <div class="grupo-num-badge">${g.numero}</div>
-        <div>
-          <div class="grupo-card-title">Grupo ${g.numero}</div>
-          <div class="grupo-card-count">${g.miembros.length} miembro${g.miembros.length !== 1 ? 's' : ''}</div>
-        </div>
-        <button class="grupo-card-toggle" tabindex="-1">
-          <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-      </div>
-      <div class="grupo-card-body">
-        ${leadersHtml}
-        <div class="grupo-members-list">${membersHtml}</div>
-      </div>
-    </div>`;
+  const btnsHtml = '<div class="grupos-btn-grid" id="grupos-cards-grid">' + grupos.map(g => {
+    const cnt = g.miembros.length;
+    return `<button class="grupo-btn" onclick="openGrupoDetailPage('${g.id}')">
+      <div class="grupo-btn-num">${g.numero}</div>
+      <div class="grupo-btn-label">Grupo ${g.numero}</div>
+      <span class="grupo-btn-count">${cnt}</span>
+    </button>`;
   }).join('') + '</div>';
 
-  container.innerHTML = searchBar + gruposHtml;
-}
-
-function toggleGrupoCard(gid) {
-  const card = document.getElementById('grupo-card-pub-' + gid);
-  if (card) card.classList.toggle('open');
+  container.innerHTML = searchBar + btnsHtml;
 }
 
 function filterGruposSearch(query) {
@@ -2621,6 +2736,342 @@ function filterGruposSearch(query) {
 function clearGruposSearch() {
   const input = document.getElementById('grupos-search-input');
   if (input) { input.value = ''; filterGruposSearch(''); input.focus(); }
+}
+
+// ── Grupo Detail Page ─────────────────────────────────────────────────────────
+let _currentGrupoId = null;
+
+function _canEditGrupoContent(g) {
+  // Admin/dev/semiadmin always can
+  if (['dev','admin','semiadmin'].includes(currentRole)) return true;
+  if (!g || !currentUser) return false;
+  // Superintendent or Auxiliary of this group can also upload
+  const me = g.miembros.find(m =>
+    m.nombre.toLowerCase() === currentUser.name.toLowerCase() &&
+    (m.rol === 'superintendente' || m.rol === 'auxiliar')
+  );
+  return !!me;
+}
+
+async function openGrupoDetailPage(gid) {
+  _currentGrupoId = gid;
+  const g = grupos.find(x => x.id === gid);
+  if (!g) return;
+
+  const page = document.getElementById('page-grupo');
+  page.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // Hero
+  document.getElementById('grupo-detail-nav-title').textContent = `Grupo ${g.numero}`;
+  document.getElementById('grupo-detail-badge').textContent = g.numero;
+  document.getElementById('grupo-detail-title').textContent = `Grupo de Servicio ${g.numero}`;
+  document.getElementById('grupo-detail-sub').textContent = `${g.miembros.length} miembro${g.miembros.length !== 1 ? 's' : ''}`;
+
+  // Members
+  _renderGrupoDetailMembers(g);
+
+  // Check edit permission
+  const canEdit = _canEditGrupoContent(g);
+  document.getElementById('grupo-map-actions').style.display = canEdit ? '' : 'none';
+  document.getElementById('grupo-photos-actions').style.display = canEdit ? '' : 'none';
+  document.getElementById('grupo-hosp-actions').style.display = canEdit ? '' : 'none';
+
+  // Load map & photos & hospitalidad from platform_config
+  await Promise.all([
+    _loadGrupoMap(gid),
+    _loadGrupoPhotos(gid),
+    _loadGrupoHosp(gid),
+  ]);
+}
+
+function closeGrupoDetailPage() {
+  document.getElementById('page-grupo').classList.remove('open');
+  document.body.style.overflow = '';
+  _currentGrupoId = null;
+}
+
+function _renderGrupoDetailMembers(g) {
+  const leaders   = g.miembros.filter(m => m.rol === 'superintendente' || m.rol === 'auxiliar');
+  const precursors = g.miembros.filter(m => m.rol !== 'superintendente' && m.rol !== 'auxiliar' && m.precursor);
+  const regular   = g.miembros.filter(m => m.rol !== 'superintendente' && m.rol !== 'auxiliar' && !m.precursor);
+
+  // Leaders
+  const leadersEl = document.getElementById('grupo-detail-leaders-list');
+  if (leaders.length) {
+    leadersEl.innerHTML = leaders.map(m => _memberRowHtml(m)).join('');
+    document.getElementById('grupo-detail-leaders-section').style.display = '';
+  } else {
+    document.getElementById('grupo-detail-leaders-section').style.display = 'none';
+  }
+
+  // Precursors
+  const precEl = document.getElementById('grupo-detail-precursors-list');
+  if (precursors.length) {
+    precEl.innerHTML = precursors.map(m => _memberRowHtml(m)).join('');
+    document.getElementById('grupo-detail-precursors-section').style.display = '';
+  } else {
+    document.getElementById('grupo-detail-precursors-section').style.display = 'none';
+  }
+
+  // Regular members
+  const membEl = document.getElementById('grupo-detail-members-list');
+  if (regular.length) {
+    membEl.innerHTML = regular.map(m => _memberRowHtml(m)).join('');
+    document.getElementById('grupo-detail-members-section').style.display = '';
+  } else {
+    document.getElementById('grupo-detail-members-section').style.display = 'none';
+  }
+}
+
+function _memberRowHtml(m) {
+  const col    = memberColor(m.nombre);
+  const inits  = memberInitials(m.nombre);
+  const avatar = getAvatarForName(m.nombre);
+  const avatarHtml = avatar
+    ? `<div class="grupo-member-avatar-md" style="background:${col}"><img src="${avatar}" style="width:100%;height:100%;object-fit:cover"></div>`
+    : `<div class="grupo-member-avatar-md" style="background:${col}">${inits}</div>`;
+  const roleLabel = m.rol === 'superintendente'
+    ? `<span class="grupo-member-role-label role-super">Superintendente</span>`
+    : m.rol === 'auxiliar'
+      ? `<span class="grupo-member-role-label role-aux">Auxiliar</span>`
+      : m.precursor ? `<span class="grupo-member-role-label role-prec">Precursor</span>` : '';
+  return `<div class="grupo-member-row-full">
+    ${avatarHtml}
+    <div class="grupo-member-info">
+      <div class="grupo-member-name-full">${m.nombre}</div>
+    </div>
+    ${roleLabel}
+  </div>`;
+}
+
+// ── Grupo Map ─────────────────────────────────────────────────────────────────
+async function _loadGrupoMap(gid) {
+  try {
+    const { data } = await sb.from('platform_config').select('value').eq('key', `grupo_map_${gid}`);
+    const src = data && data.length ? data[0].value : null;
+    _updateGrupoMapUI(src);
+  } catch(e) { _updateGrupoMapUI(null); }
+}
+
+function _updateGrupoMapUI(src) {
+  const img     = document.getElementById('grupo-map-img');
+  const empty   = document.getElementById('grupo-map-empty');
+  const delBtn  = document.getElementById('grupo-map-delete-btn');
+  const label   = document.getElementById('grupo-map-upload-label');
+  const wrap    = document.getElementById('grupo-map-wrap');
+  if (src) {
+    img.src = src; img.style.display = 'block'; empty.style.display = 'none';
+    wrap.style.cursor = 'zoom-in';
+    if (delBtn) delBtn.style.display = '';
+    if (label)  label.textContent = 'Cambiar mapa';
+  } else {
+    img.src = ''; img.style.display = 'none'; empty.style.display = 'flex';
+    wrap.style.cursor = 'default';
+    if (delBtn) delBtn.style.display = 'none';
+    if (label)  label.textContent = 'Subir mapa PNG';
+  }
+}
+
+function openGrupoMapLightbox() {
+  const img = document.getElementById('grupo-map-img');
+  if (!img.src || !img.src.startsWith('data:')) return;
+  openLightbox(img.src);
+}
+
+async function handleGrupoMapUpload(event) {
+  const file = event.target.files[0]; event.target.value = '';
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { showToast('Solo imágenes','error'); return; }
+  showToast('Procesando…','');
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const img2 = new Image();
+    img2.onload = async () => {
+      const MAX = 1600; let w = img2.width, h = img2.height;
+      if (w > MAX || h > MAX) { if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;} }
+      const canvas = document.createElement('canvas'); canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img2,0,0,w,h);
+      let b64 = canvas.toDataURL('image/jpeg',0.85);
+      if(b64.length>3*1024*1024) b64=canvas.toDataURL('image/jpeg',0.65);
+      const key = `grupo_map_${_currentGrupoId}`;
+      const { data: ex } = await sb.from('platform_config').select('key').eq('key',key);
+      let err;
+      if(ex&&ex.length){ ({error:err}=await sb.from('platform_config').update({value:b64}).eq('key',key)); }
+      else { ({error:err}=await sb.from('platform_config').insert({key,value:b64})); }
+      if(err){ showToast('Error: '+err.message,'error'); return; }
+      _updateGrupoMapUI(b64);
+      showToast('Mapa de sector guardado ✓','success');
+    };
+    img2.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function deleteGrupoMap() {
+  if(!confirm('¿Eliminar el mapa de sector?')) return;
+  const key = `grupo_map_${_currentGrupoId}`;
+  await sb.from('platform_config').delete().eq('key',key);
+  _updateGrupoMapUI(null);
+  showToast('Mapa eliminado','success');
+}
+
+// ── Grupo Photos ──────────────────────────────────────────────────────────────
+async function _loadGrupoPhotos(gid) {
+  try {
+    const { data } = await sb.from('platform_config').select('value').eq('key', `grupo_photos_${gid}`);
+    const photos = data && data.length ? JSON.parse(data[0].value) : [];
+    _renderGrupoPhotos(photos);
+  } catch(e) { _renderGrupoPhotos([]); }
+}
+
+function _renderGrupoPhotos(photos) {
+  const grid  = document.getElementById('grupo-photos-grid');
+  const empty = document.getElementById('grupo-photos-empty');
+  const g = grupos.find(x => x.id === _currentGrupoId);
+  const canEdit = _canEditGrupoContent(g);
+  if (!photos || !photos.length) {
+    grid.style.display = 'none'; empty.style.display = '';
+  } else {
+    empty.style.display = 'none'; grid.style.display = '';
+    grid.innerHTML = photos.map((src, idx) => `
+      <div class="grupo-photo-thumb" onclick="openLightbox('${src.replace(/'/g,"\\'")}')">
+        <img src="${src}" loading="lazy">
+        ${canEdit ? `<button class="grupo-photo-del-btn" onclick="event.stopPropagation();deleteGrupoPhoto(${idx})" title="Eliminar">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>` : ''}
+      </div>`).join('');
+  }
+}
+
+async function handleGrupoPhotoUpload(event) {
+  const file = event.target.files[0]; event.target.value = '';
+  if (!file || !_currentGrupoId) return;
+  if (!file.type.startsWith('image/')) { showToast('Solo imágenes','error'); return; }
+  showToast('Procesando foto…','');
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const img2 = new Image();
+    img2.onload = async () => {
+      const MAX = 1200; let w = img2.width, h = img2.height;
+      if(w>MAX||h>MAX){if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}}
+      const canvas = document.createElement('canvas'); canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img2,0,0,w,h);
+      const b64 = canvas.toDataURL('image/jpeg',0.80);
+      // Load existing photos
+      const key = `grupo_photos_${_currentGrupoId}`;
+      const {data:ex} = await sb.from('platform_config').select('value').eq('key',key);
+      let photos = (ex&&ex.length) ? JSON.parse(ex[0].value) : [];
+      photos.push(b64);
+      const val = JSON.stringify(photos);
+      let err;
+      if(ex&&ex.length){ ({error:err}=await sb.from('platform_config').update({value:val}).eq('key',key)); }
+      else { ({error:err}=await sb.from('platform_config').insert({key,value:val})); }
+      if(err){ showToast('Error: '+err.message,'error'); return; }
+      _renderGrupoPhotos(photos);
+      showToast('Foto agregada ✓','success');
+    };
+    img2.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function deleteGrupoPhoto(idx) {
+  if(!confirm('¿Eliminar esta foto?')) return;
+  const key = `grupo_photos_${_currentGrupoId}`;
+  const {data:ex} = await sb.from('platform_config').select('value').eq('key',key);
+  let photos = (ex&&ex.length) ? JSON.parse(ex[0].value) : [];
+  photos.splice(idx,1);
+  const val = JSON.stringify(photos);
+  let err;
+  if(photos.length){
+    ({error:err}=await sb.from('platform_config').update({value:val}).eq('key',key));
+  } else {
+    await sb.from('platform_config').delete().eq('key',key);
+  }
+  if(err){ showToast('Error','error'); return; }
+  _renderGrupoPhotos(photos);
+  showToast('Foto eliminada','success');
+}
+
+// ── Hospitalidad ──────────────────────────────────────────────────────────────
+async function _loadGrupoHosp(gid) {
+  try {
+    const { data } = await sb.from('platform_config').select('value').eq('key', `grupo_hosp_${gid}`);
+    const hosps = data && data.length ? JSON.parse(data[0].value) : [];
+    _renderGrupoHosp(hosps);
+  } catch(e) { _renderGrupoHosp([]); }
+}
+
+function _renderGrupoHosp(hosps) {
+  const list = document.getElementById('grupo-hosp-list');
+  if (!hosps || !hosps.length) {
+    list.innerHTML = `<div class="grupo-hosp-row" style="justify-content:center;color:var(--text3);font-size:0.82rem">Sin fechas registradas</div>`;
+    return;
+  }
+  const g = grupos.find(x => x.id === _currentGrupoId);
+  const canEdit = _canEditGrupoContent(g);
+  const MON = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const sorted = [...hosps].sort((a,b)=>a.date>b.date?1:-1);
+  list.innerHTML = sorted.map((h,i) => {
+    const [y,m,d] = h.date.split('-');
+    const dateStr = `${parseInt(d)} ${MON[parseInt(m)-1]} ${y}`;
+    return `<div class="grupo-hosp-row">
+      <div>
+        <div class="grupo-hosp-date">${dateStr}</div>
+        ${h.who ? `<div class="grupo-hosp-who">${h.who}</div>` : ''}
+      </div>
+      ${canEdit ? `<button class="btn-icon-sm danger" onclick="deleteGrupoHosp(${i})" title="Eliminar">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function openAddHospModal() {
+  document.getElementById('hosp-date').value = '';
+  document.getElementById('hosp-who').value = '';
+  document.getElementById('hosp-modal').classList.add('open');
+}
+function closeHospModal() { document.getElementById('hosp-modal').classList.remove('open'); }
+
+async function saveHosp() {
+  const date = document.getElementById('hosp-date').value;
+  const who  = document.getElementById('hosp-who').value.trim();
+  if (!date) { showToast('Selecciona una fecha','error'); return; }
+  const btn = document.getElementById('save-hosp-btn');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  const key = `grupo_hosp_${_currentGrupoId}`;
+  const {data:ex} = await sb.from('platform_config').select('value').eq('key',key);
+  let hosps = (ex&&ex.length) ? JSON.parse(ex[0].value) : [];
+  hosps.push({date, who});
+  const val = JSON.stringify(hosps);
+  let err;
+  if(ex&&ex.length){ ({error:err}=await sb.from('platform_config').update({value:val}).eq('key',key)); }
+  else { ({error:err}=await sb.from('platform_config').insert({key,value:val})); }
+  btn.disabled = false; btn.textContent = 'Guardar';
+  if(err){ showToast('Error','error'); return; }
+  _renderGrupoHosp(hosps);
+  closeHospModal();
+  showToast('Fecha guardada ✓','success');
+}
+
+async function deleteGrupoHosp(idx) {
+  if(!confirm('¿Eliminar esta fecha?')) return;
+  const key = `grupo_hosp_${_currentGrupoId}`;
+  const {data:ex} = await sb.from('platform_config').select('value').eq('key',key);
+  let hosps = (ex&&ex.length) ? JSON.parse(ex[0].value) : [];
+  hosps.splice(idx,1);
+  let err;
+  if(hosps.length){
+    const val = JSON.stringify(hosps);
+    ({error:err}=await sb.from('platform_config').update({value:val}).eq('key',key));
+  } else {
+    await sb.from('platform_config').delete().eq('key',key);
+  }
+  if(err){ showToast('Error','error'); return; }
+  _renderGrupoHosp(hosps);
+  showToast('Fecha eliminada','success');
 }
 
 // ── Profile page ──────────────────────────────────────────────────────────────
@@ -4934,6 +5385,116 @@ async function submitSugerirQuitado() {
       </button>
     </div>
 
+  </div>
+</div>
+
+<!-- ── Grupo Detail fullscreen page ── -->
+<div id="page-grupo" class="">
+  <nav class="topnav" style="position:sticky;top:0;flex-shrink:0">
+    <button class="admin-back-btn" onclick="closeGrupoDetailPage()">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      Grupos
+    </button>
+    <span id="grupo-detail-nav-title" style="font-size:1rem;font-weight:700;letter-spacing:-0.01em">Grupo</span>
+    <div style="width:80px"></div>
+  </nav>
+
+  <!-- Hero -->
+  <div class="grupo-detail-hero">
+    <div class="grupo-detail-badge" id="grupo-detail-badge">—</div>
+    <div class="grupo-detail-title" id="grupo-detail-title">Grupo de Servicio</div>
+    <div class="grupo-detail-sub" id="grupo-detail-sub">— miembros</div>
+  </div>
+
+  <div class="grupo-detail-body">
+
+    <!-- Líderes (Super + Aux) -->
+    <div class="grupo-section" id="grupo-detail-leaders-section">
+      <div class="grupo-section-title">Liderazgo</div>
+      <div id="grupo-detail-leaders-list"></div>
+    </div>
+
+    <!-- Precursores -->
+    <div class="grupo-section" id="grupo-detail-precursors-section" style="display:none">
+      <div class="grupo-section-title">Precursores</div>
+      <div id="grupo-detail-precursors-list"></div>
+    </div>
+
+    <!-- Publicadores en general -->
+    <div class="grupo-section" id="grupo-detail-members-section" style="display:none">
+      <div class="grupo-section-title">Publicadores</div>
+      <div id="grupo-detail-members-list"></div>
+    </div>
+
+    <!-- Mapa de Sector -->
+    <div class="grupo-section">
+      <div class="grupo-section-title">Mapa de Sector</div>
+      <div class="grupo-map-wrap" id="grupo-map-wrap" onclick="openGrupoMapLightbox()">
+        <div class="grupo-map-empty" id="grupo-map-empty">
+          <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+          Sin mapa de sector
+        </div>
+        <img id="grupo-map-img" src="" alt="Mapa de sector" style="display:none">
+      </div>
+      <div class="grupo-map-actions" id="grupo-map-actions" style="display:none">
+        <button class="grupo-upload-btn" onclick="document.getElementById('grupo-map-file-input').click()">
+          <svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+          <span id="grupo-map-upload-label">Subir mapa PNG</span>
+        </button>
+        <button class="grupo-upload-btn" id="grupo-map-delete-btn" onclick="deleteGrupoMap()" style="display:none;border-color:rgba(255,59,48,0.3);color:var(--red)">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          Eliminar mapa
+        </button>
+        <input type="file" id="grupo-map-file-input" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="handleGrupoMapUpload(event)">
+      </div>
+    </div>
+
+    <!-- Fotos del Grupo -->
+    <div class="grupo-section">
+      <div class="grupo-section-title">Fotos del Grupo</div>
+      <div class="grupo-photos-empty" id="grupo-photos-empty">Sin fotos del grupo aún</div>
+      <div class="grupo-photos-grid" id="grupo-photos-grid" style="display:none"></div>
+      <div class="grupo-photos-actions" id="grupo-photos-actions" style="display:none">
+        <button class="grupo-upload-btn" onclick="document.getElementById('grupo-photo-file-input').click()">
+          <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Agregar foto
+        </button>
+        <input type="file" id="grupo-photo-file-input" accept="image/*" style="display:none" onchange="handleGrupoPhotoUpload(event)">
+      </div>
+    </div>
+
+    <!-- Hospitalidad -->
+    <div class="grupo-section">
+      <div class="grupo-section-title">Fechas de Hospitalidad</div>
+      <div id="grupo-hosp-list">
+        <div class="grupo-hosp-row" style="justify-content:center;color:var(--text3);font-size:0.82rem">Sin fechas registradas</div>
+      </div>
+      <div class="grupo-hosp-actions" id="grupo-hosp-actions" style="display:none">
+        <button class="grupo-upload-btn" onclick="openAddHospModal()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Agregar fecha
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /.grupo-detail-body -->
+</div>
+
+<!-- ── Hospitalidad modal ── -->
+<div class="modal-overlay" id="hosp-modal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <div class="modal-title">Fecha de Hospitalidad</div>
+      <button class="modal-close" onclick="closeHospModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group2"><label class="form-label2">Fecha</label><input type="date" class="form-input" id="hosp-date"></div>
+      <div class="form-group2"><label class="form-label2">¿Quién lo hace? (opcional)</label><input type="text" class="form-input" id="hosp-who" placeholder="Ej: Familia González"></div>
+      <div style="display:flex;gap:10px;margin-top:1.1rem;justify-content:flex-end">
+        <button class="btn-secondary" onclick="closeHospModal()">Cancelar</button>
+        <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="saveHosp()" id="save-hosp-btn">Guardar</button>
+      </div>
+    </div>
   </div>
 </div>
 
