@@ -1871,8 +1871,8 @@
     <div class="nav-spacer"></div>
 
     <div class="main-segment">
-      <button class="main-seg-btn active" onclick="switchMainTab('predicacion',this)">Predicación</button>
-      <button class="main-seg-btn" onclick="switchMainTab('reuniones',this)">Reuniones</button>
+      <button class="main-seg-btn active" data-tab="predicacion" onclick="switchMainTab('predicacion',this)">Predicación</button>
+      <button class="main-seg-btn" data-tab="reuniones" onclick="switchMainTab('reuniones',this)">Reuniones</button>
     </div>
 
     <div class="nav-icons">
@@ -3470,10 +3470,38 @@ async function enterApp() {
   const usersBtn = document.getElementById('users-panel-btn');
   if (usersBtn) usersBtn.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
 
-  renderSubTabs('predicacion');
+  // Restore navigation position from before reload (if any)
+  const _nav = _loadNavState();
+  if (_nav && _nav.mainTab) {
+    currentMainTab = _nav.mainTab;
+    currentSubTab  = _nav.subTab || 'casa';
+  }
+
+  // Sync main segment button
+  document.querySelectorAll('.main-seg-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === currentMainTab);
+  });
+
+  renderSubTabs(currentMainTab);
+
+  // Restore sub-page visibility
+  if (currentMainTab === 'predicacion') {
+    showPage('schedule');
+    ['casa','territorios','carritos','grupos'].forEach(id => {
+      const el = document.getElementById('sub-content-' + id);
+      if (el) el.style.display = id === currentSubTab ? '' : 'none';
+    });
+  } else {
+    showPage('reuniones');
+  }
+
   loadSchedule();
   loadFullMap();
-  loadAvatarCache();
+  loadAvatarCache().then(() => {
+    if (currentSubTab === 'grupos') {
+      loadGrupos().then(() => renderGruposView());
+    }
+  });
   startRolePolling();
 
   // Show assigned task in dropdown for semiadmin
@@ -3525,6 +3553,7 @@ async function doAccess() {
 function doLogout() {
   stopRolePolling();
   closeProfilePage();
+  sessionStorage.removeItem('fleming_nav');
   clearSession(); currentUser = null; currentRole = 'viewer';
   closeProfileMenu();
   document.getElementById('app').style.display = 'none';
@@ -3550,12 +3579,23 @@ function renderSubTabs(mainTab) {
     '</div>';
 }
 
+// ── Nav state persistence (survives reload) ──────────────────────────────────
+function _saveNavState() {
+  sessionStorage.setItem('fleming_nav', JSON.stringify({
+    mainTab: currentMainTab,
+    subTab:  currentSubTab,
+  }));
+}
+function _loadNavState() {
+  try { return JSON.parse(sessionStorage.getItem('fleming_nav')); } catch { return null; }
+}
+
 function switchMainTab(tab, btn) {
   currentMainTab = tab;
   document.querySelectorAll('.main-seg-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   renderSubTabs(tab);
-
+  _saveNavState();
   if (tab === 'predicacion') {
     showPage('schedule');
   } else {
@@ -3570,6 +3610,7 @@ function switchSubTab(tabId) {
     const el = document.getElementById('sub-content-' + id);
     if (el) el.style.display = id === tabId ? '' : 'none';
   });
+  _saveNavState();
   if (tabId === 'territorios') renderTerritoryView();
   if (tabId === 'grupos') {
     loadAvatarCache().then(() => {
