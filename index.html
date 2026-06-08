@@ -2641,9 +2641,9 @@
   /* ════ end FlemingPlans CSS ════ */
 
   /* ════ Carritos CSS ════ */
-  #sub-content-carritos { display:flex; flex-direction:column; min-height:400px; }
-  #carritos-list-screen { display:flex; flex-direction:column; }
-  #carritos-detail-screen { display:flex; flex-direction:column; }
+  #sub-content-carritos { display:block; min-height:400px; }
+  #carritos-list-screen { display:block; }
+  #carritos-detail-screen { display:block; }
   #carritos-turn-detail-screen { display:flex !important; }
 
   .crt-chip {
@@ -4744,6 +4744,7 @@ function switchSubTab(tabId) {
   _saveNavState();
   if (tabId === 'programacion') initFlemingSchedule();
   if (tabId === 'territorios') renderTerritoryView();
+  if (tabId === 'carritos') carritos_init();
   if (tabId === 'grupos') {
     loadAvatarCache().then(() => {
       if (!grupos.length) {
@@ -8322,19 +8323,23 @@ async function carritos_loadFromSupabase() {
       .from('carritos_turnos')
       .select('*')
       .order('id');
-    if (error) throw error;
-    carritos_allData = (data || []).map(r => ({
-      id:      r.id,
-      dia:     r.dia,
-      tipo:    (r.tipo || '').toUpperCase(),
-      nombres: r.nombres,
-      hora:    r.hora,
-      punto:   r.punto
-    }));
+    if (error) {
+      // Table may not exist yet — still render the point grid
+      console.warn('Carritos Supabase error (tabla puede no existir aún):', error.message);
+      carritos_allData = [];
+    } else {
+      carritos_allData = (data || []).map(r => ({
+        id:      r.id,
+        dia:     r.dia,
+        tipo:    (r.tipo || '').toUpperCase(),
+        nombres: r.nombres || '',
+        hora:    r.hora,
+        punto:   r.punto
+      }));
+    }
   } catch(e) {
     console.error('Carritos load error:', e);
     carritos_allData = [];
-    showToast('Error al cargar datos de Carritos', 'error');
   }
   carritos_renderHome();
 }
@@ -8344,6 +8349,10 @@ function carritos_renderHome() {
   const home = document.getElementById('carritos-home-content');
   if (!home) return;
   home.innerHTML = '';
+
+  // Ensure list screen is visible
+  const listScreen = document.getElementById('carritos-list-screen');
+  if (listScreen) { listScreen.style.display = 'flex'; listScreen.style.flexDirection = 'column'; }
 
   const myName = currentUser ? currentUser.name.toLowerCase() : '';
 
@@ -8585,14 +8594,7 @@ function carritos_clearFilters() {
   carritos_renderHome();
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  Hook: inicializar carritos cuando se activa el sub-tab
-// ═══════════════════════════════════════════════════════════════════════════
-const _orig_switchSubTab = switchSubTab;
-switchSubTab = function(tabId) {
-  _orig_switchSubTab(tabId);
-  if (tabId === 'carritos') carritos_init();
-};
+// carritos_init() is called directly from switchSubTab
 
 </script>
 </body>
