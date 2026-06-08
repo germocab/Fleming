@@ -1440,6 +1440,50 @@
     .admin-topbar { height: 56px; padding: 0 1rem; }
   }
 
+  /* ── Casa modal — días disponibles ────────────────────────────────────────── */
+  .dias-picker {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 4px;
+  }
+  .dia-btn {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 1px; padding: 8px 2px; border-radius: 10px; cursor: pointer; user-select: none;
+    border: 1.5px solid var(--border); background: var(--surface2);
+    transition: all 0.15s;
+  }
+  .dia-btn:hover { border-color: var(--accent); background: var(--accent-light); }
+  .dia-btn.selected {
+    border-color: var(--accent); background: var(--accent);
+  }
+  .dia-btn-letter {
+    font-size: 0.75rem; font-weight: 800; letter-spacing: 0;
+    color: var(--text2);
+  }
+  .dia-btn.selected .dia-btn-letter { color: #fff; }
+  .dia-btn-num {
+    font-size: 0.6rem; color: var(--text3); font-weight: 600;
+  }
+  .dia-btn.selected .dia-btn-num { color: rgba(255,255,255,0.75); }
+
+  /* Tipo de propiedad + amo inline */
+  .tipo-amo-row { display: flex; gap: 8px; align-items: stretch; }
+  .tipo-amo-row .tipo-select { flex: 0 0 auto; min-width: 130px; }
+  .tipo-amo-row .form-input { flex: 1; }
+  @media (max-width: 400px) {
+    .tipo-amo-row { flex-direction: column; }
+    .tipo-amo-row .tipo-select { min-width: unset; }
+    .dias-picker { grid-template-columns: repeat(7,1fr); gap: 3px; }
+    .dia-btn { padding: 6px 1px; border-radius: 8px; }
+    .dia-btn-letter { font-size: 0.7rem; }
+  }
+
+  /* Días chip display in list */
+  .dias-chips { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 3px; }
+  .dia-chip {
+    font-size: 0.62rem; font-weight: 700; padding: 2px 6px;
+    border-radius: 6px; background: var(--accent-light); color: var(--accent);
+    border: 1px solid rgba(0,122,255,0.2);
+  }
+
   /* ── Grupos de Servicio — vista pública ───────────────────────────────────── */
 
   /* Button list */
@@ -2395,21 +2439,39 @@
 </div>
 
 <div class="modal-overlay" id="casa-modal">
-  <div class="modal" style="max-width:480px">
+  <div class="modal" style="max-width:500px">
     <div class="modal-header">
       <div class="modal-title" id="casa-modal-title">Nueva Casa</div>
       <button class="modal-close" onclick="closeCasaModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="modal-body">
+
       <div class="form-group2">
         <label class="form-label2">Dirección</label>
         <input type="text" class="form-input" id="casa-direccion" placeholder="Ej: Tres Marías 1633">
       </div>
+
       <div class="form-group2">
-        <label class="form-label2">Amo de casa</label>
-        <input type="text" class="form-input" id="casa-amo" placeholder="Ej: Julia Pérez">
+        <label class="form-label2">Habitante</label>
+        <div class="tipo-amo-row">
+          <select class="form-input tipo-select" id="casa-tipo">
+            <option value="casa">🏠 Casa</option>
+            <option value="departamento">🏢 Departamento</option>
+            <option value="otro">📍 Otro</option>
+          </select>
+          <input type="text" class="form-input" id="casa-amo" placeholder="Ej: Familia González">
+        </div>
       </div>
-      <div style="display:flex;gap:10px;margin-top:1.1rem;justify-content:flex-end">
+
+      <div class="form-group2">
+        <label class="form-label2">Días disponibles</label>
+        <div class="dias-picker" id="casa-dias-picker">
+          <!-- Rendered by JS -->
+        </div>
+        <div style="font-size:0.72rem;color:var(--text3);margin-top:5px">Marca los días en que se puede visitar. Sin selección = cualquier día.</div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:1.25rem;justify-content:flex-end">
         <button class="btn-secondary" onclick="closeCasaModal()">Cancelar</button>
         <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="saveCasa()" id="save-casa-btn">Guardar</button>
       </div>
@@ -4240,6 +4302,21 @@ async function saveAssignment() {
     phone: conductor?.telefono || null,
   };
   if (!payload.date || !payload.time) { showError('as-error','Fecha y hora son requeridos'); return; }
+
+  // ── Day-availability conflict check ──
+  if (casa && !isCasaAvailableOnDate(casa, payload.date)) {
+    const dayKey = JS_DAY_TO_KEY[new Date(payload.date + 'T12:00:00').getDay()];
+    const dayName = (DIAS_SEMANA.find(d => d.key === dayKey) || {}).full || dayKey;
+    const diasDisp = parseCasaDias(casa);
+    const diasNombres = diasDisp.map(k => (DIAS_SEMANA.find(d=>d.key===k)||{}).full||k).join(', ');
+    const proceed = confirm(
+      `⚠️ Aviso de disponibilidad\n\n` +
+      `La casa "${casa.direccion}" tiene marcados solo estos días:\n${diasNombres}\n\n` +
+      `Estás asignando un ${dayName}. ¿Deseas continuar de todas formas?`
+    );
+    if (!proceed) return;
+  }
+
   const btn = document.getElementById('save-as-btn');
   btn.disabled = true; btn.textContent = 'Guardando...';
   let error;
@@ -4502,28 +4579,105 @@ function renderAdminCasas() {
     container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><h4>Sin casas registradas</h4><p>Agrega la primera casa</p></div>`;
     return;
   }
-  container.innerHTML = casas.map(h => `
-    <div class="list-item">
-      <div style="width:38px;height:38px;border-radius:10px;background:var(--surface3);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+  container.innerHTML = casas.map(h => {
+    const tipo = parseCasaTipo(h);
+    const tipoIcon = tipo === 'departamento'
+      ? `<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M9 3v18"/><path d="M2 9h7"/><path d="M2 15h7"/><path d="M15 9h5"/><path d="M15 15h5"/></svg>`
+      : tipo === 'otro'
+      ? `<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
+      : `<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`;
+    const dias = parseCasaDias(h);
+    return `
+    <div class="list-item" style="align-items:flex-start">
+      <div style="width:38px;height:38px;border-radius:10px;background:var(--surface3);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
+        ${tipoIcon}
       </div>
       <div class="list-item-main">
         <div class="list-item-title">${h.direccion}</div>
-        <div class="list-item-sub">${h.amo||'Sin amo de casa registrado'}</div>
+        <div class="list-item-sub">${h.amo ? `${tipo==='departamento'?'Dpto':'Casa'} · ${h.amo}` : 'Sin habitante registrado'}</div>
+        ${dias.length ? diasChipsHtml(dias) : ''}
       </div>
       <div class="list-item-actions">
         <button class="btn-sm" onclick="editCasa('${h.id}')">Editar</button>
         <button class="btn-danger" onclick="deleteCasa('${h.id}')"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
+
+// ── Casa modal — días disponibles helper ──────────────────────────────────────
+const DIAS_SEMANA = [
+  { key: 'lun', label: 'L', full: 'Lunes' },
+  { key: 'mar', label: 'M', full: 'Martes' },
+  { key: 'mie', label: 'X', full: 'Miércoles' },
+  { key: 'jue', label: 'J', full: 'Jueves' },
+  { key: 'vie', label: 'V', full: 'Viernes' },
+  { key: 'sab', label: 'S', full: 'Sábado' },
+  { key: 'dom', label: 'D', full: 'Domingo' },
+];
+
+// Map JS getDay() (0=Sun) to our key
+const JS_DAY_TO_KEY = ['dom','lun','mar','mie','jue','vie','sab'];
+
+let _selectedDias = new Set();
+
+function renderDiasPicker(selectedDias) {
+  _selectedDias = new Set(selectedDias || []);
+  const container = document.getElementById('casa-dias-picker');
+  if (!container) return;
+  container.innerHTML = DIAS_SEMANA.map(d => `
+    <div class="dia-btn${_selectedDias.has(d.key) ? ' selected' : ''}" id="dia-btn-${d.key}" onclick="toggleDia('${d.key}')">
+      <span class="dia-btn-letter">${d.label}</span>
+      <span class="dia-btn-num">${d.full.slice(0,3)}</span>
+    </div>
+  `).join('');
+}
+
+function toggleDia(key) {
+  if (_selectedDias.has(key)) { _selectedDias.delete(key); }
+  else { _selectedDias.add(key); }
+  // Update UI
+  DIAS_SEMANA.forEach(d => {
+    const btn = document.getElementById('dia-btn-' + d.key);
+    if (btn) btn.classList.toggle('selected', _selectedDias.has(d.key));
+  });
+}
+
+function parseCasaDias(h) {
+  if (!h) return [];
+  try { return JSON.parse(h.dias || '[]'); } catch { return []; }
+}
+
+function parseCasaTipo(h) {
+  return h?.tipo || 'casa';
+}
+
+function diasChipsHtml(dias) {
+  if (!dias || !dias.length) return '';
+  return '<div class="dias-chips">' +
+    dias.map(k => {
+      const d = DIAS_SEMANA.find(x=>x.key===k);
+      return d ? `<span class="dia-chip">${d.full}</span>` : '';
+    }).join('') + '</div>';
+}
+
+// Check if a given JS Date's weekday is allowed by this casa
+function isCasaAvailableOnDate(casa, dateStr) {
+  const dias = parseCasaDias(casa);
+  if (!dias.length) return true; // no restriction
+  if (!dateStr) return true;
+  const dayKey = JS_DAY_TO_KEY[new Date(dateStr + 'T12:00:00').getDay()];
+  return dias.includes(dayKey);
+}
 function openCasaModal(h) {
   if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   editingCasaId = h ? h.id : null;
   document.getElementById('casa-modal-title').textContent = h ? 'Editar Casa' : 'Nueva Casa';
   document.getElementById('casa-direccion').value = h?.direccion || '';
   document.getElementById('casa-amo').value = h?.amo || '';
+  document.getElementById('casa-tipo').value = parseCasaTipo(h);
+  renderDiasPicker(parseCasaDias(h));
   document.getElementById('casa-error').style.display = 'none';
   document.getElementById('casa-modal').classList.add('open');
 }
@@ -4537,12 +4691,15 @@ async function saveCasa() {
   }
   const direccion = document.getElementById('casa-direccion').value.trim();
   const amo = document.getElementById('casa-amo').value.trim();
+  const tipo = document.getElementById('casa-tipo').value;
+  const dias = JSON.stringify([..._selectedDias]);
   if (!direccion) { showError('casa-error','La dirección es requerida'); return; }
   const btn = document.getElementById('save-casa-btn');
   btn.disabled = true; btn.textContent = 'Guardando...';
+  const payload = { direccion, amo, tipo, dias };
   let error;
-  if (editingCasaId) { ({error} = await sb.from('casas').update({direccion,amo}).eq('id',editingCasaId)); }
-  else { ({error} = await sb.from('casas').insert({direccion,amo})); }
+  if (editingCasaId) { ({error} = await sb.from('casas').update(payload).eq('id',editingCasaId)); }
+  else { ({error} = await sb.from('casas').insert(payload)); }
   btn.disabled = false; btn.textContent = 'Guardar';
   if (error) { showError('casa-error', error.message); return; }
   showToast(editingCasaId?'Casa actualizada':'Casa creada','success');
