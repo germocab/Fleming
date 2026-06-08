@@ -1982,16 +1982,36 @@
   .hora-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
   .hora-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
-  /* ── Assignment card — grupo badge ────────────────────────────────────────── */
+  /* ── Assignment card — grupo badge & priority ─────────────────────────────── */
   .grupo-scope-badge {
     display: inline-flex; align-items: center; gap: 4px;
-    padding: 2px 8px; border-radius: 20px;
+    padding: 2px 9px; border-radius: 20px;
     background: var(--accent-light); color: var(--accent);
-    font-size: 0.68rem; font-weight: 700; white-space: nowrap;
+    font-size: 0.68rem; font-weight: 700; white-space: nowrap; flex-shrink: 0;
   }
-  .assignment-card-today.grupo-priority,
+
+  /* "Tu grupo" tag — shown above address, always visible */
+  .mi-grupo-tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 9px; border-radius: 20px;
+    background: var(--accent); color: #fff;
+    font-size: 0.66rem; font-weight: 800; letter-spacing: 0.04em;
+    text-transform: uppercase; white-space: nowrap;
+    margin-bottom: 5px; align-self: flex-start;
+  }
+  .mi-grupo-tag svg {
+    width: 9px; height: 9px; stroke: currentColor; fill: none;
+    stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0;
+  }
+
+  /* Priority card — blue glow border */
+  .assignment-card-today.grupo-priority {
+    border: 2px solid var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-light), var(--shadow);
+  }
   .assignment-card.grupo-priority {
-    border-left: 3px solid var(--accent);
+    border: 2px solid var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-light), 0 1px 6px rgba(0,0,0,0.06);
   }
 </style>
 </head>
@@ -4013,11 +4033,14 @@ function renderSchedule() {
       const grupoObj = a.grupo_id ? grupos.find(g => g.id === a.grupo_id) : null;
       const grupoBadge = grupoObj ? `<span class="grupo-scope-badge">Grupo ${grupoObj.numero}</span>` : '';
       const priorityClass = isMyGrupo ? ' grupo-priority' : '';
+      // "Tu grupo" tag — shown above the address, only for the user's own grupo
+      const miGrupoTag = isMyGrupo ? `<span class="mi-grupo-tag"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Tu grupo</span>` : '';
 
       if (isToday) {
         // ── Featured today card ──
         html += `<div class="assignment-card-today${priorityClass}" onclick="viewAssignment('${a.id}')">
           <div class="today-card-info">
+            ${miGrupoTag}
             <div class="today-card-address">${a.address||'Sin dirección'}${a.house?`<br><span class="today-card-house">${a.house}</span>`:''}</div>
             <div class="today-card-meta">
               <span class="card-time-chip">
@@ -4025,7 +4048,7 @@ function renderSchedule() {
                 ${timeStr}hrs
               </span>
               <span class="card-conductor">${a.conductor||'Sin conductor'}</span>
-              ${typeChip}${grupoBadge}
+              ${typeChip}${!isMyGrupo ? grupoBadge : ''}
             </div>
           </div>
           ${rightBadge}
@@ -4034,6 +4057,7 @@ function renderSchedule() {
         // ── Regular card ──
         html += `<div class="assignment-card${priorityClass}" onclick="viewAssignment('${a.id}')">
           <div class="card-main">
+            ${miGrupoTag}
             <div class="card-address">${a.address||'Sin dirección'}${a.house?`<br><span class="card-house">${a.house}</span>`:''}</div>
             <div class="card-meta">
               <span class="card-time-chip">
@@ -4041,7 +4065,7 @@ function renderSchedule() {
                 ${timeStr}hrs
               </span>
               <span class="card-conductor">${a.conductor||'Sin conductor'}</span>
-              ${typeChip}${grupoBadge}
+              ${typeChip}${!isMyGrupo ? grupoBadge : ''}
             </div>
           </div>
           ${rightBadge}
