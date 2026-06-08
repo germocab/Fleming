@@ -2860,74 +2860,6 @@
         <div id="schedule-content"><div class="loader-wrap"><div class="loader"></div></div></div>
       </div>
 
-<!-- ════════════════════════════════════════════════════════
-     FlemingPlans — Programación semanal (sub-content-programacion)
-════════════════════════════════════════════════════════ -->
-<div id="sub-content-programacion" class="sub-page" style="display:none">
-  <div id="fp-capture-frame">
-    <div id="fp-view-schedule-inner">
-
-      <div class="fp-schedule-header">
-        <div class="fp-schedule-title">
-          <h2>Programación Semanal</h2>
-          <p id="fp-week-label">Selecciona el lunes para comenzar</p>
-        </div>
-        <div class="fp-date-box" id="fp-date-box-ui">
-          <label>Lunes de la semana</label>
-          <input type="date" id="fp-monday-picker" onchange="fp_updateWeek()">
-        </div>
-      </div>
-
-      <div class="fp-rec-section" id="fp-rec-section-ui">
-        <div class="fp-rec-section-title">Territorios sugeridos · arrastra al día que prefieras</div>
-        <div class="fp-rec-row" id="fp-rec-week-grid"></div>
-      </div>
-
-      <div class="fp-week-grid" id="fp-main-grid"></div>
-
-      <div class="fp-schedule-actions" id="fp-schedule-actions-ui">
-        <button class="fp-btn-danger admin-only" onclick="fp_clearSchedule()">Reiniciar semana</button>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-          <button class="fp-btn-confirm-week admin-only" onclick="fp_confirmWeekToDatabase()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-            Confirmar semana
-          </button>
-          <button class="fp-btn-export" onclick="fp_exportImage()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Compartir
-          </button>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Historial -->
-  <div id="fp-programacion-content" style="margin-top:2rem">
-    <div class="fp-hist-page-header">
-      <div>
-        <h2 class="fp-hist-page-title">Historial</h2>
-        <div id="fp-history-week-label" class="fp-hist-page-sub"></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div class="fp-history-nav">
-          <button class="fp-hist-nav-btn" id="fp-hist-prev" onclick="fp_historyNavWeek(-1)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <span id="fp-hist-page-label" style="font-size:0.8rem;font-weight:600;color:var(--text2);min-width:60px;text-align:center;"></span>
-          <button class="fp-hist-nav-btn" id="fp-hist-next" onclick="fp_historyNavWeek(1)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-        </div>
-        <button class="fp-hist-delete-btn" onclick="fp_deleteWeekFromHistory(fp_historyWeeks[fp_historyWeekIndex])">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-        </button>
-      </div>
-    </div>
-    <div id="fp-history-grid" class="fp-history-grid"></div>
-    <div id="fp-history-empty" style="display:none;text-align:center;padding:2rem;color:var(--text3);font-size:0.85rem;">Sin historial registrado</div>
-  </div>
-</div>
 
       <div id="sub-content-carritos" class="sub-page" style="display:none">
 
@@ -4693,7 +4625,6 @@ function doLogout() {
 const SUB_TABS = {
   predicacion: [
     { id: 'casa',           label: 'Casa en casa' },
-    { id: 'programacion',   label: 'Programación' },
     { id: 'territorios',    label: 'Territorios' },
     { id: 'carritos',       label: 'Carritos' },
     { id: 'grupos',         label: 'Grupos' },
@@ -4737,12 +4668,11 @@ function switchMainTab(tab, btn) {
 function switchSubTab(tabId) {
   currentSubTab = tabId;
   renderSubTabs(currentMainTab);
-  ['casa','programacion','territorios','carritos','grupos'].forEach(id => {
+  ['casa','territorios','carritos','grupos'].forEach(id => {
     const el = document.getElementById('sub-content-' + id);
     if (el) el.style.display = id === tabId ? '' : 'none';
   });
   _saveNavState();
-  if (tabId === 'programacion') initFlemingSchedule();
   if (tabId === 'territorios') renderTerritoryView();
   if (tabId === 'carritos') carritos_init();
   if (tabId === 'grupos') {
