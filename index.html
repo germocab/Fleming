@@ -5011,6 +5011,27 @@ function openUserProfilePage(uid) {
       </div>
     </div>` : '';
 
+  // Grupo de Servicio section (DEV only, not self)
+  const myMembershipInGrupos = findMembershipForName(u.name);
+  const currentGrupoId = myMembershipInGrupos?.grupo?.id || '';
+  const grupoOptions = '<option value="">Sin grupo asignado</option>' +
+    grupos.map(g => `<option value="${g.id}"${g.id === currentGrupoId ? ' selected' : ''}>Grupo ${g.numero}</option>`).join('');
+
+  const grupoSection = isDev ? `
+    <div class="uprofile-edit-section">
+      <div class="uprofile-edit-title">Grupo de Servicio</div>
+      <div class="uprofile-edit-body">
+        <div class="form-group2">
+          <label class="form-label2">Grupo asignado</label>
+          <select class="role-select-inline" id="uprof-grupo-sel">${grupoOptions}</select>
+        </div>
+        <div class="uprofile-actions" style="margin-top:0.75rem">
+          <button class="btn-primary" style="width:auto;padding:0.6rem 1.5rem" onclick="saveUserGrupo('${u.id}','${u.name.replace(/'/g,"\'")}')">Guardar grupo</button>
+        </div>
+        <div class="auth-error" id="uprof-grupo-error" style="margin-top:6px"></div>
+      </div>
+    </div>` : '';
+
   const dangerSection = isDev && !isCurrentUser ? `
     <div class="uprofile-danger-zone">
       <div class="uprofile-danger-title">Zona de peligro</div>
@@ -5036,6 +5057,7 @@ function openUserProfilePage(uid) {
     </div>
     ${labelChipsFull ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.1rem">${labelChipsFull}</div>` : ''}
     ${editSection}
+    ${grupoSection}
     ${dangerSection}
   `;
 
@@ -5067,6 +5089,46 @@ async function saveProfileChanges(uid) {
   showToast('Cambios guardados ✓', 'success');
   closeUserProfilePage();
   renderUsersPanel();
+}
+
+async function saveUserGrupo(uid, userName) {
+  const grupoId = document.getElementById('uprof-grupo-sel').value;
+  const errEl = document.getElementById('uprof-grupo-error');
+  if (errEl) errEl.style.display = 'none';
+
+  // Find current membership to know if we need to insert, update or delete
+  const existing = findMembershipForName(userName);
+
+  try {
+    if (existing) {
+      if (grupoId === '' || grupoId === null) {
+        // Remove from current grupo
+        const { error } = await sb.from('grupo_miembros').delete().eq('id', existing.miembro.id);
+        if (error) throw error;
+      } else if (existing.grupo.id !== grupoId) {
+        // Move: delete old, insert new
+        await sb.from('grupo_miembros').delete().eq('id', existing.miembro.id);
+        const rol = existing.miembro.rol || 'miembro';
+        const { error } = await sb.from('grupo_miembros').insert({ grupo_id: grupoId, nombre: userName, rol, precursor: existing.miembro.precursor || false });
+        if (error) throw error;
+      }
+      // else same grupo — nothing to do
+    } else if (grupoId) {
+      // No existing membership, insert new
+      const { error } = await sb.from('grupo_miembros').insert({ grupo_id: grupoId, nombre: userName, rol: 'miembro', precursor: false });
+      if (error) throw error;
+    }
+  } catch(e) {
+    if (errEl) { errEl.textContent = e.message; errEl.style.display = 'block'; }
+    showToast('Error al guardar grupo', 'error');
+    return;
+  }
+
+  showToast('Grupo actualizado', 'success');
+  await loadGrupos();
+  renderGruposView();
+  // Refresh the profile page to show updated grupo
+  openUserProfilePage(uid);
 }
 
 async function deleteUser(uid, name) {
