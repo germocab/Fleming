@@ -1967,6 +1967,32 @@
   .label-toggle.active-anciano svg,
   .label-toggle.active-siervo svg { opacity: 1; }
 
+
+  /* ── Assignment modal — hora preset chips ─────────────────────────────────── */
+  .hora-preset-chips {
+    display: flex; flex-wrap: wrap; gap: 5px;
+  }
+  .hora-chip {
+    padding: 4px 10px; border-radius: 20px;
+    border: 1px solid var(--border); background: var(--surface2);
+    color: var(--text2); font-family: var(--font); font-size: 0.76rem;
+    font-weight: 600; cursor: pointer; transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .hora-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .hora-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* ── Assignment card — grupo badge ────────────────────────────────────────── */
+  .grupo-scope-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 20px;
+    background: var(--accent-light); color: var(--accent);
+    font-size: 0.68rem; font-weight: 700; white-space: nowrap;
+  }
+  .assignment-card-today.grupo-priority,
+  .assignment-card.grupo-priority {
+    border-left: 3px solid var(--accent);
+  }
 </style>
 </head>
 <body>
@@ -2320,9 +2346,35 @@
       <button class="modal-close" onclick="closeAssignmentModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="modal-body">
+      <!-- Tipo de asignación -->
+      <div class="form-group2">
+        <label class="form-label2">Tipo de asignación</label>
+        <select class="form-select" id="as-scope" onchange="onScopeChange()">
+          <option value="general">Predicación de Semana</option>
+          <option value="grupo">Grupo de Servicio</option>
+        </select>
+      </div>
+      <!-- Grupo selector (solo visible cuando scope=grupo) -->
+      <div class="form-group2" id="as-grupo-row" style="display:none">
+        <label class="form-label2">Grupo</label>
+        <select class="form-select" id="as-grupo-select">
+          <option value="">Seleccionar grupo…</option>
+        </select>
+      </div>
+      <!-- Fecha + Hora -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
         <div class="form-group2"><label class="form-label2">Fecha</label><input type="date" class="form-input" id="as-date"></div>
-        <div class="form-group2"><label class="form-label2">Hora</label><input type="time" class="form-input" id="as-time"></div>
+        <div class="form-group2">
+          <label class="form-label2">Hora</label>
+          <div class="hora-preset-chips" id="hora-preset-chips">
+            <button type="button" class="hora-chip" onclick="setHoraPreset('09:45')">9:45 AM</button>
+            <button type="button" class="hora-chip" onclick="setHoraPreset('10:00')">10:00 AM</button>
+            <button type="button" class="hora-chip" onclick="setHoraPreset('17:00')">5:00 PM</button>
+            <button type="button" class="hora-chip" onclick="setHoraPreset('17:30')">5:30 PM</button>
+            <button type="button" class="hora-chip" onclick="setHoraPreset('18:00')">6:00 PM</button>
+          </div>
+          <input type="time" class="form-input" id="as-time" oninput="syncHoraChips()" style="margin-top:5px">
+        </div>
       </div>
       <div class="form-group2">
         <label class="form-label2">Casa</label>
@@ -3920,9 +3972,19 @@ function renderSchedule() {
       html += `<div class="date-section"><div class="date-section-header">${dateLabel}</div>`;
     }
 
-    grouped[date].forEach(a => {
+    // Sort: user's grupo assignments first, then by time
+    const myMem = currentUser ? findMembershipForName(currentUser.name) : null;
+    const myGrupoId = myMem?.grupo?.id || null;
+    const sortedAssignments = [...grouped[date]].sort((a, b) => {
+      const aPrio = myGrupoId && a.grupo_id === myGrupoId ? 0 : 1;
+      const bPrio = myGrupoId && b.grupo_id === myGrupoId ? 0 : 1;
+      if (aPrio !== bPrio) return aPrio - bPrio;
+      return (a.time || '') < (b.time || '') ? -1 : 1;
+    });
+    sortedAssignments.forEach(a => {
       const ter = a.territories;
       const timeStr = a.time ? a.time.substring(0,5) : '--:--';
+      const isMyGrupo = myGrupoId && a.grupo_id === myGrupoId;
 
       let rightBadge = '';
       if (a.type === 'zoom') {
@@ -3947,9 +4009,14 @@ function renderSchedule() {
       else if (a.type === 'telefono') typeChip = `<span class="type-chip chip-phone">Teléfono</span>`;
       else if (a.type === 'cartas') typeChip = `<span class="type-chip chip-cartas">Cartas</span>`;
 
+      // Grupo badge chip
+      const grupoObj = a.grupo_id ? grupos.find(g => g.id === a.grupo_id) : null;
+      const grupoBadge = grupoObj ? `<span class="grupo-scope-badge">Grupo ${grupoObj.numero}</span>` : '';
+      const priorityClass = isMyGrupo ? ' grupo-priority' : '';
+
       if (isToday) {
         // ── Featured today card ──
-        html += `<div class="assignment-card-today" onclick="viewAssignment('${a.id}')">
+        html += `<div class="assignment-card-today${priorityClass}" onclick="viewAssignment('${a.id}')">
           <div class="today-card-info">
             <div class="today-card-address">${a.address||'Sin dirección'}${a.house?`<br><span class="today-card-house">${a.house}</span>`:''}</div>
             <div class="today-card-meta">
@@ -3958,14 +4025,14 @@ function renderSchedule() {
                 ${timeStr}hrs
               </span>
               <span class="card-conductor">${a.conductor||'Sin conductor'}</span>
-              ${typeChip}
+              ${typeChip}${grupoBadge}
             </div>
           </div>
           ${rightBadge}
         </div>`;
       } else {
         // ── Regular card ──
-        html += `<div class="assignment-card" onclick="viewAssignment('${a.id}')">
+        html += `<div class="assignment-card${priorityClass}" onclick="viewAssignment('${a.id}')">
           <div class="card-main">
             <div class="card-address">${a.address||'Sin dirección'}${a.house?`<br><span class="card-house">${a.house}</span>`:''}</div>
             <div class="card-meta">
@@ -3974,7 +4041,7 @@ function renderSchedule() {
                 ${timeStr}hrs
               </span>
               <span class="card-conductor">${a.conductor||'Sin conductor'}</span>
-              ${typeChip}
+              ${typeChip}${grupoBadge}
             </div>
           </div>
           ${rightBadge}
@@ -4230,13 +4297,23 @@ function openAssignmentModal(a) {
   document.getElementById('as-type').value = a?.type || 'presencial';
   document.getElementById('as-notes').value = a?.notes || '';
 
+  // Scope + grupo
+  const scope = a?.grupo_id ? 'grupo' : 'general';
+  document.getElementById('as-scope').value = scope;
+  const selGrupo = document.getElementById('as-grupo-select');
+  selGrupo.innerHTML = '<option value="">Seleccionar grupo…</option>' +
+    grupos.map(g => `<option value="${g.id}"${a?.grupo_id===g.id?' selected':''}>Grupo ${g.numero}</option>`).join('');
+  document.getElementById('as-grupo-row').style.display = scope === 'grupo' ? '' : 'none';
+
+  syncHoraChips();
+
   const selConductor = document.getElementById('as-conductor-select');
   selConductor.innerHTML = '<option value="">Sin conductor</option>' +
     conductores.map(c => `<option value="${c.id}"${a?.conductor_id===c.id?' selected':''}>${c.nombre} ${c.apellido}</option>`).join('');
 
   const selCasa = document.getElementById('as-casa-select');
   selCasa.innerHTML = '<option value="">Sin casa asignada</option>' +
-    casas.map(h => `<option value="${h.id}"${a?.casa_id===h.id?' selected':''}>${h.direccion}${h.amo?' (${h.amo})':''}</option>`).join('');
+    casas.map(h => `<option value="${h.id}"${a?.casa_id===h.id?' selected':''}>${h.direccion}${h.amo?` (${h.amo})`:''}</option>`).join('');
 
   const selTer = document.getElementById('as-territory');
   selTer.innerHTML = '<option value="">Sin territorio</option>' +
@@ -4244,6 +4321,31 @@ function openAssignmentModal(a) {
 
   document.getElementById('as-error').style.display = 'none';
   document.getElementById('assignment-modal').classList.add('open');
+}
+
+function onScopeChange() {
+  const isGrupo = document.getElementById('as-scope').value === 'grupo';
+  document.getElementById('as-grupo-row').style.display = isGrupo ? '' : 'none';
+  if (isGrupo) {
+    const selGrupo = document.getElementById('as-grupo-select');
+    if (selGrupo.options.length <= 1) {
+      selGrupo.innerHTML = '<option value="">Seleccionar grupo…</option>' +
+        grupos.map(g => `<option value="${g.id}">Grupo ${g.numero}</option>`).join('');
+    }
+  }
+}
+
+function setHoraPreset(val) {
+  document.getElementById('as-time').value = val;
+  syncHoraChips();
+}
+
+function syncHoraChips() {
+  const val = document.getElementById('as-time').value;
+  const PRESETS = ['09:45','10:00','17:00','17:30','18:00'];
+  document.querySelectorAll('.hora-chip').forEach((btn, i) => {
+    btn.classList.toggle('active', val === PRESETS[i]);
+  });
 }
 function closeAssignmentModal() { document.getElementById('assignment-modal').classList.remove('open'); editingAssignmentId = null; }
 function editAssignment(id) { openAssignmentModal(assignments.find(a=>a.id===id)); }
@@ -4257,6 +4359,10 @@ async function saveAssignment() {
   const casaId = document.getElementById('as-casa-select').value || null;
   const conductor = conductorId ? conductores.find(c=>c.id===conductorId) : null;
   const casa = casaId ? casas.find(h=>h.id===casaId) : null;
+  const scope = document.getElementById('as-scope').value;
+  const grupoId = scope === 'grupo' ? (document.getElementById('as-grupo-select').value || null) : null;
+  if (scope === 'grupo' && !grupoId) { showError('as-error','Selecciona un grupo'); return; }
+
   const payload = {
     date: document.getElementById('as-date').value,
     time: document.getElementById('as-time').value,
@@ -4269,6 +4375,7 @@ async function saveAssignment() {
     territory_id: document.getElementById('as-territory').value || null,
     notes: document.getElementById('as-notes').value.trim(),
     phone: conductor?.telefono || null,
+    grupo_id: grupoId,
   };
   if (!payload.date || !payload.time) { showError('as-error','Fecha y hora son requeridos'); return; }
 
@@ -4351,10 +4458,33 @@ if (editingAssignmentId) {
     }
   }
 }
-else { ({error} = await sb.from('assignments').insert(payload)); }
+else {
+  ({error} = await sb.from('assignments').insert(payload));
+  // Send push notification to grupo members if this is a grupo assignment
+  if (!error && grupoId) {
+    const g = grupos.find(x => x.id === grupoId);
+    if (g) {
+      const d = new Date(payload.date + 'T00:00:00');
+      const DAY = ['Domingo','Lunes','Martes','Mi\u00e9rcoles','Jueves','Viernes','S\u00e1bado'];
+      const MON = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+      const dateStr = `${DAY[d.getDay()]} ${d.getDate()} de ${MON[d.getMonth()]}`;
+      const timeLabel = payload.time ? payload.time.substring(0,5) + 'hrs' : '';
+      const notifTitle = `Asignaci\u00f3n Grupo ${g.numero}`;
+      const notifBody = `Nueva predicaci\u00f3n el ${dateStr}${timeLabel ? ' a las ' + timeLabel : ''}${payload.address ? ' — ' + payload.address : ''}`;
+      await sb.from('notifications').insert({ title: notifTitle, body: notifBody, grupo_id: grupoId });
+      try {
+        await fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+          body: JSON.stringify({ title: notifTitle, body: notifBody, grupo_id: grupoId })
+        });
+      } catch(e) { console.warn('Push grupo fallido:', e.message); }
+    }
+  }
+}
   btn.disabled = false; btn.textContent = 'Guardar';
   if (error) { showError('as-error', error.message); return; }
-  showToast(editingAssignmentId?'Asignación actualizada':'Asignación creada','success');
+  showToast(editingAssignmentId?'Asignaci\u00f3n actualizada':'Asignaci\u00f3n creada','success');
   closeAssignmentModal();
   await loadSchedule();
   renderAdminAssignments();
