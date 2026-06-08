@@ -2455,9 +2455,9 @@
         <label class="form-label2">Habitante</label>
         <div class="tipo-amo-row">
           <select class="form-input tipo-select" id="casa-tipo">
-            <option value="casa">🏠 Casa</option>
-            <option value="departamento">🏢 Departamento</option>
-            <option value="otro">📍 Otro</option>
+            <option value="casa">Casa</option>
+            <option value="departamento">Departamento</option>
+            <option value="otro">Otro</option>
           </select>
           <input type="text" class="form-input" id="casa-amo" placeholder="Ej: Familia González">
         </div>
@@ -2534,7 +2534,7 @@
 <!-- Full congregation map lightbox -->
 <div class="full-map-lightbox" id="full-map-lightbox" onclick="handleFullMapClick(event)">
   <div class="full-map-lb-header">
-    <span class="full-map-lb-title">🗺 Mapa completo de la congregación</span>
+    <span class="full-map-lb-title">Mapa completo de la congregación</span>
     <div class="full-map-lb-actions">
       <button class="full-map-lb-btn download" onclick="downloadFullMap()">
         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -3729,7 +3729,7 @@ async function enterApp() {
   const taskEl = document.getElementById('dropdown-task');
   if (taskEl && currentRole === 'semiadmin') {
     const { data: me } = await sb.from('platform_users').select('task').eq('name', currentUser.name).single();
-    if (me && me.task) { taskEl.textContent = '📋 ' + me.task; taskEl.style.display = ''; }
+    if (me && me.task) { taskEl.textContent = me.task; taskEl.style.display = ''; }
     else { taskEl.style.display = 'none'; }
   } else if (taskEl) { taskEl.style.display = 'none'; }
 
@@ -4310,7 +4310,7 @@ async function saveAssignment() {
     const diasDisp = parseCasaDias(casa);
     const diasNombres = diasDisp.map(k => (DIAS_SEMANA.find(d=>d.key===k)||{}).full||k).join(', ');
     const proceed = confirm(
-      `⚠️ Aviso de disponibilidad\n\n` +
+      `Aviso de disponibilidad\n\n` +
       `La casa "${casa.direccion}" tiene marcados solo estos días:\n${diasNombres}\n\n` +
       `Estás asignando un ${dayName}. ¿Deseas continuar de todas formas?`
     );
