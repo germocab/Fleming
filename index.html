@@ -1486,61 +1486,44 @@
 
   /* ── Grupos de Servicio — vista pública ───────────────────────────────────── */
 
-  /* Button list */
+  /* Grid de tarjetas */
   .grupos-btn-grid {
-    display: flex; flex-direction: column; gap: 11px;
-    padding: 0.5rem 0 2.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    padding: 0.25rem 0 2.5rem;
   }
   .grupo-btn {
-    display: flex; align-items: center; gap: 0;
-    padding: 0; border: none;
-    border-radius: 20px;
-    cursor: pointer; transition: transform 0.18s, box-shadow 0.18s;
-    position: relative; overflow: hidden; text-align: left; width: 100%;
-    box-shadow: 0 3px 14px rgba(0,0,0,0.09);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 0; padding: 1.25rem 0.75rem 1rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer; transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    text-align: center; width: 100%; position: relative; overflow: hidden;
   }
-  .grupo-btn:hover { transform: translateY(-2px) translateX(2px); box-shadow: 0 8px 28px rgba(0,0,0,0.15); }
-  .grupo-btn:active { transform: scale(0.985); }
-  /* Left colored bar */
-  .grupo-btn-bar {
-    width: 7px; align-self: stretch; flex-shrink: 0;
-    background: var(--grupo-color, var(--accent));
-    border-radius: 20px 0 0 20px;
+  .grupo-btn::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 3px; background: var(--grupo-color, var(--accent));
+    border-radius: var(--radius) var(--radius) 0 0;
   }
-  /* Colored icon block */
+  .grupo-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: var(--border-active); }
+  .grupo-btn:active { transform: scale(0.97); }
+  /* Numero grande */
   .grupo-btn-icon {
-    width: 56px; height: 56px; border-radius: 15px; flex-shrink: 0;
-    background: var(--grupo-color, var(--accent));
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.45rem; font-weight: 900; color: #fff;
-    margin: 13px 14px 13px 13px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
-    letter-spacing: -0.03em;
+    font-size: 2rem; font-weight: 800; color: var(--grupo-color, var(--accent));
+    line-height: 1; letter-spacing: -0.04em; margin-bottom: 0.5rem;
   }
-  /* White / surface main body */
-  .grupo-btn-body {
-    flex: 1; background: var(--surface);
-    padding: 14px 0 14px 0; align-self: stretch;
-    display: flex; align-items: center; gap: 10px;
-    border-radius: 0 20px 20px 0;
-  }
-  .grupo-btn-info { flex: 1; min-width: 0; }
   .grupo-btn-label {
-    font-size: 1.05rem; font-weight: 800; color: var(--text);
-    letter-spacing: -0.02em;
+    font-size: 0.72rem; font-weight: 600; color: var(--text2);
+    letter-spacing: 0.01em; line-height: 1.2;
   }
-  .grupo-btn-sublabel { font-size: 0.76rem; color: var(--text3); margin-top: 3px; font-weight: 500; }
-  .grupo-btn-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; margin-right: 16px; flex-shrink: 0; }
   .grupo-btn-count {
-    font-size: 0.72rem; font-weight: 700; padding: 3px 10px;
-    border-radius: 20px; white-space: nowrap;
-    background: var(--grupo-color, var(--accent));
-    color: #fff; opacity: 0.85;
+    font-size: 0.68rem; font-weight: 600; color: var(--text3);
+    margin-top: 3px;
   }
-  .grupo-btn-arrow {
-    width: 16px; height: 16px; stroke: var(--text3); fill: none;
-    stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
-  }
+  /* Ocultar elementos del diseño anterior */
+  .grupo-btn-bar, .grupo-btn-body, .grupo-btn-info,
+  .grupo-btn-sublabel, .grupo-btn-right, .grupo-btn-arrow { display: none; }
 
   /* ── Group detail fullscreen page ── */
   #page-grupo {
@@ -2879,25 +2862,11 @@ function renderGruposView() {
   ];
   const btnsHtml = '<div class="grupos-btn-grid" id="grupos-cards-grid">' + grupos.map((g, i) => {
     const color = GRUPO_COLORS[i % GRUPO_COLORS.length];
-    const super_ = g.miembros.find(m => m.rol === 'superintendente');
-    const aux    = g.miembros.find(m => m.rol === 'auxiliar');
-    const sublabel = super_
-      ? `${super_.nombre.split(' ').slice(0,2).join(' ')}${aux ? '  ·  ' + aux.nombre.split(' ').slice(0,2).join(' ') : ''}`
-      : (aux ? aux.nombre.split(' ').slice(0,2).join(' ') : 'Sin liderazgo asignado');
     const cnt = g.miembros.length;
     return `<button class="grupo-btn" style="--grupo-color:${color}" onclick="openGrupoDetailPage('${g.id}')">
-      <div class="grupo-btn-bar"></div>
       <div class="grupo-btn-icon">${g.numero}</div>
-      <div class="grupo-btn-body">
-        <div class="grupo-btn-info">
-          <div class="grupo-btn-label">Grupo ${g.numero}</div>
-          <div class="grupo-btn-sublabel">${sublabel}</div>
-        </div>
-        <div class="grupo-btn-right">
-          <span class="grupo-btn-count">${cnt} miembro${cnt !== 1 ? 's' : ''}</span>
-          <svg class="grupo-btn-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-        </div>
-      </div>
+      <div class="grupo-btn-label">Grupo ${g.numero}</div>
+      <div class="grupo-btn-count">${cnt} miembro${cnt !== 1 ? 's' : ''}</div>
     </button>`;
   }).join('') + '</div>';
 
