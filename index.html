@@ -2639,6 +2639,93 @@
             .atm-grid { grid-template-columns: repeat(2, 1fr); }
         }
   /* ════ end FlemingPlans CSS ════ */
+
+  /* ════ Carritos CSS ════ */
+  #sub-content-carritos { display:flex; flex-direction:column; min-height:400px; }
+  #carritos-list-screen { display:flex; flex-direction:column; }
+  #carritos-detail-screen { display:flex; flex-direction:column; }
+  #carritos-turn-detail-screen { display:flex !important; }
+
+  .crt-chip {
+    padding:7px 14px; border-radius:20px; font-size:0.83rem; font-weight:600;
+    cursor:pointer; transition:all 0.18s;
+    background:var(--surface); border:1px solid var(--border); color:var(--text3);
+  }
+  .crt-chip.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+
+  .crt-slot {
+    padding:16px; border-radius:18px; margin-bottom:10px; color:white;
+    display:flex; flex-direction:column; gap:8px; cursor:pointer;
+    transition:transform 0.18s, box-shadow 0.18s; box-shadow:0 2px 10px rgba(0,0,0,0.12);
+  }
+  .crt-slot:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(0,0,0,0.15); }
+  .crt-slot:active { transform:scale(0.98); }
+  .crt-slot.turno-M { background: linear-gradient(135deg, #e8720c, #f59e0b); }
+  .crt-slot.turno-T { background: linear-gradient(135deg, #1d4ed8, #3b82f6); }
+  .crt-slot.turno-TD { background: linear-gradient(135deg, #15803d, #22c55e); }
+
+  .crt-location-card {
+    padding:18px 10px; border-radius:20px; cursor:pointer;
+    background:var(--surface2); display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center;
+    gap:10px; border:2px solid transparent; min-height:130px;
+    transition:border-color 0.18s, box-shadow 0.18s;
+  }
+  .crt-location-card:hover { border-color:var(--accent); box-shadow:0 4px 16px rgba(0,122,255,0.15); }
+
+  .crt-logistics-box {
+    background:var(--surface2); border:1px solid var(--border);
+    border-radius:18px; padding:16px; margin-bottom:12px;
+    box-shadow:0 1px 6px rgba(0,0,0,0.04);
+  }
+  .crt-logistics-box.orange {
+    background:linear-gradient(145deg,rgba(245,158,11,0.08),rgba(245,158,11,0.02));
+    border-color:rgba(245,158,11,0.2);
+  }
+  .crt-logistics-box h4 {
+    margin:0 0 8px; font-size:0.7rem; text-transform:uppercase;
+    letter-spacing:1px; color:var(--text3); display:flex; align-items:center; gap:5px;
+  }
+  .crt-logistics-box p { margin:0; font-weight:700; font-size:0.95rem; color:var(--text); }
+
+  .crt-btn-mini {
+    flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
+    padding:9px 12px; border-radius:12px; text-decoration:none;
+    font-size:0.82rem; font-weight:700; transition:all 0.18s;
+    border:1px solid var(--border); background:var(--surface); color:var(--text);
+    cursor:pointer;
+  }
+  .crt-btn-mini:hover { border-color:var(--accent); color:var(--accent); }
+
+  .crt-days-row { display:flex; gap:7px; margin:14px 0; overflow-x:auto; scrollbar-width:none; }
+  .crt-days-row::-webkit-scrollbar { display:none; }
+
+  .crt-day-chip {
+    padding:7px 14px; border-radius:20px; font-size:0.83rem; font-weight:600;
+    cursor:pointer; border:1px solid var(--border); background:var(--surface);
+    color:var(--text2); white-space:nowrap; transition:all 0.15s; flex-shrink:0;
+  }
+  .crt-day-chip.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+
+  .crt-my-shift-card {
+    background:var(--surface); border:1px solid var(--border); border-radius:18px;
+    padding:14px; margin-bottom:10px; display:flex; flex-direction:column;
+    gap:7px; cursor:pointer; box-shadow:0 1px 6px rgba(0,0,0,0.05);
+    transition:box-shadow 0.15s, transform 0.15s;
+  }
+  .crt-my-shift-card:hover { box-shadow:0 4px 16px rgba(0,0,0,0.10); transform:translateY(-1px); }
+
+  .crt-section-title {
+    font-size:1rem; font-weight:800; margin:12px 0 8px 2px; color:var(--text);
+  }
+
+  #carritos-filter-menu.open { max-height:200px !important; opacity:1 !important; transform:translateY(0) !important; }
+
+  @media (max-width:767px) {
+    #carritos-turn-detail-screen { position:fixed; top:0; left:0; }
+  }
+  /* ════ end Carritos CSS ════ */
+
 </style>
 </head>
 <body>
@@ -2843,12 +2930,97 @@
 </div>
 
       <div id="sub-content-carritos" class="sub-page" style="display:none">
-        <div class="coming-soon-panel">
-          <div class="coming-soon-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div>
-          <h3>Carritos</h3>
-          <p>Las asignaciones de carritos estarán disponibles pronto.</p>
+
+        <!-- ══════════════════════════════════════════════════════════
+             CARRITOS — Sub-sección completa (migrada de index_25)
+             Base de datos: Supabase — tabla carritos_turnos + carritos_puntos
+        ══════════════════════════════════════════════════════════ -->
+
+        <!-- Pantalla principal: lista + buscador -->
+        <div id="carritos-list-screen">
+          <div style="padding: 12px 16px 6px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+            <h2 style="margin:0; font-size:1.4rem; font-weight:800; color:var(--text)">Carritos</h2>
+            <div id="carritos-sync-indicator" style="font-size:0.72rem;color:var(--text3);"></div>
+          </div>
+
+          <div style="padding:0 16px 8px;">
+            <div style="position:relative; display:flex; align-items:center;">
+              <input type="text" id="carritos-search-input" placeholder="Buscar por nombre..."
+                oninput="carritos_handleSearch()"
+                style="width:100%; padding:12px 46px 12px 16px; border-radius:16px;
+                       border:1px solid var(--border); background:var(--surface2);
+                       color:var(--text); outline:none; font-family:var(--font); font-size:0.9rem;">
+              <button onclick="carritos_toggleFilterMenu()"
+                style="position:absolute; right:12px; background:none; border:none; cursor:pointer; color:var(--text3);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="4" y1="6" x2="20" y2="6"/><circle cx="10" cy="6" r="2"/>
+                  <line x1="4" y1="12" x2="20" y2="12"/><circle cx="14" cy="12" r="2"/>
+                  <line x1="4" y1="18" x2="20" y2="18"/><circle cx="8" cy="18" r="2"/>
+                </svg>
+              </button>
+            </div>
+
+            <div id="carritos-filter-menu" style="max-height:0; opacity:0; overflow:hidden; transform:translateY(-6px);
+                 transition:max-height 0.35s ease,opacity 0.25s ease,transform 0.35s ease;
+                 margin-top:8px; padding:0 0 0;">
+              <div style="background:var(--surface2); border-radius:14px; padding:14px;">
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                  <div class="crt-chip" id="crt-chip-M" onclick="carritos_toggleFilter('M',this)">Mañana</div>
+                  <div class="crt-chip" id="crt-chip-T" onclick="carritos_toggleFilter('T',this)">Tarde</div>
+                  <div class="crt-chip" id="crt-chip-TD" onclick="carritos_toggleFilter('TD',this)">Disponibles</div>
+                  <div onclick="carritos_clearFilters()"
+                    style="font-size:0.8rem; color:var(--accent); cursor:pointer; font-weight:700;
+                           margin-left:8px; text-decoration:underline; line-height:1;">
+                    Quitar filtros
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="carritos-home-content" style="padding:4px 16px 80px; overflow-y:auto;">
+            <div style="text-align:center; padding:2rem; color:var(--text3);">
+              <div class="loader"></div>
+            </div>
+          </div>
         </div>
+
+        <!-- Panel derecho: detalle del punto (desktop) / pantalla (mobile) -->
+        <div id="carritos-detail-screen" style="display:none;">
+          <div style="padding:14px 16px 0; display:flex; align-items:center; gap:10px;">
+            <button onclick="carritos_goBack()" class="nav-icon-btn">
+              <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <h3 id="carritos-point-title" style="margin:0; font-size:1.2rem; font-weight:800; color:var(--text); flex:1;">Punto</h3>
+          </div>
+          <div id="carritos-detail-body" style="padding:14px 16px 80px; overflow-y:auto;">
+          </div>
+        </div>
+
+        <!-- Pantalla de ficha de turno (fixed overlay) -->
+        <div id="carritos-turn-detail-screen"
+          style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+                 background:var(--surface); z-index:4500; flex-direction:column;">
+          <div style="padding:20px 20px 0; display:flex; align-items:center; gap:14px;">
+            <button onclick="carritos_closeTurnDetail()"
+              style="background:var(--surface2); border:none; width:40px; height:40px;
+                     border-radius:50%; cursor:pointer; color:var(--text); display:flex;
+                     align-items:center; justify-content:center;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+            <h3 style="margin:0; font-size:1.1rem; font-weight:700; color:var(--text);">Ficha de Turno</h3>
+          </div>
+          <div id="carritos-turn-detail-body"
+            style="padding:20px; overflow-y:auto; flex:1;"></div>
+          <div id="carritos-turn-action-bar" style="padding:16px 20px 20px;"></div>
+        </div>
+
       </div>
+
       <div id="sub-content-territorios" class="sub-page" style="display:none">
         <div class="ter-view-header">
           <span class="ter-view-title">Territorios</span>
@@ -8108,6 +8280,320 @@ function fp_renderTerritories() {
         grid.appendChild(card);
     });
 }
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  CARRITOS — Módulo completo (migrado de index_25 → Supabase)
+//  Tablas: carritos_turnos, carritos_puntos
+// ═══════════════════════════════════════════════════════════════════════════
+
+const CARRITOS_POINT_DATA = {
+  "Clínica Cordillera":              { color:"#f59e0b", days:["Lunes","Martes","Miércoles","Jueves","Viernes"], guardado:{ nombre:"Av. Alejandro Fleming 7806", tel:"+56982195443" }, encargado:{ nombre:"Douglas García", tel:"+56934574675" } },
+  "Supermercado Lider":              { color:"#3b82f6", days:["Lunes","Martes","Miércoles","Jueves","Viernes"], guardado:{ nombre:"Av. Alejandro Fleming 7806", tel:"+56982195443" }, encargado:{ nombre:"Douglas García", tel:"+56934574675" } },
+  "Santa Zita":                      { color:"#22c55e", days:["Lunes","Martes","Miércoles","Jueves","Viernes"], guardado:{ nombre:"Incahuasi 1549", tel:"+56992357751" }, encargado:{ nombre:"Fernando Aldunate", tel:"+56996377733" } },
+  "Visviri/Supermercado Santa Isabel":{ color:"#f59e0b", days:["Lunes","Martes","Miércoles","Jueves","Viernes"], guardado:{ nombre:"Espigas 1625", tel:"+56987274609" }, encargado:{ nombre:"Fernando Aldunate", tel:"+56996377733" } },
+  "Feria de Francisco Bilbao (Curaco)":{ color:"#3b82f6", days:["Sábado"],                                      guardado:{ nombre:"Duqueco 1965", tel:"+56977081786" }, encargado:{ nombre:"Germán Cabezas", tel:"+56967883164" } },
+  "Parque Intercomunal":             { color:"#22c55e", days:["Domingo"],                                      guardado:{ nombre:"Duqueco 1965", tel:"+56977081786" }, encargado:{ nombre:"Germán Cabezas", tel:"+56967883164" } },
+  "Patricia":                        { color:"#f59e0b", days:["Domingo"],                                      guardado:{ nombre:"Incahuasi 1549", tel:"+56992357751" }, encargado:{ nombre:"Fernando Aldunate", tel:"+56996377733" } }
+};
+
+let carritos_allData      = [];
+let carritos_currentDay   = '';
+let carritos_currentPoint = '';
+let carritos_activeFilters = [];
+let carritos_initialized  = false;
+
+// ── Inicializar cuando se entra al sub-tab ──────────────────────────────────
+async function carritos_init() {
+  if (carritos_initialized && carritos_allData.length) {
+    carritos_renderHome();
+    return;
+  }
+  document.getElementById('carritos-home-content').innerHTML =
+    '<div style="text-align:center;padding:2rem;color:var(--text3);"><div class="loader"></div></div>';
+  await carritos_loadFromSupabase();
+  carritos_initialized = true;
+}
+
+// ── Cargar datos desde Supabase ─────────────────────────────────────────────
+async function carritos_loadFromSupabase() {
+  try {
+    const { data, error } = await sb
+      .from('carritos_turnos')
+      .select('*')
+      .order('id');
+    if (error) throw error;
+    carritos_allData = (data || []).map(r => ({
+      id:      r.id,
+      dia:     r.dia,
+      tipo:    (r.tipo || '').toUpperCase(),
+      nombres: r.nombres,
+      hora:    r.hora,
+      punto:   r.punto
+    }));
+  } catch(e) {
+    console.error('Carritos load error:', e);
+    carritos_allData = [];
+    showToast('Error al cargar datos de Carritos', 'error');
+  }
+  carritos_renderHome();
+}
+
+// ── Render pantalla principal ───────────────────────────────────────────────
+function carritos_renderHome() {
+  const home = document.getElementById('carritos-home-content');
+  if (!home) return;
+  home.innerHTML = '';
+
+  const myName = currentUser ? currentUser.name.toLowerCase() : '';
+
+  // Mis turnos
+  if (myName) {
+    const myShifts = carritos_allData.filter(d => d.nombres.toLowerCase().includes(myName));
+    if (myShifts.length) {
+      home.innerHTML += `<div class="crt-section-title">Mis Turnos</div>`;
+      myShifts.forEach(s => {
+        const color = s.tipo.includes('TD') ? 'var(--green)' : (s.tipo.startsWith('M') ? 'var(--orange)' : 'var(--accent)');
+        home.innerHTML += `
+          <div class="crt-my-shift-card" onclick="carritos_openTurnDetail(${s.id})">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div style="width:11px;height:11px;border-radius:50%;background:${color};flex-shrink:0;"></div>
+              <span style="font-weight:800;font-size:0.95rem;">${s.punto}</span>
+            </div>
+            <div style="color:var(--text3);font-size:0.85rem;font-weight:600;padding-left:19px;">${s.dia} • ${s.hora}</div>
+            <div style="background:var(--surface2);border-radius:10px;padding:8px;margin-top:2px;font-size:0.82rem;border:1px solid var(--border);">
+              <span style="color:var(--text3);font-weight:700;display:block;margin-bottom:1px;font-size:0.68rem;text-transform:uppercase;">Turno de:</span>
+              <span style="font-weight:700;">${s.nombres}</span>
+            </div>
+          </div>`;
+      });
+    }
+  }
+
+  // Locaciones
+  home.innerHTML += `<div class="crt-section-title">Locaciones</div>`;
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:grid;grid-template-columns:repeat(2,1fr);gap:12px;';
+  grid.innerHTML = Object.keys(CARRITOS_POINT_DATA).map(name => `
+    <div class="crt-location-card" onclick="carritos_selectPoint('${name.replace(/'/g,"\'")}')">
+      <div style="width:38px;height:38px;border-radius:50%;background:${CARRITOS_POINT_DATA[name].color};flex-shrink:0;"></div>
+      <h4 style="margin:0;font-size:0.85rem;font-weight:800;line-height:1.3;color:var(--text);">${name}</h4>
+    </div>`).join('');
+  home.appendChild(grid);
+}
+
+// ── Seleccionar punto ───────────────────────────────────────────────────────
+function carritos_selectPoint(name) {
+  carritos_currentPoint = name;
+  const p = CARRITOS_POINT_DATA[name];
+
+  document.getElementById('carritos-point-title').textContent = name;
+
+  // Logística
+  const body = document.getElementById('carritos-detail-body');
+  body.innerHTML = `
+    <div class="crt-logistics-box orange">
+      <h4>📍 Retiro</h4>
+      <p>${p.guardado.nombre}</p>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <a href="tel:${p.guardado.tel}" class="crt-btn-mini">📞 Llamar</a>
+        <a href="https://maps.google.com/?q=${encodeURIComponent(p.guardado.nombre)}" target="_blank" class="crt-btn-mini">🗺️ Mapa</a>
+      </div>
+    </div>
+    <div class="crt-logistics-box">
+      <h4>👤 Encargado</h4>
+      <p>${p.encargado.nombre}</p>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <a href="tel:${p.encargado.tel}" class="crt-btn-mini">📞 Llamar</a>
+      </div>
+    </div>
+    <div class="crt-days-row" id="carritos-days-row"></div>
+    <div id="carritos-slots-container"></div>`;
+
+  // Días
+  carritos_currentDay = p.days[0];
+  const dRow = document.getElementById('carritos-days-row');
+  p.days.forEach(d => {
+    const btn = document.createElement('div');
+    btn.className = `crt-day-chip${d === carritos_currentDay ? ' active' : ''}`;
+    btn.textContent = d.substring(0, 3);
+    btn.onclick = () => {
+      document.querySelectorAll('#carritos-days-row .crt-day-chip').forEach(x => x.classList.remove('active'));
+      btn.classList.add('active');
+      carritos_currentDay = d;
+      carritos_renderShifts();
+    };
+    dRow.appendChild(btn);
+  });
+
+  // Mostrar pantalla de detalle
+  const detailEl = document.getElementById('carritos-detail-screen');
+  const listEl   = document.getElementById('carritos-list-screen');
+  if (window.innerWidth < 768) {
+    listEl.style.display   = 'none';
+    detailEl.style.display = 'flex';
+    detailEl.style.flexDirection = 'column';
+  } else {
+    detailEl.style.display = 'flex';
+    detailEl.style.flexDirection = 'column';
+  }
+
+  carritos_renderShifts();
+}
+
+// ── Renderizar turnos del día ───────────────────────────────────────────────
+function carritos_renderShifts() {
+  const cont = document.getElementById('carritos-slots-container');
+  if (!cont) return;
+  const filtered = carritos_allData.filter(d =>
+    d.dia.toLowerCase() === carritos_currentDay.toLowerCase() &&
+    d.punto === carritos_currentPoint
+  );
+  cont.innerHTML = filtered.map(s => {
+    const isTD = s.tipo.includes('TD');
+    const cls  = isTD ? 'turno-TD' : (s.tipo.startsWith('T') ? 'turno-T' : 'turno-M');
+    return `<div class="crt-slot ${cls}" onclick="carritos_openTurnDetail(${s.id})">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <b style="font-size:1rem;">${s.nombres}</b>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div style="background:rgba(255,255,255,0.22);padding:5px 12px;border-radius:999px;width:fit-content;font-size:0.88rem;font-weight:700;">${s.hora}</div>
+    </div>`;
+  }).join('') || '<p style="text-align:center;opacity:0.5;margin-top:20px;font-size:0.88rem;">No hay turnos este día.</p>';
+}
+
+// ── Abrir ficha de turno ────────────────────────────────────────────────────
+function carritos_openTurnDetail(id) {
+  const s = carritos_allData.find(x => x.id === id);
+  if (!s) return;
+  const p      = CARRITOS_POINT_DATA[s.punto] || {};
+  const isTD   = s.tipo.includes('TD');
+  const isM    = s.tipo.startsWith('M');
+  const color  = isTD ? 'var(--green)' : 'var(--accent)';
+  const estado = isTD ? 'Disponible' : 'Ocupado';
+
+  document.getElementById('carritos-turn-detail-body').innerHTML = `
+    <div style="background:var(--surface2);border-radius:20px;padding:22px;margin-bottom:16px;">
+      <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px;">
+        <span style="width:fit-content;font-size:0.72rem;font-weight:800;color:${color};border:1.5px solid ${color};padding:3px 9px;border-radius:8px;">${estado}</span>
+        <span style="font-size:0.82rem;color:var(--text3);font-weight:700;">⏰ ${isM ? 'Turno Mañana' : 'Turno Tarde'}</span>
+      </div>
+      <h2 style="margin:0 0 4px;font-size:1.4rem;">${s.nombres}</h2>
+      <h4 style="margin:0;font-weight:600;color:var(--text2);">${s.hora}</h4>
+    </div>
+    ${p.guardado ? `<div class="crt-logistics-box orange">
+      <h4>📍 Retiro</h4><p>${p.guardado.nombre}</p>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <a href="tel:${p.guardado.tel}" class="crt-btn-mini">📞 Llamar</a>
+        <a href="https://maps.google.com/?q=${encodeURIComponent(p.guardado.nombre)}" target="_blank" class="crt-btn-mini">🗺️ Mapa</a>
+      </div>
+    </div>` : ''}
+    ${p.encargado ? `<div class="crt-logistics-box">
+      <h4>👤 Encargado</h4><p>${p.encargado.nombre}</p>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <a href="https://wa.me/${p.encargado.tel.replace('+','')}" target="_blank" class="crt-btn-mini" style="background:#25D366;color:white;border:none;">💬 WhatsApp</a>
+        <a href="tel:${p.encargado.tel}" class="crt-btn-mini">📞 Llamar</a>
+      </div>
+    </div>` : ''}`;
+
+  let actionBtns = `<a href="https://maps.google.com/?q=${encodeURIComponent(s.punto)}" target="_blank"
+    style="background:var(--surface2);color:var(--text);border:1px solid var(--border);
+           margin-bottom:10px;display:flex;padding:14px;border-radius:14px;
+           justify-content:center;text-decoration:none;font-weight:700;font-size:0.9rem;">
+    📍 Cómo llegar
+  </a>`;
+
+  if (isTD && currentUser) {
+    const msg = `Hola! Quiero inscribirme en el turno disponible:
+📍 Punto: ${s.punto}
+📅 Día: ${s.dia}
+⏰ Hora: ${s.hora}
+👤 Nombre: ${currentUser.name}`;
+    actionBtns += `<a href="https://api.whatsapp.com/send?phone=56996377733&text=${encodeURIComponent(msg)}" target="_blank"
+      style="background:#25D366;color:white;padding:16px;border-radius:14px;font-weight:800;
+             width:100%;display:flex;justify-content:center;text-decoration:none;font-size:0.95rem;">
+      Solicitar Turno
+    </a>`;
+  }
+
+  document.getElementById('carritos-turn-action-bar').innerHTML = actionBtns;
+
+  const screen = document.getElementById('carritos-turn-detail-screen');
+  screen.style.display = 'flex';
+  screen.style.flexDirection = 'column';
+}
+
+// ── Cerrar ficha ────────────────────────────────────────────────────────────
+function carritos_closeTurnDetail() {
+  document.getElementById('carritos-turn-detail-screen').style.display = 'none';
+}
+
+// ── Volver a lista ──────────────────────────────────────────────────────────
+function carritos_goBack() {
+  document.getElementById('carritos-detail-screen').style.display = 'none';
+  document.getElementById('carritos-list-screen').style.display   = 'flex';
+  document.getElementById('carritos-list-screen').style.flexDirection = 'column';
+}
+
+// ── Buscar ──────────────────────────────────────────────────────────────────
+function carritos_handleSearch() {
+  const q = (document.getElementById('carritos-search-input').value || '').toLowerCase().trim();
+  const home = document.getElementById('carritos-home-content');
+  if (!q && !carritos_activeFilters.length) { carritos_renderHome(); return; }
+
+  let res = carritos_allData.filter(r => r.nombres.toLowerCase().includes(q));
+  if (carritos_activeFilters.length) {
+    res = res.filter(r => carritos_activeFilters.some(f => {
+      if (f === 'M')  return r.tipo.startsWith('M');
+      if (f === 'T')  return r.tipo.startsWith('T') && !r.tipo.includes('TD');
+      if (f === 'TD') return r.tipo.includes('TD');
+      return false;
+    }));
+  }
+
+  home.innerHTML = `<div style="display:grid;gap:9px">${res.map(r => {
+    const isTD = r.tipo.includes('TD');
+    const isM  = r.tipo.startsWith('M');
+    const color = isTD ? 'var(--green)' : (isM ? 'var(--orange)' : 'var(--accent)');
+    return `<div class="crt-logistics-box" onclick="carritos_openTurnDetail(${r.id})"
+      style="cursor:pointer;display:flex;align-items:center;gap:12px;">
+      <div style="width:13px;height:13px;border-radius:50%;background:${color};flex-shrink:0;"></div>
+      <div>
+        <div style="font-weight:800;font-size:0.9rem;">${r.nombres}</div>
+        <div style="font-size:0.78rem;color:var(--text3);">${r.punto} • ${r.dia}</div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ── Filtros ─────────────────────────────────────────────────────────────────
+function carritos_toggleFilterMenu() {
+  document.getElementById('carritos-filter-menu').classList.toggle('open');
+}
+
+function carritos_toggleFilter(f, el) {
+  el.classList.toggle('active');
+  const i = carritos_activeFilters.indexOf(f);
+  if (i > -1) carritos_activeFilters.splice(i, 1); else carritos_activeFilters.push(f);
+  carritos_handleSearch();
+}
+
+function carritos_clearFilters() {
+  carritos_activeFilters = [];
+  document.querySelectorAll('.crt-chip').forEach(c => c.classList.remove('active'));
+  document.getElementById('carritos-search-input').value = '';
+  carritos_renderHome();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Hook: inicializar carritos cuando se activa el sub-tab
+// ═══════════════════════════════════════════════════════════════════════════
+const _orig_switchSubTab = switchSubTab;
+switchSubTab = function(tabId) {
+  _orig_switchSubTab(tabId);
+  if (tabId === 'carritos') carritos_init();
+};
+
 </script>
 </body>
 </html>
