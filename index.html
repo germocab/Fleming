@@ -2386,11 +2386,62 @@
     </div>
 
     <div class="page" id="page-reuniones">
-      <div class="coming-soon-panel">
-        <div class="coming-soon-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-        <h3>Reuniones</h3>
-        <p>La sección de reuniones estará disponible próximamente.</p>
+
+      <!-- Vida y Ministerio -->
+      <div id="sub-content-vida-ministerio" class="sub-page active-sub">
+        <div class="coming-soon-panel">
+          <div class="coming-soon-icon">
+            <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          </div>
+          <h3>Vida y Ministerio</h3>
+          <p>Las asignaciones de la reunión Vida y Ministerio estarán disponibles próximamente.</p>
+        </div>
       </div>
+
+      <!-- Fin de Semana -->
+      <div id="sub-content-fin-semana" class="sub-page" style="display:none">
+        <div class="coming-soon-panel">
+          <div class="coming-soon-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <h3>Fin de Semana</h3>
+          <p>Las asignaciones de la reunión de Fin de Semana estarán disponibles próximamente.</p>
+        </div>
+      </div>
+
+      <!-- Aseo del Salón -->
+      <div id="sub-content-aseo-salon" class="sub-page" style="display:none">
+        <div class="coming-soon-panel">
+          <div class="coming-soon-icon">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <h3>Aseo del Salón del Reino</h3>
+          <p>El calendario de aseo del Salón del Reino estará disponible próximamente.</p>
+        </div>
+      </div>
+
+      <!-- Hospitalidad -->
+      <div id="sub-content-hospitalidad" class="sub-page" style="display:none">
+        <div class="coming-soon-panel">
+          <div class="coming-soon-icon">
+            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+          <h3>Hospitalidad</h3>
+          <p>El calendario de hospitalidad estará disponible próximamente.</p>
+        </div>
+      </div>
+
+      <!-- Responsabilidades -->
+      <div id="sub-content-responsabilidades" class="sub-page" style="display:none">
+        <div class="coming-soon-panel">
+          <div class="coming-soon-icon">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h3>Responsabilidades</h3>
+          <p>La asignación de responsabilidades de la congregación estará disponible próximamente.</p>
+        </div>
+      </div>
+
     </div>
 
     <div id="page-admin">
@@ -3988,6 +4039,13 @@ async function enterApp() {
     });
   } else {
     showPage('reuniones');
+    const reunTabs = ['vida-ministerio','fin-semana','aseo-salon','hospitalidad','responsabilidades'];
+    if (!reunTabs.includes(currentSubTab)) currentSubTab = 'vida-ministerio';
+    reunTabs.forEach(id => {
+      const el = document.getElementById('sub-content-' + id);
+      if (el) el.style.display = id === currentSubTab ? '' : 'none';
+    });
+    renderSubTabs(currentMainTab);
   }
 
   loadSchedule();
@@ -4062,7 +4120,13 @@ const SUB_TABS = {
     { id: 'carritos',    label: 'Carritos' },
     { id: 'grupos',      label: 'Grupos' },
   ],
-  reuniones: []
+  reuniones: [
+    { id: 'vida-ministerio',    label: 'Vida y Ministerio' },
+    { id: 'fin-semana',         label: 'Fin de Semana' },
+    { id: 'aseo-salon',         label: 'Aseo del Salón' },
+    { id: 'hospitalidad',       label: 'Hospitalidad' },
+    { id: 'responsabilidades',  label: 'Responsabilidades' },
+  ]
 };
 
 function renderSubTabs(mainTab) {
@@ -4089,22 +4153,36 @@ function switchMainTab(tab, btn) {
   currentMainTab = tab;
   document.querySelectorAll('.main-seg-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  renderSubTabs(tab);
-  _saveNavState();
+
   if (tab === 'predicacion') {
+    currentSubTab = currentSubTab && ['casa','territorios','carritos','grupos'].includes(currentSubTab) ? currentSubTab : 'casa';
+    renderSubTabs(tab);
     showPage('schedule');
+    switchSubTab(currentSubTab);
   } else {
+    const reunTabs = ['vida-ministerio','fin-semana','aseo-salon','hospitalidad','responsabilidades'];
+    currentSubTab = currentSubTab && reunTabs.includes(currentSubTab) ? currentSubTab : 'vida-ministerio';
+    renderSubTabs(tab);
     showPage('reuniones');
+    switchSubTab(currentSubTab);
   }
+  _saveNavState();
 }
 
 function switchSubTab(tabId) {
   currentSubTab = tabId;
   renderSubTabs(currentMainTab);
-  ['casa','territorios','carritos','grupos'].forEach(id => {
+
+  // Predicación sub-tabs
+  const predTabs = ['casa','territorios','carritos','grupos'];
+  // Reuniones sub-tabs
+  const reunTabs = ['vida-ministerio','fin-semana','aseo-salon','hospitalidad','responsabilidades'];
+
+  [...predTabs, ...reunTabs].forEach(id => {
     const el = document.getElementById('sub-content-' + id);
     if (el) el.style.display = id === tabId ? '' : 'none';
   });
+
   _saveNavState();
   if (tabId === 'casa') refreshScheduleIfStale();
   if (tabId === 'territorios') renderTerritoryView();
