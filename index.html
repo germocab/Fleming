@@ -794,11 +794,27 @@
     text-transform: uppercase; padding-bottom: 0.7rem; border-bottom: 1px solid var(--border);
     margin-bottom: 0.9rem;
   }
-  .wb-suggested-row { display: flex; gap: 0.7rem; flex-wrap: wrap; }
+  /* ── Suggested row: desktop wraps, mobile scrolls horizontally ── */
+  .wb-suggested-row {
+    display: flex; gap: 0.7rem; flex-wrap: wrap;
+  }
+  @media (max-width: 639px) {
+    .wb-suggested-row {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+      padding-bottom: 4px;
+      /* hide scrollbar but keep functionality */
+      scrollbar-width: none;
+    }
+    .wb-suggested-row::-webkit-scrollbar { display: none; }
+  }
+
   .wb-ter-chip {
     width: 116px; flex-shrink: 0; border-radius: 14px; padding: 0.8rem 0.85rem 0.7rem;
     color: #fff; cursor: grab; transition: transform 0.15s, box-shadow 0.15s; user-select: none;
-    border: 2px solid transparent;
+    border: 2px solid transparent; scroll-snap-align: start;
   }
   .wb-ter-chip:active { cursor: grabbing; }
   .wb-ter-chip:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.18); }
@@ -812,10 +828,122 @@
     color: #fff; cursor: pointer; font-family: var(--font);
   }
   .wb-ter-add:hover { background: rgba(255,255,255,0.32); }
+
+  /* "+N más" chip at the end of the suggested row */
+  .wb-ter-chip-more {
+    width: 80px; flex-shrink: 0; border-radius: 14px; padding: 0.8rem 0.6rem;
+    background: var(--surface2); border: 2px dashed var(--border-active);
+    color: var(--text3); font-size: 0.82rem; font-weight: 700;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    cursor: pointer; transition: all 0.18s; user-select: none; scroll-snap-align: start;
+    text-align: center;
+  }
+  .wb-ter-chip-more:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+  .wb-ter-chip-more svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+
   .wb-suggested-empty { font-size: 0.82rem; color: var(--text3); padding: 0.5rem 0; }
   .wb-suggested-hint {
     font-size: 0.72rem; color: var(--text3); margin-top: 0.7rem; display: flex; align-items: center; gap: 5px;
   }
+
+  /* ── Territory Picker Pop-Up ── */
+  .wb-ter-picker-overlay {
+    display: none; position: fixed; inset: 0; z-index: 600;
+    background: var(--modal-overlay-bg); backdrop-filter: blur(10px);
+    align-items: flex-end; justify-content: center;
+  }
+  .wb-ter-picker-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+  @media (min-width: 640px) {
+    .wb-ter-picker-overlay { align-items: center; padding: 1.5rem; }
+  }
+  .wb-ter-picker-modal {
+    background: var(--surface); width: 100%; max-width: 580px;
+    display: flex; flex-direction: column; max-height: 92vh;
+    border-radius: 22px 22px 0 0;
+    box-shadow: var(--shadow-lg);
+    animation: slideUpPanel 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+  @media (min-width: 640px) {
+    .wb-ter-picker-modal { border-radius: 22px; animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1); }
+  }
+  @media (max-width: 639px) {
+    .wb-ter-picker-modal { max-height: 96dvh; }
+  }
+  .wb-ter-picker-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 1.15rem 1.25rem 0.9rem; border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  .wb-ter-picker-title { font-size: 1.05rem; font-weight: 700; line-height: 1.2; }
+  .wb-ter-picker-sub  { font-size: 0.78rem; color: var(--text3); margin-top: 3px; }
+  .wb-ter-picker-close {
+    width: 30px; height: 30px; border-radius: 50%; background: var(--surface3);
+    border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: var(--text3); flex-shrink: 0; margin-top: 1px;
+  }
+  .wb-ter-picker-close svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+  .wb-ter-picker-search-wrap { padding: 0.85rem 1.25rem 0.5rem; flex-shrink: 0; position: relative; }
+  .wb-ter-picker-search-icon {
+    position: absolute; left: 2rem; top: 50%; transform: translateY(-50%);
+    width: 15px; height: 15px; stroke: var(--text3); fill: none; stroke-width: 2; stroke-linecap: round; pointer-events: none;
+  }
+  .wb-ter-picker-search {
+    width: 100%; padding: 0.65rem 1rem 0.65rem 2.4rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; color: var(--text);
+    font-family: var(--font); font-size: 0.9rem; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .wb-ter-picker-search:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .wb-ter-picker-search::placeholder { color: var(--text3); }
+  .wb-ter-picker-list {
+    flex: 1; overflow-y: auto; padding: 0.4rem 1.25rem 1.5rem;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .wb-ter-picker-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 0.72rem 0.9rem; border-radius: 14px;
+    border: 1.5px solid var(--border); background: var(--surface2);
+    cursor: pointer; transition: all 0.16s; user-select: none;
+  }
+  .wb-ter-picker-item:hover { background: var(--surface3); border-color: var(--border-active); }
+  .wb-ter-picker-num-badge {
+    width: 42px; height: 42px; border-radius: 11px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; font-weight: 900; color: #fff;
+  }
+  .wb-ter-picker-info { flex: 1; min-width: 0; }
+  .wb-ter-picker-name { font-size: 0.93rem; font-weight: 700; color: var(--text); }
+  .wb-ter-picker-meta { font-size: 0.76rem; color: var(--text3); margin-top: 2px; }
+  .wb-ter-picker-status-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    background: var(--border-active);
+  }
+  .wb-ter-picker-status-dot.recent { background: var(--green); }
+  .wb-ter-picker-status-dot.old    { background: var(--orange); }
+  .wb-ter-picker-status-dot.never  { background: var(--red); }
+  .wb-ter-picker-empty { font-size: 0.85rem; color: var(--text3); text-align: center; padding: 2.5rem 0; }
+  .wb-ter-picker-footer {
+    padding: 0.85rem 1.25rem; border-top: 1px solid var(--border);
+    flex-shrink: 0; display: flex; align-items: center; gap: 10px;
+  }
+  .wb-ter-picker-cancel {
+    flex: 1; padding: 0.75rem; border-radius: 12px;
+    background: var(--surface3); border: none; color: var(--text2);
+    font-family: var(--font); font-size: 0.88rem; font-weight: 600; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .wb-ter-picker-cancel:hover { background: var(--surface2); }
+
+  /* ── Shift special mode badge (Telefónico / Zoom) ── */
+  .wb-shift-mode-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px 2px 6px; border-radius: 20px;
+    font-size: 0.65rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+  .wb-shift-mode-badge svg { width: 10px; height: 10px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; flex-shrink: 0; }
+  .wb-shift-mode-badge.phone { background: rgba(52,199,89,0.15); color: var(--green); }
+  .wb-shift-mode-badge.zoom  { background: rgba(0,122,255,0.13); color: var(--accent); }
 
   .wb-days-grid {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 0.85rem;
@@ -888,7 +1016,6 @@
   }
   @media (max-width: 460px) {
     .wb-days-grid { grid-template-columns: 1fr; }
-    .wb-ter-chip { width: calc(50% - 0.35rem); flex-basis: calc(50% - 0.35rem); box-sizing: border-box; }
   }
 
   .form-group2 { display: flex; flex-direction: column; gap: 5px; margin-bottom: 0.85rem; }
@@ -4649,7 +4776,7 @@ function wbSetMonday(monday) {
     wbDays.push({
       date,
       dayIndex: i,
-      shifts: [ { uid: wbNextUid(), territory_id: '', conductor_id: '', period: 'manana', time: '' } ],
+      shifts: [ { uid: wbNextUid(), territory_id: '', conductor_id: '', period: 'manana', time: '', mode: '' } ],
     });
   }
   const sunday = wbAddDays(monday, 6);
@@ -4691,7 +4818,13 @@ function wbRenderSuggested() {
   });
   withMeta.sort((a,b) => b.daysSince - a.daysSince);
 
-  row.innerHTML = withMeta.map(({t, last, daysSince}) => {
+  // Limit visible chips: 8 on desktop, 4 on mobile
+  const isMobile = window.innerWidth < 640;
+  const maxChips = isMobile ? 4 : 8;
+  const visible = withMeta.slice(0, maxChips);
+  const hiddenCount = withMeta.length - maxChips;
+
+  row.innerHTML = visible.map(({t, last, daysSince}) => {
     const color = getTerColor(t.number);
     const metaLabel = last ? `hace ${daysSince}d` : 'Sin asignar';
     const isSelected = wbSelectedTerritoryId === t.id;
@@ -4703,11 +4836,16 @@ function wbRenderSuggested() {
       <div class="wb-ter-meta">${metaLabel}</div>
       <button class="wb-ter-add" onclick="event.stopPropagation();wbQuickAssignFirstOpenSlot('${t.id}')">+ Añadir</button>
     </div>`;
-  }).join('');
+  }).join('') + (hiddenCount > 0
+    ? `<div class="wb-ter-chip-more" onclick="wbOpenTerritoryPickerAll()">
+         <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+         +${hiddenCount} más
+       </div>`
+    : '');
 
   hint.innerHTML = wbSelectedTerritoryId
     ? `<svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> Territorio seleccionado — toca un turno para asignarlo, o arrástralo.`
-    : `<svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> En escritorio: arrastra. En móvil: toca un territorio y luego el turno donde irá.`;
+    : `<svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> Arrastra un chip al turno, o toca el turno vacío para elegir desde el listado completo.`;
 }
 
 function wbToggleSelectTerritory(terId) {
@@ -4721,7 +4859,7 @@ function wbQuickAssignFirstOpenSlot(terId) {
     if (openShift) { openShift.territory_id = terId; wbRenderDays(); showToast('Territorio asignado','success'); return; }
   }
   // No open slot: add a new shift on Monday
-  wbDays[0].shifts.push({ uid: wbNextUid(), territory_id: terId, conductor_id: '', period: 'manana', time: '' });
+  wbDays[0].shifts.push({ uid: wbNextUid(), territory_id: terId, conductor_id: '', period: 'manana', time: '', mode: '' });
   wbRenderDays();
   showToast('Territorio añadido como nuevo turno el Lunes','success');
 }
@@ -4753,15 +4891,115 @@ function wbDropZoneDrop(ev, dayIndex, uid) {
   wbAssignTerritoryToShift(dayIndex, uid, terId);
 }
 
-// ── Tap-to-assign (mobile / click) ──
+// ── Tap-to-assign (mobile / click) — kept for legacy chip tap flow ──
 function wbShiftSlotClick(dayIndex, uid) {
-  if (!wbSelectedTerritoryId) {
-    showToast('Primero toca un territorio sugerido arriba','');
+  if (wbSelectedTerritoryId) {
+    wbAssignTerritoryToShift(dayIndex, uid, wbSelectedTerritoryId);
+    wbSelectedTerritoryId = null;
+    wbRenderSuggested();
+  } else {
+    wbOpenTerritoryPicker(dayIndex, uid);
+  }
+}
+
+// ── Territory Picker state ──
+let _wbPickerDayIndex = null;
+let _wbPickerShiftUid  = null;
+
+function wbOpenTerritoryPicker(dayIndex, uid) {
+  _wbPickerDayIndex = dayIndex;
+  _wbPickerShiftUid  = uid;
+  // sub-label
+  const day = wbDays[dayIndex];
+  const d = new Date(day.date + 'T00:00:00');
+  const shift = day.shifts.find(s => s.uid === uid);
+  const periodLabels = { manana: 'Mañana', tarde: 'Tarde', noche: 'Noche' };
+  document.getElementById('wb-ter-picker-sub').textContent =
+    `${WB_DAY_NAMES[dayIndex]} ${d.getDate()} ${WB_MON[d.getMonth()]} · ${periodLabels[shift?.period] || ''}`;
+  document.getElementById('wb-ter-picker-search').value = '';
+  wbRenderTerPickerList('');
+  document.getElementById('wb-ter-picker-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('wb-ter-picker-search').focus(), 120);
+}
+
+function wbOpenTerritoryPickerAll() {
+  // Open picker without a target shift — used from "+N más" chip; no auto-assign
+  _wbPickerDayIndex = null;
+  _wbPickerShiftUid  = null;
+  document.getElementById('wb-ter-picker-sub').textContent = 'Toca un territorio para seleccionarlo';
+  document.getElementById('wb-ter-picker-search').value = '';
+  wbRenderTerPickerList('');
+  document.getElementById('wb-ter-picker-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('wb-ter-picker-search').focus(), 120);
+}
+
+function wbCloseTerritoryPicker() {
+  document.getElementById('wb-ter-picker-overlay').classList.remove('open');
+  _wbPickerDayIndex = null;
+  _wbPickerShiftUid  = null;
+}
+
+function wbTerPickerOverlayClick(e) {
+  if (e.target === document.getElementById('wb-ter-picker-overlay')) wbCloseTerritoryPicker();
+}
+
+function wbFilterTerPicker() {
+  wbRenderTerPickerList(document.getElementById('wb-ter-picker-search').value);
+}
+
+function wbRenderTerPickerList(query) {
+  const list = document.getElementById('wb-ter-picker-list');
+  const q = (query || '').trim().toLowerCase();
+  const withMeta = territories.map(t => {
+    const last = wbTerritoryLastAssignedDate(t.id);
+    return { t, last, daysSince: last ? wbDaysSince(last) : Infinity };
+  });
+  withMeta.sort((a,b) => b.daysSince - a.daysSince);
+
+  const filtered = q ? withMeta.filter(({t}) => String(t.number).includes(q)) : withMeta;
+
+  if (!filtered.length) {
+    list.innerHTML = `<div class="wb-ter-picker-empty">No se encontraron territorios</div>`;
     return;
   }
-  wbAssignTerritoryToShift(dayIndex, uid, wbSelectedTerritoryId);
-  wbSelectedTerritoryId = null;
-  wbRenderSuggested();
+
+  list.innerHTML = filtered.map(({t, last, daysSince}) => {
+    const color = getTerColor(t.number);
+    const metaLabel = last
+      ? (daysSince > 60 ? `⚠ hace ${daysSince} días` : `hace ${daysSince} días`)
+      : 'Nunca asignado';
+    const dotClass = last
+      ? (daysSince <= 30 ? 'recent' : daysSince <= 90 ? 'old' : 'never')
+      : 'never';
+    return `<div class="wb-ter-picker-item" onclick="wbPickerSelectTerritory('${t.id}')">
+      <div class="wb-ter-picker-num-badge" style="background:${color}">${t.number}</div>
+      <div class="wb-ter-picker-info">
+        <div class="wb-ter-picker-name">Territorio ${t.number}</div>
+        <div class="wb-ter-picker-meta">${metaLabel}</div>
+      </div>
+      <div class="wb-ter-picker-status-dot ${dotClass}"></div>
+    </div>`;
+  }).join('');
+}
+
+function wbPickerSelectTerritory(terId) {
+  if (_wbPickerDayIndex !== null && _wbPickerShiftUid !== null) {
+    // Direct assign to the target shift
+    wbAssignTerritoryToShift(_wbPickerDayIndex, _wbPickerShiftUid, terId);
+    wbCloseTerritoryPicker();
+  } else {
+    // Opened from "+N más" — fall back to toggle-select behaviour
+    wbCloseTerritoryPicker();
+    wbToggleSelectTerritory(terId);
+  }
+}
+
+// ── Shift mode (Presencial / Telefónico / Zoom) ──
+function wbUpdateShiftMode(dayIndex, uid, value) {
+  const shift = wbDays[dayIndex].shifts.find(s => s.uid === uid);
+  if (!shift) return;
+  shift.mode = value;
+  wbRenderDays();
 }
 
 function wbAssignTerritoryToShift(dayIndex, uid, terId) {
@@ -4780,12 +5018,12 @@ function wbClearShiftTerritory(dayIndex, uid) {
 }
 
 function wbAddShift(dayIndex) {
-  wbDays[dayIndex].shifts.push({ uid: wbNextUid(), territory_id: '', conductor_id: '', period: 'tarde', time: '' });
+  wbDays[dayIndex].shifts.push({ uid: wbNextUid(), territory_id: '', conductor_id: '', period: 'tarde', time: '', mode: '' });
   wbRenderDays();
 }
 function wbRemoveShift(dayIndex, uid) {
   const day = wbDays[dayIndex];
-  if (day.shifts.length <= 1) { day.shifts = [{ uid: wbNextUid(), territory_id: '', conductor_id: '', period: 'manana', time: '' }]; }
+  if (day.shifts.length <= 1) { day.shifts = [{ uid: wbNextUid(), territory_id: '', conductor_id: '', period: 'manana', time: '', mode: '' }]; }
   else { day.shifts = day.shifts.filter(s => s.uid !== uid); }
   wbRenderDays();
 }
@@ -4808,7 +5046,7 @@ function wbRenderDays() {
       const ter = territories.find(t => t.id === shift.territory_id);
       if (ter) totalAssigned++;
       const terBlock = ter
-        ? `<div class="wb-ter-assigned" style="background:${getTerColor(ter.number)}" onclick="wbShiftSlotClick(${dayIndex},'${shift.uid}')">
+        ? `<div class="wb-ter-assigned" style="background:${getTerColor(ter.number)}" onclick="wbOpenTerritoryPicker(${dayIndex},'${shift.uid}')">
              <span class="wb-ter-assigned-num">${ter.number}</span>
              <span class="wb-ter-assigned-label">Territorio ${ter.number}</span>
              <button class="wb-ter-assigned-x" onclick="event.stopPropagation();wbClearShiftTerritory(${dayIndex},'${shift.uid}')">
@@ -4818,9 +5056,17 @@ function wbRenderDays() {
         : `<div class="wb-drop-zone" data-day="${dayIndex}" data-uid="${shift.uid}"
               ondragover="wbDropZoneDragOver(event)" ondragleave="wbDropZoneDragLeave(event)"
               ondrop="wbDropZoneDrop(event,${dayIndex},'${shift.uid}')"
-              onclick="wbShiftSlotClick(${dayIndex},'${shift.uid}')">
-             Arrastra un territorio aquí, o toca uno sugerido
+              onclick="wbOpenTerritoryPicker(${dayIndex},'${shift.uid}')">
+             <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" style="opacity:0.5;flex-shrink:0"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+             Elegir territorio
            </div>`;
+
+      // Special mode badge shown above the territory block when not presencial
+      const modeBadge = shift.mode === 'telefono'
+        ? `<div class="wb-shift-mode-badge phone"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.8 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Telefónico</div>`
+        : shift.mode === 'zoom'
+        ? `<div class="wb-shift-mode-badge zoom"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="15" height="14" rx="2"/><path d="M17 9l5-3v12l-5-3V9z"/></svg>Por Zoom</div>`
+        : '';
 
       return `<div class="wb-shift-block">
         <div class="wb-shift-toprow">
@@ -4829,10 +5075,16 @@ function wbRenderDays() {
             <option value="tarde" ${shift.period==='tarde'?'selected':''}>Tarde</option>
             <option value="noche" ${shift.period==='noche'?'selected':''}>Noche</option>
           </select>
+          <select class="wb-shift-label-select" style="background:${shift.mode==='telefono'?'rgba(52,199,89,0.15)':shift.mode==='zoom'?'rgba(0,122,255,0.13)':'var(--accent-light)'};color:${shift.mode==='telefono'?'var(--green)':shift.mode==='zoom'?'var(--accent)':'var(--accent)'}" onchange="wbUpdateShiftMode(${dayIndex},'${shift.uid}',this.value)">
+            <option value="" ${!shift.mode?'selected':''}>Presencial</option>
+            <option value="telefono" ${shift.mode==='telefono'?'selected':''}>Telefónico</option>
+            <option value="zoom" ${shift.mode==='zoom'?'selected':''}>Por Zoom</option>
+          </select>
           <button class="wb-shift-remove" onclick="wbRemoveShift(${dayIndex},'${shift.uid}')" title="Quitar turno">
             <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
+        ${modeBadge}
         ${terBlock}
         <div class="wb-field-row">
           <select class="wb-mini-select" onchange="wbUpdateShiftField(${dayIndex},'${shift.uid}','conductor_id',this.value)">
@@ -4879,7 +5131,7 @@ async function saveWeekBuilder() {
         conductor: conductor ? `${conductor.nombre} ${conductor.apellido}` : '',
         conductor_id: shift.conductor_id || null,
         casa_id: null,
-        type: 'presencial',
+        type: shift.mode === 'telefono' ? 'telefono' : shift.mode === 'zoom' ? 'zoom' : 'presencial',
         territory_id: shift.territory_id,
         notes: '',
         phone: conductor?.telefono || null,
@@ -6538,6 +6790,29 @@ async function submitSugerirQuitado() {
   </nav>
   <div style="flex:1;overflow-y:auto;padding:1rem;max-width:640px;width:100%;margin:0 auto" id="notifications-list-mobile">
     <div class="loader-wrap"><div class="loader"></div></div>
+  </div>
+</div>
+
+<!-- ── Territory Picker Pop-Up (Week Builder) ── -->
+<div class="wb-ter-picker-overlay" id="wb-ter-picker-overlay" onclick="wbTerPickerOverlayClick(event)">
+  <div class="wb-ter-picker-modal" id="wb-ter-picker-modal">
+    <div class="wb-ter-picker-header">
+      <div>
+        <div class="wb-ter-picker-title" id="wb-ter-picker-title">Seleccionar Territorio</div>
+        <div class="wb-ter-picker-sub" id="wb-ter-picker-sub">Elige el territorio para este turno</div>
+      </div>
+      <button class="wb-ter-picker-close" onclick="wbCloseTerritoryPicker()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="wb-ter-picker-search-wrap">
+      <svg class="wb-ter-picker-search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="wb-ter-picker-search" id="wb-ter-picker-search" type="text" placeholder="Buscar territorio…" oninput="wbFilterTerPicker()" autocomplete="off">
+    </div>
+    <div class="wb-ter-picker-list" id="wb-ter-picker-list"></div>
+    <div class="wb-ter-picker-footer">
+      <button class="wb-ter-picker-cancel" onclick="wbCloseTerritoryPicker()">Cancelar</button>
+    </div>
   </div>
 </div>
 
