@@ -756,6 +756,141 @@
   .admin-section { display: none; }
   .admin-section.active { display: block; }
 
+  /* ── Week Builder (Casa en Casa weekly upload) ────────────────────────── */
+  .wb-overlay {
+    display: none; position: fixed; inset: 0; z-index: 400;
+    background: var(--bg); overflow-y: auto;
+  }
+  .wb-overlay.open { display: block; animation: fadeIn 0.2s ease; }
+  .wb-wrap { max-width: 1100px; margin: 0 auto; padding: 1.25rem 1.25rem 4rem; }
+  .wb-topbar {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 1.25rem;
+  }
+  .wb-back {
+    width: 36px; height: 36px; border-radius: 50%; background: var(--surface);
+    border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center;
+    justify-content: center; color: var(--text2); flex-shrink: 0; box-shadow: var(--shadow);
+  }
+  .wb-back svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
+  .wb-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; flex: 1; }
+  .wb-title { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; }
+  .wb-subtitle { font-size: 0.84rem; color: var(--text3); margin-top: 2px; }
+  .wb-monday-picker {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 0.55rem 0.85rem; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 2px;
+  }
+  .wb-monday-label { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.04em; color: var(--accent); text-transform: uppercase; }
+  .wb-monday-input {
+    border: none; background: transparent; font-family: var(--font); font-size: 0.95rem;
+    font-weight: 600; color: var(--text); outline: none; padding: 0; color-scheme: light dark;
+  }
+
+  .wb-suggested-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 1.1rem 1.1rem 1.25rem; margin-bottom: 1.5rem;
+  }
+  .wb-suggested-title {
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; color: var(--text3);
+    text-transform: uppercase; padding-bottom: 0.7rem; border-bottom: 1px solid var(--border);
+    margin-bottom: 0.9rem;
+  }
+  .wb-suggested-row { display: flex; gap: 0.7rem; flex-wrap: wrap; }
+  .wb-ter-chip {
+    width: 116px; flex-shrink: 0; border-radius: 14px; padding: 0.8rem 0.85rem 0.7rem;
+    color: #fff; cursor: grab; transition: transform 0.15s, box-shadow 0.15s; user-select: none;
+    border: 2px solid transparent;
+  }
+  .wb-ter-chip:active { cursor: grabbing; }
+  .wb-ter-chip:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.18); }
+  .wb-ter-chip.wb-selected { border-color: #fff; box-shadow: 0 0 0 3px var(--accent); transform: translateY(-2px); }
+  .wb-ter-chip.wb-dragging { opacity: 0.4; }
+  .wb-ter-num { font-size: 1.5rem; font-weight: 800; line-height: 1.1; }
+  .wb-ter-meta { font-size: 0.68rem; font-weight: 600; opacity: 0.92; margin: 5px 0 9px; min-height: 1em; }
+  .wb-ter-add {
+    display: inline-flex; align-items: center; gap: 3px; font-size: 0.68rem; font-weight: 700;
+    background: rgba(255,255,255,0.22); padding: 4px 9px; border-radius: 20px; border: none;
+    color: #fff; cursor: pointer; font-family: var(--font);
+  }
+  .wb-ter-add:hover { background: rgba(255,255,255,0.32); }
+  .wb-suggested-empty { font-size: 0.82rem; color: var(--text3); padding: 0.5rem 0; }
+  .wb-suggested-hint {
+    font-size: 0.72rem; color: var(--text3); margin-top: 0.7rem; display: flex; align-items: center; gap: 5px;
+  }
+
+  .wb-days-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 0.85rem;
+  }
+  .wb-day-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 0.9rem 0.9rem 0.8rem; display: flex; flex-direction: column;
+    transition: box-shadow 0.15s, border-color 0.15s;
+  }
+  .wb-day-card.wb-drop-hover { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .wb-day-name { font-size: 0.78rem; font-weight: 800; letter-spacing: 0.02em; text-transform: uppercase; }
+  .wb-day-date { font-size: 0.75rem; color: var(--text3); margin-top: 1px; }
+  .wb-shift-block { margin-top: 0.75rem; padding-top: 0.7rem; border-top: 1px solid var(--border); }
+  .wb-shift-block:first-of-type { border-top: none; padding-top: 0; }
+  .wb-shift-toprow { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 0.55rem; }
+  .wb-shift-label-select {
+    border: none; background: var(--accent-light); color: var(--accent); font-family: var(--font);
+    font-size: 0.7rem; font-weight: 700; padding: 4px 8px; border-radius: 8px; outline: none;
+    text-transform: uppercase; letter-spacing: 0.02em; cursor: pointer;
+  }
+  .wb-shift-remove {
+    width: 22px; height: 22px; border-radius: 50%; border: none; background: var(--surface3);
+    color: var(--text3); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .wb-shift-remove svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+  .wb-shift-remove:hover { background: var(--red); color: #fff; }
+
+  .wb-drop-zone {
+    min-height: 56px; border: 2px dashed var(--border-active); border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    font-size: 0.72rem; color: var(--text3); padding: 0.5rem; transition: all 0.15s; cursor: pointer;
+  }
+  .wb-drop-zone:hover { background: var(--surface2); }
+  .wb-drop-zone.wb-drop-hover { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+  .wb-ter-assigned {
+    border-radius: var(--radius-sm); padding: 0.55rem 0.65rem; display: flex; align-items: center;
+    gap: 8px; color: #fff; cursor: pointer;
+  }
+  .wb-ter-assigned-num { font-size: 1.05rem; font-weight: 800; line-height: 1; }
+  .wb-ter-assigned-label { font-size: 0.68rem; font-weight: 600; opacity: 0.9; flex: 1; }
+  .wb-ter-assigned-x {
+    width: 18px; height: 18px; border-radius: 50%; background: rgba(255,255,255,0.25); border: none;
+    color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
+  }
+  .wb-ter-assigned-x svg { width: 9px; height: 9px; stroke: currentColor; fill: none; stroke-width: 3; stroke-linecap: round; }
+
+  .wb-field-row { display: flex; gap: 6px; margin-top: 0.55rem; }
+  .wb-mini-select, .wb-mini-time {
+    flex: 1; min-width: 0; padding: 0.45rem 0.5rem; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-family: var(--font); font-size: 0.76rem; outline: none;
+  }
+  .wb-mini-select:focus, .wb-mini-time:focus { border-color: var(--accent); }
+  .wb-add-shift-btn {
+    margin-top: 0.75rem; width: 100%; padding: 0.5rem; border-radius: 8px; border: 1px dashed var(--border-active);
+    background: transparent; color: var(--text3); font-family: var(--font); font-size: 0.76rem; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;
+  }
+  .wb-add-shift-btn:hover { background: var(--surface2); color: var(--text2); }
+
+  .wb-footer-bar {
+    position: sticky; bottom: 0; margin-top: 1.75rem; padding: 0.9rem 0; background: var(--bg);
+    display: flex; align-items: center; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border);
+  }
+  .wb-footer-count { flex: 1; font-size: 0.8rem; color: var(--text3); }
+
+  @media (max-width: 640px) {
+    .wb-wrap { padding: 1rem 0.85rem 4rem; }
+    .wb-title { font-size: 1.25rem; }
+    .wb-days-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+  }
+  @media (max-width: 460px) {
+    .wb-days-grid { grid-template-columns: 1fr; }
+    .wb-ter-chip { width: calc(50% - 0.35rem); flex-basis: calc(50% - 0.35rem); box-sizing: border-box; }
+  }
+
   .form-group2 { display: flex; flex-direction: column; gap: 5px; margin-bottom: 0.85rem; }
   .form-label2 { font-size: 0.78rem; font-weight: 600; color: var(--text3); }
   .form-select {
@@ -2202,6 +2337,7 @@
       <div class="admin-section active" id="admin-assignments">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
           <span style="flex:1;font-size:0.95rem;font-weight:700">Todas las asignaciones</span>
+          <button class="btn-secondary" onclick="openWeekBuilder()">📅 Subir semana</button>
           <button class="btn-secondary" onclick="openAssignmentModal()">+ Nueva</button>
         </div>
         <div id="admin-assignments-list"><div class="loader-wrap"><div class="loader"></div></div></div>
@@ -2355,6 +2491,41 @@
         <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="saveAssignment()" id="save-as-btn">Guardar</button>
       </div>
       <div class="auth-error" id="as-error"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Week Builder: subir asignaciones de Casa en Casa por semana ── -->
+<div class="wb-overlay" id="wb-overlay">
+  <div class="wb-wrap">
+    <div class="wb-topbar">
+      <button class="wb-back" onclick="closeWeekBuilder()">
+        <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      </button>
+      <div class="wb-header">
+        <div>
+          <div class="wb-title">Programación Semanal</div>
+          <div class="wb-subtitle" id="wb-week-range">Selecciona el lunes de la semana</div>
+        </div>
+        <div class="wb-monday-picker">
+          <span class="wb-monday-label">Lunes de la semana</span>
+          <input type="date" class="wb-monday-input" id="wb-monday-input" onchange="wbOnMondayChange()">
+        </div>
+      </div>
+    </div>
+
+    <div class="wb-suggested-card">
+      <div class="wb-suggested-title">Territorios sugeridos · arrastra al día que prefieras</div>
+      <div class="wb-suggested-row" id="wb-suggested-row"></div>
+      <div class="wb-suggested-hint" id="wb-suggested-hint"></div>
+    </div>
+
+    <div class="wb-days-grid" id="wb-days-grid"></div>
+
+    <div class="wb-footer-bar">
+      <span class="wb-footer-count" id="wb-footer-count"></span>
+      <button class="btn-secondary" onclick="closeWeekBuilder()">Cancelar</button>
+      <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="saveWeekBuilder()" id="wb-save-btn">Guardar semana</button>
     </div>
   </div>
 </div>
@@ -4395,6 +4566,339 @@ async function deleteAssignment(id) {
   if (error) { showToast('Error al eliminar','error'); return; }
   showToast('Asignación eliminada','success');
   await loadSchedule(); renderAdminAssignments();
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// ── Week Builder: subir asignaciones de Casa en Casa por semana completa ──
+// ══════════════════════════════════════════════════════════════════════════
+const WB_DAY_NAMES = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+const WB_MON = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const WB_MON_LONG = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+let wbMonday = null;          // 'YYYY-MM-DD' string for the Monday of the selected week
+let wbDays = [];              // [{ date, dayIndex, shifts: [{uid, territory_id, conductor_id, period, time}] }]
+let wbSelectedTerritoryId = null; // for tap-to-assign on touch devices
+let wbDragTerritoryId = null;     // for HTML5 drag and drop
+let wbShiftUidCounter = 0;
+
+function wbNextUid() { return 'wbs' + (++wbShiftUidCounter); }
+
+// Local YYYY-MM-DD for "today", matching the rest of the app's convention
+function wbTodayStr() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+}
+function wbAddDays(dateStr, n) {
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + n);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+// Find the Monday on/before a given date
+function wbMondayOf(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const jsDay = d.getDay(); // 0=Sun..6=Sat
+  const diffToMonday = jsDay === 0 ? -6 : 1 - jsDay;
+  return wbAddDays(dateStr, diffToMonday);
+}
+
+function openWeekBuilder() {
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (currentRole === 'semiadmin') {
+    getUserPermissions().then(perms => {
+      if (!canAccessModule(perms, 'assignments')) { showToast('No tienes permiso para gestionar Asignaciones.','error'); return; }
+      wbInit();
+    });
+    return;
+  }
+  wbInit();
+}
+function wbInit() {
+  const monday = wbMondayOf(wbTodayStr());
+  document.getElementById('wb-monday-input').value = monday;
+  document.getElementById('wb-overlay').classList.add('open');
+  document.getElementById('wb-suggested-row').innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
+  document.getElementById('wb-days-grid').innerHTML = '';
+  wbLoadDataAndSetMonday(monday);
+}
+async function wbLoadDataAndSetMonday(monday) {
+  const [{ data: tData }, { data: cData }] = await Promise.all([
+    sb.from('territories').select('*').order('number'),
+    sb.from('conductores').select('*').order('apellido').order('nombre'),
+  ]);
+  territories = tData || [];
+  conductores = cData || [];
+  wbSetMonday(monday);
+}
+function closeWeekBuilder() {
+  document.getElementById('wb-overlay').classList.remove('open');
+}
+function wbOnMondayChange() {
+  const raw = document.getElementById('wb-monday-input').value;
+  if (!raw) return;
+  // Snap to the Monday of whatever week was picked, in case the user picks a non-Monday date
+  const snapped = wbMondayOf(raw);
+  if (snapped !== raw) document.getElementById('wb-monday-input').value = snapped;
+  wbSetMonday(snapped);
+}
+
+function wbSetMonday(monday) {
+  wbMonday = monday;
+  wbDays = [];
+  for (let i = 0; i < 7; i++) {
+    const date = wbAddDays(monday, i);
+    wbDays.push({
+      date,
+      dayIndex: i,
+      shifts: [ { uid: wbNextUid(), territory_id: '', conductor_id: '', period: 'manana', time: '' } ],
+    });
+  }
+  const sunday = wbAddDays(monday, 6);
+  const dM = new Date(monday + 'T00:00:00'), dS = new Date(sunday + 'T00:00:00');
+  document.getElementById('wb-week-range').textContent =
+    `Semana del ${dM.getDate()} ${WB_MON[dM.getMonth()]} al ${dS.getDate()} ${WB_MON[dS.getMonth()]} de ${dS.getFullYear()}`;
+  wbRenderSuggested();
+  wbRenderDays();
+}
+
+// ── Suggested territories: every territory, sorted by longest time unassigned ──
+function wbTerritoryLastAssignedDate(territoryId) {
+  let last = null;
+  for (const a of assignments) {
+    if (a.territory_id === territoryId && a.date) {
+      if (!last || a.date > last) last = a.date;
+    }
+  }
+  return last;
+}
+function wbDaysSince(dateStr) {
+  const today = wbTodayStr();
+  const d1 = new Date(dateStr + 'T00:00:00');
+  const d2 = new Date(today + 'T00:00:00');
+  return Math.round((d2 - d1) / 86400000);
+}
+
+function wbRenderSuggested() {
+  const row = document.getElementById('wb-suggested-row');
+  const hint = document.getElementById('wb-suggested-hint');
+  if (!territories.length) {
+    row.innerHTML = `<div class="wb-suggested-empty">No hay territorios creados todavía. Créalos primero en la pestaña Territorios.</div>`;
+    hint.textContent = '';
+    return;
+  }
+  const withMeta = territories.map(t => {
+    const last = wbTerritoryLastAssignedDate(t.id);
+    return { t, last, daysSince: last ? wbDaysSince(last) : Infinity };
+  });
+  withMeta.sort((a,b) => b.daysSince - a.daysSince);
+
+  row.innerHTML = withMeta.map(({t, last, daysSince}) => {
+    const color = getTerColor(t.number);
+    const metaLabel = last ? `hace ${daysSince}d` : 'Sin asignar';
+    const isSelected = wbSelectedTerritoryId === t.id;
+    return `<div class="wb-ter-chip${isSelected ? ' wb-selected' : ''}" style="background:${color}"
+        draggable="true" data-ter-id="${t.id}"
+        ondragstart="wbDragStart(event,'${t.id}')" ondragend="wbDragEnd(event)"
+        onclick="wbToggleSelectTerritory('${t.id}')">
+      <div class="wb-ter-num">${t.number}</div>
+      <div class="wb-ter-meta">${metaLabel}</div>
+      <button class="wb-ter-add" onclick="event.stopPropagation();wbQuickAssignFirstOpenSlot('${t.id}')">+ Añadir</button>
+    </div>`;
+  }).join('');
+
+  hint.innerHTML = wbSelectedTerritoryId
+    ? `<svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> Territorio seleccionado — toca un turno para asignarlo, o arrástralo.`
+    : `<svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> En escritorio: arrastra. En móvil: toca un territorio y luego el turno donde irá.`;
+}
+
+function wbToggleSelectTerritory(terId) {
+  wbSelectedTerritoryId = (wbSelectedTerritoryId === terId) ? null : terId;
+  wbRenderSuggested();
+}
+
+function wbQuickAssignFirstOpenSlot(terId) {
+  for (const day of wbDays) {
+    const openShift = day.shifts.find(s => !s.territory_id);
+    if (openShift) { openShift.territory_id = terId; wbRenderDays(); showToast('Territorio asignado','success'); return; }
+  }
+  // No open slot: add a new shift on Monday
+  wbDays[0].shifts.push({ uid: wbNextUid(), territory_id: terId, conductor_id: '', period: 'manana', time: '' });
+  wbRenderDays();
+  showToast('Territorio añadido como nuevo turno el Lunes','success');
+}
+
+// ── Drag & drop (desktop) ──
+function wbDragStart(ev, terId) {
+  wbDragTerritoryId = terId;
+  ev.dataTransfer.effectAllowed = 'copy';
+  ev.dataTransfer.setData('text/plain', terId);
+  ev.currentTarget.classList.add('wb-dragging');
+}
+function wbDragEnd(ev) {
+  ev.currentTarget.classList.remove('wb-dragging');
+  wbDragTerritoryId = null;
+}
+function wbDropZoneDragOver(ev) {
+  ev.preventDefault();
+  ev.dataTransfer.dropEffect = 'copy';
+  ev.currentTarget.classList.add('wb-drop-hover');
+}
+function wbDropZoneDragLeave(ev) {
+  ev.currentTarget.classList.remove('wb-drop-hover');
+}
+function wbDropZoneDrop(ev, dayIndex, uid) {
+  ev.preventDefault();
+  ev.currentTarget.classList.remove('wb-drop-hover');
+  const terId = ev.dataTransfer.getData('text/plain') || wbDragTerritoryId;
+  if (!terId) return;
+  wbAssignTerritoryToShift(dayIndex, uid, terId);
+}
+
+// ── Tap-to-assign (mobile / click) ──
+function wbShiftSlotClick(dayIndex, uid) {
+  if (!wbSelectedTerritoryId) {
+    showToast('Primero toca un territorio sugerido arriba','');
+    return;
+  }
+  wbAssignTerritoryToShift(dayIndex, uid, wbSelectedTerritoryId);
+  wbSelectedTerritoryId = null;
+  wbRenderSuggested();
+}
+
+function wbAssignTerritoryToShift(dayIndex, uid, terId) {
+  const day = wbDays[dayIndex];
+  const shift = day.shifts.find(s => s.uid === uid);
+  if (!shift) return;
+  shift.territory_id = terId;
+  wbRenderDays();
+}
+function wbClearShiftTerritory(dayIndex, uid) {
+  const day = wbDays[dayIndex];
+  const shift = day.shifts.find(s => s.uid === uid);
+  if (!shift) return;
+  shift.territory_id = '';
+  wbRenderDays();
+}
+
+function wbAddShift(dayIndex) {
+  wbDays[dayIndex].shifts.push({ uid: wbNextUid(), territory_id: '', conductor_id: '', period: 'tarde', time: '' });
+  wbRenderDays();
+}
+function wbRemoveShift(dayIndex, uid) {
+  const day = wbDays[dayIndex];
+  if (day.shifts.length <= 1) { day.shifts = [{ uid: wbNextUid(), territory_id: '', conductor_id: '', period: 'manana', time: '' }]; }
+  else { day.shifts = day.shifts.filter(s => s.uid !== uid); }
+  wbRenderDays();
+}
+function wbUpdateShiftField(dayIndex, uid, field, value) {
+  const shift = wbDays[dayIndex].shifts.find(s => s.uid === uid);
+  if (!shift) return;
+  shift[field] = value;
+  if (field === 'conductor_id') { /* no re-render needed */ }
+}
+
+function wbRenderDays() {
+  const grid = document.getElementById('wb-days-grid');
+  const conductorBaseOptions = conductores.map(c => ({ id: c.id, label: `${c.nombre} ${c.apellido}` }));
+
+  let totalAssigned = 0;
+
+  grid.innerHTML = wbDays.map((day, dayIndex) => {
+    const d = new Date(day.date + 'T00:00:00');
+    const shiftsHtml = day.shifts.map(shift => {
+      const ter = territories.find(t => t.id === shift.territory_id);
+      if (ter) totalAssigned++;
+      const terBlock = ter
+        ? `<div class="wb-ter-assigned" style="background:${getTerColor(ter.number)}" onclick="wbShiftSlotClick(${dayIndex},'${shift.uid}')">
+             <span class="wb-ter-assigned-num">${ter.number}</span>
+             <span class="wb-ter-assigned-label">Territorio ${ter.number}</span>
+             <button class="wb-ter-assigned-x" onclick="event.stopPropagation();wbClearShiftTerritory(${dayIndex},'${shift.uid}')">
+               <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+             </button>
+           </div>`
+        : `<div class="wb-drop-zone" data-day="${dayIndex}" data-uid="${shift.uid}"
+              ondragover="wbDropZoneDragOver(event)" ondragleave="wbDropZoneDragLeave(event)"
+              ondrop="wbDropZoneDrop(event,${dayIndex},'${shift.uid}')"
+              onclick="wbShiftSlotClick(${dayIndex},'${shift.uid}')">
+             Arrastra un territorio aquí, o toca uno sugerido
+           </div>`;
+
+      return `<div class="wb-shift-block">
+        <div class="wb-shift-toprow">
+          <select class="wb-shift-label-select" onchange="wbUpdateShiftField(${dayIndex},'${shift.uid}','period',this.value)">
+            <option value="manana" ${shift.period==='manana'?'selected':''}>Mañana</option>
+            <option value="tarde" ${shift.period==='tarde'?'selected':''}>Tarde</option>
+            <option value="noche" ${shift.period==='noche'?'selected':''}>Noche</option>
+          </select>
+          <button class="wb-shift-remove" onclick="wbRemoveShift(${dayIndex},'${shift.uid}')" title="Quitar turno">
+            <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        ${terBlock}
+        <div class="wb-field-row">
+          <select class="wb-mini-select" onchange="wbUpdateShiftField(${dayIndex},'${shift.uid}','conductor_id',this.value)">
+            <option value=""${!shift.conductor_id?' selected':''}>Sin encargado</option>
+            ${conductorBaseOptions.map(c => `<option value="${c.id}"${shift.conductor_id===c.id?' selected':''}>${c.label}</option>`).join('')}
+          </select>
+          <input type="time" class="wb-mini-time" value="${shift.time||''}" onchange="wbUpdateShiftField(${dayIndex},'${shift.uid}','time',this.value)">
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div class="wb-day-card">
+      <div class="wb-day-name">${WB_DAY_NAMES[dayIndex]}</div>
+      <div class="wb-day-date">${d.getDate()} ${WB_MON[d.getMonth()]}</div>
+      ${shiftsHtml}
+      <button class="wb-add-shift-btn" onclick="wbAddShift(${dayIndex})">
+        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Añadir turno
+      </button>
+    </div>`;
+  }).join('');
+
+  document.getElementById('wb-footer-count').textContent =
+    totalAssigned > 0 ? `${totalAssigned} turno${totalAssigned===1?'':'s'} con territorio asignado` : 'Aún no has asignado territorios a ningún turno';
+}
+
+async function saveWeekBuilder() {
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (currentRole === 'semiadmin') {
+    const perms = await getUserPermissions();
+    if (!canAccessModule(perms, 'assignments')) { showToast('No tienes permiso para gestionar Asignaciones.','error'); return; }
+  }
+
+  const payloads = [];
+  for (const day of wbDays) {
+    for (const shift of day.shifts) {
+      if (!shift.territory_id) continue; // skip empty slots
+      const conductor = shift.conductor_id ? conductores.find(c => c.id === shift.conductor_id) : null;
+      payloads.push({
+        date: day.date,
+        time: shift.time || (shift.period === 'manana' ? '10:00' : shift.period === 'tarde' ? '15:00' : '19:00'),
+        address: '',
+        house: '',
+        conductor: conductor ? `${conductor.nombre} ${conductor.apellido}` : '',
+        conductor_id: shift.conductor_id || null,
+        casa_id: null,
+        type: 'presencial',
+        territory_id: shift.territory_id,
+        notes: '',
+        phone: conductor?.telefono || null,
+      });
+    }
+  }
+
+  if (!payloads.length) { showToast('Asigna al menos un territorio a un turno antes de guardar','error'); return; }
+
+  const btn = document.getElementById('wb-save-btn');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  const { error } = await sb.from('assignments').insert(payloads);
+  btn.disabled = false; btn.textContent = 'Guardar semana';
+
+  if (error) { showToast('Error al guardar: ' + error.message, 'error'); return; }
+  showToast(`${payloads.length} asignaci${payloads.length===1?'ón':'ones'} creada${payloads.length===1?'':'s'} ✓`, 'success');
+  closeWeekBuilder();
+  await loadSchedule();
+  renderAdminAssignments();
 }
 
 function openTerritoryModal(t) {
