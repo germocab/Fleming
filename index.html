@@ -5643,13 +5643,23 @@ async function saveResponsabilidadesAsignacion() {
     const dia = respDiaLabel(dateStr);
     const resumen = newlyAssigned.map(n => `${n.hermano} (${n.cargo})`).join(', ');
     const title = 'Nueva Responsabilidad';
-    const body = `Se asignaron responsabilidades para el ${dia}: ${resumen}.`;
+    const body = `Se te asignó una responsabilidad para el ${dia}: ${resumen.includes(',') ? resumen : newlyAssigned[0].cargo}.`;
+    const targetNames = [...new Set(newlyAssigned.map(n => n.hermano.trim().toLowerCase()))];
     try {
-      await sb.from('notifications').insert({ title, body });
+      // Guarda una notificación distinta por cada hermano para que el mensaje
+      // sea específico a su propio cargo, y solo le aparezca a él.
+      const rows = newlyAssigned.map(n => ({
+        title: 'Nueva Responsabilidad',
+        body: `Se te asignó: ${n.cargo} para el ${dia}.`,
+        target_names: [n.hermano.trim().toLowerCase()],
+      }));
+      await sb.from('notifications').insert(rows);
+
+      // Push dirigido solo a los suscriptores cuyo nombre coincide.
       const resp = await fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
-        body: JSON.stringify({ title, body })
+        body: JSON.stringify({ title, body, target_names: targetNames })
       });
       if (!resp.ok) console.warn('Edge Function respondió con error:', resp.status, await resp.text());
     } catch (err) {
@@ -6736,12 +6746,22 @@ async function checkForNewNotifications() {
   try {
     const since = getLastSeenNotifTime();
     const { data } = await sb.from('notifications')
-      .select('id')
+      .select('id, target_names')
       .gt('created_at', since)
-      .limit(1);
+      .limit(50);
+    const myName = currentUser?.name?.trim().toLowerCase();
+    const relevant = (data || []).filter(n => isNotifForMe(n, myName));
     const badge = document.getElementById('notif-badge');
-    if (badge) badge.style.display = (data && data.length > 0) ? 'block' : 'none';
+    if (badge) badge.style.display = relevant.length > 0 ? 'block' : 'none';
   } catch(e) { /* silently ignore */ }
+}
+
+// A notification with no target_names (or an empty array) is a broadcast
+// visible to everyone. One with target_names only shows for the matching user.
+function isNotifForMe(n, myNameLower) {
+  if (!n.target_names || !Array.isArray(n.target_names) || n.target_names.length === 0) return true;
+  if (!myNameLower) return false;
+  return n.target_names.some(t => (t || '').trim().toLowerCase() === myNameLower);
 }
 
 let _notifPollInterval = null;
@@ -6810,10 +6830,13 @@ async function loadNotifications(target) {
   // target = 'desktop' | 'mobile' | undefined (refresh both)
   const targets = target ? [target] : ['desktop', 'mobile'];
 
-  const { data } = await sb.from('notifications')
+  const { data: rawData } = await sb.from('notifications')
     .select('*')
     .order('created_at', { ascending: false })
     .limit(50);
+
+  const myNameLower = currentUser?.name?.trim().toLowerCase();
+  const data = (rawData || []).filter(n => isNotifForMe(n, myNameLower));
 
   const lastSeen = getLastSeenNotifTime();
   const clearBtnDesktop = document.getElementById('notif-clear-btn-desktop');
