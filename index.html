@@ -5571,6 +5571,25 @@ function respDiaLabel(dateStr) {
   return d.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
 }
 
+// Versión larga y capitalizada para notificaciones: "Sábado 27 de Junio de 2026"
+function respDiaLabelLong(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const weekday = d.toLocaleDateString('es-CL', { weekday: 'long' });
+  const day = d.getDate();
+  const month = d.toLocaleDateString('es-CL', { month: 'long' });
+  const year = d.getFullYear();
+  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+  return `${cap(weekday)} ${day} de ${cap(month)} de ${year}`;
+}
+
+// Agrupa el cargo específico en una categoría más general para el título de la notificación.
+function respCargoCategoria(cargo) {
+  if (cargo.includes('Audio') || cargo.includes('Micrófono')) return 'Audio y Video';
+  if (cargo === 'Plataforma') return 'Plataforma';
+  if (cargo.startsWith('Acomodador')) return 'Acomodadores';
+  return cargo;
+}
+
 function onRespAsignarFechaChange() {
   const input = document.getElementById('resp-asignar-fecha');
   const errEl = document.getElementById('resp-fecha-error');
@@ -5641,29 +5660,38 @@ async function saveResponsabilidadesAsignacion() {
 
   if (newlyAssigned.length) {
     const dia = respDiaLabel(dateStr);
-    const resumen = newlyAssigned.map(n => `${n.hermano} (${n.cargo})`).join(', ');
-    const title = 'Nueva Responsabilidad';
-    const body = `Se te asignó una responsabilidad para el ${dia}: ${resumen.includes(',') ? resumen : newlyAssigned[0].cargo}.`;
+    const diaLargo = respDiaLabelLong(dateStr);
     const targetNames = [...new Set(newlyAssigned.map(n => n.hermano.trim().toLowerCase()))];
     try {
-      // Guarda una notificación distinta por cada hermano para que el mensaje
-      // sea específico a su propio cargo, y solo le aparezca a él.
+      // Una notificación por hermano, con título según su categoría de cargo
+      // y detalle con su cargo específico exacto + la fecha completa.
       const rows = newlyAssigned.map(n => ({
-        title: 'Nueva Responsabilidad',
-        body: `Se te asignó: ${n.cargo} para el ${dia}.`,
+        title: respCargoCategoria(n.cargo),
+        body: `Se te asignó como ${n.cargo} para el ${diaLargo}.`,
         target_names: [n.hermano.trim().toLowerCase()],
       }));
       await sb.from('notifications').insert(rows);
 
-      // Push dirigido solo a los suscriptores cuyo nombre coincide.
-      const resp = await fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
-        body: JSON.stringify({ title, body, target_names: targetNames })
-      });
-      if (!resp.ok) console.warn('Edge Function respondió con error:', resp.status, await resp.text());
+      // Push: se manda una vez por cada hermano para que el título/cuerpo
+      // de la notificación nativa también sea el específico de su cargo.
+      for (const n of newlyAssigned) {
+        try {
+          const resp = await fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+            body: JSON.stringify({
+              title: respCargoCategoria(n.cargo),
+              body: `Se te asignó como ${n.cargo} para el ${diaLargo}.`,
+              target_names: [n.hermano.trim().toLowerCase()],
+            })
+          });
+          if (!resp.ok) console.warn('Edge Function respondió con error:', resp.status, await resp.text());
+        } catch (err) {
+          console.warn('No se pudo enviar push (Edge Function no disponible):', err.message);
+        }
+      }
     } catch (err) {
-      console.warn('No se pudo enviar push (Edge Function no disponible):', err.message);
+      console.warn('No se pudieron guardar/enviar las notificaciones:', err.message);
     }
   }
 
