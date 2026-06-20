@@ -499,10 +499,15 @@
   }
   @keyframes slideUpPanel { from{transform:translateY(100%)} to{transform:translateY(0)} }
 
+  /* En pantallas anchas (tablets/desktop), el detalle de la asignación se
+     muestra como un popup centrado y compacto en vez de una hoja a ancho
+     completo, para no estirar la información innecesariamente. */
   @media(min-width: 640px) {
-    .detail-overlay { align-items: center; }
+    .detail-overlay { align-items: center; padding: 1.5rem; }
     .detail-panel {
+      width: 100%; max-width: 480px;
       border-radius: 20px; max-height: 88vh;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
       animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1);
     }
   }
