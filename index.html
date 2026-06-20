@@ -2433,13 +2433,7 @@
 
       <!-- Responsabilidades -->
       <div id="sub-content-responsabilidades" class="sub-page" style="display:none">
-        <div class="coming-soon-panel">
-          <div class="coming-soon-icon">
-            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          </div>
-          <h3>Responsabilidades</h3>
-          <p>La asignación de responsabilidades de la congregación estará disponible próximamente.</p>
-        </div>
+        <div id="resp-user-view"><div class="loader-wrap"><div class="loader"></div></div></div>
       </div>
 
     </div>
@@ -2511,6 +2505,7 @@
         <button class="admin-tab" onclick="switchAdminTab('conductores')">Conductores</button>
         <button class="admin-tab" onclick="switchAdminTab('casas')">Casas</button>
         <button class="admin-tab" onclick="switchAdminTab('grupos')">Grupos</button>
+        <button class="admin-tab" onclick="switchAdminTab('responsabilidades')">Responsabilidades</button>
       </div>
       <div class="admin-section active" id="admin-assignments">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
@@ -2571,6 +2566,41 @@
           <button class="btn-secondary" onclick="openGrupoModal()">+ Nuevo grupo</button>
         </div>
         <div id="admin-grupos-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+      </div>
+      <div class="admin-section" id="admin-responsabilidades">
+        <div class="sub-tabs" style="margin-bottom:1.1rem">
+          <button class="sub-tab active" id="resp-admin-tab-hermanos" onclick="switchRespAdminTab('hermanos')">Hermanos</button>
+          <button class="sub-tab" id="resp-admin-tab-asignar" onclick="switchRespAdminTab('asignar')">Asignar Jueves/Sábado</button>
+        </div>
+
+        <!-- Hermanos -->
+        <div id="resp-admin-hermanos">
+          <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
+            <span style="flex:1;font-size:0.95rem;font-weight:700">Hermanos habilitados</span>
+            <button class="btn-secondary" onclick="openHermanoModal()">+ Nuevo</button>
+          </div>
+          <div id="admin-hermanos-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+        </div>
+
+        <!-- Asignar -->
+        <div id="resp-admin-asignar" style="display:none">
+          <div class="form-group2">
+            <label class="form-label2">Selecciona el día (debe ser Jueves o Sábado)</label>
+            <input type="date" class="form-input" id="resp-asignar-fecha" onchange="onRespAsignarFechaChange()">
+            <div class="auth-error" id="resp-fecha-error"></div>
+          </div>
+          <div id="resp-asignar-cargos-wrap" style="display:none">
+            <div id="resp-asignar-cargos-list" style="display:flex;flex-direction:column;gap:0.8rem;margin:1rem 0"></div>
+            <div style="display:flex;gap:10px;justify-content:flex-end">
+              <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="saveResponsabilidadesAsignacion()" id="save-resp-btn">Guardar asignación</button>
+            </div>
+          </div>
+
+          <div style="margin-top:1.6rem">
+            <div style="font-size:0.95rem;font-weight:700;margin-bottom:0.9rem">Próximas asignaciones</div>
+            <div id="admin-resp-upcoming-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+          </div>
+        </div>
       </div>
       </div><!-- /.admin-body -->
     </div><!-- /#page-admin -->
@@ -2742,6 +2772,26 @@
         <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="saveTerritory()" id="save-ter-btn">Guardar</button>
       </div>
       <div class="auth-error" id="ter-error"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="hermano-modal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <div class="modal-title" id="herm-modal-title">Nuevo Hermano</div>
+      <button class="modal-close" onclick="closeHermanoModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group2">
+        <label class="form-label2">Nombre completo</label>
+        <input type="text" class="form-input" id="herm-nombre" placeholder="Ej: Tomás Vergara">
+      </div>
+      <div style="display:flex;gap:10px;margin-top:1.1rem;justify-content:flex-end">
+        <button class="btn-secondary" onclick="closeHermanoModal()">Cancelar</button>
+        <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="saveHermano()" id="save-herm-btn">Guardar</button>
+      </div>
+      <div class="auth-error" id="herm-error"></div>
     </div>
   </div>
 </div>
@@ -2965,6 +3015,19 @@ let assignments = [];
 let territories = [];
 let conductores = [];
 let casas = [];
+let hermanos = [];
+let responsabilidades = [];
+let editingHermanoId = null;
+let respAdminTab = 'hermanos';
+const RESP_CARGOS = [
+  'Encargado de Audio y Video',
+  'Auxiliar de Audio y Video',
+  'Micrófono 1',
+  'Micrófono 2',
+  'Plataforma',
+  'Acomodador 1',
+  'Acomodador 2',
+];
 let editingAssignmentId = null;
 let editingTerritoryId = null;
 let editingConductorId = null;
@@ -3735,9 +3798,15 @@ async function renderProfilePage() {
     groupSec.style.display = '';
   }
 
-  // Task
+  // Task / Responsabilidad
   const taskEl = document.getElementById('profile-task-value');
-  if (me?.task) {
+  const { data: myResp } = await sb.from('responsabilidades')
+    .select('*').ilike('hermano', currentUser.name).gte('fecha', todayStr()).order('fecha').limit(1);
+  if (myResp && myResp.length) {
+    const r = myResp[0];
+    taskEl.className = 'profile-row-value';
+    taskEl.innerHTML = `<strong>${r.cargo}</strong><br><span style="font-size:0.82rem;color:var(--text3)">${respDiaLabel(r.fecha)}</span>`;
+  } else if (me?.task) {
     taskEl.className = 'profile-row-value';
     taskEl.textContent = me.task;
   } else {
@@ -4186,6 +4255,7 @@ function switchSubTab(tabId) {
   _saveNavState();
   if (tabId === 'casa') refreshScheduleIfStale();
   if (tabId === 'territorios') renderTerritoryView();
+  if (tabId === 'responsabilidades') renderRespUserView();
   if (tabId === 'grupos') {
     loadAvatarCache().then(() => {
       if (!grupos.length) {
@@ -4218,24 +4288,25 @@ function showPage(name) {
 async function switchAdminTab(tab) {
   if (currentRole === 'semiadmin') {
     const perms = await getUserPermissions();
-    const moduleMap = { assignments: 'assignments', territories: 'territories', conductores: 'conductores', casas: 'casas', grupos: 'grupos' };
+    const moduleMap = { assignments: 'assignments', territories: 'territories', conductores: 'conductores', casas: 'casas', grupos: 'grupos', responsabilidades: 'responsabilidades' };
     const moduleKey = moduleMap[tab];
     if (moduleKey && !canAccessModule(perms, moduleKey)) {
       showToast('No tienes permisos para acceder a este módulo.', 'error');
       return;
     }
   }
-  const tabs = ['assignments','territories','conductores','casas','grupos'];
+  const tabs = ['assignments','territories','conductores','casas','grupos','responsabilidades'];
   document.querySelectorAll('.admin-tab').forEach((t,i) => t.classList.toggle('active', tabs[i] === tab));
   document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
   document.getElementById('admin-' + tab).classList.add('active');
+  if (tab === 'responsabilidades') loadResponsabilidadesAdmin();
 }
 
 async function applyAdminTabPermissions() {
   if (!['semiadmin'].includes(currentRole)) return;
   const perms = await getUserPermissions();
   if (!perms) return;
-  const tabs = ['assignments','territories','conductores','casas','grupos'];
+  const tabs = ['assignments','territories','conductores','casas','grupos','responsabilidades'];
   document.querySelectorAll('.admin-tab').forEach((btn, i) => {
     const key = tabs[i];
     const allowed = canAccessModule(perms, key);
@@ -4542,6 +4613,7 @@ async function loadAdminData() {
   renderAdminConductores();
   renderAdminCasas();
   renderAdminGrupos();
+  loadResponsabilidadesAdmin();
   await applyAdminTabPermissions();
 }
 
@@ -5405,6 +5477,274 @@ async function deleteConductor(id) {
   conductores = data || []; renderAdminConductores();
 }
 
+// ══════════════════════════════════════════════════════════════════════════
+// ── Responsabilidades (Audio/Video, Micrófonos, Plataforma, Acomodadores) ──
+// ══════════════════════════════════════════════════════════════════════════
+
+function todayStr() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+}
+
+function switchRespAdminTab(tab) {
+  respAdminTab = tab;
+  document.getElementById('resp-admin-tab-hermanos').classList.toggle('active', tab === 'hermanos');
+  document.getElementById('resp-admin-tab-asignar').classList.toggle('active', tab === 'asignar');
+  document.getElementById('resp-admin-hermanos').style.display = tab === 'hermanos' ? '' : 'none';
+  document.getElementById('resp-admin-asignar').style.display = tab === 'asignar' ? '' : 'none';
+}
+
+async function loadResponsabilidadesAdmin() {
+  const [{ data: hData }, { data: rData }] = await Promise.all([
+    sb.from('hermanos').select('*').order('nombre'),
+    sb.from('responsabilidades').select('*').gte('fecha', todayStr()).order('fecha').order('cargo'),
+  ]);
+  hermanos = hData || [];
+  responsabilidades = rData || [];
+  renderAdminHermanos();
+  renderAdminRespUpcoming();
+}
+
+// ── Hermanos (lista de nombres habilitados) ──
+function renderAdminHermanos() {
+  const container = document.getElementById('admin-hermanos-list');
+  if (!hermanos.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><h4>Sin hermanos</h4><p>Agrega el primer hermano habilitado para responsabilidades</p></div>`;
+    return;
+  }
+  container.innerHTML = hermanos.map(h => {
+    const inits = h.nombre.trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    return `
+    <div class="list-item">
+      <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#007AFF,#5ac8fa);display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:700;color:white;flex-shrink:0">${inits}</div>
+      <div class="list-item-main">
+        <div class="list-item-title">${h.nombre}</div>
+      </div>
+      <div class="list-item-actions">
+        <button class="btn-sm" onclick="editHermano('${h.id}')">Editar</button>
+        <button class="btn-danger" onclick="deleteHermano('${h.id}')"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openHermanoModal(h) {
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  editingHermanoId = h ? h.id : null;
+  document.getElementById('herm-modal-title').textContent = h ? 'Editar Hermano' : 'Nuevo Hermano';
+  document.getElementById('herm-nombre').value = h?.nombre || '';
+  document.getElementById('herm-error').style.display = 'none';
+  document.getElementById('hermano-modal').classList.add('open');
+}
+function closeHermanoModal() { document.getElementById('hermano-modal').classList.remove('open'); editingHermanoId = null; }
+function editHermano(id) { openHermanoModal(hermanos.find(h=>h.id===id)); }
+async function saveHermano() {
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  const nombre = document.getElementById('herm-nombre').value.trim();
+  if (!nombre) { showError('herm-error','El nombre es requerido'); return; }
+  const btn = document.getElementById('save-herm-btn');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  let error;
+  if (editingHermanoId) { ({error} = await sb.from('hermanos').update({nombre}).eq('id',editingHermanoId)); }
+  else { ({error} = await sb.from('hermanos').insert({nombre})); }
+  btn.disabled = false; btn.textContent = 'Guardar';
+  if (error) { showError('herm-error', error.message); return; }
+  showToast(editingHermanoId?'Hermano actualizado':'Hermano creado','success');
+  closeHermanoModal();
+  const {data} = await sb.from('hermanos').select('*').order('nombre');
+  hermanos = data || [];
+  renderAdminHermanos();
+}
+async function deleteHermano(id) {
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!confirm('¿Eliminar este hermano de la lista? (no se borran sus asignaciones pasadas)')) return;
+  const {error} = await sb.from('hermanos').delete().eq('id',id);
+  if (error) { showToast('Error al eliminar','error'); return; }
+  showToast('Hermano eliminado','success');
+  const {data} = await sb.from('hermanos').select('*').order('nombre');
+  hermanos = data || []; renderAdminHermanos();
+}
+
+// ── Asignar cargos para un Jueves o Sábado específico ──
+function respDiaLabel(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+function onRespAsignarFechaChange() {
+  const input = document.getElementById('resp-asignar-fecha');
+  const errEl = document.getElementById('resp-fecha-error');
+  const wrap = document.getElementById('resp-asignar-cargos-wrap');
+  errEl.style.display = 'none';
+  wrap.style.display = 'none';
+  const val = input.value;
+  if (!val) return;
+  const d = new Date(val + 'T00:00:00');
+  const day = d.getDay(); // 0=Dom..6=Sáb, 4=Jueves
+  if (day !== 4 && day !== 6) {
+    showError('resp-fecha-error', 'Debes seleccionar un día Jueves o Sábado.');
+    return;
+  }
+  renderRespCargosForm(val);
+  wrap.style.display = '';
+}
+
+function renderRespCargosForm(dateStr) {
+  const existing = responsabilidades.filter(r => r.fecha === dateStr);
+  const hermanoOptions = `<option value="">— Sin asignar —</option>` +
+    hermanos.map(h => `<option value="${h.nombre}">${h.nombre}</option>`).join('');
+  const list = document.getElementById('resp-asignar-cargos-list');
+  list.innerHTML = `<div style="font-size:0.85rem;font-weight:700;color:var(--text2);margin-bottom:0.2rem">${respDiaLabel(dateStr)}</div>` +
+    RESP_CARGOS.map((cargo, i) => {
+      const found = existing.find(r => r.cargo === cargo);
+      const opts = hermanoOptions.replace(`value="${(found?.hermano||'').replace(/"/g,'')}"`, `value="${(found?.hermano||'').replace(/"/g,'')}" selected`);
+      return `
+      <div class="form-group2" style="margin-bottom:0">
+        <label class="form-label2">${cargo}</label>
+        <select class="form-input" id="resp-cargo-sel-${i}">${found?.hermano ? opts : hermanoOptions}</select>
+      </div>`;
+    }).join('');
+}
+
+async function saveResponsabilidadesAsignacion() {
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (currentRole === 'semiadmin') {
+    const perms = await getUserPermissions();
+    if (!canAccessModule(perms, 'responsabilidades')) { showToast('No tienes permiso para gestionar Responsabilidades.','error'); return; }
+  }
+  const dateStr = document.getElementById('resp-asignar-fecha').value;
+  if (!dateStr) return;
+  const existing = responsabilidades.filter(r => r.fecha === dateStr);
+  const btn = document.getElementById('save-resp-btn');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+
+  const newlyAssigned = []; // names newly assigned/changed, to notify
+  for (let i = 0; i < RESP_CARGOS.length; i++) {
+    const cargo = RESP_CARGOS[i];
+    const sel = document.getElementById('resp-cargo-sel-' + i);
+    const hermanoName = sel.value || null;
+    const prev = existing.find(r => r.cargo === cargo);
+
+    if (prev) {
+      if (prev.hermano !== hermanoName) {
+        await sb.from('responsabilidades').update({ hermano: hermanoName }).eq('id', prev.id);
+        if (hermanoName) newlyAssigned.push({ cargo, hermano: hermanoName });
+      }
+    } else if (hermanoName) {
+      await sb.from('responsabilidades').insert({ fecha: dateStr, cargo, hermano: hermanoName });
+      newlyAssigned.push({ cargo, hermano: hermanoName });
+    }
+  }
+
+  btn.disabled = false; btn.textContent = 'Guardar asignación';
+  showToast('Asignación guardada ✓', 'success');
+
+  if (newlyAssigned.length) {
+    const dia = respDiaLabel(dateStr);
+    const resumen = newlyAssigned.map(n => `${n.hermano} (${n.cargo})`).join(', ');
+    const title = 'Nueva Responsabilidad';
+    const body = `Se asignaron responsabilidades para el ${dia}: ${resumen}.`;
+    try {
+      await sb.from('notifications').insert({ title, body });
+      const resp = await fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+        body: JSON.stringify({ title, body })
+      });
+      if (!resp.ok) console.warn('Edge Function respondió con error:', resp.status, await resp.text());
+    } catch (err) {
+      console.warn('No se pudo enviar push (Edge Function no disponible):', err.message);
+    }
+  }
+
+  const { data } = await sb.from('responsabilidades').select('*').gte('fecha', todayStr()).order('fecha').order('cargo');
+  responsabilidades = data || [];
+  renderAdminRespUpcoming();
+  if (currentUser) renderProfilePage();
+}
+
+function renderAdminRespUpcoming() {
+  const container = document.getElementById('admin-resp-upcoming-list');
+  const dates = [...new Set(responsabilidades.map(r => r.fecha))].sort();
+  if (!dates.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><h4>Sin asignaciones próximas</h4><p>Selecciona un día Jueves o Sábado para empezar</p></div>`;
+    return;
+  }
+  container.innerHTML = dates.map(dateStr => {
+    const rows = responsabilidades.filter(r => r.fecha === dateStr);
+    const filled = rows.filter(r => r.hermano).length;
+    return `
+    <div class="list-item" style="align-items:flex-start;flex-direction:column;gap:0.5rem;padding:0.9rem 1rem">
+      <div style="display:flex;width:100%;align-items:center;gap:10px">
+        <div class="list-item-main">
+          <div class="list-item-title">${respDiaLabel(dateStr)}</div>
+          <div class="list-item-sub">${filled}/${RESP_CARGOS.length} cargos asignados</div>
+        </div>
+        <div class="list-item-actions">
+          <button class="btn-sm" onclick="editRespDate('${dateStr}')">Editar</button>
+          <button class="btn-danger" onclick="deleteRespDate('${dateStr}')"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+      </div>
+      <div style="font-size:0.8rem;color:var(--text3);line-height:1.5">
+        ${rows.map(r => `${r.cargo}: <strong style="color:var(--text2)">${r.hermano || 'Sin asignar'}</strong>`).join(' · ')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function editRespDate(dateStr) {
+  document.getElementById('resp-asignar-fecha').value = dateStr;
+  onRespAsignarFechaChange();
+  document.getElementById('resp-admin-asignar').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+async function deleteRespDate(dateStr) {
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!confirm(`¿Eliminar toda la asignación del ${respDiaLabel(dateStr)}?`)) return;
+  const {error} = await sb.from('responsabilidades').delete().eq('fecha', dateStr);
+  if (error) { showToast('Error al eliminar','error'); return; }
+  showToast('Asignación eliminada','success');
+  const { data } = await sb.from('responsabilidades').select('*').gte('fecha', todayStr()).order('fecha').order('cargo');
+  responsabilidades = data || [];
+  renderAdminRespUpcoming();
+}
+
+// ── Vista del usuario final (sub-tab Responsabilidades) ──
+async function renderRespUserView() {
+  const el = document.getElementById('resp-user-view');
+  el.innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
+  const { data } = await sb.from('responsabilidades').select('*').gte('fecha', todayStr()).order('fecha').order('cargo');
+  const rows = data || [];
+  const dates = [...new Set(rows.map(r => r.fecha))].sort();
+  if (!dates.length) {
+    el.innerHTML = `<div class="coming-soon-panel"><div class="coming-soon-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><h3>Responsabilidades</h3><p>Aún no hay responsabilidades asignadas para los próximos Jueves o Sábados.</p></div>`;
+    return;
+  }
+  const myName = currentUser?.name?.trim().toLowerCase();
+  el.innerHTML = dates.map(dateStr => {
+    const cargosDia = rows.filter(r => r.fecha === dateStr);
+    return `
+    <div class="profile-section" style="margin-bottom:1rem">
+      <div class="profile-section-title">${respDiaLabel(dateStr)}</div>
+      ${RESP_CARGOS.map(cargo => {
+        const r = cargosDia.find(x => x.cargo === cargo);
+        const name = r?.hermano || null;
+        const isMe = name && myName && name.trim().toLowerCase() === myName;
+        return `
+        <div class="profile-row" style="${isMe ? 'background:var(--accent-light);border-radius:var(--radius-sm)' : ''}">
+          <div class="profile-row-icon" style="background:${isMe?'var(--accent)':'var(--surface3)'};color:${isMe?'#fff':'var(--text3)'}">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          </div>
+          <div class="profile-row-content">
+            <div class="profile-row-label">${cargo}</div>
+            <div class="profile-row-value" style="${isMe?'font-weight:700':''}">${name || '<span class="profile-row-empty">Sin asignar</span>'}</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+
 function renderAdminCasas() {
   const container = document.getElementById('admin-casas-list');
   if (!casas.length) {
@@ -5562,10 +5902,11 @@ const PERM_MODULES = [
   { key: 'conductores', label: 'Conductores',  icon: '<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' },
   { key: 'casas',       label: 'Casas',         icon: '<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>' },
   { key: 'grupos',      label: 'Grupos',         icon: '<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
+  { key: 'responsabilidades', label: 'Responsabilidades', icon: '<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
 ];
 
 function parsePermissions(raw) {
-  if (!raw) return { territories: true, assignments: true, conductores: true, casas: true, grupos: true };
+  if (!raw) return { territories: true, assignments: true, conductores: true, casas: true, grupos: true, responsabilidades: true };
   try {
     const p = typeof raw === 'string' ? JSON.parse(raw) : raw;
     return {
@@ -5574,8 +5915,9 @@ function parsePermissions(raw) {
       conductores: p.conductores !== false,
       casas:       p.casas       !== false,
       grupos:      p.grupos      !== false,
+      responsabilidades: p.responsabilidades !== false,
     };
-  } catch { return { territories: true, assignments: true, conductores: true, casas: true, grupos: true }; }
+  } catch { return { territories: true, assignments: true, conductores: true, casas: true, grupos: true, responsabilidades: true }; }
 }
 
 // Check if current user can edit permissions of a target user
@@ -5659,7 +6001,7 @@ function openUserProfilePage(uid) {
   ].filter(Boolean).join('');
 
   // Permissions text
-  const permNames = { assignments:'Asignaciones', territories:'Territorios', conductores:'Conductores', casas:'Casas', grupos:'Grupos' };
+  const permNames = { assignments:'Asignaciones', territories:'Territorios', conductores:'Conductores', casas:'Casas', grupos:'Grupos', responsabilidades:'Responsabilidades' };
   const permList = PERM_MODULES.filter(m => perms[m.key]).map(m => m.label).join(', ') || 'Ninguno';
 
   // Role options
@@ -5956,7 +6298,7 @@ async function revokeUser(uid) {
   if (!u) return;
   if (!confirm(`¿Revocar el acceso de ${u.name}? Podrá volver a ingresar con la contraseña de visitante.`)) return;
 
-  const defaultPerms = { territories: true, assignments: true, conductores: true, casas: true };
+  const defaultPerms = { territories: true, assignments: true, conductores: true, casas: true, grupos: true, responsabilidades: true };
   // Try update with permissions; if column doesn't exist yet, retry without it
   let { error } = await sb.from('platform_users')
     .update({ role: 'viewer', task: '', permissions: defaultPerms })
