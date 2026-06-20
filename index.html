@@ -1121,6 +1121,87 @@
   .empty-state h4 { font-size: 1rem; color: var(--text2); margin-bottom: 0.3rem; }
   .empty-state p { font-size: 0.84rem; }
 
+  /* ── Asignar Jueves/Sábado (Responsabilidades) ── */
+  .resp-intro { font-size: 0.82rem; color: var(--text3); margin-bottom: 0.9rem; }
+  .resp-date-chips {
+    display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 10px;
+    margin-bottom: 0.3rem; scrollbar-width: none;
+  }
+  .resp-date-chips::-webkit-scrollbar { display: none; }
+  .resp-date-chip {
+    flex-shrink: 0; min-width: 72px; padding: 9px 6px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; text-align: center; cursor: pointer;
+    font-family: var(--font); color: var(--text); position: relative;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .resp-date-chip:hover { border-color: var(--border-active); }
+  .resp-date-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .resp-date-chip-day { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; color: var(--text3); }
+  .resp-date-chip.active .resp-date-chip-day { color: rgba(255,255,255,0.85); }
+  .resp-date-chip-num { font-size: 1.05rem; font-weight: 800; line-height: 1.2; }
+  .resp-date-chip-month { font-size: 0.62rem; font-weight: 600; color: var(--text3); }
+  .resp-date-chip.active .resp-date-chip-month { color: rgba(255,255,255,0.9); }
+  .resp-date-chip-dot {
+    position: absolute; top: 7px; right: 7px; width: 6px; height: 6px; border-radius: 50%;
+  }
+  .resp-date-chip-dot.complete { background: var(--green); }
+  .resp-date-chip-dot.incomplete { background: var(--orange); }
+  .resp-date-chip-other {
+    flex-shrink: 0; min-width: 56px; padding: 9px 4px;
+    background: transparent; border: 1px dashed var(--border-active);
+    border-radius: 14px; text-align: center; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    color: var(--text3); font-family: var(--font);
+  }
+  .resp-date-chip-other:hover { border-color: var(--accent); color: var(--accent); }
+  .resp-date-chip-other svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+  .resp-date-chip-other span { font-size: 0.6rem; font-weight: 600; }
+  .resp-custom-date-wrap { margin-bottom: 1rem; }
+
+  .resp-cargos-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.1rem; margin-bottom: 1.4rem;
+  }
+  .resp-cargos-day-title { font-size: 0.98rem; font-weight: 700; margin-bottom: 1rem; }
+  .resp-cat-title {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+    margin-bottom: 7px;
+  }
+  .resp-cat-title svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+  .resp-cat-block { margin-bottom: 1rem; }
+  .resp-cat-block:last-of-type { margin-bottom: 0; }
+  .resp-cargo-row {
+    display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+    background: var(--surface2); border-radius: var(--radius-xs); margin-bottom: 6px;
+  }
+  .resp-cargo-row:last-child { margin-bottom: 0; }
+  .resp-cargo-name { flex-shrink: 0; font-size: 0.82rem; color: var(--text2); min-width: 118px; }
+  .resp-cargo-select {
+    flex: 1; padding: 6px 28px 6px 8px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-family: var(--font); font-size: 0.82rem;
+    outline: none; appearance: none; min-width: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238e8e93' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 9px center;
+  }
+  .resp-cargo-select:focus { border-color: var(--accent); }
+
+  .resp-history-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.8rem; }
+  .resp-history-item {
+    display: flex; align-items: center; gap: 10px; padding: 0.75rem 0.9rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); margin-bottom: 0.5rem; cursor: pointer; transition: background 0.15s;
+  }
+  .resp-history-item:hover { background: var(--surface2); }
+  .resp-history-item-main { flex: 1; min-width: 0; }
+  .resp-history-item-title { font-size: 0.86rem; font-weight: 600; }
+  .resp-history-item-sub { font-size: 0.76rem; color: var(--text3); margin-top: 1px; }
+  .resp-history-item svg.chev { width: 16px; height: 16px; stroke: var(--text3); fill: none; stroke-width: 2; stroke-linecap: round; flex-shrink: 0; }
+  @media (max-width: 480px) {
+    .resp-cargo-name { min-width: 96px; font-size: 0.78rem; }
+  }
+
   .loader-wrap { display: flex; align-items: center; justify-content: center; padding: 3rem; }
   .loader { width: 32px; height: 32px; border: 2.5px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.75s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -2589,20 +2670,27 @@
 
         <!-- Asignar -->
         <div id="resp-admin-asignar" style="display:none">
-          <div class="form-group2">
-            <label class="form-label2">Selecciona el día (debe ser Jueves o Sábado)</label>
-            <input type="date" class="form-input" id="resp-asignar-fecha" onchange="onRespAsignarFechaChange()">
-            <div class="auth-error" id="resp-fecha-error"></div>
-          </div>
-          <div id="resp-asignar-cargos-wrap" style="display:none">
-            <div id="resp-asignar-cargos-list" style="display:flex;flex-direction:column;gap:0.8rem;margin:1rem 0"></div>
-            <div style="display:flex;gap:10px;justify-content:flex-end">
-              <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="saveResponsabilidadesAsignacion()" id="save-resp-btn">Guardar asignación</button>
+          <div class="resp-intro">Elige una fecha próxima o selecciona otra</div>
+          <div class="resp-date-chips" id="resp-date-chips"></div>
+
+          <div class="resp-custom-date-wrap" id="resp-custom-date-wrap" style="display:none">
+            <div class="form-group2" style="margin-bottom:0">
+              <label class="form-label2">Selecciona el día (debe ser Jueves o Sábado)</label>
+              <input type="date" class="form-input" id="resp-asignar-fecha" onchange="onRespAsignarFechaChange()">
+              <div class="auth-error" id="resp-fecha-error"></div>
             </div>
           </div>
 
-          <div style="margin-top:1.6rem">
-            <div style="font-size:0.95rem;font-weight:700;margin-bottom:0.9rem">Próximas asignaciones</div>
+          <div id="resp-asignar-cargos-wrap" style="display:none">
+            <div class="resp-cargos-card">
+              <div class="resp-cargos-day-title" id="resp-cargos-day-title">—</div>
+              <div id="resp-asignar-cargos-list"></div>
+              <button class="btn-primary" style="margin-top:1.1rem" onclick="saveResponsabilidadesAsignacion()" id="save-resp-btn">Guardar asignación</button>
+            </div>
+          </div>
+
+          <div style="margin-top:0.4rem">
+            <div class="resp-history-title">Historial de asignaciones</div>
             <div id="admin-resp-upcoming-list"><div class="loader-wrap"><div class="loader"></div></div></div>
           </div>
         </div>
@@ -3033,6 +3121,27 @@ const RESP_CARGOS = [
   'Acomodador 1',
   'Acomodador 2',
 ];
+// Agrupación visual de los cargos en categorías para el formulario de asignación.
+const RESP_CATEGORIAS = [
+  {
+    nombre: 'Audio y video',
+    cargos: ['Encargado de Audio y Video', 'Auxiliar de Audio y Video', 'Micrófono 1', 'Micrófono 2'],
+    color: 'var(--accent)',
+    icon: '<svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>',
+  },
+  {
+    nombre: 'Plataforma',
+    cargos: ['Plataforma'],
+    color: '#a855f7',
+    icon: '<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+  },
+  {
+    nombre: 'Acomodadores',
+    cargos: ['Acomodador 1', 'Acomodador 2'],
+    color: '#f59e0b',
+    icon: '<svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>',
+  },
+];
 let editingAssignmentId = null;
 let editingTerritoryId = null;
 let editingConductorId = null;
@@ -3041,6 +3150,8 @@ let noPasarCount = 0;
 let pendingMapBase64 = null;
 let currentMainTab = 'predicacion';
 let currentSubTab  = 'casa';
+let respHistorial = [];
+let respSelectedDate = null;
 
 const TER_COLORS = ['#64748b','#22c55e','#3b82f6','#a855f7','#f59e0b','#ef4444','#06b6d4','#ec4899','#84cc16','#f97316'];
 function getTerColor(num) { return TER_COLORS[num % TER_COLORS.length]; }
@@ -5500,13 +5611,16 @@ function switchRespAdminTab(tab) {
 }
 
 async function loadResponsabilidadesAdmin() {
-  const [{ data: hData }, { data: rData }] = await Promise.all([
+  const [{ data: hData }, { data: rData }, { data: histData }] = await Promise.all([
     sb.from('hermanos').select('*').order('nombre'),
     sb.from('responsabilidades').select('*').gte('fecha', todayStr()).order('fecha').order('cargo'),
+    sb.from('responsabilidades').select('*').lt('fecha', todayStr()).order('fecha', { ascending: false }).order('cargo'),
   ]);
   hermanos = hData || [];
   responsabilidades = rData || [];
+  respHistorial = histData || [];
   renderAdminHermanos();
+  renderRespDateChips();
   renderAdminRespUpcoming();
 }
 
@@ -5595,6 +5709,66 @@ function respCargoCategoria(cargo) {
   return cargo;
 }
 
+// Genera las próximas N fechas válidas (Jueves o Sábado) a partir de hoy.
+function respProximasFechas(n) {
+  const fechas = [];
+  const d = new Date(todayStr() + 'T00:00:00');
+  for (let i = 0; i < 60 && fechas.length < n; i++) {
+    const day = d.getDay();
+    if (day === 4 || day === 6) {
+      const f = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      fechas.push(f);
+    }
+    d.setDate(d.getDate() + 1);
+  }
+  return fechas;
+}
+
+function renderRespDateChips() {
+  const wrap = document.getElementById('resp-date-chips');
+  const fechas = respProximasFechas(6);
+  const MES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const DIA = ['dom','lun','mar','mié','jue','vie','sáb'];
+  wrap.innerHTML = fechas.map(f => {
+    const d = new Date(f + 'T00:00:00');
+    const rows = responsabilidades.filter(r => r.fecha === f);
+    let dot = '';
+    if (rows.length) {
+      const completo = rows.length >= RESP_CARGOS.length && rows.every(r => r.hermano);
+      dot = `<div class="resp-date-chip-dot ${completo ? 'complete' : 'incomplete'}"></div>`;
+    }
+    const isActive = respSelectedDate === f;
+    return `
+    <div class="resp-date-chip${isActive ? ' active' : ''}" onclick="selectRespDate('${f}')">
+      <div class="resp-date-chip-day">${DIA[d.getDay()]}</div>
+      <div class="resp-date-chip-num">${d.getDate()}</div>
+      <div class="resp-date-chip-month">${MES[d.getMonth()]}</div>
+      ${dot}
+    </div>`;
+  }).join('') + `
+    <div class="resp-date-chip-other" onclick="toggleRespCustomDate()">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Otra</span>
+    </div>`;
+}
+
+function toggleRespCustomDate() {
+  const wrap = document.getElementById('resp-custom-date-wrap');
+  const willOpen = wrap.style.display === 'none';
+  wrap.style.display = willOpen ? '' : 'none';
+  if (willOpen) document.getElementById('resp-asignar-fecha').focus();
+}
+
+function selectRespDate(dateStr) {
+  respSelectedDate = dateStr;
+  document.getElementById('resp-custom-date-wrap').style.display = 'none';
+  document.getElementById('resp-asignar-fecha').value = dateStr;
+  document.getElementById('resp-fecha-error').style.display = 'none';
+  renderRespDateChips();
+  renderRespCargosForm(dateStr);
+  document.getElementById('resp-asignar-cargos-wrap').style.display = '';
+}
+
 function onRespAsignarFechaChange() {
   const input = document.getElementById('resp-asignar-fecha');
   const errEl = document.getElementById('resp-fecha-error');
@@ -5609,26 +5783,40 @@ function onRespAsignarFechaChange() {
     showError('resp-fecha-error', 'Debes seleccionar un día Jueves o Sábado.');
     return;
   }
+  respSelectedDate = val;
+  renderRespDateChips();
   renderRespCargosForm(val);
   wrap.style.display = '';
 }
 
 function renderRespCargosForm(dateStr) {
   const existing = responsabilidades.filter(r => r.fecha === dateStr);
-  const hermanoOptions = `<option value="">— Sin asignar —</option>` +
+  const hermanoOptions = `<option value="">Sin asignar</option>` +
     hermanos.map(h => `<option value="${h.nombre}">${h.nombre}</option>`).join('');
+  document.getElementById('resp-cargos-day-title').textContent = capitalizar(respDiaLabel(dateStr));
+
+  let cargoIndex = 0;
   const list = document.getElementById('resp-asignar-cargos-list');
-  list.innerHTML = `<div style="font-size:0.85rem;font-weight:700;color:var(--text2);margin-bottom:0.2rem">${respDiaLabel(dateStr)}</div>` +
-    RESP_CARGOS.map((cargo, i) => {
+  list.innerHTML = RESP_CATEGORIAS.map(cat => {
+    const rowsHtml = cat.cargos.map(cargo => {
+      const i = cargoIndex++;
       const found = existing.find(r => r.cargo === cargo);
       const opts = hermanoOptions.replace(`value="${(found?.hermano||'').replace(/"/g,'')}"`, `value="${(found?.hermano||'').replace(/"/g,'')}" selected`);
       return `
-      <div class="form-group2" style="margin-bottom:0">
-        <label class="form-label2">${cargo}</label>
-        <select class="form-input" id="resp-cargo-sel-${i}">${found?.hermano ? opts : hermanoOptions}</select>
+      <div class="resp-cargo-row">
+        <span class="resp-cargo-name">${cargo}</span>
+        <select class="resp-cargo-select" id="resp-cargo-sel-${i}" data-cargo="${cargo}">${found?.hermano ? opts : hermanoOptions}</select>
       </div>`;
     }).join('');
+    return `
+    <div class="resp-cat-block">
+      <div class="resp-cat-title" style="color:${cat.color}">${cat.icon}${cat.nombre}</div>
+      ${rowsHtml}
+    </div>`;
+  }).join('');
 }
+
+function capitalizar(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
 async function saveResponsabilidadesAsignacion() {
   if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
@@ -5702,53 +5890,66 @@ async function saveResponsabilidadesAsignacion() {
 
   const { data } = await sb.from('responsabilidades').select('*').gte('fecha', todayStr()).order('fecha').order('cargo');
   responsabilidades = data || [];
+  renderRespDateChips();
   renderAdminRespUpcoming();
   if (currentUser) renderProfilePage();
 }
 
 function renderAdminRespUpcoming() {
   const container = document.getElementById('admin-resp-upcoming-list');
-  const dates = [...new Set(responsabilidades.map(r => r.fecha))].sort();
-  if (!dates.length) {
-    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><h4>Sin asignaciones próximas</h4><p>Selecciona un día Jueves o Sábado para empezar</p></div>`;
+  const upcomingDates = [...new Set(responsabilidades.map(r => r.fecha))].sort();
+  const pastDates = [...new Set(respHistorial.map(r => r.fecha))].sort().reverse();
+  const allRows = [...responsabilidades, ...respHistorial];
+
+  if (!upcomingDates.length && !pastDates.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><h4>Sin asignaciones registradas</h4><p>Selecciona un día Jueves o Sábado para empezar</p></div>`;
     return;
   }
-  container.innerHTML = dates.map(dateStr => {
-    const rows = responsabilidades.filter(r => r.fecha === dateStr);
+
+  const renderItem = (dateStr, isPast) => {
+    const rows = allRows.filter(r => r.fecha === dateStr);
     const filled = rows.filter(r => r.hermano).length;
+    const detalle = rows.map(r => `${r.cargo}: <strong style="color:var(--text2)">${r.hermano || 'Sin asignar'}</strong>`).join(' · ');
     return `
-    <div class="list-item" style="align-items:flex-start;flex-direction:column;gap:0.5rem;padding:0.9rem 1rem">
+    <div class="resp-history-item" style="cursor:default;align-items:flex-start;flex-direction:column;gap:0.5rem">
       <div style="display:flex;width:100%;align-items:center;gap:10px">
-        <div class="list-item-main">
-          <div class="list-item-title">${respDiaLabel(dateStr)}</div>
-          <div class="list-item-sub">${filled}/${RESP_CARGOS.length} cargos asignados</div>
+        <div class="resp-history-item-main">
+          <div class="resp-history-item-title">${capitalizar(respDiaLabel(dateStr))}</div>
+          <div class="resp-history-item-sub">${filled}/${RESP_CARGOS.length} cargos asignados${isPast ? ' · ya ocurrió' : ''}</div>
         </div>
         <div class="list-item-actions">
-          <button class="btn-sm" onclick="editRespDate('${dateStr}')">Editar</button>
-          <button class="btn-danger" onclick="deleteRespDate('${dateStr}')"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          ${isPast ? '' : `<button class="btn-sm" onclick="editRespDate('${dateStr}')">Editar</button>`}
+          <button class="btn-danger" onclick="deleteRespDate('${dateStr}', ${isPast})"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
       </div>
-      <div style="font-size:0.8rem;color:var(--text3);line-height:1.5">
-        ${rows.map(r => `${r.cargo}: <strong style="color:var(--text2)">${r.hermano || 'Sin asignar'}</strong>`).join(' · ')}
-      </div>
+      <div style="font-size:0.8rem;color:var(--text3);line-height:1.5">${detalle}</div>
     </div>`;
-  }).join('');
+  };
+
+  container.innerHTML =
+    upcomingDates.map(d => renderItem(d, false)).join('') +
+    pastDates.map(d => renderItem(d, true)).join('');
 }
 
 function editRespDate(dateStr) {
-  document.getElementById('resp-asignar-fecha').value = dateStr;
-  onRespAsignarFechaChange();
+  selectRespDate(dateStr);
   document.getElementById('resp-admin-asignar').scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
-async function deleteRespDate(dateStr) {
+async function deleteRespDate(dateStr, isPast) {
   if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   if (!confirm(`¿Eliminar toda la asignación del ${respDiaLabel(dateStr)}?`)) return;
   const {error} = await sb.from('responsabilidades').delete().eq('fecha', dateStr);
   if (error) { showToast('Error al eliminar','error'); return; }
   showToast('Asignación eliminada','success');
-  const { data } = await sb.from('responsabilidades').select('*').gte('fecha', todayStr()).order('fecha').order('cargo');
-  responsabilidades = data || [];
+  if (isPast) {
+    const { data } = await sb.from('responsabilidades').select('*').lt('fecha', todayStr()).order('fecha', { ascending: false }).order('cargo');
+    respHistorial = data || [];
+  } else {
+    const { data } = await sb.from('responsabilidades').select('*').gte('fecha', todayStr()).order('fecha').order('cargo');
+    responsabilidades = data || [];
+    renderRespDateChips();
+  }
   renderAdminRespUpcoming();
 }
 
