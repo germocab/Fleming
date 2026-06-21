@@ -750,7 +750,7 @@
   .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem; }
   .page-header-title { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; }
   .page-header-sub { font-size: 0.84rem; color: var(--text3); margin-top: 2px; }
-  .admin-tabs { display: flex; gap: 6px; margin-bottom: 1.25rem; }
+  .admin-tabs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 1.25rem; }
   .admin-tab {
     padding: 6px 16px; border-radius: 20px;
     font-size: 0.82rem; font-weight: 600;
@@ -758,6 +758,20 @@
     color: var(--text2); cursor: pointer; transition: all 0.2s; font-family: var(--font);
   }
   .admin-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .admin-tabs-group { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .admin-tabs-group-label {
+    font-size: 0.68rem; font-weight: 700; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.07em;
+    padding: 0 2px; margin-right: 2px;
+  }
+  .admin-tabs-divider {
+    width: 1px; align-self: stretch; min-height: 22px;
+    background: var(--border); margin: 0 4px;
+  }
+  @media (max-width: 639px) {
+    .admin-tabs-divider { display: none; }
+    .admin-tabs-group-label { width: 100%; margin-top: 4px; }
+  }
   .admin-section { display: none; }
   .admin-section.active { display: block; }
 
@@ -2652,13 +2666,20 @@
         </div>
       </div>
       <div class="admin-tabs">
-        <button class="admin-tab active" onclick="switchAdminTab('assignments')">Asignaciones</button>
-        <button class="admin-tab" onclick="switchAdminTab('territories')">Territorios</button>
-        <button class="admin-tab" onclick="switchAdminTab('conductores')">Conductores</button>
-        <button class="admin-tab" onclick="switchAdminTab('casas')">Casas</button>
-        <button class="admin-tab" onclick="switchAdminTab('grupos')">Grupos</button>
-        <button class="admin-tab" onclick="switchAdminTab('responsabilidades')">Responsabilidades</button>
-        <button class="admin-tab" onclick="switchAdminTab('aseo-salon')">Aseo Salón</button>
+        <div class="admin-tabs-group">
+          <span class="admin-tabs-group-label">Predicación</span>
+          <button class="admin-tab active" data-tab="assignments" onclick="switchAdminTab('assignments')">Asignaciones</button>
+          <button class="admin-tab" data-tab="territories" onclick="switchAdminTab('territories')">Territorios</button>
+          <button class="admin-tab" data-tab="conductores" onclick="switchAdminTab('conductores')">Conductores</button>
+          <button class="admin-tab" data-tab="casas" onclick="switchAdminTab('casas')">Casas</button>
+          <button class="admin-tab" data-tab="grupos" onclick="switchAdminTab('grupos')">Grupos</button>
+        </div>
+        <div class="admin-tabs-divider"></div>
+        <div class="admin-tabs-group">
+          <span class="admin-tabs-group-label">Reuniones</span>
+          <button class="admin-tab" data-tab="responsabilidades" onclick="switchAdminTab('responsabilidades')">Responsabilidades</button>
+          <button class="admin-tab" data-tab="aseo-salon" onclick="switchAdminTab('aseo-salon')">Aseo Salón</button>
+        </div>
       </div>
       <div class="admin-section active" id="admin-assignments">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
@@ -4539,8 +4560,7 @@ async function switchAdminTab(tab) {
       return;
     }
   }
-  const tabs = ['assignments','territories','conductores','casas','grupos','responsabilidades','aseo-salon'];
-  document.querySelectorAll('.admin-tab').forEach((t,i) => t.classList.toggle('active', tabs[i] === tab));
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
   document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
   document.getElementById('admin-' + tab).classList.add('active');
   if (tab === 'responsabilidades') loadResponsabilidadesAdmin();
@@ -4551,19 +4571,19 @@ async function applyAdminTabPermissions() {
   if (!['semiadmin'].includes(currentRole)) return;
   const perms = await getUserPermissions();
   if (!perms) return;
-  const tabs = ['assignments','territories','conductores','casas','grupos','responsabilidades','aseo-salon'];
-  const permKeys = ['assignments','territories','conductores','casas','grupos','responsabilidades','aseo_salon'];
-  document.querySelectorAll('.admin-tab').forEach((btn, i) => {
-    const key = permKeys[i];
+  const permKeyMap = { assignments: 'assignments', territories: 'territories', conductores: 'conductores', casas: 'casas', grupos: 'grupos', responsabilidades: 'responsabilidades', 'aseo-salon': 'aseo_salon' };
+  let firstAllowed = null;
+  document.querySelectorAll('.admin-tab').forEach(btn => {
+    const tab = btn.dataset.tab;
+    const key = permKeyMap[tab];
     const allowed = canAccessModule(perms, key);
     btn.style.opacity = allowed ? '' : '0.4';
     btn.style.pointerEvents = allowed ? '' : 'none';
     btn.title = allowed ? '' : 'Sin permiso para este módulo';
+    if (allowed && firstAllowed === null) firstAllowed = tab;
   });
-  const firstAllowedIdx = permKeys.findIndex(k => canAccessModule(perms, k));
-  if (firstAllowedIdx !== -1) {
-    const firstAllowed = tabs[firstAllowedIdx];
-    document.querySelectorAll('.admin-tab').forEach((t,i) => t.classList.toggle('active', tabs[i] === firstAllowed));
+  if (firstAllowed !== null) {
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === firstAllowed));
     document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
     document.getElementById('admin-' + firstAllowed).classList.add('active');
   }
