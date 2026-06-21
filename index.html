@@ -1202,6 +1202,15 @@
     .resp-cargo-name { min-width: 96px; font-size: 0.78rem; }
   }
 
+  /* ── Aseo del Salón ── */
+  .aseo-match-badge {
+    display: flex; align-items: center; gap: 7px; padding: 7px 10px;
+    border-radius: 9px; margin-bottom: 1.1rem; font-size: 0.74rem;
+  }
+  .aseo-match-badge.ok { background: rgba(52,199,89,0.1); color: var(--green); }
+  .aseo-match-badge.warn { background: rgba(255,149,0,0.1); color: var(--orange); }
+  .aseo-match-badge svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; flex-shrink: 0; }
+
   .loader-wrap { display: flex; align-items: center; justify-content: center; padding: 3rem; }
   .loader { width: 32px; height: 32px; border: 2.5px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.75s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -2497,13 +2506,7 @@
 
       <!-- Aseo del Salón -->
       <div id="sub-content-aseo-salon" class="sub-page" style="display:none">
-        <div class="coming-soon-panel">
-          <div class="coming-soon-icon">
-            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          </div>
-          <h3>Aseo del Salón del Reino</h3>
-          <p>El calendario de aseo del Salón del Reino estará disponible próximamente.</p>
-        </div>
+        <div id="aseo-user-view"><div class="loader-wrap"><div class="loader"></div></div></div>
       </div>
 
       <!-- Hospitalidad -->
@@ -2592,6 +2595,7 @@
         <button class="admin-tab" onclick="switchAdminTab('casas')">Casas</button>
         <button class="admin-tab" onclick="switchAdminTab('grupos')">Grupos</button>
         <button class="admin-tab" onclick="switchAdminTab('responsabilidades')">Responsabilidades</button>
+        <button class="admin-tab" onclick="switchAdminTab('aseo-salon')">Aseo Salón</button>
       </div>
       <div class="admin-section active" id="admin-assignments">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
@@ -2693,6 +2697,58 @@
             <div class="resp-history-title">Historial de asignaciones</div>
             <div id="admin-resp-upcoming-list"><div class="loader-wrap"><div class="loader"></div></div></div>
           </div>
+        </div>
+      </div>
+
+      <div class="admin-section" id="admin-aseo-salon">
+        <div class="resp-intro">Elige una fecha próxima o selecciona otra</div>
+        <div class="resp-date-chips" id="aseo-date-chips"></div>
+
+        <div class="resp-custom-date-wrap" id="aseo-custom-date-wrap" style="display:none">
+          <div class="form-group2" style="margin-bottom:0">
+            <label class="form-label2">Selecciona el día (debe ser Jueves o Sábado)</label>
+            <input type="date" class="form-input" id="aseo-asignar-fecha" onchange="onAseoFechaChange()">
+            <div class="auth-error" id="aseo-fecha-error"></div>
+          </div>
+        </div>
+
+        <div id="aseo-form-wrap" style="display:none">
+          <div class="resp-cargos-card">
+            <div class="resp-cargos-day-title" id="aseo-day-title">—</div>
+
+            <div class="resp-cat-block">
+              <div class="resp-cat-title" style="color:var(--accent)">
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Encargado
+              </div>
+              <div class="resp-cargo-row">
+                <span class="resp-cargo-name">Persona a cargo</span>
+                <select class="resp-cargo-select" id="aseo-encargado-sel" onchange="onAseoFormChange()"></select>
+              </div>
+            </div>
+
+            <div class="resp-cat-block">
+              <div class="resp-cat-title" style="color:#a855f7">
+                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Grupos asignados
+              </div>
+              <div class="resp-cargo-row">
+                <span class="resp-cargo-name">Grupo 1</span>
+                <select class="resp-cargo-select" id="aseo-grupo1-sel" onchange="onAseoFormChange()"></select>
+              </div>
+              <div class="resp-cargo-row">
+                <span class="resp-cargo-name">Grupo 2</span>
+                <select class="resp-cargo-select" id="aseo-grupo2-sel" onchange="onAseoFormChange()"></select>
+              </div>
+            </div>
+
+            <div id="aseo-match-badge"></div>
+
+            <button class="btn-primary" onclick="saveAseoSalonAsignacion()" id="save-aseo-btn">Guardar asignación</button>
+          </div>
+        </div>
+
+        <div style="margin-top:0.4rem">
+          <div class="resp-history-title">Historial de aseos</div>
+          <div id="admin-aseo-upcoming-list"><div class="loader-wrap"><div class="loader"></div></div></div>
         </div>
       </div>
       </div><!-- /.admin-body -->
@@ -4372,6 +4428,7 @@ function switchSubTab(tabId) {
   if (tabId === 'casa') refreshScheduleIfStale();
   if (tabId === 'territorios') renderTerritoryView();
   if (tabId === 'responsabilidades') renderRespUserView();
+  if (tabId === 'aseo-salon') renderAseoUserView();
   if (tabId === 'grupos') {
     loadAvatarCache().then(() => {
       if (!grupos.length) {
@@ -4404,34 +4461,37 @@ function showPage(name) {
 async function switchAdminTab(tab) {
   if (currentRole === 'semiadmin') {
     const perms = await getUserPermissions();
-    const moduleMap = { assignments: 'assignments', territories: 'territories', conductores: 'conductores', casas: 'casas', grupos: 'grupos', responsabilidades: 'responsabilidades' };
+    const moduleMap = { assignments: 'assignments', territories: 'territories', conductores: 'conductores', casas: 'casas', grupos: 'grupos', responsabilidades: 'responsabilidades', 'aseo-salon': 'aseo_salon' };
     const moduleKey = moduleMap[tab];
     if (moduleKey && !canAccessModule(perms, moduleKey)) {
       showToast('No tienes permisos para acceder a este módulo.', 'error');
       return;
     }
   }
-  const tabs = ['assignments','territories','conductores','casas','grupos','responsabilidades'];
+  const tabs = ['assignments','territories','conductores','casas','grupos','responsabilidades','aseo-salon'];
   document.querySelectorAll('.admin-tab').forEach((t,i) => t.classList.toggle('active', tabs[i] === tab));
   document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
   document.getElementById('admin-' + tab).classList.add('active');
   if (tab === 'responsabilidades') loadResponsabilidadesAdmin();
+  if (tab === 'aseo-salon') loadAseoSalonAdmin();
 }
 
 async function applyAdminTabPermissions() {
   if (!['semiadmin'].includes(currentRole)) return;
   const perms = await getUserPermissions();
   if (!perms) return;
-  const tabs = ['assignments','territories','conductores','casas','grupos','responsabilidades'];
+  const tabs = ['assignments','territories','conductores','casas','grupos','responsabilidades','aseo-salon'];
+  const permKeys = ['assignments','territories','conductores','casas','grupos','responsabilidades','aseo_salon'];
   document.querySelectorAll('.admin-tab').forEach((btn, i) => {
-    const key = tabs[i];
+    const key = permKeys[i];
     const allowed = canAccessModule(perms, key);
     btn.style.opacity = allowed ? '' : '0.4';
     btn.style.pointerEvents = allowed ? '' : 'none';
     btn.title = allowed ? '' : 'Sin permiso para este módulo';
   });
-  const firstAllowed = tabs.find(k => canAccessModule(perms, k));
-  if (firstAllowed) {
+  const firstAllowedIdx = permKeys.findIndex(k => canAccessModule(perms, k));
+  if (firstAllowedIdx !== -1) {
+    const firstAllowed = tabs[firstAllowedIdx];
     document.querySelectorAll('.admin-tab').forEach((t,i) => t.classList.toggle('active', tabs[i] === firstAllowed));
     document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
     document.getElementById('admin-' + firstAllowed).classList.add('active');
@@ -4730,6 +4790,7 @@ async function loadAdminData() {
   renderAdminCasas();
   renderAdminGrupos();
   loadResponsabilidadesAdmin();
+  loadAseoSalonAdmin();
   await applyAdminTabPermissions();
 }
 
@@ -5989,6 +6050,311 @@ async function renderRespUserView() {
   }).join('');
 }
 
+// ── Aseo del Salón ───────────────────────────────────────────────────────────
+let aseoSalon = [];
+let aseoHistorial = [];
+let aseoSelectedDate = null;
+
+async function loadAseoSalonAdmin() {
+  if (!conductores.length) {
+    const { data: cData } = await sb.from('conductores').select('*').order('apellido').order('nombre');
+    conductores = cData || [];
+  }
+  if (!grupos.length) await loadGrupos();
+  const [{ data: aData }, { data: histData }] = await Promise.all([
+    sb.from('aseo_salon').select('*').gte('fecha', todayStr()).order('fecha'),
+    sb.from('aseo_salon').select('*').lt('fecha', todayStr()).order('fecha', { ascending: false }),
+  ]);
+  aseoSalon = aData || [];
+  aseoHistorial = histData || [];
+  renderAseoDateChips();
+  renderAdminAseoUpcoming();
+}
+
+function renderAseoDateChips() {
+  const wrap = document.getElementById('aseo-date-chips');
+  if (!wrap) return;
+  const fechas = respProximasFechas(6);
+  const MES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const DIA = ['dom','lun','mar','mié','jue','vie','sáb'];
+  wrap.innerHTML = fechas.map(f => {
+    const d = new Date(f + 'T00:00:00');
+    const row = aseoSalon.find(r => r.fecha === f);
+    const dot = row ? `<div class="resp-date-chip-dot complete"></div>` : '';
+    const isActive = aseoSelectedDate === f;
+    return `
+    <div class="resp-date-chip${isActive ? ' active' : ''}" onclick="selectAseoDate('${f}')">
+      <div class="resp-date-chip-day">${DIA[d.getDay()]}</div>
+      <div class="resp-date-chip-num">${d.getDate()}</div>
+      <div class="resp-date-chip-month">${MES[d.getMonth()]}</div>
+      ${dot}
+    </div>`;
+  }).join('') + `
+    <div class="resp-date-chip-other" onclick="toggleAseoCustomDate()">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Otra</span>
+    </div>`;
+}
+
+function toggleAseoCustomDate() {
+  const wrap = document.getElementById('aseo-custom-date-wrap');
+  const willOpen = wrap.style.display === 'none';
+  wrap.style.display = willOpen ? '' : 'none';
+  if (willOpen) document.getElementById('aseo-asignar-fecha').focus();
+}
+
+function selectAseoDate(dateStr) {
+  aseoSelectedDate = dateStr;
+  document.getElementById('aseo-custom-date-wrap').style.display = 'none';
+  document.getElementById('aseo-asignar-fecha').value = dateStr;
+  document.getElementById('aseo-fecha-error').style.display = 'none';
+  renderAseoDateChips();
+  renderAseoForm(dateStr);
+  document.getElementById('aseo-form-wrap').style.display = '';
+}
+
+function onAseoFechaChange() {
+  const input = document.getElementById('aseo-asignar-fecha');
+  const errEl = document.getElementById('aseo-fecha-error');
+  const wrap = document.getElementById('aseo-form-wrap');
+  errEl.style.display = 'none';
+  wrap.style.display = 'none';
+  const val = input.value;
+  if (!val) return;
+  const d = new Date(val + 'T00:00:00');
+  const day = d.getDay();
+  if (day !== 4 && day !== 6) {
+    showError('aseo-fecha-error', 'Debes seleccionar un día Jueves o Sábado.');
+    return;
+  }
+  aseoSelectedDate = val;
+  renderAseoDateChips();
+  renderAseoForm(val);
+  wrap.style.display = '';
+}
+
+function renderAseoForm(dateStr) {
+  const existing = aseoSalon.find(r => r.fecha === dateStr) || aseoHistorial.find(r => r.fecha === dateStr);
+  document.getElementById('aseo-day-title').textContent = capitalizar(respDiaLabel(dateStr));
+
+  const encSel = document.getElementById('aseo-encargado-sel');
+  encSel.innerHTML = `<option value="">Sin asignar</option>` +
+    conductores.map(c => `<option value="${c.nombre} ${c.apellido}">${c.nombre} ${c.apellido}</option>`).join('');
+  encSel.value = existing?.encargado_nombre || '';
+
+  const grupoOpts = `<option value="">Sin asignar</option>` +
+    grupos.map(g => `<option value="${g.numero}">Grupo ${g.numero}</option>`).join('');
+  const g1Sel = document.getElementById('aseo-grupo1-sel');
+  const g2Sel = document.getElementById('aseo-grupo2-sel');
+  g1Sel.innerHTML = grupoOpts;
+  g2Sel.innerHTML = grupoOpts;
+  g1Sel.value = existing?.grupo1_numero ?? '';
+  g2Sel.value = existing?.grupo2_numero ?? '';
+
+  renderAseoMatchBadge();
+}
+
+// Evita elegir el mismo grupo dos veces: si lo eligen, limpia el otro select.
+function onAseoFormChange() {
+  const g1 = document.getElementById('aseo-grupo1-sel');
+  const g2 = document.getElementById('aseo-grupo2-sel');
+  if (g1.value && g1.value === g2.value) {
+    showToast('Los dos grupos deben ser distintos.', 'error');
+    g2.value = '';
+  }
+  renderAseoMatchBadge();
+}
+
+// Verifica (por coincidencia de nombre) si el encargado elegido pertenece
+// a alguno de los dos grupos seleccionados, y muestra un aviso visual.
+// No bloquea el guardado — solo informa.
+function renderAseoMatchBadge() {
+  const badge = document.getElementById('aseo-match-badge');
+  const encargado = document.getElementById('aseo-encargado-sel').value.trim();
+  const g1 = document.getElementById('aseo-grupo1-sel').value;
+  const g2 = document.getElementById('aseo-grupo2-sel').value;
+  if (!encargado || (!g1 && !g2)) { badge.innerHTML = ''; return; }
+
+  const nombreLower = encargado.toLowerCase();
+  const gruposSeleccionados = grupos.filter(g => String(g.numero) === g1 || String(g.numero) === g2);
+  const grupoDelEncargado = gruposSeleccionados.find(g =>
+    g.miembros.some(m => m.nombre.trim().toLowerCase() === nombreLower)
+  );
+
+  if (grupoDelEncargado) {
+    badge.innerHTML = `<div class="aseo-match-badge ok">
+      <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 17"/></svg>
+      ${encargado} pertenece al Grupo ${grupoDelEncargado.numero} ✓
+    </div>`;
+  } else {
+    badge.innerHTML = `<div class="aseo-match-badge warn">
+      <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      ${encargado} no figura en ninguno de los grupos seleccionados
+    </div>`;
+  }
+}
+
+async function saveAseoSalonAsignacion() {
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (currentRole === 'semiadmin') {
+    const perms = await getUserPermissions();
+    if (!canAccessModule(perms, 'aseo_salon')) { showToast('No tienes permiso para gestionar Aseo del Salón.','error'); return; }
+  }
+  const dateStr = document.getElementById('aseo-asignar-fecha').value;
+  if (!dateStr) return;
+
+  const encargado = document.getElementById('aseo-encargado-sel').value.trim() || null;
+  const g1 = document.getElementById('aseo-grupo1-sel').value;
+  const g2 = document.getElementById('aseo-grupo2-sel').value;
+  if (g1 && g2 && g1 === g2) { showToast('Los dos grupos deben ser distintos.', 'error'); return; }
+  const grupo1_numero = g1 ? Number(g1) : null;
+  const grupo2_numero = g2 ? Number(g2) : null;
+
+  const btn = document.getElementById('save-aseo-btn');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+
+  const existing = aseoSalon.find(r => r.fecha === dateStr);
+  let error;
+  if (existing) {
+    ({ error } = await sb.from('aseo_salon').update({ encargado_nombre: encargado, grupo1_numero, grupo2_numero }).eq('id', existing.id));
+  } else {
+    ({ error } = await sb.from('aseo_salon').insert({ fecha: dateStr, encargado_nombre: encargado, grupo1_numero, grupo2_numero }));
+  }
+
+  btn.disabled = false; btn.textContent = 'Guardar asignación';
+  if (error) { showToast('Error al guardar: ' + error.message, 'error'); return; }
+  showToast('Asignación guardada ✓', 'success');
+
+  // Notificar a todos los miembros (por nombre) de ambos grupos asignados.
+  const gruposAsignados = grupos.filter(g => g.numero === grupo1_numero || g.numero === grupo2_numero);
+  const targetNames = [...new Set(
+    gruposAsignados.flatMap(g => g.miembros.map(m => m.nombre.trim().toLowerCase()))
+  )];
+  if (targetNames.length) {
+    const diaLargo = respDiaLabelLong(dateStr);
+    const gruposTexto = gruposAsignados.map(g => `Grupo ${g.numero}`).join(' y ');
+    const title = 'Aseo del Salón';
+    const body = `Tu grupo fue asignado al aseo del salón el ${diaLargo}, junto al ${gruposTexto}.`;
+    try {
+      await sb.from('notifications').insert([{ title, body, target_names: targetNames }]);
+      try {
+        const resp = await fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+          body: JSON.stringify({ title, body, target_names: targetNames })
+        });
+        if (!resp.ok) console.warn('Edge Function respondió con error:', resp.status, await resp.text());
+      } catch (err) {
+        console.warn('No se pudo enviar push (Edge Function no disponible):', err.message);
+      }
+    } catch (err) {
+      console.warn('No se pudieron guardar/enviar las notificaciones:', err.message);
+    }
+  }
+
+  const { data } = await sb.from('aseo_salon').select('*').gte('fecha', todayStr()).order('fecha');
+  aseoSalon = data || [];
+  renderAseoDateChips();
+  renderAdminAseoUpcoming();
+}
+
+function aseoGruposLabel(row) {
+  const parts = [];
+  if (row.grupo1_numero) parts.push(`Grupo ${row.grupo1_numero}`);
+  if (row.grupo2_numero) parts.push(`Grupo ${row.grupo2_numero}`);
+  return parts.length ? parts.join(' y ') : 'Sin grupos asignados';
+}
+
+function renderAdminAseoUpcoming() {
+  const container = document.getElementById('admin-aseo-upcoming-list');
+  if (!container) return;
+  const upcoming = [...aseoSalon].sort((a,b) => a.fecha.localeCompare(b.fecha));
+  const past = [...aseoHistorial].sort((a,b) => b.fecha.localeCompare(a.fecha));
+
+  if (!upcoming.length && !past.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><h4>Sin aseos registrados</h4><p>Selecciona un día Jueves o Sábado para empezar</p></div>`;
+    return;
+  }
+
+  const renderItem = (row, isPast) => `
+    <div class="resp-history-item" style="cursor:default;align-items:flex-start;flex-direction:column;gap:0.5rem">
+      <div style="display:flex;width:100%;align-items:center;gap:10px">
+        <div class="resp-history-item-main">
+          <div class="resp-history-item-title">${capitalizar(respDiaLabel(row.fecha))}</div>
+          <div class="resp-history-item-sub">${aseoGruposLabel(row)}${isPast ? ' · ya ocurrió' : ''}</div>
+        </div>
+        <div class="list-item-actions">
+          ${isPast ? '' : `<button class="btn-sm" onclick="editAseoDate('${row.fecha}')">Editar</button>`}
+          <button class="btn-danger" onclick="deleteAseoDate('${row.fecha}', ${isPast})"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+      </div>
+      <div style="font-size:0.8rem;color:var(--text3);line-height:1.5">Encargado: <strong style="color:var(--text2)">${row.encargado_nombre || 'Sin asignar'}</strong></div>
+    </div>`;
+
+  container.innerHTML = upcoming.map(r => renderItem(r, false)).join('') + past.map(r => renderItem(r, true)).join('');
+}
+
+function editAseoDate(dateStr) {
+  selectAseoDate(dateStr);
+  document.getElementById('admin-aseo-salon').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+async function deleteAseoDate(dateStr, isPast) {
+  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!confirm(`¿Eliminar la asignación de aseo del ${respDiaLabel(dateStr)}?`)) return;
+  const { error } = await sb.from('aseo_salon').delete().eq('fecha', dateStr);
+  if (error) { showToast('Error al eliminar','error'); return; }
+  showToast('Asignación eliminada','success');
+  if (isPast) {
+    const { data } = await sb.from('aseo_salon').select('*').lt('fecha', todayStr()).order('fecha', { ascending: false });
+    aseoHistorial = data || [];
+  } else {
+    const { data } = await sb.from('aseo_salon').select('*').gte('fecha', todayStr()).order('fecha');
+    aseoSalon = data || [];
+    renderAseoDateChips();
+  }
+  renderAdminAseoUpcoming();
+}
+
+// Vista de solo lectura para usuarios normales (igual patrón que Responsabilidades).
+async function renderAseoUserView() {
+  const el = document.getElementById('aseo-user-view');
+  if (!el) return;
+  el.innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
+  const { data } = await sb.from('aseo_salon').select('*').gte('fecha', todayStr()).order('fecha');
+  const rows = data || [];
+  if (!rows.length) {
+    el.innerHTML = `<div class="coming-soon-panel"><div class="coming-soon-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><h3>Aseo del Salón</h3><p>Aún no hay aseos asignados para los próximos Jueves o Sábados.</p></div>`;
+    return;
+  }
+  const myName = currentUser?.name?.trim().toLowerCase();
+  el.innerHTML = rows.map(row => {
+    const isMe = myName && row.encargado_nombre && row.encargado_nombre.trim().toLowerCase() === myName;
+    return `
+    <div class="profile-section" style="margin-bottom:1rem">
+      <div class="profile-section-title">${capitalizar(respDiaLabel(row.fecha))}</div>
+      <div class="profile-row">
+        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text3)">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Grupos asignados</div>
+          <div class="profile-row-value">${aseoGruposLabel(row)}</div>
+        </div>
+      </div>
+      <div class="profile-row" style="${isMe ? 'background:var(--accent-light);border-radius:var(--radius-sm)' : ''}">
+        <div class="profile-row-icon" style="background:${isMe?'var(--accent)':'var(--surface3)'};color:${isMe?'#fff':'var(--text3)'}">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Encargado</div>
+          <div class="profile-row-value" style="${isMe?'font-weight:700':''}">${row.encargado_nombre || '<span class="profile-row-empty">Sin asignar</span>'}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
 function renderAdminCasas() {
   const container = document.getElementById('admin-casas-list');
   if (!casas.length) {
@@ -6147,10 +6513,11 @@ const PERM_MODULES = [
   { key: 'casas',       label: 'Casas',         icon: '<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>' },
   { key: 'grupos',      label: 'Grupos',         icon: '<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
   { key: 'responsabilidades', label: 'Responsabilidades', icon: '<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
+  { key: 'aseo_salon', label: 'Aseo del Salón', icon: '<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>' },
 ];
 
 function parsePermissions(raw) {
-  if (!raw) return { territories: true, assignments: true, conductores: true, casas: true, grupos: true, responsabilidades: true };
+  if (!raw) return { territories: true, assignments: true, conductores: true, casas: true, grupos: true, responsabilidades: true, aseo_salon: true };
   try {
     const p = typeof raw === 'string' ? JSON.parse(raw) : raw;
     return {
@@ -6160,8 +6527,9 @@ function parsePermissions(raw) {
       casas:       p.casas       !== false,
       grupos:      p.grupos      !== false,
       responsabilidades: p.responsabilidades !== false,
+      aseo_salon:  p.aseo_salon  !== false,
     };
-  } catch { return { territories: true, assignments: true, conductores: true, casas: true, grupos: true, responsabilidades: true }; }
+  } catch { return { territories: true, assignments: true, conductores: true, casas: true, grupos: true, responsabilidades: true, aseo_salon: true }; }
 }
 
 // Check if current user can edit permissions of a target user
