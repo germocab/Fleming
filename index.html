@@ -1211,6 +1211,69 @@
   .aseo-match-badge.warn { background: rgba(255,149,0,0.1); color: var(--orange); }
   .aseo-match-badge svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; flex-shrink: 0; }
 
+  /* Tarjetas de aseo: clicables en escritorio para abrir modo pantalla/TV */
+  .aseo-card { cursor: default; }
+  @media (min-width: 640px) {
+    .aseo-card { cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+    .aseo-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+  }
+
+  /* ── Aseo del Salón: modo pantalla completa (proyección en TV) ── */
+  .aseo-tv-overlay {
+    display: none; position: fixed; inset: 0; z-index: 1000;
+    background: var(--bg); color: var(--text);
+    align-items: center; justify-content: center;
+    overflow-y: auto; padding: 3vh 4vw;
+  }
+  .aseo-tv-overlay.open { display: flex; animation: fadeIn 0.25s ease; }
+  .aseo-tv-card {
+    width: 100%; max-width: 1480px; margin: auto;
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center; gap: clamp(3.5rem, 7vh, 6.5rem);
+    animation: lightboxIn 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+  .aseo-tv-day {
+    font-size: clamp(3.2rem, 7.5vw, 6rem);
+    font-weight: 800; letter-spacing: -0.02em; line-height: 1.05;
+  }
+  .aseo-tv-grid {
+    width: 100%; display: flex; flex-wrap: wrap; justify-content: center;
+    gap: clamp(1.5rem, 3vw, 3.25rem);
+  }
+  .aseo-tv-block {
+    flex: 1 1 380px; max-width: 620px;
+    background: var(--surface2); border: 1px solid var(--border-active);
+    border-radius: 36px; padding: clamp(2.5rem, 4.5vh, 4rem) clamp(2rem, 3.5vw, 3.5rem);
+    display: flex; flex-direction: column; align-items: center; gap: 1.1rem;
+    box-shadow: var(--shadow-lg);
+  }
+  .aseo-tv-block-icon {
+    width: clamp(70px, 7.5vw, 100px); height: clamp(70px, 7.5vw, 100px);
+    border-radius: 50%; background: var(--surface3); color: var(--text3);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .aseo-tv-block.is-encargado .aseo-tv-block-icon { background: var(--accent); color: #fff; }
+  .aseo-tv-block-icon svg { width: 46%; height: 46%; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .aseo-tv-block-label {
+    font-size: clamp(1.1rem, 1.4vw, 1.4rem); font-weight: 700;
+    color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em;
+  }
+  .aseo-tv-block-value {
+    font-size: clamp(2.2rem, 4.2vw, 3.8rem); font-weight: 800;
+    line-height: 1.15; word-break: break-word;
+  }
+  .aseo-tv-block-value.is-empty { font-weight: 500; font-style: italic; color: var(--text3); font-size: clamp(1.5rem, 2.6vw, 2.2rem); }
+  .aseo-tv-close {
+    position: fixed; top: clamp(1.25rem, 2.5vw, 2.25rem); right: clamp(1.25rem, 2.5vw, 2.25rem);
+    width: clamp(48px, 4vw, 60px); height: clamp(48px, 4vw, 60px); border-radius: 50%;
+    background: var(--surface2); border: 1px solid var(--border-active);
+    box-shadow: var(--shadow-lg);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: var(--text); transition: background 0.2s, transform 0.15s;
+  }
+  .aseo-tv-close:hover { background: var(--surface3); transform: scale(1.05); }
+  .aseo-tv-close svg { width: 44%; height: 44%; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+
   .loader-wrap { display: flex; align-items: center; justify-content: center; padding: 3rem; }
   .loader { width: 32px; height: 32px; border: 2.5px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.75s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -3060,6 +3123,14 @@
     <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
   </button>
   <img id="lightbox-img" src="" alt="Mapa del territorio">
+</div>
+
+<!-- Aseo del Salón: modo pantalla completa para proyección en TV -->
+<div class="aseo-tv-overlay" id="aseo-tv-overlay">
+  <button class="aseo-tv-close" onclick="closeAseoTvMode()" aria-label="Salir de pantalla completa">
+    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <div class="aseo-tv-card" id="aseo-tv-card"></div>
 </div>
 
 <!-- Full congregation map lightbox -->
@@ -6317,21 +6388,24 @@ async function deleteAseoDate(dateStr, isPast) {
 }
 
 // Vista de solo lectura para usuarios normales (igual patrón que Responsabilidades).
+let _aseoUserRows = [];
+
 async function renderAseoUserView() {
   const el = document.getElementById('aseo-user-view');
   if (!el) return;
   el.innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
   const { data } = await sb.from('aseo_salon').select('*').gte('fecha', todayStr()).order('fecha');
   const rows = data || [];
+  _aseoUserRows = rows;
   if (!rows.length) {
     el.innerHTML = `<div class="coming-soon-panel"><div class="coming-soon-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><h3>Aseo del Salón</h3><p>Aún no hay aseos asignados para los próximos Jueves o Sábados.</p></div>`;
     return;
   }
   const myName = currentUser?.name?.trim().toLowerCase();
-  el.innerHTML = rows.map(row => {
+  el.innerHTML = rows.map((row, idx) => {
     const isMe = myName && row.encargado_nombre && row.encargado_nombre.trim().toLowerCase() === myName;
     return `
-    <div class="profile-section" style="margin-bottom:1rem">
+    <div class="profile-section aseo-card" style="margin-bottom:1rem" onclick="openAseoTvMode(${idx})">
       <div class="profile-section-title">${capitalizar(respDiaLabel(row.fecha))}</div>
       <div class="profile-row">
         <div class="profile-row-icon" style="background:var(--surface3);color:var(--text3)">
@@ -6354,6 +6428,75 @@ async function renderAseoUserView() {
     </div>`;
   }).join('');
 }
+
+// ── Aseo del Salón: modo pantalla completa (proyección en TV) ──────────────
+// Solo se activa en pantallas anchas (escritorio). En móvil, el tap no hace nada.
+function openAseoTvMode(idx) {
+  if (window.innerWidth < 640) return; // móvil: sin efecto
+  const row = _aseoUserRows[idx];
+  if (!row) return;
+
+  const card = document.getElementById('aseo-tv-card');
+  const g1 = row.grupo1_numero ? `Grupo ${row.grupo1_numero}` : null;
+  const g2 = row.grupo2_numero ? `Grupo ${row.grupo2_numero}` : null;
+  const gruposValue = (g1 || g2) ? [g1, g2].filter(Boolean).join(' y ') : null;
+  const encargadoValue = row.encargado_nombre || null;
+
+  card.innerHTML = `
+    <div class="aseo-tv-day">${capitalizar(respDiaLabel(row.fecha))}</div>
+    <div class="aseo-tv-grid">
+      <div class="aseo-tv-block">
+        <div class="aseo-tv-block-icon">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="aseo-tv-block-label">Grupos asignados</div>
+        <div class="aseo-tv-block-value${gruposValue ? '' : ' is-empty'}">${gruposValue || 'Sin grupos asignados'}</div>
+      </div>
+      <div class="aseo-tv-block is-encargado">
+        <div class="aseo-tv-block-icon">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="aseo-tv-block-label">Encargado</div>
+        <div class="aseo-tv-block-value${encargadoValue ? '' : ' is-empty'}">${encargadoValue || 'Sin asignar'}</div>
+      </div>
+    </div>
+  `;
+
+  const overlay = document.getElementById('aseo-tv-overlay');
+  overlay.classList.add('open');
+
+  if (overlay.requestFullscreen) {
+    overlay.requestFullscreen().catch(() => {});
+  } else if (overlay.webkitRequestFullscreen) {
+    overlay.webkitRequestFullscreen();
+  }
+}
+
+function closeAseoTvMode() {
+  const overlay = document.getElementById('aseo-tv-overlay');
+  overlay.classList.remove('open');
+  if (document.fullscreenElement || document.webkitFullscreenElement) {
+    if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+  }
+}
+
+// Si el usuario sale de pantalla completa con Esc (o el control del navegador/SO),
+// también cerramos el overlay para no dejarlo "flotando" en modo windowed.
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement) {
+    const overlay = document.getElementById('aseo-tv-overlay');
+    if (overlay) overlay.classList.remove('open');
+  }
+});
+document.addEventListener('webkitfullscreenchange', () => {
+  if (!document.webkitFullscreenElement) {
+    const overlay = document.getElementById('aseo-tv-overlay');
+    if (overlay) overlay.classList.remove('open');
+  }
+});
+
+
 
 function renderAdminCasas() {
   const container = document.getElementById('admin-casas-list');
