@@ -2514,19 +2514,10 @@
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             Administrar
           </button>
-          <button class="dropdown-item" id="users-panel-btn" onclick="openUsersPanel();closeOptionsMenu()" style="display:none">
-            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            Usuarios
-          </button>
           <div class="dropdown-divider"></div>
           <button class="dropdown-item danger" onclick="doLogout()">
             <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             Cerrar sesión
-          </button>
-          <div class="dropdown-divider"></div>
-          <button class="dropdown-item" onclick="debugPush();closeOptionsMenu()" style="color:var(--orange)">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Probar notificación
           </button>
         </div>
       </div>
@@ -2653,11 +2644,6 @@
               </button>
             </div>
             <div class="dropdown-divider"></div>
-            <button class="dropdown-item" id="users-panel-btn-admin" onclick="openUsersPanel();closeAdminOptionsMenu()" style="display:none">
-              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              Usuarios
-            </button>
-            <div class="dropdown-divider"></div>
             <button class="dropdown-item danger" onclick="doLogout()">
               <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
               Cerrar sesión
@@ -2675,6 +2661,7 @@
       <div class="admin-section-tabs">
         <button class="admin-section-tab active" data-section="predicacion" onclick="switchAdminSection('predicacion')">Predicación</button>
         <button class="admin-section-tab" data-section="reuniones" onclick="switchAdminSection('reuniones')">Reuniones</button>
+        <button class="admin-section-tab" id="admin-section-tab-fleming" data-section="fleming" onclick="switchAdminSection('fleming')" style="display:none">Fleming App</button>
       </div>
       <div class="admin-tabs-row active" data-section="predicacion">
         <button class="admin-tab active" data-tab="assignments" onclick="switchAdminTab('assignments')">Asignaciones</button>
@@ -2686,6 +2673,9 @@
       <div class="admin-tabs-row" data-section="reuniones">
         <button class="admin-tab" data-tab="responsabilidades" onclick="switchAdminTab('responsabilidades')">Responsabilidades</button>
         <button class="admin-tab" data-tab="aseo-salon" onclick="switchAdminTab('aseo-salon')">Aseo Salón</button>
+      </div>
+      <div class="admin-tabs-row" data-section="fleming">
+        <button class="admin-tab" data-tab="usuarios" onclick="switchAdminTab('usuarios')">Usuarios</button>
       </div>
       <div class="admin-section active" id="admin-assignments">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
@@ -2839,6 +2829,19 @@
         <div style="margin-top:0.4rem">
           <div class="resp-history-title">Historial de aseos</div>
           <div id="admin-aseo-upcoming-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+        </div>
+      </div>
+      <div class="admin-section" id="admin-usuarios">
+        <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
+          <span style="flex:1;font-size:0.95rem;font-weight:700">Usuarios</span>
+        </div>
+        <div class="empty-state">
+          <div class="empty-state-icon">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h3>Gestión de usuarios</h3>
+          <p>Administra roles, permisos y accesos de los usuarios.</p>
+          <button class="btn-primary" style="margin-top:0.75rem" onclick="openUsersPanel()">Abrir panel de usuarios</button>
         </div>
       </div>
       </div><!-- /.admin-body -->
@@ -4084,14 +4087,6 @@ async function renderProfilePage() {
     taskEl.textContent = 'Ninguna responsabilidad asignada';
   }
 
-  // Joined
-  const joinedEl = document.getElementById('profile-joined-value');
-  if (me?.joined_at) {
-    const d = new Date(me.joined_at);
-    joinedEl.textContent = d.toLocaleDateString('es-CL', { day:'numeric', month:'long', year:'numeric' });
-  } else {
-    joinedEl.textContent = '—';
-  }
 }
 
 async function loadGruposIfNeeded() {
@@ -4352,8 +4347,8 @@ async function enterApp() {
 
   const adminBtn = document.getElementById('admin-dropdown-btn');
   adminBtn.style.display = ['dev','admin','semiadmin'].includes(currentRole) ? '' : 'none';
-  const usersBtn = document.getElementById('users-panel-btn');
-  if (usersBtn) usersBtn.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
+  const flemingTab = document.getElementById('admin-section-tab-fleming');
+  if (flemingTab) flemingTab.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
 
   // Restore navigation position from before reload (if any)
   const _nav = _loadNavState();
@@ -4561,6 +4556,7 @@ const ADMIN_TAB_SECTION = {
   assignments: 'predicacion', territories: 'predicacion', conductores: 'predicacion',
   casas: 'predicacion', grupos: 'predicacion',
   responsabilidades: 'reuniones', 'aseo-salon': 'reuniones',
+  usuarios: 'fleming',
 };
 
 // Cambia la sección visible (Predicación/Reuniones) y activa la primera sub-pestaña disponible dentro de ella.
@@ -4575,6 +4571,10 @@ function switchAdminSection(section, skipTabSwitch) {
 }
 
 async function switchAdminTab(tab) {
+  if (tab === 'usuarios' && !['dev','admin'].includes(currentRole)) {
+    showToast('No tienes permisos para acceder a este módulo.', 'error');
+    return;
+  }
   if (currentRole === 'semiadmin') {
     const perms = await getUserPermissions();
     const moduleMap = { assignments: 'assignments', territories: 'territories', conductores: 'conductores', casas: 'casas', grupos: 'grupos', responsabilidades: 'responsabilidades', 'aseo-salon': 'aseo_salon' };
@@ -4602,6 +4602,7 @@ async function applyAdminTabPermissions() {
   let firstAllowed = null;
   document.querySelectorAll('.admin-tab').forEach(btn => {
     const tab = btn.dataset.tab;
+    if (tab === 'usuarios') { btn.style.opacity = '0.4'; btn.style.pointerEvents = 'none'; return; }
     const key = permKeyMap[tab];
     const allowed = canAccessModule(perms, key);
     btn.style.opacity = allowed ? '' : '0.4';
@@ -7214,8 +7215,13 @@ async function syncRoleFromServer() {
       // Show/hide admin buttons
       const adminBtn = document.getElementById('admin-dropdown-btn');
       if (adminBtn) adminBtn.style.display = ['dev','admin','semiadmin'].includes(currentRole) ? '' : 'none';
-      const usersBtn = document.getElementById('users-panel-btn');
-      if (usersBtn) usersBtn.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
+      const flemingTab = document.getElementById('admin-section-tab-fleming');
+      if (flemingTab) flemingTab.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
+      // If user was viewing the Fleming App / Usuarios section and lost access, send them back to predicación
+      const usuariosSection = document.getElementById('admin-usuarios');
+      if (usuariosSection && usuariosSection.classList.contains('active') && !['dev','admin'].includes(currentRole)) {
+        switchAdminSection('predicacion');
+      }
       // If user was on admin page and lost access, kick them out
       const adminPage = document.getElementById('page-admin');
       if (adminPage && adminPage.classList.contains('active') && !['dev','admin','semiadmin'].includes(currentRole)) {
@@ -7352,14 +7358,14 @@ function syncAdminDropdown() {
   const adminAvatar  = document.getElementById('user-avatar-admin');
   const adminName    = document.getElementById('dropdown-name-admin');
   const adminRole    = document.getElementById('dropdown-role-admin');
-  const usersAdminBtn = document.getElementById('users-panel-btn-admin');
   if (adminAvatar) adminAvatar.textContent = initials;
   if (adminName)   adminName.textContent = currentUser ? currentUser.name : '—';
   if (adminRole) {
     const roleLabelsMap = { dev:'DEV', admin:'Administrador', semiadmin:'SemiAdmin', viewer:'Visitante' };
     adminRole.textContent = roleLabelsMap[currentRole] || 'Visitante';
   }
-  if (usersAdminBtn) usersAdminBtn.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
+  const flemingTab = document.getElementById('admin-section-tab-fleming');
+  if (flemingTab) flemingTab.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
   const themeLabel = document.getElementById('theme-btn-label-admin');
   if (themeLabel) _updateThemeActive(document.documentElement.getAttribute('data-theme') || 'auto');
 }
@@ -7849,20 +7855,6 @@ async function submitSugerirQuitado() {
         <div class="profile-row-content">
           <div class="profile-row-label">Responsabilidad actual</div>
           <div id="profile-task-value"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Desde cuándo -->
-    <div class="profile-section">
-      <div class="profile-section-title">Cuenta</div>
-      <div class="profile-row">
-        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text3)">
-          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label">Miembro desde</div>
-          <div id="profile-joined-value" class="profile-row-value">—</div>
         </div>
       </div>
     </div>
