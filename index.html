@@ -8591,9 +8591,9 @@ function vmcPpFilter() {
     </div>`;
   }).join('');
 
-  // Botón crear — solo si hay texto y no hay match exacto
-  const exactMatch = vmcPeople.some(p => p.full_name.toLowerCase() === q);
-  if (q && !exactMatch) {
+  // Botón crear — siempre visible si hay texto (permite nombres repetidos,
+  // por ejemplo dos hermanos que se llaman igual)
+  if (q) {
     vmcPpShowCreateForm(q);
   } else {
     vmcPpHideCreateForm();
@@ -8655,9 +8655,7 @@ function vmcPpHideCreateForm() {
 async function vmcPpCreatePerson() {
   const full = vmcPpPendingName;
   if (!full) { showToast('Escribe un nombre', 'error'); return; }
-  // Verificar duplicado
-  const dup = vmcPeople.find(p => p.full_name.toLowerCase() === full.toLowerCase());
-  if (dup) { vmcPpSelect(dup.full_name); return; }
+  // Nota: se permiten nombres repetidos (puede haber dos hermanos con el mismo nombre)
 
   const parts = full.split(/\s+/);
   const fn = parts[0];
