@@ -8466,7 +8466,6 @@ async function openVmcWeekModal(id) {
   vmcRenderAllSections(parts);
 
   // Show notify button only for existing weeks
-  document.getElementById('vmc-notify-btn').style.display = week ? '' : 'none';
 }
 
 // Restaura el botón de persona con el valor guardado
@@ -8819,6 +8818,9 @@ async function saveVmcWeek() {
     parts:         vmcCollectParts(),
   };
 
+  // Snapshot del estado anterior para detectar cambios de asignacion
+  const prevWeek = vmcEditingId ? vmcWeeks.find(w => w.id === vmcEditingId) : null;
+
   btn.disabled = true; btn.textContent = 'Guardando…';
   let error;
   if (vmcEditingId) {
@@ -8834,6 +8836,14 @@ async function saveVmcWeek() {
   await loadVmcWeeks();
   renderAdminVmc();
   renderVmcUserView();
+
+  // Notificaciones personales automaticas
+  try {
+    const range = vmcFormatRange(payload);
+    await vmcNotifyNewAssignments(payload, prevWeek, range);
+  } catch (err) {
+    console.warn('No se pudieron enviar notificaciones VMC:', err.message);
+  }
 }
 
 // ── Delete week ───────────────────────────────────────────────────────────────
@@ -8848,66 +8858,68 @@ async function deleteVmcWeek(id) {
   renderVmcUserView();
 }
 
-// ── Notifications ─────────────────────────────────────────────────────────────
+// ── Notificaciones personales automáticas VMC ────────────────────────────────
 
-async function vmcNotifyWeek(id) {
-  const week = vmcWeeks.find(w => w.id === id);
-  if (!week) return;
-  await vmcSendNotification(week);
-}
-
-async function vmcNotifyAssigned() {
-  const week = vmcEditingId ? vmcWeeks.find(w => w.id === vmcEditingId) : null;
-  if (week) await vmcSendNotification(week);
-}
-
-async function vmcSendNotification(week) {
-  const range = vmcFormatRange(week);
-  const parts = Array.isArray(week.parts) ? week.parts : [];
-
-  // Build per-person summary
-  const byPerson = {};
-  [week.presidente, week.prayer_open, week.prayer_close].forEach((name, i) => {
+// Construye un mapa { nombrePersona: [asignacion1, asignacion2, ...] } para una semana
+function vmcBuildAssignmentMap(week) {
+  const map = {};
+  const add = (name, role) => {
     if (!name) return;
-    const roles = ['Presidente', 'Oración de apertura', 'Oración de cierre'];
-    if (!byPerson[name]) byPerson[name] = [];
-    byPerson[name].push(roles[i]);
-  });
+    const key = name.trim();
+    if (!map[key]) map[key] = [];
+    map[key].push(role);
+  };
+  add(week.presidente,   'Presidente');
+  add(week.prayer_open,  'Oración de apertura');
+  add(week.prayer_close, 'Oración de cierre');
+  const parts = Array.isArray(week.parts) ? week.parts : [];
   parts.forEach(p => {
-    [p.assigned, p.assigned2].forEach(name => {
-      if (!name) return;
-      if (!byPerson[name]) byPerson[name] = [];
-      byPerson[name].push(p.name + (p.mins ? ` (${p.mins} min)` : ''));
-    });
+    add(p.assigned,  p.name);
+    add(p.assigned2, p.name);
   });
+  return map;
+}
 
-  const summary = Object.entries(byPerson).map(([n,roles]) => `• ${n}: ${roles.join(', ')}`).join('\n');
-  const defaultMsg = `Semana VMC ${range}${week.reading ? ' – ' + week.reading : ''}.\n\nAsignaciones:\n${summary}\n\nRecuerda prepararte con anticipación.`;
+async function vmcNotifyNewAssignments(newWeek, prevWeek, range) {
+  const newMap  = vmcBuildAssignmentMap(newWeek);
+  const prevMap = prevWeek ? vmcBuildAssignmentMap(prevWeek) : {};
 
-  const msg = prompt('Mensaje a enviar a los asignados (edita o cancela):', defaultMsg);
-  if (!msg) return;
-
-  showToast('Enviando notificación…', '');
-  const { error } = await sb.from('notifications').insert({
-    title: `VMC – ${range}`,
-    body: msg
-  });
-  if (error) { showToast('Error al enviar', 'error'); return; }
-
-  // Push via Edge Function
-  try {
-    await fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
-      body: JSON.stringify({ title: `VMC – ${range}`, body: msg })
-    });
-  } catch(e) { console.warn('Push no disponible:', e.message); }
-
-  // Mark notified
-  if (vmcEditingId || week.id) {
-    await sb.from('vmc_weeks').update({ notified_at: new Date().toISOString() }).eq('id', week.id || vmcEditingId);
+  // Detectar personas con asignaciones nuevas o cambiadas
+  const toNotify = []; // { name, roles[] }
+  for (const [name, roles] of Object.entries(newMap)) {
+    const prevRoles = prevMap[name] || [];
+    const newRoles  = roles.filter(r => !prevRoles.includes(r));
+    if (newRoles.length) toNotify.push({ name, roles: newRoles });
   }
-  showToast('Notificación enviada ✓', 'success');
+
+  if (!toNotify.length) return;
+
+  const EDGE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users';
+
+  for (const { name, roles } of toNotify) {
+    const isRole = (r) => ['Presidente','Oración de apertura','Oración de cierre'].includes(r);
+    const formatRole = (r) => isRole(r) ? `el rol de "${r}"` : `la parte "${r}"`;
+    const rolesText = roles.map(formatRole).join(' y ');
+    const title = 'Nueva asignación en reunión';
+    const body  = `Se te ha asignado ${rolesText} para la semana del ${range}. Revisa los detalles.`;
+    const target = [name.trim().toLowerCase()];
+
+    try {
+      await sb.from('notifications').insert({ title, body, target_names: target });
+    } catch (err) {
+      console.warn('Error guardando notificación para', name, err.message);
+    }
+
+    try {
+      await fetch(EDGE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+        body: JSON.stringify({ title, body, target_names: target })
+      });
+    } catch (err) {
+      console.warn('Push no disponible para', name, err.message);
+    }
+  }
 }
 
 // ── User view ─────────────────────────────────────────────────────────────────
@@ -9448,10 +9460,6 @@ ADMIN_TAB_SECTION['vmc'] = 'reuniones';
     <div class="vmc-modal-footer">
       <button class="btn-secondary" onclick="closeVmcWeekModal()">Cancelar</button>
       <div style="flex:1"></div>
-      <button class="vmc-notify-btn" id="vmc-notify-btn" onclick="vmcNotifyAssigned()" style="display:none">
-        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        Notificar asignados
-      </button>
       <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="saveVmcWeek()" id="vmc-save-btn">Guardar</button>
     </div>
   </div>
