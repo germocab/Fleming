@@ -8584,7 +8584,8 @@ function vmcPpFilter() {
     const ini = vmcInitials(p.full_name);
     // ¿Esta persona tiene cuenta en la plataforma?
     const hasAccount = activeUsers.some(u => u.name && u.name.toLowerCase() === p.full_name.toLowerCase());
-    return `<div class="vmc-pp-item" onclick="vmcPpSelect(${JSON.stringify(p.full_name)})">
+    const safeName = p.full_name.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+    return `<div class="vmc-pp-item" data-name="${safeName}" onclick="vmcPpSelect(this.dataset.name)">
       <div class="vmc-pp-item-avatar" style="background:${col}">${ini}</div>
       <span class="vmc-pp-item-name">${p.full_name}</span>
       ${hasAccount ? '<span class="vmc-pp-item-badge">En plataforma</span>' : ''}
