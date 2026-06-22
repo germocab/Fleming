@@ -1528,25 +1528,171 @@
   .vmc-add-part-btn:hover { background: var(--accent-light); }
   .vmc-add-part-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
 
-  /* ── Autocomplete dropdown for assigned person ── */
+  /* ── Selector de persona VMC (botón reemplaza input libre) ── */
   .vmc-assign-wrap { position: relative; width: 100%; }
-  .vmc-assign-dropdown {
-    position: absolute; top: calc(100% + 4px); left: 0; right: 0;
-    background: var(--surface); border: 1px solid var(--border-active);
-    border-radius: var(--radius-xs); box-shadow: var(--shadow-lg);
-    z-index: 600; max-height: 160px; overflow-y: auto;
+  /* legacy dropdown — ya no se usa, queda oculto por si acaso */
+  .vmc-assign-dropdown { display: none !important; }
+
+  .vmc-person-btn {
+    display: flex; align-items: center; gap: 7px; width: 100%;
+    padding: 0.42rem 0.65rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-xs); font-family: var(--font);
+    font-size: 0.84rem; color: var(--text3); cursor: pointer;
+    transition: border-color 0.2s, color 0.2s; text-align: left;
+    min-height: 36px;
   }
-  .vmc-assign-opt {
-    padding: 0.5rem 0.75rem; font-size: 0.84rem; cursor: pointer;
-    display: flex; align-items: center; gap: 8px;
-    transition: background 0.1s;
-  }
-  .vmc-assign-opt:hover { background: var(--accent-light); }
-  .vmc-assign-opt-avatar {
-    width: 24px; height: 24px; border-radius: 6px;
+  .vmc-person-btn:hover { border-color: var(--accent); color: var(--text); }
+  .vmc-person-btn.selected { color: var(--text); border-color: var(--border-active); }
+  .vmc-person-btn-avatar {
+    width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
-    font-size: 0.65rem; font-weight: 700; color: #fff; flex-shrink: 0;
+    font-size: 0.6rem; font-weight: 700; color: #fff;
   }
+  .vmc-person-btn-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .vmc-person-btn-clear {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--surface3);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    border: none; cursor: pointer; transition: background 0.15s; padding: 0;
+    color: var(--text3);
+  }
+  .vmc-person-btn-clear:hover { background: rgba(255,59,48,0.15); color: var(--red); }
+  .vmc-person-btn-clear svg { width: 10px; height: 10px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+
+  /* Meta row button variant */
+  .vmc-meta-val-input.vmc-person-btn-meta {
+    cursor: pointer; text-align: left;
+  }
+
+  /* ── VMC People Picker Modal ── */
+  .vmc-pp-overlay {
+    display: none; position: fixed; inset: 0;
+    background: var(--modal-overlay-bg); backdrop-filter: blur(10px);
+    z-index: 1200; align-items: center; justify-content: center; padding: 1rem;
+  }
+  .vmc-pp-overlay.open { display: flex; animation: fadeIn 0.18s ease; }
+  .vmc-pp-modal {
+    background: var(--surface); border-radius: 20px;
+    width: 100%; max-width: 420px; max-height: 82vh;
+    display: flex; flex-direction: column;
+    box-shadow: var(--shadow-lg); overflow: hidden;
+    animation: slideUp 0.28s cubic-bezier(0.16,1,0.3,1);
+  }
+  .vmc-pp-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 1.1rem 0.75rem; border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .vmc-pp-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+  .vmc-pp-sub { font-size: 0.75rem; color: var(--text3); margin-top: 1px; }
+  .vmc-pp-close {
+    width: 30px; height: 30px; border-radius: 50%; background: var(--surface3);
+    border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: var(--text2); transition: background 0.15s; flex-shrink: 0;
+  }
+  .vmc-pp-close:hover { background: var(--surface2); }
+  .vmc-pp-close svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
+
+  .vmc-pp-search-wrap {
+    padding: 0.7rem 1.1rem; border-bottom: 1px solid var(--border); flex-shrink: 0;
+    position: relative;
+  }
+  .vmc-pp-search-icon {
+    position: absolute; left: 1.75rem; top: 50%; transform: translateY(-50%);
+    width: 15px; height: 15px; stroke: var(--text3); fill: none; stroke-width: 2; stroke-linecap: round; pointer-events: none;
+  }
+  .vmc-pp-search {
+    width: 100%; padding: 0.6rem 0.85rem 0.6rem 2.2rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); font-family: var(--font);
+    font-size: 0.9rem; color: var(--text); outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .vmc-pp-search:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .vmc-pp-search::placeholder { color: var(--text3); }
+
+  .vmc-pp-list {
+    flex: 1; overflow-y: auto; padding: 0.4rem 0;
+    scrollbar-width: thin; scrollbar-color: var(--surface3) transparent;
+  }
+  .vmc-pp-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0.6rem 1.1rem; cursor: pointer; transition: background 0.12s;
+  }
+  .vmc-pp-item:hover { background: var(--accent-light); }
+  .vmc-pp-item-avatar {
+    width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; font-weight: 700; color: #fff;
+  }
+  .vmc-pp-item-name { font-size: 0.88rem; font-weight: 500; color: var(--text); flex: 1; }
+  .vmc-pp-item-badge {
+    font-size: 0.68rem; font-weight: 600; padding: 2px 7px;
+    border-radius: 20px; background: var(--accent-light); color: var(--accent);
+  }
+  .vmc-pp-empty {
+    padding: 2rem 1.5rem; text-align: center;
+    font-size: 0.875rem; color: var(--text3);
+  }
+  .vmc-pp-create-btn {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0.7rem 1.1rem; cursor: pointer; transition: background 0.12s;
+    border-top: 1px solid var(--border); width: 100%;
+    background: none; border-left: none; border-right: none; border-bottom: none;
+    font-family: var(--font); text-align: left;
+  }
+  .vmc-pp-create-btn:hover { background: var(--green-light); }
+  .vmc-pp-create-icon {
+    width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--green-light); color: var(--green);
+  }
+  .vmc-pp-create-icon svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
+  .vmc-pp-create-text { font-size: 0.84rem; color: var(--text2); }
+  .vmc-pp-create-text strong { color: var(--green); font-weight: 700; }
+
+  /* Create person mini-form inside picker */
+  .vmc-pp-create-form {
+    display: none; flex-direction: column; gap: 0.55rem;
+    padding: 0.85rem 1.1rem; border-top: 1px solid var(--border);
+    background: var(--surface2); flex-shrink: 0;
+  }
+  .vmc-pp-create-form.open { display: flex; animation: fadeIn 0.15s ease; }
+  .vmc-pp-form-row { display: flex; gap: 0.5rem; }
+  .vmc-pp-form-input {
+    flex: 1; padding: 0.55rem 0.75rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-xs); font-family: var(--font);
+    font-size: 0.875rem; color: var(--text); outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s;
+  }
+  .vmc-pp-form-input:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-light); }
+  .vmc-pp-form-input::placeholder { color: var(--text3); }
+  .vmc-pp-form-actions { display: flex; gap: 0.5rem; }
+  .vmc-pp-form-save {
+    flex: 1; padding: 0.6rem; border: none; border-radius: var(--radius-xs);
+    background: var(--green); color: #fff; font-family: var(--font);
+    font-size: 0.875rem; font-weight: 700; cursor: pointer; transition: opacity 0.18s;
+  }
+  .vmc-pp-form-save:hover { opacity: 0.88; }
+  .vmc-pp-form-save:disabled { opacity: 0.5; cursor: not-allowed; }
+  .vmc-pp-form-cancel {
+    padding: 0.6rem 0.9rem; border: none; border-radius: var(--radius-xs);
+    background: var(--surface3); color: var(--text2); font-family: var(--font);
+    font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: background 0.15s;
+  }
+  .vmc-pp-form-cancel:hover { background: var(--surface2); }
+
+  .vmc-pp-footer {
+    padding: 0.7rem 1.1rem; border-top: 1px solid var(--border);
+    display: flex; justify-content: flex-end; flex-shrink: 0;
+  }
+  .vmc-pp-footer-cancel {
+    padding: 0.6rem 1.1rem; border: none; border-radius: var(--radius-xs);
+    background: var(--surface3); color: var(--text2); font-family: var(--font);
+    font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: background 0.15s;
+  }
+  .vmc-pp-footer-cancel:hover { background: var(--surface2); }
 
   /* ── Meta row (presidente, canción, etc.) ── */
   .vmc-meta-row {
@@ -8256,7 +8402,7 @@ function renderAdminVmc() {
 
 // ── Modal open / close ────────────────────────────────────────────────────────
 
-function openVmcWeekModal(id) {
+async function openVmcWeekModal(id) {
   vmcEditingId = id || null;
   const overlay = document.getElementById('vmc-modal-overlay');
   overlay.classList.add('open');
@@ -8265,15 +8411,20 @@ function openVmcWeekModal(id) {
   document.getElementById('vmc-modal-title').textContent = week ? 'Editar semana VMC' : 'Nueva semana VMC';
 
   // Fill meta fields
-  document.getElementById('vmc-date-start').value  = week?.date_start || '';
-  document.getElementById('vmc-date-end').value    = week?.date_end   || '';
-  document.getElementById('vmc-reading').value     = week?.reading    || '';
-  document.getElementById('vmc-meta-presidente').value   = week?.presidente   || '';
-  document.getElementById('vmc-meta-song-open').value    = week?.song_open    || '';
-  document.getElementById('vmc-meta-prayer-open').value  = week?.prayer_open  || '';
-  document.getElementById('vmc-meta-song-mid').value     = week?.song_mid     || '';
-  document.getElementById('vmc-meta-song-close').value   = week?.song_close   || '';
-  document.getElementById('vmc-meta-prayer-close').value = week?.prayer_close || '';
+  document.getElementById('vmc-date-start').value = week?.date_start || '';
+  document.getElementById('vmc-date-end').value   = week?.date_end   || '';
+  document.getElementById('vmc-reading').value    = week?.reading    || '';
+  document.getElementById('vmc-meta-song-open').value  = week?.song_open  || '';
+  document.getElementById('vmc-meta-song-mid').value   = week?.song_mid   || '';
+  document.getElementById('vmc-meta-song-close').value = week?.song_close || '';
+
+  // Cargar lista de personas si aún no está cargada
+  if (!vmcPeople.length) await loadVmcPeople();
+
+  // Pre-poblar botones de selección de persona
+  vmcRestorePersonBtn('vmc-meta-presidente',  week?.presidente   || '', 'Seleccionar…');
+  vmcRestorePersonBtn('vmc-meta-prayer-open', week?.prayer_open  || '', 'Seleccionar…');
+  vmcRestorePersonBtn('vmc-meta-prayer-close',week?.prayer_close || '', 'Seleccionar…');
 
   // Render part rows per section
   const parts = Array.isArray(week?.parts) ? week.parts : [];
@@ -8281,6 +8432,29 @@ function openVmcWeekModal(id) {
 
   // Show notify button only for existing weeks
   document.getElementById('vmc-notify-btn').style.display = week ? '' : 'none';
+}
+
+// Restaura el botón de persona con el valor guardado
+function vmcRestorePersonBtn(hiddenId, value, placeholder) {
+  const hidden = document.getElementById(hiddenId);
+  if (!hidden) return;
+  hidden.value = value;
+  const btn = hidden.nextElementSibling;
+  if (!btn || !btn.classList.contains('vmc-person-btn')) return;
+  if (value) {
+    const col = vmcUserColor(value);
+    const ini = vmcInitials(value);
+    btn.classList.add('selected');
+    btn.innerHTML = `
+      <div class="vmc-person-btn-avatar" style="background:${col}">${ini}</div>
+      <span class="vmc-person-btn-name">${value}</span>
+      <button class="vmc-person-btn-clear" onclick="vmcPpClear(event,this)" title="Quitar">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>`;
+  } else {
+    btn.classList.remove('selected');
+    btn.innerHTML = placeholder;
+  }
 }
 
 function closeVmcWeekModal() {
@@ -8335,14 +8509,10 @@ function vmcAppendPartRow(section, p = {}) {
       </div>
       <div style="display:flex;gap:6px">
         <div class="vmc-assign-wrap" style="flex:1">
-          <input type="text" class="vmc-part-assign-input" placeholder="Asignado a…" value="${p.assigned||''}" autocomplete="off"
-            oninput="vmcShowAutocomplete(this,'vmc-drop-${id}-1')" onblur="vmcHideDropdown('vmc-drop-${id}-1')">
-          <div class="vmc-assign-dropdown" id="vmc-drop-${id}-1" style="display:none"></div>
+          ${vmcPersonField(`vmc-hidden-${id}-1`, p.assigned||'', 'Asignado a…')}
         </div>
         <div class="vmc-assign-wrap" style="flex:1">
-          <input type="text" class="vmc-part-assign-input" placeholder="Ayudante / 2do (opc.)" value="${p.assigned2||''}" autocomplete="off"
-            oninput="vmcShowAutocomplete(this,'vmc-drop-${id}-2')" onblur="vmcHideDropdown('vmc-drop-${id}-2')">
-          <div class="vmc-assign-dropdown" id="vmc-drop-${id}-2" style="display:none"></div>
+          ${vmcPersonField(`vmc-hidden-${id}-2`, p.assigned2||'', 'Ayudante (opc.)')}
         </div>
       </div>
     </div>
@@ -8356,40 +8526,170 @@ function vmcAddPart(section) {
   vmcAppendPartRow(section, { section, name:'', mins:'', assigned:'', assigned2:'' });
 }
 
-// ── Autocomplete ──────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+//  VMC People Picker — lista independiente (tabla: vmc_people)
+// ══════════════════════════════════════════════════════════════════
 
-function vmcShowAutocomplete(input, dropId) {
-  const q = input.value.toLowerCase().trim();
-  const drop = document.getElementById(dropId);
-  if (!drop) return;
-  const matches = activeUsers.filter(u => q && u.name.toLowerCase().includes(q)).slice(0, 6);
-  if (!matches.length) { drop.style.display = 'none'; return; }
-  drop.style.display = 'block';
-  drop.innerHTML = matches.map(u => {
-    const col = vmcUserColor(u.name);
-    const ini = vmcInitials(u.name);
-    return `<div class="vmc-assign-opt" onmousedown="vmcPickUser(event,'${dropId}','${u.name.replace(/'/g,"\\'")}')">
-      <div class="vmc-assign-opt-avatar" style="background:${col}">${ini}</div>
-      ${u.name}
+let vmcPeople = [];          // cache de vmc_people
+let vmcPpTargetInput = null; // input hidden que recibe el nombre seleccionado
+let vmcPpTargetBtn   = null; // botón visible que dispara el picker
+
+// ── Carga ─────────────────────────────────────────────────────────
+async function loadVmcPeople() {
+  const { data } = await sb.from('vmc_people').select('*').order('last_name').order('first_name');
+  vmcPeople = data || [];
+}
+
+// ── Abrir picker ──────────────────────────────────────────────────
+// targetInput  = <input type="hidden"> que almacena el nombre
+// targetBtn    = <button> que muestra el nombre seleccionado
+// subLabel     = texto descriptivo del rol (ej: "Presidente")
+function vmcPpOpen(targetInput, targetBtn, subLabel) {
+  vmcPpTargetInput = targetInput;
+  vmcPpTargetBtn   = targetBtn;
+  document.getElementById('vmc-pp-sub').textContent = subLabel || 'Elige quién estará a cargo';
+  document.getElementById('vmc-pp-search').value = '';
+  vmcPpHideCreateForm();
+  vmcPpFilter();
+  document.getElementById('vmc-pp-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('vmc-pp-search').focus(), 80);
+}
+
+function vmcPpClose() {
+  document.getElementById('vmc-pp-overlay').classList.remove('open');
+  vmcPpHideCreateForm();
+  vmcPpTargetInput = null;
+  vmcPpTargetBtn   = null;
+}
+
+function vmcPpOverlayClick(e) {
+  if (e.target === document.getElementById('vmc-pp-overlay')) vmcPpClose();
+}
+
+// ── Filtrar lista ─────────────────────────────────────────────────
+function vmcPpFilter() {
+  const q = document.getElementById('vmc-pp-search').value.toLowerCase().trim();
+  const list = document.getElementById('vmc-pp-list');
+  const matches = vmcPeople.filter(p =>
+    !q || p.full_name.toLowerCase().includes(q)
+  );
+
+  if (!matches.length && !q) {
+    list.innerHTML = `<div class="vmc-pp-empty">No hay nadie en la lista aún.<br>Escribe un nombre para agregar.</div>`;
+    vmcPpHideCreateForm();
+    return;
+  }
+
+  list.innerHTML = matches.map(p => {
+    const col = vmcUserColor(p.full_name);
+    const ini = vmcInitials(p.full_name);
+    // ¿Esta persona tiene cuenta en la plataforma?
+    const hasAccount = activeUsers.some(u => u.name && u.name.toLowerCase() === p.full_name.toLowerCase());
+    return `<div class="vmc-pp-item" onclick="vmcPpSelect(${JSON.stringify(p.full_name)})">
+      <div class="vmc-pp-item-avatar" style="background:${col}">${ini}</div>
+      <span class="vmc-pp-item-name">${p.full_name}</span>
+      ${hasAccount ? '<span class="vmc-pp-item-badge">En plataforma</span>' : ''}
     </div>`;
   }).join('');
+
+  // Botón crear — solo si hay texto y no hay match exacto
+  const exactMatch = vmcPeople.some(p => p.full_name.toLowerCase() === q);
+  if (q && !exactMatch) {
+    vmcPpShowCreateForm(q);
+  } else {
+    vmcPpHideCreateForm();
+  }
+
+  if (!matches.length && q) {
+    list.innerHTML = `<div class="vmc-pp-empty">No se encontró "<strong>${q}</strong>"</div>`;
+  }
 }
 
-function vmcPickUser(e, dropId, name) {
-  e.preventDefault();
-  const drop = document.getElementById(dropId);
-  if (!drop) return;
-  const input = drop.previousElementSibling;
-  if (input) input.value = name;
-  drop.style.display = 'none';
+// ── Seleccionar persona ───────────────────────────────────────────
+function vmcPpSelect(fullName) {
+  if (!vmcPpTargetInput || !vmcPpTargetBtn) return;
+  vmcPpTargetInput.value = fullName;
+  // Actualizar botón visible
+  const col = vmcUserColor(fullName);
+  const ini = vmcInitials(fullName);
+  vmcPpTargetBtn.classList.add('selected');
+  vmcPpTargetBtn.innerHTML = `
+    <div class="vmc-person-btn-avatar" style="background:${col}">${ini}</div>
+    <span class="vmc-person-btn-name">${fullName}</span>
+    <button class="vmc-person-btn-clear" onclick="vmcPpClear(event,this)" title="Quitar">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>`;
+  vmcPpClose();
 }
 
-function vmcHideDropdown(dropId) {
-  setTimeout(() => {
-    const d = document.getElementById(dropId);
-    if (d) d.style.display = 'none';
-  }, 180);
+function vmcPpClear(e, clearBtn) {
+  e.stopPropagation();
+  const btn = clearBtn.closest('.vmc-person-btn');
+  const input = btn.previousElementSibling; // hidden input anterior
+  if (input) input.value = '';
+  btn.classList.remove('selected');
+  btn.innerHTML = btn.dataset.placeholder || 'Seleccionar…';
 }
+
+// ── Formulario crear ──────────────────────────────────────────────
+function vmcPpShowCreateForm(q) {
+  const form = document.getElementById('vmc-pp-create-form');
+  form.classList.add('open');
+  // Pre-rellenar con lo escrito
+  const parts = q.trim().split(/\s+/);
+  document.getElementById('vmc-pp-fn').value = parts[0] || '';
+  document.getElementById('vmc-pp-ln').value = parts.slice(1).join(' ') || '';
+}
+
+function vmcPpHideCreateForm() {
+  document.getElementById('vmc-pp-create-form').classList.remove('open');
+  document.getElementById('vmc-pp-fn').value = '';
+  document.getElementById('vmc-pp-ln').value = '';
+}
+
+async function vmcPpCreatePerson() {
+  const fn = document.getElementById('vmc-pp-fn').value.trim();
+  const ln = document.getElementById('vmc-pp-ln').value.trim();
+  if (!fn) { showToast('Ingresa al menos el nombre', 'error'); return; }
+  const full = [fn, ln].filter(Boolean).join(' ');
+  // Verificar duplicado
+  if (vmcPeople.some(p => p.full_name.toLowerCase() === full.toLowerCase())) {
+    vmcPpSelect(vmcPeople.find(p => p.full_name.toLowerCase() === full.toLowerCase()).full_name);
+    return;
+  }
+  const saveBtn = document.getElementById('vmc-pp-form-save');
+  saveBtn.disabled = true;
+  const { data, error } = await sb.from('vmc_people').insert({ first_name: fn, last_name: ln || null, full_name: full }).select().single();
+  saveBtn.disabled = false;
+  if (error) { showToast('Error al crear: ' + error.message, 'error'); return; }
+  vmcPeople.push(data);
+  vmcPeople.sort((a,b) => a.full_name.localeCompare(b.full_name));
+  showToast(`${full} agregado/a ✓`, 'success');
+  vmcPpSelect(full);
+}
+
+// ── Helper: crear el par hidden-input + botón selector ────────────
+// Reemplaza el antiguo sistema oninput/onblur
+function vmcPersonField(id, value, placeholder) {
+  const col = value ? vmcUserColor(value) : '';
+  const ini = value ? vmcInitials(value) : '';
+  const label = placeholder || 'Seleccionar…';
+  const btnContent = value
+    ? `<div class="vmc-person-btn-avatar" style="background:${col}">${ini}</div>
+       <span class="vmc-person-btn-name">${value}</span>
+       <button class="vmc-person-btn-clear" onclick="vmcPpClear(event,this)" title="Quitar">
+         <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+       </button>`
+    : label;
+  return `<input type="hidden" id="${id}" value="${value||''}">
+    <button type="button" class="vmc-person-btn${value?' selected':''}" data-placeholder="${label}"
+      onclick="vmcPpOpen(document.getElementById('${id}'),this,'${label}')">${btnContent}</button>`;
+}
+
+// ── Compatibilidad con funciones antiguas (ya no se usan activamente) ──
+function vmcShowAutocomplete() {}
+function vmcPickUser() {}
+function vmcHideDropdown() {}
 
 // ── Collect form data ─────────────────────────────────────────────────────────
 
@@ -8397,11 +8697,14 @@ function vmcCollectParts() {
   const parts = [];
   document.querySelectorAll('.vmc-part-row').forEach(row => {
     const section = row.dataset.section;
-    const inputs = row.querySelectorAll('input');
-    const name      = inputs[0]?.value.trim() || '';
-    const mins      = parseInt(inputs[1]?.value) || 0;
-    const assigned  = inputs[2]?.value.trim() || '';
-    const assigned2 = inputs[3]?.value.trim() || '';
+    const nameInput    = row.querySelector('.vmc-part-name-input');
+    const minsInput    = row.querySelector('.vmc-part-mins-input');
+    // Hidden inputs generados por vmcPersonField
+    const hiddenInputs = row.querySelectorAll('input[type="hidden"]');
+    const name      = nameInput?.value.trim() || '';
+    const mins      = parseInt(minsInput?.value) || 0;
+    const assigned  = hiddenInputs[0]?.value.trim() || '';
+    const assigned2 = hiddenInputs[1]?.value.trim() || '';
     if (name) parts.push({ section, name, mins, assigned, assigned2 });
   });
   return parts;
@@ -8973,9 +9276,10 @@ ADMIN_TAB_SECTION['vmc'] = 'reuniones';
         </div>
         <div class="vmc-meta-row">
           <span class="vmc-meta-label">Presidente</span>
-          <div class="vmc-assign-wrap">
-            <input type="text" class="vmc-meta-val-input" id="vmc-meta-presidente" placeholder="Nombre…" autocomplete="off" oninput="vmcShowAutocomplete(this,'vmc-drop-presidente')" onblur="vmcHideDropdown('vmc-drop-presidente')">
-            <div class="vmc-assign-dropdown" id="vmc-drop-presidente" style="display:none"></div>
+          <div class="vmc-assign-wrap" style="flex:1">
+            <input type="hidden" id="vmc-meta-presidente">
+            <button type="button" class="vmc-person-btn" data-placeholder="Seleccionar…"
+              onclick="vmcPpOpen(document.getElementById('vmc-meta-presidente'),this,'Presidente')">Seleccionar…</button>
           </div>
         </div>
         <div class="vmc-meta-row">
@@ -8984,9 +9288,10 @@ ADMIN_TAB_SECTION['vmc'] = 'reuniones';
         </div>
         <div class="vmc-meta-row">
           <span class="vmc-meta-label">Oración apertura</span>
-          <div class="vmc-assign-wrap">
-            <input type="text" class="vmc-meta-val-input" id="vmc-meta-prayer-open" placeholder="Nombre…" autocomplete="off" oninput="vmcShowAutocomplete(this,'vmc-drop-prayer-open')" onblur="vmcHideDropdown('vmc-drop-prayer-open')">
-            <div class="vmc-assign-dropdown" id="vmc-drop-prayer-open" style="display:none"></div>
+          <div class="vmc-assign-wrap" style="flex:1">
+            <input type="hidden" id="vmc-meta-prayer-open">
+            <button type="button" class="vmc-person-btn" data-placeholder="Seleccionar…"
+              onclick="vmcPpOpen(document.getElementById('vmc-meta-prayer-open'),this,'Oración de apertura')">Seleccionar…</button>
           </div>
         </div>
         <div class="vmc-meta-row">
@@ -8999,9 +9304,10 @@ ADMIN_TAB_SECTION['vmc'] = 'reuniones';
         </div>
         <div class="vmc-meta-row" style="border-bottom:none">
           <span class="vmc-meta-label">Oración cierre</span>
-          <div class="vmc-assign-wrap">
-            <input type="text" class="vmc-meta-val-input" id="vmc-meta-prayer-close" placeholder="Nombre…" autocomplete="off" oninput="vmcShowAutocomplete(this,'vmc-drop-prayer-close')" onblur="vmcHideDropdown('vmc-drop-prayer-close')">
-            <div class="vmc-assign-dropdown" id="vmc-drop-prayer-close" style="display:none"></div>
+          <div class="vmc-assign-wrap" style="flex:1">
+            <input type="hidden" id="vmc-meta-prayer-close">
+            <button type="button" class="vmc-person-btn" data-placeholder="Seleccionar…"
+              onclick="vmcPpOpen(document.getElementById('vmc-meta-prayer-close'),this,'Oración de cierre')">Seleccionar…</button>
           </div>
         </div>
       </div>
@@ -9054,6 +9360,46 @@ ADMIN_TAB_SECTION['vmc'] = 'reuniones';
         Notificar asignados
       </button>
       <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="saveVmcWeek()" id="vmc-save-btn">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     VMC People Picker Modal
+══════════════════════════════════════════════════════════════════ -->
+<div class="vmc-pp-overlay" id="vmc-pp-overlay" onclick="vmcPpOverlayClick(event)">
+  <div class="vmc-pp-modal" id="vmc-pp-modal">
+    <div class="vmc-pp-header">
+      <div>
+        <div class="vmc-pp-title">Seleccionar hermano/a</div>
+        <div class="vmc-pp-sub" id="vmc-pp-sub">Elige quién estará a cargo</div>
+      </div>
+      <button class="vmc-pp-close" onclick="vmcPpClose()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="vmc-pp-search-wrap">
+      <svg class="vmc-pp-search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="vmc-pp-search" id="vmc-pp-search" type="text" placeholder="Buscar por nombre…" oninput="vmcPpFilter()" autocomplete="off">
+    </div>
+    <div class="vmc-pp-list" id="vmc-pp-list"></div>
+    <!-- Create person form (shown when no match) -->
+    <div class="vmc-pp-create-form" id="vmc-pp-create-form">
+      <div style="font-size:0.78rem;font-weight:700;color:var(--text2);margin-bottom:2px">Agregar nuevo hermano/a</div>
+      <div class="vmc-pp-form-row">
+        <input class="vmc-pp-form-input" id="vmc-pp-fn" type="text" placeholder="Nombre" autocomplete="off">
+        <input class="vmc-pp-form-input" id="vmc-pp-ln" type="text" placeholder="Apellido" autocomplete="off">
+      </div>
+      <div class="vmc-pp-form-actions">
+        <button class="vmc-pp-form-save" id="vmc-pp-form-save" onclick="vmcPpCreatePerson()">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;vertical-align:middle;margin-right:4px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Crear y seleccionar
+        </button>
+        <button class="vmc-pp-form-cancel" onclick="vmcPpHideCreateForm()">Cancelar</button>
+      </div>
+    </div>
+    <div class="vmc-pp-footer">
+      <button class="vmc-pp-footer-cancel" onclick="vmcPpClose()">Cancelar</button>
     </div>
   </div>
 </div>
