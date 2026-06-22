@@ -1429,7 +1429,7 @@
   }
 
   /* Body */
-  .users-panel-body { flex: 1; overflow-y: auto; padding: 1rem 1rem 4rem; }
+  .users-panel-body { padding: 0; }
 
   /* Stats strip */
   .users-stats-strip {
@@ -2860,15 +2860,11 @@
       </div>
       <div class="admin-section" id="admin-usuarios">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
-          <span style="flex:1;font-size:0.95rem;font-weight:700">Usuarios</span>
+          <span style="flex:1;font-size:0.95rem;font-weight:700">Usuarios <span class="users-count-badge" id="users-count-badge" style="font-size:0.78rem;font-weight:600;color:var(--text3);background:var(--surface3);border:1px solid var(--border);padding:2px 9px;border-radius:20px;margin-left:6px">0</span></span>
+          <span style="font-size:0.75rem;color:var(--text3)">Gestiona roles y permisos</span>
         </div>
-        <div class="empty-state">
-          <div class="empty-state-icon">
-            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          </div>
-          <h3>Gestión de usuarios</h3>
-          <p>Administra roles, permisos y accesos de los usuarios.</p>
-          <button class="btn-primary" style="margin-top:0.75rem" onclick="openUsersPanel()">Abrir panel de usuarios</button>
+        <div id="users-panel-body">
+          <div class="loader-wrap"><div class="loader"></div></div>
         </div>
       </div>
       </div><!-- /.admin-body -->
@@ -4646,6 +4642,7 @@ async function switchAdminTab(tab) {
   if (section) switchAdminSection(section, true);
   if (tab === 'responsabilidades') loadResponsabilidadesAdmin();
   if (tab === 'aseo-salon') loadAseoSalonAdmin();
+  if (tab === 'usuarios') { loadUsers().then(() => renderUsersPanel()); }
 }
 
 async function applyAdminTabPermissions() {
@@ -6800,13 +6797,9 @@ async function loadUsers() {
 
 async function openUsersPanel() {
   if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
-  document.getElementById('users-panel-overlay').classList.add('open');
-  document.getElementById('users-panel-body').innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
-  await loadUsers();
-  renderUsersPanel();
+  switchAdminTab('usuarios');
 }
 function closeUsersPanel() {
-  document.getElementById('users-panel-overlay').classList.remove('open');
   expandedUserId = null;
 }
 
