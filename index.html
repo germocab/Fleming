@@ -206,6 +206,10 @@
     display: flex; background: var(--surface3);
     border-radius: 26px; padding: 4px; gap: 0;
     flex-shrink: 0;
+    position: relative;
+  }
+  .main-seg-thumb {
+    display: none; /* activado solo en desktop vía media query */
   }
   .main-seg-btn {
     padding: 9px 24px;
@@ -213,10 +217,32 @@
     font-family: var(--font); font-size: 0.9rem; font-weight: 600;
     color: var(--text2); background: transparent;
     cursor: pointer; transition: all 0.22s; white-space: nowrap;
+    position: relative; z-index: 1;
   }
   .main-seg-btn.active {
     background: var(--accent); color: #fff;
     box-shadow: 0 2px 12px rgba(0,122,255,0.4);
+  }
+
+  @media (min-width: 640px) {
+    /* Desktop: el thumb se desliza detrás del botón activo con una animación fluida;
+       el botón activo deja de pintar su propio fondo para que no "compita" con el thumb. */
+    .main-seg-thumb {
+      display: block;
+      position: absolute; top: 4px; left: 4px;
+      height: calc(100% - 8px);
+      background: var(--accent);
+      border-radius: 22px;
+      box-shadow: 0 2px 12px rgba(0,122,255,0.4);
+      transition: transform 0.32s cubic-bezier(0.65, 0, 0.35, 1), width 0.32s cubic-bezier(0.65, 0, 0.35, 1);
+      will-change: transform, width;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .main-seg-btn.active {
+      background: transparent;
+      box-shadow: none;
+    }
   }
 
   @media (max-width: 639px) {
@@ -2451,7 +2477,8 @@
   <nav class="topnav">
     <div class="nav-spacer"></div>
 
-    <div class="main-segment">
+    <div class="main-segment" id="main-segment">
+      <div class="main-seg-thumb" id="main-seg-thumb"></div>
       <button class="main-seg-btn active" data-tab="predicacion" onclick="switchMainTab('predicacion',this)">Predicación</button>
       <button class="main-seg-btn" data-tab="reuniones" onclick="switchMainTab('reuniones',this)">Reuniones</button>
     </div>
@@ -2655,7 +2682,7 @@
       <div class="page-header">
         <div>
           <div class="page-header-title">Administración</div>
-          <div class="page-header-sub">Gestiona la información y los arreglos para la Predicación y las Reuniones de la congregación.</div>
+          <div class="page-header-sub">Gestiona asignaciones, territorios, conductores y casas</div>
         </div>
       </div>
       <div class="admin-section-tabs">
@@ -2672,7 +2699,7 @@
       </div>
       <div class="admin-tabs-row" data-section="reuniones">
         <button class="admin-tab" data-tab="responsabilidades" onclick="switchAdminTab('responsabilidades')">Responsabilidades</button>
-        <button class="admin-tab" data-tab="aseo-salon" onclick="switchAdminTab('aseo-salon')">Aseo del Salón</button>
+        <button class="admin-tab" data-tab="aseo-salon" onclick="switchAdminTab('aseo-salon')">Aseo Salón</button>
       </div>
       <div class="admin-tabs-row" data-section="fleming">
         <button class="admin-tab" data-tab="usuarios" onclick="switchAdminTab('usuarios')">Usuarios</button>
@@ -4361,6 +4388,7 @@ async function enterApp() {
   document.querySelectorAll('.main-seg-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.tab === currentMainTab);
   });
+  updateMainSegThumb(true); // true = posicionar sin animación (carga inicial)
 
   renderSubTabs(currentMainTab);
 
@@ -4487,6 +4515,7 @@ function switchMainTab(tab, btn) {
   currentMainTab = tab;
   document.querySelectorAll('.main-seg-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  updateMainSegThumb();
 
   if (tab === 'predicacion') {
     currentSubTab = currentSubTab && ['casa','territorios','carritos','grupos'].includes(currentSubTab) ? currentSubTab : 'casa';
@@ -4502,6 +4531,31 @@ function switchMainTab(tab, btn) {
   }
   _saveNavState();
 }
+
+// Desliza el thumb de la píldora Predicación/Reuniones detrás del botón activo (solo desktop, ≥640px).
+// instant=true posiciona sin animación (usado en la carga inicial / restauración de estado).
+function updateMainSegThumb(instant) {
+  if (window.innerWidth < 640) return; // móvil: sin thumb animado
+  const seg = document.getElementById('main-segment');
+  const thumb = document.getElementById('main-seg-thumb');
+  const activeBtn = seg?.querySelector('.main-seg-btn.active');
+  if (!seg || !thumb || !activeBtn) return;
+  const segRect = seg.getBoundingClientRect();
+  const btnRect = activeBtn.getBoundingClientRect();
+  const offsetX = btnRect.left - segRect.left - 4; // 4px = padding del contenedor
+  if (instant) {
+    thumb.style.transition = 'none';
+    thumb.style.width = btnRect.width + 'px';
+    thumb.style.transform = `translateX(${offsetX}px)`;
+    // Forzar reflow antes de restaurar la transición, para que el próximo cambio sí anime.
+    thumb.offsetHeight;
+    thumb.style.transition = '';
+  } else {
+    thumb.style.width = btnRect.width + 'px';
+    thumb.style.transform = `translateX(${offsetX}px)`;
+  }
+}
+window.addEventListener('resize', () => updateMainSegThumb(true));
 
 function switchSubTab(tabId) {
   currentSubTab = tabId;
@@ -7891,7 +7945,7 @@ async function submitSugerirQuitado() {
 
     <!-- Líderes (Super + Aux) -->
     <div class="grupo-section" id="grupo-detail-leaders-section">
-      <div class="grupo-section-title">Encargados del Grupo</div>
+      <div class="grupo-section-title">Liderazgo</div>
       <div id="grupo-detail-leaders-list"></div>
     </div>
 
