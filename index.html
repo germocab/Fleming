@@ -1395,6 +1395,300 @@
   .section-divider { height: 1px; background: var(--border); margin: 1rem 0; }
 
 
+  /* ══════════════════════════════════════════════════════════════════
+     VMC — Vida y Ministerio (Admin + Vista usuario)
+  ══════════════════════════════════════════════════════════════════ */
+
+  /* ── Admin: week cards list ── */
+  .vmc-week-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1rem 1.1rem;
+    margin-bottom: 0.75rem; cursor: pointer;
+    transition: box-shadow 0.18s, border-color 0.18s;
+  }
+  .vmc-week-card:hover { box-shadow: var(--shadow); border-color: var(--border-active); }
+  .vmc-week-card-header { display: flex; align-items: center; gap: 10px; }
+  .vmc-week-range {
+    flex: 1; font-size: 0.95rem; font-weight: 700; letter-spacing: -0.01em;
+  }
+  .vmc-week-badge {
+    font-size: 0.72rem; font-weight: 700; padding: 3px 10px;
+    border-radius: 20px; letter-spacing: 0.01em;
+  }
+  .vmc-week-badge-upcoming { background: var(--accent-light); color: var(--accent); }
+  .vmc-week-badge-current  { background: var(--green-light); color: var(--green); }
+  .vmc-week-badge-past     { background: var(--surface3); color: var(--text3); }
+  .vmc-week-parts-preview {
+    margin-top: 0.55rem; display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .vmc-section-chip {
+    font-size: 0.67rem; font-weight: 700; padding: 2px 8px;
+    border-radius: 20px; letter-spacing: 0.02em; text-transform: uppercase;
+  }
+  .vmc-chip-tesoros  { background: rgba(245,158,11,0.12); color: #d97706; }
+  .vmc-chip-maestros { background: rgba(59,130,246,0.12); color: #2563eb; }
+  .vmc-chip-vida     { background: rgba(168,85,247,0.12); color: #9333ea; }
+  .vmc-week-actions {
+    display: flex; gap: 8px; margin-top: 0.75rem; padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── Admin week editor modal ── */
+  .vmc-modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 500;
+    background: var(--modal-overlay-bg);
+    align-items: flex-start; justify-content: center;
+    padding: 0; overflow: hidden;
+  }
+  .vmc-modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+  .vmc-modal {
+    background: var(--bg); width: 100%; max-width: 680px;
+    height: 100%; max-height: 100%;
+    display: flex; flex-direction: column; overflow: hidden;
+    border-radius: 0;
+  }
+  @media (min-width: 700px) {
+    .vmc-modal-overlay { align-items: center; padding: 2rem 1rem; overflow-y: auto; }
+    .vmc-modal { height: auto; max-height: 92vh; border-radius: var(--radius); }
+  }
+  .vmc-modal-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 0.9rem 1rem; border-bottom: 1px solid var(--border);
+    background: var(--surface); flex-shrink: 0; position: sticky; top: 0; z-index: 1;
+  }
+  .vmc-modal-title { flex: 1; font-size: 1rem; font-weight: 800; letter-spacing: -0.02em; }
+  .vmc-modal-body { flex: 1; overflow-y: auto; padding: 1rem; }
+  .vmc-modal-footer {
+    display: flex; gap: 8px; padding: 0.85rem 1rem;
+    border-top: 1px solid var(--border); background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  /* ── Section block inside editor ── */
+  .vmc-section-block {
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    margin-bottom: 1rem; overflow: hidden;
+  }
+  .vmc-section-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0.7rem 0.9rem; font-size: 0.8rem; font-weight: 800;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .vmc-section-header-tesoros  { background: rgba(245,158,11,0.08); color: #b45309; border-bottom: 1px solid rgba(245,158,11,0.2); }
+  .vmc-section-header-maestros { background: rgba(59,130,246,0.08); color: #1d4ed8; border-bottom: 1px solid rgba(59,130,246,0.2); }
+  .vmc-section-header-vida     { background: rgba(168,85,247,0.08); color: #7e22ce; border-bottom: 1px solid rgba(168,85,247,0.2); }
+
+  /* ── Part row inside section ── */
+  .vmc-part-row {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 0.65rem 0.9rem; border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .vmc-part-row:last-child { border-bottom: none; }
+  .vmc-part-row-fields { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+  .vmc-part-row-top { display: flex; gap: 6px; }
+  .vmc-part-name-input {
+    flex: 1; padding: 0.5rem 0.75rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-xs); font-family: var(--font);
+    font-size: 0.85rem; color: var(--text); outline: none;
+    transition: border-color 0.2s;
+  }
+  .vmc-part-name-input:focus { border-color: var(--accent); }
+  .vmc-part-mins-input {
+    width: 70px; padding: 0.5rem 0.5rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-xs); font-family: var(--font);
+    font-size: 0.85rem; color: var(--text); outline: none;
+    text-align: center; transition: border-color 0.2s;
+  }
+  .vmc-part-mins-input:focus { border-color: var(--accent); }
+  .vmc-part-assign-input {
+    width: 100%; padding: 0.5rem 0.75rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-xs); font-family: var(--font);
+    font-size: 0.82rem; color: var(--text); outline: none;
+    transition: border-color 0.2s;
+  }
+  .vmc-part-assign-input:focus { border-color: var(--accent); }
+  .vmc-part-del-btn {
+    background: none; border: none; cursor: pointer; color: var(--text3);
+    padding: 6px; border-radius: 8px; line-height: 0;
+    transition: background 0.15s, color 0.15s; flex-shrink: 0; margin-top: 2px;
+  }
+  .vmc-part-del-btn:hover { background: rgba(255,59,48,0.1); color: var(--red); }
+  .vmc-part-del-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
+  .vmc-add-part-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 0.5rem 0.9rem; background: none; border: none;
+    font-family: var(--font); font-size: 0.8rem; font-weight: 600;
+    color: var(--accent); cursor: pointer; width: 100%;
+    transition: background 0.15s; border-top: 1px dashed var(--border);
+  }
+  .vmc-add-part-btn:hover { background: var(--accent-light); }
+  .vmc-add-part-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+
+  /* ── Autocomplete dropdown for assigned person ── */
+  .vmc-assign-wrap { position: relative; width: 100%; }
+  .vmc-assign-dropdown {
+    position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+    background: var(--surface); border: 1px solid var(--border-active);
+    border-radius: var(--radius-xs); box-shadow: var(--shadow-lg);
+    z-index: 600; max-height: 160px; overflow-y: auto;
+  }
+  .vmc-assign-opt {
+    padding: 0.5rem 0.75rem; font-size: 0.84rem; cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    transition: background 0.1s;
+  }
+  .vmc-assign-opt:hover { background: var(--accent-light); }
+  .vmc-assign-opt-avatar {
+    width: 24px; height: 24px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem; font-weight: 700; color: #fff; flex-shrink: 0;
+  }
+
+  /* ── Meta row (presidente, canción, etc.) ── */
+  .vmc-meta-row {
+    display: flex; gap: 8px; align-items: center;
+    padding: 0.55rem 0.9rem; border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .vmc-meta-label {
+    font-size: 0.78rem; font-weight: 600; color: var(--text3);
+    width: 130px; flex-shrink: 0;
+  }
+  .vmc-meta-val-input {
+    flex: 1; padding: 0.42rem 0.65rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-xs); font-family: var(--font);
+    font-size: 0.84rem; color: var(--text); outline: none;
+    transition: border-color 0.2s;
+  }
+  .vmc-meta-val-input:focus { border-color: var(--accent); }
+
+  /* ── Notify button ── */
+  .vmc-notify-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 0.55rem 1rem; border: 1.5px solid var(--accent);
+    border-radius: var(--radius-sm); background: none;
+    font-family: var(--font); font-size: 0.82rem; font-weight: 700;
+    color: var(--accent); cursor: pointer; transition: background 0.15s;
+  }
+  .vmc-notify-btn:hover { background: var(--accent-light); }
+  .vmc-notify-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
+
+  /* ─────────────────────────────────────────────────────────────────
+     VMC — Vista de usuario (sub-content-vida-ministerio)
+  ───────────────────────────────────────────────────────────────── */
+  .vmc-user-week-selector {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 1rem 0.75rem; margin-bottom: 0.25rem;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .vmc-user-week-selector::-webkit-scrollbar { display: none; }
+  .vmc-week-pill {
+    flex-shrink: 0; padding: 0.42rem 0.9rem;
+    border: 1.5px solid var(--border); border-radius: 20px;
+    font-size: 0.78rem; font-weight: 700; cursor: pointer;
+    background: var(--surface); color: var(--text2);
+    transition: border-color 0.2s, background 0.2s, color 0.2s;
+    white-space: nowrap;
+  }
+  .vmc-week-pill.active { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+
+  .vmc-program-container { padding: 0 1rem 5rem; }
+  .vmc-program-header {
+    margin-bottom: 1.1rem;
+  }
+  .vmc-program-title {
+    font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em;
+  }
+  .vmc-program-reading {
+    font-size: 0.82rem; color: var(--accent); font-weight: 600; margin-top: 3px;
+  }
+  .vmc-program-meta-strip {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 0.65rem;
+  }
+  .vmc-meta-chip {
+    display: flex; align-items: center; gap: 5px;
+    padding: 5px 10px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; font-size: 0.75rem; font-weight: 600; color: var(--text2);
+  }
+  .vmc-meta-chip svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; flex-shrink: 0; }
+
+  .vmc-user-section { margin-bottom: 1.25rem; }
+  .vmc-user-section-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0.55rem 0.85rem; border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    font-size: 0.72rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .vmc-user-section-header-tesoros  { background: rgba(245,158,11,0.1); color: #b45309; }
+  .vmc-user-section-header-maestros { background: rgba(59,130,246,0.1); color: #1d4ed8; }
+  .vmc-user-section-header-vida     { background: rgba(168,85,247,0.1); color: #7e22ce; }
+
+  .vmc-user-part-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-top: none; padding: 0.7rem 0.85rem;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .vmc-user-section > .vmc-user-part-card:last-child {
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  }
+  .vmc-user-part-card.is-mine {
+    background: var(--accent-light); border-color: rgba(0,122,255,0.25);
+  }
+  .vmc-part-time-badge {
+    flex-shrink: 0; width: 38px; height: 38px; border-radius: 10px;
+    background: var(--surface2); border: 1px solid var(--border);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 700; color: var(--text3); line-height: 1.1;
+  }
+  .vmc-part-time-num { font-size: 0.95rem; color: var(--text2); font-weight: 800; }
+  .vmc-part-body { flex: 1; min-width: 0; }
+  .vmc-part-name-display {
+    font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 3px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .vmc-part-assigned-display {
+    font-size: 0.78rem; color: var(--text3); font-style: italic;
+  }
+  .vmc-part-assigned-display.mine-label {
+    color: var(--accent); font-weight: 700; font-style: normal;
+  }
+  .vmc-song-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0.6rem 0.85rem;
+    background: var(--surface); border: 1px solid var(--border); border-top: none;
+    font-size: 0.82rem; font-weight: 600; color: var(--text2);
+  }
+  .vmc-song-row svg { width: 14px; height: 14px; stroke: var(--text3); fill: none; stroke-width: 2.2; stroke-linecap: round; flex-shrink: 0; }
+
+  /* ── My assignments highlight card ── */
+  .vmc-my-assignments {
+    background: var(--surface); border: 1.5px solid var(--accent);
+    border-radius: var(--radius); padding: 0.85rem 1rem;
+    margin-bottom: 1rem;
+  }
+  .vmc-my-assignments-title {
+    font-size: 0.78rem; font-weight: 800; color: var(--accent);
+    letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 0.6rem;
+  }
+  .vmc-my-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0.45rem 0; border-bottom: 1px solid var(--border); font-size: 0.84rem;
+  }
+  .vmc-my-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .vmc-my-item-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+  /* ── Empty / loader ── */
+  .vmc-empty {
+    text-align: center; padding: 3rem 1rem;
+    color: var(--text3); font-size: 0.88rem;
+  }
+  .vmc-empty svg { width: 44px; height: 44px; stroke: var(--text3); fill: none; stroke-width: 1.5; stroke-linecap: round; opacity: 0.35; margin-bottom: 0.75rem; }
+
   /* ── Users panel modal ── */
   /* ── Users Panel (fullscreen page) ── */
   /* ── Users Panel fullscreen ─────────────────────────────────────────────── */
@@ -1429,7 +1723,7 @@
   }
 
   /* Body */
-  .users-panel-body { padding: 0; }
+  .users-panel-body { flex: 1; overflow-y: auto; padding: 1rem 1rem 4rem; }
 
   /* Stats strip */
   .users-stats-strip {
@@ -2586,12 +2880,8 @@
 
       <!-- Vida y Ministerio -->
       <div id="sub-content-vida-ministerio" class="sub-page active-sub">
-        <div class="coming-soon-panel">
-          <div class="coming-soon-icon">
-            <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-          </div>
-          <h3>Vida y Ministerio</h3>
-          <p>Las asignaciones de la reunión Vida y Ministerio estarán disponibles próximamente.</p>
+        <div id="vmc-user-view">
+          <div class="loader-wrap"><div class="loader"></div></div>
         </div>
       </div>
 
@@ -2698,6 +2988,7 @@
         <button class="admin-tab" data-tab="grupos" onclick="switchAdminTab('grupos')">Grupos</button>
       </div>
       <div class="admin-tabs-row" data-section="reuniones">
+        <button class="admin-tab" data-tab="vmc" onclick="switchAdminTab('vmc')">Vida y Ministerio</button>
         <button class="admin-tab" data-tab="responsabilidades" onclick="switchAdminTab('responsabilidades')">Responsabilidades</button>
         <button class="admin-tab" data-tab="aseo-salon" onclick="switchAdminTab('aseo-salon')">Aseo Salón</button>
       </div>
@@ -2858,13 +3149,26 @@
           <div id="admin-aseo-upcoming-list"><div class="loader-wrap"><div class="loader"></div></div></div>
         </div>
       </div>
+      <!-- ── VMC Admin Section ── -->
+      <div class="admin-section" id="admin-vmc">
+        <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
+          <span style="flex:1;font-size:0.95rem;font-weight:700">Vida y Ministerio</span>
+          <button class="btn-secondary" onclick="openVmcWeekModal(null)">+ Nueva semana</button>
+        </div>
+        <div id="admin-vmc-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+      </div>
+
       <div class="admin-section" id="admin-usuarios">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
-          <span style="flex:1;font-size:0.95rem;font-weight:700">Usuarios <span class="users-count-badge" id="users-count-badge" style="font-size:0.78rem;font-weight:600;color:var(--text3);background:var(--surface3);border:1px solid var(--border);padding:2px 9px;border-radius:20px;margin-left:6px">0</span></span>
-          <span style="font-size:0.75rem;color:var(--text3)">Gestiona roles y permisos</span>
+          <span style="flex:1;font-size:0.95rem;font-weight:700">Usuarios</span>
         </div>
-        <div id="users-panel-body">
-          <div class="loader-wrap"><div class="loader"></div></div>
+        <div class="empty-state">
+          <div class="empty-state-icon">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h3>Gestión de usuarios</h3>
+          <p>Administra roles, permisos y accesos de los usuarios.</p>
+          <button class="btn-primary" style="margin-top:0.75rem" onclick="openUsersPanel()">Abrir panel de usuarios</button>
         </div>
       </div>
       </div><!-- /.admin-body -->
@@ -4404,6 +4708,7 @@ async function enterApp() {
       if (el) el.style.display = id === currentSubTab ? '' : 'none';
     });
     renderSubTabs(currentMainTab);
+    if (currentSubTab === 'vida-ministerio') loadAndRenderVmcUserView();
   }
 
   loadSchedule();
@@ -4524,6 +4829,7 @@ function switchMainTab(tab, btn) {
     renderSubTabs(tab);
     showPage('reuniones');
     switchSubTab(currentSubTab);
+    if (currentSubTab === 'vida-ministerio') loadAndRenderVmcUserView();
   }
   _saveNavState();
 }
@@ -4572,6 +4878,7 @@ function switchSubTab(tabId) {
   if (tabId === 'territorios') renderTerritoryView();
   if (tabId === 'responsabilidades') renderRespUserView();
   if (tabId === 'aseo-salon') renderAseoUserView();
+  if (tabId === 'vida-ministerio') loadAndRenderVmcUserView();
   if (tabId === 'grupos') {
     loadAvatarCache().then(() => {
       if (!grupos.length) {
@@ -4643,6 +4950,7 @@ async function switchAdminTab(tab) {
   if (tab === 'responsabilidades') loadResponsabilidadesAdmin();
   if (tab === 'aseo-salon') loadAseoSalonAdmin();
   if (tab === 'usuarios') { loadUsers().then(() => renderUsersPanel()); }
+  if (tab === 'vmc') { loadVmcWeeks().then(() => renderAdminVmc()); }
 }
 
 async function applyAdminTabPermissions() {
@@ -6797,9 +7105,13 @@ async function loadUsers() {
 
 async function openUsersPanel() {
   if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
-  switchAdminTab('usuarios');
+  document.getElementById('users-panel-overlay').classList.add('open');
+  document.getElementById('users-panel-body').innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
+  await loadUsers();
+  renderUsersPanel();
 }
 function closeUsersPanel() {
+  document.getElementById('users-panel-overlay').classList.remove('open');
   expandedUserId = null;
 }
 
@@ -7840,6 +8152,536 @@ async function submitSugerirQuitado() {
   closeNpActionSheet();
 }
 
+// ══════════════════════════════════════════════════════════════════════════════
+// VMC — Vida y Ministerio
+// Tabla Supabase: vmc_weeks
+// Esquema: { id uuid pk, date_start date, date_end date, reading text,
+//            presidente text, song_open text, prayer_open text,
+//            song_mid text, song_close text, prayer_close text,
+//            parts jsonb, created_at timestamptz, notified_at timestamptz }
+// parts: [ { section:'tesoros'|'maestros'|'vida', name:str, mins:int, assigned:str, assigned2:str }, … ]
+// ══════════════════════════════════════════════════════════════════════════════
+
+let vmcWeeks = [];          // cache of all weeks from Supabase
+let vmcEditingId = null;    // null = new week, else id of week being edited
+let vmcPartCounter = 0;     // for unique DOM ids
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function vmcWeekStatus(w) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const start = new Date(w.date_start + 'T00:00:00');
+  const end   = new Date(w.date_end   + 'T00:00:00');
+  if (today < start) return 'upcoming';
+  if (today > end)   return 'past';
+  return 'current';
+}
+
+function vmcFormatRange(w) {
+  const opts = { day: 'numeric', month: 'long' };
+  const s = new Date(w.date_start + 'T00:00:00').toLocaleDateString('es-CL', opts);
+  const e = new Date(w.date_end   + 'T00:00:00').toLocaleDateString('es-CL', { ...opts, year: 'numeric' });
+  return `${s} – ${e}`;
+}
+
+function vmcUserColor(name) {
+  if (!name) return '#8e8e93';
+  const colors = ['#007AFF','#34c759','#ff9500','#af52de','#ff2d55','#5ac8fa','#ff6b35','#30d158'];
+  let h = 0; for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffffffff;
+  return colors[Math.abs(h) % colors.length];
+}
+function vmcInitials(name) {
+  if (!name) return '?';
+  const parts = name.trim().split(/\s+/);
+  return (parts[0][0] + (parts[1]?.[0] || '')).toUpperCase();
+}
+
+// ── Load / render admin list ──────────────────────────────────────────────────
+
+async function loadVmcWeeks() {
+  const { data, error } = await sb.from('vmc_weeks').select('*').order('date_start', { ascending: false });
+  if (error) { showToast('Error cargando semanas VMC', 'error'); return; }
+  vmcWeeks = data || [];
+}
+
+function renderAdminVmc() {
+  const container = document.getElementById('admin-vmc-list');
+  if (!container) return;
+
+  if (!vmcWeeks.length) {
+    container.innerHTML = `<div class="vmc-empty">
+      <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      <p>No hay semanas cargadas aún.<br>Usa "+ Nueva semana" para empezar.</p>
+    </div>`;
+    return;
+  }
+
+  const statusLabel = { upcoming: 'Próxima', current: 'Esta semana', past: 'Pasada' };
+  const statusClass = { upcoming: 'vmc-week-badge-upcoming', current: 'vmc-week-badge-current', past: 'vmc-week-badge-past' };
+
+  container.innerHTML = vmcWeeks.map(w => {
+    const st = vmcWeekStatus(w);
+    const parts = Array.isArray(w.parts) ? w.parts : [];
+    const hasTes = parts.some(p => p.section === 'tesoros');
+    const hasMae = parts.some(p => p.section === 'maestros');
+    const hasVid = parts.some(p => p.section === 'vida');
+    const totalParts = parts.length;
+
+    return `<div class="vmc-week-card">
+      <div class="vmc-week-card-header">
+        <div class="vmc-week-range">${vmcFormatRange(w)}</div>
+        <span class="vmc-week-badge ${statusClass[st]}">${statusLabel[st]}</span>
+      </div>
+      ${w.reading ? `<div style="font-size:0.78rem;color:var(--accent);font-weight:600;margin-top:4px">${w.reading}</div>` : ''}
+      <div class="vmc-week-parts-preview">
+        ${hasTes ? '<span class="vmc-section-chip vmc-chip-tesoros">Tesoros</span>' : ''}
+        ${hasMae ? '<span class="vmc-section-chip vmc-chip-maestros">Maestros</span>' : ''}
+        ${hasVid ? '<span class="vmc-section-chip vmc-chip-vida">Vida Cristiana</span>' : ''}
+        <span style="font-size:0.72rem;color:var(--text3);font-weight:600;align-self:center">${totalParts} parte${totalParts!==1?'s':''}</span>
+      </div>
+      <div class="vmc-week-actions">
+        <button class="btn-secondary" style="font-size:0.8rem;padding:0.45rem 0.9rem" onclick="openVmcWeekModal('${w.id}')">✏️ Editar</button>
+        <button class="vmc-notify-btn" style="font-size:0.8rem;padding:0.45rem 0.9rem" onclick="vmcNotifyWeek('${w.id}')">
+          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Notificar
+        </button>
+        <div style="flex:1"></div>
+        <button class="vmc-part-del-btn" onclick="deleteVmcWeek('${w.id}')" title="Eliminar semana">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Modal open / close ────────────────────────────────────────────────────────
+
+function openVmcWeekModal(id) {
+  vmcEditingId = id || null;
+  const overlay = document.getElementById('vmc-modal-overlay');
+  overlay.classList.add('open');
+
+  const week = id ? vmcWeeks.find(w => w.id === id) : null;
+  document.getElementById('vmc-modal-title').textContent = week ? 'Editar semana VMC' : 'Nueva semana VMC';
+
+  // Fill meta fields
+  document.getElementById('vmc-date-start').value  = week?.date_start || '';
+  document.getElementById('vmc-date-end').value    = week?.date_end   || '';
+  document.getElementById('vmc-reading').value     = week?.reading    || '';
+  document.getElementById('vmc-meta-presidente').value   = week?.presidente   || '';
+  document.getElementById('vmc-meta-song-open').value    = week?.song_open    || '';
+  document.getElementById('vmc-meta-prayer-open').value  = week?.prayer_open  || '';
+  document.getElementById('vmc-meta-song-mid').value     = week?.song_mid     || '';
+  document.getElementById('vmc-meta-song-close').value   = week?.song_close   || '';
+  document.getElementById('vmc-meta-prayer-close').value = week?.prayer_close || '';
+
+  // Render part rows per section
+  const parts = Array.isArray(week?.parts) ? week.parts : [];
+  vmcRenderAllSections(parts);
+
+  // Show notify button only for existing weeks
+  document.getElementById('vmc-notify-btn').style.display = week ? '' : 'none';
+}
+
+function closeVmcWeekModal() {
+  document.getElementById('vmc-modal-overlay').classList.remove('open');
+  vmcEditingId = null;
+}
+
+// ── Part rendering ────────────────────────────────────────────────────────────
+
+function vmcDefaultParts(section) {
+  if (section === 'tesoros')  return [
+    { section:'tesoros', name:'Discurso de apertura', mins:10, assigned:'', assigned2:'' },
+    { section:'tesoros', name:'Busquemos perlas escondidas', mins:10, assigned:'', assigned2:'' },
+    { section:'tesoros', name:'Lectura de la Biblia', mins:4, assigned:'', assigned2:'' },
+  ];
+  if (section === 'maestros') return [
+    { section:'maestros', name:'Empiece conversaciones', mins:4, assigned:'', assigned2:'' },
+    { section:'maestros', name:'Empiece conversaciones', mins:4, assigned:'', assigned2:'' },
+    { section:'maestros', name:'Haga revisitas', mins:4, assigned:'', assigned2:'' },
+  ];
+  if (section === 'vida') return [
+    { section:'vida', name:'Discurso', mins:15, assigned:'', assigned2:'' },
+    { section:'vida', name:'Estudio bíblico de la congregación', mins:30, assigned:'', assigned2:'' },
+  ];
+  return [];
+}
+
+function vmcRenderAllSections(parts) {
+  vmcPartCounter = 0;
+  ['tesoros','maestros','vida'].forEach(section => {
+    const sectionParts = parts.length
+      ? parts.filter(p => p.section === section)
+      : vmcDefaultParts(section);
+    const container = document.getElementById(`vmc-parts-${section}`);
+    container.innerHTML = '';
+    sectionParts.forEach(p => vmcAppendPartRow(section, p));
+  });
+}
+
+function vmcAppendPartRow(section, p = {}) {
+  const id = ++vmcPartCounter;
+  const container = document.getElementById(`vmc-parts-${section}`);
+  const row = document.createElement('div');
+  row.className = 'vmc-part-row';
+  row.dataset.section = section;
+  row.id = `vmc-row-${id}`;
+  row.innerHTML = `
+    <div class="vmc-part-row-fields">
+      <div class="vmc-part-row-top">
+        <input type="text" class="vmc-part-name-input" placeholder="Nombre de la parte…" value="${p.name||''}" autocomplete="off">
+        <input type="number" class="vmc-part-mins-input" min="1" max="60" placeholder="min" value="${p.mins||''}">
+      </div>
+      <div style="display:flex;gap:6px">
+        <div class="vmc-assign-wrap" style="flex:1">
+          <input type="text" class="vmc-part-assign-input" placeholder="Asignado a…" value="${p.assigned||''}" autocomplete="off"
+            oninput="vmcShowAutocomplete(this,'vmc-drop-${id}-1')" onblur="vmcHideDropdown('vmc-drop-${id}-1')">
+          <div class="vmc-assign-dropdown" id="vmc-drop-${id}-1" style="display:none"></div>
+        </div>
+        <div class="vmc-assign-wrap" style="flex:1">
+          <input type="text" class="vmc-part-assign-input" placeholder="Ayudante / 2do (opc.)" value="${p.assigned2||''}" autocomplete="off"
+            oninput="vmcShowAutocomplete(this,'vmc-drop-${id}-2')" onblur="vmcHideDropdown('vmc-drop-${id}-2')">
+          <div class="vmc-assign-dropdown" id="vmc-drop-${id}-2" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+    <button class="vmc-part-del-btn" onclick="document.getElementById('vmc-row-${id}').remove()">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>`;
+  container.appendChild(row);
+}
+
+function vmcAddPart(section) {
+  vmcAppendPartRow(section, { section, name:'', mins:'', assigned:'', assigned2:'' });
+}
+
+// ── Autocomplete ──────────────────────────────────────────────────────────────
+
+function vmcShowAutocomplete(input, dropId) {
+  const q = input.value.toLowerCase().trim();
+  const drop = document.getElementById(dropId);
+  if (!drop) return;
+  const matches = activeUsers.filter(u => q && u.name.toLowerCase().includes(q)).slice(0, 6);
+  if (!matches.length) { drop.style.display = 'none'; return; }
+  drop.style.display = 'block';
+  drop.innerHTML = matches.map(u => {
+    const col = vmcUserColor(u.name);
+    const ini = vmcInitials(u.name);
+    return `<div class="vmc-assign-opt" onmousedown="vmcPickUser(event,'${dropId}','${u.name.replace(/'/g,"\\'")}')">
+      <div class="vmc-assign-opt-avatar" style="background:${col}">${ini}</div>
+      ${u.name}
+    </div>`;
+  }).join('');
+}
+
+function vmcPickUser(e, dropId, name) {
+  e.preventDefault();
+  const drop = document.getElementById(dropId);
+  if (!drop) return;
+  const input = drop.previousElementSibling;
+  if (input) input.value = name;
+  drop.style.display = 'none';
+}
+
+function vmcHideDropdown(dropId) {
+  setTimeout(() => {
+    const d = document.getElementById(dropId);
+    if (d) d.style.display = 'none';
+  }, 180);
+}
+
+// ── Collect form data ─────────────────────────────────────────────────────────
+
+function vmcCollectParts() {
+  const parts = [];
+  document.querySelectorAll('.vmc-part-row').forEach(row => {
+    const section = row.dataset.section;
+    const inputs = row.querySelectorAll('input');
+    const name      = inputs[0]?.value.trim() || '';
+    const mins      = parseInt(inputs[1]?.value) || 0;
+    const assigned  = inputs[2]?.value.trim() || '';
+    const assigned2 = inputs[3]?.value.trim() || '';
+    if (name) parts.push({ section, name, mins, assigned, assigned2 });
+  });
+  return parts;
+}
+
+// ── Save week ─────────────────────────────────────────────────────────────────
+
+async function saveVmcWeek() {
+  const btn = document.getElementById('vmc-save-btn');
+  const dateStart = document.getElementById('vmc-date-start').value;
+  const dateEnd   = document.getElementById('vmc-date-end').value;
+  if (!dateStart || !dateEnd) { showToast('Ingresa las fechas de la semana', 'error'); return; }
+
+  const payload = {
+    date_start:    dateStart,
+    date_end:      dateEnd,
+    reading:       document.getElementById('vmc-reading').value.trim(),
+    presidente:    document.getElementById('vmc-meta-presidente').value.trim(),
+    song_open:     document.getElementById('vmc-meta-song-open').value.trim(),
+    prayer_open:   document.getElementById('vmc-meta-prayer-open').value.trim(),
+    song_mid:      document.getElementById('vmc-meta-song-mid').value.trim(),
+    song_close:    document.getElementById('vmc-meta-song-close').value.trim(),
+    prayer_close:  document.getElementById('vmc-meta-prayer-close').value.trim(),
+    parts:         vmcCollectParts(),
+  };
+
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  let error;
+  if (vmcEditingId) {
+    ({ error } = await sb.from('vmc_weeks').update(payload).eq('id', vmcEditingId));
+  } else {
+    ({ error } = await sb.from('vmc_weeks').insert(payload));
+  }
+  btn.disabled = false; btn.textContent = 'Guardar';
+
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  showToast(vmcEditingId ? 'Semana actualizada ✓' : 'Semana creada ✓', 'success');
+  closeVmcWeekModal();
+  await loadVmcWeeks();
+  renderAdminVmc();
+  renderVmcUserView();
+}
+
+// ── Delete week ───────────────────────────────────────────────────────────────
+
+async function deleteVmcWeek(id) {
+  if (!confirm('¿Eliminar esta semana VMC?')) return;
+  const { error } = await sb.from('vmc_weeks').delete().eq('id', id);
+  if (error) { showToast('Error al eliminar', 'error'); return; }
+  showToast('Semana eliminada', 'success');
+  vmcWeeks = vmcWeeks.filter(w => w.id !== id);
+  renderAdminVmc();
+  renderVmcUserView();
+}
+
+// ── Notifications ─────────────────────────────────────────────────────────────
+
+async function vmcNotifyWeek(id) {
+  const week = vmcWeeks.find(w => w.id === id);
+  if (!week) return;
+  await vmcSendNotification(week);
+}
+
+async function vmcNotifyAssigned() {
+  const week = vmcEditingId ? vmcWeeks.find(w => w.id === vmcEditingId) : null;
+  if (week) await vmcSendNotification(week);
+}
+
+async function vmcSendNotification(week) {
+  const range = vmcFormatRange(week);
+  const parts = Array.isArray(week.parts) ? week.parts : [];
+
+  // Build per-person summary
+  const byPerson = {};
+  [week.presidente, week.prayer_open, week.prayer_close].forEach((name, i) => {
+    if (!name) return;
+    const roles = ['Presidente', 'Oración de apertura', 'Oración de cierre'];
+    if (!byPerson[name]) byPerson[name] = [];
+    byPerson[name].push(roles[i]);
+  });
+  parts.forEach(p => {
+    [p.assigned, p.assigned2].forEach(name => {
+      if (!name) return;
+      if (!byPerson[name]) byPerson[name] = [];
+      byPerson[name].push(p.name + (p.mins ? ` (${p.mins} min)` : ''));
+    });
+  });
+
+  const summary = Object.entries(byPerson).map(([n,roles]) => `• ${n}: ${roles.join(', ')}`).join('\n');
+  const defaultMsg = `Semana VMC ${range}${week.reading ? ' – ' + week.reading : ''}.\n\nAsignaciones:\n${summary}\n\nRecuerda prepararte con anticipación.`;
+
+  const msg = prompt('Mensaje a enviar a los asignados (edita o cancela):', defaultMsg);
+  if (!msg) return;
+
+  showToast('Enviando notificación…', '');
+  const { error } = await sb.from('notifications').insert({
+    title: `VMC – ${range}`,
+    body: msg
+  });
+  if (error) { showToast('Error al enviar', 'error'); return; }
+
+  // Push via Edge Function
+  try {
+    await fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+      body: JSON.stringify({ title: `VMC – ${range}`, body: msg })
+    });
+  } catch(e) { console.warn('Push no disponible:', e.message); }
+
+  // Mark notified
+  if (vmcEditingId || week.id) {
+    await sb.from('vmc_weeks').update({ notified_at: new Date().toISOString() }).eq('id', week.id || vmcEditingId);
+  }
+  showToast('Notificación enviada ✓', 'success');
+}
+
+// ── User view ─────────────────────────────────────────────────────────────────
+
+let vmcSelectedWeekId = null;
+
+async function loadAndRenderVmcUserView() {
+  await loadVmcWeeks();
+  renderVmcUserView();
+}
+
+function renderVmcUserView() {
+  const container = document.getElementById('vmc-user-view');
+  if (!container) return;
+
+  // Sort chronologically for user view
+  const sorted = [...vmcWeeks].sort((a,b) => a.date_start.localeCompare(b.date_start));
+  // Show current + upcoming first, then past
+  const relevant = [
+    ...sorted.filter(w => vmcWeekStatus(w) !== 'past'),
+    ...sorted.filter(w => vmcWeekStatus(w) === 'past')
+  ];
+
+  if (!relevant.length) {
+    container.innerHTML = `<div class="vmc-empty">
+      <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      <p>Aún no hay programa cargado.</p>
+    </div>`;
+    return;
+  }
+
+  // Pick default selected week (current or first upcoming)
+  const currentWeek = relevant.find(w => vmcWeekStatus(w) === 'current') || relevant[0];
+  if (!vmcSelectedWeekId || !relevant.find(w => w.id === vmcSelectedWeekId)) {
+    vmcSelectedWeekId = currentWeek.id;
+  }
+
+  // Build week selector pills
+  const pills = relevant.map(w => {
+    const st = vmcWeekStatus(w);
+    const label = st === 'current' ? 'Esta semana' : vmcShortRange(w);
+    return `<div class="vmc-week-pill${w.id === vmcSelectedWeekId ? ' active' : ''}"
+      onclick="vmcSelectWeek('${w.id}')">${label}</div>`;
+  }).join('');
+
+  // Render selected week program
+  const week = relevant.find(w => w.id === vmcSelectedWeekId);
+  const programHtml = week ? vmcRenderWeekProgram(week) : '';
+
+  container.innerHTML = `
+    <div class="vmc-user-week-selector">${pills}</div>
+    <div class="vmc-program-container" id="vmc-program-container">${programHtml}</div>`;
+}
+
+function vmcSelectWeek(id) {
+  vmcSelectedWeekId = id;
+  const week = vmcWeeks.find(w => w.id === id);
+  // Update pills
+  document.querySelectorAll('.vmc-week-pill').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  // Update program
+  const c = document.getElementById('vmc-program-container');
+  if (c && week) c.innerHTML = vmcRenderWeekProgram(week);
+}
+
+function vmcShortRange(w) {
+  const s = new Date(w.date_start + 'T00:00:00');
+  const e = new Date(w.date_end   + 'T00:00:00');
+  const sm = s.toLocaleDateString('es-CL', { day:'numeric', month:'short' });
+  const em = e.toLocaleDateString('es-CL', { day:'numeric', month:'short' });
+  return `${sm} – ${em}`;
+}
+
+function vmcRenderWeekProgram(week) {
+  const parts = Array.isArray(week.parts) ? week.parts : [];
+  const myName = currentUser?.name || '';
+
+  // My assignments
+  const myParts = parts.filter(p => p.assigned === myName || p.assigned2 === myName);
+  const myMeta  = [];
+  if (week.presidente === myName)   myMeta.push('Presidente');
+  if (week.prayer_open === myName)  myMeta.push('Oración de apertura');
+  if (week.prayer_close === myName) myMeta.push('Oración de cierre');
+  const allMine = [...myMeta.map(m => ({ name: m })), ...myParts];
+
+  const myBlock = allMine.length ? `
+    <div class="vmc-my-assignments">
+      <div class="vmc-my-assignments-title">
+        <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;vertical-align:middle;margin-right:4px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Tus partes esta semana
+      </div>
+      ${allMine.map(p => `<div class="vmc-my-item"><span class="vmc-my-item-dot"></span>${p.name}${p.mins ? ` <span style="color:var(--text3);font-size:0.75rem">(${p.mins} min)</span>` : ''}</div>`).join('')}
+    </div>` : '';
+
+  // Section renderer
+  function sectionHtml(label, cls, sectionId, sectionParts, songBefore) {
+    if (!sectionParts.length) return '';
+    const songRow = songBefore
+      ? `<div class="vmc-song-row"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Canción ${songBefore}</div>`
+      : '';
+    return `${songRow}<div class="vmc-user-section">
+      <div class="vmc-user-section-header vmc-user-section-header-${sectionId}">${label}</div>
+      ${sectionParts.map(p => {
+        const isMine = p.assigned === myName || p.assigned2 === myName;
+        const assignText = [p.assigned, p.assigned2].filter(Boolean).join(' & ') || '—';
+        return `<div class="vmc-user-part-card${isMine ? ' is-mine' : ''}">
+          <div class="vmc-part-time-badge">
+            <span class="vmc-part-time-num">${p.mins||'—'}</span>
+            ${p.mins ? 'min' : ''}
+          </div>
+          <div class="vmc-part-body">
+            <div class="vmc-part-name-display">${p.name}</div>
+            <div class="vmc-part-assigned-display${isMine ? ' mine-label' : ''}">${isMine ? '✦ ' : ''}${assignText}</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+
+  const tes = parts.filter(p => p.section === 'tesoros');
+  const mae = parts.filter(p => p.section === 'maestros');
+  const vid = parts.filter(p => p.section === 'vida');
+
+  const openRow = week.presidente || week.prayer_open || week.song_open
+    ? `<div class="vmc-user-section">
+        <div class="vmc-user-section-header" style="background:var(--surface2);color:var(--text2)">Apertura</div>
+        ${week.song_open ? `<div class="vmc-song-row"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Canción ${week.song_open} y oración</div>` : ''}
+        ${week.presidente ? `<div class="vmc-user-part-card${week.presidente===myName?' is-mine':''}">
+          <div class="vmc-part-time-badge"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <div class="vmc-part-body">
+            <div class="vmc-part-name-display">Presidente</div>
+            <div class="vmc-part-assigned-display${week.presidente===myName?' mine-label':''}">${week.presidente===myName?'✦ ':''}${week.presidente}</div>
+          </div>
+        </div>` : ''}
+      </div>` : '';
+
+  const closeRow = week.song_close
+    ? `<div class="vmc-song-row" style="border-radius:0 0 var(--radius-sm) var(--radius-sm);border-top:1px solid var(--border)">
+        <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        Canción ${week.song_close} y oración${week.prayer_close ? ' – ' + week.prayer_close : ''}
+      </div>` : '';
+
+  return `
+    <div class="vmc-program-header">
+      <div class="vmc-program-title">${vmcFormatRange(week)}</div>
+      ${week.reading ? `<div class="vmc-program-reading">📖 ${week.reading}</div>` : ''}
+      <div class="vmc-program-meta-strip">
+        ${week.presidente ? `<div class="vmc-meta-chip"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Pres. ${week.presidente}</div>` : ''}
+        ${parts.length ? `<div class="vmc-meta-chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${parts.reduce((a,p)=>a+(p.mins||0),0)} min</div>` : ''}
+      </div>
+    </div>
+    ${myBlock}
+    ${openRow}
+    ${sectionHtml('Tesoros de la Biblia','','tesoros', tes, null)}
+    ${sectionHtml('Seamos Mejores Maestros','','maestros', mae, null)}
+    ${week.song_mid && vid.length ? `<div class="vmc-song-row"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Canción ${week.song_mid}</div>` : ''}
+    ${sectionHtml('Nuestra Vida Cristiana','','vida', vid, null)}
+    ${closeRow}`;
+}
+
+// ── Hook into switchAdminTab & app init ───────────────────────────────────────
+
+// Patch ADMIN_TAB_SECTION to include vmc
+ADMIN_TAB_SECTION['vmc'] = 'reuniones';
+
 </script>
 <!-- ── Profile fullscreen page ── -->
 <div id="page-profile" class="">
@@ -8088,6 +8930,130 @@ async function submitSugerirQuitado() {
     <div class="wb-ter-picker-list" id="wb-ter-picker-list"></div>
     <div class="wb-ter-picker-footer">
       <button class="wb-ter-picker-cancel" onclick="wbCloseTerritoryPicker()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     VMC Week Editor Modal
+══════════════════════════════════════════════════════════════════ -->
+<div class="vmc-modal-overlay" id="vmc-modal-overlay">
+  <div class="vmc-modal">
+    <div class="vmc-modal-header">
+      <button class="users-panel-back" onclick="closeVmcWeekModal()">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Volver
+      </button>
+      <div class="vmc-modal-title" id="vmc-modal-title">Nueva semana VMC</div>
+    </div>
+    <div class="vmc-modal-body" id="vmc-modal-body">
+      <!-- Rango de fechas -->
+      <div style="display:flex;gap:8px;margin-bottom:1rem;align-items:center;flex-wrap:wrap">
+        <div style="flex:1;min-width:140px">
+          <div class="form-label" style="margin-bottom:4px">Semana del</div>
+          <input type="date" class="form-input" id="vmc-date-start" style="padding:0.55rem 0.75rem;font-size:0.85rem">
+        </div>
+        <div style="flex:1;min-width:140px">
+          <div class="form-label" style="margin-bottom:4px">al</div>
+          <input type="date" class="form-input" id="vmc-date-end" style="padding:0.55rem 0.75rem;font-size:0.85rem">
+        </div>
+      </div>
+
+      <!-- Lectura bíblica de la semana -->
+      <div style="margin-bottom:1rem">
+        <div class="form-label" style="margin-bottom:4px">Lectura bíblica de la semana</div>
+        <input type="text" class="form-input" id="vmc-reading" placeholder="Ej: Jeremías 9, 10" style="font-size:0.85rem;padding:0.55rem 0.75rem">
+      </div>
+
+      <!-- Meta rows: Presidente, Canción apertura, Oración apertura, Canción cierre, Oración cierre -->
+      <div class="vmc-section-block">
+        <div class="vmc-section-header" style="background:var(--surface2);color:var(--text2);border-bottom:1px solid var(--border);font-size:0.72rem">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Roles Generales
+        </div>
+        <div class="vmc-meta-row">
+          <span class="vmc-meta-label">Presidente</span>
+          <div class="vmc-assign-wrap">
+            <input type="text" class="vmc-meta-val-input" id="vmc-meta-presidente" placeholder="Nombre…" autocomplete="off" oninput="vmcShowAutocomplete(this,'vmc-drop-presidente')" onblur="vmcHideDropdown('vmc-drop-presidente')">
+            <div class="vmc-assign-dropdown" id="vmc-drop-presidente" style="display:none"></div>
+          </div>
+        </div>
+        <div class="vmc-meta-row">
+          <span class="vmc-meta-label">Canción apertura</span>
+          <input type="text" class="vmc-meta-val-input" id="vmc-meta-song-open" placeholder="Ej: 5">
+        </div>
+        <div class="vmc-meta-row">
+          <span class="vmc-meta-label">Oración apertura</span>
+          <div class="vmc-assign-wrap">
+            <input type="text" class="vmc-meta-val-input" id="vmc-meta-prayer-open" placeholder="Nombre…" autocomplete="off" oninput="vmcShowAutocomplete(this,'vmc-drop-prayer-open')" onblur="vmcHideDropdown('vmc-drop-prayer-open')">
+            <div class="vmc-assign-dropdown" id="vmc-drop-prayer-open" style="display:none"></div>
+          </div>
+        </div>
+        <div class="vmc-meta-row">
+          <span class="vmc-meta-label">Canción intermedia</span>
+          <input type="text" class="vmc-meta-val-input" id="vmc-meta-song-mid" placeholder="Ej: 48">
+        </div>
+        <div class="vmc-meta-row">
+          <span class="vmc-meta-label">Canción cierre</span>
+          <input type="text" class="vmc-meta-val-input" id="vmc-meta-song-close" placeholder="Ej: 58">
+        </div>
+        <div class="vmc-meta-row" style="border-bottom:none">
+          <span class="vmc-meta-label">Oración cierre</span>
+          <div class="vmc-assign-wrap">
+            <input type="text" class="vmc-meta-val-input" id="vmc-meta-prayer-close" placeholder="Nombre…" autocomplete="off" oninput="vmcShowAutocomplete(this,'vmc-drop-prayer-close')" onblur="vmcHideDropdown('vmc-drop-prayer-close')">
+            <div class="vmc-assign-dropdown" id="vmc-drop-prayer-close" style="display:none"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TESOROS DE LA BIBLIA -->
+      <div class="vmc-section-block">
+        <div class="vmc-section-header vmc-section-header-tesoros">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          Tesoros de la Biblia
+        </div>
+        <div id="vmc-parts-tesoros"></div>
+        <button class="vmc-add-part-btn" onclick="vmcAddPart('tesoros')">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Agregar parte
+        </button>
+      </div>
+
+      <!-- SEAMOS MEJORES MAESTROS -->
+      <div class="vmc-section-block">
+        <div class="vmc-section-header vmc-section-header-maestros">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Seamos Mejores Maestros
+        </div>
+        <div id="vmc-parts-maestros"></div>
+        <button class="vmc-add-part-btn" onclick="vmcAddPart('maestros')">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Agregar parte
+        </button>
+      </div>
+
+      <!-- NUESTRA VIDA CRISTIANA -->
+      <div class="vmc-section-block">
+        <div class="vmc-section-header vmc-section-header-vida">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          Nuestra Vida Cristiana
+        </div>
+        <div id="vmc-parts-vida"></div>
+        <button class="vmc-add-part-btn" onclick="vmcAddPart('vida')">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Agregar parte
+        </button>
+      </div>
+    </div><!-- /.vmc-modal-body -->
+
+    <div class="vmc-modal-footer">
+      <button class="btn-secondary" onclick="closeVmcWeekModal()">Cancelar</button>
+      <div style="flex:1"></div>
+      <button class="vmc-notify-btn" id="vmc-notify-btn" onclick="vmcNotifyAssigned()" style="display:none">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Notificar asignados
+      </button>
+      <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="saveVmcWeek()" id="vmc-save-btn">Guardar</button>
     </div>
   </div>
 </div>
