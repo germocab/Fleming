@@ -1694,7 +1694,77 @@
   }
   .vmc-pp-footer-cancel:hover { background: var(--surface2); }
 
-  /* ── Meta row (presidente, canción, etc.) ── */
+  /* ── VMC Import Zone (PDF / imagen del programa) ── */
+  .vmc-import-zone {
+    margin-bottom: 1rem;
+    border: 1.5px dashed var(--border-active);
+    border-radius: var(--radius-sm);
+    background: var(--surface2);
+    transition: border-color 0.2s, background 0.2s;
+    overflow: hidden;
+  }
+  .vmc-import-zone.drag-over {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+  .vmc-import-trigger {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0.75rem 1rem; cursor: pointer; width: 100%;
+    border: none; background: none; font-family: var(--font);
+    text-align: left; transition: background 0.15s;
+  }
+  .vmc-import-trigger:hover { background: var(--surface3); }
+  .vmc-import-icon {
+    width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+    background: var(--accent-light); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .vmc-import-icon svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .vmc-import-label { flex: 1; }
+  .vmc-import-label-main { font-size: 0.88rem; font-weight: 700; color: var(--text); }
+  .vmc-import-label-sub  { font-size: 0.72rem; color: var(--text3); margin-top: 1px; }
+  .vmc-import-badge {
+    font-size: 0.68rem; font-weight: 700; padding: 3px 8px;
+    border-radius: 20px; background: var(--accent-light); color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* Estado: analizando */
+  .vmc-import-progress {
+    display: none; align-items: center; gap: 10px;
+    padding: 0.75rem 1rem; border-top: 1px solid var(--border);
+  }
+  .vmc-import-progress.visible { display: flex; }
+  .vmc-import-spinner {
+    width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
+    border: 2.5px solid var(--accent-light);
+    border-top-color: var(--accent);
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .vmc-import-progress-text { font-size: 0.82rem; color: var(--text2); font-weight: 500; flex: 1; }
+  .vmc-import-progress-file { font-size: 0.72rem; color: var(--text3); }
+
+  /* Estado: resultado */
+  .vmc-import-result {
+    display: none; align-items: center; gap: 10px;
+    padding: 0.65rem 1rem; border-top: 1px solid var(--border);
+  }
+  .vmc-import-result.visible { display: flex; }
+  .vmc-import-result-icon {
+    width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .vmc-import-result-icon svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+  .vmc-import-result-icon.ok  { background: var(--green-light); color: var(--green); }
+  .vmc-import-result-icon.err { background: rgba(255,59,48,0.12); color: var(--red); }
+  .vmc-import-result-text { font-size: 0.8rem; color: var(--text2); flex: 1; }
+  .vmc-import-retry {
+    font-size: 0.76rem; font-weight: 600; color: var(--accent);
+    border: none; background: none; cursor: pointer; font-family: var(--font);
+    padding: 0; flex-shrink: 0;
+  }
+  .vmc-import-retry:hover { text-decoration: underline; }
   .vmc-meta-row {
     display: flex; gap: 8px; align-items: center;
     padding: 0.55rem 0.9rem; border-bottom: 1px solid var(--border);
@@ -8527,6 +8597,189 @@ function vmcAddPart(section) {
 }
 
 // ══════════════════════════════════════════════════════════════════
+//  VMC Import — Extracción de programa con IA (Claude API)
+// ══════════════════════════════════════════════════════════════════
+
+const VMC_IMPORT_SYSTEM = `Eres un asistente que extrae información de programas de reuniones de los Testigos de Jehová (Vida y Ministerio Cristiano / VMC).
+Dado el contenido de un PDF o imagen de un programa, devuelve ÚNICAMENTE un objeto JSON con esta estructura exacta, sin texto adicional:
+
+{
+  "date_start": "YYYY-MM-DD",
+  "date_end": "YYYY-MM-DD",
+  "reading": "texto de la lectura bíblica",
+  "song_open": "número de canción",
+  "song_mid": "número de canción intermedia",
+  "song_close": "número de canción de cierre",
+  "parts": [
+    {
+      "section": "tesoros" | "maestros" | "vida",
+      "name": "nombre de la parte",
+      "mins": número_entero_de_minutos
+    }
+  ]
+}
+
+Reglas:
+- "section" debe ser exactamente "tesoros", "maestros" o "vida" según la sección del programa.
+  - "Tesoros de la Biblia" → "tesoros"
+  - "Seamos Mejores Maestros" → "maestros"
+  - "Nuestra Vida Cristiana" → "vida"
+- Las partes de "Busquemos perlas escondidas" van en "tesoros".
+- NO incluyas campos "assigned" ni "assigned2" — esos los asigna el encargado manualmente.
+- Si no puedes determinar un campo, usa null.
+- Las fechas deben estar en formato YYYY-MM-DD.
+- Los números de canción solo el número (sin "Canto" ni "Canción").
+- Si el programa es en español de Latinoamérica, normaliza los nombres de sección igual.
+- Devuelve solo JSON válido, sin bloques de código ni explicaciones.`;
+
+function vmcImportDragOver(e) {
+  e.preventDefault();
+  document.getElementById('vmc-import-zone').classList.add('drag-over');
+}
+function vmcImportDragLeave() {
+  document.getElementById('vmc-import-zone').classList.remove('drag-over');
+}
+function vmcImportDrop(e) {
+  e.preventDefault();
+  document.getElementById('vmc-import-zone').classList.remove('drag-over');
+  const file = e.dataTransfer?.files?.[0];
+  if (file) vmcProcessImportFile(file);
+}
+function vmcImportFile(input) {
+  const file = input.files?.[0];
+  if (file) vmcProcessImportFile(file);
+  input.value = ''; // reset so same file can be re-uploaded
+}
+
+async function vmcProcessImportFile(file) {
+  const MAX_MB = 5;
+  if (file.size > MAX_MB * 1024 * 1024) {
+    vmcImportShowResult(false, `El archivo es demasiado grande (máx ${MAX_MB} MB).`);
+    return;
+  }
+
+  // Determinar tipo
+  const isPdf   = file.type === 'application/pdf';
+  const isImage = file.type.startsWith('image/');
+  if (!isPdf && !isImage) {
+    vmcImportShowResult(false, 'Formato no válido. Usa PDF o imagen (JPG, PNG, WEBP).');
+    return;
+  }
+
+  vmcImportShowProgress(`Leyendo ${isPdf ? 'PDF' : 'imagen'}…`, file.name);
+
+  // Convertir a base64
+  let base64, mediaType;
+  try {
+    base64    = await vmcFileToBase64(file);
+    mediaType = file.type;
+  } catch {
+    vmcImportShowResult(false, 'Error al leer el archivo.');
+    return;
+  }
+
+  vmcImportShowProgress('Claude está analizando el programa…', file.name);
+
+  // Llamar a la Edge Function de Supabase (que internamente llama a Anthropic)
+  let parsed;
+  try {
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/vmc-import`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+      },
+      body: JSON.stringify({ base64, mediaType })
+    });
+
+    const result = await resp.json();
+    if (!resp.ok || !result.ok) {
+      throw new Error(result?.error || `Error ${resp.status}`);
+    }
+    parsed = result.data;
+  } catch (e) {
+    vmcImportShowResult(false, `No se pudo analizar el programa: ${e.message}`);
+    return;
+  }
+
+  // Aplicar datos al formulario
+  vmcImportApply(parsed, file.name);
+}
+
+function vmcFileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = () => reject(new Error('FileReader error'));
+    reader.readAsDataURL(file);
+  });
+}
+
+function vmcImportShowProgress(text, filename) {
+  document.getElementById('vmc-import-progress').classList.add('visible');
+  document.getElementById('vmc-import-result').classList.remove('visible');
+  document.getElementById('vmc-import-progress-text').textContent = text;
+  document.getElementById('vmc-import-progress-file').textContent = filename || '';
+}
+
+function vmcImportShowResult(ok, text) {
+  document.getElementById('vmc-import-progress').classList.remove('visible');
+  const resultEl = document.getElementById('vmc-import-result');
+  const iconEl   = document.getElementById('vmc-import-result-icon');
+  const textEl   = document.getElementById('vmc-import-result-text');
+  resultEl.classList.add('visible');
+  iconEl.className = `vmc-import-result-icon ${ok ? 'ok' : 'err'}`;
+  iconEl.innerHTML = ok
+    ? `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`
+    : `<svg viewBox="0 0 24 24"><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/><circle cx="12" cy="12" r="10"/></svg>`;
+  textEl.textContent = text;
+}
+
+function vmcImportApply(data, filename) {
+  let applied = 0;
+
+  // Fechas
+  if (data.date_start) { document.getElementById('vmc-date-start').value = data.date_start; applied++; }
+  if (data.date_end)   { document.getElementById('vmc-date-end').value   = data.date_end;   applied++; }
+
+  // Lectura
+  if (data.reading) { document.getElementById('vmc-reading').value = data.reading; applied++; }
+
+  // Canciones
+  if (data.song_open)  { document.getElementById('vmc-meta-song-open').value  = data.song_open;  applied++; }
+  if (data.song_mid)   { document.getElementById('vmc-meta-song-mid').value   = data.song_mid;   applied++; }
+  if (data.song_close) { document.getElementById('vmc-meta-song-close').value = data.song_close; applied++; }
+
+  // Partes
+  if (Array.isArray(data.parts) && data.parts.length) {
+    // Limpiar secciones
+    ['tesoros','maestros','vida'].forEach(s => {
+      const c = document.getElementById(`vmc-parts-${s}`);
+      if (c) c.innerHTML = '';
+    });
+    vmcPartCounter = 0;
+
+    data.parts.forEach(p => {
+      const section = p.section;
+      if (!['tesoros','maestros','vida'].includes(section)) return;
+      vmcAppendPartRow(section, {
+        section,
+        name:      p.name     || '',
+        mins:      p.mins     || '',
+        assigned:  '',   // el encargado lo asigna manualmente
+        assigned2: ''
+      });
+    });
+    applied += data.parts.length;
+  }
+
+  const partsCount = Array.isArray(data.parts) ? data.parts.length : 0;
+  vmcImportShowResult(true,
+    `Programa importado: ${partsCount} parte${partsCount !== 1 ? 's' : ''} detectada${partsCount !== 1 ? 's' : ''}. Asigna los hermanos a cada parte.`
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════
 //  VMC People Picker — lista independiente (tabla: vmc_people)
 // ══════════════════════════════════════════════════════════════════
 
@@ -9250,6 +9503,39 @@ ADMIN_TAB_SECTION['vmc'] = 'reuniones';
       <div class="vmc-modal-title" id="vmc-modal-title">Nueva semana VMC</div>
     </div>
     <div class="vmc-modal-body" id="vmc-modal-body">
+
+      <!-- ── Importar programa desde PDF / imagen ── -->
+      <div class="vmc-import-zone" id="vmc-import-zone"
+           ondragover="vmcImportDragOver(event)" ondragleave="vmcImportDragLeave(event)" ondrop="vmcImportDrop(event)">
+        <button type="button" class="vmc-import-trigger" onclick="document.getElementById('vmc-import-file').click()">
+          <div class="vmc-import-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <div class="vmc-import-label">
+            <div class="vmc-import-label-main">Importar programa</div>
+            <div class="vmc-import-label-sub">Sube un PDF o foto — Claude extrae todo automáticamente</div>
+          </div>
+          <span class="vmc-import-badge">IA</span>
+        </button>
+        <input type="file" id="vmc-import-file" accept=".pdf,image/*" style="display:none" onchange="vmcImportFile(this)">
+
+        <!-- Progreso -->
+        <div class="vmc-import-progress" id="vmc-import-progress">
+          <div class="vmc-import-spinner"></div>
+          <div class="vmc-import-progress-text" id="vmc-import-progress-text">Analizando programa…</div>
+          <div class="vmc-import-progress-file" id="vmc-import-progress-file"></div>
+        </div>
+
+        <!-- Resultado -->
+        <div class="vmc-import-result" id="vmc-import-result">
+          <div class="vmc-import-result-icon" id="vmc-import-result-icon">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="vmc-import-result-text" id="vmc-import-result-text"></span>
+          <button class="vmc-import-retry" onclick="document.getElementById('vmc-import-file').click()">Cambiar archivo</button>
+        </div>
+      </div>
+
       <!-- Rango de fechas -->
       <div style="display:flex;gap:8px;margin-bottom:1rem;align-items:center;flex-wrap:wrap">
         <div style="flex:1;min-width:140px">
