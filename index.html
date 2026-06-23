@@ -2924,6 +2924,64 @@
     padding: 3px 9px; border-radius: 20px; flex-shrink: 0; white-space: nowrap;
   }
 
+  /* ── Easter egg: accent color swatches ── */
+  .accent-swatch {
+    width: 36px; height: 36px; border-radius: 50%; border: 3px solid transparent;
+    background: var(--sw); cursor: pointer; transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+    flex-shrink: 0; outline: none;
+  }
+  .accent-swatch:hover { transform: scale(1.15); }
+  .accent-swatch.active {
+    border-color: var(--text);
+    box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--sw);
+    transform: scale(1.1);
+  }
+  @keyframes eggReveal {
+    from { opacity:0; transform: translateY(-8px) scale(0.97); }
+    to   { opacity:1; transform: translateY(0) scale(1); }
+  }
+
+  /* ── Easter egg: unlock overlay ── */
+  #egg-unlock-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0); pointer-events: none;
+    transition: background 0.4s;
+  }
+  #egg-unlock-overlay.active { pointer-events: all; background: rgba(0,0,0,0.72); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  #egg-unlock-card {
+    background: var(--surface); border-radius: 28px;
+    padding: 2.5rem 2rem 2rem; max-width: 320px; width: 90%;
+    text-align: center; box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+    transform: scale(0.7) translateY(40px); opacity: 0;
+    transition: transform 0.55s cubic-bezier(0.16,1,0.3,1), opacity 0.4s;
+  }
+  #egg-unlock-overlay.active #egg-unlock-card { transform: scale(1) translateY(0); opacity: 1; }
+  #egg-unlock-star {
+    width: 72px; height: 72px; margin: 0 auto 1.1rem;
+    animation: eggStarSpin 0.7s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  @keyframes eggStarSpin {
+    from { transform: scale(0) rotate(-180deg); opacity: 0; }
+    to   { transform: scale(1) rotate(0deg);   opacity: 1; }
+  }
+  #egg-unlock-title { font-size: 1.35rem; font-weight: 800; margin-bottom: 0.4rem; line-height: 1.2; }
+  #egg-unlock-sub   { font-size: 0.88rem; color: var(--text3); line-height: 1.5; margin-bottom: 1.6rem; }
+  #egg-unlock-btn   {
+    display: inline-block; padding: 0.75rem 2rem;
+    background: var(--accent); color: #fff; border: none;
+    border-radius: 50px; font-family: var(--font); font-size: 0.95rem; font-weight: 700;
+    cursor: pointer; transition: opacity 0.2s, transform 0.1s;
+  }
+  #egg-unlock-btn:hover { opacity: 0.88; }
+  #egg-unlock-btn:active { transform: scale(0.97); }
+
+  /* Confetti canvas */
+  #egg-confetti-canvas {
+    position: fixed; inset: 0; z-index: 10000; pointer-events: none;
+    width: 100%; height: 100%;
+  }
+
   .pref-theme-row { display: flex; gap: 8px; padding: 0.9rem 1rem; }
   .pref-theme-opt {
     flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px;
@@ -3824,15 +3882,37 @@
     <!-- Acerca de / Versión -->
     <div class="profile-section">
       <div class="profile-section-title">Acerca de</div>
-      <div class="profile-row">
-        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text3)">
+      <div class="profile-row" id="pref-version-row" style="user-select:none;-webkit-user-select:none;cursor:default;position:relative"
+        onmousedown="startVersionHold()" onmouseup="cancelVersionHold()" onmouseleave="cancelVersionHold()"
+        ontouchstart="startVersionHold(event)" ontouchend="cancelVersionHold()" ontouchcancel="cancelVersionHold()">
+        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text3)" id="pref-version-icon">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
         </div>
         <div class="profile-row-content">
           <div class="profile-row-label">Versión de la plataforma</div>
           <div class="profile-row-value" id="pref-version-value">—</div>
         </div>
-        <span class="pref-alpha-badge">ALPHA</span>
+        <span class="pref-alpha-badge" id="pref-alpha-badge">ALPHA</span>
+        <!-- Hold progress ring -->
+        <svg id="ver-hold-ring" viewBox="0 0 36 36" style="position:absolute;right:12px;width:28px;height:28px;opacity:0;transition:opacity 0.2s;pointer-events:none">
+          <circle cx="18" cy="18" r="15" fill="none" stroke="var(--surface3)" stroke-width="3"/>
+          <circle id="ver-hold-arc" cx="18" cy="18" r="15" fill="none" stroke="var(--accent)" stroke-width="3"
+            stroke-dasharray="94.25" stroke-dashoffset="94.25" stroke-linecap="round"
+            transform="rotate(-90 18 18)" style="transition:stroke-dashoffset 0.05s linear"/>
+        </svg>
+      </div>
+      <!-- Hidden accent color section — revealed by easter egg -->
+      <div id="pref-accent-section" style="display:none;animation:eggReveal 0.5s cubic-bezier(0.16,1,0.3,1) both">
+        <div style="padding:0.6rem 1rem 0.2rem;display:flex;align-items:center;gap:8px">
+          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">Color de acento</span>
+        </div>
+        <div style="padding:0.5rem 1rem 0.9rem;display:flex;gap:12px;align-items:center">
+          <button class="accent-swatch" id="accent-sw-blue"   onclick="setAccentColor('blue')"   style="--sw:#007AFF" title="Azul"></button>
+          <button class="accent-swatch" id="accent-sw-green"  onclick="setAccentColor('green')"  style="--sw:#30c97a" title="Verde"></button>
+          <button class="accent-swatch" id="accent-sw-pink"   onclick="setAccentColor('pink')"   style="--sw:#e040a0" title="Rosa"></button>
+          <button class="accent-swatch" id="accent-sw-yellow" onclick="setAccentColor('yellow')" style="--sw:#f5a623" title="Amarillo"></button>
+        </div>
       </div>
     </div>
 
@@ -3970,7 +4050,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.22.0-alpha';
+const APP_VERSION = '0.21.0.1-alpha';
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -4043,6 +4123,7 @@ function getTerColorClass(num) { return 'ter-color-' + (num % 10); }
 function initTheme() {
   const saved = localStorage.getItem('fleming_theme') || 'auto';
   applyTheme(saved);
+  initAccentColor();
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
     if (document.documentElement.getAttribute('data-theme') === 'auto') {
       _updateThemeActive('auto');
@@ -8212,6 +8293,199 @@ function toggleDarkMapsPref() {
   updateDarkMapToggleUI();
   if (currentSubTab === 'territorios') renderTerritoryView();
 }
+
+// ── Easter Egg: Accent Color Picker ────────────────────────────────────────
+const ACCENT_PALETTES = {
+  blue:   { light: { accent: '#007AFF', light: 'rgba(0,122,255,0.12)'   }, dark: { accent: '#0a84ff', light: 'rgba(10,132,255,0.15)'  } },
+  green:  { light: { accent: '#28cd41', light: 'rgba(40,205,65,0.12)'   }, dark: { accent: '#30d158', light: 'rgba(48,209,88,0.15)'   } },
+  pink:   { light: { accent: '#d9006e', light: 'rgba(217,0,110,0.12)'   }, dark: { accent: '#e040a0', light: 'rgba(224,64,160,0.15)'  } },
+  yellow: { light: { accent: '#c9820a', light: 'rgba(201,130,10,0.12)'  }, dark: { accent: '#f5a623', light: 'rgba(245,166,35,0.15)'  } },
+};
+let _versionHoldTimer = null;
+let _versionHoldRaf   = null;
+let _versionHoldStart = null;
+const VERSION_HOLD_MS = 5000;
+
+function startVersionHold(e) {
+  if (e) e.preventDefault();
+  cancelVersionHold();
+  _versionHoldStart = Date.now();
+  const arc  = document.getElementById('ver-hold-arc');
+  const ring = document.getElementById('ver-hold-ring');
+  const icon = document.getElementById('pref-version-icon');
+  if (ring) { ring.style.opacity = '1'; }
+
+  function tick() {
+    const elapsed = Date.now() - _versionHoldStart;
+    const frac = Math.min(elapsed / VERSION_HOLD_MS, 1);
+    const circumference = 2 * Math.PI * 15; // r=15
+    if (arc) arc.setAttribute('stroke-dashoffset', circumference * (1 - frac));
+    if (icon) icon.style.transform = `scale(${1 + frac * 0.12})`;
+    if (frac < 1) {
+      _versionHoldRaf = requestAnimationFrame(tick);
+    }
+  }
+  _versionHoldRaf = requestAnimationFrame(tick);
+
+  _versionHoldTimer = setTimeout(() => {
+    cancelVersionHold(true);
+    triggerEggUnlock();
+  }, VERSION_HOLD_MS);
+}
+
+function cancelVersionHold(completed) {
+  clearTimeout(_versionHoldTimer);
+  if (_versionHoldRaf) cancelAnimationFrame(_versionHoldRaf);
+  _versionHoldTimer = null; _versionHoldRaf = null; _versionHoldStart = null;
+  if (!completed) {
+    const arc  = document.getElementById('ver-hold-arc');
+    const ring = document.getElementById('ver-hold-ring');
+    const icon = document.getElementById('pref-version-icon');
+    if (ring) ring.style.opacity = '0';
+    if (arc)  arc.setAttribute('stroke-dashoffset', '94.25');
+    if (icon) icon.style.transform = '';
+  }
+}
+
+function triggerEggUnlock() {
+  const alreadyUnlocked = localStorage.getItem('fleming_egg_unlocked') === '1';
+  // Always show section if already unlocked on open; first time show the big reveal
+  localStorage.setItem('fleming_egg_unlocked', '1');
+  revealAccentSection();
+  if (!alreadyUnlocked) {
+    // Big reveal!
+    const overlay = document.getElementById('egg-unlock-overlay');
+    overlay.classList.add('active');
+    launchConfetti();
+  }
+}
+
+function closeEggUnlock() {
+  const overlay = document.getElementById('egg-unlock-overlay');
+  overlay.classList.remove('active');
+  stopConfetti();
+}
+
+function revealAccentSection() {
+  const sec = document.getElementById('pref-accent-section');
+  if (sec) { sec.style.display = 'block'; }
+  updateAccentSwatchesUI();
+}
+
+// ── Confetti ──────────────────────────────────────────────────────────────
+let _confettiAnimId = null;
+let _confettiPieces = [];
+let _confettiRunning = false;
+
+function launchConfetti() {
+  const canvas = document.getElementById('egg-confetti-canvas');
+  if (!canvas) return;
+  canvas.style.display = 'block';
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+  const colors = ['#007AFF','#30d158','#e040a0','#f5a623','#ff3b30','#af52de','#ffffff'];
+  _confettiPieces = Array.from({ length: 120 }, () => ({
+    x:  Math.random() * canvas.width,
+    y:  -10 - Math.random() * canvas.height * 0.5,
+    r:  4 + Math.random() * 6,
+    d:  2 + Math.random() * 3,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    angle: Math.random() * Math.PI * 2,
+    spin:  (Math.random() - 0.5) * 0.2,
+    vx:   (Math.random() - 0.5) * 2,
+    shape: Math.random() > 0.4 ? 'rect' : 'circle',
+    w: 6 + Math.random() * 8,
+    h: 4 + Math.random() * 6,
+    opacity: 1,
+  }));
+  _confettiRunning = true;
+
+  function draw() {
+    if (!_confettiRunning) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let anyVisible = false;
+    _confettiPieces.forEach(p => {
+      p.y += p.d;
+      p.x += p.vx;
+      p.angle += p.spin;
+      if (p.y > canvas.height * 0.7) p.opacity -= 0.018;
+      if (p.opacity <= 0) { p.opacity = 0; return; }
+      anyVisible = true;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, p.opacity);
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.angle);
+      ctx.fillStyle = p.color;
+      if (p.shape === 'circle') {
+        ctx.beginPath(); ctx.arc(0, 0, p.r, 0, Math.PI * 2); ctx.fill();
+      } else {
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      }
+      ctx.restore();
+    });
+    if (anyVisible) {
+      _confettiAnimId = requestAnimationFrame(draw);
+    } else {
+      stopConfetti();
+    }
+  }
+  if (_confettiAnimId) cancelAnimationFrame(_confettiAnimId);
+  _confettiAnimId = requestAnimationFrame(draw);
+  // Auto-stop after 5s
+  setTimeout(stopConfetti, 5000);
+}
+
+function stopConfetti() {
+  _confettiRunning = false;
+  if (_confettiAnimId) { cancelAnimationFrame(_confettiAnimId); _confettiAnimId = null; }
+  const canvas = document.getElementById('egg-confetti-canvas');
+  if (canvas) { canvas.style.display = 'none'; const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height); }
+}
+
+// ── Accent color application ─────────────────────────────────────────────
+function setAccentColor(name) {
+  localStorage.setItem('fleming_accent', name);
+  applyAccentColor(name);
+  updateAccentSwatchesUI();
+}
+
+function applyAccentColor(name) {
+  const palette = ACCENT_PALETTES[name] || ACCENT_PALETTES.blue;
+  const root = document.documentElement;
+  // Apply to :root (light) values always; dark values applied inline since CSS vars cascade
+  root.style.setProperty('--accent', palette.light.accent);
+  root.style.setProperty('--accent-light', palette.light.light);
+  // Also store dark values in custom props so dark theme can pick them up
+  root.style.setProperty('--accent-dark', palette.dark.accent);
+  root.style.setProperty('--accent-light-dark', palette.dark.light);
+  // Inject dynamic dark-mode accent overrides
+  let dynStyle = document.getElementById('accent-dyn-style');
+  if (!dynStyle) {
+    dynStyle = document.createElement('style');
+    dynStyle.id = 'accent-dyn-style';
+    document.head.appendChild(dynStyle);
+  }
+  dynStyle.textContent = `
+    :root[data-theme="dark"], :root[data-theme="auto"] { --accent: ${palette.dark.accent}; --accent-light: ${palette.dark.light}; }
+    @media (prefers-color-scheme: dark) { :root[data-theme="auto"] { --accent: ${palette.dark.accent}; --accent-light: ${palette.dark.light}; } }
+  `;
+}
+
+function initAccentColor() {
+  const saved = localStorage.getItem('fleming_accent') || 'blue';
+  applyAccentColor(saved);
+  if (localStorage.getItem('fleming_egg_unlocked') === '1') {
+    revealAccentSection();
+  }
+}
+
+function updateAccentSwatchesUI() {
+  const active = localStorage.getItem('fleming_accent') || 'blue';
+  ['blue','green','pink','yellow'].forEach(name => {
+    document.getElementById('accent-sw-' + name)?.classList.toggle('active', name === active);
+  });
+}
 async function renderPrefNotifList() {
   const list = document.getElementById('pref-notif-list');
   if (!list) return;
@@ -9961,11 +10235,33 @@ ADMIN_TAB_SECTION['vmc'] = 'reuniones';
   </div>
 </div>
 
+<!-- ══ Easter Egg: Unlock overlay + confetti ══ -->
+<canvas id="egg-confetti-canvas" style="display:none"></canvas>
+<div id="egg-unlock-overlay">
+  <div id="egg-unlock-card">
+    <div id="egg-unlock-star">
+      <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="eggGrad" cx="50%" cy="30%" r="70%">
+            <stop offset="0%" stop-color="#fff" stop-opacity="0.9"/>
+            <stop offset="100%" stop-color="var(--accent)"/>
+          </radialGradient>
+        </defs>
+        <path d="M36 6l7.27 14.73L60 23.27l-12 11.7 2.83 16.49L36 43.77l-14.83 7.69L24 34.97 12 23.27l16.73-2.54L36 6z"
+          fill="url(#eggGrad)" stroke="var(--accent)" stroke-width="1.5" stroke-linejoin="round"/>
+        <circle cx="36" cy="36" r="34" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.35"/>
+      </svg>
+    </div>
+    <div id="egg-unlock-title">¡Easter egg encontrado! 🎉</div>
+    <div id="egg-unlock-sub">Has descubierto una función oculta. Ahora puedes personalizar el color de acento de toda la plataforma.</div>
+    <button id="egg-unlock-btn" onclick="closeEggUnlock()">¡Genial!</button>
+  </div>
+</div>
+
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').then(reg => {
-      // Forzar actualización si hay una nueva versión disponible
       reg.addEventListener('updatefound', () => {
         const newWorker = reg.installing;
         if (newWorker) {
