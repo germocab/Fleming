@@ -725,6 +725,54 @@
   }
   .np-sugerir-cancel:hover { background: var(--surface2); }
 
+  /* ── Sugerir Corrección ────────────────────────────────────────────────────── */
+  .np-action-btn-correccion .np-action-icon { background: rgba(59,130,246,0.12); color: var(--ter-2); }
+  .np-correccion-form {
+    display: none; flex-direction: column; gap: 0.6rem;
+    padding: 0.9rem 1.25rem 0;
+  }
+  .np-correccion-form.open { display: flex; animation: fadeIn 0.18s ease; }
+  .np-correccion-label { font-size: 0.8rem; font-weight: 700; color: var(--text2); }
+  .np-correccion-reasons {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .np-correccion-reason-btn {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; padding: 0.7rem 0.9rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; font-family: var(--font); font-size: 0.88rem;
+    font-weight: 600; color: var(--text); cursor: pointer;
+    transition: all 0.15s; text-align: left;
+  }
+  .np-correccion-reason-btn:hover { border-color: var(--ter-2); background: rgba(59,130,246,0.06); }
+  .np-correccion-reason-btn.selected { border-color: var(--ter-2); background: rgba(59,130,246,0.10); color: var(--ter-2); }
+  .np-correccion-reason-icon { width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(59,130,246,0.12);color:var(--ter-2); }
+  .np-correccion-reason-icon svg { width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round; }
+  .np-correccion-sub-form {
+    display: none; flex-direction: column; gap: 0.55rem;
+    padding: 0.75rem; background: var(--surface2);
+    border: 1px solid var(--border-active); border-radius: 10px;
+  }
+  .np-correccion-sub-form.open { display: flex; animation: fadeIn 0.18s ease; }
+  .np-correccion-sub-label { font-size: 0.77rem; font-weight: 700; color: var(--text3); }
+  .np-correccion-input {
+    width: 100%; padding: 0.6rem 0.8rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text);
+    font-family: var(--font); font-size: 0.875rem; outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s;
+  }
+  .np-correccion-input:focus { border-color: var(--ter-2); box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+  .np-correccion-input::placeholder { color: var(--text3); }
+  .np-correccion-send {
+    flex:1; padding: 0.65rem; border: none; border-radius: 10px;
+    background: var(--ter-2); color: #fff;
+    font-family: var(--font); font-size: 0.88rem; font-weight: 700;
+    cursor: pointer; transition: opacity 0.18s;
+  }
+  .np-correccion-send:hover { opacity: 0.88; }
+  .np-correccion-send:disabled { opacity: 0.45; cursor: not-allowed; }
+
   /* Suggest no-pasar button */
   .suggest-np-btn {
     display: flex; align-items: center; justify-content: center; gap: 7px;
@@ -3133,11 +3181,6 @@
             <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3z"/><path d="M9 8c-2 3-4 3.5-7 4l8 8c1-.5 3.5-2 4-7"/><path d="M14.5 17.5 4.5 15"/></svg>
             Preferencias
           </button>
-          <div class="dropdown-divider"></div>
-          <button class="dropdown-item danger" onclick="doLogout()">
-            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            Cerrar sesión
-          </button>
         </div>
       </div>
     </div>
@@ -3258,11 +3301,6 @@
                 <svg class="check-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
               </button>
             </div>
-            <div class="dropdown-divider"></div>
-            <button class="dropdown-item danger" onclick="doLogout()">
-              <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-              Cerrar sesión
-            </button>
           </div>
         </div>
       </div>
@@ -4052,7 +4090,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.24.0-alpha';
+const APP_VERSION = '0.25.0-alpha';
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -4839,13 +4877,15 @@ async function renderProfilePage() {
   bigAvatar.style.background = col;
   if (me?.avatar) {
     bigAvatar.innerHTML = `<img src="${me.avatar}" style="width:100%;height:100%;object-fit:cover">`;
-    document.getElementById('profile-remove-photo-wrap').style.display = '';
+    const removeBtn = document.getElementById('profile-photo-remove-btn');
+    if (removeBtn) removeBtn.style.display = '';
     // Also update the dropdown avatar
     const dropAvatar = document.getElementById('user-avatar');
     if (dropAvatar) { dropAvatar.style.background = col; dropAvatar.innerHTML = `<img src="${me.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`; }
   } else {
     bigAvatar.textContent = inits;
-    document.getElementById('profile-remove-photo-wrap').style.display = 'none';
+    const removeBtn = document.getElementById('profile-photo-remove-btn');
+    if (removeBtn) removeBtn.style.display = 'none';
     const dropAvatar = document.getElementById('user-avatar');
     if (dropAvatar) { dropAvatar.style.background = col; dropAvatar.textContent = inits; }
   }
@@ -4972,6 +5012,16 @@ async function removeProfilePhoto() {
   showToast('Foto eliminada', 'success');
   renderProfilePage();
   renderGruposView();
+}
+
+function openProfilePhotoSheet() {
+  document.getElementById('profile-photo-overlay').classList.add('open');
+}
+function closeProfilePhotoSheet() {
+  document.getElementById('profile-photo-overlay').classList.remove('open');
+}
+function handleProfilePhotoOverlayClick(e) {
+  if (e.target === document.getElementById('profile-photo-overlay')) closeProfilePhotoSheet();
 }
 
 function toggleLabel(uid, labelKey) {
@@ -9040,11 +9090,19 @@ function openNpActionSheet(addr, terNum) {
   _npCurrentTerNum = terNum;
   document.getElementById('np-action-addr').textContent = addr;
   document.getElementById('np-action-sub').textContent = terNum ? `Territorio ${terNum}` : 'Dirección No Pasar';
-  // Reset sugerir form
+  // Reset sugerir quitado form
   const form = document.getElementById('np-sugerir-form');
   if (form) form.classList.remove('open');
   const ta = document.getElementById('np-sugerir-motivo');
   if (ta) ta.value = '';
+  // Reset corrección form
+  const cform = document.getElementById('np-correccion-form');
+  if (cform) cform.classList.remove('open');
+  selectNpCorreccionReason(null);
+  const ci1 = document.getElementById('np-correccion-territorio-val');
+  const ci2 = document.getElementById('np-correccion-nombre-val');
+  if (ci1) ci1.value = '';
+  if (ci2) ci2.value = '';
   document.getElementById('np-action-overlay').classList.add('open');
 }
 
@@ -9054,6 +9112,9 @@ function closeNpActionSheet() {
   if (form) form.classList.remove('open');
   const ta = document.getElementById('np-sugerir-motivo');
   if (ta) ta.value = '';
+  const cform = document.getElementById('np-correccion-form');
+  if (cform) cform.classList.remove('open');
+  selectNpCorreccionReason(null);
 }
 
 function handleNpOverlayClick(e) {
@@ -9063,7 +9124,38 @@ function handleNpOverlayClick(e) {
 function toggleNpSugerirForm() {
   const form = document.getElementById('np-sugerir-form');
   const isOpen = form.classList.toggle('open');
-  if (isOpen) setTimeout(() => document.getElementById('np-sugerir-motivo')?.focus(), 80);
+  if (isOpen) {
+    // Close corrección form if open
+    document.getElementById('np-correccion-form').classList.remove('open');
+    setTimeout(() => document.getElementById('np-sugerir-motivo')?.focus(), 80);
+  }
+}
+
+function toggleNpCorreccionForm() {
+  const form = document.getElementById('np-correccion-form');
+  const isOpen = form.classList.toggle('open');
+  if (isOpen) {
+    // Close quitado form if open
+    document.getElementById('np-sugerir-form').classList.remove('open');
+    // Reset reason selection
+    selectNpCorreccionReason(null);
+  }
+}
+
+function selectNpCorreccionReason(reason) {
+  const btns = document.querySelectorAll('.np-correccion-reason-btn');
+  btns.forEach(b => b.classList.remove('selected'));
+  document.getElementById('np-correccion-sub-territorio').classList.remove('open');
+  document.getElementById('np-correccion-sub-nombre').classList.remove('open');
+  if (reason === 'territorio') {
+    document.getElementById('np-reason-territorio').classList.add('selected');
+    document.getElementById('np-correccion-sub-territorio').classList.add('open');
+    setTimeout(() => document.getElementById('np-correccion-territorio-val')?.focus(), 80);
+  } else if (reason === 'nombre') {
+    document.getElementById('np-reason-nombre').classList.add('selected');
+    document.getElementById('np-correccion-sub-nombre').classList.add('open');
+    setTimeout(() => document.getElementById('np-correccion-nombre-val')?.focus(), 80);
+  }
 }
 
 // ── Sugerir Quitado ───────────────────────────────────────────────────────────
@@ -9081,6 +9173,37 @@ async function submitSugerirQuitado() {
   const { error } = await sb.from('notifications').insert({ title, body, notif_category: 'casa' });
 
   if (sendBtn) { sendBtn.textContent = 'Enviar sugerencia'; sendBtn.disabled = false; }
+
+  if (error) { showToast('Error al enviar', 'error'); return; }
+
+  showToast('Sugerencia enviada al DEV ✓', 'success');
+  closeNpActionSheet();
+}
+
+// ── Sugerir Corrección ────────────────────────────────────────────────────────
+async function submitSugerirCorreccion(type) {
+  const sender = currentUser?.name || 'Usuario';
+  const terStr = _npCurrentTerNum ? `Territorio ${_npCurrentTerNum}` : 'Territorio';
+  let title, body;
+
+  if (type === 'territorio') {
+    const val = document.getElementById('np-correccion-territorio-val').value.trim();
+    if (!val) { showToast('Indica el territorio correcto', 'error'); return; }
+    title = `Sugerir Corrección – Territorio equivocado (${terStr})`;
+    body = `${sender} sugiere que "${_npCurrentAddr}" en ${terStr} está en el territorio equivocado. Debería estar en: ${val}.`;
+  } else if (type === 'nombre') {
+    const val = document.getElementById('np-correccion-nombre-val').value.trim();
+    if (!val) { showToast('Indica el nombre correcto', 'error'); return; }
+    title = `Sugerir Corrección – Nombre mal escrito (${terStr})`;
+    body = `${sender} sugiere corregir el nombre de "${_npCurrentAddr}" en ${terStr}. Nombre correcto: "${val}".`;
+  } else return;
+
+  const sendBtns = document.querySelectorAll('.np-correccion-send');
+  sendBtns.forEach(b => { b.textContent = 'Enviando…'; b.disabled = true; });
+
+  const { error } = await sb.from('notifications').insert({ title, body, notif_category: 'casa' });
+
+  sendBtns.forEach(b => { b.textContent = 'Enviar sugerencia'; b.disabled = false; });
 
   if (error) { showToast('Error al enviar', 'error'); return; }
 
@@ -9853,7 +9976,7 @@ ADMIN_TAB_SECTION['vmc'] = 'reuniones';
 
     <!-- Hero: avatar + nombre + rol + etiquetas -->
     <div class="profile-hero">
-      <div class="profile-avatar-wrap" onclick="document.getElementById('profile-photo-input').click()" title="Cambiar foto">
+      <div class="profile-avatar-wrap" onclick="openProfilePhotoSheet()" title="Cambiar foto">
         <div class="profile-avatar" id="profile-avatar-big">GC</div>
         <div class="profile-avatar-edit-badge">
           <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
@@ -9903,13 +10026,39 @@ ADMIN_TAB_SECTION['vmc'] = 'reuniones';
       </div>
     </div>
 
-    <!-- Remove photo button (shown only when has photo) -->
-    <div id="profile-remove-photo-wrap" style="display:none;padding:0 1.25rem;margin-bottom:1.25rem">
-      <button onclick="removeProfilePhoto()" style="width:100%;padding:0.7rem;border:1.5px dashed rgba(255,59,48,0.35);border-radius:var(--radius-sm);background:none;color:var(--red);font-family:var(--font);font-size:0.85rem;font-weight:600;cursor:pointer;transition:background 0.15s" onmouseover="this.style.background='rgba(255,59,48,0.06)'" onmouseout="this.style.background='none'">
-        Eliminar foto de perfil
+    <!-- Cerrar sesión -->
+    <div style="padding:0 1.25rem;margin-bottom:1.25rem">
+      <button onclick="doLogout()" style="width:100%;padding:0.75rem;border:1px solid rgba(255,59,48,0.25);border-radius:var(--radius-sm);background:none;color:var(--red);font-family:var(--font);font-size:0.9rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.15s" onmouseover="this.style.background='rgba(255,59,48,0.06)'" onmouseout="this.style.background='none'">
+        <svg viewBox="0 0 24 24" style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Cerrar sesión
       </button>
     </div>
 
+  </div>
+</div>
+
+<!-- ── Profile Photo Options Popup ── -->
+<div class="np-action-overlay" id="profile-photo-overlay" onclick="handleProfilePhotoOverlayClick(event)">
+  <div class="np-action-sheet" id="profile-photo-sheet">
+    <div class="np-action-handle"></div>
+    <div class="np-action-header">
+      <div class="np-action-addr">Foto de perfil</div>
+      <div class="np-action-sub">Elige una acción</div>
+    </div>
+    <button class="np-action-btn" onclick="document.getElementById('profile-photo-input').click();closeProfilePhotoSheet()">
+      <span class="np-action-icon" style="background:var(--accent-light);color:var(--accent)">
+        <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      </span>
+      Cambiar foto
+    </button>
+    <div class="np-action-divider"></div>
+    <button class="np-action-btn" id="profile-photo-remove-btn" onclick="removeProfilePhoto();closeProfilePhotoSheet()" style="color:var(--red);display:none">
+      <span class="np-action-icon" style="background:rgba(255,59,48,0.1);color:var(--red)">
+        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+      </span>
+      Eliminar foto de perfil
+    </button>
+    <button class="np-action-btn-cancel" onclick="closeProfilePhotoSheet()">Cancelar</button>
   </div>
 </div>
 
@@ -10045,6 +10194,50 @@ ADMIN_TAB_SECTION['vmc'] = 'reuniones';
       <div class="np-sugerir-actions">
         <button class="np-sugerir-send" onclick="submitSugerirQuitado()">Enviar sugerencia</button>
         <button class="np-sugerir-cancel" onclick="toggleNpSugerirForm()">Cancelar</button>
+      </div>
+    </div>
+    <div class="np-action-divider"></div>
+    <!-- Sugerir Corrección -->
+    <button class="np-action-btn np-action-btn-correccion" onclick="toggleNpCorreccionForm()">
+      <span class="np-action-icon">
+        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </span>
+      Sugerir Corrección
+    </button>
+    <!-- Inline form for Sugerir Corrección -->
+    <div class="np-correccion-form" id="np-correccion-form">
+      <div class="np-correccion-label">¿Qué necesita corregirse?</div>
+      <div class="np-correccion-reasons">
+        <button type="button" class="np-correccion-reason-btn" id="np-reason-territorio" onclick="selectNpCorreccionReason('territorio')">
+          <span class="np-correccion-reason-icon">
+            <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+          </span>
+          Territorio equivocado
+        </button>
+        <button type="button" class="np-correccion-reason-btn" id="np-reason-nombre" onclick="selectNpCorreccionReason('nombre')">
+          <span class="np-correccion-reason-icon">
+            <svg viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+          </span>
+          Nombre de dirección mal escrito
+        </button>
+      </div>
+      <!-- Sub-form: territorio correcto -->
+      <div class="np-correccion-sub-form" id="np-correccion-sub-territorio">
+        <div class="np-correccion-sub-label">¿En qué territorio debería estar?</div>
+        <input type="text" class="np-correccion-input" id="np-correccion-territorio-val" placeholder="Ej: Territorio 4">
+        <div class="np-sugerir-actions">
+          <button class="np-correccion-send" onclick="submitSugerirCorreccion('territorio')">Enviar sugerencia</button>
+          <button class="np-sugerir-cancel" onclick="selectNpCorreccionReason(null)">Cancelar</button>
+        </div>
+      </div>
+      <!-- Sub-form: nombre correcto -->
+      <div class="np-correccion-sub-form" id="np-correccion-sub-nombre">
+        <div class="np-correccion-sub-label">¿Cuál es el nombre correcto de la dirección?</div>
+        <input type="text" class="np-correccion-input" id="np-correccion-nombre-val" placeholder="Ej: Av. Las Flores 234">
+        <div class="np-sugerir-actions">
+          <button class="np-correccion-send" onclick="submitSugerirCorreccion('nombre')">Enviar sugerencia</button>
+          <button class="np-sugerir-cancel" onclick="selectNpCorreccionReason(null)">Cancelar</button>
+        </div>
       </div>
     </div>
     <button class="np-action-btn-cancel" onclick="closeNpActionSheet()">Cancelar</button>
