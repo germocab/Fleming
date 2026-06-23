@@ -3561,7 +3561,7 @@
         <div class="form-group2"><label class="form-label2">N° Territorio</label><input type="number" class="form-input" id="ter-num" placeholder="Ej: 2" min="1"></div>
       </div>
       <div class="form-group2" style="margin-bottom:1.1rem">
-        <label class="form-label2">Mapa del territorio</label>
+        <label class="form-label2">Mapa del territorio <span style="font-weight:400;color:var(--text3)">(modo claro)</span></label>
         <div class="img-upload-area" id="img-upload-area" onclick="document.getElementById('ter-map-file').click()">
           <input type="file" id="ter-map-file" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="handleMapImage(event)">
           <div id="img-placeholder">
@@ -3573,6 +3573,26 @@
           <div class="img-change-btn" id="img-change-btn" style="display:none">Cambiar imagen</div>
         </div>
         <div id="img-size-warn" style="font-size:0.74rem;color:var(--red);margin-top:4px;display:none;display:flex;align-items:center;gap:4px"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Se comprimirá automáticamente.</div>
+      </div>
+      <div class="form-group2" style="margin-bottom:1.1rem">
+        <label class="form-label2" style="display:flex;align-items:center;gap:6px">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+          Versión modo oscuro <span style="font-weight:400;color:var(--text3)">(opcional)</span>
+        </label>
+        <div class="img-upload-area" id="img-upload-area-dark" onclick="document.getElementById('ter-map-file-dark').click()" style="border-style:dashed">
+          <input type="file" id="ter-map-file-dark" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="handleMapImageDark(event)">
+          <div id="img-placeholder-dark">
+            <div class="img-upload-icon"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg></div>
+            <div class="img-upload-text">Subir versión para modo oscuro</div>
+            <div class="img-upload-sub">PNG, JPG · Max 4MB · opcional</div>
+          </div>
+          <img id="img-preview-dark" class="img-preview" style="display:none" alt="Vista previa modo oscuro">
+          <div class="img-change-btn" id="img-change-btn-dark" style="display:none">Cambiar imagen</div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;align-items:center;margin-top:5px">
+          <div id="img-size-warn-dark" style="font-size:0.74rem;color:var(--red);display:none;flex:1;align-items:center;gap:4px"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Se comprimirá automáticamente.</div>
+          <button type="button" id="ter-map-dark-remove-btn" onclick="removeDarkMapImage()" style="display:none;background:none;border:none;font-size:0.74rem;color:var(--red);cursor:pointer;padding:0">Quitar imagen oscura</button>
+        </div>
       </div>
       <div style="margin-bottom:1.1rem">
         <div class="form-label2" style="margin-bottom:8px">Direcciones "No Pasar"</div>
@@ -3780,6 +3800,19 @@
           Automático
         </button>
       </div>
+      <!-- Toggle: mapas en modo oscuro -->
+      <div class="profile-row" style="cursor:pointer" onclick="toggleDarkMapsPref()">
+        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text2)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Mapas adaptados al tema oscuro</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Usa la versión oscura del mapa cuando está disponible</div>
+        </div>
+        <div id="pref-dark-maps-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="pref-dark-maps-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Notificaciones -->
@@ -3937,7 +3970,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.21.0.1-alpha';
+const APP_VERSION = '0.22.0-alpha';
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -3997,6 +4030,7 @@ let editingConductorId = null;
 let editingCasaId = null;
 let noPasarCount = 0;
 let pendingMapBase64 = null;
+let pendingMapDarkBase64 = null;
 let currentMainTab = 'predicacion';
 let currentSubTab  = 'casa';
 let respHistorial = [];
@@ -4012,6 +4046,7 @@ function initTheme() {
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
     if (document.documentElement.getAttribute('data-theme') === 'auto') {
       _updateThemeActive('auto');
+      if (currentSubTab === 'territorios') renderTerritoryView();
     }
   });
 }
@@ -4027,6 +4062,19 @@ function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('fleming_theme', theme);
   _updateThemeActive(theme);
+  // Refresh territory maps if currently visible
+  if (currentSubTab === 'territorios') renderTerritoryView();
+}
+
+// Returns the correct map src for a territory object based on active theme + user preference
+function getActiveTerMapSrc(t) {
+  if (!t) return null;
+  const useDarkMaps = localStorage.getItem('fleming_dark_maps') !== 'false'; // default true
+  if (!useDarkMaps) return t.map_data || null;
+  const theme = document.documentElement.getAttribute('data-theme') || 'auto';
+  const isDark = theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  if (isDark && t.map_data_dark) return t.map_data_dark;
+  return t.map_data || null;
 }
 function toggleAppearanceSubmenu(menu) {
   const submenu  = document.getElementById(`appearance-submenu-${menu}`);
@@ -5512,10 +5560,11 @@ function viewAssignment(id) {
 
   const mapWrap = document.getElementById('detail-map-wrap');
   const mapImg  = document.getElementById('detail-map-img');
-  if (ter && ter.map_data) {
-    mapImg.src = ter.map_data;
+  const terMapSrc = ter ? getActiveTerMapSrc(ter) : null;
+  if (terMapSrc) {
+    mapImg.src = terMapSrc;
     mapWrap.style.display = '';
-    mapWrap.onclick = () => openLightbox(ter.map_data);
+    mapWrap.onclick = () => openLightbox(terMapSrc);
   } else {
     mapWrap.style.display = 'none';
     mapWrap.onclick = null;
@@ -6340,6 +6389,7 @@ function openTerritoryModal(t) {
   const placeholder = document.getElementById('img-placeholder');
   const changeBtn = document.getElementById('img-change-btn');
   document.getElementById('ter-map-file').value = '';
+  document.getElementById('ter-map-file-dark').value = '';
   if (t && t.map_data) {
     preview.src = t.map_data; preview.style.display = 'block';
     placeholder.style.display = 'none'; changeBtn.style.display = 'block';
@@ -6348,6 +6398,23 @@ function openTerritoryModal(t) {
     preview.src = ''; preview.style.display = 'none';
     placeholder.style.display = 'block'; changeBtn.style.display = 'none';
     area.classList.remove('has-image');
+  }
+  // Dark map
+  const areaDark = document.getElementById('img-upload-area-dark');
+  const previewDark = document.getElementById('img-preview-dark');
+  const placeholderDark = document.getElementById('img-placeholder-dark');
+  const changeBtnDark = document.getElementById('img-change-btn-dark');
+  const removeBtn = document.getElementById('ter-map-dark-remove-btn');
+  if (t && t.map_data_dark) {
+    previewDark.src = t.map_data_dark; previewDark.style.display = 'block';
+    placeholderDark.style.display = 'none'; changeBtnDark.style.display = 'block';
+    areaDark.classList.add('has-image'); pendingMapDarkBase64 = t.map_data_dark;
+    removeBtn.style.display = 'block';
+  } else {
+    previewDark.src = ''; previewDark.style.display = 'none';
+    placeholderDark.style.display = 'block'; changeBtnDark.style.display = 'none';
+    areaDark.classList.remove('has-image'); pendingMapDarkBase64 = null;
+    removeBtn.style.display = 'none';
   }
   noPasarCount = 0;
   const npContainer = document.getElementById('no-pasar-inputs');
@@ -6364,7 +6431,7 @@ function openTerritoryModal(t) {
   document.getElementById('territory-edit-modal').classList.add('open');
 }
 function editTerritory(id) { openTerritoryModal(territories.find(t=>t.id===id)); }
-function closeTerritoryEditModal() { document.getElementById('territory-edit-modal').classList.remove('open'); editingTerritoryId=null; pendingMapBase64=null; }
+function closeTerritoryEditModal() { document.getElementById('territory-edit-modal').classList.remove('open'); editingTerritoryId=null; pendingMapBase64=null; pendingMapDarkBase64=null; }
 function handleMapImage(event) {
   const file = event.target.files[0]; if (!file) return;
   const warn = document.getElementById('img-size-warn');
@@ -6389,6 +6456,42 @@ function handleMapImage(event) {
     img.src = e.target.result;
   };
   reader.readAsDataURL(file);
+}
+function handleMapImageDark(event) {
+  const file = event.target.files[0]; if (!file) return;
+  const warn = document.getElementById('img-size-warn-dark');
+  warn.style.display = file.size > 4*1024*1024 ? 'flex' : 'none';
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img; const maxW = 1200;
+      if (width > maxW) { height = Math.round(height * maxW / width); width = maxW; }
+      const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      const compressed = canvas.toDataURL('image/jpeg', 0.82);
+      pendingMapDarkBase64 = compressed;
+      const preview = document.getElementById('img-preview-dark');
+      preview.src = compressed; preview.style.display = 'block';
+      document.getElementById('img-placeholder-dark').style.display = 'none';
+      document.getElementById('img-change-btn-dark').style.display = 'block';
+      document.getElementById('img-upload-area-dark').classList.add('has-image');
+      document.getElementById('ter-map-dark-remove-btn').style.display = 'block';
+      warn.style.display = 'none';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function removeDarkMapImage() {
+  pendingMapDarkBase64 = null;
+  document.getElementById('img-preview-dark').src = '';
+  document.getElementById('img-preview-dark').style.display = 'none';
+  document.getElementById('img-placeholder-dark').style.display = 'block';
+  document.getElementById('img-change-btn-dark').style.display = 'none';
+  document.getElementById('img-upload-area-dark').classList.remove('has-image');
+  document.getElementById('ter-map-dark-remove-btn').style.display = 'none';
+  document.getElementById('ter-map-file-dark').value = '';
 }
 function addNoPasarInput(addr = '', date = '') {
   noPasarCount++;
@@ -6419,7 +6522,7 @@ async function saveTerritory() {
   }).filter(Boolean);
   const btn = document.getElementById('save-ter-btn');
   btn.disabled = true; btn.textContent = 'Guardando...';
-  const payload = { number, no_pasar, map_data: pendingMapBase64 || null };
+  const payload = { number, no_pasar, map_data: pendingMapBase64 || null, map_data_dark: pendingMapDarkBase64 !== undefined ? pendingMapDarkBase64 : null };
   let error;
   if (editingTerritoryId) { ({error} = await sb.from('territories').update(payload).eq('id',editingTerritoryId)); }
   else { ({error} = await sb.from('territories').insert(payload)); }
@@ -7977,8 +8080,9 @@ function renderTerritoryView() {
     return;
   }
   container.innerHTML = `<div class="ter-grid" style="padding-top:0.25rem">` + territories.map(t => {
-    const mapHtml = t.map_data
-      ? `<img src="${t.map_data}" alt="Mapa T${t.number}" loading="lazy">`
+    const mapSrc = getActiveTerMapSrc(t);
+    const mapHtml = mapSrc
+      ? `<img src="${mapSrc}" alt="Mapa T${t.number}" loading="lazy">`
       : `<div class="ter-grid-map-empty"><svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg><span>Sin mapa</span></div>`;
     return `<div class="ter-grid-card" onclick="viewTerritory('${t.id}')">
       <div class="ter-grid-map">${mapHtml}</div>
@@ -8015,10 +8119,11 @@ function viewTerritory(id) {
   // Map
   const mapWrap = document.getElementById('detail-map-wrap');
   const mapImg  = document.getElementById('detail-map-img');
-  if (t.map_data) {
-    mapImg.src = t.map_data;
+  const terMapSrc = getActiveTerMapSrc(t);
+  if (terMapSrc) {
+    mapImg.src = terMapSrc;
     mapWrap.style.display = '';
-    mapWrap.onclick = () => openLightbox(t.map_data);
+    mapWrap.onclick = () => openLightbox(terMapSrc);
   } else {
     mapWrap.style.display = 'none';
     mapWrap.onclick = null;
@@ -8075,6 +8180,7 @@ async function openPreferencias() {
   document.body.style.overflow = 'hidden';
   document.getElementById('pref-version-value').textContent = 'Versión ' + APP_VERSION;
   updatePrefThemeActive();
+  updateDarkMapToggleUI();
   await renderPrefNotifList();
 }
 function closePreferencias() {
@@ -8091,6 +8197,20 @@ function updatePrefThemeActive() {
   ['light','dark','auto'].forEach(t => {
     document.getElementById('pref-theme-' + t)?.classList.toggle('active', t === theme);
   });
+}
+function updateDarkMapToggleUI() {
+  const enabled = localStorage.getItem('fleming_dark_maps') !== 'false';
+  const toggle = document.getElementById('pref-dark-maps-toggle');
+  const thumb  = document.getElementById('pref-dark-maps-thumb');
+  if (!toggle || !thumb) return;
+  toggle.style.background = enabled ? 'var(--accent)' : 'var(--surface3)';
+  thumb.style.left = enabled ? '21px' : '3px';
+}
+function toggleDarkMapsPref() {
+  const current = localStorage.getItem('fleming_dark_maps') !== 'false';
+  localStorage.setItem('fleming_dark_maps', current ? 'false' : 'true');
+  updateDarkMapToggleUI();
+  if (currentSubTab === 'territorios') renderTerritoryView();
 }
 async function renderPrefNotifList() {
   const list = document.getElementById('pref-notif-list');
