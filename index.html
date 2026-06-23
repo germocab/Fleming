@@ -3130,7 +3130,7 @@
             Administrar
           </button>
           <button class="dropdown-item" onclick="openPreferencias();closeOptionsMenu()">
-            <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3z"/><path d="M9 8c-2 3-4 3.5-7 4l8 8c1-.5 3.5-2 4-7"/><path d="M14.5 17.5 4.5 15"/></svg>
             Preferencias
           </button>
           <div class="dropdown-divider"></div>
@@ -3871,6 +3871,20 @@
           <div id="pref-dark-maps-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
+      <!-- Accent color — only visible when easter egg is unlocked -->
+      <div id="pref-accent-section" style="display:none;animation:eggReveal 0.5s cubic-bezier(0.16,1,0.3,1) both;border-top:1px solid var(--border)">
+        <div style="padding:0.75rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
+          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">Color de acento</span>
+        </div>
+        <div style="padding:0.4rem 1rem 1rem;display:flex;gap:14px;align-items:center">
+          <button class="accent-swatch" id="accent-sw-blue"   onclick="setAccentColor('blue')"   style="--sw:#007AFF" title="Azul"></button>
+          <button class="accent-swatch" id="accent-sw-green"  onclick="setAccentColor('green')"  style="--sw:#30c97a" title="Verde"></button>
+          <button class="accent-swatch" id="accent-sw-pink"   onclick="setAccentColor('pink')"   style="--sw:#e040a0" title="Rosa"></button>
+          <button class="accent-swatch" id="accent-sw-yellow" onclick="setAccentColor('yellow')" style="--sw:#f5a623" title="Amarillo"></button>
+          <button class="accent-swatch" id="accent-sw-purple" onclick="setAccentColor('purple')" style="--sw:#a855f7" title="Morado"></button>
+        </div>
+      </div>
     </div>
 
     <!-- Notificaciones -->
@@ -3901,19 +3915,7 @@
             transform="rotate(-90 18 18)" style="transition:stroke-dashoffset 0.05s linear"/>
         </svg>
       </div>
-      <!-- Hidden accent color section — revealed by easter egg -->
-      <div id="pref-accent-section" style="display:none;animation:eggReveal 0.5s cubic-bezier(0.16,1,0.3,1) both">
-        <div style="padding:0.6rem 1rem 0.2rem;display:flex;align-items:center;gap:8px">
-          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">Color de acento</span>
-        </div>
-        <div style="padding:0.5rem 1rem 0.9rem;display:flex;gap:12px;align-items:center">
-          <button class="accent-swatch" id="accent-sw-blue"   onclick="setAccentColor('blue')"   style="--sw:#007AFF" title="Azul"></button>
-          <button class="accent-swatch" id="accent-sw-green"  onclick="setAccentColor('green')"  style="--sw:#30c97a" title="Verde"></button>
-          <button class="accent-swatch" id="accent-sw-pink"   onclick="setAccentColor('pink')"   style="--sw:#e040a0" title="Rosa"></button>
-          <button class="accent-swatch" id="accent-sw-yellow" onclick="setAccentColor('yellow')" style="--sw:#f5a623" title="Amarillo"></button>
-        </div>
-      </div>
+      <!-- Hidden accent color section — revealed by easter egg, now lives in Apariencia -->
     </div>
 
     <!-- Reportar un problema -->
@@ -4050,7 +4052,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.23.0-alpha';
+const APP_VERSION = '0.24.0-alpha';
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -8300,6 +8302,7 @@ const ACCENT_PALETTES = {
   green:  { light: { accent: '#28cd41', light: 'rgba(40,205,65,0.12)'   }, dark: { accent: '#30d158', light: 'rgba(48,209,88,0.15)'   } },
   pink:   { light: { accent: '#d9006e', light: 'rgba(217,0,110,0.12)'   }, dark: { accent: '#e040a0', light: 'rgba(224,64,160,0.15)'  } },
   yellow: { light: { accent: '#c9820a', light: 'rgba(201,130,10,0.12)'  }, dark: { accent: '#f5a623', light: 'rgba(245,166,35,0.15)'  } },
+  purple: { light: { accent: '#9333ea', light: 'rgba(147,51,234,0.12)'  }, dark: { accent: '#a855f7', light: 'rgba(168,85,247,0.15)'  } },
 };
 let _versionHoldTimer = null;
 let _versionHoldRaf   = null;
@@ -8349,15 +8352,22 @@ function cancelVersionHold(completed) {
 
 function triggerEggUnlock() {
   const alreadyUnlocked = localStorage.getItem('fleming_egg_unlocked') === '1';
-  // Always show section if already unlocked on open; first time show the big reveal
+  if (alreadyUnlocked) {
+    // Toggle off — let them relive the surprise next time
+    localStorage.removeItem('fleming_egg_unlocked');
+    localStorage.removeItem('fleming_accent');
+    applyAccentColor('blue');
+    const sec = document.getElementById('pref-accent-section');
+    if (sec) sec.style.display = 'none';
+    showToast('Easter egg desactivado. ¡Encuéntralo de nuevo!', '');
+    return;
+  }
+  // First unlock!
   localStorage.setItem('fleming_egg_unlocked', '1');
   revealAccentSection();
-  if (!alreadyUnlocked) {
-    // Big reveal!
-    const overlay = document.getElementById('egg-unlock-overlay');
-    overlay.classList.add('active');
-    launchConfetti();
-  }
+  const overlay = document.getElementById('egg-unlock-overlay');
+  overlay.classList.add('active');
+  launchConfetti();
 }
 
 function closeEggUnlock() {
@@ -8482,7 +8492,7 @@ function initAccentColor() {
 
 function updateAccentSwatchesUI() {
   const active = localStorage.getItem('fleming_accent') || 'blue';
-  ['blue','green','pink','yellow'].forEach(name => {
+  ['blue','green','pink','yellow','purple'].forEach(name => {
     document.getElementById('accent-sw-' + name)?.classList.toggle('active', name === active);
   });
 }
