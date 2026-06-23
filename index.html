@@ -2288,6 +2288,37 @@
   .ter-view-title {
     font-size: 1.05rem; font-weight: 700; color: var(--text);
   }
+
+  /* ── Contextual Admin Shortcut Banner ─────────────────────────────────────── */
+  .admin-shortcut-banner {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 0.85rem 1rem;
+    background: var(--accent-light); border: 1px solid rgba(0,122,255,0.2);
+    border-radius: var(--radius-sm); margin: 0 0 1.1rem;
+  }
+  .admin-shortcut-banner-text {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 0.84rem; font-weight: 600; color: var(--accent); min-width: 0;
+  }
+  .admin-shortcut-banner-text svg {
+    width: 16px; height: 16px; stroke: currentColor; fill: none;
+    stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0;
+  }
+  .admin-shortcut-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 0.48rem 1rem; border: none; border-radius: 20px;
+    background: var(--accent); color: #fff;
+    font-family: var(--font); font-size: 0.82rem; font-weight: 700;
+    cursor: pointer; white-space: nowrap; flex-shrink: 0;
+    transition: opacity 0.18s, transform 0.1s;
+    box-shadow: 0 2px 8px rgba(0,122,255,0.3);
+  }
+  .admin-shortcut-btn:hover { opacity: 0.88; }
+  .admin-shortcut-btn:active { transform: scale(0.97); }
+  .admin-shortcut-btn svg {
+    width: 13px; height: 13px; stroke: currentColor; fill: none;
+    stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+  }
   .btn-map-full {
     display: inline-flex; align-items: center; gap: 7px;
     padding: 0.55rem 1.1rem;
@@ -3174,12 +3205,12 @@
           </div>
           <div class="dropdown-divider"></div>
           <button class="dropdown-item" id="admin-dropdown-btn" onclick="showPage('admin');closeOptionsMenu()" style="display:none">
-            <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="12" y1="2" x2="12" y2="22" transform="rotate(-15 12 12)"/></svg>
-            Administrar
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Administración
           </button>
           <button class="dropdown-item" onclick="openPreferencias();closeOptionsMenu()">
-            <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 1 0-3-3z"/><path d="M9 8c-2 3-4 3.5-7 4l8 8c1-.5 3.5-2 4-7"/><path d="M14.5 17.5 4.5 15"/></svg>
-            Preferencias
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Configuración
           </button>
         </div>
       </div>
@@ -3192,6 +3223,7 @@
   <div class="main-content">
     <div class="page active" id="page-schedule">
       <div id="sub-content-casa" class="sub-page active-sub">
+        <div id="admin-shortcut-casa" style="display:none"></div>
         <div id="schedule-content"><div class="loader-wrap"><div class="loader"></div></div></div>
       </div>
       <div id="sub-content-carritos" class="sub-page" style="display:none">
@@ -3202,6 +3234,7 @@
         </div>
       </div>
       <div id="sub-content-territorios" class="sub-page" style="display:none">
+        <div id="admin-shortcut-territorios" style="display:none"></div>
         <div class="ter-view-header">
           <span class="ter-view-title">Territorios</span>
           <button class="btn-map-full" id="btn-ver-mapa-completo" onclick="openFullMap()" style="display:none">
@@ -3213,6 +3246,7 @@
       </div>
 
       <div id="sub-content-grupos" class="sub-page" style="display:none">
+        <div id="admin-shortcut-grupos" style="display:none"></div>
         <div id="grupos-view-content"><div class="loader-wrap"><div class="loader"></div></div></div>
       </div>
     </div>
@@ -3221,6 +3255,7 @@
 
       <!-- Vida y Ministerio -->
       <div id="sub-content-vida-ministerio" class="sub-page active-sub">
+        <div id="admin-shortcut-vida-ministerio" style="display:none"></div>
         <div id="vmc-user-view">
           <div class="loader-wrap"><div class="loader"></div></div>
         </div>
@@ -3239,6 +3274,7 @@
 
       <!-- Aseo del Salón -->
       <div id="sub-content-aseo-salon" class="sub-page" style="display:none">
+        <div id="admin-shortcut-aseo-salon" style="display:none"></div>
         <div id="aseo-user-view"><div class="loader-wrap"><div class="loader"></div></div></div>
       </div>
 
@@ -3255,6 +3291,7 @@
 
       <!-- Responsabilidades -->
       <div id="sub-content-responsabilidades" class="sub-page" style="display:none">
+        <div id="admin-shortcut-responsabilidades" style="display:none"></div>
         <div id="resp-user-view"><div class="loader-wrap"><div class="loader"></div></div></div>
       </div>
 
@@ -4090,7 +4127,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.25.0-alpha';
+const APP_VERSION = '0.26.0-alpha';
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -5281,6 +5318,7 @@ async function enterApp() {
   startNotifPolling();
   scheduleMidnightRefresh();
   await subscribeToPush();
+  updateAdminShortcuts();
 }
   
 async function doAccess() {
@@ -5423,6 +5461,7 @@ function switchSubTab(tabId) {
   });
 
   _saveNavState();
+  updateAdminShortcuts();
   if (tabId === 'casa') refreshScheduleIfStale();
   if (tabId === 'territorios') renderTerritoryView();
   if (tabId === 'responsabilidades') renderRespUserView();
@@ -5437,6 +5476,86 @@ function switchSubTab(tabId) {
       }
     });
   }
+}
+
+// ── Admin Shortcut Banners ────────────────────────────────────────────────────
+// Maps viewer sub-tab → admin tab key (used in switchAdminTab)
+const VIEWER_TO_ADMIN_TAB = {
+  'casa':              'assignments',
+  'territorios':       'territories',
+  'grupos':            'grupos',
+  'vida-ministerio':   'vmc',
+  'aseo-salon':        'aseo-salon',
+  'responsabilidades': 'responsabilidades',
+};
+// Human-readable labels per sub-tab
+const VIEWER_SECTION_LABELS = {
+  'casa':              'Asignaciones',
+  'territorios':       'Territorios',
+  'grupos':            'Grupos',
+  'vida-ministerio':   'Vida y Ministerio',
+  'aseo-salon':        'Aseo del Salón',
+  'responsabilidades': 'Responsabilidades',
+};
+// Permission key for semiadmin module check
+const VIEWER_PERM_KEY = {
+  'casa':              'assignments',
+  'territorios':       'territories',
+  'grupos':            'grupos',
+  'vida-ministerio':   null,   // vmc — no granular permission yet; show to all semiadmin
+  'aseo-salon':        'aseo_salon',
+  'responsabilidades': 'responsabilidades',
+};
+
+async function updateAdminShortcuts() {
+  if (!currentUser || !['dev','admin','semiadmin'].includes(currentRole)) {
+    // Hide all banners for viewers
+    Object.keys(VIEWER_TO_ADMIN_TAB).forEach(sub => {
+      const el = document.getElementById('admin-shortcut-' + sub);
+      if (el) el.style.display = 'none';
+    });
+    return;
+  }
+
+  let perms = null;
+  if (currentRole === 'semiadmin') {
+    perms = await getUserPermissions();
+  }
+
+  Object.keys(VIEWER_TO_ADMIN_TAB).forEach(sub => {
+    const el = document.getElementById('admin-shortcut-' + sub);
+    if (!el) return;
+
+    // Check permission for semiadmin
+    if (currentRole === 'semiadmin') {
+      const permKey = VIEWER_PERM_KEY[sub];
+      if (permKey && !canAccessModule(perms, permKey)) {
+        el.style.display = 'none';
+        return;
+      }
+    }
+
+    const adminTab = VIEWER_TO_ADMIN_TAB[sub];
+    const label = VIEWER_SECTION_LABELS[sub];
+    el.style.display = '';
+    el.innerHTML = `
+      <div class="admin-shortcut-banner">
+        <div class="admin-shortcut-banner-text">
+          <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Tienes acceso de administrador a <strong>${label}</strong>
+        </div>
+        <button class="admin-shortcut-btn" onclick="goAdminShortcut('${adminTab}')">
+          <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Administrar
+        </button>
+      </div>`;
+  });
+}
+
+async function goAdminShortcut(adminTab) {
+  showPage('admin');
+  await new Promise(r => setTimeout(r, 60)); // let admin page open
+  switchAdminTab(adminTab);
 }
 
 function showPage(name) {
