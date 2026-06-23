@@ -1428,6 +1428,51 @@
   .notif-delete-btn:hover { background: rgba(255,59,48,0.1); color: var(--red); }
   .notif-delete-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
 
+  /* ── Notif category pill (badge dentro de cada tarjeta) ── */
+  .notif-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px 2px 6px; border-radius: 20px;
+    font-size: 0.66rem; font-weight: 700; letter-spacing: 0.01em;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .notif-pill svg { width: 10px; height: 10px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+  /* ── Notif search bar ── */
+  .notif-search-wrap {
+    position: relative; padding: 0 0 0.6rem;
+  }
+  .notif-search-wrap .notif-search-icon {
+    position: absolute; left: 0.65rem; top: 50%; transform: translateY(-50%);
+    width: 14px; height: 14px; stroke: var(--text3); fill: none; stroke-width: 2; stroke-linecap: round; pointer-events: none;
+  }
+  .notif-search-input {
+    width: 100%; padding: 0.5rem 0.65rem 0.5rem 2rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); font-family: var(--font);
+    font-size: 0.82rem; color: var(--text); outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .notif-search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .notif-search-input::placeholder { color: var(--text3); }
+
+  /* ── Notif filter chips ── */
+  .notif-filter-chips {
+    display: flex; gap: 6px; flex-wrap: wrap; padding-bottom: 0.7rem;
+  }
+  .notif-filter-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 0.32rem 0.7rem 0.32rem 0.55rem; border-radius: 20px;
+    font-size: 0.72rem; font-weight: 700; cursor: pointer;
+    border: 1.5px solid var(--border); background: var(--surface);
+    color: var(--text3); transition: border-color 0.18s, background 0.18s, color 0.18s;
+    user-select: none;
+  }
+  .notif-filter-chip svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .notif-filter-chip.active { color: #fff; border-color: transparent; }
+
+  /* ── Notif empty (sin resultados de filtro/búsqueda) ── */
+  .notif-empty-filtered { text-align: center; padding: 2rem 1rem; color: var(--text3); font-size: 0.85rem; }
+
   .filter-row { display: flex; gap: 8px; margin-bottom: 1.25rem; flex-wrap: wrap; align-items: center; }
   .date-input {
     padding: 5px 12px; background: var(--surface); border: 1px solid var(--border);
@@ -3083,6 +3128,16 @@
   .pref-notif-title { font-size: 0.88rem; font-weight: 600; color: var(--text); }
   .pref-notif-sub { font-size: 0.74rem; color: var(--text3); margin-top: 1px; }
   .pref-notif-lock { width: 15px; height: 15px; stroke: var(--text3); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .pref-notif-icon {
+    width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .pref-notif-icon svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .pref-notif-group-header {
+    padding: 0.9rem 1rem 0.3rem; font-size: 0.7rem; font-weight: 800;
+    letter-spacing: 0.05em; text-transform: uppercase; color: var(--text3);
+  }
+  .pref-notif-group-header:first-child { padding-top: 0.3rem; }
 
   /* Admin labels panel inside users panel */
   .labels-grid { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 6px; }
@@ -3158,10 +3213,17 @@
     <div id="notif-badge" style="display:none;position:absolute;top:6px;right:6px;width:9px;height:9px;background:var(--red);border-radius:50%;border:2px solid var(--surface);pointer-events:none"></div>
   </button>
   <!-- Desktop dropdown (hidden on mobile via CSS) -->
-  <div class="options-dropdown notif-desktop-dropdown" id="notifications-dropdown" style="width:340px;max-height:480px;overflow-y:auto;">
-    <div style="padding:0.85rem 1rem;font-weight:700;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+  <div class="options-dropdown notif-desktop-dropdown" id="notifications-dropdown" style="width:340px;max-height:520px;overflow-y:auto;">
+    <div style="padding:0.85rem 1rem 0.4rem;font-weight:700;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
       <span>Notificaciones</span>
       <button id="notif-clear-btn-desktop" onclick="deleteAllNotifications()" style="background:none;border:none;font-family:var(--font);font-size:0.75rem;font-weight:600;color:var(--red);cursor:pointer;padding:2px 6px;border-radius:6px;transition:background 0.15s" onmouseover="this.style.background='rgba(255,59,48,0.08)'" onmouseout="this.style.background='none'">Borrar todo</button>
+    </div>
+    <div style="padding:0.6rem 1rem 0;border-bottom:1px solid var(--border)">
+      <div class="notif-search-wrap">
+        <svg class="notif-search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="notif-search-input" placeholder="Buscar notificaciones…" autocomplete="off" oninput="notifSearchInput(this.value,'desktop')">
+      </div>
+      <div class="notif-filter-chips" id="notif-filter-chips-desktop"></div>
     </div>
     <div id="notifications-list-desktop">
       <div class="loader-wrap"><div class="loader"></div></div>
@@ -4135,7 +4197,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.28.0-alpha';
+const APP_VERSION = '0.29.0-alpha';
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -8704,19 +8766,28 @@ async function renderPrefNotifList() {
   if (!list) return;
   list.innerHTML = '<div class="loader-wrap" style="padding:1rem"><div class="loader"></div></div>';
   const prefs = await loadNotifPrefs();
-  list.innerHTML = NOTIF_CATEGORIES.map(cat => {
-    const checked = cat.mandatory ? true : (prefs[cat.id] !== false);
-    const lockOrToggle = cat.mandatory
-      ? `<svg class="pref-notif-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
-      : `<div class="toggle-switch${checked ? ' on' : ''}" onclick="togglePrefNotif('${cat.id}', this)"><div class="toggle-thumb"></div></div>`;
-    return `<div class="pref-notif-row">
-      <div class="pref-notif-content">
-        <div class="pref-notif-title">${cat.label}</div>
-        ${cat.mandatory ? '<div class="pref-notif-sub">Obligatoria, no se puede desactivar</div>' : ''}
-      </div>
-      ${lockOrToggle}
-    </div>`;
-  }).join('');
+
+  let html = '';
+  Object.entries(NOTIF_GROUPS).forEach(([groupKey, g]) => {
+    const cats = NOTIF_CATEGORIES.filter(c => c.group === groupKey);
+    if (!cats.length) return;
+    html += `<div class="pref-notif-group-header">${g.label}</div>`;
+    html += cats.map(cat => {
+      const checked = cat.mandatory ? true : (prefs[cat.id] !== false);
+      const lockOrToggle = cat.mandatory
+        ? `<svg class="pref-notif-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
+        : `<div class="toggle-switch${checked ? ' on' : ''}" onclick="togglePrefNotif('${cat.id}', this)"><div class="toggle-thumb"></div></div>`;
+      return `<div class="pref-notif-row">
+        <div class="pref-notif-icon" style="background:${g.bg};color:${g.color}">${g.icon}</div>
+        <div class="pref-notif-content">
+          <div class="pref-notif-title">${cat.label}</div>
+          ${cat.mandatory ? '<div class="pref-notif-sub">Obligatoria, no se puede desactivar</div>' : ''}
+        </div>
+        ${lockOrToggle}
+      </div>`;
+    }).join('');
+  });
+  list.innerHTML = html;
 }
 async function togglePrefNotif(categoryId, el) {
   const turningOn = !el.classList.contains('on');
@@ -9105,18 +9176,66 @@ init();
 
 // ── Notification badge logic ──────────────────────────────────────────────────
 // Stores the ISO timestamp of the last notification the user has seen.
+// ── Notification groups (macro-categorías visuales) ──────────────────────────
+// Cada notificación se clasifica en uno de estos 4 grupos para mostrarse con
+// un pill reconocible (ícono + color). El grupo se deriva de notif_category
+// (ver NOTIF_CATEGORIES → group) o cae en 'sistema' si no tiene categoría.
+const NOTIF_GROUPS = {
+  casa: {
+    label: 'Casa en Casa',
+    color: '#34c759',
+    bg: 'rgba(52,199,89,0.12)',
+    icon: '<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+  },
+  grupos: {
+    label: 'Grupos de Servicio',
+    color: '#af52de',
+    bg: 'rgba(175,82,222,0.12)',
+    icon: '<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  },
+  reuniones: {
+    label: 'Reuniones',
+    color: '#007AFF',
+    bg: 'rgba(0,122,255,0.12)',
+    icon: '<svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>',
+  },
+  sistema: {
+    label: 'Sistema',
+    color: '#ff9500',
+    bg: 'rgba(255,149,0,0.12)',
+    icon: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+  },
+};
+
 // ── Notification categories & preferences ───────────────────────────────────
 // Cada notificación lleva (opcionalmente) un campo notif_category. Las
 // categorías marcadas como mandatory NO pueden desactivarse desde Preferencias.
+// El campo "group" indica a qué macro-categoría (NOTIF_GROUPS) pertenece para
+// fines de visualización (pill con ícono y color) y filtrado.
 const NOTIF_CATEGORIES = [
-  { id: 'casa',             label: 'Predicación de Casa en Casa', mandatory: false },
-  { id: 'grupo',            label: 'Grupo de Servicio',           mandatory: false },
-  { id: 'aseo',             label: 'Aseo del Salón',               mandatory: false },
-  { id: 'hospitalidad',     label: 'Hospitalidad',                 mandatory: false },
-  { id: 'vida-ministerio',  label: 'Vida y Ministerio',            mandatory: true  },
-  { id: 'fin-semana',       label: 'Fin de Semana',                mandatory: true  },
-  { id: 'responsabilidades', label: 'Responsabilidades',           mandatory: true  },
+  { id: 'casa',              label: 'Predicación de Casa en Casa', mandatory: false, group: 'casa' },
+  { id: 'grupo',             label: 'Grupo de Servicio',           mandatory: false, group: 'grupos' },
+  { id: 'vida-ministerio',   label: 'Vida y Ministerio',           mandatory: true,  group: 'reuniones' },
+  { id: 'fin-semana',        label: 'Fin de Semana',               mandatory: true,  group: 'reuniones' },
+  { id: 'aseo',              label: 'Aseo del Salón',               mandatory: false, group: 'reuniones' },
+  { id: 'hospitalidad',      label: 'Hospitalidad',                 mandatory: false, group: 'reuniones' },
+  { id: 'responsabilidades', label: 'Responsabilidades',           mandatory: true,  group: 'reuniones' },
+  { id: 'sistema',           label: 'Avisos de la Plataforma',     mandatory: true,  group: 'sistema' },
 ];
+
+// Devuelve la key de NOTIF_GROUPS correspondiente a una notificación.
+// Sin categoría (legado) o dev_only sin categoría → 'sistema'.
+function getNotifGroupKey(n) {
+  if (!n || !n.notif_category) return 'sistema';
+  const cat = NOTIF_CATEGORIES.find(c => c.id === n.notif_category);
+  return cat?.group || 'sistema';
+}
+function notifGroupPillHTML(n) {
+  const key = getNotifGroupKey(n);
+  const g = NOTIF_GROUPS[key];
+  return `<span class="notif-pill" style="background:${g.bg};color:${g.color}">${g.icon}${g.label}</span>`;
+}
+
 function defaultNotifPrefs() {
   const prefs = {};
   NOTIF_CATEGORIES.forEach(c => { prefs[c.id] = true; });
@@ -9238,9 +9357,18 @@ function toggleNotificationsMenu() {
       setLastSeenNotifTime(new Date().toISOString());
       const badge = document.getElementById('notif-badge');
       if (badge) badge.style.display = 'none';
+      _syncNotifSearchInput('desktop');
       loadNotifications('desktop');
     }
   }
+}
+
+// Mantiene el input de búsqueda visible en sincronía con el estado guardado
+// (útil porque el dropdown/página se recrea visualmente cada vez que se abre).
+function _syncNotifSearchInput(target) {
+  const wrap = target === 'desktop' ? document.getElementById('notifications-dropdown') : document.getElementById('page-notifications');
+  const input = wrap?.querySelector('.notif-search-input');
+  if (input) input.value = _notifSearchQuery;
 }
 
 function openNotificationsPage() {
@@ -9249,6 +9377,7 @@ function openNotificationsPage() {
   setLastSeenNotifTime(new Date().toISOString());
   const badge = document.getElementById('notif-badge');
   if (badge) badge.style.display = 'none';
+  _syncNotifSearchInput('mobile');
   loadNotifications('mobile');
 }
 
@@ -9265,6 +9394,62 @@ function _notifEmptyHTML(target) {
   </div>`;
 }
 
+function _notifEmptyFilteredHTML() {
+  return `<div class="notif-empty-filtered">
+    <svg viewBox="0 0 24 24" style="width:32px;height:32px;stroke:var(--text3);fill:none;stroke-width:1.5;stroke-linecap:round;opacity:0.4;margin-bottom:0.5rem;display:block;margin-left:auto;margin-right:auto"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    No hay notificaciones que coincidan con la búsqueda o el filtro.
+  </div>`;
+}
+
+// ── Estado de búsqueda y filtros del panel de notificaciones ────────────────
+let _notifAllData = [];                 // último fetch ya filtrado por isNotifForMe
+let _notifActiveGroups = new Set();      // vacío = sin filtro (mostrar todos los grupos)
+let _notifSearchQuery = '';
+
+function _notifApplyFilters(data) {
+  let out = data;
+  if (_notifActiveGroups.size > 0) {
+    out = out.filter(n => _notifActiveGroups.has(getNotifGroupKey(n)));
+  }
+  const q = _notifSearchQuery.trim().toLowerCase();
+  if (q) {
+    out = out.filter(n =>
+      (n.title || '').toLowerCase().includes(q) ||
+      (n.body  || '').toLowerCase().includes(q)
+    );
+  }
+  return out;
+}
+
+function notifFilterChipsHTML() {
+  return Object.entries(NOTIF_GROUPS).map(([key, g]) => {
+    const active = _notifActiveGroups.has(key);
+    const style = active ? `background:${g.color};border-color:${g.color}` : '';
+    return `<button type="button" class="notif-filter-chip${active ? ' active' : ''}" style="${style}" onclick="notifToggleFilterChip('${key}')">${g.icon}${g.label}</button>`;
+  }).join('');
+}
+
+function notifToggleFilterChip(key) {
+  if (_notifActiveGroups.has(key)) _notifActiveGroups.delete(key);
+  else _notifActiveGroups.add(key);
+  _renderNotifAllTargets();
+}
+
+function notifSearchInput(value, target) {
+  _notifSearchQuery = value;
+  _renderNotifTarget(target);
+}
+
+// Re-pinta ambos targets (desktop + mobile) usando los datos ya cacheados —
+// usado cuando cambia un filtro de grupo (los chips existen en ambas vistas).
+function _renderNotifAllTargets() {
+  ['desktop','mobile'].forEach(t => {
+    const chipsEl = document.getElementById(t === 'desktop' ? 'notif-filter-chips-desktop' : 'notif-filter-chips-mobile');
+    if (chipsEl) chipsEl.innerHTML = notifFilterChipsHTML();
+    _renderNotifTarget(t);
+  });
+}
+
 async function loadNotifications(target) {
   // target = 'desktop' | 'mobile' | undefined (refresh both)
   const targets = target ? [target] : ['desktop', 'mobile'];
@@ -9275,65 +9460,82 @@ async function loadNotifications(target) {
     .limit(50);
 
   const myNameLower = currentUser?.name?.trim().toLowerCase();
-  const data = (rawData || []).filter(n => isNotifForMe(n, myNameLower));
+  _notifAllData = (rawData || []).filter(n => isNotifForMe(n, myNameLower));
 
-  const lastSeen = getLastSeenNotifTime();
+  targets.forEach(t => {
+    const chipsEl = document.getElementById(t === 'desktop' ? 'notif-filter-chips-desktop' : 'notif-filter-chips-mobile');
+    if (chipsEl) chipsEl.innerHTML = notifFilterChipsHTML();
+    _renderNotifTarget(t);
+  });
+}
+
+function _renderNotifTarget(t) {
+  const listEl = document.getElementById(t === 'desktop' ? 'notifications-list-desktop' : 'notifications-list-mobile');
+  if (!listEl) return;
+
   const clearBtnDesktop = document.getElementById('notif-clear-btn-desktop');
   const clearBtnMobile  = document.getElementById('notif-clear-btn');
+  const lastSeen = getLastSeenNotifTime();
 
-  for (const t of targets) {
-    const listEl = document.getElementById(t === 'desktop' ? 'notifications-list-desktop' : 'notifications-list-mobile');
-    if (!listEl) continue;
+  if (!_notifAllData.length) {
+    if (t === 'desktop' && clearBtnDesktop) clearBtnDesktop.style.display = 'none';
+    if (t === 'mobile'  && clearBtnMobile)  clearBtnMobile.style.display  = 'none';
+    listEl.innerHTML = _notifEmptyHTML(t);
+    return;
+  }
 
-    if (!data || data.length === 0) {
-      if (t === 'desktop' && clearBtnDesktop) clearBtnDesktop.style.display = 'none';
-      if (t === 'mobile'  && clearBtnMobile)  clearBtnMobile.style.display  = 'none';
-      listEl.innerHTML = _notifEmptyHTML(t);
-      continue;
-    }
+  if (t === 'desktop' && clearBtnDesktop) clearBtnDesktop.style.display = '';
+  if (t === 'mobile'  && clearBtnMobile)  clearBtnMobile.style.display  = '';
 
-    if (t === 'desktop' && clearBtnDesktop) clearBtnDesktop.style.display = '';
-    if (t === 'mobile'  && clearBtnMobile)  clearBtnMobile.style.display  = '';
+  const data = _notifApplyFilters(_notifAllData);
 
-    if (t === 'desktop') {
-      // Compact dropdown style
-      listEl.innerHTML = data.map(n => {
-        const isNew = n.created_at > lastSeen;
-        const dateStr = new Date(n.created_at).toLocaleDateString('es-CL', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-        return `<div id="notif-d-${n.id}" style="padding:0.75rem 1rem;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:4px;${isNew?'background:var(--accent-light);':''}position:relative">
-          <div style="display:flex;align-items:center;gap:6px;padding-right:24px">
-            <span style="font-size:0.85rem;font-weight:700;color:var(--text)">${n.title}</span>
-            ${isNew?'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0"></span>':''}
+  if (!data.length) {
+    listEl.innerHTML = _notifEmptyFilteredHTML();
+    return;
+  }
+
+  if (t === 'desktop') {
+    // Compact dropdown style
+    listEl.innerHTML = data.map(n => {
+      const isNew = n.created_at > lastSeen;
+      const dateStr = new Date(n.created_at).toLocaleDateString('es-CL', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      return `<div id="notif-d-${n.id}" style="padding:0.75rem 1rem;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:5px;${isNew?'background:var(--accent-light);':''}position:relative">
+        <div style="display:flex;align-items:center;gap:6px;padding-right:24px">
+          <span style="font-size:0.85rem;font-weight:700;color:var(--text)">${n.title}</span>
+          ${isNew?'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0"></span>':''}
+        </div>
+        <span style="font-size:0.8rem;color:var(--text2);line-height:1.4">${n.body}</span>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;gap:6px">
+          ${notifGroupPillHTML(n)}
+          <span style="font-size:0.65rem;color:var(--text3);flex-shrink:0">${dateStr}</span>
+        </div>
+        <button onclick="deleteNotification('${n.id}')" title="Eliminar" style="position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text3);padding:0" onmouseover="this.style.background='rgba(255,59,48,0.1)';this.style.color='var(--red)'" onmouseout="this.style.background='none';this.style.color='var(--text3)'">
+          <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>`;
+    }).join('');
+  } else {
+    // Fullscreen card style
+    listEl.innerHTML = data.map(n => {
+      const isNew = n.created_at > lastSeen;
+      const dateStr = new Date(n.created_at).toLocaleDateString('es-CL', {weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      return `<div class="notif-card${isNew?' is-new':''}" id="notif-m-${n.id}">
+        <div class="notif-card-header">
+          <div class="notif-card-title-row">
+            ${isNew?'<div class="notif-card-dot"></div>':''}
+            <span class="notif-card-title">${n.title}</span>
           </div>
-          <span style="font-size:0.8rem;color:var(--text2);line-height:1.4">${n.body}</span>
-          <span style="font-size:0.65rem;color:var(--text3);margin-top:2px">${dateStr}</span>
-          <button onclick="deleteNotification('${n.id}')" title="Eliminar" style="position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text3);padding:0" onmouseover="this.style.background='rgba(255,59,48,0.1)';this.style.color='var(--red)'" onmouseout="this.style.background='none';this.style.color='var(--text3)'">
-            <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <button class="notif-delete-btn" title="Eliminar" onclick="deleteNotification('${n.id}')">
+            <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
-        </div>`;
-      }).join('');
-    } else {
-      // Fullscreen card style
-      listEl.innerHTML = data.map(n => {
-        const isNew = n.created_at > lastSeen;
-        const dateStr = new Date(n.created_at).toLocaleDateString('es-CL', {weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-        return `<div class="notif-card${isNew?' is-new':''}" id="notif-m-${n.id}">
-          <div class="notif-card-header">
-            <div class="notif-card-title-row">
-              ${isNew?'<div class="notif-card-dot"></div>':''}
-              <span class="notif-card-title">${n.title}</span>
-            </div>
-            <button class="notif-delete-btn" title="Eliminar" onclick="deleteNotification('${n.id}')">
-              <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-          </div>
-          <div class="notif-card-body">${n.body}</div>
-          <div class="notif-card-footer">
-            <span class="notif-card-date">${dateStr}</span>
-          </div>
-        </div>`;
-      }).join('');
-    }
+        </div>
+        <div class="notif-card-body">${n.body}</div>
+        <div class="notif-card-footer">
+          ${notifGroupPillHTML(n)}
+          <span class="notif-card-date">${dateStr}</span>
+        </div>
+      </div>`;
+    }).join('');
   }
 }
 
@@ -9355,14 +9557,16 @@ async function deleteNotification(id) {
     const el = document.getElementById(prefix + id);
     if (el) el.remove();
   });
+  // Mantener el caché de filtros sincronizado con lo eliminado
+  _notifAllData = _notifAllData.filter(n => n.id !== id);
   // Show empty state if no cards left
   ['notifications-list-desktop','notifications-list-mobile'].forEach(lid => {
     const list = document.getElementById(lid);
     if (list && !list.querySelector('[id^="notif-d-"],[id^="notif-m-"]')) {
       const t = lid.includes('desktop') ? 'desktop' : 'mobile';
-      list.innerHTML = _notifEmptyHTML(t);
+      list.innerHTML = _notifAllData.length ? _notifEmptyFilteredHTML() : _notifEmptyHTML(t);
       const btn = document.getElementById(t === 'desktop' ? 'notif-clear-btn-desktop' : 'notif-clear-btn');
-      if (btn) btn.style.display = 'none';
+      if (btn && !_notifAllData.length) btn.style.display = 'none';
     }
   });
 }
@@ -10919,7 +11123,14 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
     <span style="font-size:1rem;font-weight:700;letter-spacing:-0.01em">Notificaciones</span>
     <button id="notif-clear-btn" onclick="deleteAllNotifications()" style="background:none;border:none;font-family:var(--font);font-size:0.8rem;font-weight:600;color:var(--red);cursor:pointer;padding:0.35rem 0.65rem;border-radius:8px;transition:background 0.15s" onmouseover="this.style.background='rgba(255,59,48,0.08)'" onmouseout="this.style.background='none'">Borrar todo</button>
   </nav>
-  <div style="flex:1;overflow-y:auto;padding:1rem;max-width:640px;width:100%;margin:0 auto" id="notifications-list-mobile">
+  <div style="padding:0.85rem 1rem 0;max-width:640px;width:100%;margin:0 auto">
+    <div class="notif-search-wrap">
+      <svg class="notif-search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" class="notif-search-input" placeholder="Buscar notificaciones…" autocomplete="off" oninput="notifSearchInput(this.value,'mobile')">
+    </div>
+    <div class="notif-filter-chips" id="notif-filter-chips-mobile"></div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:0 1rem 1rem;max-width:640px;width:100%;margin:0 auto" id="notifications-list-mobile">
     <div class="loader-wrap"><div class="loader"></div></div>
   </div>
 </div>
