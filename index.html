@@ -4135,7 +4135,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.28.0.0-alpha';
+const APP_VERSION = '0.28.0-alpha';
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -10253,9 +10253,9 @@ function vmcRenderWeekProgram(week) {
 // Fin de Semana — Admin + Vista de usuario
 // Tabla Supabase: fs_weeks
 // Esquema: { id uuid pk, date_start date, date_end date,
-//            song_open text, presidente text, speaker_name text,
-//            visiting_cong text, watchtower_article text, watchtower_reader text,
-//            created_at timestamptz, notified_at timestamptz }
+//            talk_title text, presidente text, speaker_name text,
+//            visiting_cong text, watchtower_article text, watchtower_link text,
+//            watchtower_reader text, created_at timestamptz, notified_at timestamptz }
 // Reutiliza vmc_people (picker de personas) y las funciones genéricas
 // vmcUserColor / vmcInitials / vmcPpOpen / vmcPersonField / vmcRestorePersonBtn.
 // ══════════════════════════════════════════════════════════════════════════════
@@ -10314,9 +10314,11 @@ function renderAdminFs() {
 
   container.innerHTML = fsWeeks.map(w => {
     const st = fsWeekStatus(w);
-    const sub = w.speaker_name
-      ? `Conferenciante: ${w.speaker_name}${w.visiting_cong ? ' (' + w.visiting_cong + ')' : ''}`
-      : (w.presidente ? `Presidente: ${w.presidente}` : '');
+    const sub = w.talk_title
+      ? `${w.talk_title}${w.speaker_name ? ' — ' + w.speaker_name : ''}`
+      : (w.speaker_name
+        ? `Conferenciante: ${w.speaker_name}${w.visiting_cong ? ' (' + w.visiting_cong + ')' : ''}`
+        : (w.presidente ? `Presidente: ${w.presidente}` : ''));
 
     return `<div class="vmc-week-card">
       <div class="vmc-week-card-header">
@@ -10350,10 +10352,11 @@ async function openFsWeekModal(id) {
 
   document.getElementById('fs-date-start').value          = week?.date_start          || '';
   document.getElementById('fs-date-end').value            = week?.date_end            || '';
-  document.getElementById('fs-song-open').value            = week?.song_open           || '';
+  document.getElementById('fs-talk-title').value           = week?.talk_title          || '';
   document.getElementById('fs-speaker-name').value          = week?.speaker_name        || '';
   document.getElementById('fs-visiting-cong').value         = week?.visiting_cong       || '';
   document.getElementById('fs-watchtower-article').value    = week?.watchtower_article  || '';
+  document.getElementById('fs-watchtower-link').value       = week?.watchtower_link     || '';
 
   // Cargar lista de personas si aún no está cargada (picker compartido con VMC)
   if (!vmcPeople.length) await loadVmcPeople();
@@ -10375,14 +10378,18 @@ async function saveFsWeek() {
   const dateEnd   = document.getElementById('fs-date-end').value;
   if (!dateStart || !dateEnd) { showToast('Ingresa las fechas de la semana', 'error'); return; }
 
+  let watchtowerLink = document.getElementById('fs-watchtower-link').value.trim();
+  if (watchtowerLink && !/^https?:\/\//i.test(watchtowerLink)) watchtowerLink = 'https://' + watchtowerLink;
+
   const payload = {
     date_start:          dateStart,
     date_end:            dateEnd,
-    song_open:           document.getElementById('fs-song-open').value.trim(),
+    talk_title:          document.getElementById('fs-talk-title').value.trim(),
     presidente:          document.getElementById('fs-presidente').value.trim(),
     speaker_name:        document.getElementById('fs-speaker-name').value.trim(),
     visiting_cong:       document.getElementById('fs-visiting-cong').value.trim(),
     watchtower_article:  document.getElementById('fs-watchtower-article').value.trim(),
+    watchtower_link:     watchtowerLink,
     watchtower_reader:   document.getElementById('fs-watchtower-reader').value.trim(),
   };
 
@@ -10569,20 +10576,23 @@ function fsRenderWeekProgram(week) {
   const speakerIcon = '<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>';
   const articleIcon = '<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>';
 
-  const speakerBlock = week.speaker_name ? `<div class="vmc-user-part-card">
+  const speakerBlock = (week.speaker_name || week.talk_title) ? `<div class="vmc-user-part-card">
       <div class="vmc-part-time-badge">${speakerIcon}</div>
       <div class="vmc-part-body">
-        <div class="vmc-part-name-display">Conferenciante</div>
-        <div class="vmc-part-assigned-display">${week.speaker_name}</div>
+        <div class="vmc-part-name-display">Conferencia pública</div>
+        ${week.talk_title ? `<div class="vmc-part-assigned-display">${week.talk_title}</div>` : ''}
+        ${week.speaker_name ? `<div class="vmc-part-note-display">Conferenciante: ${week.speaker_name}</div>` : ''}
         ${week.visiting_cong ? `<div class="vmc-part-note-display">Congregación visitante: ${week.visiting_cong}</div>` : ''}
       </div>
     </div>` : '';
 
-  const articleBlock = week.watchtower_article ? `<div class="vmc-user-part-card">
+  const safeWtLink = week.watchtower_link ? week.watchtower_link.replace(/"/g,'&quot;') : '';
+  const articleBlock = week.watchtower_article ? `<div class="vmc-user-part-card"${safeWtLink ? ` onclick="window.open('${safeWtLink}','_blank')" style="cursor:pointer"` : ''}>
       <div class="vmc-part-time-badge">${articleIcon}</div>
       <div class="vmc-part-body">
         <div class="vmc-part-name-display">Estudio de La Atalaya</div>
         <div class="vmc-part-assigned-display">${week.watchtower_article}</div>
+        ${safeWtLink ? `<div class="vmc-part-link-display"><svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round;vertical-align:-1px;margin-right:3px"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg>Ver artículo</div>` : ''}
       </div>
     </div>` : '';
 
@@ -10604,7 +10614,6 @@ function fsRenderWeekProgram(week) {
   return `
     <div class="vmc-program-header">
       <div class="vmc-program-title">${fsFormatRange(week)}</div>
-      ${week.song_open ? `<div class="vmc-program-reading"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;margin-right:4px"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Canción de inicio ${week.song_open}</div>` : ''}
     </div>
     ${myBlock}
     ${programBody}`;
@@ -11096,8 +11105,8 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
           Reunión de Fin de Semana
         </div>
         <div class="vmc-meta-row">
-          <span class="vmc-meta-label">Canción de inicio</span>
-          <input type="text" class="vmc-meta-val-input" id="fs-song-open" placeholder="Ej: 5">
+          <span class="vmc-meta-label">Nombre de la conferencia</span>
+          <input type="text" class="vmc-meta-val-input" id="fs-talk-title" placeholder="Ej: ¿Cómo puede ayudarnos la Biblia?" autocomplete="off">
         </div>
         <div class="vmc-meta-row">
           <span class="vmc-meta-label">Presidente</span>
@@ -11115,9 +11124,12 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
           <span class="vmc-meta-label">Congregación visitante</span>
           <input type="text" class="vmc-meta-val-input" id="fs-visiting-cong" placeholder="Ej: Congregación Las Rosas (opcional)" autocomplete="off">
         </div>
-        <div class="vmc-meta-row">
-          <span class="vmc-meta-label">Artículo La Atalaya</span>
-          <input type="text" class="vmc-meta-val-input" id="fs-watchtower-article" placeholder="Ej: Artículo 25" autocomplete="off">
+        <div class="vmc-meta-row" style="align-items:flex-start">
+          <span class="vmc-meta-label" style="margin-top:0.42rem">Artículo La Atalaya</span>
+          <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+            <input type="text" class="vmc-meta-val-input" id="fs-watchtower-article" placeholder="Ej: Artículo 25 — Título del artículo" autocomplete="off">
+            <input type="url" class="vmc-part-link-input" id="fs-watchtower-link" placeholder="Enlace al artículo (opcional) https://" autocomplete="off">
+          </div>
         </div>
         <div class="vmc-meta-row" style="border-bottom:none">
           <span class="vmc-meta-label">Lector La Atalaya</span>
