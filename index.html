@@ -109,13 +109,13 @@
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { font-size: 16px; overflow-x: clip; max-width: 100vw; }
+  html { font-size: 16px; overflow-x: hidden; max-width: 100vw; }
   body {
     font-family: var(--font);
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
-    overflow-x: clip;
+    overflow-x: hidden;
     max-width: 100vw;
     transition: background 0.3s, color 0.3s;
     -webkit-font-smoothing: antialiased;
@@ -198,13 +198,7 @@
     background: var(--nav-bg); backdrop-filter: blur(20px) saturate(180%);
     border-bottom: 1px solid var(--border);
     position: sticky; top: 0; z-index: 100;
-    transition: height 0.28s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  /* Navbar compacta: activada por JS al hacer scroll hacia abajo (solo Modo Viewer) */
-  body.nav-compact .topnav { height: 56px; }
-  body.nav-compact .main-seg-btn { padding: 6px 18px; font-size: 0.85rem; }
-  body.nav-compact .nav-icon-btn { width: 36px; height: 36px; }
-  body.nav-compact .nav-icon-btn svg { width: 16px; height: 16px; }
   .nav-spacer { min-width: 0; } /* left ghost — grid balances it with nav-icons */
   .nav-icons  { display: flex; align-items: center; gap: 10px; justify-self: end; min-width: 0; }
 
@@ -267,7 +261,6 @@
       font-size: 0.82rem;
     }
     /* Iconos: vuelven a su tamaño original */
-    body.nav-compact .topnav { height: 52px; }
   }
   .nav-icon-btn {
     width: 42px; height: 42px; border-radius: 50%;
@@ -369,15 +362,7 @@
     background: var(--nav-bg); backdrop-filter: blur(20px) saturate(180%);
     border-bottom: 1px solid var(--border);
     padding: 0 1.25rem; position: sticky; top: 72px; z-index: 90;
-    overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
-    max-height: 100px; opacity: 1;
-    transition: max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, top 0.28s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s ease;
-  }
-  body.nav-compact .sub-tabs-wrap {
-    top: 56px; max-height: 0; opacity: 0; border-bottom-color: transparent;
-  }
-  @media (max-width: 639px) {
-    body.nav-compact .sub-tabs-wrap { top: 52px; }
+    overflow-x: auto; scrollbar-width: none;
   }
   .sub-tabs-wrap::-webkit-scrollbar { display: none; }
   .sub-tabs { display: flex; gap: 0; white-space: nowrap; }
@@ -3279,12 +3264,9 @@
 
       <!-- Fin de Semana -->
       <div id="sub-content-fin-semana" class="sub-page" style="display:none">
-        <div class="coming-soon-panel">
-          <div class="coming-soon-icon">
-            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          </div>
-          <h3>Fin de Semana</h3>
-          <p>Las asignaciones de la reunión de Fin de Semana estarán disponibles próximamente.</p>
+        <div id="admin-shortcut-fin-semana" style="display:none"></div>
+        <div id="fs-user-view">
+          <div class="loader-wrap"><div class="loader"></div></div>
         </div>
       </div>
 
@@ -3378,6 +3360,7 @@
       </div>
       <div class="admin-tabs-row" data-section="reuniones">
         <button class="admin-tab" data-tab="vmc" onclick="switchAdminTab('vmc')">Vida y Ministerio</button>
+        <button class="admin-tab" data-tab="fin-semana" onclick="switchAdminTab('fin-semana')">Fin de Semana</button>
         <button class="admin-tab" data-tab="responsabilidades" onclick="switchAdminTab('responsabilidades')">Responsabilidades</button>
         <button class="admin-tab" data-tab="aseo-salon" onclick="switchAdminTab('aseo-salon')">Aseo Salón</button>
       </div>
@@ -3548,6 +3531,15 @@
           <button class="btn-secondary" onclick="openVmcWeekModal(null)">+ Nueva semana</button>
         </div>
         <div id="admin-vmc-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+      </div>
+
+      <!-- ── Fin de Semana Admin Section ── -->
+      <div class="admin-section" id="admin-fin-semana">
+        <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
+          <span style="flex:1;font-size:0.95rem;font-weight:700">Fin de Semana</span>
+          <button class="btn-secondary" onclick="openFsWeekModal(null)">+ Nueva semana</button>
+        </div>
+        <div id="admin-fs-list"><div class="loader-wrap"><div class="loader"></div></div></div>
       </div>
 
       <div class="admin-section" id="admin-usuarios">
@@ -4143,7 +4135,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.27.5-alpha';
+const APP_VERSION = '0.28.0-alpha';
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -5311,6 +5303,7 @@ async function enterApp() {
     });
     renderSubTabs(currentMainTab);
     if (currentSubTab === 'vida-ministerio') loadAndRenderVmcUserView();
+    if (currentSubTab === 'fin-semana') loadAndRenderFsUserView();
   }
 
   loadSchedule();
@@ -5433,6 +5426,7 @@ function switchMainTab(tab, btn) {
     showPage('reuniones');
     switchSubTab(currentSubTab);
     if (currentSubTab === 'vida-ministerio') loadAndRenderVmcUserView();
+    if (currentSubTab === 'fin-semana') loadAndRenderFsUserView();
   }
   _saveNavState();
 }
@@ -5483,6 +5477,7 @@ function switchSubTab(tabId) {
   if (tabId === 'responsabilidades') renderRespUserView();
   if (tabId === 'aseo-salon') renderAseoUserView();
   if (tabId === 'vida-ministerio') loadAndRenderVmcUserView();
+  if (tabId === 'fin-semana') loadAndRenderFsUserView();
   if (tabId === 'grupos') {
     loadAvatarCache().then(() => {
       if (!grupos.length) {
@@ -5501,6 +5496,7 @@ const VIEWER_TO_ADMIN_TAB = {
   'territorios':       'territories',
   'grupos':            'grupos',
   'vida-ministerio':   'vmc',
+  'fin-semana':        'fin-semana',
   'aseo-salon':        'aseo-salon',
   'responsabilidades': 'responsabilidades',
 };
@@ -5510,6 +5506,7 @@ const VIEWER_SECTION_LABELS = {
   'territorios':       'Territorios',
   'grupos':            'Grupos',
   'vida-ministerio':   'Vida y Ministerio',
+  'fin-semana':        'Fin de Semana',
   'aseo-salon':        'Aseo del Salón',
   'responsabilidades': 'Responsabilidades',
 };
@@ -5518,7 +5515,8 @@ const VIEWER_PERM_KEY = {
   'casa':              'assignments',
   'territorios':       'territories',
   'grupos':            'grupos',
-  'vida-ministerio':   null,   // vmc — no granular permission yet; show to all semiadmin
+  'vida-ministerio':   'vida_ministerio',
+  'fin-semana':        'fin_semana',
   'aseo-salon':        'aseo_salon',
   'responsabilidades': 'responsabilidades',
 };
@@ -5570,53 +5568,6 @@ async function goAdminShortcut(adminTab) {
   switchAdminTab(adminTab);
 }
 
-// ── Navbar maestra: se compacta al hacer scroll hacia abajo, vuelve a su tamaño
-// completo al hacer scroll hacia arriba. Solo aplica en Modo Viewer (no en Admin).
-(function initCompactNavOnScroll() {
-  let lastY = window.scrollY || 0;
-  let isCompact = false;
-  let ticking = false;
-  const THRESHOLD = 4; // px mínimos por frame para considerar que hubo movimiento real
-
-  function isAdminOpen() {
-    const adminPage = document.getElementById('page-admin');
-    return !!(adminPage && adminPage.classList.contains('active'));
-  }
-
-  function setCompact(value) {
-    if (value === isCompact) return;
-    isCompact = value;
-    document.body.classList.toggle('nav-compact', value);
-  }
-
-  function onScroll() {
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(() => {
-      ticking = false;
-      const y = window.scrollY || 0;
-      const delta = y - lastY; // movimiento respecto al frame anterior (siempre, no solo cuando supera el threshold)
-      lastY = y;
-
-      if (isAdminOpen()) return; // el comportamiento solo aplica en Modo Viewer
-
-      if (y <= 4) {
-        // Arriba del todo: siempre mostrar la barra completa.
-        setCompact(false);
-      } else if (delta > THRESHOLD) {
-        // Movimiento neto hacia abajo en este frame: compactar.
-        setCompact(true);
-      } else if (delta < -THRESHOLD) {
-        // Movimiento neto hacia arriba en este frame: expandir.
-        setCompact(false);
-      }
-      // Si |delta| <= THRESHOLD (micro-jitter de inercia/rebote), no cambiar el estado actual.
-    });
-  }
-
-  window.addEventListener('scroll', onScroll, { passive: true });
-})();
-
 function showPage(name) {
   if (name === 'admin') {
     if (!['dev','admin','semiadmin'].includes(currentRole)) {
@@ -5626,7 +5577,6 @@ function showPage(name) {
     // Open admin as a fullscreen overlay — independent of main nav
     document.getElementById('page-admin').classList.add('active');
     document.body.style.overflow = 'hidden';
-    document.body.classList.remove('nav-compact'); // la navbar del Viewer vuelve a su tamaño completo
     syncAdminDropdown();
     loadAdminData();
     return;
@@ -5640,7 +5590,7 @@ function showPage(name) {
 const ADMIN_TAB_SECTION = {
   assignments: 'predicacion', territories: 'predicacion', conductores: 'predicacion',
   casas: 'predicacion', grupos: 'predicacion',
-  responsabilidades: 'reuniones', 'aseo-salon': 'reuniones',
+  vmc: 'reuniones', 'fin-semana': 'reuniones', responsabilidades: 'reuniones', 'aseo-salon': 'reuniones',
   usuarios: 'fleming',
 };
 
@@ -5662,7 +5612,7 @@ async function switchAdminTab(tab) {
   }
   if (currentRole === 'semiadmin') {
     const perms = await getUserPermissions();
-    const moduleMap = { assignments: 'assignments', territories: 'territories', conductores: 'conductores', casas: 'casas', grupos: 'grupos', responsabilidades: 'responsabilidades', 'aseo-salon': 'aseo_salon' };
+    const moduleMap = { assignments: 'assignments', territories: 'territories', conductores: 'conductores', casas: 'casas', grupos: 'grupos', responsabilidades: 'responsabilidades', 'aseo-salon': 'aseo_salon', vmc: 'vida_ministerio', 'fin-semana': 'fin_semana' };
     const moduleKey = moduleMap[tab];
     if (moduleKey && !canAccessModule(perms, moduleKey)) {
       showToast('No tienes permisos para acceder a este módulo.', 'error');
@@ -5679,13 +5629,14 @@ async function switchAdminTab(tab) {
   if (tab === 'aseo-salon') loadAseoSalonAdmin();
   if (tab === 'usuarios') { loadUsers().then(() => renderUsersPanel()); }
   if (tab === 'vmc') { loadVmcWeeks().then(() => renderAdminVmc()); }
+  if (tab === 'fin-semana') { loadFsWeeks().then(() => renderAdminFs()); }
 }
 
 async function applyAdminTabPermissions() {
   if (!['semiadmin'].includes(currentRole)) return;
   const perms = await getUserPermissions();
   if (!perms) return;
-  const permKeyMap = { assignments: 'assignments', territories: 'territories', conductores: 'conductores', casas: 'casas', grupos: 'grupos', responsabilidades: 'responsabilidades', 'aseo-salon': 'aseo_salon' };
+  const permKeyMap = { assignments: 'assignments', territories: 'territories', conductores: 'conductores', casas: 'casas', grupos: 'grupos', responsabilidades: 'responsabilidades', 'aseo-salon': 'aseo_salon', vmc: 'vida_ministerio', 'fin-semana': 'fin_semana' };
   let firstAllowed = null;
   document.querySelectorAll('.admin-tab').forEach(btn => {
     const tab = btn.dataset.tab;
@@ -10298,10 +10249,372 @@ function vmcRenderWeekProgram(week) {
     ${closeRow}`;
 }
 
+// ══════════════════════════════════════════════════════════════════════════════
+// Fin de Semana — Admin + Vista de usuario
+// Tabla Supabase: fs_weeks
+// Esquema: { id uuid pk, date_start date, date_end date,
+//            song_open text, presidente text, speaker_name text,
+//            visiting_cong text, watchtower_article text, watchtower_reader text,
+//            created_at timestamptz, notified_at timestamptz }
+// Reutiliza vmc_people (picker de personas) y las funciones genéricas
+// vmcUserColor / vmcInitials / vmcPpOpen / vmcPersonField / vmcRestorePersonBtn.
+// ══════════════════════════════════════════════════════════════════════════════
+
+let fsWeeks = [];          // cache of all weeks from Supabase
+let fsEditingId = null;    // null = new week, else id of week being edited
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function fsWeekStatus(w) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const start = new Date(w.date_start + 'T00:00:00');
+  const end   = new Date(w.date_end   + 'T00:00:00');
+  if (today < start) return 'upcoming';
+  if (today > end)   return 'past';
+  return 'current';
+}
+
+function fsFormatRange(w) {
+  const opts = { day: 'numeric', month: 'long' };
+  const s = new Date(w.date_start + 'T00:00:00').toLocaleDateString('es-CL', opts);
+  const e = new Date(w.date_end   + 'T00:00:00').toLocaleDateString('es-CL', { ...opts, year: 'numeric' });
+  return `${s} – ${e}`;
+}
+
+function fsShortRange(w) {
+  const s = new Date(w.date_start + 'T00:00:00');
+  const e = new Date(w.date_end   + 'T00:00:00');
+  const sm = s.toLocaleDateString('es-CL', { day:'numeric', month:'short' });
+  const em = e.toLocaleDateString('es-CL', { day:'numeric', month:'short' });
+  return `${sm} – ${em}`;
+}
+
+// ── Load / render admin list ──────────────────────────────────────────────────
+
+async function loadFsWeeks() {
+  const { data, error } = await sb.from('fs_weeks').select('*').order('date_start', { ascending: false });
+  if (error) { showToast('Error cargando semanas de Fin de Semana', 'error'); return; }
+  fsWeeks = data || [];
+}
+
+function renderAdminFs() {
+  const container = document.getElementById('admin-fs-list');
+  if (!container) return;
+
+  if (!fsWeeks.length) {
+    container.innerHTML = `<div class="vmc-empty">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <p>No hay semanas cargadas aún.<br>Usa "+ Nueva semana" para empezar.</p>
+    </div>`;
+    return;
+  }
+
+  const statusLabel = { upcoming: 'Próxima', current: 'Esta semana', past: 'Pasada' };
+  const statusClass = { upcoming: 'vmc-week-badge-upcoming', current: 'vmc-week-badge-current', past: 'vmc-week-badge-past' };
+
+  container.innerHTML = fsWeeks.map(w => {
+    const st = fsWeekStatus(w);
+    const sub = w.speaker_name
+      ? `Conferenciante: ${w.speaker_name}${w.visiting_cong ? ' (' + w.visiting_cong + ')' : ''}`
+      : (w.presidente ? `Presidente: ${w.presidente}` : '');
+
+    return `<div class="vmc-week-card">
+      <div class="vmc-week-card-header">
+        <div class="vmc-week-range">${fsFormatRange(w)}</div>
+        <span class="vmc-week-badge ${statusClass[st]}">${statusLabel[st]}</span>
+      </div>
+      ${sub ? `<div style="font-size:0.78rem;color:var(--accent);font-weight:600;margin-top:4px">${sub}</div>` : ''}
+      <div class="vmc-week-actions">
+        <button class="btn-secondary" style="font-size:0.8rem;padding:0.45rem 0.9rem" onclick="openFsWeekModal('${w.id}')">
+          <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;vertical-align:middle;margin-right:4px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Editar
+        </button>
+        <div style="flex:1"></div>
+        <button class="vmc-part-del-btn" onclick="deleteFsWeek('${w.id}')" title="Eliminar semana">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Modal open / close ────────────────────────────────────────────────────────
+
+async function openFsWeekModal(id) {
+  fsEditingId = id || null;
+  const overlay = document.getElementById('fs-modal-overlay');
+  overlay.classList.add('open');
+
+  const week = id ? fsWeeks.find(w => w.id === id) : null;
+  document.getElementById('fs-modal-title').textContent = week ? 'Editar semana — Fin de Semana' : 'Nueva semana — Fin de Semana';
+
+  document.getElementById('fs-date-start').value          = week?.date_start          || '';
+  document.getElementById('fs-date-end').value            = week?.date_end            || '';
+  document.getElementById('fs-song-open').value            = week?.song_open           || '';
+  document.getElementById('fs-speaker-name').value          = week?.speaker_name        || '';
+  document.getElementById('fs-visiting-cong').value         = week?.visiting_cong       || '';
+  document.getElementById('fs-watchtower-article').value    = week?.watchtower_article  || '';
+
+  // Cargar lista de personas si aún no está cargada (picker compartido con VMC)
+  if (!vmcPeople.length) await loadVmcPeople();
+
+  vmcRestorePersonBtn('fs-presidente',         week?.presidente         || '', 'Seleccionar…');
+  vmcRestorePersonBtn('fs-watchtower-reader',  week?.watchtower_reader || '', 'Seleccionar…');
+}
+
+function closeFsWeekModal() {
+  document.getElementById('fs-modal-overlay').classList.remove('open');
+  fsEditingId = null;
+}
+
+// ── Save week ─────────────────────────────────────────────────────────────────
+
+async function saveFsWeek() {
+  const btn = document.getElementById('fs-save-btn');
+  const dateStart = document.getElementById('fs-date-start').value;
+  const dateEnd   = document.getElementById('fs-date-end').value;
+  if (!dateStart || !dateEnd) { showToast('Ingresa las fechas de la semana', 'error'); return; }
+
+  const payload = {
+    date_start:          dateStart,
+    date_end:            dateEnd,
+    song_open:           document.getElementById('fs-song-open').value.trim(),
+    presidente:          document.getElementById('fs-presidente').value.trim(),
+    speaker_name:        document.getElementById('fs-speaker-name').value.trim(),
+    visiting_cong:       document.getElementById('fs-visiting-cong').value.trim(),
+    watchtower_article:  document.getElementById('fs-watchtower-article').value.trim(),
+    watchtower_reader:   document.getElementById('fs-watchtower-reader').value.trim(),
+  };
+
+  // Snapshot del estado anterior para detectar cambios de asignación
+  const prevWeek = fsEditingId ? fsWeeks.find(w => w.id === fsEditingId) : null;
+
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  let error;
+  if (fsEditingId) {
+    ({ error } = await sb.from('fs_weeks').update(payload).eq('id', fsEditingId));
+  } else {
+    ({ error } = await sb.from('fs_weeks').insert(payload));
+  }
+  btn.disabled = false; btn.textContent = 'Guardar';
+
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  showToast(fsEditingId ? 'Semana actualizada ✓' : 'Semana creada ✓', 'success');
+  closeFsWeekModal();
+  await loadFsWeeks();
+  renderAdminFs();
+  renderFsUserView();
+
+  // Notificaciones personales automáticas
+  try {
+    const range = fsFormatRange(payload);
+    await fsNotifyNewAssignments(payload, prevWeek, range);
+  } catch (err) {
+    console.warn('No se pudieron enviar notificaciones de Fin de Semana:', err.message);
+  }
+}
+
+// ── Delete week ───────────────────────────────────────────────────────────────
+
+async function deleteFsWeek(id) {
+  if (!confirm('¿Eliminar esta semana de Fin de Semana?')) return;
+  const { error } = await sb.from('fs_weeks').delete().eq('id', id);
+  if (error) { showToast('Error al eliminar', 'error'); return; }
+  showToast('Semana eliminada', 'success');
+  fsWeeks = fsWeeks.filter(w => w.id !== id);
+  renderAdminFs();
+  renderFsUserView();
+}
+
+// ── Notificaciones personales automáticas — Fin de Semana ───────────────────
+
+function fsBuildAssignmentMap(week) {
+  const map = {};
+  const add = (name, role) => {
+    if (!name) return;
+    const key = name.trim();
+    if (!map[key]) map[key] = [];
+    map[key].push(role);
+  };
+  add(week.presidente,        'Presidente');
+  add(week.watchtower_reader, 'Lector de La Atalaya');
+  return map;
+}
+
+async function fsNotifyNewAssignments(newWeek, prevWeek, range) {
+  const newMap  = fsBuildAssignmentMap(newWeek);
+  const prevMap = prevWeek ? fsBuildAssignmentMap(prevWeek) : {};
+
+  const toNotify = [];
+  for (const [name, roles] of Object.entries(newMap)) {
+    const prevRoles = prevMap[name] || [];
+    const newRoles  = roles.filter(r => !prevRoles.includes(r));
+    if (newRoles.length) toNotify.push({ name, roles: newRoles });
+  }
+
+  if (!toNotify.length) return;
+
+  const EDGE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users';
+
+  for (const { name, roles } of toNotify) {
+    const rolesText = roles.map(r => `el rol de "${r}"`).join(' y ');
+    const title = 'Nueva asignación en reunión';
+    const body  = `Se te ha asignado ${rolesText} para la semana del ${range}. Revisa los detalles.`;
+    const target = [name.trim().toLowerCase()];
+
+    try {
+      await sb.from('notifications').insert({ title, body, target_names: target, notif_category: 'fin-semana' });
+    } catch (err) {
+      console.warn('Error guardando notificación para', name, err.message);
+    }
+
+    try {
+      await fetch(EDGE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+        body: JSON.stringify({ title, body, target_names: target })
+      });
+    } catch (err) {
+      console.warn('Push no disponible para', name, err.message);
+    }
+  }
+}
+
+// ── User view ─────────────────────────────────────────────────────────────────
+
+let fsSelectedWeekId = null;
+
+async function loadAndRenderFsUserView() {
+  await loadFsWeeks();
+  renderFsUserView();
+}
+
+function renderFsUserView() {
+  const container = document.getElementById('fs-user-view');
+  if (!container) return;
+
+  const sorted = [...fsWeeks].sort((a,b) => a.date_start.localeCompare(b.date_start));
+  const relevant = [
+    ...sorted.filter(w => fsWeekStatus(w) !== 'past'),
+    ...sorted.filter(w => fsWeekStatus(w) === 'past')
+  ];
+
+  if (!relevant.length) {
+    container.innerHTML = `<div class="vmc-empty">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <p>Aún no hay programa cargado.</p>
+    </div>`;
+    return;
+  }
+
+  const currentWeek = relevant.find(w => fsWeekStatus(w) === 'current') || relevant[0];
+  if (!fsSelectedWeekId || !relevant.find(w => w.id === fsSelectedWeekId)) {
+    fsSelectedWeekId = currentWeek.id;
+  }
+
+  const pills = relevant.map(w => {
+    const st = fsWeekStatus(w);
+    const label = st === 'current' ? 'Esta semana' : fsShortRange(w);
+    return `<div class="vmc-week-pill${w.id === fsSelectedWeekId ? ' active' : ''}"
+      onclick="fsSelectWeek('${w.id}')">${label}</div>`;
+  }).join('');
+
+  const week = relevant.find(w => w.id === fsSelectedWeekId);
+  const programHtml = week ? fsRenderWeekProgram(week) : '';
+
+  container.innerHTML = `
+    <div class="vmc-user-week-selector">${pills}</div>
+    <div class="vmc-program-container" id="fs-program-container">${programHtml}</div>`;
+}
+
+function fsSelectWeek(id) {
+  fsSelectedWeekId = id;
+  const week = fsWeeks.find(w => w.id === id);
+  document.querySelectorAll('#fs-user-view .vmc-week-pill').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  const c = document.getElementById('fs-program-container');
+  if (c && week) c.innerHTML = fsRenderWeekProgram(week);
+}
+
+function fsRenderWeekProgram(week) {
+  const myName = currentUser?.name || '';
+
+  const myMeta = [];
+  if (week.presidente === myName)        myMeta.push('Presidente');
+  if (week.watchtower_reader === myName) myMeta.push('Lector de La Atalaya');
+
+  const myBlock = myMeta.length ? `
+    <div class="vmc-my-assignments">
+      <div class="vmc-my-assignments-title">
+        <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;vertical-align:middle;margin-right:4px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Tus partes esta semana
+      </div>
+      ${myMeta.map(m => `<div class="vmc-my-item"><span class="vmc-my-item-dot"></span>${m}</div>`).join('')}
+    </div>` : '';
+
+  function roleCard(label, value, iconSvg) {
+    if (!value) return '';
+    const isMine = value === myName;
+    return `<div class="vmc-user-part-card${isMine ? ' is-mine' : ''}">
+      <div class="vmc-part-time-badge">${iconSvg}</div>
+      <div class="vmc-part-body">
+        <div class="vmc-part-name-display">${label}</div>
+        <div class="vmc-part-assigned-display${isMine ? ' mine-label' : ''}">${isMine ? '<svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;vertical-align:-1px;margin-right:3px"><polyline points="20 6 9 17 4 12"/></svg>' : ''}${value}</div>
+      </div>
+    </div>`;
+  }
+
+  const presIcon = '<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+  const readerIcon = '<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>';
+  const speakerIcon = '<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>';
+  const articleIcon = '<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>';
+
+  const speakerBlock = week.speaker_name ? `<div class="vmc-user-part-card">
+      <div class="vmc-part-time-badge">${speakerIcon}</div>
+      <div class="vmc-part-body">
+        <div class="vmc-part-name-display">Conferenciante</div>
+        <div class="vmc-part-assigned-display">${week.speaker_name}</div>
+        ${week.visiting_cong ? `<div class="vmc-part-note-display">Congregación visitante: ${week.visiting_cong}</div>` : ''}
+      </div>
+    </div>` : '';
+
+  const articleBlock = week.watchtower_article ? `<div class="vmc-user-part-card">
+      <div class="vmc-part-time-badge">${articleIcon}</div>
+      <div class="vmc-part-body">
+        <div class="vmc-part-name-display">Estudio de La Atalaya</div>
+        <div class="vmc-part-assigned-display">${week.watchtower_article}</div>
+      </div>
+    </div>` : '';
+
+  const cards = [
+    speakerBlock,
+    roleCard('Presidente', week.presidente, presIcon),
+    articleBlock,
+    roleCard('Lector de La Atalaya', week.watchtower_reader, readerIcon),
+  ].filter(Boolean);
+
+  const programBody = cards.length ? `<div class="vmc-user-section">
+      <div class="vmc-user-section-header" style="background:rgba(0,122,255,0.1);color:var(--accent)">Fin de Semana</div>
+      ${cards.join('')}
+    </div>` : `<div class="vmc-empty">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <p>Aún no se han cargado los datos de esta semana.</p>
+    </div>`;
+
+  return `
+    <div class="vmc-program-header">
+      <div class="vmc-program-title">${fsFormatRange(week)}</div>
+      ${week.song_open ? `<div class="vmc-program-reading"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;margin-right:4px"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Canción de inicio ${week.song_open}</div>` : ''}
+    </div>
+    ${myBlock}
+    ${programBody}`;
+}
+
 // ── Hook into switchAdminTab & app init ───────────────────────────────────────
 
 // Patch ADMIN_TAB_SECTION to include vmc
 ADMIN_TAB_SECTION['vmc'] = 'reuniones';
+ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
 
 </script>
 <!-- ── Profile fullscreen page ── -->
@@ -10745,6 +11058,82 @@ ADMIN_TAB_SECTION['vmc'] = 'reuniones';
       <button class="btn-secondary" onclick="closeVmcWeekModal()">Cancelar</button>
       <div style="flex:1"></div>
       <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="saveVmcWeek()" id="vmc-save-btn">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     Fin de Semana — Week Editor Modal
+     (reutiliza las clases .vmc-* y el picker de personas vmc_people)
+══════════════════════════════════════════════════════════════════ -->
+<div class="vmc-modal-overlay" id="fs-modal-overlay">
+  <div class="vmc-modal">
+    <div class="vmc-modal-header">
+      <button class="users-panel-back" onclick="closeFsWeekModal()">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Volver
+      </button>
+      <div class="vmc-modal-title" id="fs-modal-title">Nueva semana — Fin de Semana</div>
+    </div>
+    <div class="vmc-modal-body" id="fs-modal-body">
+
+      <!-- Rango de fechas -->
+      <div style="display:flex;gap:8px;margin-bottom:1rem;align-items:center;flex-wrap:wrap">
+        <div style="flex:1;min-width:140px">
+          <div class="form-label" style="margin-bottom:4px">Semana del</div>
+          <input type="date" class="form-input" id="fs-date-start" style="padding:0.55rem 0.75rem;font-size:0.85rem">
+        </div>
+        <div style="flex:1;min-width:140px">
+          <div class="form-label" style="margin-bottom:4px">al</div>
+          <input type="date" class="form-input" id="fs-date-end" style="padding:0.55rem 0.75rem;font-size:0.85rem">
+        </div>
+      </div>
+
+      <!-- Campos de la reunión de Fin de Semana -->
+      <div class="vmc-section-block">
+        <div class="vmc-section-header" style="background:rgba(0,122,255,0.08);color:var(--accent);border-bottom:1px solid rgba(0,122,255,0.2)">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Reunión de Fin de Semana
+        </div>
+        <div class="vmc-meta-row">
+          <span class="vmc-meta-label">Canción de inicio</span>
+          <input type="text" class="vmc-meta-val-input" id="fs-song-open" placeholder="Ej: 5">
+        </div>
+        <div class="vmc-meta-row">
+          <span class="vmc-meta-label">Presidente</span>
+          <div class="vmc-assign-wrap" style="flex:1">
+            <input type="hidden" id="fs-presidente">
+            <button type="button" class="vmc-person-btn" data-placeholder="Seleccionar…"
+              onclick="vmcPpOpen(document.getElementById('fs-presidente'),this,'Presidente')">Seleccionar…</button>
+          </div>
+        </div>
+        <div class="vmc-meta-row">
+          <span class="vmc-meta-label">Conferenciante</span>
+          <input type="text" class="vmc-meta-val-input" id="fs-speaker-name" placeholder="Nombre del conferenciante" autocomplete="off">
+        </div>
+        <div class="vmc-meta-row">
+          <span class="vmc-meta-label">Congregación visitante</span>
+          <input type="text" class="vmc-meta-val-input" id="fs-visiting-cong" placeholder="Ej: Congregación Las Rosas (opcional)" autocomplete="off">
+        </div>
+        <div class="vmc-meta-row">
+          <span class="vmc-meta-label">Artículo La Atalaya</span>
+          <input type="text" class="vmc-meta-val-input" id="fs-watchtower-article" placeholder="Ej: Artículo 25" autocomplete="off">
+        </div>
+        <div class="vmc-meta-row" style="border-bottom:none">
+          <span class="vmc-meta-label">Lector La Atalaya</span>
+          <div class="vmc-assign-wrap" style="flex:1">
+            <input type="hidden" id="fs-watchtower-reader">
+            <button type="button" class="vmc-person-btn" data-placeholder="Seleccionar…"
+              onclick="vmcPpOpen(document.getElementById('fs-watchtower-reader'),this,'Lector de La Atalaya')">Seleccionar…</button>
+          </div>
+        </div>
+      </div>
+    </div><!-- /.vmc-modal-body -->
+
+    <div class="vmc-modal-footer">
+      <button class="btn-secondary" onclick="closeFsWeekModal()">Cancelar</button>
+      <div style="flex:1"></div>
+      <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="saveFsWeek()" id="fs-save-btn">Guardar</button>
     </div>
   </div>
 </div>
