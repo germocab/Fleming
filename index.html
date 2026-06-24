@@ -2637,40 +2637,39 @@
   /* Grid de tarjetas */
   .grupos-btn-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
     padding: 0.25rem 0 2.5rem;
   }
   .grupo-btn {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 0; padding: 1.25rem 0.75rem 1rem;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius);
-    cursor: pointer; transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
-    text-align: center; width: 100%; position: relative; overflow: hidden;
+    display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end;
+    gap: 0; padding: 1rem 1rem 0.85rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+    text-align: left; width: 100%; position: relative; overflow: hidden;
+    min-height: 110px;
   }
-  .grupo-btn::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0;
-    height: 3px; background: var(--grupo-color, var(--accent));
-    border-radius: var(--radius) var(--radius) 0 0;
-  }
-  .grupo-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: var(--border-active); }
+  .grupo-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow); background: var(--surface); }
   .grupo-btn:active { transform: scale(0.97); }
-  /* Numero grande */
+  .grupo-btn-eyebrow {
+    font-size: 0.65rem; font-weight: 700; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.07em;
+    margin-bottom: auto;
+  }
   .grupo-btn-icon {
-    font-size: 2rem; font-weight: 800; color: var(--grupo-color, var(--accent));
-    line-height: 1; letter-spacing: -0.04em; margin-bottom: 0.5rem;
+    font-size: 2.8rem; font-weight: 800; color: var(--grupo-color, var(--accent));
+    line-height: 1; letter-spacing: -0.05em;
+    margin-top: 0.5rem;
   }
   .grupo-btn-label {
-    font-size: 0.72rem; font-weight: 600; color: var(--text2);
-    letter-spacing: 0.01em; line-height: 1.2;
-  }
-  .grupo-btn-count {
-    font-size: 0.68rem; font-weight: 600; color: var(--text3);
-    margin-top: 3px;
+    font-size: 0.72rem; font-weight: 600; color: var(--text3);
+    margin-top: 2px;
   }
   /* Ocultar elementos del diseño anterior */
-  .grupo-btn-bar, .grupo-btn-body, .grupo-btn-info,
+  .grupo-btn-count, .grupo-btn-bar, .grupo-btn-body, .grupo-btn-info,
   .grupo-btn-sublabel, .grupo-btn-right, .grupo-btn-arrow { display: none; }
 
   /* ── Group detail fullscreen page ── */
@@ -4303,7 +4302,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.29.7.2-alpha';
+const APP_VERSION = '0.29.8-alpha';
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -4630,9 +4629,8 @@ function renderGruposView() {
     const color = GRUPO_COLORS[i % GRUPO_COLORS.length];
     const cnt = g.miembros.length;
     return `<button class="grupo-btn" style="--grupo-color:${color}" onclick="openGrupoDetailPage('${g.id}')">
+      <div class="grupo-btn-eyebrow">Grupo</div>
       <div class="grupo-btn-icon">${g.numero}</div>
-      <div class="grupo-btn-label">Grupo ${g.numero}</div>
-      <div class="grupo-btn-count">${cnt} miembro${cnt !== 1 ? 's' : ''}</div>
     </button>`;
   }).join('') + '</div>';
 
