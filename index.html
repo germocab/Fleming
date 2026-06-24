@@ -7996,6 +7996,13 @@ function openUserProfilePage(uid) {
     <div class="uprofile-edit-section">
       <div class="uprofile-edit-title">Editar Perfil</div>
       <div class="uprofile-edit-body">
+        ${isDev ? `
+        <div class="form-group2" style="margin-bottom:0.75rem">
+          <label class="form-label2">Nombre completo</label>
+          <div style="display:flex;gap:8px">
+            <input type="text" class="form-input" id="uprof-name-input" value="${u.name}" placeholder="Nombre y apellido" style="padding:0.6rem 0.85rem;font-size:0.88rem">
+          </div>
+        </div>` : ''}
         <div class="form-group2">
           <label class="form-label2">Rol</label>
           <select class="role-select-inline" id="uprof-role-sel" onchange="changeUserRole('${u.id}',this.value)">${roleOptions}</select>
@@ -8088,21 +8095,36 @@ function closeUserProfilePage() {
 }
 
 async function saveProfileChanges(uid) {
-  const roleSel = document.getElementById('uprof-role-sel');
-  const taskEl  = document.getElementById('uprof-task');
+  const roleSel   = document.getElementById('uprof-role-sel');
+  const taskEl    = document.getElementById('uprof-task');
+  const nameInput = document.getElementById('uprof-name-input');
   const u = activeUsers.find(x=>x.id===uid);
   if (!u) return;
   if (roleSel) u.role = roleSel.value;
   if (taskEl)  u.task = taskEl.value.trim();
+
+  // DEV puede cambiar el nombre de usuario
+  let newName = u.name;
+  if (currentRole === 'dev' && nameInput) {
+    newName = nameInput.value.trim();
+    if (!newName) { showToast('El nombre no puede estar vacío.', 'error'); return; }
+  }
+
   const perms = parsePermissions(u.permissions);
+  const updatePayload = { role: u.role, task: u.task, permissions: perms, labels: parseLabels(u.labels) };
+  if (currentRole === 'dev' && newName !== u.name) updatePayload.name = newName;
 
   let { error } = await sb.from('platform_users')
-    .update({ role: u.role, task: u.task, permissions: perms, labels: parseLabels(u.labels) })
+    .update(updatePayload)
     .eq('id', u.id);
   if (error) {
-    const retry = await sb.from('platform_users').update({ role: u.role, task: u.task, labels: parseLabels(u.labels) }).eq('id', u.id);
+    const fallback = { role: u.role, task: u.task, labels: parseLabels(u.labels) };
+    if (currentRole === 'dev' && newName !== u.name) fallback.name = newName;
+    const retry = await sb.from('platform_users').update(fallback).eq('id', u.id);
     if (retry.error) { showToast('Error: ' + retry.error.message, 'error'); return; }
   }
+
+  if (currentRole === 'dev' && newName !== u.name) u.name = newName;
   if (currentUser && u.name === currentUser.name) { currentRole = u.role; currentUser.role = u.role; saveSession(currentUser); }
   showToast('Cambios guardados ✓', 'success');
   closeUserProfilePage();
