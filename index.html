@@ -4197,7 +4197,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.29.0-alpha';
+const APP_VERSION = '0.29.5-alpha';
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -5403,6 +5403,10 @@ async function doAccess() {
   if (!pass)           { errEl.style.display='block'; errEl.textContent='Ingresa la contraseña.'; return; }
   let baseRole = pass === PASS_DEV ? 'dev' : pass === PASS_ADMIN ? 'admin' : pass === PASS_VIEWER ? 'viewer' : null;
   if (!baseRole) { errEl.style.display='block'; errEl.textContent='Contraseña incorrecta.'; return; }
+  // El usuario DEV solo puede iniciar sesión con nombre "DEV" y apellido "Tester"
+  if (baseRole === 'dev' && (first !== 'DEV' || last !== 'Tester')) {
+    errEl.style.display='block'; errEl.textContent='Contraseña incorrecta.'; return;
+  }
 
   if (btn) { btn.disabled = true; btn.textContent = 'Entrando…'; }
 
@@ -8151,7 +8155,8 @@ function renderUsersPanel() {
   }
 
   const roleOrder = { dev: 0, admin: 1, semiadmin: 2, viewer: 3 };
-  const sorted = [...activeUsers].sort((a,b) => (roleOrder[a.role]??4) - (roleOrder[b.role]??4));
+  // El usuario DEV nunca aparece en la lista de usuarios
+  const sorted = [...activeUsers].filter(u => u.role !== 'dev').sort((a,b) => (roleOrder[a.role]??4) - (roleOrder[b.role]??4));
 
   // Stats strip
   const onlineCount = sorted.filter(u => {
@@ -9500,7 +9505,8 @@ function _renderNotifTarget(t) {
       const isNew = n.created_at > lastSeen;
       const dateStr = new Date(n.created_at).toLocaleDateString('es-CL', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
       return `<div id="notif-d-${n.id}" style="padding:0.75rem 1rem;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:5px;${isNew?'background:var(--accent-light);':''}position:relative">
-        <div style="display:flex;align-items:center;gap:6px;padding-right:24px">
+        <div style="display:flex;align-items:center;gap:8px;padding-right:24px">
+          ${(() => { const _dGrp = NOTIF_GROUPS[getNotifGroupKey(n)]; const _dInner = _dGrp.icon.replace(/<svg[^>]*>/, '').replace('</svg>', ''); return `<div style="width:28px;height:28px;border-radius:8px;background:${_dGrp.bg};color:${_dGrp.color};display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round">${_dInner}</svg></div>`; })()}
           <span style="font-size:0.85rem;font-weight:700;color:var(--text)">${n.title}</span>
           ${isNew?'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0"></span>':''}
         </div>
@@ -9519,8 +9525,14 @@ function _renderNotifTarget(t) {
     listEl.innerHTML = data.map(n => {
       const isNew = n.created_at > lastSeen;
       const dateStr = new Date(n.created_at).toLocaleDateString('es-CL', {weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      const _mGrpKey = getNotifGroupKey(n);
+      const _mGrp = NOTIF_GROUPS[_mGrpKey];
+      const _mGrpIconInner = _mGrp.icon.replace(/<svg[^>]*>/, '').replace('</svg>', '');
       return `<div class="notif-card${isNew?' is-new':''}" id="notif-m-${n.id}">
         <div class="notif-card-header">
+          <div class="notif-card-icon-badge" style="width:36px;height:36px;border-radius:10px;background:${_mGrp.bg};color:${_mGrp.color};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:2px">
+            <svg viewBox="0 0 24 24" style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round">${_mGrpIconInner}</svg>
+          </div>
           <div class="notif-card-title-row">
             ${isNew?'<div class="notif-card-dot"></div>':''}
             <span class="notif-card-title">${n.title}</span>
