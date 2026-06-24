@@ -7940,7 +7940,7 @@ function openUserProfilePage(uid) {
   const inits = userInitials(u.name);
   const isDev = currentRole === 'dev';
   const isCurrentUser = currentUser && u.name === currentUser.name;
-  const canEdit = !isCurrentUser && canChangeRole(u.role);
+  const canEdit = (!isCurrentUser && canChangeRole(u.role)) || (isDev && isCurrentUser);
 
   const lastActive = u.last_seen || u.joined_at;
   const minutesAgo = lastActive ? Math.round((new Date() - new Date(lastActive)) / 60000) : 9999;
@@ -8003,6 +8003,7 @@ function openUserProfilePage(uid) {
             <input type="text" class="form-input" id="uprof-name-input" value="${u.name}" placeholder="Nombre y apellido" style="padding:0.6rem 0.85rem;font-size:0.88rem">
           </div>
         </div>` : ''}
+        ${!isCurrentUser ? `
         <div class="form-group2">
           <label class="form-label2">Rol</label>
           <select class="role-select-inline" id="uprof-role-sel" onchange="changeUserRole('${u.id}',this.value)">${roleOptions}</select>
@@ -8049,11 +8050,11 @@ function openUserProfilePage(uid) {
               <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Siervo Min.
             </div>
           </div>
-        </div>
+        </div>` : ''}
 
         <div class="uprofile-actions" style="margin-top:1rem">
           <button class="btn-primary" style="width:auto;padding:0.6rem 1.5rem" onclick="saveProfileChanges('${u.id}')">Guardar cambios</button>
-          <button class="btn-secondary" onclick="revokeUser('${u.id}')">Revocar acceso</button>
+          ${!isCurrentUser ? `<button class="btn-secondary" onclick="revokeUser('${u.id}')">Revocar acceso</button>` : ''}
         </div>
       </div>
     </div>` : '';
@@ -8124,8 +8125,17 @@ async function saveProfileChanges(uid) {
     if (retry.error) { showToast('Error: ' + retry.error.message, 'error'); return; }
   }
 
+  const wasCurrentUser = currentUser && u.name === currentUser.name;
   if (currentRole === 'dev' && newName !== u.name) u.name = newName;
-  if (currentUser && u.name === currentUser.name) { currentRole = u.role; currentUser.role = u.role; saveSession(currentUser); }
+  if (wasCurrentUser) {
+    currentRole = u.role;
+    currentUser.role = u.role;
+    if (currentRole === 'dev' && newName) currentUser.name = u.name;
+    saveSession(currentUser);
+    // Update displayed name in the nav dropdown
+    const nameEl = document.querySelector('.options-user-name');
+    if (nameEl) nameEl.textContent = currentUser.name;
+  }
   showToast('Cambios guardados ✓', 'success');
   closeUserProfilePage();
   renderUsersPanel();
