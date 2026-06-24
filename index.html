@@ -57,6 +57,79 @@
     --tab-bar-bg: rgba(242,242,247,0.92);
   }
 
+
+  /* ── DEV Version Pill ─────────────────────────────────────────────────────── */
+  #dev-version-pill {
+    display: none; /* shown via JS only for DEV */
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px 5px 8px;
+    background: rgba(255,149,0,0.13);
+    border: 1px solid rgba(255,149,0,0.35);
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--orange);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.18s, box-shadow 0.18s;
+    letter-spacing: 0.01em;
+    user-select: none;
+    position: relative;
+  }
+  #dev-version-pill:hover { background: rgba(255,149,0,0.2); box-shadow: 0 2px 8px rgba(255,149,0,0.18); }
+  #dev-version-pill svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; flex-shrink: 0; }
+  #dev-version-pill .dev-pill-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--orange); flex-shrink: 0;
+    animation: devPillPulse 2s ease-in-out infinite;
+  }
+  @keyframes devPillPulse {
+    0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
+  }
+
+  .dev-pill-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    background: var(--surface);
+    border: 1px solid var(--border-active);
+    border-radius: 16px;
+    padding: 0.45rem;
+    min-width: 200px;
+    box-shadow: var(--shadow-lg);
+    z-index: 300;
+    display: none;
+  }
+  .dev-pill-menu.open { display: block; animation: fadeDown 0.15s ease; }
+  .dev-pill-menu-header {
+    padding: 0.45rem 0.75rem 0.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+  }
+  .dev-pill-menu-header-label {
+    font-size: 0.65rem; font-weight: 700; color: var(--orange);
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .dev-pill-menu-header-ver {
+    font-size: 0.8rem; font-weight: 700; color: var(--text); margin-top: 1px;
+  }
+  .dev-pill-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 0.55rem 0.75rem; border-radius: 10px;
+    font-size: 0.875rem; font-weight: 500; color: var(--text2);
+    cursor: pointer; transition: background 0.15s;
+    border: none; background: none; width: 100%;
+    text-align: left; font-family: var(--font);
+  }
+  .dev-pill-item svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; color: var(--text3); }
+  .dev-pill-item:hover { background: var(--surface2); color: var(--text); }
+  .dev-pill-item:hover svg { color: var(--text2); }
+  .dev-pill-item.danger { color: var(--red); }
+  .dev-pill-item.danger svg { color: var(--red); }
+  .dev-pill-item.danger:hover { background: rgba(255,59,48,0.07); }
+  .dev-pill-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
   /* Auto mode: respects system preference when data-theme="auto" */
   @media (prefers-color-scheme: dark) {
     :root[data-theme="auto"] {
@@ -3198,7 +3271,36 @@
 
 <div id="app">
   <nav class="topnav">
-    <div class="nav-spacer"></div>
+    <div class="nav-spacer">
+      <!-- DEV-only version pill -->
+      <div id="dev-version-pill" onclick="toggleDevPillMenu(event)" title="Accesos directos DEV">
+        <span class="dev-pill-dot"></span>
+        <span id="dev-pill-label">v0.0.0</span>
+        <div class="dev-pill-menu" id="dev-pill-menu">
+          <div class="dev-pill-menu-header">
+            <div class="dev-pill-menu-header-label">DEV Tools</div>
+            <div class="dev-pill-menu-header-ver" id="dev-pill-menu-ver">—</div>
+          </div>
+          <button class="dev-pill-item" onclick="devPillAction('users')">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Panel de Usuarios
+          </button>
+          <button class="dev-pill-item" onclick="devPillAction('settings')">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Configuración
+          </button>
+          <button class="dev-pill-item" onclick="devPillAction('reload')">
+            <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Recargar página
+          </button>
+          <div class="dev-pill-divider"></div>
+          <button class="dev-pill-item danger" onclick="devPillAction('logout')">
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Cerrar Sesión
+          </button>
+        </div>
+      </div>
+    </div>
 
     <div class="main-segment" id="main-segment">
       <div class="main-seg-thumb" id="main-seg-thumb"></div>
@@ -4197,7 +4299,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.29.5-alpha';
+const APP_VERSION = '0.29.7-alpha';
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -5390,6 +5492,7 @@ async function enterApp() {
   scheduleMidnightRefresh();
   await subscribeToPush();
   updateAdminShortcuts();
+  initDevPill();
 }
   
 async function doAccess() {
@@ -5428,12 +5531,61 @@ async function doAccess() {
   enterApp();
 }
 
+function initDevPill() {
+  const pill = document.getElementById('dev-version-pill');
+  if (!pill) return;
+  if (currentRole === 'dev') {
+    pill.style.display = 'flex';
+    document.getElementById('dev-pill-label').textContent = 'v' + APP_VERSION;
+    document.getElementById('dev-pill-menu-ver').textContent = 'Versión ' + APP_VERSION;
+  } else {
+    pill.style.display = 'none';
+  }
+}
+
+function toggleDevPillMenu(e) {
+  e.stopPropagation();
+  const menu = document.getElementById('dev-pill-menu');
+  if (!menu) return;
+  menu.classList.toggle('open');
+}
+
+function closeDevPillMenu() {
+  const menu = document.getElementById('dev-pill-menu');
+  if (menu) menu.classList.remove('open');
+}
+
+function devPillAction(action) {
+  closeDevPillMenu();
+  if (action === 'users') {
+    openUsersPanel();
+  } else if (action === 'settings') {
+    openProfilePage().then(() => {
+      // Switch to preferences tab if possible
+      const prefTab = document.querySelector('.profile-tab[data-tab="prefs"]');
+      if (prefTab) prefTab.click();
+    });
+  } else if (action === 'reload') {
+    location.reload();
+  } else if (action === 'logout') {
+    doLogout();
+  }
+}
+
+// Close pill menu when clicking outside
+document.addEventListener('click', function(e) {
+  const pill = document.getElementById('dev-version-pill');
+  if (pill && !pill.contains(e.target)) closeDevPillMenu();
+});
+
 function doLogout() {
   stopRolePolling();
   closeProfilePage();
   sessionStorage.removeItem('fleming_nav');
   clearSession(); currentUser = null; currentRole = 'viewer';
   closeProfileMenu();
+  const devPill = document.getElementById('dev-version-pill');
+  if (devPill) devPill.style.display = 'none';
   document.getElementById('app').style.display = 'none';
   document.getElementById('auth-screen').style.display = 'flex';
 }
