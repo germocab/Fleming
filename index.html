@@ -2442,8 +2442,19 @@
     width: 12px; height: 12px; stroke: currentColor; fill: none;
     stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
   }
-  
- 
+  .btn-map-full {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 0.55rem 1.1rem;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: 20px;
+    font-family: var(--font); font-size: 0.84rem; font-weight: 600;
+    cursor: pointer; transition: opacity 0.18s, transform 0.1s;
+    box-shadow: 0 2px 10px rgba(0,122,255,0.35);
+    flex-shrink: 0;
+  }
+  .btn-map-full:hover { opacity: 0.88; }
+  .btn-map-full:active { transform: scale(0.97); }
+  .btn-map-full svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
   /* ── Full map banner (card visible para todos los usuarios en Territorios) ── */
   .ter-map-banner {
@@ -3443,8 +3454,6 @@
         <div id="admin-shortcut-territorios" style="display:none"></div>
         <div class="ter-view-header">
           <span class="ter-view-title">Territorios</span>
-            <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
-          
         </div>
         <!-- Banner: Ver mapa completo (card, visible cuando hay mapa cargado) -->
         <div class="ter-map-banner" id="ter-map-banner" onclick="openFullMap()" role="button" aria-label="Ver mapa completo de la congregación">
@@ -4348,7 +4357,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.29.9.5-alpha';
+const APP_VERSION = '0.29.9.6-alpha';
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -8376,9 +8385,7 @@ function openUserProfilePage(uid) {
           <div class="form-label2" style="margin-bottom:6px">Módulos permitidos</div>
           <div class="perms-grid" id="uprof-perms-grid-${u.id}">
             ${(() => {
-              const groups = u.role === 'admin'
-                ? [ { key: 'sistema', label: 'Sistema' } ]
-                : [
+              const groups = [
                     { key: 'predicacion', label: 'Predicación' },
                     { key: 'reuniones',   label: 'Reuniones' },
                     { key: 'sistema',     label: 'Sistema' },
@@ -9560,7 +9567,6 @@ async function loadFullMap() {
 }
 
 function updateFullMapUI(src) {
-  const btnView     = document.getElementById('btn-ver-mapa-completo');
   const adminCard   = document.getElementById('full-map-admin-card');
   const previewWrap = document.getElementById('full-map-preview-wrap');
   const previewImg  = document.getElementById('full-map-admin-preview');
@@ -9572,7 +9578,6 @@ function updateFullMapUI(src) {
   const bannerImg   = document.getElementById('ter-map-banner-img');
 
   if (src) {
-    if (btnView) { btnView.style.display = 'inline-flex'; }
     const lbImg = document.getElementById('full-map-lb-img');
     if (lbImg) lbImg.src = src;
     if (previewWrap) { previewWrap.classList.add('visible'); previewImg.src = src; }
@@ -9584,7 +9589,6 @@ function updateFullMapUI(src) {
     if (banner)    { banner.classList.add('visible'); }
     if (bannerImg) { bannerImg.src = src; }
   } else {
-    if (btnView) btnView.style.display = 'none';
     if (previewWrap) previewWrap.classList.remove('visible');
     if (deleteBtn)   deleteBtn.style.display = 'none';
     if (uploadLabel) uploadLabel.textContent = 'Subir mapa PNG';
