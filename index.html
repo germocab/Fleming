@@ -2456,6 +2456,42 @@
   .btn-map-full:active { transform: scale(0.97); }
   .btn-map-full svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
+  /* ── Full map banner (card visible para todos los usuarios en Territorios) ── */
+  .ter-map-banner {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    align-items: center;
+    gap: 0;
+  }
+  .ter-map-banner.visible { display: flex; }
+  .ter-map-banner:hover { border-color: var(--border-active); box-shadow: var(--shadow); }
+  .ter-map-banner:active { opacity: 0.9; }
+  .ter-map-banner-thumb {
+    width: 90px; min-width: 90px; height: 72px;
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; flex-shrink: 0;
+  }
+  .ter-map-banner-thumb img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+  .ter-map-banner-body {
+    flex: 1; padding: 0 1rem;
+  }
+  .ter-map-banner-label {
+    font-size: 0.98rem; font-weight: 700; color: var(--text);
+  }
+  @media (max-width: 480px) {
+    .ter-map-banner-thumb { width: 72px; min-width: 72px; height: 62px; }
+    .ter-map-banner-label { font-size: 0.88rem; }
+  }
+
   /* ── Full map lightbox (extends existing lightbox) ── */
   .full-map-lightbox {
     position: fixed; inset: 0; z-index: 500;
@@ -3423,6 +3459,16 @@
             Ver mapa completo
           </button>
         </div>
+        <!-- Banner: Ver mapa completo (card, visible cuando hay mapa cargado) -->
+        <div class="ter-map-banner" id="ter-map-banner" onclick="openFullMap()" role="button" aria-label="Ver mapa completo de la congregación">
+          <div class="ter-map-banner-thumb">
+            <img id="ter-map-banner-img" src="" alt="Vista previa del mapa">
+          </div>
+          <div class="ter-map-banner-body">
+            <div class="ter-map-banner-label">Ver el mapa completo de la congregación</div>
+          </div>
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-right:1rem"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
         <div id="territories-view-content"></div>
       </div>
 
@@ -4315,7 +4361,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.29.9.1-alpha';
+const APP_VERSION = '0.29.9.5-alpha';
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -5177,6 +5223,98 @@ async function renderProfilePage() {
     taskEl.textContent = 'Ninguna responsabilidad asignada';
   }
 
+  // Partes asignadas: Vida y Ministerio + Fin de Semana
+  await renderProfilePartes();
+
+}
+
+async function renderProfilePartes() {
+  const userName = currentUser.name.trim().toLowerCase();
+  const today = todayStr();
+  const partesSection = document.getElementById('profile-partes-section');
+  const partesList = document.getElementById('profile-partes-list');
+  if (!partesSection || !partesList) return;
+
+  const foundPartes = [];
+
+  // Buscar en vmc_weeks (partes y roles de cabecera)
+  try {
+    const { data: vmcData } = await sb.from('vmc_weeks')
+      .select('id,date_start,date_end,parts,presidente,prayer_open,prayer_close')
+      .gte('date_end', today)
+      .order('date_start');
+    if (vmcData) {
+      for (const w of vmcData) {
+        const rango = vmcFormatRange(w);
+        // Partes internas del array parts
+        const parts = Array.isArray(w.parts) ? w.parts : [];
+        for (const p of parts) {
+          const a1 = (p.assigned  || '').trim().toLowerCase();
+          const a2 = (p.assigned2 || '').trim().toLowerCase();
+          if (a1 === userName || a2 === userName) {
+            foundPartes.push({
+              tipo: 'vmc',
+              label: p.name || 'Parte',
+              rango,
+              color: 'var(--accent)',
+              bgColor: 'var(--accent-light)',
+            });
+          }
+        }
+        // Roles de cabecera VMC
+        const roles = [
+          { field: 'presidente',    label: 'Presidente — Vida y Ministerio' },
+          { field: 'prayer_open',   label: 'Oración de apertura — Vida y Ministerio' },
+          { field: 'prayer_close',  label: 'Oración de cierre — Vida y Ministerio' },
+        ];
+        for (const rol of roles) {
+          if ((w[rol.field] || '').trim().toLowerCase() === userName) {
+            foundPartes.push({ tipo: 'vmc', label: rol.label, rango, color: 'var(--accent)', bgColor: 'var(--accent-light)' });
+          }
+        }
+      }
+    }
+  } catch(e) { console.warn('renderProfilePartes VMC:', e); }
+
+  // Buscar en fs_weeks (roles de cabecera)
+  try {
+    const { data: fsData } = await sb.from('fs_weeks')
+      .select('id,date_start,date_end,presidente,watchtower_reader')
+      .gte('date_end', today)
+      .order('date_start');
+    if (fsData) {
+      const fsRoles = [
+        { field: 'presidente',        label: 'Presidente — Fin de Semana' },
+        { field: 'watchtower_reader', label: 'Lector de La Atalaya' },
+      ];
+      for (const w of fsData) {
+        const rango = fsFormatRange(w);
+        for (const rol of fsRoles) {
+          if ((w[rol.field] || '').trim().toLowerCase() === userName) {
+            foundPartes.push({ tipo: 'fs', label: rol.label, rango, color: '#34c759', bgColor: 'rgba(52,199,89,0.12)' });
+          }
+        }
+      }
+    }
+  } catch(e) { console.warn('renderProfilePartes FS:', e); }
+
+  if (!foundPartes.length) {
+    partesSection.style.display = 'none';
+    return;
+  }
+
+  partesSection.style.display = '';
+  partesList.innerHTML = foundPartes.map(p => `
+    <div class="profile-row">
+      <div class="profile-row-icon" style="background:${p.bgColor};color:${p.color}">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      </div>
+      <div class="profile-row-content">
+        <div class="profile-row-label">${p.rango}</div>
+        <div class="profile-row-value" style="font-size:0.88rem">${p.label}</div>
+      </div>
+    </div>
+  `).join('');
 }
 
 async function loadGruposIfNeeded() {
@@ -9442,6 +9580,9 @@ function updateFullMapUI(src) {
   const deleteBtn   = document.getElementById('full-map-delete-btn');
   const uploadLabel = document.getElementById('full-map-upload-label');
   const adminSub    = document.getElementById('full-map-admin-sub');
+  // Banner card (visible para todos los usuarios)
+  const banner      = document.getElementById('ter-map-banner');
+  const bannerImg   = document.getElementById('ter-map-banner-img');
 
   if (src) {
     if (btnView) { btnView.style.display = 'inline-flex'; }
@@ -9452,6 +9593,9 @@ function updateFullMapUI(src) {
     if (uploadLabel) uploadLabel.textContent = 'Cambiar mapa';
     if (adminSub)    adminSub.textContent = 'Mapa subido · Visible para todos los usuarios';
     if (adminCard)   adminCard.classList.add('has-map');
+    // Mostrar banner con preview
+    if (banner)    { banner.classList.add('visible'); }
+    if (bannerImg) { bannerImg.src = src; }
   } else {
     if (btnView) btnView.style.display = 'none';
     if (previewWrap) previewWrap.classList.remove('visible');
@@ -9459,6 +9603,9 @@ function updateFullMapUI(src) {
     if (uploadLabel) uploadLabel.textContent = 'Subir mapa PNG';
     if (adminSub)    adminSub.textContent = 'Sube un PNG con el mapa general de todos los territorios';
     if (adminCard)   adminCard.classList.remove('has-map');
+    // Ocultar banner
+    if (banner)    { banner.classList.remove('visible'); }
+    if (bannerImg) { bannerImg.src = ''; }
   }
 }
 
@@ -11340,6 +11487,12 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
           <div id="profile-task-value"></div>
         </div>
       </div>
+    </div>
+
+    <!-- Partes asignadas (VMC y Fin de Semana) -->
+    <div class="profile-section" id="profile-partes-section" style="display:none">
+      <div class="profile-section-title">Partes asignadas</div>
+      <div id="profile-partes-list"></div>
     </div>
 
     <!-- Cerrar sesión -->
