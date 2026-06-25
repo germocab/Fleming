@@ -4315,7 +4315,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.29.9-alpha';
+const APP_VERSION = '0.29.9.1-alpha';
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -5970,7 +5970,7 @@ window.addEventListener('pageshow', () => refreshScheduleIfStale());
 async function loadSchedule() {
   _lastScheduleLoad = Date.now();
   document.getElementById('schedule-content').innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
-  const { data: aData } = await sb.from('assignments').select('*, territories(id,number,name,map_data,no_pasar)').order('date').order('time');
+  const { data: aData } = await sb.from('assignments').select('*, territories(id,number,name,map_data,map_data_dark,no_pasar)').order('date').order('time');
   assignments = aData || [];
   const { data: tData } = await sb.from('territories').select('*').order('number');
   territories = tData || [];
