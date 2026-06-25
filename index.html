@@ -3272,6 +3272,19 @@
   </div>
 </div>
 
+<div id="auth-pending-screen" style="display:none;align-items:center;justify-content:center;min-height:100vh;padding:1rem;background:var(--bg)">
+  <div class="auth-card" style="text-align:center">
+    <div style="width:64px;height:64px;border-radius:18px;background:var(--orange-light,rgba(255,149,0,0.12));color:var(--orange);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem">
+      <svg viewBox="0 0 24 24" style="width:30px;height:30px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </div>
+    <h2 class="auth-title" style="margin-bottom:0.5rem">Solicitud enviada</h2>
+    <p class="auth-sub" style="margin-bottom:0.25rem" id="auth-pending-name">Tu cuenta está pendiente de aceptación.</p>
+    <p class="auth-sub" style="margin-bottom:1.5rem">Un administrador debe aprobar tu acceso antes de que puedas continuar. Te avisaremos apenas se resuelva.</p>
+    <button class="btn-primary" onclick="checkPendingApproval()" id="pending-check-btn">Verificar estado</button>
+    <button class="btn-secondary" style="margin-top:0.6rem" onclick="doLogout()">Cerrar sesión</button>
+  </div>
+</div>
+
 <div id="app">
   <nav class="topnav">
     <div class="nav-spacer">
@@ -4302,7 +4315,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.29.8-alpha';
+const APP_VERSION = '0.29.9-alpha';
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -4318,6 +4331,9 @@ const PASS_DEV    = 'FlemingDEV2026.!!';
 
 let currentUser = null;
 let currentRole = 'viewer';
+// Caché de los permisos del usuario actual (solo relevante para admin/semiadmin).
+// Se usa para decidir, sin async, si una notificación de tipo "usuarios_module" le corresponde.
+let _currentUserPermsCache = null;
 let assignments = [];
 let territories = [];
 let conductores = [];
@@ -5413,6 +5429,17 @@ function urlBase64ToUint8Array(base64String) {
   
 async function enterApp() {
   document.getElementById('auth-screen').style.display = 'none';
+
+  // Register/update in Supabase — may update currentRole if admin changed it,
+  // or set it to 'pending' if this is a re-entry request from a deleted account.
+  await registerUserSession(currentUser.name, currentRole);
+
+  if (currentRole === 'pending') {
+    showPendingScreen();
+    return;
+  }
+  document.getElementById('auth-pending-screen').style.display = 'none';
+
   const app = document.getElementById('app');
   app.style.display = 'flex'; app.style.flexDirection = 'column';
 
@@ -5420,11 +5447,9 @@ async function enterApp() {
   document.getElementById('user-avatar').textContent = initials;
   document.getElementById('dropdown-name').textContent = currentUser.name;
 
-  // Register/update in Supabase — may update currentRole if admin changed it
-  await registerUserSession(currentUser.name, currentRole);
-
   // Cargar preferencias de notificaciones (en segundo plano, no bloquea el resto del arranque)
   loadNotifPrefs();
+  refreshCurrentUserPermsCache();
 
   // Update UI based on final role
   const roleLabelsMap = { dev:'DEV', admin:'Administrador', semiadmin:'SemiAdmin', viewer:'Visitante' };
@@ -5516,6 +5541,7 @@ async function doAccess() {
   if (btn) { btn.disabled = true; btn.textContent = 'Entrando…'; }
 
   // If logging in as viewer, check Supabase for a semiadmin/admin promotion
+  // (or a 'pending' state, if this account is awaiting DEV/Admin approval).
   let role = baseRole;
   if (baseRole === 'viewer') {
     const fullName = first + ' ' + last;
@@ -5523,7 +5549,7 @@ async function doAccess() {
       .select('role')
       .ilike('name', fullName)
       .single();
-    if (stored && ['semiadmin','admin'].includes(stored.role)) role = stored.role;
+    if (stored && ['semiadmin','admin','pending'].includes(stored.role)) role = stored.role;
   }
 
   if (btn) { btn.disabled = false; btn.textContent = 'Ingresar'; }
@@ -5589,7 +5615,51 @@ function doLogout() {
   const devPill = document.getElementById('dev-version-pill');
   if (devPill) devPill.style.display = 'none';
   document.getElementById('app').style.display = 'none';
+  const pendingScreen = document.getElementById('auth-pending-screen');
+  if (pendingScreen) pendingScreen.style.display = 'none';
+  if (_pendingPollInterval) { clearInterval(_pendingPollInterval); _pendingPollInterval = null; }
   document.getElementById('auth-screen').style.display = 'flex';
+}
+
+// ── Pending account approval screen ──────────────────────────────────────────
+let _pendingPollInterval = null;
+
+function showPendingScreen() {
+  document.getElementById('app').style.display = 'none';
+  const nameEl = document.getElementById('auth-pending-name');
+  if (nameEl && currentUser) nameEl.textContent = `Hola, ${currentUser.name}. Tu cuenta está pendiente de aceptación.`;
+  document.getElementById('auth-pending-screen').style.display = 'flex';
+  if (_pendingPollInterval) clearInterval(_pendingPollInterval);
+  _pendingPollInterval = setInterval(checkPendingApproval, 20000);
+}
+
+// Revisa si DEV/Admin ya resolvió la solicitud. Si fue aceptada (role pasó a
+// 'viewer'), entra normalmente a la app. Si la cuenta ya no existe (fue
+// denegada), informa y vuelve a la pantalla de login.
+async function checkPendingApproval() {
+  if (!currentUser) return;
+  const btn = document.getElementById('pending-check-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Verificando…'; }
+  try {
+    const { data } = await sb.from('platform_users').select('role').ilike('name', currentUser.name).single();
+    if (!data) {
+      // La solicitud fue denegada: el registro fue eliminado.
+      if (_pendingPollInterval) { clearInterval(_pendingPollInterval); _pendingPollInterval = null; }
+      showToast('Tu solicitud de acceso fue denegada.', 'error');
+      doLogout();
+      return;
+    }
+    if (data.role !== 'pending') {
+      if (_pendingPollInterval) { clearInterval(_pendingPollInterval); _pendingPollInterval = null; }
+      currentRole = data.role;
+      currentUser.role = data.role;
+      saveSession(currentUser);
+      document.getElementById('auth-pending-screen').style.display = 'none';
+      enterApp();
+      return;
+    }
+  } catch (e) { /* sin red u otro error transitorio: seguir esperando */ }
+  if (btn) { btn.disabled = false; btn.textContent = 'Verificar estado'; }
 }
 
 const SUB_TABS = {
@@ -8028,10 +8098,12 @@ const PERM_MODULES = [
   { key: 'hospitalidad',      label: 'Hospitalidad',       group: 'reuniones', icon: '<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' },
   { key: 'aseo_salon',        label: 'Aseo del Salón',     group: 'reuniones', icon: '<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>' },
   { key: 'responsabilidades', label: 'Responsabilidades',  group: 'reuniones', icon: '<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
+  // ── Sistema ────────────────────────────────────────────────────────────────
+  { key: 'usuarios',          label: 'Usuarios',            group: 'sistema',   icon: '<svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg>' },
 ];
 
 function parsePermissions(raw) {
-  const defaults = { territories: true, assignments: true, conductores: true, casas: true, grupos: true, carritos: true, vida_ministerio: true, fin_semana: true, hospitalidad: true, responsabilidades: true, aseo_salon: true };
+  const defaults = { territories: true, assignments: true, conductores: true, casas: true, grupos: true, carritos: true, vida_ministerio: true, fin_semana: true, hospitalidad: true, responsabilidades: true, aseo_salon: true, usuarios: false };
   if (!raw) return { ...defaults };
   try {
     const p = typeof raw === 'string' ? JSON.parse(raw) : raw;
@@ -8047,6 +8119,7 @@ function parsePermissions(raw) {
       hospitalidad:      p.hospitalidad      !== false,
       responsabilidades: p.responsabilidades !== false,
       aseo_salon:        p.aseo_salon        !== false,
+      usuarios:          p.usuarios          === true,
     };
   } catch { return { ...defaults }; }
 }
@@ -8107,7 +8180,7 @@ function openUserProfilePage(uid) {
   })() : '—';
   const joinedStr = u.joined_at ? new Date(u.joined_at).toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'}) : '—';
 
-  const ROLE_LABELS_ES = { dev:'DEV', viewer:'Visitante', semiadmin:'SemiAdmin', admin:'Administrador' };
+  const ROLE_LABELS_ES = { dev:'DEV', viewer:'Visitante', semiadmin:'SemiAdmin', admin:'Administrador', pending:'Pendiente' };
   const roleLabel = ROLE_LABELS_ES[u.role] || u.role;
   const perms = parsePermissions(u.permissions);
   const uLabels = parseLabels(u.labels);
@@ -8146,10 +8219,16 @@ function openUserProfilePage(uid) {
       <option value="semiadmin" ${u.role==='semiadmin'?'selected':''}>SemiAdmin</option>`;
   }
 
-  const editSection = canEdit ? `
-    <div class="uprofile-edit-section">
-      <div class="uprofile-edit-title">Editar Perfil</div>
-      <div class="uprofile-edit-body">
+  const pendingActionsHTML = `
+    <p style="font-size:0.85rem;color:var(--text2);line-height:1.5;margin-bottom:1rem">
+      Esta cuenta fue eliminada anteriormente y ${u.name.split(' ')[0]} intentó iniciar sesión de nuevo con el mismo nombre. Acepta para permitirle volver a entrar como Visitante, o deniega para mantener la cuenta bloqueada.
+    </p>
+    <div class="uprofile-actions">
+      <button class="btn-primary" style="width:auto;padding:0.6rem 1.5rem;background:var(--green)" onclick="acceptPendingFromProfile('${u.id}','${u.name.replace(/'/g,"\\'")}')">Aceptar</button>
+      <button class="btn-secondary" onclick="denyPendingFromProfile('${u.id}','${u.name.replace(/'/g,"\\'")}')">Denegar</button>
+    </div>`;
+
+  const normalEditBodyHTML = `
         ${isDev ? `
         <div class="form-group2" style="margin-bottom:0.75rem">
           <label class="form-label2">Nombre completo</label>
@@ -8167,17 +8246,21 @@ function openUserProfilePage(uid) {
           <textarea class="task-textarea" id="uprof-task" placeholder="Ej: Encargado de territorios…">${u.task||''}</textarea>
         </div>
 
-        ${u.role === 'semiadmin' ? `
+        ${(u.role === 'semiadmin' || u.role === 'admin') ? `
         <div style="margin-top:0.9rem">
           <div class="form-label2" style="margin-bottom:6px">Módulos permitidos</div>
           <div class="perms-grid" id="uprof-perms-grid-${u.id}">
             ${(() => {
-              const groups = [
-                { key: 'predicacion', label: 'Predicación' },
-                { key: 'reuniones',   label: 'Reuniones' },
-              ];
+              const groups = u.role === 'admin'
+                ? [ { key: 'sistema', label: 'Sistema' } ]
+                : [
+                    { key: 'predicacion', label: 'Predicación' },
+                    { key: 'reuniones',   label: 'Reuniones' },
+                    { key: 'sistema',     label: 'Sistema' },
+                  ];
               return groups.map(g => {
                 const mods = PERM_MODULES.filter(m => m.group === g.key);
+                if (!mods.length) return '';
                 return `<div class="perms-group-label">${g.label}</div>
                 <div class="perms-group-grid">
                   ${mods.map(m => `
@@ -8209,7 +8292,13 @@ function openUserProfilePage(uid) {
         <div class="uprofile-actions" style="margin-top:1rem">
           <button class="btn-primary" style="width:auto;padding:0.6rem 1.5rem" onclick="saveProfileChanges('${u.id}')">Guardar cambios</button>
           ${!isCurrentUser ? `<button class="btn-secondary" onclick="revokeUser('${u.id}')">Revocar acceso</button>` : ''}
-        </div>
+        </div>`;
+
+  const editSection = canEdit ? `
+    <div class="uprofile-edit-section">
+      <div class="uprofile-edit-title">${u.role === 'pending' ? 'Solicitud de acceso' : 'Editar Perfil'}</div>
+      <div class="uprofile-edit-body">
+        ${u.role === 'pending' ? pendingActionsHTML : normalEditBodyHTML}
       </div>
     </div>` : '';
 
@@ -8318,6 +8407,30 @@ async function deleteUser(uid, name) {
   renderUsersPanel();
 }
 
+// Acepta o deniega una solicitud de reingreso directamente desde la página
+// de Perfil de Usuario (alternativa a hacerlo desde la notificación).
+async function acceptPendingFromProfile(uid, name) {
+  const ok = await acceptAccountRequest(name);
+  if (!ok) { showToast('No se pudo aceptar la solicitud.', 'error'); return; }
+  const u = activeUsers.find(x => x.id === uid);
+  if (u) u.role = 'viewer';
+  showToast(`Acceso de ${name.split(' ')[0]} aceptado`, 'success');
+  closeUserProfilePage();
+  renderUsersPanel();
+}
+
+async function denyPendingFromProfile(uid, name) {
+  if (!confirm(`¿Denegar el acceso de "${name}"? La cuenta seguirá bloqueada.`)) return;
+  const ok = await denyAccountRequest(name);
+  if (!ok) { showToast('No se pudo denegar la solicitud.', 'error'); return; }
+  activeUsers = activeUsers.filter(u => u.id !== uid);
+  showToast(`Solicitud de ${name.split(' ')[0]} denegada`, 'success');
+  closeUserProfilePage();
+  renderUsersPanel();
+}
+
+
+
 const USER_COLORS = ['#22c55e','#3b82f6','#a855f7','#f59e0b','#ef4444','#06b6d4','#ec4899','#84cc16','#f97316','#64748b'];
 function userColor(name) {
   let h = 0; for (let i=0; i<name.length; i++) h = (h*31 + name.charCodeAt(i)) & 0xffff;
@@ -8325,7 +8438,7 @@ function userColor(name) {
 }
 function userInitials(name) { return name.trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
 
-const ROLE_LABELS = { dev:'DEV', viewer:'Visitante', semiadmin:'SemiAdmin', admin:'Administrador' };
+const ROLE_LABELS = { dev:'DEV', viewer:'Visitante', semiadmin:'SemiAdmin', admin:'Administrador', pending:'Pendiente' };
 
 function renderUsersPanel() {
   const body = document.getElementById('users-panel-body');
@@ -8340,20 +8453,21 @@ function renderUsersPanel() {
     return;
   }
 
-  const roleOrder = { dev: 0, admin: 1, semiadmin: 2, viewer: 3 };
+  const roleOrder = { dev: 0, admin: 1, semiadmin: 2, pending: 3, viewer: 4 };
   // El usuario DEV nunca aparece en la lista de usuarios
-  const sorted = [...activeUsers].filter(u => u.role !== 'dev').sort((a,b) => (roleOrder[a.role]??4) - (roleOrder[b.role]??4));
+  const sorted = [...activeUsers].filter(u => u.role !== 'dev').sort((a,b) => (roleOrder[a.role]??5) - (roleOrder[b.role]??5));
 
   // Stats strip
   const onlineCount = sorted.filter(u => {
     const m = u.last_seen ? Math.round((new Date() - new Date(u.last_seen)) / 60000) : 9999;
     return m < 10;
   }).length;
-  const byRole = { dev:0, admin:0, semiadmin:0, viewer:0 };
+  const byRole = { dev:0, admin:0, semiadmin:0, viewer:0, pending:0 };
   sorted.forEach(u => { if (byRole[u.role] !== undefined) byRole[u.role]++; else byRole.viewer++; });
 
   const stats = `<div class="users-stats-strip">
     <div class="users-stat-chip"><span class="users-stat-chip-dot" style="background:var(--green)"></span>${onlineCount} en línea</div>
+    ${byRole.pending ? `<div class="users-stat-chip"><span class="users-stat-chip-dot" style="background:var(--orange)"></span>${byRole.pending} pendiente${byRole.pending!==1?'s':''}</div>` : ''}
     ${byRole.admin ? `<div class="users-stat-chip"><span class="users-stat-chip-dot" style="background:var(--accent)"></span>${byRole.admin} admin</div>` : ''}
     ${byRole.semiadmin ? `<div class="users-stat-chip"><span class="users-stat-chip-dot" style="background:#a855f7"></span>${byRole.semiadmin} semiadmin</div>` : ''}
     <div class="users-stat-chip"><span class="users-stat-chip-dot" style="background:var(--surface3)"></span>${byRole.viewer} visitante${byRole.viewer!==1?'s':''}</div>
@@ -8362,7 +8476,7 @@ function renderUsersPanel() {
   const cards = sorted.map(u => {
     const col = userColor(u.name);
     const inits = userInitials(u.name);
-    const roleBadgeCls = u.role === 'dev' ? 'role-badge-dev' : u.role === 'admin' ? 'role-badge-admin' : u.role === 'semiadmin' ? 'role-badge-semiadmin' : 'role-badge-viewer';
+    const roleBadgeCls = u.role === 'dev' ? 'role-badge-dev' : u.role === 'admin' ? 'role-badge-admin' : u.role === 'semiadmin' ? 'role-badge-semiadmin' : u.role === 'pending' ? 'role-badge-viewer' : 'role-badge-viewer';
     const roleLabel = ROLE_LABELS[u.role] || u.role;
     const lastActive = u.last_seen || u.joined_at;
     const minutesAgo = lastActive ? Math.round((new Date() - new Date(lastActive)) / 60000) : 9999;
@@ -8509,6 +8623,21 @@ async function getUserPermissions() {
   return parsePermissions(data.permissions);
 }
 
+// Indica si el admin actual tiene activado el módulo "Usuarios" (recibe
+// notificaciones de solicitudes de cuenta). Los DEV siempre lo tienen.
+// A diferencia de getUserPermissions(), esto SÍ consulta permisos para admin,
+// ya que "usuarios" es el único módulo restringible para ese rol.
+async function refreshCurrentUserPermsCache() {
+  if (currentRole === 'dev') { _currentUserPermsCache = { usuarios: true }; return; }
+  if (currentRole !== 'admin' && currentRole !== 'semiadmin') { _currentUserPermsCache = null; return; }
+  try {
+    const { data } = await sb.from('platform_users').select('permissions').ilike('name', currentUser.name).single();
+    _currentUserPermsCache = data ? parsePermissions(data.permissions) : parsePermissions(null);
+  } catch (e) {
+    _currentUserPermsCache = parsePermissions(null);
+  }
+}
+
 function canAccessModule(permissions, moduleKey) {
   if (!permissions) return true; // no restrictions = full access
   return permissions[moduleKey] !== false;
@@ -8518,15 +8647,18 @@ async function registerUserSession(name, role) {
   const now = new Date().toISOString();
   if (role === 'dev') return;
 
-  // Check blocklist — deleted accounts must not be re-created
+  // Check blocklist — a previously deleted account trying to log in again
+  // no longer gets hard-blocked. Instead, it's allowed to request access:
+  // we create a 'pending' record and notify DEV + Admins with the
+  // "Usuarios" module enabled, who can Accept or Deny from their notification.
   try {
     const { data: bl } = await sb.from('platform_config').select('value').eq('key', 'deleted_users_blocklist');
     if (bl && bl.length) {
       const blocked = JSON.parse(bl[0].value);
       if (blocked.includes(name.toLowerCase())) {
-        // Force logout — this account was deleted by DEV
-        showToast('Esta cuenta fue eliminada. Contacta al administrador.', 'error');
-        setTimeout(() => doLogout(), 2000);
+        await requestAccountReentry(name, blocked);
+        currentRole = 'pending';
+        if (currentUser) { currentUser.role = 'pending'; saveSession(currentUser); }
         return;
       }
     }
@@ -8538,6 +8670,7 @@ async function registerUserSession(name, role) {
   if (existing) {
     await sb.from('platform_users').update({ last_seen: now }).eq('id', existing.id);
     // Always adopt the role Supabase has — this is the source of truth
+    // (incluye 'pending': si ya hay una solicitud en curso, no se reinserta).
     if (existing.role !== currentRole) {
       currentRole = existing.role;
       currentUser.role = existing.role;
@@ -8548,6 +8681,68 @@ async function registerUserSession(name, role) {
       .insert({ name, role, task: '', joined_at: now, last_seen: now });
   }
 }
+
+// Crea (o reactiva) el registro de un usuario previamente eliminado como
+// 'pending' y notifica a DEV + Admins con el módulo "Usuarios" activado,
+// quienes pueden Aceptar o Denegar la solicitud desde la notificación.
+// Se quita del blocklist al crear la solicitud para evitar duplicados;
+// si la solicitud es denegada, vuelve a agregarse (ver denyAccountRequest).
+async function requestAccountReentry(name, blocked) {
+  const remaining = blocked.filter(n => n !== name.toLowerCase());
+  await sb.from('platform_config').update({ value: JSON.stringify(remaining) }).eq('key', 'deleted_users_blocklist');
+
+  const now = new Date().toISOString();
+  const { data: existingPending } = await sb.from('platform_users')
+    .select('id, role').ilike('name', name).single();
+
+  if (existingPending) {
+    if (existingPending.role !== 'pending') {
+      await sb.from('platform_users').update({ role: 'pending', last_seen: now }).eq('id', existingPending.id);
+    }
+  } else {
+    await sb.from('platform_users')
+      .insert({ name, role: 'pending', task: '', joined_at: now, last_seen: now });
+  }
+
+  await sb.from('notifications').insert({
+    title: 'Solicitud de cuenta',
+    body: `${name} fue eliminado anteriormente e intentó iniciar sesión de nuevo. Acepta o deniega la solicitud para que pueda volver a acceder.`,
+    notif_category: 'solicitud-cuenta',
+    notif_audience: 'usuarios_module',
+    notif_type: 'account_request',
+    notif_payload: { name },
+  });
+}
+
+// Acepta una solicitud de reingreso: el usuario pasa a 'viewer' y puede
+// volver a entrar normalmente con la contraseña de visitante.
+async function acceptAccountRequest(name) {
+  const { data } = await sb.from('platform_users').select('id,role').ilike('name', name).single();
+  if (!data || data.role !== 'pending') return false;
+  const { error } = await sb.from('platform_users').update({ role: 'viewer' }).eq('id', data.id);
+  return !error;
+}
+
+// Deniega una solicitud de reingreso: se elimina el registro y el nombre
+// vuelve al blocklist, tal como si nunca hubiese intentado volver a entrar.
+async function denyAccountRequest(name) {
+  const { data } = await sb.from('platform_users').select('id,role').ilike('name', name).single();
+  if (data && data.role === 'pending') {
+    await sb.from('platform_users').delete().eq('id', data.id);
+  }
+  const key = 'deleted_users_blocklist';
+  const { data: bl } = await sb.from('platform_config').select('value').eq('key', key);
+  let blocked = (bl && bl.length) ? JSON.parse(bl[0].value) : [];
+  if (!blocked.includes(name.toLowerCase())) blocked.push(name.toLowerCase());
+  const val = JSON.stringify(blocked);
+  if (bl && bl.length) {
+    await sb.from('platform_config').update({ value: val }).eq('key', key);
+  } else {
+    await sb.from('platform_config').insert({ key, value: val });
+  }
+  return true;
+}
+
 
 // ── Role sync polling ─────────────────────────────────────────────────────────
 // Every 30s, check if an admin changed this user's role or revoked access.
@@ -8571,6 +8766,10 @@ async function syncRoleFromServer() {
       .ilike('name', currentUser.name)
       .single();
     if (!data) return;
+    // Mantener el caché de permisos al día (usado para notificaciones del módulo "Usuarios").
+    if (['admin','semiadmin'].includes(currentRole)) {
+      _currentUserPermsCache = parsePermissions(data.permissions);
+    }
     if (data.role !== currentRole) {
       const prevRole = currentRole;
       currentRole = data.role;
@@ -9412,6 +9611,7 @@ const NOTIF_CATEGORIES = [
   { id: 'hospitalidad',      label: 'Hospitalidad',                 mandatory: false, group: 'reuniones' },
   { id: 'responsabilidades', label: 'Responsabilidades',           mandatory: true,  group: 'reuniones' },
   { id: 'sistema',           label: 'Avisos de la Plataforma',     mandatory: true,  group: 'sistema' },
+  { id: 'solicitud-cuenta',  label: 'Solicitudes de cuenta',        mandatory: true,  group: 'sistema' },
 ];
 
 // Devuelve la key de NOTIF_GROUPS correspondiente a una notificación.
@@ -9491,7 +9691,7 @@ async function checkForNewNotifications() {
   try {
     const since = getLastSeenNotifTime();
     const { data } = await sb.from('notifications')
-      .select('id, target_names, notif_category, dev_only')
+      .select('id, target_names, notif_category, dev_only, notif_audience')
       .gt('created_at', since)
       .limit(50);
     const myName = currentUser?.name?.trim().toLowerCase();
@@ -9504,9 +9704,18 @@ async function checkForNewNotifications() {
 // A notification with no target_names (or an empty array) is a broadcast
 // visible to everyone. One with target_names only shows for the matching user.
 // Las notificaciones marcadas dev_only solo son visibles para el rol 'dev'.
+// Las marcadas notif_audience:'usuarios_module' solo son visibles para el
+// rol 'dev' y para administradores que tengan el módulo "Usuarios" activado
+// (permissions.usuarios === true) — se usan para solicitudes de cuenta.
 // Las de una categoría desactivada por el usuario quedan ocultas (salvo las obligatorias).
 function isNotifForMe(n, myNameLower) {
   if (n.dev_only) return currentRole === 'dev';
+  if (n.notif_audience === 'usuarios_module') {
+    if (!isNotifCategoryEnabled(n)) return false;
+    if (currentRole === 'dev') return true;
+    if (currentRole === 'admin') return !!(_currentUserPermsCache && _currentUserPermsCache.usuarios === true);
+    return false;
+  }
   if (!isNotifCategoryEnabled(n)) return false;
   if (!n.target_names || !Array.isArray(n.target_names) || n.target_names.length === 0) return true;
   if (!myNameLower) return false;
@@ -9660,6 +9869,44 @@ async function loadNotifications(target) {
   });
 }
 
+// Genera los botones "Aceptar" / "Denegar" para notificaciones de tipo
+// account_request (solicitud de reingreso de una cuenta previamente
+// eliminada). Solo se muestran mientras la solicitud sigue pendiente —
+// una vez resuelta, se reemplazan por un estado final.
+function _accountRequestActionsHTML(n, variant) {
+  if (n.notif_type !== 'account_request') return '';
+  const name = n.notif_payload?.name || '';
+  if (!name) return '';
+  const resolved = n._resolvedAs; // 'accepted' | 'denied' | undefined
+  const wrapStyle = variant === 'desktop'
+    ? 'display:flex;gap:8px;margin-top:4px'
+    : 'display:flex;gap:8px;margin-top:10px';
+  if (resolved === 'accepted') {
+    return `<div style="${wrapStyle}"><span style="font-size:0.78rem;font-weight:600;color:var(--green)">✓ Solicitud aceptada</span></div>`;
+  }
+  if (resolved === 'denied') {
+    return `<div style="${wrapStyle}"><span style="font-size:0.78rem;font-weight:600;color:var(--red)">✕ Solicitud denegada</span></div>`;
+  }
+  const btnBase = 'flex:1;padding:0.45rem 0.7rem;border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer;border:none;font-family:var(--font)';
+  return `<div style="${wrapStyle}">
+    <button style="${btnBase};background:var(--green);color:#fff" onclick="resolveAccountRequest('${n.id}','${name.replace(/'/g,"\\'")}',true)">Aceptar</button>
+    <button style="${btnBase};background:var(--surface3);color:var(--text)" onclick="resolveAccountRequest('${n.id}','${name.replace(/'/g,"\\'")}',false)">Denegar</button>
+  </div>`;
+}
+
+async function resolveAccountRequest(notifId, name, accept) {
+  const n = _notifAllData.find(x => x.id === notifId);
+  ['notif-d-actions-','notif-m-actions-'].forEach(prefix => {
+    const el = document.getElementById(prefix + notifId);
+    if (el) el.innerHTML = '<span style="font-size:0.78rem;color:var(--text3)">Procesando…</span>';
+  });
+  const ok = accept ? await acceptAccountRequest(name) : await denyAccountRequest(name);
+  if (!ok) { showToast('No se pudo procesar la solicitud.', 'error'); _renderNotifAllTargets(); return; }
+  if (n) n._resolvedAs = accept ? 'accepted' : 'denied';
+  showToast(accept ? `Acceso de ${name.split(' ')[0]} aceptado` : `Solicitud de ${name.split(' ')[0]} denegada`, 'success');
+  await deleteNotification(notifId);
+}
+
 function _renderNotifTarget(t) {
   const listEl = document.getElementById(t === 'desktop' ? 'notifications-list-desktop' : 'notifications-list-mobile');
   if (!listEl) return;
@@ -9697,6 +9944,7 @@ function _renderNotifTarget(t) {
           ${isNew?'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0"></span>':''}
         </div>
         <span style="font-size:0.8rem;color:var(--text2);line-height:1.4">${n.body}</span>
+        <div id="notif-d-actions-${n.id}">${_accountRequestActionsHTML(n, 'desktop')}</div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;gap:6px">
           ${notifGroupPillHTML(n)}
           <span style="font-size:0.65rem;color:var(--text3);flex-shrink:0">${dateStr}</span>
@@ -9728,6 +9976,7 @@ function _renderNotifTarget(t) {
           </button>
         </div>
         <div class="notif-card-body">${n.body}</div>
+        <div id="notif-m-actions-${n.id}">${_accountRequestActionsHTML(n, 'mobile')}</div>
         <div class="notif-card-footer">
           ${notifGroupPillHTML(n)}
           <span class="notif-card-date">${dateStr}</span>
