@@ -694,6 +694,29 @@
   .lightbox-close:hover { background: rgba(255,255,255,0.25); }
   .lightbox-close svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
 
+  /* ── Territory tabs in detail panel ─────────────────────────────────────── */
+  .detail-ter-tabs {
+    display: flex; gap: 0; margin: 0 1.25rem 0.75rem;
+    background: var(--surface2); border-radius: 10px; padding: 3px;
+    border: 1px solid var(--border);
+  }
+  .detail-ter-tab {
+    flex: 1; padding: 0.45rem 0.75rem; border: none; cursor: pointer;
+    border-radius: 8px; font-size: 0.82rem; font-weight: 600;
+    background: transparent; color: var(--text3);
+    transition: background 0.15s, color 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .detail-ter-tab.active {
+    background: var(--surface); color: var(--text);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+  }
+  .detail-ter-tab .tab-badge {
+    width: 20px; height: 20px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; font-weight: 800; color: white; flex-shrink: 0;
+  }
+
   .no-pasar-section { padding: 0 1.25rem 1.25rem; }
   .no-pasar-title {
     font-size: 0.875rem; font-weight: 700;
@@ -3929,6 +3952,17 @@
       <button class="detail-btn-primary" id="detail-call-btn">Llamar</button>
       <button class="detail-btn-secondary" id="detail-map-btn">Cómo llegar</button>
     </div>
+    <!-- Territory tabs (shown only when 2 territories assigned) -->
+    <div class="detail-ter-tabs" id="detail-ter-tabs" style="display:none">
+      <button class="detail-ter-tab active" id="detail-ter-tab-1" onclick="switchDetailTerTab(1)">
+        <span class="tab-badge" id="detail-ter-tab-badge-1"></span>
+        <span id="detail-ter-tab-label-1">Territorio 1</span>
+      </button>
+      <button class="detail-ter-tab" id="detail-ter-tab-2" onclick="switchDetailTerTab(2)">
+        <span class="tab-badge" id="detail-ter-tab-badge-2"></span>
+        <span id="detail-ter-tab-label-2">Territorio 2</span>
+      </button>
+    </div>
     <div class="detail-map-wrap" id="detail-map-wrap" style="display:none">
       <img id="detail-map-img" alt="Mapa del territorio">
     </div>
@@ -3988,8 +4022,11 @@
           </select>
         </div>
       </div>
-      <div class="form-group2"><label class="form-label2">Territorio</label>
+      <div class="form-group2"><label class="form-label2">Territorio (1º)</label>
         <select class="form-select" id="as-territory"><option value="">Sin territorio</option></select>
+      </div>
+      <div class="form-group2"><label class="form-label2">Territorio (2º) <span style="font-weight:400;color:var(--text3)">— opcional</span></label>
+        <select class="form-select" id="as-territory2"><option value="">Sin segundo territorio</option></select>
       </div>
       <div class="form-group2"><label class="form-label2">Notas</label><textarea class="form-textarea" id="as-notes" placeholder="Observaciones adicionales..."></textarea></div>
       <div style="display:flex;gap:10px;margin-top:1.1rem;justify-content:flex-end">
@@ -4536,7 +4573,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.29.10.1-alpha';
+const APP_VERSION = '0.29.11-alpha';
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -6283,7 +6320,7 @@ window.addEventListener('pageshow', () => refreshScheduleIfStale());
 async function loadSchedule() {
   _lastScheduleLoad = Date.now();
   document.getElementById('schedule-content').innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
-  const { data: aData } = await sb.from('assignments').select('*, territories(id,number,name,map_data,map_data_dark,no_pasar)').order('date').order('time');
+  const { data: aData } = await sb.from('assignments').select('*, territories(id,number,name,map_data,map_data_dark,no_pasar), territories2:territories!territory_id_2(id,number,name,map_data,map_data_dark,no_pasar)').order('date').order('time');
   assignments = aData || [];
   const { data: tData } = await sb.from('territories').select('*').order('number');
   territories = tData || [];
@@ -6403,7 +6440,8 @@ function renderSchedule() {
 function viewAssignment(id) {
   const a = assignments.find(x => x.id === id);
   if (!a) return;
-  const ter = a.territories || territories.find(t => t.id === a.territory_id);
+  const ter  = a.territories  || territories.find(t => t.id === a.territory_id);
+  const ter2 = a.territories2 || (a.territory_id_2 ? territories.find(t => t.id === a.territory_id_2) : null);
   const d = new Date(a.date+'T00:00:00');
   const DAY = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
   const MON = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
@@ -6422,18 +6460,6 @@ function viewAssignment(id) {
     badge.style.display = 'none';
   } else {
     badge.style.display = 'none';
-  }
-
-  const mapWrap = document.getElementById('detail-map-wrap');
-  const mapImg  = document.getElementById('detail-map-img');
-  const terMapSrc = ter ? getActiveTerMapSrc(ter) : null;
-  if (terMapSrc) {
-    mapImg.src = terMapSrc;
-    mapWrap.style.display = '';
-    mapWrap.onclick = () => openLightbox(terMapSrc);
-  } else {
-    mapWrap.style.display = 'none';
-    mapWrap.onclick = null;
   }
 
   const actions = document.getElementById('detail-actions');
@@ -6461,6 +6487,63 @@ function viewAssignment(id) {
     mapBtn.style.opacity = '0.45';
   }
 
+  // ── Territory tabs setup ──
+  const tabsBar = document.getElementById('detail-ter-tabs');
+  if (ter && ter2) {
+    // Show tabs bar
+    const tab1 = document.getElementById('detail-ter-tab-1');
+    const tab2 = document.getElementById('detail-ter-tab-2');
+    const badge1 = document.getElementById('detail-ter-tab-badge-1');
+    const badge2 = document.getElementById('detail-ter-tab-badge-2');
+    badge1.textContent = ter.number;  badge1.style.background = getTerColor(ter.number);
+    badge2.textContent = ter2.number; badge2.style.background = getTerColor(ter2.number);
+    document.getElementById('detail-ter-tab-label-1').textContent = `Territorio ${ter.number}`;
+    document.getElementById('detail-ter-tab-label-2').textContent = `Territorio ${ter2.number}`;
+    tabsBar.style.display = '';
+    // Store both territories on panel for tab switching
+    const panel = document.getElementById('detail-panel');
+    panel._ter1 = ter; panel._ter2 = ter2;
+    // Activate tab 1 by default
+    tab1.classList.add('active'); tab2.classList.remove('active');
+    _renderDetailTerContent(ter);
+  } else {
+    tabsBar.style.display = 'none';
+    // Single territory or none
+    const mapWrap = document.getElementById('detail-map-wrap');
+    const mapImg  = document.getElementById('detail-map-img');
+    const terMapSrc = ter ? getActiveTerMapSrc(ter) : null;
+    if (terMapSrc) {
+      mapImg.src = terMapSrc;
+      mapWrap.style.display = '';
+      mapWrap.onclick = () => openLightbox(terMapSrc);
+    } else {
+      mapWrap.style.display = 'none';
+      mapWrap.onclick = null;
+    }
+    _renderDetailNoPasar(ter);
+  }
+
+  document.getElementById('detail-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+// Render map + no-pasar content for a given territory object
+function _renderDetailTerContent(ter) {
+  const mapWrap = document.getElementById('detail-map-wrap');
+  const mapImg  = document.getElementById('detail-map-img');
+  const terMapSrc = ter ? getActiveTerMapSrc(ter) : null;
+  if (terMapSrc) {
+    mapImg.src = terMapSrc;
+    mapWrap.style.display = '';
+    mapWrap.onclick = () => openLightbox(terMapSrc);
+  } else {
+    mapWrap.style.display = 'none';
+    mapWrap.onclick = null;
+  }
+  _renderDetailNoPasar(ter);
+}
+
+function _renderDetailNoPasar(ter) {
   const noPasarSec  = document.getElementById('detail-no-pasar-section');
   const noPasarList = document.getElementById('detail-no-pasar-list');
   if (ter && ter.no_pasar) {
@@ -6474,12 +6557,15 @@ function viewAssignment(id) {
     } else { noPasarList.innerHTML = ''; }
   } else { noPasarList.innerHTML = ''; }
   noPasarSec.style.display = ter ? '' : 'none';
-  // Store territory id for suggest form
-  noPasarSec.dataset.territoryId = ter ? ter.id : '';
-  noPasarSec.dataset.territoryName = ter ? `Territorio ${ter.number}` : (a.address || '');
+  noPasarSec.dataset.territoryId   = ter ? ter.id     : '';
+  noPasarSec.dataset.territoryName = ter ? `Territorio ${ter.number}` : '';
+}
 
-  document.getElementById('detail-overlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
+function switchDetailTerTab(tabNum) {
+  const panel = document.getElementById('detail-panel');
+  document.getElementById('detail-ter-tab-1').classList.toggle('active', tabNum === 1);
+  document.getElementById('detail-ter-tab-2').classList.toggle('active', tabNum === 2);
+  _renderDetailTerContent(tabNum === 1 ? panel._ter1 : panel._ter2);
 }
 
 function toggleSuggestNpForm() {
@@ -6526,6 +6612,12 @@ function closeDetail() {
   document.getElementById('detail-time-chip').style.display = '';
   document.getElementById('detail-address').style.fontSize = '';
   document.getElementById('detail-actions').style.display = '';
+  // Reset territory tabs
+  document.getElementById('detail-ter-tabs').style.display = 'none';
+  document.getElementById('detail-ter-tab-1').classList.add('active');
+  document.getElementById('detail-ter-tab-2').classList.remove('active');
+  const panel = document.getElementById('detail-panel');
+  panel._ter1 = null; panel._ter2 = null;
   document.getElementById('detail-overlay').classList.remove('open');
   document.body.style.overflow = '';
   // Reset suggest form
@@ -6659,6 +6751,10 @@ function openAssignmentModal(a) {
   selTer.innerHTML = '<option value="">Sin territorio</option>' +
     territories.map(t => `<option value="${t.id}"${a?.territory_id===t.id?' selected':''}>Territorio ${t.number}</option>`).join('');
 
+  const selTer2 = document.getElementById('as-territory2');
+  selTer2.innerHTML = '<option value="">Sin segundo territorio</option>' +
+    territories.map(t => `<option value="${t.id}"${a?.territory_id_2===t.id?' selected':''}>Territorio ${t.number}</option>`).join('');
+
   document.getElementById('as-error').style.display = 'none';
   document.getElementById('assignment-modal').classList.add('open');
 }
@@ -6684,6 +6780,7 @@ async function saveAssignment() {
     casa_id: casaId,
     type: document.getElementById('as-type').value,
     territory_id: document.getElementById('as-territory').value || null,
+    territory_id_2: document.getElementById('as-territory2').value || null,
     notes: document.getElementById('as-notes').value.trim(),
     phone: conductor?.telefono || null,
   };
@@ -6720,7 +6817,8 @@ if (editingAssignmentId) {
     oldAssign.time         !== payload.time         ||
     oldAssign.conductor    !== payload.conductor    ||
     oldAssign.type         !== payload.type         ||
-    (oldAssign.territory_id || null) !== (payload.territory_id || null)
+    (oldAssign.territory_id || null) !== (payload.territory_id || null) ||
+    (oldAssign.territory_id_2 || null) !== (payload.territory_id_2 || null)
   );
 
   if (!error && hasChanged) {
@@ -9418,6 +9516,8 @@ function viewTerritory(id) {
 
   // Hide call/directions buttons — not relevant for a territory
   document.getElementById('detail-actions').style.display = 'none';
+  // Hide territory tabs — single territory view
+  document.getElementById('detail-ter-tabs').style.display = 'none';
 
   // Map
   const mapWrap = document.getElementById('detail-map-wrap');
