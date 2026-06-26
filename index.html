@@ -583,6 +583,15 @@
     font-size: 0.85rem; font-weight: 800; color: white;
   }
 
+  /* Territory color picker swatches */
+  .ter-color-swatch {
+    width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+    border: 3px solid transparent; transition: transform 0.12s, border-color 0.12s;
+    flex-shrink: 0;
+  }
+  .ter-color-swatch:hover { transform: scale(1.15); }
+  .ter-color-swatch.selected { border-color: var(--text); transform: scale(1.15); }
+
   .ter-color-0 { background: #64748b; }
   .ter-color-1 { background: #22c55e; }
   .ter-color-2 { background: #3b82f6; }
@@ -4128,6 +4137,11 @@
           <button type="button" id="ter-map-dark-remove-btn" onclick="removeDarkMapImage()" style="display:none;background:none;border:none;font-size:0.74rem;color:var(--red);cursor:pointer;padding:0">Quitar imagen oscura</button>
         </div>
       </div>
+      <div class="form-group2" style="margin-bottom:1.1rem">
+        <label class="form-label2">Color del badge</label>
+        <div id="ter-color-picker" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px"></div>
+        <input type="hidden" id="ter-color-value">
+      </div>
       <div style="margin-bottom:1.1rem">
         <div class="form-label2" style="margin-bottom:8px">Direcciones "No Pasar"</div>
         <div id="no-pasar-inputs"></div>
@@ -4584,7 +4598,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.29.11.6.3-alpha';
+const APP_VERSION = '0.29.11.7-alpha';
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -4654,7 +4668,15 @@ let respHistorial = [];
 let respSelectedDate = null;
 
 const TER_COLORS = ['#64748b','#22c55e','#3b82f6','#a855f7','#f59e0b','#ef4444','#06b6d4','#ec4899','#84cc16','#f97316'];
-function getTerColor(num) { return TER_COLORS[num % TER_COLORS.length]; }
+// Returns color for a territory — prefers saved `color` field, falls back to auto palette
+function getTerColor(num) {
+  const t = territories.find(x => x.number === num);
+  return (t && t.color) ? t.color : TER_COLORS[num % TER_COLORS.length];
+}
+// Overload that accepts a territory object directly (avoids array lookup)
+function getTerColorFromObj(t) {
+  return (t && t.color) ? t.color : TER_COLORS[(t ? t.number : 0) % TER_COLORS.length];
+}
 function getTerColorClass(num) { return 'ter-color-' + (num % 10); }
 
 function initTheme() {
@@ -7428,10 +7450,25 @@ function openTerritoryModal(t) {
       else addNoPasarInput(e, ''); // backwards compat with old string entries
     });
   } else { addNoPasarInput(); }
+  // ── Color picker ──
+  const PICKER_COLORS = ['#64748b','#22c55e','#3b82f6','#a855f7','#f59e0b','#ef4444','#06b6d4','#ec4899','#84cc16','#f97316','#0ea5e9','#d946ef','#10b981','#f43f5e','#8b5cf6'];
+  const savedColor = t?.color || TER_COLORS[(t?.number || 0) % TER_COLORS.length];
+  document.getElementById('ter-color-value').value = savedColor;
+  const pickerEl = document.getElementById('ter-color-picker');
+  pickerEl.innerHTML = PICKER_COLORS.map(c =>
+    `<div class="ter-color-swatch${c===savedColor?' selected':''}" style="background:${c}" title="${c}" onclick="selectTerColor('${c}')"></div>`
+  ).join('');
+
   document.getElementById('ter-error').style.display = 'none';
   document.getElementById('territory-edit-modal').classList.add('open');
 }
 function editTerritory(id) { openTerritoryModal(territories.find(t=>t.id===id)); }
+function selectTerColor(color) {
+  document.getElementById('ter-color-value').value = color;
+  document.querySelectorAll('.ter-color-swatch').forEach(s => {
+    s.classList.toggle('selected', s.style.background === color || s.title === color);
+  });
+}
 function closeTerritoryEditModal() { document.getElementById('territory-edit-modal').classList.remove('open'); editingTerritoryId=null; pendingMapBase64=null; pendingMapDarkBase64=null; }
 function handleMapImage(event) {
   const file = event.target.files[0]; if (!file) return;
@@ -7523,7 +7560,8 @@ async function saveTerritory() {
   }).filter(Boolean);
   const btn = document.getElementById('save-ter-btn');
   btn.disabled = true; btn.textContent = 'Guardando...';
-  const payload = { number, no_pasar, map_data: pendingMapBase64 || null, map_data_dark: pendingMapDarkBase64 !== undefined ? pendingMapDarkBase64 : null };
+  const color = document.getElementById('ter-color-value').value || null;
+  const payload = { number, color, no_pasar, map_data: pendingMapBase64 || null, map_data_dark: pendingMapDarkBase64 !== undefined ? pendingMapDarkBase64 : null };
   let error;
   if (editingTerritoryId) { ({error} = await sb.from('territories').update(payload).eq('id',editingTerritoryId)); }
   else { ({error} = await sb.from('territories').insert(payload)); }
