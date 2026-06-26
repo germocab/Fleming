@@ -572,6 +572,17 @@
   }
   .ter-badge-icon svg { width: 24px; height: 24px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; }
 
+  /* Double territory badge */
+  .ter-badge-duo {
+    display: flex; flex-direction: column; gap: 4px;
+    align-items: center; flex-shrink: 0;
+  }
+  .ter-badge-duo .ter-badge-sm {
+    width: 38px; height: 21px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; font-weight: 800; color: white;
+  }
+
   .ter-color-0 { background: #64748b; }
   .ter-color-1 { background: #22c55e; }
   .ter-color-2 { background: #3b82f6; }
@@ -4573,7 +4584,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.29.11.2-alpha';
+const APP_VERSION = '0.29.11.5-alpha';
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -6380,7 +6391,8 @@ function renderSchedule() {
     }
 
     grouped[date].forEach(a => {
-      const ter = a.territories || territories.find(t => t.id === a.territory_id) || null;
+      const ter  = territories.find(t => t.id === a.territory_id)  || null;
+      const ter2 = a.territory_id_2 ? (territories.find(t => t.id === a.territory_id_2) || null) : null;
       const timeStr = a.time ? a.time.substring(0,5) : '--:--';
 
       let rightBadge = '';
@@ -6396,9 +6408,14 @@ function renderSchedule() {
         rightBadge = `<div class="ter-badge-icon cartas-badge">
           <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
         </div>`;
+      } else if (ter && ter2) {
+        // Two territories — show stacked pill badges
+        rightBadge = `<div class="ter-badge-duo">
+          <div class="ter-badge-sm" style="background:${getTerColor(ter.number)}">${ter.number}</div>
+          <div class="ter-badge-sm" style="background:${getTerColor(ter2.number)}">${ter2.number}</div>
+        </div>`;
       } else if (ter) {
-        const color = getTerColor(ter.number);
-        rightBadge = `<div class="ter-badge" style="background:${color}">${ter.number}</div>`;
+        rightBadge = `<div class="ter-badge" style="background:${getTerColor(ter.number)}">${ter.number}</div>`;
       }
 
       let typeChip = '';
