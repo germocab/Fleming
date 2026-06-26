@@ -4409,6 +4409,13 @@
           <span id="aseo-tv-theme-label">Modo Oscuro</span>
         </span>
       </div>
+      <div class="aseo-tv-more-divider"></div>
+      <div class="aseo-tv-more-item" onclick="switchAseoToPopup()">
+        <span>
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+          Cambiar a PopUp
+        </span>
+      </div>
     </div>
   </div>
   <button class="aseo-tv-close" onclick="closeAseoTvMode()" aria-label="Salir de pantalla completa">
@@ -4529,7 +4536,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.29.10-alpha';
+const APP_VERSION = '0.29.10.1-alpha';
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -8224,6 +8231,7 @@ function buildAseoTvCardHTML(row) {
 function openAseoTvMode(idx) {
   const row = _aseoUserRows[idx];
   if (!row) return;
+  _aseoCurrentIdx = idx;
 
   document.getElementById('aseo-tv-card').innerHTML = buildAseoTvCardHTML(row);
 
@@ -8248,6 +8256,22 @@ function closeAseoTvMode() {
   }
 }
 
+// Cambia del Full Screen al modo PopUp, manteniendo el mismo aseo mostrado.
+function switchAseoToPopup() {
+  const idx = _aseoCurrentIdx;
+  if (idx === null) return;
+  closeAseoTvMode();
+  openAseoPopupMode(idx);
+}
+
+// Cambia del PopUp al modo Full Screen, manteniendo el mismo aseo mostrado.
+function switchAseoToFullscreen() {
+  const idx = _aseoCurrentIdx;
+  if (idx === null) return;
+  if (window._aseoPopupWin && !window._aseoPopupWin.closed) window._aseoPopupWin.close();
+  openAseoTvMode(idx);
+}
+
 // Si el usuario sale de pantalla completa con Esc (o el control del navegador/SO),
 // también cerramos el overlay para no dejarlo "flotando" en modo windowed.
 document.addEventListener('fullscreenchange', () => {
@@ -8268,6 +8292,7 @@ document.addEventListener('webkitfullscreenchange', () => {
 const ASEO_TV_SCALE_STEPS = [0.75, 0.85, 1, 1.15, 1.3, 1.5];
 let _aseoTvScaleIdx = 2; // 100%
 let _aseoTvLocalTheme = 'dark'; // 'dark' | 'light', por defecto coincide con el diseño original
+let _aseoCurrentIdx = null; // idx de la fila mostrada actualmente, en Full Screen o PopUp
 
 function initAseoTvLocalControls(overlay) {
   overlay.style.setProperty('--aseo-tv-scale', ASEO_TV_SCALE_STEPS[_aseoTvScaleIdx]);
@@ -8322,6 +8347,7 @@ document.addEventListener('click', (e) => {
 async function openAseoPopupMode(idx) {
   const row = _aseoUserRows[idx];
   if (!row) return;
+  _aseoCurrentIdx = idx;
 
   let left = Math.round((window.screen.width - 1000) / 2) + (window.screenLeft || window.screenX || 0);
   let top = Math.round((window.screen.height - 700) / 2) + (window.screenTop || window.screenY || 0);
@@ -8379,6 +8405,13 @@ async function openAseoPopupMode(idx) {
         <div class="aseo-tv-more-item" id="popup-theme-toggle">
           <span><span id="popup-theme-label">${_aseoTvLocalTheme === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}</span></span>
         </div>
+        <div class="aseo-tv-more-divider"></div>
+        <div class="aseo-tv-more-item" id="popup-switch-fullscreen">
+          <span>
+            <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+            Cambiar a Full Screen
+          </span>
+        </div>
       </div>
     </div>
     <div class="aseo-tv-card" id="aseo-tv-card">${buildAseoTvCardHTML(row)}</div>
@@ -8403,6 +8436,13 @@ async function openAseoPopupMode(idx) {
     const cur = overlay.getAttribute('data-local-theme') === 'dark' ? 'light' : 'dark';
     overlay.setAttribute('data-local-theme', cur);
     document.getElementById('popup-theme-label').textContent = cur === 'dark' ? 'Modo Claro' : 'Modo Oscuro';
+  });
+  document.getElementById('popup-switch-fullscreen').addEventListener('click', () => {
+    if (window.opener && !window.opener.closed && typeof window.opener.switchAseoToFullscreen === 'function') {
+      window.opener.switchAseoToFullscreen();
+      window.opener.focus();
+    }
+    window.close();
   });
   renderScale();
 ` + '<' + `/script>
