@@ -6427,7 +6427,7 @@ function renderSchedule() {
         // ── Featured today card ──
         html += `<div class="assignment-card-today" onclick="viewAssignment('${a.id}')">
           <div class="today-card-info">
-            <div class="today-card-address">${a.address||'Sin dirección'}${a.house?`<br><span class="today-card-house">${a.house}</span>`:''}</div>
+            <div class="today-card-address">${a.address||'Sin dirección'}${a.house?`<br><span class="today-card-house">Casa o Depto de ${a.house}</span>`:''}</div>
             <div class="today-card-meta">
               <span class="card-time-chip">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -6443,7 +6443,7 @@ function renderSchedule() {
         // ── Regular card ──
         html += `<div class="assignment-card" onclick="viewAssignment('${a.id}')">
           <div class="card-main">
-            <div class="card-address">${a.address||'Sin dirección'}${a.house?`<br><span class="card-house">${a.house}</span>`:''}</div>
+            <div class="card-address">${a.address||'Sin dirección'}${a.house?`<br><span class="card-house">Casa o Depto de ${a.house}</span>`:''}</div>
             <div class="card-meta">
               <span class="card-time-chip">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -6473,7 +6473,7 @@ function viewAssignment(id) {
 
   document.getElementById('detail-date-label').textContent = `${DAY[d.getDay()]} ${d.getDate()} de ${MON[d.getMonth()]}`;
   document.getElementById('detail-time').textContent = (a.time ? a.time.substring(0,5) : '--:--') + 'hrs';
-  document.getElementById('detail-address').textContent = [a.address, a.house].filter(Boolean).join('\n');
+  document.getElementById('detail-address').textContent = [a.address, a.house ? 'Casa o Depto de ' + a.house : ''].filter(Boolean).join('\n');
   document.getElementById('detail-conductor').textContent = a.conductor || '';
 
   const badge = document.getElementById('detail-ter-badge');
@@ -6692,7 +6692,7 @@ function renderAdminAssignments() {
         <span>${a.time?a.time.substring(0,5):'--'}</span><span style="color:var(--text3);font-size:0.62rem">${dateStr}</span>
       </div>
       <div class="list-item-main">
-        <div class="list-item-title">${a.address||'Sin dirección'}${a.house?' — '+a.house:''}</div>
+        <div class="list-item-title">${a.address||'Sin dirección'}${a.house?' — Casa o Depto de '+a.house:''}</div>
         <div class="list-item-sub">${a.conductor||'Sin conductor'}${ter?` · T.${ter.number}`:''}</div>
       </div>
       ${ter ? `<div style="width:28px;height:28px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:800;color:white;flex-shrink:0">${ter.number}</div>` : ''}
