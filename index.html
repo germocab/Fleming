@@ -1396,13 +1396,50 @@
     background: var(--bg); color: var(--text);
     align-items: center; justify-content: center;
     overflow-y: auto; padding: 3vh 4vw;
+    --aseo-tv-scale: 1;
   }
+  /* Tema local del Full Screen / PopUp: independiente del tema global de la plataforma */
+  .aseo-tv-overlay[data-local-theme="light"] {
+    background: #f4f5f7; color: #0b0c0f;
+  }
+  .aseo-tv-overlay[data-local-theme="light"] .aseo-tv-block { background: #ffffff; border-color: #e3e5ea; }
+  .aseo-tv-overlay[data-local-theme="light"] .aseo-tv-block-icon { background: #eceef2; color: #6b7280; }
+  .aseo-tv-overlay[data-local-theme="light"] .aseo-tv-block.is-encargado .aseo-tv-block-icon { background: var(--accent); color: #fff; }
+  .aseo-tv-overlay[data-local-theme="light"] .aseo-tv-block-label,
+  .aseo-tv-overlay[data-local-theme="light"] .aseo-tv-block-value.is-empty { color: #8a8f99; }
+  .aseo-tv-overlay[data-local-theme="light"] .aseo-tv-close,
+  .aseo-tv-overlay[data-local-theme="light"] .aseo-tv-more-btn { background: #ffffff; border-color: #e3e5ea; color: #0b0c0f; }
+  .aseo-tv-overlay[data-local-theme="light"] .aseo-tv-more-menu { background: #ffffff; border-color: #e3e5ea; }
+  .aseo-tv-overlay[data-local-theme="light"] .aseo-tv-more-item:hover,
+  .aseo-tv-overlay[data-local-theme="light"] .aseo-tv-more-scale-btn:hover { background: #eceef2; }
+  .aseo-tv-overlay[data-local-theme="dark"] {
+    background: #0a0a0c; color: #f5f5f7;
+  }
+  .aseo-tv-overlay[data-local-theme="dark"] .aseo-tv-block { background: #18181b; border-color: #2c2c30; }
+  .aseo-tv-overlay[data-local-theme="dark"] .aseo-tv-block-icon { background: #26262b; color: #9a9aa2; }
+  .aseo-tv-overlay[data-local-theme="dark"] .aseo-tv-block.is-encargado .aseo-tv-block-icon { background: var(--accent); color: #fff; }
+  .aseo-tv-overlay[data-local-theme="dark"] .aseo-tv-block-label,
+  .aseo-tv-overlay[data-local-theme="dark"] .aseo-tv-block-value.is-empty { color: #8a8a92; }
+  .aseo-tv-overlay[data-local-theme="dark"] .aseo-tv-close,
+  .aseo-tv-overlay[data-local-theme="dark"] .aseo-tv-more-btn { background: #18181b; border-color: #2c2c30; color: #f5f5f7; }
+  .aseo-tv-overlay[data-local-theme="dark"] .aseo-tv-more-menu { background: #18181b; border-color: #2c2c30; }
+  .aseo-tv-overlay[data-local-theme="dark"] .aseo-tv-more-item:hover,
+  .aseo-tv-overlay[data-local-theme="dark"] .aseo-tv-more-scale-btn:hover { background: #26262b; }
+
   .aseo-tv-overlay.open { display: flex; animation: fadeIn 0.25s ease; }
   .aseo-tv-card {
     width: 100%; max-width: 1480px; margin: auto;
     display: flex; flex-direction: column; align-items: center;
     text-align: center; gap: clamp(3.5rem, 7vh, 6.5rem);
     animation: lightboxIn 0.3s cubic-bezier(0.16,1,0.3,1);
+    transform: scale(var(--aseo-tv-scale));
+    transform-origin: center top;
+    transition: transform 0.2s ease;
+  }
+  .aseo-tv-title {
+    font-size: clamp(1.1rem, 1.8vw, 1.6rem);
+    font-weight: 700; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.06em;
   }
   .aseo-tv-day {
     font-size: clamp(3.2rem, 7.5vw, 6rem);
@@ -1445,6 +1482,92 @@
   }
   .aseo-tv-close:hover { background: var(--surface3); transform: scale(1.05); }
   .aseo-tv-close svg { width: 44%; height: 44%; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+
+  /* Botón "Más opciones" dentro del Full Screen / PopUp */
+  .aseo-tv-more-wrap {
+    position: fixed; top: clamp(1.25rem, 2.5vw, 2.25rem); right: calc(clamp(48px, 4vw, 60px) + clamp(1.25rem, 2.5vw, 2.25rem) + 0.75rem);
+  }
+  .aseo-tv-more-btn {
+    width: clamp(48px, 4vw, 60px); height: clamp(48px, 4vw, 60px); border-radius: 50%;
+    background: var(--surface2); border: 1px solid var(--border-active);
+    box-shadow: var(--shadow-lg);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: var(--text); transition: background 0.2s, transform 0.15s;
+  }
+  .aseo-tv-more-btn:hover { background: var(--surface3); transform: scale(1.05); }
+  .aseo-tv-more-btn svg { width: 42%; height: 42%; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .aseo-tv-more-menu {
+    position: absolute; top: calc(100% + 10px); right: 0;
+    background: var(--surface); border: 1px solid var(--border-active);
+    border-radius: 16px; padding: 0.6rem;
+    min-width: 240px; box-shadow: var(--shadow-lg);
+    display: none; z-index: 10;
+  }
+  .aseo-tv-more-menu.open { display: block; animation: fadeDown 0.15s ease; }
+  .aseo-tv-more-section-label {
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--text3); padding: 0.4rem 0.6rem 0.3rem;
+  }
+  .aseo-tv-more-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 0.6rem 0.6rem; border-radius: 10px;
+    font-size: 0.875rem; font-weight: 500; color: var(--text2);
+    cursor: pointer; transition: background 0.15s; width: 100%;
+  }
+  .aseo-tv-more-item:hover { background: var(--surface2); }
+  .aseo-tv-more-item span { display: flex; align-items: center; gap: 10px; }
+  .aseo-tv-more-item svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .aseo-tv-more-scale-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 0.35rem 0.6rem 0.55rem;
+  }
+  .aseo-tv-more-scale-btn {
+    width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border-active);
+    background: none; color: var(--text); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; font-weight: 700; transition: background 0.15s;
+  }
+  .aseo-tv-more-scale-btn:hover { background: var(--surface2); }
+  .aseo-tv-more-scale-btn:disabled { opacity: 0.35; cursor: default; }
+  .aseo-tv-more-scale-val { font-size: 0.85rem; font-weight: 600; color: var(--text2); min-width: 42px; text-align: center; }
+  .aseo-tv-more-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+  /* Modal de selección de modo: Full Screen vs PopUp */
+  .aseo-mode-overlay {
+    display: none; position: fixed; inset: 0; z-index: 1100;
+    background: rgba(0,0,0,0.45);
+    align-items: center; justify-content: center; padding: 1.5rem;
+  }
+  .aseo-mode-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+  .aseo-mode-card {
+    background: var(--surface); border: 1px solid var(--border-active);
+    border-radius: 20px; padding: 1.5rem; width: 100%; max-width: 380px;
+    box-shadow: var(--shadow-lg); animation: lightboxIn 0.25s cubic-bezier(0.16,1,0.3,1);
+  }
+  .aseo-mode-title { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 0.25rem; }
+  .aseo-mode-sub { font-size: 0.82rem; color: var(--text3); margin-bottom: 1.1rem; }
+  .aseo-mode-opt {
+    display: flex; align-items: center; gap: 12px; width: 100%;
+    padding: 0.85rem 1rem; border-radius: 14px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text); cursor: pointer;
+    text-align: left; transition: background 0.15s, border-color 0.15s; margin-bottom: 0.6rem;
+  }
+  .aseo-mode-opt:last-of-type { margin-bottom: 0; }
+  .aseo-mode-opt:hover { background: var(--surface3); border-color: var(--border-active); }
+  .aseo-mode-opt-icon {
+    width: 40px; height: 40px; border-radius: 50%; background: var(--accent-light); color: var(--accent);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .aseo-mode-opt-icon svg { width: 50%; height: 50%; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .aseo-mode-opt-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .aseo-mode-opt-text strong { font-size: 0.9rem; font-weight: 700; }
+  .aseo-mode-opt-text span { font-size: 0.76rem; color: var(--text3); }
+  .aseo-mode-cancel {
+    margin-top: 0.4rem; width: 100%; text-align: center; padding: 0.7rem;
+    border-radius: 12px; background: none; border: none; color: var(--text3);
+    font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: background 0.15s;
+  }
+  .aseo-mode-cancel:hover { background: var(--surface2); }
 
   .loader-wrap { display: flex; align-items: center; justify-content: center; padding: 3rem; }
   .loader { width: 32px; height: 32px; border: 2.5px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.75s linear infinite; }
@@ -4267,11 +4390,60 @@
 
 <!-- Aseo del Salón: modo pantalla completa para proyección en TV -->
 <div class="aseo-tv-overlay" id="aseo-tv-overlay">
+  <div class="aseo-tv-more-wrap">
+    <button class="aseo-tv-more-btn" onclick="toggleAseoTvMoreMenu(event)" aria-label="Más opciones">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.2" fill="currentColor" stroke="none"/></svg>
+    </button>
+    <div class="aseo-tv-more-menu" id="aseo-tv-more-menu">
+      <div class="aseo-tv-more-section-label">Tamaño</div>
+      <div class="aseo-tv-more-scale-row">
+        <button class="aseo-tv-more-scale-btn" id="aseo-tv-scale-down" onclick="adjustAseoTvScale(-1)" aria-label="Achicar">−</button>
+        <span class="aseo-tv-more-scale-val" id="aseo-tv-scale-val">100%</span>
+        <button class="aseo-tv-more-scale-btn" id="aseo-tv-scale-up" onclick="adjustAseoTvScale(1)" aria-label="Agrandar">+</button>
+      </div>
+      <div class="aseo-tv-more-divider"></div>
+      <div class="aseo-tv-more-item" onclick="toggleAseoTvLocalTheme()">
+        <span>
+          <svg id="aseo-tv-theme-icon-light" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg id="aseo-tv-theme-icon-dark" viewBox="0 0 24 24" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+          <span id="aseo-tv-theme-label">Modo Oscuro</span>
+        </span>
+      </div>
+    </div>
+  </div>
   <button class="aseo-tv-close" onclick="closeAseoTvMode()" aria-label="Salir de pantalla completa">
     <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
   </button>
   <div class="aseo-tv-card" id="aseo-tv-card"></div>
 </div>
+
+<!-- Aseo del Salón: modal para elegir entre Full Screen y PopUp -->
+<div class="aseo-mode-overlay" id="aseo-mode-overlay" onclick="if(event.target===this) closeAseoModeChooser()">
+  <div class="aseo-mode-card">
+    <div class="aseo-mode-title">¿Cómo quieres verlo?</div>
+    <div class="aseo-mode-sub">Elige el modo en el que se mostrará el aseo del salón.</div>
+    <button class="aseo-mode-opt" onclick="chooseAseoMode('fullscreen')">
+      <div class="aseo-mode-opt-icon">
+        <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+      </div>
+      <div class="aseo-mode-opt-text">
+        <strong>Full Screen</strong>
+        <span>Ocupa toda la pantalla del dispositivo</span>
+      </div>
+    </button>
+    <button class="aseo-mode-opt" onclick="chooseAseoMode('popup')">
+      <div class="aseo-mode-opt-icon">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+      </div>
+      <div class="aseo-mode-opt-text">
+        <strong>PopUp</strong>
+        <span>Abre una ventana emergente, ideal para una pantalla externa</span>
+      </div>
+    </button>
+    <button class="aseo-mode-cancel" onclick="closeAseoModeChooser()">Cancelar</button>
+  </div>
+</div>
+
 
 <!-- Full congregation map lightbox -->
 <div class="full-map-lightbox" id="full-map-lightbox" onclick="handleFullMapClick(event)">
@@ -4357,7 +4529,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.29.9.6-alpha';
+const APP_VERSION = '0.29.10-alpha';
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -7899,10 +8071,10 @@ async function saveAseoSalonAsignacion() {
 }
 
 function aseoGruposLabel(row) {
-  const parts = [];
-  if (row.grupo1_numero) parts.push(`Grupo ${row.grupo1_numero}`);
-  if (row.grupo2_numero) parts.push(`Grupo ${row.grupo2_numero}`);
-  return parts.length ? parts.join(' y ') : 'Sin grupos asignados';
+  const nums = [row.grupo1_numero, row.grupo2_numero].filter(Boolean);
+  if (!nums.length) return 'Sin grupos asignados';
+  if (nums.length === 1) return `Grupo ${nums[0]}`;
+  return `Grupos ${nums.join(' y ')}`;
 }
 
 function renderAdminAseoUpcoming() {
@@ -7974,7 +8146,7 @@ async function renderAseoUserView() {
   el.innerHTML = rows.map((row, idx) => {
     const isMe = myName && row.encargado_nombre && row.encargado_nombre.trim().toLowerCase() === myName;
     return `
-    <div class="profile-section aseo-card" style="margin-bottom:1rem" onclick="openAseoTvMode(${idx})">
+    <div class="profile-section aseo-card" style="margin-bottom:1rem" onclick="openAseoModeChooser(${idx})">
       <div class="profile-section-title">${capitalizar(respDiaLabel(row.fecha))}</div>
       <div class="profile-row">
         <div class="profile-row-icon" style="background:var(--surface3);color:var(--text3)">
@@ -8000,18 +8172,35 @@ async function renderAseoUserView() {
 
 // ── Aseo del Salón: modo pantalla completa (proyección en TV) ──────────────
 // Solo se activa en pantallas anchas (escritorio). En móvil, el tap no hace nada.
-function openAseoTvMode(idx) {
+let _aseoChooserIdx = null;
+
+function openAseoModeChooser(idx) {
   if (window.innerWidth < 640) return; // móvil: sin efecto
   const row = _aseoUserRows[idx];
   if (!row) return;
+  _aseoChooserIdx = idx;
+  document.getElementById('aseo-mode-overlay').classList.add('open');
+}
 
-  const card = document.getElementById('aseo-tv-card');
-  const g1 = row.grupo1_numero ? `Grupo ${row.grupo1_numero}` : null;
-  const g2 = row.grupo2_numero ? `Grupo ${row.grupo2_numero}` : null;
-  const gruposValue = (g1 || g2) ? [g1, g2].filter(Boolean).join(' y ') : null;
+function closeAseoModeChooser() {
+  document.getElementById('aseo-mode-overlay').classList.remove('open');
+  _aseoChooserIdx = null;
+}
+
+function chooseAseoMode(mode) {
+  const idx = _aseoChooserIdx;
+  closeAseoModeChooser();
+  if (idx === null) return;
+  if (mode === 'fullscreen') openAseoTvMode(idx);
+  else if (mode === 'popup') openAseoPopupMode(idx);
+}
+
+// Construye el bloque "día + grupos + encargado", reutilizado por Full Screen y PopUp.
+function buildAseoTvCardHTML(row) {
+  const gruposValue = (row.grupo1_numero || row.grupo2_numero) ? aseoGruposLabel(row) : null;
   const encargadoValue = row.encargado_nombre || null;
-
-  card.innerHTML = `
+  return `
+    <div class="aseo-tv-title">Aseo del Salón para hoy</div>
     <div class="aseo-tv-day">${capitalizar(respDiaLabel(row.fecha))}</div>
     <div class="aseo-tv-grid">
       <div class="aseo-tv-block">
@@ -8030,9 +8219,17 @@ function openAseoTvMode(idx) {
       </div>
     </div>
   `;
+}
+
+function openAseoTvMode(idx) {
+  const row = _aseoUserRows[idx];
+  if (!row) return;
+
+  document.getElementById('aseo-tv-card').innerHTML = buildAseoTvCardHTML(row);
 
   const overlay = document.getElementById('aseo-tv-overlay');
   overlay.classList.add('open');
+  initAseoTvLocalControls(overlay);
 
   if (overlay.requestFullscreen) {
     overlay.requestFullscreen().catch(() => {});
@@ -8044,6 +8241,7 @@ function openAseoTvMode(idx) {
 function closeAseoTvMode() {
   const overlay = document.getElementById('aseo-tv-overlay');
   overlay.classList.remove('open');
+  document.getElementById('aseo-tv-more-menu')?.classList.remove('open');
   if (document.fullscreenElement || document.webkitFullscreenElement) {
     if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
     else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
@@ -8065,7 +8263,202 @@ document.addEventListener('webkitfullscreenchange', () => {
   }
 });
 
+// ── Más opciones del Full Screen: tamaño y tema local ───────────────────────
+// Estos ajustes NUNCA afectan al resto de la plataforma: viven solo en este overlay.
+const ASEO_TV_SCALE_STEPS = [0.75, 0.85, 1, 1.15, 1.3, 1.5];
+let _aseoTvScaleIdx = 2; // 100%
+let _aseoTvLocalTheme = 'dark'; // 'dark' | 'light', por defecto coincide con el diseño original
 
+function initAseoTvLocalControls(overlay) {
+  overlay.style.setProperty('--aseo-tv-scale', ASEO_TV_SCALE_STEPS[_aseoTvScaleIdx]);
+  overlay.setAttribute('data-local-theme', _aseoTvLocalTheme);
+  renderAseoTvScaleVal();
+  renderAseoTvThemeLabel();
+}
+
+function toggleAseoTvMoreMenu(e) {
+  e.stopPropagation();
+  document.getElementById('aseo-tv-more-menu').classList.toggle('open');
+}
+
+function adjustAseoTvScale(dir) {
+  const next = _aseoTvScaleIdx + dir;
+  if (next < 0 || next >= ASEO_TV_SCALE_STEPS.length) return;
+  _aseoTvScaleIdx = next;
+  const overlay = document.getElementById('aseo-tv-overlay');
+  overlay?.style.setProperty('--aseo-tv-scale', ASEO_TV_SCALE_STEPS[_aseoTvScaleIdx]);
+  renderAseoTvScaleVal();
+}
+
+function renderAseoTvScaleVal() {
+  const val = document.getElementById('aseo-tv-scale-val');
+  if (val) val.textContent = Math.round(ASEO_TV_SCALE_STEPS[_aseoTvScaleIdx] * 100) + '%';
+  document.getElementById('aseo-tv-scale-down')?.toggleAttribute('disabled', _aseoTvScaleIdx === 0);
+  document.getElementById('aseo-tv-scale-up')?.toggleAttribute('disabled', _aseoTvScaleIdx === ASEO_TV_SCALE_STEPS.length - 1);
+}
+
+function toggleAseoTvLocalTheme() {
+  _aseoTvLocalTheme = _aseoTvLocalTheme === 'dark' ? 'light' : 'dark';
+  document.getElementById('aseo-tv-overlay')?.setAttribute('data-local-theme', _aseoTvLocalTheme);
+  renderAseoTvThemeLabel();
+}
+
+function renderAseoTvThemeLabel() {
+  const isDark = _aseoTvLocalTheme === 'dark';
+  document.getElementById('aseo-tv-theme-label').textContent = isDark ? 'Modo Claro' : 'Modo Oscuro';
+  document.getElementById('aseo-tv-theme-icon-light').style.display = isDark ? '' : 'none';
+  document.getElementById('aseo-tv-theme-icon-dark').style.display = isDark ? 'none' : '';
+}
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.aseo-tv-more-wrap')) {
+    document.getElementById('aseo-tv-more-menu')?.classList.remove('open');
+  }
+});
+
+// ── Aseo del Salón: modo PopUp (ventana emergente, sin pantalla completa) ──
+// Muestra el mismo contenido que el Full Screen, preferentemente en una
+// pantalla externa si el dispositivo tiene una conectada.
+async function openAseoPopupMode(idx) {
+  const row = _aseoUserRows[idx];
+  if (!row) return;
+
+  let left = Math.round((window.screen.width - 1000) / 2) + (window.screenLeft || window.screenX || 0);
+  let top = Math.round((window.screen.height - 700) / 2) + (window.screenTop || window.screenY || 0);
+  let width = 1000, height = 700;
+
+  // Si el navegador soporta Window Management API, intentamos posicionar
+  // la ventana en una pantalla externa (segunda pantalla conectada).
+  try {
+    if (window.getScreenDetails) {
+      const details = await window.getScreenDetails();
+      const externalScreen = details.screens.find(s => s !== details.currentScreen) || null;
+      if (externalScreen) {
+        left = externalScreen.availLeft + 40;
+        top = externalScreen.availTop + 40;
+        width = Math.min(1200, externalScreen.availWidth - 80);
+        height = Math.min(800, externalScreen.availHeight - 80);
+      }
+    }
+  } catch (e) { /* sin permiso o no soportado: se usa la ventana actual */ }
+
+  const win = window.open('', 'aseoSalonPopup', `popup=yes,left=${left},top=${top},width=${width},height=${height}`);
+  if (!win) { showToast('El navegador bloqueó la ventana emergente. Permite ventanas emergentes para usar este modo.', 'error'); return; }
+  window._aseoPopupWin = win;
+
+  const isDarkGlobal = (() => {
+    const theme = document.documentElement.getAttribute('data-theme') || 'auto';
+    return theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  })();
+  _aseoTvLocalTheme = isDarkGlobal ? 'dark' : 'light';
+
+  const scale = ASEO_TV_SCALE_STEPS[_aseoTvScaleIdx];
+
+  win.document.open();
+  win.document.write(`<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Aseo del Salón</title>
+<style>${getAseoPopupCSS()}</style>
+</head>
+<body>
+  <div class="aseo-tv-overlay open" id="aseo-tv-overlay" data-local-theme="${_aseoTvLocalTheme}" style="position:static;--aseo-tv-scale:${scale}">
+    <div class="aseo-tv-more-wrap">
+      <button class="aseo-tv-more-btn" id="popup-more-btn" aria-label="Más opciones">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.2" fill="currentColor" stroke="none"/></svg>
+      </button>
+      <div class="aseo-tv-more-menu" id="popup-more-menu">
+        <div class="aseo-tv-more-section-label">Tamaño</div>
+        <div class="aseo-tv-more-scale-row">
+          <button class="aseo-tv-more-scale-btn" id="popup-scale-down">−</button>
+          <span class="aseo-tv-more-scale-val" id="popup-scale-val">${Math.round(scale*100)}%</span>
+          <button class="aseo-tv-more-scale-btn" id="popup-scale-up">+</button>
+        </div>
+        <div class="aseo-tv-more-divider"></div>
+        <div class="aseo-tv-more-item" id="popup-theme-toggle">
+          <span><span id="popup-theme-label">${_aseoTvLocalTheme === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}</span></span>
+        </div>
+      </div>
+    </div>
+    <div class="aseo-tv-card" id="aseo-tv-card">${buildAseoTvCardHTML(row)}</div>
+  </div>
+` + '<' + `script>
+  const SCALE_STEPS = ${JSON.stringify(ASEO_TV_SCALE_STEPS)};
+  let scaleIdx = ${_aseoTvScaleIdx};
+  const overlay = document.getElementById('aseo-tv-overlay');
+  const moreBtn = document.getElementById('popup-more-btn');
+  const moreMenu = document.getElementById('popup-more-menu');
+  moreBtn.addEventListener('click', (e) => { e.stopPropagation(); moreMenu.classList.toggle('open'); });
+  document.addEventListener('click', (e) => { if (!e.target.closest('.aseo-tv-more-wrap')) moreMenu.classList.remove('open'); });
+  function renderScale() {
+    document.getElementById('popup-scale-val').textContent = Math.round(SCALE_STEPS[scaleIdx]*100) + '%';
+    overlay.style.setProperty('--aseo-tv-scale', SCALE_STEPS[scaleIdx]);
+    document.getElementById('popup-scale-down').disabled = scaleIdx === 0;
+    document.getElementById('popup-scale-up').disabled = scaleIdx === SCALE_STEPS.length - 1;
+  }
+  document.getElementById('popup-scale-down').addEventListener('click', () => { if (scaleIdx>0){scaleIdx--; renderScale();} });
+  document.getElementById('popup-scale-up').addEventListener('click', () => { if (scaleIdx<SCALE_STEPS.length-1){scaleIdx++; renderScale();} });
+  document.getElementById('popup-theme-toggle').addEventListener('click', () => {
+    const cur = overlay.getAttribute('data-local-theme') === 'dark' ? 'light' : 'dark';
+    overlay.setAttribute('data-local-theme', cur);
+    document.getElementById('popup-theme-label').textContent = cur === 'dark' ? 'Modo Claro' : 'Modo Oscuro';
+  });
+  renderScale();
+` + '<' + `/script>
+</body>
+</html>`);
+  win.document.close();
+}
+
+// CSS embebido para la ventana PopUp (usa las mismas variables de color que la plataforma).
+function getAseoPopupCSS() {
+  const rootVars = getComputedStyle(document.documentElement);
+  const varsToCopy = ['--bg','--surface','--surface2','--surface3','--text','--text2','--text3','--border','--border-active','--accent','--accent-light','--shadow-lg','--font'];
+  const rootCss = `:root[data-theme] { ${varsToCopy.map(v => `${v}: ${rootVars.getPropertyValue(v) || ''};`).join(' ')} }`;
+  return `
+    ${rootCss}
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: var(--font, -apple-system, sans-serif); background: var(--bg); }
+    .aseo-tv-overlay { display:flex; min-height:100vh; align-items:center; justify-content:center; padding:3vh 4vw; background: var(--bg); color: var(--text); }
+    .aseo-tv-card { width:100%; max-width:1480px; margin:auto; display:flex; flex-direction:column; align-items:center; text-align:center; gap:clamp(2.5rem,6vh,4.5rem); transform-origin:center top; transition:transform 0.2s ease; }
+    .aseo-tv-title { font-size:clamp(1.1rem,1.8vw,1.6rem); font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:0.06em; }
+    .aseo-tv-day { font-size:clamp(2.6rem,6vw,4.5rem); font-weight:800; letter-spacing:-0.02em; line-height:1.05; }
+    .aseo-tv-grid { width:100%; display:flex; flex-wrap:wrap; justify-content:center; gap:clamp(1.5rem,3vw,3.25rem); }
+    .aseo-tv-block { flex:1 1 320px; max-width:560px; background:var(--surface2); border:1px solid var(--border-active); border-radius:32px; padding:clamp(2rem,4vh,3rem) clamp(1.5rem,3vw,2.5rem); display:flex; flex-direction:column; align-items:center; gap:1rem; box-shadow:var(--shadow-lg); }
+    .aseo-tv-block-icon { width:clamp(56px,6vw,80px); height:clamp(56px,6vw,80px); border-radius:50%; background:var(--surface3); color:var(--text3); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .aseo-tv-block.is-encargado .aseo-tv-block-icon { background:var(--accent); color:#fff; }
+    .aseo-tv-block-icon svg { width:46%; height:46%; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+    .aseo-tv-block-label { font-size:clamp(0.95rem,1.2vw,1.2rem); font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:0.07em; }
+    .aseo-tv-block-value { font-size:clamp(1.8rem,3.4vw,3rem); font-weight:800; line-height:1.15; word-break:break-word; }
+    .aseo-tv-block-value.is-empty { font-weight:500; font-style:italic; color:var(--text3); font-size:clamp(1.2rem,2vw,1.7rem); }
+    .aseo-tv-more-wrap { position:fixed; top:1.25rem; right:1.25rem; }
+    .aseo-tv-more-btn { width:48px; height:48px; border-radius:50%; background:var(--surface2); border:1px solid var(--border-active); box-shadow:var(--shadow-lg); cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--text); }
+    .aseo-tv-more-btn svg { width:42%; height:42%; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+    .aseo-tv-more-menu { position:absolute; top:calc(100% + 10px); right:0; background:var(--surface); border:1px solid var(--border-active); border-radius:16px; padding:0.6rem; min-width:230px; box-shadow:var(--shadow-lg); display:none; }
+    .aseo-tv-more-menu.open { display:block; }
+    .aseo-tv-more-section-label { font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--text3); padding:0.4rem 0.6rem 0.3rem; }
+    .aseo-tv-more-scale-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:0.35rem 0.6rem 0.55rem; }
+    .aseo-tv-more-scale-btn { width:34px; height:34px; border-radius:50%; border:1px solid var(--border-active); background:none; color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.1rem; font-weight:700; }
+    .aseo-tv-more-scale-btn:disabled { opacity:0.35; cursor:default; }
+    .aseo-tv-more-scale-val { font-size:0.85rem; font-weight:600; color:var(--text2); min-width:42px; text-align:center; }
+    .aseo-tv-more-divider { height:1px; background:var(--border); margin:4px 0; }
+    .aseo-tv-more-item { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:0.6rem 0.6rem; border-radius:10px; font-size:0.875rem; font-weight:500; color:var(--text2); cursor:pointer; width:100%; }
+    .aseo-tv-more-item:hover { background:var(--surface2); }
+    .aseo-tv-overlay[data-local-theme="light"] { background:#f4f5f7; color:#0b0c0f; }
+    .aseo-tv-overlay[data-local-theme="light"] .aseo-tv-block { background:#ffffff; border-color:#e3e5ea; }
+    .aseo-tv-overlay[data-local-theme="light"] .aseo-tv-block-icon { background:#eceef2; color:#6b7280; }
+    .aseo-tv-overlay[data-local-theme="light"] .aseo-tv-block.is-encargado .aseo-tv-block-icon { background:var(--accent); color:#fff; }
+    .aseo-tv-overlay[data-local-theme="light"] .aseo-tv-block-label, .aseo-tv-overlay[data-local-theme="light"] .aseo-tv-block-value.is-empty { color:#8a8f99; }
+    .aseo-tv-overlay[data-local-theme="light"] .aseo-tv-more-btn, .aseo-tv-overlay[data-local-theme="light"] .aseo-tv-more-menu { background:#ffffff; border-color:#e3e5ea; color:#0b0c0f; }
+    .aseo-tv-overlay[data-local-theme="dark"] { background:#0a0a0c; color:#f5f5f7; }
+    .aseo-tv-overlay[data-local-theme="dark"] .aseo-tv-block { background:#18181b; border-color:#2c2c30; }
+    .aseo-tv-overlay[data-local-theme="dark"] .aseo-tv-block-icon { background:#26262b; color:#9a9aa2; }
+    .aseo-tv-overlay[data-local-theme="dark"] .aseo-tv-block.is-encargado .aseo-tv-block-icon { background:var(--accent); color:#fff; }
+    .aseo-tv-overlay[data-local-theme="dark"] .aseo-tv-block-label, .aseo-tv-overlay[data-local-theme="dark"] .aseo-tv-block-value.is-empty { color:#8a8a92; }
+    .aseo-tv-overlay[data-local-theme="dark"] .aseo-tv-more-btn, .aseo-tv-overlay[data-local-theme="dark"] .aseo-tv-more-menu { background:#18181b; border-color:#2c2c30; color:#f5f5f7; }
+  `;
+}
 
 function renderAdminCasas() {
   const container = document.getElementById('admin-casas-list');
@@ -9406,6 +9799,14 @@ function _closeTopLayer() {
   if (document.getElementById('vmc-modal-overlay')?.classList.contains('open')) {
     if (typeof closeVmcWeekModal === 'function') closeVmcWeekModal(); return;
   }
+  // Modal selección de modo (Full Screen / PopUp) del Aseo
+  if (document.getElementById('aseo-mode-overlay')?.classList.contains('open')) {
+    closeAseoModeChooser(); return;
+  }
+  // Menú "más opciones" dentro del Full Screen de Aseo
+  if (document.getElementById('aseo-tv-more-menu')?.classList.contains('open')) {
+    document.getElementById('aseo-tv-more-menu').classList.remove('open'); return;
+  }
   // Overlay aseo TV
   if (document.getElementById('aseo-tv-overlay')?.classList.contains('open')) {
     document.getElementById('aseo-tv-overlay').classList.remove('open'); return;
@@ -9697,7 +10098,14 @@ function downloadFullMap() {
 }
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeLightbox(); closeFullMap(); }
+  if (e.key === 'Escape') {
+    closeLightbox(); closeFullMap();
+    if (document.getElementById('aseo-tv-more-menu')?.classList.contains('open')) {
+      document.getElementById('aseo-tv-more-menu').classList.remove('open');
+    } else if (document.getElementById('aseo-mode-overlay')?.classList.contains('open')) {
+      closeAseoModeChooser();
+    }
+  }
 });
 
 init();
