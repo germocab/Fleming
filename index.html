@@ -6320,8 +6320,28 @@ window.addEventListener('pageshow', () => refreshScheduleIfStale());
 async function loadSchedule() {
   _lastScheduleLoad = Date.now();
   document.getElementById('schedule-content').innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
-  const { data: aData } = await sb.from('assignments').select('*, territories(id,number,name,map_data,map_data_dark,no_pasar), territories2:territories!territory_id_2(id,number,name,map_data,map_data_dark,no_pasar)').order('date').order('time');
-  assignments = aData || [];
+
+  // Fetch assignments with first territory joined; second territory joined separately for resilience
+  const { data: aData, error: aErr } = await sb.from('assignments')
+    .select('*, territories(id,number,name,map_data,map_data_dark,no_pasar)')
+    .order('date').order('time');
+  if (aErr) { console.error('loadSchedule assignments error:', aErr.message); }
+
+  let rawAssignments = aData || [];
+
+  // Try to also join territory_id_2 — gracefully skip if column doesn't exist yet
+  try {
+    const { data: aData2, error: aErr2 } = await sb.from('assignments')
+      .select('id, territory_id_2, territories2:territories!territory_id_2(id,number,name,map_data,map_data_dark,no_pasar)')
+      .order('date').order('time');
+    if (!aErr2 && aData2) {
+      const ter2Map = {};
+      aData2.forEach(r => { ter2Map[r.id] = { territory_id_2: r.territory_id_2, territories2: r.territories2 }; });
+      rawAssignments = rawAssignments.map(a => ({ ...a, ...(ter2Map[a.id] || {}) }));
+    }
+  } catch(e) { console.warn('territory_id_2 not available yet:', e.message); }
+
+  assignments = rawAssignments;
   const { data: tData } = await sb.from('territories').select('*').order('number');
   territories = tData || [];
   if (currentSubTab === 'territorios') renderTerritoryView();
@@ -6802,75 +6822,85 @@ async function saveAssignment() {
 
   const btn = document.getElementById('save-as-btn');
   btn.disabled = true; btn.textContent = 'Guardando...';
-  let error;
-if (editingAssignmentId) { 
-  // 1. Guardamos el estado anterior antes de actualizar
-  const oldAssign = assignments.find(a => a.id === editingAssignmentId);
-  
-  // 2. Actualizamos en la base de datos
-  ({error} = await sb.from('assignments').update(payload).eq('id', editingAssignmentId)); 
-  
-  // 3. Detectamos si cambió cualquier campo relevante para el publicador
-  const hasChanged = !oldAssign || (
-    oldAssign.address      !== payload.address      ||
-    oldAssign.date         !== payload.date         ||
-    oldAssign.time         !== payload.time         ||
-    oldAssign.conductor    !== payload.conductor    ||
-    oldAssign.type         !== payload.type         ||
-    (oldAssign.territory_id || null) !== (payload.territory_id || null) ||
-    (oldAssign.territory_id_2 || null) !== (payload.territory_id_2 || null)
-  );
 
-  if (!error && hasChanged) {
-    const d = new Date(payload.date + 'T00:00:00');
-    const dateStr = d.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
-    const parts = [];
-    if (payload.address) parts.push(`dirección: ${payload.address}`);
-    if (payload.time)    parts.push(`hora: ${payload.time.substring(0,5)}`);
-    if (payload.conductor) parts.push(`conductor: ${payload.conductor}`);
-    const detalle = parts.length ? ` (${parts.join(', ')})` : '';
-    const defaultText = `Se realizó un cambio en la predicación del ${dateStr}${detalle}. Por favor revisar los arreglos actualizados.`;
-
-    const userMessage = prompt("Se detectaron cambios en la asignación. Edita el mensaje o cancela para no notificar:", defaultText);
-    
-    if (userMessage) {
-      showToast('Enviando notificación...', '');
-      
-      // 1. Guarda la notificación en la tabla notifications para que aparezca en la app
-      await sb.from('notifications').insert({
-        title: 'Cambio en Asignación',
-        body: userMessage,
-        notif_category: 'casa'
-      });
-
-      // 2. Envía el push a suscriptores vía Edge Function
-      try {
-        const resp = await fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${SUPABASE_KEY}`
-          },
-          body: JSON.stringify({
-            title: 'Cambio en Asignación',
-            body: userMessage
-          })
-        });
-        if (!resp.ok) {
-          const errText = await resp.text();
-          console.warn('Edge Function respondió con error:', resp.status, errText);
-        }
-      } catch (err) {
-        console.warn('No se pudo enviar push (Edge Function no disponible):', err.message);
-      }
-      showToast('Notificación enviada ✓', 'success');
+  // Helper: try insert/update, if territory_id_2 column not yet in Supabase, strip it and retry
+  async function robustSave(pl) {
+    let res;
+    if (editingAssignmentId) {
+      res = await sb.from('assignments').update(pl).eq('id', editingAssignmentId);
+    } else {
+      res = await sb.from('assignments').insert(pl);
     }
+    if (res.error && res.error.message && res.error.message.includes('territory_id_2')) {
+      const pl2 = { ...pl }; delete pl2.territory_id_2;
+      if (editingAssignmentId) {
+        res = await sb.from('assignments').update(pl2).eq('id', editingAssignmentId);
+      } else {
+        res = await sb.from('assignments').insert(pl2);
+      }
+    }
+    return res;
   }
-}
-else { ({error} = await sb.from('assignments').insert(payload)); }
-  btn.disabled = false; btn.textContent = 'Guardar';
-  if (error) { showError('as-error', error.message); return; }
-  showToast(editingAssignmentId?'Asignación actualizada':'Asignación creada','success');
+
+  if (editingAssignmentId) {
+    // 1. Estado anterior
+    const oldAssign = assignments.find(a => a.id === editingAssignmentId);
+
+    // 2. Actualizar
+    const { error: updErr } = await robustSave(payload);
+    btn.disabled = false; btn.textContent = 'Guardar';
+    if (updErr) { showError('as-error', updErr.message); return; }
+
+    // 3. Detectar cambios relevantes para notificar
+    const hasChanged = !oldAssign || (
+      oldAssign.address      !== payload.address      ||
+      oldAssign.date         !== payload.date         ||
+      oldAssign.time         !== payload.time         ||
+      oldAssign.conductor    !== payload.conductor    ||
+      oldAssign.type         !== payload.type         ||
+      (oldAssign.territory_id   || null) !== (payload.territory_id   || null) ||
+      (oldAssign.territory_id_2 || null) !== (payload.territory_id_2 || null)
+    );
+
+    if (hasChanged) {
+      const d = new Date(payload.date + 'T00:00:00');
+      const dateStr = d.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
+      const parts = [];
+      if (payload.address)   parts.push(`dirección: ${payload.address}`);
+      if (payload.time)      parts.push(`hora: ${payload.time.substring(0,5)}`);
+      if (payload.conductor) parts.push(`conductor: ${payload.conductor}`);
+      const detalle = parts.length ? ` (${parts.join(', ')})` : '';
+      const defaultText = `Se realizó un cambio en la predicación del ${dateStr}${detalle}. Por favor revisar los arreglos actualizados.`;
+
+      const userMessage = prompt('Se detectaron cambios en la asignación. Edita el mensaje o cancela para no notificar:', defaultText);
+
+      if (userMessage) {
+        showToast('Enviando notificación...', '');
+        await sb.from('notifications').insert({
+          title: 'Cambio en Asignación',
+          body: userMessage,
+          notif_category: 'casa'
+        });
+        try {
+          const resp = await fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+            body: JSON.stringify({ title: 'Cambio en Asignación', body: userMessage })
+          });
+          if (!resp.ok) console.warn('Edge Function error:', resp.status, await resp.text());
+        } catch (err) {
+          console.warn('No se pudo enviar push:', err.message);
+        }
+        showToast('Notificación enviada ✓', 'success');
+      }
+    }
+  } else {
+    const { error: insErr } = await robustSave(payload);
+    btn.disabled = false; btn.textContent = 'Guardar';
+    if (insErr) { showError('as-error', insErr.message); return; }
+  }
+
+  showToast(editingAssignmentId ? 'Asignación actualizada' : 'Asignación creada', 'success');
   closeAssignmentModal();
   await loadSchedule();
   renderAdminAssignments();
