@@ -749,7 +749,70 @@
   .lightbox-correccion-send  { background: var(--accent); color: #fff; }
   .lightbox-correccion-cancel{ background: var(--surface3); color: var(--text); }
 
-  /* ── Territory tabs in detail panel ─────────────────────────────────────── */
+  /* ── Sábado — Grupos de Servicio Grid ───────────────────────────────────── */
+  .sabado-section-label {
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--text3); padding: 0.6rem 0 0.4rem; display: flex; align-items: center; gap: 7px;
+  }
+  .sabado-section-label::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+  .sabado-grupos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+  @media (max-width: 400px) { .sabado-grupos-grid { grid-template-columns: 1fr 1fr; } }
+
+  .sabado-grupo-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.9rem 0.85rem 0.8rem;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    display: flex; flex-direction: column; gap: 0.55rem;
+    position: relative; overflow: hidden;
+  }
+  .sabado-grupo-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: var(--border-active); }
+  .sabado-grupo-card:active { transform: scale(0.97); }
+
+  /* Accent bar on the left */
+  .sabado-grupo-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 3.5px; border-radius: var(--radius) 0 0 var(--radius);
+    background: var(--card-accent, var(--accent));
+  }
+
+  .sabado-grupo-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; border-radius: 10px;
+    font-size: 1rem; font-weight: 800; color: #fff; flex-shrink: 0;
+  }
+  .sabado-grupo-num-label {
+    font-size: 0.65rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .sabado-grupo-conductor {
+    font-size: 0.82rem; font-weight: 600; color: var(--text); line-height: 1.3;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .sabado-grupo-meta {
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .sabado-grupo-meta-row {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 0.72rem; color: var(--text3); font-weight: 500;
+  }
+  .sabado-grupo-meta-row svg {
+    width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2.2;
+    stroke-linecap: round; flex-shrink: 0;
+  }
+  .sabado-grupo-ter-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; border-radius: 6px;
+    font-size: 0.68rem; font-weight: 800; color: #fff; flex-shrink: 0;
+  }
   .detail-ter-tabs {
     display: flex; gap: 0; margin: 0 1.25rem 0.75rem;
     background: var(--surface2); border-radius: 10px; padding: 3px;
@@ -4760,7 +4823,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.30.2-alpha';
+const APP_VERSION = '0.30.3-alpha';
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -6530,6 +6593,8 @@ async function loadSchedule() {
     conductores = cData || [];
     casas = hData || [];
   }
+  // Ensure grupos are available for Saturday group rendering
+  if (!grupos.length) await loadGrupos();
   renderSchedule();
 }
 
@@ -6551,9 +6616,48 @@ function renderSchedule() {
   const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
 
   let html = '';
+  // Helper: find which grupo a conductor belongs to (superintendent or any member)
+  function _findGrupoForAssignment(a) {
+    if (!grupos.length) return null;
+    const condLower = (a.conductor || '').trim().toLowerCase();
+    if (!condLower) return null;
+    // First try to match superintendent
+    for (const g of grupos) {
+      const sup = g.miembros.find(m => m.rol === 'superintendente' && m.nombre.trim().toLowerCase() === condLower);
+      if (sup) return g;
+    }
+    // Then any member
+    for (const g of grupos) {
+      const mem = g.miembros.find(m => m.nombre.trim().toLowerCase() === condLower);
+      if (mem) return g;
+    }
+    return null;
+  }
+
+  // Helper: build right badge HTML for an assignment
+  function _buildRightBadge(a) {
+    const ter  = territories.find(t => t.id === a.territory_id)  || null;
+    const ter2 = a.territory_id_2 ? (territories.find(t => t.id === a.territory_id_2) || null) : null;
+    if (a.type === 'zoom') return `<div class="ter-badge-icon zoom-badge"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="15" height="10" rx="2"/><polygon points="17 9 22 6 22 18 17 15"/></svg></div>`;
+    if (a.type === 'telefono') return `<div class="ter-badge-icon phone-badge"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.35 2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>`;
+    if (a.type === 'cartas') return `<div class="ter-badge-icon cartas-badge"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>`;
+    if (ter && ter2) return `<div class="ter-badge-duo"><div class="ter-badge-sm" style="background:${getTerColor(ter.number)}">${ter.number}</div><div class="ter-badge-sm" style="background:${getTerColor(ter2.number)}">${ter2.number}</div></div>`;
+    if (ter) return `<div class="ter-badge" style="background:${getTerColor(ter.number)}">${ter.number}</div>`;
+    return '';
+  }
+
+  // Helper: build type chip
+  function _buildTypeChip(a) {
+    if (a.type === 'zoom') return `<span class="type-chip chip-zoom">Zoom</span>`;
+    if (a.type === 'telefono') return `<span class="type-chip chip-phone">Teléfono</span>`;
+    if (a.type === 'cartas') return `<span class="type-chip chip-cartas">Cartas</span>`;
+    return '';
+  }
+
   Object.keys(grouped).sort().filter(date => date >= todayStr).forEach(date => {
     const d = new Date(date+'T00:00:00');
     const isToday = date === todayStr;
+    const isSabado = d.getDay() === 6;
     const dayName  = DAY[d.getDay()];
     const dateLabel = `${dayName} ${d.getDate()} de ${MON[d.getMonth()]}`;
 
@@ -6567,73 +6671,143 @@ function renderSchedule() {
       html += `<div class="date-section"><div class="date-section-header">${dateLabel}</div>`;
     }
 
-    grouped[date].forEach(a => {
-      const ter  = territories.find(t => t.id === a.territory_id)  || null;
-      const ter2 = a.territory_id_2 ? (territories.find(t => t.id === a.territory_id_2) || null) : null;
-      const timeStr = a.time ? a.time.substring(0,5) : '--:--';
+    if (isSabado && !isToday) {
+      // ── SÁBADO: Vista de Grupos de Servicio ──────────────────────────────
+      const myName = (currentUser?.name || '').trim().toLowerCase();
 
-      let rightBadge = '';
-      if (a.type === 'zoom') {
-        rightBadge = `<div class="ter-badge-icon zoom-badge">
-          <svg viewBox="0 0 24 24"><rect x="2" y="7" width="15" height="10" rx="2"/><polygon points="17 9 22 6 22 18 17 15"/></svg>
-        </div>`;
-      } else if (a.type === 'telefono') {
-        rightBadge = `<div class="ter-badge-icon phone-badge">
-          <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.35 2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-        </div>`;
-      } else if (a.type === 'cartas') {
-        rightBadge = `<div class="ter-badge-icon cartas-badge">
-          <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        </div>`;
-      } else if (ter && ter2) {
-        // Two territories — show stacked pill badges
-        rightBadge = `<div class="ter-badge-duo">
-          <div class="ter-badge-sm" style="background:${getTerColor(ter.number)}">${ter.number}</div>
-          <div class="ter-badge-sm" style="background:${getTerColor(ter2.number)}">${ter2.number}</div>
-        </div>`;
-      } else if (ter) {
-        rightBadge = `<div class="ter-badge" style="background:${getTerColor(ter.number)}">${ter.number}</div>`;
+      // Find current user's grupo
+      let myGrupo = null;
+      if (myName) {
+        for (const g of grupos) {
+          if (g.miembros.some(m => m.nombre.trim().toLowerCase() === myName)) { myGrupo = g; break; }
+        }
       }
 
-      let typeChip = '';
-      if (a.type === 'zoom') typeChip = `<span class="type-chip chip-zoom">Zoom</span>`;
-      else if (a.type === 'telefono') typeChip = `<span class="type-chip chip-phone">Teléfono</span>`;
-      else if (a.type === 'cartas') typeChip = `<span class="type-chip chip-cartas">Cartas</span>`;
+      // Find my group's assignment for this Saturday
+      const myAssignment = myGrupo ? grouped[date].find(a => _findGrupoForAssignment(a)?.id === myGrupo.id) : null;
+      const otherAssignments = grouped[date].filter(a => a !== myAssignment);
 
-      if (isToday) {
-        // ── Featured today card ──
-        html += `<div class="assignment-card-today" onclick="viewAssignment('${a.id}')">
-          <div class="today-card-info">
-            <div class="today-card-address">${a.address||'Sin dirección'}${a.house?`<br><span class="today-card-house">${(()=>{const _c=casas.find(c=>c.id===a.casa_id);return(_c&&_c.tipo==='departamento'?'Depto':'Casa')+' de '})()}${a.house}</span>`:''}</div>
-            <div class="today-card-meta">
-              <span class="card-time-chip">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                ${timeStr}hrs
-              </span>
-              <span class="card-conductor">${a.conductor||'Sin conductor'}</span>
-              ${typeChip}
+      // My group assignment — shown as a normal card on top
+      if (myAssignment) {
+        const ter  = territories.find(t => t.id === myAssignment.territory_id)  || null;
+        const ter2 = myAssignment.territory_id_2 ? (territories.find(t => t.id === myAssignment.territory_id_2) || null) : null;
+        const timeStr = myAssignment.time ? myAssignment.time.substring(0,5) : '--:--';
+        const rightBadge = _buildRightBadge(myAssignment);
+        const typeChip = _buildTypeChip(myAssignment);
+        const _c = casas.find(c => c.id === myAssignment.casa_id);
+        const houseLabel = myAssignment.house ? ((_c && _c.tipo === 'departamento' ? 'Depto' : 'Casa') + ' de ') + myAssignment.house : '';
+
+        html += `<div style="margin-bottom:0.6rem">
+          <div class="sabado-section-label">Tu Grupo (Grupo ${myGrupo.numero})</div>
+          <div class="assignment-card" onclick="viewAssignment('${myAssignment.id}')" style="border-color:${getTerColorFromObj(ter)||'var(--accent)'};border-left-width:3px">
+            <div class="card-main">
+              <div class="card-address">${myAssignment.address||'Sin dirección'}${houseLabel?`<br><span class="card-house">${houseLabel}</span>`:''}</div>
+              <div class="card-meta">
+                <span class="card-time-chip">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  ${timeStr}hrs
+                </span>
+                <span class="card-conductor">${myAssignment.conductor||'Sin conductor'}</span>
+                ${typeChip}
+              </div>
             </div>
+            ${rightBadge}
           </div>
-          ${rightBadge}
-        </div>`;
-      } else {
-        // ── Regular card ──
-        html += `<div class="assignment-card" onclick="viewAssignment('${a.id}')">
-          <div class="card-main">
-            <div class="card-address">${a.address||'Sin dirección'}${a.house?`<br><span class="card-house">${(()=>{const _c=casas.find(c=>c.id===a.casa_id);return(_c&&_c.tipo==='departamento'?'Depto':'Casa')+' de '})()}${a.house}</span>`:''}</div>
-            <div class="card-meta">
-              <span class="card-time-chip">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                ${timeStr}hrs
-              </span>
-              <span class="card-conductor">${a.conductor||'Sin conductor'}</span>
-              ${typeChip}
-            </div>
-          </div>
-          ${rightBadge}
         </div>`;
       }
-    });
+
+      // Other groups — grid of cards
+      if (otherAssignments.length) {
+        html += `<div class="sabado-section-label">Otros Grupos</div>`;
+        html += `<div class="sabado-grupos-grid">`;
+        otherAssignments.forEach(a => {
+          const ter  = territories.find(t => t.id === a.territory_id)  || null;
+          const terColor = ter ? getTerColor(ter.number) : '#64748b';
+          const timeStr = a.time ? a.time.substring(0,5) : '--:--';
+          const grupoAsoc = _findGrupoForAssignment(a);
+          const grupoNum = grupoAsoc ? grupoAsoc.numero : null;
+          const grupoLabel = grupoNum ? `Grupo ${grupoNum}` : (a.conductor || 'Grupo');
+          const conductorLabel = a.conductor || 'Sin conductor';
+
+          const terBadgeHtml = ter
+            ? `<div class="sabado-grupo-ter-badge" style="background:${terColor}">${ter.number}</div>`
+            : '';
+
+          const ter2 = a.territory_id_2 ? territories.find(t => t.id === a.territory_id_2) : null;
+          const ter2BadgeHtml = ter2
+            ? `<div class="sabado-grupo-ter-badge" style="background:${getTerColor(ter2.number)}">${ter2.number}</div>`
+            : '';
+
+          html += `<div class="sabado-grupo-card" onclick="viewAssignment('${a.id}')" style="--card-accent:${terColor}">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div class="sabado-grupo-badge" style="background:${terColor}">${grupoNum || '?'}</div>
+              <div style="display:flex;gap:4px">${terBadgeHtml}${ter2BadgeHtml}</div>
+            </div>
+            <div>
+              <div class="sabado-grupo-num-label">${grupoLabel}</div>
+              <div class="sabado-grupo-conductor">${conductorLabel}</div>
+            </div>
+            <div class="sabado-grupo-meta">
+              <div class="sabado-grupo-meta-row">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                ${timeStr}hrs
+              </div>
+              ${a.address ? `<div class="sabado-grupo-meta-row">
+                <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.address}</span>
+              </div>` : ''}
+            </div>
+          </div>`;
+        });
+        html += `</div>`;
+      }
+
+      // If today AND Sábado, just show normal cards (handled below)
+    } else {
+      // ── Regular days (and today even if Saturday) ─────────────────────────
+      grouped[date].forEach(a => {
+        const timeStr = a.time ? a.time.substring(0,5) : '--:--';
+        const rightBadge = _buildRightBadge(a);
+        const typeChip = _buildTypeChip(a);
+
+        if (isToday) {
+          const _c = casas.find(c => c.id === a.casa_id);
+          const houseLabel = a.house ? ((_c && _c.tipo === 'departamento' ? 'Depto' : 'Casa') + ' de ') + a.house : '';
+          html += `<div class="assignment-card-today" onclick="viewAssignment('${a.id}')">
+            <div class="today-card-info">
+              <div class="today-card-address">${a.address||'Sin dirección'}${houseLabel?`<br><span class="today-card-house">${houseLabel}</span>`:''}</div>
+              <div class="today-card-meta">
+                <span class="card-time-chip">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  ${timeStr}hrs
+                </span>
+                <span class="card-conductor">${a.conductor||'Sin conductor'}</span>
+                ${typeChip}
+              </div>
+            </div>
+            ${rightBadge}
+          </div>`;
+        } else {
+          const _c = casas.find(c => c.id === a.casa_id);
+          const houseLabel = a.house ? ((_c && _c.tipo === 'departamento' ? 'Depto' : 'Casa') + ' de ') + a.house : '';
+          html += `<div class="assignment-card" onclick="viewAssignment('${a.id}')">
+            <div class="card-main">
+              <div class="card-address">${a.address||'Sin dirección'}${houseLabel?`<br><span class="card-house">${houseLabel}</span>`:''}</div>
+              <div class="card-meta">
+                <span class="card-time-chip">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  ${timeStr}hrs
+                </span>
+                <span class="card-conductor">${a.conductor||'Sin conductor'}</span>
+                ${typeChip}
+              </div>
+            </div>
+            ${rightBadge}
+          </div>`;
+        }
+      });
+    }
+
     html += `</div>`;
   });
   container.innerHTML = html;
@@ -10781,6 +10955,14 @@ const NOTIF_TEMPLATES_DEFAULT = [
     desc: 'Se envía al DEV cuando alguien sugiere que una dirección está asignada al territorio equivocado.',
     title: 'Sugerir Corrección – Territorio equivocado ({territorio})',
     body: '{remitente} sugiere que "{direccion}" en {territorio} está en el territorio equivocado. Debería estar en: {valor}.',
+    vars: ['territorio', 'remitente', 'direccion', 'valor'],
+  },
+  {
+    id: 'sugerir_correccion_nombre',
+    label: 'Sugerir Corrección — Nombre de dirección mal escrito',
+    desc: 'Se envía al DEV cuando alguien sugiere que el nombre de una dirección No Pasar está mal escrito o necesita corrección.',
+    title: 'Sugerir Corrección – Nombre mal escrito ({territorio})',
+    body: '{remitente} sugiere que "{direccion}" en {territorio} tiene el nombre mal escrito. La corrección sugerida es: {valor}.',
     vars: ['territorio', 'remitente', 'direccion', 'valor'],
   },
   {
