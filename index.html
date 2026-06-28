@@ -3792,6 +3792,7 @@
   <button class="nav-icon-btn" title="Notificaciones" onclick="toggleNotificationsMenu()" style="position:relative">
     <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
     <div id="notif-badge" style="display:none;position:absolute;top:6px;right:6px;width:9px;height:9px;background:var(--red);border-radius:50%;border:2px solid var(--surface);pointer-events:none"></div>
+    <div id="live-notif-indicator" style="display:none;position:absolute;bottom:5px;right:5px;width:9px;height:9px;background:var(--green);border-radius:50%;border:2px solid var(--surface);pointer-events:none;animation:liveDotBlink 1.2s ease-in-out infinite"></div>
   </button>
   <!-- Desktop dropdown (hidden on mobile via CSS) -->
   <div class="options-dropdown notif-desktop-dropdown" id="notifications-dropdown" style="width:340px;max-height:520px;overflow-y:auto;">
@@ -4212,6 +4213,7 @@
         <div class="sub-tabs" style="margin-bottom:1.1rem">
           <button class="sub-tab active" id="notif-admin-tab-anuncios" onclick="switchNotifAdminTab('anuncios')">Anuncios</button>
           <button class="sub-tab" id="notif-admin-tab-plantillas" onclick="switchNotifAdminTab('plantillas')">Plantillas</button>
+          <button class="sub-tab" id="notif-admin-tab-live" onclick="switchNotifAdminTab('live')">Live</button>
         </div>
 
         <!-- Anuncios -->
@@ -4243,6 +4245,23 @@
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
             El anuncio se enviará a todos como una notificación de categoría <strong>Sistema</strong>.
           </div>
+        </div>
+
+        <!-- Live -->
+        <div id="notif-admin-live" style="display:none">
+          <div class="notif-gestor-card" style="margin-bottom:1rem">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.9rem">
+              <div style="width:36px;height:36px;border-radius:10px;background:rgba(52,199,89,0.13);color:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg></div>
+              <div>
+                <div style="font-size:0.9rem;font-weight:700;color:var(--text)">Estado de Live</div>
+                <div style="font-size:0.75rem;color:var(--text3)" id="live-admin-status-text">Live no est&#225; activo</div>
+              </div>
+              <div id="live-admin-status-dot" style="width:10px;height:10px;border-radius:50%;background:var(--surface3);flex-shrink:0;margin-left:auto"></div>
+            </div>
+            <div id="live-admin-session-info" style="display:none;padding:0.75rem;background:rgba(52,199,89,0.07);border:1px solid rgba(52,199,89,0.22);border-radius:10px;font-size:0.82rem;color:var(--text2);line-height:1.5"></div>
+          </div>
+          <div style="font-size:0.8rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;margin:0 0 0.6rem">Historial de alertas Live</div>
+          <div id="live-admin-history"><div class="loader-wrap"><div class="loader"></div></div></div>
         </div>
 
         <!-- Plantillas -->
@@ -7226,6 +7245,15 @@ async function _liveOnPosition(pos) {
     if (nameEl) nameEl.textContent = road;
     banner.classList.add('visible');
     _liveHighlight(road);
+    _liveUpdateNotifPanelBanner();
+    // Count matches and fire notifications if there are No Pasar in this street
+    var matchedItems = document.querySelectorAll('#detail-no-pasar-list .no-pasar-item.live-match');
+    if (matchedItems.length > 0) {
+      var terBadge = document.getElementById('detail-ter-badge');
+      var terNum = terBadge ? terBadge.textContent.trim() : '?';
+      _liveSendBrowserNotif(road, matchedItems.length, terNum);
+      _liveSendInternalNotif(road, matchedItems.length, terNum);
+    }
   } else if (!road) {
     const nameEl = document.getElementById('live-street-name');
     if (nameEl) nameEl.textContent = 'Calle no identificada';
@@ -7250,6 +7278,9 @@ function startLiveMode() {
   btn.classList.add('live-active');
   if (label) label.textContent = 'Live activo';
   locating.classList.add('visible');
+  _liveUpdateNavIndicator(true);
+  _liveUpdateNotifPanelBanner();
+  _liveRequestNotifPermission();
   _liveWatchId = navigator.geolocation.watchPosition(_liveOnPosition, _liveOnError, { enableHighAccuracy: true, maximumAge: 5000, timeout: 12000 });
 }
 function stopLiveMode() {
@@ -7266,6 +7297,8 @@ function stopLiveMode() {
   banner.classList.remove('visible');
   locating.classList.remove('visible');
   _liveHighlight(null);
+  _liveUpdateNavIndicator(false);
+  _liveUpdateNotifPanelBanner();
 }
 function _liveUpdateBtnVisibility() {
   const sec  = document.getElementById('detail-no-pasar-section');
@@ -7275,6 +7308,140 @@ function _liveUpdateBtnVisibility() {
     && document.querySelectorAll('#detail-no-pasar-list .no-pasar-item').length > 0;
   wrap.style.display = hasEntries ? '' : 'none';
 }
+
+// ── Live Mode — Notificaciones del sistema ─────────────────────────────────────
+
+async function _liveRequestNotifPermission() {
+  if (!('Notification' in window)) return false;
+  if (Notification.permission === 'granted') return true;
+  if (Notification.permission === 'denied') return false;
+  const perm = await Notification.requestPermission();
+  return perm === 'granted';
+}
+
+function _liveSendBrowserNotif(streetName, count, territoryNum) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const title = count + ' No Pasar en esta calle';
+  const body  = streetName + ' \u2014 Territorio ' + territoryNum + '. Toca para ver los detalles.';
+  const notif = new Notification(title, {
+    body: body,
+    icon: 'icons/apple-touch-icon.png',
+    badge: 'icons/favicon-32x32.png',
+    tag: 'live-no-pasar',
+    requireInteraction: false,
+  });
+  notif.onclick = function() { window.focus(); notif.close(); };
+}
+
+async function _liveSendInternalNotif(streetName, count, territoryNum) {
+  if (!currentUser) return;
+  const userName = currentUser.name || 'Usuario';
+  const title = 'Live \u2014 ' + count + ' No Pasar en ' + streetName;
+  const body  = 'Territorio ' + territoryNum + ': ' + count + ' direcci' + (count !== 1 ? 'ones' : '\u00f3n') + ' No Pasar en ' + streetName + '.';
+  try {
+    await sb.from('notifications').insert({
+      title: title,
+      body: body,
+      notif_category: 'live',
+      target_names: [userName.trim().toLowerCase()],
+    });
+    checkForNewNotifications();
+  } catch(e) { console.warn('[Live] No se pudo insertar notificaci\u00f3n interna:', e); }
+}
+
+function _liveUpdateNavIndicator(active) {
+  var el = document.getElementById('live-notif-indicator');
+  if (el) el.style.display = active ? 'block' : 'none';
+}
+
+function _liveUpdateNotifPanelBanner() {
+  ['desktop', 'mobile'].forEach(function(target) {
+    var wrap = target === 'desktop'
+      ? document.getElementById('notifications-dropdown')
+      : document.getElementById('page-notifications');
+    if (!wrap) return;
+    var banner = wrap.querySelector('.live-panel-banner');
+    if (_liveActive) {
+      if (!banner) {
+        banner = document.createElement('div');
+        banner.className = 'live-panel-banner';
+        var streetId = 'live-panel-banner-street-' + target;
+        banner.innerHTML = '<div style="display:flex;align-items:center;gap:10px;padding:0.7rem 1rem;background:rgba(52,199,89,0.1);border-bottom:1px solid rgba(52,199,89,0.2)">'
+          + '<div style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;animation:liveDotBlink 1.2s ease-in-out infinite"></div>'
+          + '<div style="flex:1;min-width:0">'
+          + '<div style="font-size:0.82rem;font-weight:700;color:var(--green)">Live activo</div>'
+          + '<div style="font-size:0.72rem;color:var(--text3)" id="' + streetId + '">Detectando calle\u2026</div>'
+          + '</div>'
+          + '<button onclick="stopLiveMode()" style="background:rgba(255,59,48,0.08);border:none;font-family:var(--font);font-size:0.75rem;font-weight:700;color:var(--red);cursor:pointer;padding:3px 8px;border-radius:6px">Detener</button>'
+          + '</div>';
+        var firstChild = wrap.querySelector('.notif-filter-chips') ? wrap.querySelector('.notif-filter-chips').parentElement : wrap.firstElementChild;
+        wrap.insertBefore(banner, firstChild);
+      }
+      var streetEl = document.getElementById('live-panel-banner-street-' + target);
+      if (streetEl && _liveLastRoad) streetEl.textContent = _liveLastRoad;
+    } else {
+      if (banner) banner.remove();
+    }
+  });
+}
+
+async function renderLiveAdminPanel() {
+  var statusText  = document.getElementById('live-admin-status-text');
+  var statusDot   = document.getElementById('live-admin-status-dot');
+  var sessionInfo = document.getElementById('live-admin-session-info');
+  var historyEl   = document.getElementById('live-admin-history');
+  if (_liveActive) {
+    if (statusText) statusText.textContent = 'Live activo en este dispositivo' + (_liveLastRoad ? ' \u2014 ' + _liveLastRoad : '');
+    if (statusDot)  { statusDot.style.background = 'var(--green)'; statusDot.style.animation = 'liveDotBlink 1.2s ease-in-out infinite'; }
+    if (sessionInfo) {
+      sessionInfo.style.display = '';
+      sessionInfo.innerHTML = '<strong>Usuario:</strong> ' + (currentUser ? currentUser.name : '\u2014') + '<br>'
+        + '<strong>Calle actual:</strong> ' + (_liveLastRoad || 'Detectando\u2026') + '<br>'
+        + '<strong>Modo:</strong> GPS + Reverse Geocoding (OpenStreetMap)';
+    }
+  } else {
+    if (statusText) statusText.textContent = 'Live no est\u00e1 activo en este dispositivo';
+    if (statusDot)  { statusDot.style.background = 'var(--surface3)'; statusDot.style.animation = 'none'; }
+    if (sessionInfo) sessionInfo.style.display = 'none';
+  }
+  if (!historyEl) return;
+  historyEl.innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
+  try {
+    var myName = currentUser && currentUser.name ? currentUser.name.trim().toLowerCase() : '';
+    var result = await sb.from('notifications')
+      .select('id, title, body, created_at, target_names')
+      .eq('notif_category', 'live')
+      .order('created_at', { ascending: false })
+      .limit(30);
+    var data = result.data || [];
+    var mine = data.filter(function(n) {
+      if (!n.target_names || !n.target_names.length) return true;
+      return n.target_names.some(function(name) { return name.trim().toLowerCase() === myName; });
+    });
+    if (!mine.length) {
+      historyEl.innerHTML = '<div style="font-size:0.83rem;color:var(--text3);text-align:center;padding:1.5rem 0">Sin alertas Live registradas todav\u00eda</div>';
+      return;
+    }
+    var MON = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    historyEl.innerHTML = mine.map(function(n) {
+      var d = new Date(n.created_at);
+      var ds = d.getDate() + ' ' + MON[d.getMonth()] + ' ' + d.getFullYear() + ', ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+      return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0.75rem 0.9rem;margin-bottom:6px">'
+        + '<div style="display:flex;align-items:flex-start;gap:8px">'
+        + '<div style="width:28px;height:28px;border-radius:8px;background:rgba(52,199,89,0.12);color:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">'
+        + '<svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>'
+        + '</div>'
+        + '<div style="flex:1;min-width:0">'
+        + '<div style="font-size:0.84rem;font-weight:700;color:var(--text)">' + (n.title || '') + '</div>'
+        + '<div style="font-size:0.76rem;color:var(--text2);margin-top:2px">' + (n.body || '') + '</div>'
+        + '<div style="font-size:0.68rem;color:var(--text3);margin-top:5px">' + ds + '</div>'
+        + '</div></div></div>';
+    }).join('');
+  } catch(e) {
+    historyEl.innerHTML = '<div style="font-size:0.83rem;color:var(--red);text-align:center;padding:1rem 0">Error al cargar el historial</div>';
+  }
+}
+
 // ── Fin Live Mode ──────────────────────────────────────────────────────────────
 
 async function loadAdminData() {
@@ -10972,6 +11139,12 @@ const NOTIF_GROUPS = {
     bg: 'rgba(255,149,0,0.12)',
     icon: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
   },
+  live: {
+    label: 'Live',
+    color: '#34c759',
+    bg: 'rgba(52,199,89,0.12)',
+    icon: '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>',
+  },
 };
 
 // ── Notification categories & preferences ───────────────────────────────────
@@ -10989,6 +11162,7 @@ const NOTIF_CATEGORIES = [
   { id: 'responsabilidades', label: 'Responsabilidades',           mandatory: true,  group: 'reuniones' },
   { id: 'sistema',           label: 'Avisos de la Plataforma',     mandatory: true,  group: 'sistema' },
   { id: 'solicitud-cuenta',  label: 'Solicitudes de cuenta',        mandatory: true,  group: 'sistema' },
+  { id: 'live',              label: 'Notificaciones Live',          mandatory: false, group: 'live'   },
 ];
 
 // Devuelve la key de NOTIF_GROUPS correspondiente a una notificación.
@@ -11026,10 +11200,13 @@ async function resetCategoryLabel(catId) {
 
 // ── Gestor de Notificaciones — UI (solo DEV) ─────────────────────────────────
 function switchNotifAdminTab(tab) {
-  document.getElementById('notif-admin-tab-anuncios').classList.toggle('active', tab === 'anuncios');
-  document.getElementById('notif-admin-tab-plantillas').classList.toggle('active', tab === 'plantillas');
-  document.getElementById('notif-admin-anuncios').style.display = tab === 'anuncios' ? '' : 'none';
-  document.getElementById('notif-admin-plantillas').style.display = tab === 'plantillas' ? '' : 'none';
+  ['anuncios','plantillas','live'].forEach(function(t) {
+    var btn = document.getElementById('notif-admin-tab-' + t);
+    var sec = document.getElementById('notif-admin-' + t);
+    if (btn) btn.classList.toggle('active', t === tab);
+    if (sec) sec.style.display = t === tab ? '' : 'none';
+  });
+  if (tab === 'live') renderLiveAdminPanel();
 }
 
 document.addEventListener('change', (e) => {
