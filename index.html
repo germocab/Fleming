@@ -3199,6 +3199,51 @@
   .rol-s { background: var(--accent-light); color: var(--accent); border: 1px solid rgba(0,122,255,0.2); }
   .rol-a { background: var(--green-light); color: var(--green); border: 1px solid rgba(52,199,89,0.25); }
 
+  /* ── Gestor de Notificaciones ─────────────────────────────────────────────── */
+  .notif-gestor-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 1.1rem; margin-bottom: 1rem;
+  }
+  .notif-gestor-hint {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 0.8rem; color: var(--text3); line-height: 1.45;
+    background: rgba(0,122,255,0.07); border: 1px solid rgba(0,122,255,0.15);
+    border-radius: var(--radius-sm); padding: 0.7rem 0.85rem;
+  }
+  .notif-gestor-hint svg { width: 16px; height: 16px; stroke: var(--accent); fill: none; stroke-width: 2; flex-shrink: 0; margin-top: 1px; }
+  .notif-tpl-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); margin-bottom: 0.75rem; overflow: hidden;
+  }
+  .notif-tpl-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0.75rem 1rem; cursor: pointer; transition: background 0.15s;
+  }
+  .notif-tpl-header:hover { background: var(--surface3); }
+  .notif-tpl-name { flex: 1; font-size: 0.88rem; font-weight: 600; }
+  .notif-tpl-custom-badge {
+    font-size: 0.6rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 20px;
+    background: var(--accent-light); color: var(--accent); border: 1px solid rgba(0,122,255,0.2);
+  }
+  .notif-tpl-chevron { width: 16px; height: 16px; stroke: var(--text3); fill: none; stroke-width: 2.5; transition: transform 0.2s; flex-shrink: 0; }
+  .notif-tpl-body { padding: 0 1rem 1rem; border-top: 1px solid var(--border); }
+  .notif-tpl-desc { font-size: 0.78rem; color: var(--text3); margin: 0.75rem 0; line-height: 1.4; }
+  .notif-tpl-vars { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 0.85rem; }
+  .notif-tpl-var-chip {
+    font-size: 0.68rem; font-weight: 600; font-family: ui-monospace, monospace;
+    padding: 2px 8px; border-radius: 6px;
+    background: var(--surface3); color: var(--text2); border: 1px solid var(--border);
+  }
+  .notif-tpl-actions { display: flex; gap: 8px; margin-top: 0.6rem; }
+  .notif-cat-row {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 0.7rem 0.9rem; margin-bottom: 0.6rem;
+  }
+  .notif-cat-row-label { flex: 1; font-size: 0.85rem; font-weight: 500; }
+  .notif-cat-row input { flex: 1; }
+
   /* Toggle switch */
   .toggle-switch {
     width: 44px; height: 26px; border-radius: 13px;
@@ -3764,6 +3809,7 @@
       </div>
       <div class="admin-tabs-row" data-section="fleming">
         <button class="admin-tab" data-tab="usuarios" onclick="switchAdminTab('usuarios')">Usuarios</button>
+        <button class="admin-tab" id="admin-tab-notificaciones" data-tab="notificaciones" onclick="switchAdminTab('notificaciones')" style="display:none">Notificaciones</button>
       </div>
       <div class="admin-section active" id="admin-assignments">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
@@ -3951,6 +3997,58 @@
           <h3>Gestión de usuarios</h3>
           <p>Administra roles, permisos y accesos de los usuarios.</p>
           <button class="btn-primary" style="margin-top:0.75rem" onclick="openUsersPanel()">Abrir panel de usuarios</button>
+        </div>
+      </div>
+      <div class="admin-section" id="admin-notificaciones">
+        <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
+          <span style="flex:1;font-size:0.95rem;font-weight:700">Gestor de Notificaciones</span>
+        </div>
+        <div class="sub-tabs" style="margin-bottom:1.1rem">
+          <button class="sub-tab active" id="notif-admin-tab-anuncios" onclick="switchNotifAdminTab('anuncios')">Anuncios</button>
+          <button class="sub-tab" id="notif-admin-tab-plantillas" onclick="switchNotifAdminTab('plantillas')">Plantillas</button>
+        </div>
+
+        <!-- Anuncios -->
+        <div id="notif-admin-anuncios">
+          <div class="notif-gestor-card">
+            <div class="form-group2">
+              <label class="form-label2">Título del anuncio</label>
+              <input type="text" class="form-input" id="anuncio-title" placeholder="Ej: Cambio de horario esta semana" maxlength="120">
+            </div>
+            <div class="form-group2">
+              <label class="form-label2">Mensaje</label>
+              <textarea class="form-textarea" id="anuncio-body" placeholder="Escribe el contenido del anuncio…" rows="4" maxlength="600"></textarea>
+            </div>
+            <div class="form-group2">
+              <label class="form-label2">Destinatarios</label>
+              <select class="form-select" id="anuncio-target">
+                <option value="">Todos (anuncio general)</option>
+                <option value="nombres">Personas específicas</option>
+              </select>
+            </div>
+            <div class="form-group2" id="anuncio-target-names-wrap" style="display:none">
+              <label class="form-label2">Nombres (uno por línea, o separados por coma)</label>
+              <textarea class="form-textarea" id="anuncio-target-names" placeholder="Juan Pérez&#10;María González" rows="3"></textarea>
+            </div>
+            <div id="anuncio-error" class="form-error" style="display:none"></div>
+            <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" id="send-anuncio-btn" onclick="sendAnuncioSistema()">Enviar anuncio</button>
+          </div>
+          <div class="notif-gestor-hint">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            El anuncio se enviará a todos como una notificación de categoría <strong>Sistema</strong>.
+          </div>
+        </div>
+
+        <!-- Plantillas -->
+        <div id="notif-admin-plantillas" style="display:none">
+          <div class="notif-gestor-hint" style="margin-bottom:1rem">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            Personaliza el texto de las notificaciones automáticas y el nombre de las categorías. Usa las variables entre llaves tal como aparecen; se reemplazan automáticamente al enviarse.
+          </div>
+          <div style="font-size:0.8rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;margin:0.5rem 0 0.6rem">Mensajes automáticos</div>
+          <div id="notif-templates-list"></div>
+          <div style="font-size:0.8rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;margin:1.4rem 0 0.6rem">Nombres de categorías</div>
+          <div id="notif-categories-list"></div>
         </div>
       </div>
       </div><!-- /.admin-body -->
@@ -4608,7 +4706,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.30.0-alpha';
+const APP_VERSION = '0.30.1-alpha';
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -5860,6 +5958,7 @@ async function enterApp() {
 
   // Cargar preferencias de notificaciones (en segundo plano, no bloquea el resto del arranque)
   loadNotifPrefs();
+  loadNotifTemplates();
   refreshCurrentUserPermsCache();
 
   // Update UI based on final role
@@ -5872,6 +5971,8 @@ async function enterApp() {
   adminBtn.style.display = ['dev','admin','semiadmin'].includes(currentRole) ? '' : 'none';
   const flemingTab = document.getElementById('admin-section-tab-fleming');
   if (flemingTab) flemingTab.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
+  const notifAdminTab = document.getElementById('admin-tab-notificaciones');
+  if (notifAdminTab) notifAdminTab.style.display = currentRole === 'dev' ? '' : 'none';
 
   // Restore navigation position from before reload (if any)
   const _nav = _loadNavState();
@@ -6292,7 +6393,7 @@ const ADMIN_TAB_SECTION = {
   assignments: 'predicacion', territories: 'predicacion', conductores: 'predicacion',
   casas: 'predicacion', grupos: 'predicacion',
   vmc: 'reuniones', 'fin-semana': 'reuniones', responsabilidades: 'reuniones', 'aseo-salon': 'reuniones',
-  usuarios: 'fleming',
+  usuarios: 'fleming', notificaciones: 'fleming',
 };
 
 // Cambia la sección visible (Predicación/Reuniones) y activa la primera sub-pestaña disponible dentro de ella.
@@ -6308,6 +6409,10 @@ function switchAdminSection(section, skipTabSwitch) {
 
 async function switchAdminTab(tab) {
   if (tab === 'usuarios' && !['dev','admin'].includes(currentRole)) {
+    showToast('No tienes permisos para acceder a este módulo.', 'error');
+    return;
+  }
+  if (tab === 'notificaciones' && currentRole !== 'dev') {
     showToast('No tienes permisos para acceder a este módulo.', 'error');
     return;
   }
@@ -6331,6 +6436,7 @@ async function switchAdminTab(tab) {
   if (tab === 'usuarios') { loadUsers().then(() => renderUsersPanel()); }
   if (tab === 'vmc') { loadVmcWeeks().then(() => renderAdminVmc()); }
   if (tab === 'fin-semana') { loadFsWeeks().then(() => renderAdminFs()); }
+  if (tab === 'notificaciones') { renderNotifAdminTemplates(); renderNotifAdminCategories(); }
 }
 
 async function applyAdminTabPermissions() {
@@ -6341,7 +6447,7 @@ async function applyAdminTabPermissions() {
   let firstAllowed = null;
   document.querySelectorAll('.admin-tab').forEach(btn => {
     const tab = btn.dataset.tab;
-    if (tab === 'usuarios') { btn.style.opacity = '0.4'; btn.style.pointerEvents = 'none'; return; }
+    if (tab === 'usuarios' || tab === 'notificaciones') { btn.style.opacity = '0.4'; btn.style.pointerEvents = 'none'; return; }
     const key = permKeyMap[tab];
     const allowed = canAccessModule(perms, key);
     btn.style.opacity = allowed ? '' : '0.4';
@@ -6667,8 +6773,9 @@ async function submitSuggestNp() {
   const terName = sec.dataset.territoryName || 'Territorio';
   const sender  = currentUser?.name || 'Usuario';
 
-  const title = `Sugerencia No Pasar – ${terName}`;
-  const body  = `${sender} sugiere agregar "${addr}" como No Pasar${motivo ? `.\nMotivo: ${motivo}` : '.'}`;
+  const tpl = renderTemplate('sugerencia_no_pasar', { territorio: terName, remitente: sender, direccion: addr, motivo: motivo ? `.\nMotivo: ${motivo}` : '.' });
+  const title = tpl.title;
+  const body  = tpl.body;
 
   const sendBtn = document.querySelector('.suggest-np-send');
   sendBtn.textContent = 'Enviando…'; sendBtn.disabled = true;
@@ -6927,14 +7034,14 @@ async function saveAssignment() {
       if (payload.time)      parts.push(`hora: ${payload.time.substring(0,5)}`);
       if (payload.conductor) parts.push(`conductor: ${payload.conductor}`);
       const detalle = parts.length ? ` (${parts.join(', ')})` : '';
-      const defaultText = `Se realizó un cambio en la predicación del ${dateStr}${detalle}. Por favor revisar los arreglos actualizados.`;
+      const tpl = renderTemplate('cambio_asignacion', { fecha: dateStr, detalle });
 
-      const userMessage = prompt('Se detectaron cambios en la asignación. Edita el mensaje o cancela para no notificar:', defaultText);
+      const userMessage = prompt('Se detectaron cambios en la asignación. Edita el mensaje o cancela para no notificar:', tpl.body);
 
       if (userMessage) {
         showToast('Enviando notificación...', '');
         await sb.from('notifications').insert({
-          title: 'Cambio en Asignación',
+          title: tpl.title,
           body: userMessage,
           notif_category: 'casa'
         });
@@ -6942,7 +7049,7 @@ async function saveAssignment() {
           const resp = await fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
-            body: JSON.stringify({ title: 'Cambio en Asignación', body: userMessage })
+            body: JSON.stringify({ title: tpl.title, body: userMessage })
           });
           if (!resp.ok) console.warn('Edge Function error:', resp.status, await resp.text());
         } catch (err) {
@@ -7939,8 +8046,7 @@ async function saveResponsabilidadesAsignacion() {
       // Una notificación por hermano, con título según su categoría de cargo
       // y detalle con su cargo específico exacto + la fecha completa.
       const rows = newlyAssigned.map(n => ({
-        title: respCargoCategoria(n.cargo),
-        body: `Se te asignó como ${n.cargo} para el ${diaLargo}.`,
+        ...renderTemplate('responsabilidad_asignada', { categoria_cargo: respCargoCategoria(n.cargo), cargo: n.cargo, fecha: diaLargo }),
         target_names: [n.hermano.trim().toLowerCase()],
         notif_category: 'responsabilidades',
       }));
@@ -7950,12 +8056,13 @@ async function saveResponsabilidadesAsignacion() {
       // de la notificación nativa también sea el específico de su cargo.
       for (const n of newlyAssigned) {
         try {
+          const pushTpl = renderTemplate('responsabilidad_asignada', { categoria_cargo: respCargoCategoria(n.cargo), cargo: n.cargo, fecha: diaLargo });
           const resp = await fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
             body: JSON.stringify({
-              title: respCargoCategoria(n.cargo),
-              body: `Se te asignó como ${n.cargo} para el ${diaLargo}.`,
+              title: pushTpl.title,
+              body: pushTpl.body,
               target_names: [n.hermano.trim().toLowerCase()],
             })
           });
@@ -8253,8 +8360,9 @@ async function saveAseoSalonAsignacion() {
   if (targetNames.length) {
     const diaLargo = respDiaLabelLong(dateStr);
     const gruposTexto = gruposAsignados.map(g => `Grupo ${g.numero}`).join(' y ');
-    const title = 'Aseo del Salón';
-    const body = `Tu grupo fue asignado al aseo del salón el ${diaLargo}, junto al ${gruposTexto}.`;
+    const tpl = renderTemplate('aseo_asignado', { fecha: diaLargo, grupos: gruposTexto });
+    const title = tpl.title;
+    const body = tpl.body;
     try {
       await sb.from('notifications').insert([{ title, body, target_names: targetNames, notif_category: 'aseo' }]);
       try {
@@ -9470,9 +9578,10 @@ async function requestAccountReentry(name, blocked) {
       .insert({ name, role: 'pending', task: '', joined_at: now, last_seen: now });
   }
 
+  const _tplSc = renderTemplate('solicitud_cuenta', { nombre: name });
   await sb.from('notifications').insert({
-    title: 'Solicitud de cuenta',
-    body: `${name} fue eliminado anteriormente e intentó iniciar sesión de nuevo. Acepta o deniega la solicitud para que pueda volver a acceder.`,
+    title: _tplSc.title,
+    body: _tplSc.body,
     notif_category: 'solicitud-cuenta',
     notif_audience: 'usuarios_module',
     notif_type: 'account_request',
@@ -9553,9 +9662,16 @@ async function syncRoleFromServer() {
       if (adminBtn) adminBtn.style.display = ['dev','admin','semiadmin'].includes(currentRole) ? '' : 'none';
       const flemingTab = document.getElementById('admin-section-tab-fleming');
       if (flemingTab) flemingTab.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
+      const notifAdminTab = document.getElementById('admin-tab-notificaciones');
+      if (notifAdminTab) notifAdminTab.style.display = currentRole === 'dev' ? '' : 'none';
       // If user was viewing the Fleming App / Usuarios section and lost access, send them back to predicación
       const usuariosSection = document.getElementById('admin-usuarios');
       if (usuariosSection && usuariosSection.classList.contains('active') && !['dev','admin'].includes(currentRole)) {
+        switchAdminSection('predicacion');
+      }
+      // If user was viewing Notificaciones and lost access (lost DEV role), send them back
+      const notificacionesSection = document.getElementById('admin-notificaciones');
+      if (notificacionesSection && notificacionesSection.classList.contains('active') && currentRole !== 'dev') {
         switchAdminSection('predicacion');
       }
       // If user was on admin page and lost access, kick them out
@@ -9938,7 +10054,7 @@ async function renderPrefNotifList() {
       return `<div class="pref-notif-row">
         <div class="pref-notif-icon" style="background:${g.bg};color:${g.color}">${g.icon}</div>
         <div class="pref-notif-content">
-          <div class="pref-notif-title">${cat.label}</div>
+          <div class="pref-notif-title">${getCategoryLabel(cat.id)}</div>
           ${cat.mandatory ? '<div class="pref-notif-sub">Obligatoria, no se puede desactivar</div>' : ''}
         </div>
         ${lockOrToggle}
@@ -10173,6 +10289,8 @@ function syncAdminDropdown() {
   }
   const flemingTab = document.getElementById('admin-section-tab-fleming');
   if (flemingTab) flemingTab.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
+  const notifAdminTab = document.getElementById('admin-tab-notificaciones');
+  if (notifAdminTab) notifAdminTab.style.display = currentRole === 'dev' ? '' : 'none';
   const themeLabel = document.getElementById('theme-btn-label-admin');
   if (themeLabel) _updateThemeActive(document.documentElement.getAttribute('data-theme') || 'auto');
 }
@@ -10416,6 +10534,169 @@ function notifGroupPillHTML(n) {
   return `<span class="notif-pill" style="background:${g.bg};color:${g.color}">${g.icon}${g.label}</span>`;
 }
 
+// ── Etiquetas de categoría personalizables ───────────────────────────────────
+// El DEV puede renombrar cómo se ve cada categoría (ej. "Avisos de la
+// Plataforma" → otro texto) desde el Gestor de Notificaciones. El override se
+// guarda reutilizando la tabla notif_templates con un id prefijado "cat__",
+// almacenando el texto en la columna title (body queda vacío).
+function categoryTemplateId(catId) { return 'cat__' + catId; }
+function getCategoryLabel(catId) {
+  const cat = NOTIF_CATEGORIES.find(c => c.id === catId);
+  if (!cat) return catId;
+  const overrides = getNotifTemplatesCached();
+  const ov = overrides[categoryTemplateId(catId)];
+  return (ov && ov.title) ? ov.title : cat.label;
+}
+async function saveCategoryLabel(catId, label) {
+  return saveNotifTemplate(categoryTemplateId(catId), label, '');
+}
+async function resetCategoryLabel(catId) {
+  return resetNotifTemplate(categoryTemplateId(catId));
+}
+
+// ── Gestor de Notificaciones — UI (solo DEV) ─────────────────────────────────
+function switchNotifAdminTab(tab) {
+  document.getElementById('notif-admin-tab-anuncios').classList.toggle('active', tab === 'anuncios');
+  document.getElementById('notif-admin-tab-plantillas').classList.toggle('active', tab === 'plantillas');
+  document.getElementById('notif-admin-anuncios').style.display = tab === 'anuncios' ? '' : 'none';
+  document.getElementById('notif-admin-plantillas').style.display = tab === 'plantillas' ? '' : 'none';
+}
+
+document.addEventListener('change', (e) => {
+  if (e.target && e.target.id === 'anuncio-target') {
+    document.getElementById('anuncio-target-names-wrap').style.display = e.target.value === 'nombres' ? '' : 'none';
+  }
+});
+
+async function sendAnuncioSistema() {
+  const title = document.getElementById('anuncio-title').value.trim();
+  const body  = document.getElementById('anuncio-body').value.trim();
+  const targetMode = document.getElementById('anuncio-target').value;
+  document.getElementById('anuncio-error').style.display = 'none';
+
+  if (!title) { showError('anuncio-error', 'El título es requerido'); return; }
+  if (!body)  { showError('anuncio-error', 'El mensaje es requerido'); return; }
+
+  let target_names = null;
+  if (targetMode === 'nombres') {
+    const raw = document.getElementById('anuncio-target-names').value.trim();
+    if (!raw) { showError('anuncio-error', 'Indica al menos un nombre'); return; }
+    target_names = raw.split(/[\n,]/).map(s => s.trim().toLowerCase()).filter(Boolean);
+  }
+
+  const btn = document.getElementById('send-anuncio-btn');
+  btn.disabled = true; btn.textContent = 'Enviando…';
+
+  const payload = { title, body, notif_category: 'sistema' };
+  if (target_names) payload.target_names = target_names;
+
+  const { error } = await sb.from('notifications').insert(payload);
+
+  try {
+    const resp = await fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+      body: JSON.stringify(target_names ? { title, body, target_names } : { title, body })
+    });
+    if (!resp.ok) console.warn('Edge Function respondió con error:', resp.status, await resp.text());
+  } catch (err) {
+    console.warn('No se pudo enviar push (Edge Function no disponible):', err.message);
+  }
+
+  btn.disabled = false; btn.textContent = 'Enviar anuncio';
+  if (error) { showError('anuncio-error', error.message); return; }
+
+  showToast('Anuncio enviado ✓', 'success');
+  document.getElementById('anuncio-title').value = '';
+  document.getElementById('anuncio-body').value = '';
+  document.getElementById('anuncio-target').value = '';
+  document.getElementById('anuncio-target-names').value = '';
+  document.getElementById('anuncio-target-names-wrap').style.display = 'none';
+}
+
+let _notifTplOpenId = null;
+function renderNotifAdminTemplates() {
+  const container = document.getElementById('notif-templates-list');
+  if (!container) return;
+  const overrides = getNotifTemplatesCached();
+  container.innerHTML = NOTIF_TEMPLATES_DEFAULT.map(def => {
+    const isCustom = !!overrides[def.id];
+    const open = _notifTplOpenId === def.id;
+    const current = getTemplate(def.id);
+    return `<div class="notif-tpl-card">
+      <div class="notif-tpl-header" onclick="toggleNotifTplCard('${def.id}')">
+        <div class="notif-tpl-name">${def.label}</div>
+        ${isCustom ? '<span class="notif-tpl-custom-badge">Editado</span>' : ''}
+        <svg class="notif-tpl-chevron" style="transform:rotate(${open ? '90deg' : '0deg'})" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="notif-tpl-body" id="notif-tpl-body-${def.id}" style="display:${open ? '' : 'none'}">
+        <div class="notif-tpl-desc">${def.desc}</div>
+        ${def.vars.length ? `<div class="notif-tpl-vars">${def.vars.map(v => `<span class="notif-tpl-var-chip">{${v}}</span>`).join('')}</div>` : ''}
+        <div class="form-group2">
+          <label class="form-label2">Título</label>
+          <input type="text" class="form-input" id="notif-tpl-title-${def.id}" value="${(current.title || '').replace(/"/g, '&quot;')}">
+        </div>
+        <div class="form-group2">
+          <label class="form-label2">Mensaje</label>
+          <textarea class="form-textarea" id="notif-tpl-body-input-${def.id}" rows="3">${current.body || ''}</textarea>
+        </div>
+        <div class="notif-tpl-actions">
+          <button class="btn-primary" style="width:auto;padding:0.55rem 1.1rem" onclick="saveTemplateFromUI('${def.id}')">Guardar</button>
+          <button class="btn-secondary" style="width:auto;padding:0.55rem 1.1rem" onclick="resetTemplateFromUI('${def.id}')" ${isCustom ? '' : 'disabled style="opacity:0.5"'}>Restaurar original</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function toggleNotifTplCard(id) {
+  _notifTplOpenId = _notifTplOpenId === id ? null : id;
+  renderNotifAdminTemplates();
+}
+async function saveTemplateFromUI(id) {
+  const title = document.getElementById('notif-tpl-title-' + id).value.trim();
+  const body  = document.getElementById('notif-tpl-body-input-' + id).value.trim();
+  if (!title || !body) { showToast('Título y mensaje no pueden estar vacíos', 'error'); return; }
+  const ok = await saveNotifTemplate(id, title, body);
+  showToast(ok ? 'Plantilla actualizada ✓' : 'Guardado localmente (sin conexión a la tabla)', ok ? 'success' : '');
+  renderNotifAdminTemplates();
+}
+async function resetTemplateFromUI(id) {
+  if (!confirm('¿Restaurar el texto original de esta notificación?')) return;
+  await resetNotifTemplate(id);
+  showToast('Plantilla restaurada ✓', 'success');
+  renderNotifAdminTemplates();
+}
+
+function renderNotifAdminCategories() {
+  const container = document.getElementById('notif-categories-list');
+  if (!container) return;
+  container.innerHTML = NOTIF_CATEGORIES.map(cat => {
+    const label = getCategoryLabel(cat.id);
+    const isCustom = label !== cat.label;
+    return `<div class="notif-cat-row">
+      <input type="text" class="form-input" id="notif-cat-input-${cat.id}" value="${label.replace(/"/g, '&quot;')}">
+      <button class="btn-icon-sm" title="Guardar" onclick="saveCategoryLabelFromUI('${cat.id}')">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </button>
+      <button class="btn-icon-sm" title="Restaurar nombre original" onclick="resetCategoryLabelFromUI('${cat.id}')" ${isCustom ? '' : 'disabled style="opacity:0.4"'}>
+        <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+      </button>
+    </div>`;
+  }).join('');
+}
+async function saveCategoryLabelFromUI(catId) {
+  const label = document.getElementById('notif-cat-input-' + catId).value.trim();
+  if (!label) { showToast('El nombre no puede estar vacío', 'error'); return; }
+  await saveCategoryLabel(catId, label);
+  showToast('Nombre de categoría actualizado ✓', 'success');
+  renderNotifAdminCategories();
+}
+async function resetCategoryLabelFromUI(catId) {
+  await resetCategoryLabel(catId);
+  showToast('Nombre restaurado ✓', 'success');
+  renderNotifAdminCategories();
+}
+
 function defaultNotifPrefs() {
   const prefs = {};
   NOTIF_CATEGORIES.forEach(c => { prefs[c.id] = true; });
@@ -10467,6 +10748,153 @@ function isNotifCategoryEnabled(n) {
   if (!cat || cat.mandatory) return true;
   const prefs = getNotifPrefsCached();
   return prefs[n.notif_category] !== false;
+}
+
+// ── Plantillas de notificaciones (Gestor de Notificaciones, solo DEV) ───────
+// Cada mensaje automático que envía la plataforma está aquí como plantilla
+// editable, con variables {nombre_variable} que se reemplazan al enviarse.
+// Los overrides (lo que el DEV personalizó) viven en la tabla notif_templates
+// (columnas: id text PK, title text, body text) y se cachean en localStorage
+// para que el envío de notificaciones nunca quede bloqueado por la red.
+const NOTIF_TEMPLATES_DEFAULT = [
+  {
+    id: 'cambio_asignacion',
+    label: 'Cambio en Asignación',
+    desc: 'Se envía cuando se edita una asignación de predicación ya existente (dirección, hora, conductor o territorio).',
+    title: 'Cambio en Asignación',
+    body: 'Se realizó un cambio en la predicación del {fecha}{detalle}. Por favor revisar los arreglos actualizados.',
+    vars: ['fecha', 'detalle'],
+  },
+  {
+    id: 'sugerencia_no_pasar',
+    label: 'Sugerencia No Pasar',
+    desc: 'Se envía al DEV cuando alguien sugiere agregar una dirección a la lista de "No Pasar" de un territorio.',
+    title: 'Sugerencia No Pasar – {territorio}',
+    body: '{remitente} sugiere agregar "{direccion}" como No Pasar{motivo}.',
+    vars: ['territorio', 'remitente', 'direccion', 'motivo'],
+  },
+  {
+    id: 'sugerir_quitado',
+    label: 'Sugerir Quitado de No Pasar',
+    desc: 'Se envía al DEV cuando alguien sugiere quitar una dirección de la lista de "No Pasar" de un territorio.',
+    title: 'Sugerir Quitado – {territorio}',
+    body: '{remitente} sugiere quitar "{direccion}" de las direcciones No Pasar en {territorio}{motivo}.',
+    vars: ['territorio', 'remitente', 'direccion', 'motivo'],
+  },
+  {
+    id: 'sugerir_correccion_territorio',
+    label: 'Sugerir Corrección — Territorio equivocado',
+    desc: 'Se envía al DEV cuando alguien sugiere que una dirección está asignada al territorio equivocado.',
+    title: 'Sugerir Corrección – Territorio equivocado ({territorio})',
+    body: '{remitente} sugiere que "{direccion}" en {territorio} está en el territorio equivocado. Debería estar en: {valor}.',
+    vars: ['territorio', 'remitente', 'direccion', 'valor'],
+  },
+  {
+    id: 'sugerir_correccion_nombre',
+    label: 'Sugerir Corrección — Nombre mal escrito',
+    desc: 'Se envía al DEV cuando alguien sugiere corregir el nombre escrito de una dirección.',
+    title: 'Sugerir Corrección – Nombre mal escrito ({territorio})',
+    body: '{remitente} sugiere corregir el nombre de "{direccion}" en {territorio}. Nombre correcto: "{valor}".',
+    vars: ['territorio', 'remitente', 'direccion', 'valor'],
+  },
+  {
+    id: 'responsabilidad_asignada',
+    label: 'Responsabilidad Asignada',
+    desc: 'Se envía a un hermano cuando se le asigna un cargo (Acomodador, Sonido, etc.) para un día Jueves/Sábado.',
+    title: '{categoria_cargo}',
+    body: 'Se te asignó como {cargo} para el {fecha}.',
+    vars: ['categoria_cargo', 'cargo', 'fecha'],
+  },
+  {
+    id: 'aseo_asignado',
+    label: 'Aseo del Salón',
+    desc: 'Se envía a los miembros de los grupos de servicio asignados al aseo del salón.',
+    title: 'Aseo del Salón',
+    body: 'Tu grupo fue asignado al aseo del salón el {fecha}, junto al {grupos}.',
+    vars: ['fecha', 'grupos'],
+  },
+  {
+    id: 'nueva_asignacion_reunion',
+    label: 'Nueva Asignación en Reunión',
+    desc: 'Se envía cuando a alguien se le asigna una parte o rol en Vida y Ministerio o Fin de Semana.',
+    title: 'Nueva asignación en reunión',
+    body: 'Se te ha asignado {roles} para la semana del {rango}. Revisa los detalles.',
+    vars: ['roles', 'rango'],
+  },
+  {
+    id: 'solicitud_cuenta',
+    label: 'Solicitud de Cuenta',
+    desc: 'Se envía a Usuarios cuando alguien que fue eliminado previamente intenta volver a iniciar sesión.',
+    title: 'Solicitud de cuenta',
+    body: '{nombre} fue eliminado anteriormente e intentó iniciar sesión de nuevo. Acepta o deniega la solicitud para que pueda volver a acceder.',
+    vars: ['nombre'],
+  },
+];
+
+let _notifTemplatesCache = null;
+function getNotifTemplatesCached() {
+  if (_notifTemplatesCache) return _notifTemplatesCache;
+  try {
+    const raw = localStorage.getItem('fleming_notif_templates');
+    _notifTemplatesCache = raw ? JSON.parse(raw) : {};
+  } catch { _notifTemplatesCache = {}; }
+  return _notifTemplatesCache;
+}
+async function loadNotifTemplates() {
+  try {
+    const { data, error } = await sb.from('notif_templates').select('*');
+    if (error) throw error;
+    const overrides = {};
+    (data || []).forEach(row => { overrides[row.id] = { title: row.title, body: row.body }; });
+    _notifTemplatesCache = overrides;
+    localStorage.setItem('fleming_notif_templates', JSON.stringify(overrides));
+    return overrides;
+  } catch (e) {
+    // Tabla inexistente u otro error de red: usar lo cacheado localmente.
+    console.warn('No se pudieron cargar las plantillas de notificación:', e.message);
+    return getNotifTemplatesCached();
+  }
+}
+// Devuelve la plantilla activa (override si existe, si no el default) para un id dado.
+function getTemplate(id) {
+  const def = NOTIF_TEMPLATES_DEFAULT.find(t => t.id === id);
+  if (!def) return null;
+  const overrides = getNotifTemplatesCached();
+  const ov = overrides[id];
+  return {
+    ...def,
+    title: (ov && ov.title) ? ov.title : def.title,
+    body:  (ov && ov.body)  ? ov.body  : def.body,
+  };
+}
+// Reemplaza {variable} en un string con los valores entregados. Las variables
+// sin valor entregado se eliminan limpiamente (sin dejar "{x}" visible).
+function fillTemplateVars(str, vars) {
+  return (str || '').replace(/\{(\w+)\}/g, (m, key) => (vars && key in vars) ? (vars[key] ?? '') : '');
+}
+// Devuelve { title, body } ya con las variables reemplazadas, listo para insertar/enviar.
+function renderTemplate(id, vars) {
+  const t = getTemplate(id);
+  if (!t) return { title: '', body: '' };
+  return { title: fillTemplateVars(t.title, vars), body: fillTemplateVars(t.body, vars) };
+}
+async function saveNotifTemplate(id, title, body) {
+  const overrides = getNotifTemplatesCached();
+  overrides[id] = { title, body };
+  _notifTemplatesCache = overrides;
+  localStorage.setItem('fleming_notif_templates', JSON.stringify(overrides));
+  const { error } = await sb.from('notif_templates').upsert({ id, title, body });
+  if (error) console.warn('No se pudo guardar la plantilla en Supabase:', error.message);
+  return !error;
+}
+async function resetNotifTemplate(id) {
+  const overrides = getNotifTemplatesCached();
+  delete overrides[id];
+  _notifTemplatesCache = overrides;
+  localStorage.setItem('fleming_notif_templates', JSON.stringify(overrides));
+  const { error } = await sb.from('notif_templates').delete().eq('id', id);
+  if (error) console.warn('No se pudo restaurar la plantilla en Supabase:', error.message);
+  return !error;
 }
 
 function getLastSeenNotifTime() {
@@ -10898,8 +11326,12 @@ async function submitSugerirQuitado() {
   const sender = currentUser?.name || 'Usuario';
   const terStr = _npCurrentTerNum ? `Territorio ${_npCurrentTerNum}` : 'Territorio';
 
-  const title = `Sugerir Quitado – ${terStr}`;
-  const body = `${sender} sugiere quitar "${_npCurrentAddr}" de las direcciones No Pasar en ${terStr}${motivo ? `.\nMotivo: ${motivo}` : ' porque ya no califica.'}`;
+  const tpl = renderTemplate('sugerir_quitado', {
+    territorio: terStr, remitente: sender, direccion: _npCurrentAddr,
+    motivo: motivo ? `.\nMotivo: ${motivo}` : ' porque ya no califica.',
+  });
+  const title = tpl.title;
+  const body = tpl.body;
 
   const sendBtn = document.querySelector('.np-sugerir-send');
   if (sendBtn) { sendBtn.textContent = 'Enviando…'; sendBtn.disabled = true; }
@@ -10923,13 +11355,13 @@ async function submitSugerirCorreccion(type) {
   if (type === 'territorio') {
     const val = document.getElementById('np-correccion-territorio-val').value.trim();
     if (!val) { showToast('Indica el territorio correcto', 'error'); return; }
-    title = `Sugerir Corrección – Territorio equivocado (${terStr})`;
-    body = `${sender} sugiere que "${_npCurrentAddr}" en ${terStr} está en el territorio equivocado. Debería estar en: ${val}.`;
+    const tpl = renderTemplate('sugerir_correccion_territorio', { territorio: terStr, remitente: sender, direccion: _npCurrentAddr, valor: val });
+    title = tpl.title; body = tpl.body;
   } else if (type === 'nombre') {
     const val = document.getElementById('np-correccion-nombre-val').value.trim();
     if (!val) { showToast('Indica el nombre correcto', 'error'); return; }
-    title = `Sugerir Corrección – Nombre mal escrito (${terStr})`;
-    body = `${sender} sugiere corregir el nombre de "${_npCurrentAddr}" en ${terStr}. Nombre correcto: "${val}".`;
+    const tpl = renderTemplate('sugerir_correccion_nombre', { territorio: terStr, remitente: sender, direccion: _npCurrentAddr, valor: val });
+    title = tpl.title; body = tpl.body;
   } else return;
 
   const sendBtns = document.querySelectorAll('.np-correccion-send');
@@ -11505,8 +11937,9 @@ async function vmcNotifyNewAssignments(newWeek, prevWeek, range) {
     const isRole = (r) => ['Presidente','Oración de apertura','Oración de cierre'].includes(r);
     const formatRole = (r) => isRole(r) ? `el rol de "${r}"` : `la parte "${r}"`;
     const rolesText = roles.map(formatRole).join(' y ');
-    const title = 'Nueva asignación en reunión';
-    const body  = `Se te ha asignado ${rolesText} para la semana del ${range}. Revisa los detalles.`;
+    const tpl = renderTemplate('nueva_asignacion_reunion', { roles: rolesText, rango: range });
+    const title = tpl.title;
+    const body  = tpl.body;
     const target = [name.trim().toLowerCase()];
 
     try {
@@ -11905,8 +12338,9 @@ async function fsNotifyNewAssignments(newWeek, prevWeek, range) {
 
   for (const { name, roles } of toNotify) {
     const rolesText = roles.map(r => `el rol de "${r}"`).join(' y ');
-    const title = 'Nueva asignación en reunión';
-    const body  = `Se te ha asignado ${rolesText} para la semana del ${range}. Revisa los detalles.`;
+    const tpl = renderTemplate('nueva_asignacion_reunion', { roles: rolesText, rango: range });
+    const title = tpl.title;
+    const body  = tpl.body;
     const target = [name.trim().toLowerCase()];
 
     try {
