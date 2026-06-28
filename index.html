@@ -714,6 +714,41 @@
   .lightbox-close:hover { background: rgba(255,255,255,0.25); }
   .lightbox-close svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
 
+  /* ── Sugerir corrección de mapa (dentro del lightbox de Pantalla Completa) ── */
+  .lightbox-suggest-btn {
+    position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 7px;
+    padding: 0.65rem 1.2rem; border-radius: 999px; border: none; cursor: pointer;
+    background: rgba(255,255,255,0.14); color: #fff; backdrop-filter: blur(8px);
+    font-family: var(--font); font-size: 0.85rem; font-weight: 600;
+    transition: background 0.2s;
+  }
+  .lightbox-suggest-btn:hover { background: rgba(255,255,255,0.24); }
+  .lightbox-suggest-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .lightbox-correccion-form {
+    position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(12px);
+    width: min(420px, 88vw); background: var(--surface); border-radius: 16px;
+    padding: 1rem 1.1rem; box-shadow: 0 8px 40px rgba(0,0,0,0.45);
+    opacity: 0; pointer-events: none; transition: opacity 0.18s, transform 0.18s;
+    cursor: default;
+  }
+  .lightbox-correccion-form.open {
+    opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0);
+  }
+  .lightbox-correccion-form-label { font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 0.5rem; }
+  .lightbox-correccion-textarea {
+    width: 100%; min-height: 72px; resize: vertical; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--surface2); color: var(--text);
+    font-family: var(--font); font-size: 0.85rem; padding: 0.6rem 0.7rem; margin-bottom: 0.65rem;
+  }
+  .lightbox-correccion-actions { display: flex; gap: 8px; }
+  .lightbox-correccion-actions button {
+    flex: 1; padding: 0.55rem 0.7rem; border-radius: 9px; border: none; cursor: pointer;
+    font-family: var(--font); font-size: 0.82rem; font-weight: 600;
+  }
+  .lightbox-correccion-send  { background: var(--accent); color: #fff; }
+  .lightbox-correccion-cancel{ background: var(--surface3); color: var(--text); }
+
   /* ── Territory tabs in detail panel ─────────────────────────────────────── */
   .detail-ter-tabs {
     display: flex; gap: 0; margin: 0 1.25rem 0.75rem;
@@ -837,6 +872,13 @@
     cursor: pointer; transition: opacity 0.18s;
   }
   .np-sugerir-send:hover { opacity: 0.88; }
+  .np-fecha-send {
+    flex:1; padding: 0.65rem; border: none; border-radius: 10px;
+    background: var(--green); color: #fff;
+    font-family: var(--font); font-size: 0.88rem; font-weight: 700;
+    cursor: pointer; transition: opacity 0.18s;
+  }
+  .np-fecha-send:hover { opacity: 0.88; }
   .np-sugerir-cancel {
     padding: 0.65rem 0.9rem; border: none; border-radius: 10px;
     background: var(--surface3); color: var(--text2);
@@ -847,6 +889,7 @@
 
   /* ── Sugerir Corrección ────────────────────────────────────────────────────── */
   .np-action-btn-correccion .np-action-icon { background: rgba(59,130,246,0.12); color: var(--ter-2); }
+  .np-action-btn-fecha .np-action-icon { background: rgba(52,199,89,0.12); color: var(--green); }
   .np-correccion-form {
     display: none; flex-direction: column; gap: 0.6rem;
     padding: 0.9rem 1.25rem 0;
@@ -2296,8 +2339,7 @@
     white-space: nowrap;
   }
   .role-badge-admin     { background: rgba(0,122,255,0.12); color: var(--accent); border: 1px solid rgba(0,122,255,0.25); }
-  .role-badge-semiadmin { background: rgba(168,85,247,0.12); color: #a855f7;      border: 1px solid rgba(168,85,247,0.25); }
-  .role-badge-viewer    { background: var(--surface3);        color: var(--text3); border: 1px solid var(--border); }
+    .role-badge-viewer    { background: var(--surface3);        color: var(--text3); border: 1px solid var(--border); }
   .role-badge-dev       { background: rgba(255,149,0,0.12);   color: var(--orange); border: 1px solid rgba(255,149,0,0.35); }
 
   /* ── User Profile fullscreen page ── */
@@ -4556,6 +4598,18 @@
     <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
   </button>
   <img id="lightbox-img" src="" alt="Mapa del territorio">
+  <button class="lightbox-suggest-btn" id="lightbox-suggest-btn" style="display:none" onclick="event.stopPropagation();toggleMapCorreccionForm()">
+    <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    Sugerir corrección
+  </button>
+  <div class="lightbox-correccion-form" id="lightbox-correccion-form" onclick="event.stopPropagation()">
+    <div class="lightbox-correccion-form-label">¿Qué hay que corregir en este mapa?</div>
+    <textarea class="lightbox-correccion-textarea" id="lightbox-correccion-text" placeholder="Ej: El nombre de la calle está mal escrito, falta una manzana, la distribución no coincide…"></textarea>
+    <div class="lightbox-correccion-actions">
+      <button class="lightbox-correccion-send" onclick="submitMapCorreccion()">Enviar sugerencia</button>
+      <button class="lightbox-correccion-cancel" onclick="toggleMapCorreccionForm()">Cancelar</button>
+    </div>
+  </div>
 </div>
 
 <!-- Aseo del Salón: modo pantalla completa para proyección en TV -->
@@ -4706,7 +4760,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.30.1-alpha';
+const APP_VERSION = '0.30.2-alpha';
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -4722,7 +4776,7 @@ const PASS_DEV    = 'FlemingDEV2026.!!';
 
 let currentUser = null;
 let currentRole = 'viewer';
-// Caché de los permisos del usuario actual (solo relevante para admin/semiadmin).
+// Caché de los permisos del usuario actual (solo relevante para admin).
 // Se usa para decidir, sin async, si una notificación de tipo "usuarios_module" le corresponde.
 let _currentUserPermsCache = null;
 let assignments = [];
@@ -4854,9 +4908,24 @@ function clearSession() { localStorage.removeItem('fleming_user'); }
 
 async function init() {
   initTheme();
+  migrateSemiAdminsToAdmin(); // El cargo SemiAdmin fue eliminado: se promueve a Admin.
   const saved = loadSession();
-  if (saved) { currentUser = saved; currentRole = saved.role; enterApp(); }
+  if (saved) {
+    if (saved.role === 'semiadmin') { saved.role = 'admin'; }
+    currentUser = saved; currentRole = saved.role; enterApp();
+  }
   else { document.getElementById('auth-screen').style.display = 'flex'; }
+}
+
+// El cargo "SemiAdmin" fue eliminado de la plataforma (v0.30.2-alpha): ahora
+// solo existen Miembro (viewer), Admin y DEV. Cualquier usuario que todavía
+// tenga el rol 'semiadmin' guardado en Supabase pasa automáticamente a 'admin'.
+async function migrateSemiAdminsToAdmin() {
+  try {
+    await sb.from('platform_users').update({ role: 'admin' }).eq('role', 'semiadmin');
+  } catch (e) {
+    console.warn('No se pudo migrar usuarios SemiAdmin a Admin:', e.message);
+  }
 }
 
 // ── Push Notifications ───────────────────────────────────────────────────────
@@ -5111,8 +5180,8 @@ function clearGruposSearch() {
 let _currentGrupoId = null;
 
 function _canEditGrupoContent(g) {
-  // Admin/dev/semiadmin always can
-  if (['dev','admin','semiadmin'].includes(currentRole)) return true;
+  // Admin/dev always can
+  if (['dev','admin'].includes(currentRole)) return true;
   if (!g || !currentUser) return false;
   // Superintendent or Auxiliary of this group can also upload
   const me = g.miembros.find(m =>
@@ -5524,7 +5593,6 @@ async function renderProfilePage() {
   const roleMap = {
     dev:      { label:'DEV',           bg:'rgba(255,149,0,0.15)',  color:'#ff9500' },
     admin:    { label:'Administrador', bg:'var(--accent-light)',   color:'var(--accent)' },
-    semiadmin:{ label:'SemiAdmin',     bg:'rgba(168,85,247,0.12)', color:'#a855f7' },
     viewer:   { label:'Visitante',     bg:'var(--surface3)',       color:'var(--text3)' },
   };
   const rm = roleMap[currentRole] || roleMap.viewer;
@@ -5962,13 +6030,13 @@ async function enterApp() {
   refreshCurrentUserPermsCache();
 
   // Update UI based on final role
-  const roleLabelsMap = { dev:'DEV', admin:'Administrador', semiadmin:'SemiAdmin', viewer:'Visitante' };
+  const roleLabelsMap = { dev:'DEV', admin:'Administrador', viewer:'Visitante' };
   const roleEl = document.getElementById('dropdown-role');
   roleEl.textContent = roleLabelsMap[currentRole] || 'Visitante';
-  roleEl.style.color = currentRole === 'dev' ? 'var(--orange)' : currentRole === 'admin' ? 'var(--accent)' : currentRole === 'semiadmin' ? '#a855f7' : '';
+  roleEl.style.color = currentRole === 'dev' ? 'var(--orange)' : currentRole === 'admin' ? 'var(--accent)' : '';
 
   const adminBtn = document.getElementById('admin-dropdown-btn');
-  adminBtn.style.display = ['dev','admin','semiadmin'].includes(currentRole) ? '' : 'none';
+  adminBtn.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
   const flemingTab = document.getElementById('admin-section-tab-fleming');
   if (flemingTab) flemingTab.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
   const notifAdminTab = document.getElementById('admin-tab-notificaciones');
@@ -6018,13 +6086,8 @@ async function enterApp() {
   });
   startRolePolling();
 
-  // Show assigned task in dropdown for semiadmin
   const taskEl = document.getElementById('dropdown-task');
-  if (taskEl && currentRole === 'semiadmin') {
-    const { data: me } = await sb.from('platform_users').select('task').eq('name', currentUser.name).single();
-    if (me && me.task) { taskEl.textContent = me.task; taskEl.style.display = ''; }
-    else { taskEl.style.display = 'none'; }
-  } else if (taskEl) { taskEl.style.display = 'none'; }
+  if (taskEl) taskEl.style.display = 'none';
 
   showToast(`¡Hola, ${currentUser.name}!`, 'success');
   startNotifPolling();
@@ -6052,7 +6115,7 @@ async function doAccess() {
 
   if (btn) { btn.disabled = true; btn.textContent = 'Entrando…'; }
 
-  // If logging in as viewer, check Supabase for a semiadmin/admin promotion
+  // If logging in as viewer, check Supabase for an admin promotion
   // (or a 'pending' state, if this account is awaiting DEV/Admin approval).
   let role = baseRole;
   if (baseRole === 'viewer') {
@@ -6061,7 +6124,7 @@ async function doAccess() {
       .select('role')
       .ilike('name', fullName)
       .single();
-    if (stored && ['semiadmin','admin','pending'].includes(stored.role)) role = stored.role;
+    if (stored && ['admin','pending'].includes(stored.role)) role = stored.role;
   }
 
   if (btn) { btn.disabled = false; btn.textContent = 'Ingresar'; }
@@ -6312,7 +6375,7 @@ const VIEWER_SECTION_LABELS = {
   'aseo-salon':        'Aseo del Salón',
   'responsabilidades': 'Responsabilidades',
 };
-// Permission key for semiadmin module check
+// Permission key for admin module check
 const VIEWER_PERM_KEY = {
   'casa':              'assignments',
   'territorios':       'territories',
@@ -6324,7 +6387,7 @@ const VIEWER_PERM_KEY = {
 };
 
 async function updateAdminShortcuts() {
-  if (!currentUser || !['dev','admin','semiadmin'].includes(currentRole)) {
+  if (!currentUser || !['dev','admin'].includes(currentRole)) {
     // Hide all banners for viewers
     Object.keys(VIEWER_TO_ADMIN_TAB).forEach(sub => {
       const el = document.getElementById('admin-shortcut-' + sub);
@@ -6333,23 +6396,9 @@ async function updateAdminShortcuts() {
     return;
   }
 
-  let perms = null;
-  if (currentRole === 'semiadmin') {
-    perms = await getUserPermissions();
-  }
-
   Object.keys(VIEWER_TO_ADMIN_TAB).forEach(sub => {
     const el = document.getElementById('admin-shortcut-' + sub);
     if (!el) return;
-
-    // Check permission for semiadmin
-    if (currentRole === 'semiadmin') {
-      const permKey = VIEWER_PERM_KEY[sub];
-      if (permKey && !canAccessModule(perms, permKey)) {
-        el.style.display = 'none';
-        return;
-      }
-    }
 
     const adminTab = VIEWER_TO_ADMIN_TAB[sub];
     const label = VIEWER_SECTION_LABELS[sub];
@@ -6372,7 +6421,7 @@ async function goAdminShortcut(adminTab) {
 
 function showPage(name) {
   if (name === 'admin') {
-    if (!['dev','admin','semiadmin'].includes(currentRole)) {
+    if (!['dev','admin'].includes(currentRole)) {
       showToast('No tienes permisos para acceder a esta sección.', 'error');
       return;
     }
@@ -6416,15 +6465,6 @@ async function switchAdminTab(tab) {
     showToast('No tienes permisos para acceder a este módulo.', 'error');
     return;
   }
-  if (currentRole === 'semiadmin') {
-    const perms = await getUserPermissions();
-    const moduleMap = { assignments: 'assignments', territories: 'territories', conductores: 'conductores', casas: 'casas', grupos: 'grupos', responsabilidades: 'responsabilidades', 'aseo-salon': 'aseo_salon', vmc: 'vida_ministerio', 'fin-semana': 'fin_semana' };
-    const moduleKey = moduleMap[tab];
-    if (moduleKey && !canAccessModule(perms, moduleKey)) {
-      showToast('No tienes permisos para acceder a este módulo.', 'error');
-      return;
-    }
-  }
   document.querySelectorAll('.admin-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
   document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
   document.getElementById('admin-' + tab).classList.add('active');
@@ -6440,28 +6480,9 @@ async function switchAdminTab(tab) {
 }
 
 async function applyAdminTabPermissions() {
-  if (!['semiadmin'].includes(currentRole)) return;
-  const perms = await getUserPermissions();
-  if (!perms) return;
-  const permKeyMap = { assignments: 'assignments', territories: 'territories', conductores: 'conductores', casas: 'casas', grupos: 'grupos', responsabilidades: 'responsabilidades', 'aseo-salon': 'aseo_salon', vmc: 'vida_ministerio', 'fin-semana': 'fin_semana' };
-  let firstAllowed = null;
-  document.querySelectorAll('.admin-tab').forEach(btn => {
-    const tab = btn.dataset.tab;
-    if (tab === 'usuarios' || tab === 'notificaciones') { btn.style.opacity = '0.4'; btn.style.pointerEvents = 'none'; return; }
-    const key = permKeyMap[tab];
-    const allowed = canAccessModule(perms, key);
-    btn.style.opacity = allowed ? '' : '0.4';
-    btn.style.pointerEvents = allowed ? '' : 'none';
-    btn.title = allowed ? '' : 'Sin permiso para este módulo';
-    if (allowed && firstAllowed === null) firstAllowed = tab;
-  });
-  if (firstAllowed !== null) {
-    document.querySelectorAll('.admin-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === firstAllowed));
-    document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
-    document.getElementById('admin-' + firstAllowed).classList.add('active');
-    const section = ADMIN_TAB_SECTION[firstAllowed];
-    if (section) switchAdminSection(section, true);
-  }
+  // El cargo SemiAdmin fue eliminado: Admin ya tiene acceso completo a todos los
+  // módulos, por lo que ya no se necesita restringir tabs por permisos.
+  return;
 }
 
 // ── Mantener los datos frescos en sesiones largas ────────────────────────────
@@ -6698,7 +6719,7 @@ function viewAssignment(id) {
     if (terMapSrc) {
       mapImg.src = terMapSrc;
       mapWrap.style.display = '';
-      mapWrap.onclick = () => openLightbox(terMapSrc);
+      mapWrap.onclick = () => openLightbox(terMapSrc, ter ? `Territorio ${ter.number}` : '');
     } else {
       mapWrap.style.display = 'none';
       mapWrap.onclick = null;
@@ -6718,7 +6739,7 @@ function _renderDetailTerContent(ter) {
   if (terMapSrc) {
     mapImg.src = terMapSrc;
     mapWrap.style.display = '';
-    mapWrap.onclick = () => openLightbox(terMapSrc);
+    mapWrap.onclick = () => openLightbox(terMapSrc, ter ? `Territorio ${ter.number}` : '');
   } else {
     mapWrap.style.display = 'none';
     mapWrap.onclick = null;
@@ -6733,7 +6754,7 @@ function _renderDetailNoPasar(ter) {
     const entries = parseNoPasar(ter.no_pasar);
     if (entries.length) {
       noPasarList.innerHTML = entries.map(e => `
-        <div class="no-pasar-item" onclick="openNpActionSheet('${e.addr.replace(/'/g,"\\'")}','${ter ? ter.number : ''}')">
+        <div class="no-pasar-item" onclick="openNpActionSheet('${e.addr.replace(/'/g,"\\'")}','${ter ? ter.number : ''}',${e.date ? 'true' : 'false'})">
           <span class="no-pasar-item-addr">${e.addr}</span>
           ${e.date ? `<span class="no-pasar-item-date">${fmtNpDate(e.date)}</span>` : ''}
         </div>`).join('');
@@ -6780,7 +6801,7 @@ async function submitSuggestNp() {
   const sendBtn = document.querySelector('.suggest-np-send');
   sendBtn.textContent = 'Enviando…'; sendBtn.disabled = true;
 
-  const { error } = await sb.from('notifications').insert({ title, body, notif_category: 'casa' });
+  const { error } = await sb.from('notifications').insert({ title, body, notif_category: 'casa', dev_only: true });
 
   sendBtn.textContent = 'Enviar sugerencia'; sendBtn.disabled = false;
 
@@ -6915,7 +6936,7 @@ function renderAdminTerritories() {
 }
 
 function openAssignmentModal(a) {
-  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   editingAssignmentId = a ? a.id : null;
   document.getElementById('assignment-modal-title').textContent = a ? 'Editar Asignación' : 'Nueva Asignación';
   document.getElementById('as-date').value = a?.date || '';
@@ -6945,11 +6966,7 @@ function openAssignmentModal(a) {
 function closeAssignmentModal() { document.getElementById('assignment-modal').classList.remove('open'); editingAssignmentId = null; }
 function editAssignment(id) { openAssignmentModal(assignments.find(a=>a.id===id)); }
 async function saveAssignment() {
-  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
-  if (currentRole === 'semiadmin') {
-    const perms = await getUserPermissions();
-    if (!canAccessModule(perms, 'assignments')) { showToast('No tienes permiso para gestionar Asignaciones.','error'); return; }
-  }
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   const conductorId = document.getElementById('as-conductor-select').value || null;
   const casaId = document.getElementById('as-casa-select').value || null;
   const conductor = conductorId ? conductores.find(c=>c.id===conductorId) : null;
@@ -7070,7 +7087,7 @@ async function saveAssignment() {
   renderAdminAssignments();
 }
 async function deleteAssignment(id) {
-  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   if (!confirm('¿Eliminar esta asignación?')) return;
   const {error} = await sb.from('assignments').delete().eq('id',id);
   if (error) { showToast('Error al eliminar','error'); return; }
@@ -7112,14 +7129,7 @@ function wbMondayOf(dateStr) {
 }
 
 function openWeekBuilder() {
-  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
-  if (currentRole === 'semiadmin') {
-    getUserPermissions().then(perms => {
-      if (!canAccessModule(perms, 'assignments')) { showToast('No tienes permiso para gestionar Asignaciones.','error'); return; }
-      wbInit();
-    });
-    return;
-  }
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   wbInit();
 }
 function wbInit() {
@@ -7495,11 +7505,7 @@ function wbRenderDays() {
 }
 
 async function saveWeekBuilder() {
-  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
-  if (currentRole === 'semiadmin') {
-    const perms = await getUserPermissions();
-    if (!canAccessModule(perms, 'assignments')) { showToast('No tienes permiso para gestionar Asignaciones.','error'); return; }
-  }
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
 
   const payloads = [];
   for (const day of wbDays) {
@@ -7537,7 +7543,7 @@ async function saveWeekBuilder() {
 }
 
 function openTerritoryModal(t) {
-  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   editingTerritoryId = t ? t.id : null;
   document.getElementById('ter-modal-title').textContent = t ? 'Editar Territorio' : 'Nuevo Territorio';
   document.getElementById('ter-num').value = t?.number || '';
@@ -7678,11 +7684,7 @@ function addNoPasarInput(addr = '', date = '') {
   document.getElementById('no-pasar-inputs').appendChild(div);
 }
 async function saveTerritory() {
-  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
-  if (currentRole === 'semiadmin') {
-    const perms = await getUserPermissions();
-    if (!canAccessModule(perms, 'territories')) { showToast('No tienes permiso para gestionar Territorios.','error'); return; }
-  }
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   const number = parseInt(document.getElementById('ter-num').value);
   if (!number) { showError('ter-error','El número de territorio es requerido'); return; }
   // Collect no_pasar as array of {addr, date} objects
@@ -7710,7 +7712,7 @@ async function saveTerritory() {
   await loadSchedule();
 }
 async function deleteTerritory(id) {
-  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   if (!confirm('¿Eliminar este territorio?')) return;
   const {error} = await sb.from('territories').delete().eq('id',id);
   if (error) { showToast('Error al eliminar','error'); return; }
@@ -7740,7 +7742,7 @@ function renderAdminConductores() {
 }
 
 function openConductorModal(c) {
-  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   editingConductorId = c ? c.id : null;
   document.getElementById('cond-modal-title').textContent = c ? 'Editar Conductor' : 'Nuevo Conductor';
   document.getElementById('cond-nombre').value = c?.nombre || '';
@@ -7752,7 +7754,7 @@ function openConductorModal(c) {
 function closeConductorModal() { document.getElementById('conductor-modal').classList.remove('open'); editingConductorId = null; }
 function editConductor(id) { openConductorModal(conductores.find(c=>c.id===id)); }
 async function saveConductor() {
-  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   const nombre = document.getElementById('cond-nombre').value.trim();
   const apellido = document.getElementById('cond-apellido').value.trim();
   const telefono = document.getElementById('cond-telefono').value.trim();
@@ -7771,7 +7773,7 @@ async function saveConductor() {
   renderAdminConductores();
 }
 async function deleteConductor(id) {
-  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   if (!confirm('¿Eliminar este conductor?')) return;
   const {error} = await sb.from('conductores').delete().eq('id',id);
   if (error) { showToast('Error al eliminar','error'); return; }
@@ -7835,7 +7837,7 @@ function renderAdminHermanos() {
 }
 
 function openHermanoModal(h) {
-  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   editingHermanoId = h ? h.id : null;
   document.getElementById('herm-modal-title').textContent = h ? 'Editar Hermano' : 'Nuevo Hermano';
   document.getElementById('herm-nombre').value = h?.nombre || '';
@@ -7845,7 +7847,7 @@ function openHermanoModal(h) {
 function closeHermanoModal() { document.getElementById('hermano-modal').classList.remove('open'); editingHermanoId = null; }
 function editHermano(id) { openHermanoModal(hermanos.find(h=>h.id===id)); }
 async function saveHermano() {
-  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   const nombre = document.getElementById('herm-nombre').value.trim();
   if (!nombre) { showError('herm-error','El nombre es requerido'); return; }
   const btn = document.getElementById('save-herm-btn');
@@ -7862,7 +7864,7 @@ async function saveHermano() {
   renderAdminHermanos();
 }
 async function deleteHermano(id) {
-  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   if (!confirm('¿Eliminar este hermano de la lista? (no se borran sus asignaciones pasadas)')) return;
   const {error} = await sb.from('hermanos').delete().eq('id',id);
   if (error) { showToast('Error al eliminar','error'); return; }
@@ -8006,11 +8008,7 @@ function renderRespCargosForm(dateStr) {
 function capitalizar(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
 async function saveResponsabilidadesAsignacion() {
-  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
-  if (currentRole === 'semiadmin') {
-    const perms = await getUserPermissions();
-    if (!canAccessModule(perms, 'responsabilidades')) { showToast('No tienes permiso para gestionar Responsabilidades.','error'); return; }
-  }
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   const dateStr = document.getElementById('resp-asignar-fecha').value;
   if (!dateStr) return;
   const existing = responsabilidades.filter(r => r.fecha === dateStr);
@@ -8125,7 +8123,7 @@ function editRespDate(dateStr) {
 }
 
 async function deleteRespDate(dateStr, isPast) {
-  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   if (!confirm(`¿Eliminar toda la asignación del ${respDiaLabel(dateStr)}?`)) return;
   const {error} = await sb.from('responsabilidades').delete().eq('fecha', dateStr);
   if (error) { showToast('Error al eliminar','error'); return; }
@@ -8322,11 +8320,7 @@ function renderAseoMatchBadge() {
 }
 
 async function saveAseoSalonAsignacion() {
-  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
-  if (currentRole === 'semiadmin') {
-    const perms = await getUserPermissions();
-    if (!canAccessModule(perms, 'aseo_salon')) { showToast('No tienes permiso para gestionar Aseo del Salón.','error'); return; }
-  }
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   const dateStr = document.getElementById('aseo-asignar-fecha').value;
   if (!dateStr) return;
 
@@ -8428,7 +8422,7 @@ function editAseoDate(dateStr) {
 }
 
 async function deleteAseoDate(dateStr, isPast) {
-  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   if (!confirm(`¿Eliminar la asignación de aseo del ${respDiaLabel(dateStr)}?`)) return;
   const { error } = await sb.from('aseo_salon').delete().eq('fecha', dateStr);
   if (error) { showToast('Error al eliminar','error'); return; }
@@ -8907,7 +8901,7 @@ function isCasaAvailableOnDate(casa, dateStr) {
   return dias.includes(dayKey);
 }
 function openCasaModal(h) {
-  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   editingCasaId = h ? h.id : null;
   document.getElementById('casa-modal-title').textContent = h ? 'Editar Casa' : 'Nueva Casa';
   document.getElementById('casa-direccion').value = h?.direccion || '';
@@ -8920,11 +8914,7 @@ function openCasaModal(h) {
 function closeCasaModal() { document.getElementById('casa-modal').classList.remove('open'); editingCasaId = null; }
 function editCasa(id) { openCasaModal(casas.find(h=>h.id===id)); }
 async function saveCasa() {
-  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
-  if (currentRole === 'semiadmin') {
-    const perms = await getUserPermissions();
-    if (!canAccessModule(perms, 'casas')) { showToast('No tienes permiso para gestionar Casas.','error'); return; }
-  }
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   const direccion = document.getElementById('casa-direccion').value.trim();
   const amo = document.getElementById('casa-amo').value.trim();
   const tipo = document.getElementById('casa-tipo').value;
@@ -8945,7 +8935,7 @@ async function saveCasa() {
   renderAdminCasas();
 }
 async function deleteCasa(id) {
-  if (!['dev','admin','semiadmin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   if (!confirm('¿Eliminar esta casa?')) return;
   const {error} = await sb.from('casas').delete().eq('id',id);
   if (error) { showToast('Error al eliminar','error'); return; }
@@ -9002,8 +8992,7 @@ function parsePermissions(raw) {
 
 // Check if current user can edit permissions of a target user
 function canEditPermissions(targetRole) {
-  if (currentRole === 'dev') return true;       // DEV can edit admin + semiadmin
-  if (currentRole === 'admin' && targetRole === 'semiadmin') return true; // Admin only edits semiadmin
+  if (currentRole === 'dev') return true;       // DEV can edit admin
   return false;
 }
 
@@ -9056,7 +9045,7 @@ function openUserProfilePage(uid) {
   })() : '—';
   const joinedStr = u.joined_at ? new Date(u.joined_at).toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'}) : '—';
 
-  const ROLE_LABELS_ES = { dev:'DEV', viewer:'Visitante', semiadmin:'SemiAdmin', admin:'Administrador', pending:'Pendiente' };
+  const ROLE_LABELS_ES = { dev:'DEV', viewer:'Visitante', admin:'Administrador', pending:'Pendiente' };
   const roleLabel = ROLE_LABELS_ES[u.role] || u.role;
   const perms = parsePermissions(u.permissions);
   const uLabels = parseLabels(u.labels);
@@ -9088,11 +9077,9 @@ function openUserProfilePage(uid) {
   let roleOptions = '';
   if (isDev) {
     roleOptions = `<option value="viewer" ${u.role==='viewer'?'selected':''}>Visitante</option>
-      <option value="semiadmin" ${u.role==='semiadmin'?'selected':''}>SemiAdmin</option>
       <option value="admin" ${u.role==='admin'?'selected':''}>Administrador</option>`;
   } else {
-    roleOptions = `<option value="viewer" ${u.role==='viewer'?'selected':''}>Visitante</option>
-      <option value="semiadmin" ${u.role==='semiadmin'?'selected':''}>SemiAdmin</option>`;
+    roleOptions = `<option value="viewer" ${u.role==='viewer'?'selected':''}>Visitante</option>`;
   }
 
   const pendingActionsHTML = `
@@ -9122,31 +9109,7 @@ function openUserProfilePage(uid) {
           <textarea class="task-textarea" id="uprof-task" placeholder="Ej: Encargado de territorios…">${u.task||''}</textarea>
         </div>
 
-        ${(u.role === 'semiadmin' || u.role === 'admin') ? `
-        <div style="margin-top:0.9rem">
-          <div class="form-label2" style="margin-bottom:6px">Módulos permitidos</div>
-          <div class="perms-grid" id="uprof-perms-grid-${u.id}">
-            ${(() => {
-              const groups = [
-                    { key: 'predicacion', label: 'Predicación' },
-                    { key: 'reuniones',   label: 'Reuniones' },
-                    { key: 'sistema',     label: 'Sistema' },
-                  ];
-              return groups.map(g => {
-                const mods = PERM_MODULES.filter(m => m.group === g.key);
-                if (!mods.length) return '';
-                return `<div class="perms-group-label">${g.label}</div>
-                <div class="perms-group-grid">
-                  ${mods.map(m => `
-                    <div class="perm-toggle${perms[m.key] ? ' active' : ''}" onclick="togglePerm('${u.id}','${m.key}');renderUserProfilePerms('${u.id}')" id="perm-${u.id}-${m.key}">
-                      <span class="perm-toggle-label">${m.icon}${m.label}</span>
-                      <span class="perm-check"><svg viewBox="0 0 12 10"><polyline points="1 5 4.5 8.5 11 1"/></svg></span>
-                    </div>`).join('')}
-                </div>`;
-              }).join('');
-            })()}
-          </div>
-        </div>` : ''}
+        </div>
 
         <div style="margin-top:0.9rem">
           <div class="form-label2" style="margin-bottom:6px">Etiquetas</div>
@@ -9312,7 +9275,7 @@ function userColor(name) {
 }
 function userInitials(name) { return name.trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
 
-const ROLE_LABELS = { dev:'DEV', viewer:'Visitante', semiadmin:'SemiAdmin', admin:'Administrador', pending:'Pendiente' };
+const ROLE_LABELS = { dev:'DEV', viewer:'Visitante', admin:'Administrador', pending:'Pendiente' };
 
 function renderUsersPanel() {
   const body = document.getElementById('users-panel-body');
@@ -9327,7 +9290,7 @@ function renderUsersPanel() {
     return;
   }
 
-  const roleOrder = { dev: 0, admin: 1, semiadmin: 2, pending: 3, viewer: 4 };
+  const roleOrder = { dev: 0, admin: 1, pending: 2, viewer: 3 };
   // El usuario DEV nunca aparece en la lista de usuarios
   const sorted = [...activeUsers].filter(u => u.role !== 'dev').sort((a,b) => (roleOrder[a.role]??5) - (roleOrder[b.role]??5));
 
@@ -9336,21 +9299,20 @@ function renderUsersPanel() {
     const m = u.last_seen ? Math.round((new Date() - new Date(u.last_seen)) / 60000) : 9999;
     return m < 10;
   }).length;
-  const byRole = { dev:0, admin:0, semiadmin:0, viewer:0, pending:0 };
+  const byRole = { dev:0, admin:0, viewer:0, pending:0 };
   sorted.forEach(u => { if (byRole[u.role] !== undefined) byRole[u.role]++; else byRole.viewer++; });
 
   const stats = `<div class="users-stats-strip">
     <div class="users-stat-chip"><span class="users-stat-chip-dot" style="background:var(--green)"></span>${onlineCount} en línea</div>
     ${byRole.pending ? `<div class="users-stat-chip"><span class="users-stat-chip-dot" style="background:var(--orange)"></span>${byRole.pending} pendiente${byRole.pending!==1?'s':''}</div>` : ''}
     ${byRole.admin ? `<div class="users-stat-chip"><span class="users-stat-chip-dot" style="background:var(--accent)"></span>${byRole.admin} admin</div>` : ''}
-    ${byRole.semiadmin ? `<div class="users-stat-chip"><span class="users-stat-chip-dot" style="background:#a855f7"></span>${byRole.semiadmin} semiadmin</div>` : ''}
     <div class="users-stat-chip"><span class="users-stat-chip-dot" style="background:var(--surface3)"></span>${byRole.viewer} visitante${byRole.viewer!==1?'s':''}</div>
   </div>`;
 
   const cards = sorted.map(u => {
     const col = userColor(u.name);
     const inits = userInitials(u.name);
-    const roleBadgeCls = u.role === 'dev' ? 'role-badge-dev' : u.role === 'admin' ? 'role-badge-admin' : u.role === 'semiadmin' ? 'role-badge-semiadmin' : u.role === 'pending' ? 'role-badge-viewer' : 'role-badge-viewer';
+    const roleBadgeCls = u.role === 'dev' ? 'role-badge-dev' : u.role === 'admin' ? 'role-badge-admin' : u.role === 'pending' ? 'role-badge-viewer' : 'role-badge-viewer';
     const roleLabel = ROLE_LABELS[u.role] || u.role;
     const lastActive = u.last_seen || u.joined_at;
     const minutesAgo = lastActive ? Math.round((new Date() - new Date(lastActive)) / 60000) : 9999;
@@ -9491,10 +9453,7 @@ async function revokeUser(uid) {
 // ── Permission check helper used elsewhere ────────────────────────────────────
 async function getUserPermissions() {
   if (['dev','admin'].includes(currentRole)) return null; // full access
-  if (currentRole !== 'semiadmin') return null;
-  const { data } = await sb.from('platform_users').select('permissions').eq('name', currentUser.name).single();
-  if (!data) return null;
-  return parsePermissions(data.permissions);
+  return null;
 }
 
 // Indica si el admin actual tiene activado el módulo "Usuarios" (recibe
@@ -9503,7 +9462,7 @@ async function getUserPermissions() {
 // ya que "usuarios" es el único módulo restringible para ese rol.
 async function refreshCurrentUserPermsCache() {
   if (currentRole === 'dev') { _currentUserPermsCache = { usuarios: true }; return; }
-  if (currentRole !== 'admin' && currentRole !== 'semiadmin') { _currentUserPermsCache = null; return; }
+  if (currentRole !== 'admin') { _currentUserPermsCache = null; return; }
   try {
     const { data } = await sb.from('platform_users').select('permissions').ilike('name', currentUser.name).single();
     _currentUserPermsCache = data ? parsePermissions(data.permissions) : parsePermissions(null);
@@ -9642,7 +9601,7 @@ async function syncRoleFromServer() {
       .single();
     if (!data) return;
     // Mantener el caché de permisos al día (usado para notificaciones del módulo "Usuarios").
-    if (['admin','semiadmin'].includes(currentRole)) {
+    if (['admin'].includes(currentRole)) {
       _currentUserPermsCache = parsePermissions(data.permissions);
     }
     if (data.role !== currentRole) {
@@ -9651,15 +9610,15 @@ async function syncRoleFromServer() {
       currentUser.role = data.role;
       saveSession(currentUser);
       // Update dropdown role label
-      const roleLabelsMap = { dev:'DEV', admin:'Administrador', semiadmin:'SemiAdmin', viewer:'Visitante' };
+      const roleLabelsMap = { dev:'DEV', admin:'Administrador', viewer:'Visitante' };
       const roleEl = document.getElementById('dropdown-role');
       if (roleEl) {
         roleEl.textContent = roleLabelsMap[currentRole] || 'Visitante';
-        roleEl.style.color = currentRole === 'dev' ? 'var(--orange)' : currentRole === 'admin' ? 'var(--accent)' : currentRole === 'semiadmin' ? '#a855f7' : '';
+        roleEl.style.color = currentRole === 'dev' ? 'var(--orange)' : currentRole === 'admin' ? 'var(--accent)' : '';
       }
       // Show/hide admin buttons
       const adminBtn = document.getElementById('admin-dropdown-btn');
-      if (adminBtn) adminBtn.style.display = ['dev','admin','semiadmin'].includes(currentRole) ? '' : 'none';
+      if (adminBtn) adminBtn.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
       const flemingTab = document.getElementById('admin-section-tab-fleming');
       if (flemingTab) flemingTab.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
       const notifAdminTab = document.getElementById('admin-tab-notificaciones');
@@ -9676,7 +9635,7 @@ async function syncRoleFromServer() {
       }
       // If user was on admin page and lost access, kick them out
       const adminPage = document.getElementById('page-admin');
-      if (adminPage && adminPage.classList.contains('active') && !['dev','admin','semiadmin'].includes(currentRole)) {
+      if (adminPage && adminPage.classList.contains('active') && !['dev','admin'].includes(currentRole)) {
         showPage('schedule');
         showToast('Tu acceso fue modificado por un administrador.', 'error');
       } else if (prevRole !== currentRole) {
@@ -9745,7 +9704,7 @@ function viewTerritory(id) {
   if (terMapSrc) {
     mapImg.src = terMapSrc;
     mapWrap.style.display = '';
-    mapWrap.onclick = () => openLightbox(terMapSrc);
+    mapWrap.onclick = () => openLightbox(terMapSrc, `Territorio ${t.number}`);
   } else {
     mapWrap.style.display = 'none';
     mapWrap.onclick = null;
@@ -9756,7 +9715,7 @@ function viewTerritory(id) {
   const noPasarList = document.getElementById('detail-no-pasar-list');
   if (noPasar.length) {
     noPasarList.innerHTML = noPasar.map(e => `
-      <div class="no-pasar-item" onclick="openNpActionSheet('${e.addr.replace(/'/g,"\\'")}','${t.number}')">
+      <div class="no-pasar-item" onclick="openNpActionSheet('${e.addr.replace(/'/g,"\\'")}','${t.number}',${e.date ? 'true' : 'false'})">
         <span class="no-pasar-item-addr">${e.addr}</span>
         ${e.date ? `<span class="no-pasar-item-date">${fmtNpDate(e.date)}</span>` : ''}
       </div>`).join('');
@@ -9779,14 +9738,49 @@ function showToast(msg, type='') {
   t.className = 'toast ' + type; t.textContent = msg;
   wrap.appendChild(t); setTimeout(() => t.remove(), 3200);
 }
-function openLightbox(src) {
+let _lightboxTerLabel = '';
+function openLightbox(src, terLabel) {
   document.getElementById('lightbox-img').src = src;
   document.getElementById('img-lightbox').classList.add('open');
   document.body.style.overflow = 'hidden';
+  _lightboxTerLabel = terLabel || '';
+  const btn = document.getElementById('lightbox-suggest-btn');
+  if (btn) btn.style.display = _lightboxTerLabel ? '' : 'none';
+  document.getElementById('lightbox-correccion-form')?.classList.remove('open');
+  const ta = document.getElementById('lightbox-correccion-text');
+  if (ta) ta.value = '';
 }
 function closeLightbox() {
   document.getElementById('img-lightbox').classList.remove('open');
   document.body.style.overflow = '';
+  document.getElementById('lightbox-correccion-form')?.classList.remove('open');
+}
+
+// ── Sugerir Corrección de Mapa (desde el modo Pantalla Completa) ────────────
+function toggleMapCorreccionForm() {
+  const form = document.getElementById('lightbox-correccion-form');
+  const isOpen = form.classList.toggle('open');
+  if (isOpen) setTimeout(() => document.getElementById('lightbox-correccion-text')?.focus(), 80);
+}
+async function submitMapCorreccion() {
+  const detalle = document.getElementById('lightbox-correccion-text').value.trim();
+  if (!detalle) { showToast('Describe el error antes de enviar.', 'error'); return; }
+  const sender = currentUser?.name || 'Usuario';
+  const terStr = _lightboxTerLabel || 'Territorio';
+
+  const tpl = renderTemplate('sugerir_correccion_mapa', { territorio: terStr, remitente: sender, detalle });
+
+  const sendBtn = document.querySelector('.lightbox-correccion-send');
+  if (sendBtn) { sendBtn.textContent = 'Enviando…'; sendBtn.disabled = true; }
+
+  const { error } = await sb.from('notifications').insert({ title: tpl.title, body: tpl.body, notif_category: 'casa', dev_only: true });
+
+  if (sendBtn) { sendBtn.textContent = 'Enviar sugerencia'; sendBtn.disabled = false; }
+
+  if (error) { showToast('Error al enviar', 'error'); return; }
+
+  showToast('Sugerencia enviada al DEV ✓', 'success');
+  toggleMapCorreccionForm();
 }
 
 function toggleOptionsMenu() { document.getElementById('options-dropdown').classList.toggle('open'); }
@@ -10284,7 +10278,7 @@ function syncAdminDropdown() {
   if (adminAvatar) adminAvatar.textContent = initials;
   if (adminName)   adminName.textContent = currentUser ? currentUser.name : '—';
   if (adminRole) {
-    const roleLabelsMap = { dev:'DEV', admin:'Administrador', semiadmin:'SemiAdmin', viewer:'Visitante' };
+    const roleLabelsMap = { dev:'DEV', admin:'Administrador', viewer:'Visitante' };
     adminRole.textContent = roleLabelsMap[currentRole] || 'Visitante';
   }
   const flemingTab = document.getElementById('admin-section-tab-fleming');
@@ -10790,11 +10784,19 @@ const NOTIF_TEMPLATES_DEFAULT = [
     vars: ['territorio', 'remitente', 'direccion', 'valor'],
   },
   {
-    id: 'sugerir_correccion_nombre',
-    label: 'Sugerir Corrección — Nombre mal escrito',
-    desc: 'Se envía al DEV cuando alguien sugiere corregir el nombre escrito de una dirección.',
-    title: 'Sugerir Corrección – Nombre mal escrito ({territorio})',
-    body: '{remitente} sugiere corregir el nombre de "{direccion}" en {territorio}. Nombre correcto: "{valor}".',
+    id: 'sugerir_correccion_mapa',
+    label: 'Sugerir Corrección — Mapa de Territorio',
+    desc: 'Se envía al DEV cuando alguien sugiere una corrección en el mapa PNG de un territorio (calle, manzana o distribución).',
+    title: 'Sugerir Corrección de Mapa – {territorio}',
+    body: '{remitente} sugiere una corrección en el mapa de {territorio}: {detalle}',
+    vars: ['territorio', 'remitente', 'detalle'],
+  },
+  {
+    id: 'sugerir_fecha_no_pasar',
+    label: 'Sugerir Fecha — No Pasar',
+    desc: 'Se envía al DEV cuando alguien sugiere una fecha para una dirección No Pasar que no tiene este campo.',
+    title: 'Sugerir Fecha – {territorio}',
+    body: '{remitente} sugiere la fecha {valor} para "{direccion}" en {territorio}.',
     vars: ['territorio', 'remitente', 'direccion', 'valor'],
   },
   {
@@ -11247,7 +11249,7 @@ async function deleteAllNotifications() {
 let _npCurrentAddr = '';
 let _npCurrentTerNum = '';
 
-function openNpActionSheet(addr, terNum) {
+function openNpActionSheet(addr, terNum, hasDate) {
   _npCurrentAddr = addr;
   _npCurrentTerNum = terNum;
   document.getElementById('np-action-addr').textContent = addr;
@@ -11265,6 +11267,15 @@ function openNpActionSheet(addr, terNum) {
   const ci2 = document.getElementById('np-correccion-nombre-val');
   if (ci1) ci1.value = '';
   if (ci2) ci2.value = '';
+  // Reset/mostrar sugerir fecha — solo si la dirección no tiene fecha aún
+  const fechaBtn = document.getElementById('np-action-btn-fecha');
+  const fechaDivider = document.getElementById('np-fecha-divider');
+  if (fechaBtn) fechaBtn.style.display = hasDate ? 'none' : '';
+  if (fechaDivider) fechaDivider.style.display = hasDate ? 'none' : '';
+  const fform = document.getElementById('np-fecha-form');
+  if (fform) fform.classList.remove('open');
+  const fi = document.getElementById('np-fecha-val');
+  if (fi) fi.value = '';
   document.getElementById('np-action-overlay').classList.add('open');
 }
 
@@ -11277,6 +11288,8 @@ function closeNpActionSheet() {
   const cform = document.getElementById('np-correccion-form');
   if (cform) cform.classList.remove('open');
   selectNpCorreccionReason(null);
+  const fform = document.getElementById('np-fecha-form');
+  if (fform) fform.classList.remove('open');
 }
 
 function handleNpOverlayClick(e) {
@@ -11287,8 +11300,9 @@ function toggleNpSugerirForm() {
   const form = document.getElementById('np-sugerir-form');
   const isOpen = form.classList.toggle('open');
   if (isOpen) {
-    // Close corrección form if open
+    // Close corrección/fecha forms if open
     document.getElementById('np-correccion-form').classList.remove('open');
+    document.getElementById('np-fecha-form')?.classList.remove('open');
     setTimeout(() => document.getElementById('np-sugerir-motivo')?.focus(), 80);
   }
 }
@@ -11297,10 +11311,22 @@ function toggleNpCorreccionForm() {
   const form = document.getElementById('np-correccion-form');
   const isOpen = form.classList.toggle('open');
   if (isOpen) {
-    // Close quitado form if open
+    // Close quitado/fecha forms if open
     document.getElementById('np-sugerir-form').classList.remove('open');
+    document.getElementById('np-fecha-form')?.classList.remove('open');
     // Reset reason selection
     selectNpCorreccionReason(null);
+  }
+}
+
+function toggleNpFechaForm() {
+  const form = document.getElementById('np-fecha-form');
+  const isOpen = form.classList.toggle('open');
+  if (isOpen) {
+    // Close quitado/corrección forms if open
+    document.getElementById('np-sugerir-form').classList.remove('open');
+    document.getElementById('np-correccion-form').classList.remove('open');
+    setTimeout(() => document.getElementById('np-fecha-val')?.focus(), 80);
   }
 }
 
@@ -11336,7 +11362,7 @@ async function submitSugerirQuitado() {
   const sendBtn = document.querySelector('.np-sugerir-send');
   if (sendBtn) { sendBtn.textContent = 'Enviando…'; sendBtn.disabled = true; }
 
-  const { error } = await sb.from('notifications').insert({ title, body, notif_category: 'casa' });
+  const { error } = await sb.from('notifications').insert({ title, body, notif_category: 'casa', dev_only: true });
 
   if (sendBtn) { sendBtn.textContent = 'Enviar sugerencia'; sendBtn.disabled = false; }
 
@@ -11367,9 +11393,35 @@ async function submitSugerirCorreccion(type) {
   const sendBtns = document.querySelectorAll('.np-correccion-send');
   sendBtns.forEach(b => { b.textContent = 'Enviando…'; b.disabled = true; });
 
-  const { error } = await sb.from('notifications').insert({ title, body, notif_category: 'casa' });
+  const { error } = await sb.from('notifications').insert({ title, body, notif_category: 'casa', dev_only: true });
 
   sendBtns.forEach(b => { b.textContent = 'Enviar sugerencia'; b.disabled = false; });
+
+  if (error) { showToast('Error al enviar', 'error'); return; }
+
+  showToast('Sugerencia enviada al DEV ✓', 'success');
+  closeNpActionSheet();
+}
+
+// ── Sugerir Fecha ──────────────────────────────────────────────────────────────
+async function submitSugerirFecha() {
+  const val = document.getElementById('np-fecha-val').value;
+  if (!val) { showToast('Selecciona una fecha', 'error'); return; }
+  const sender = currentUser?.name || 'Usuario';
+  const terStr = _npCurrentTerNum ? `Territorio ${_npCurrentTerNum}` : 'Territorio';
+
+  const tpl = renderTemplate('sugerir_fecha_no_pasar', {
+    territorio: terStr, remitente: sender, direccion: _npCurrentAddr, valor: fmtNpDate(val),
+  });
+  const title = tpl.title;
+  const body = tpl.body;
+
+  const sendBtn = document.querySelector('.np-fecha-send');
+  if (sendBtn) { sendBtn.textContent = 'Enviando…'; sendBtn.disabled = true; }
+
+  const { error } = await sb.from('notifications').insert({ title, body, notif_category: 'casa', dev_only: true });
+
+  if (sendBtn) { sendBtn.textContent = 'Enviar sugerencia'; sendBtn.disabled = false; }
 
   if (error) { showToast('Error al enviar', 'error'); return; }
 
@@ -12783,6 +12835,23 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
           <button class="np-correccion-send" onclick="submitSugerirCorreccion('nombre')">Enviar sugerencia</button>
           <button class="np-sugerir-cancel" onclick="selectNpCorreccionReason(null)">Cancelar</button>
         </div>
+      </div>
+    </div>
+    <div class="np-action-divider" id="np-fecha-divider"></div>
+    <!-- Sugerir Fecha -->
+    <button class="np-action-btn np-action-btn-fecha" id="np-action-btn-fecha" onclick="toggleNpFechaForm()">
+      <span class="np-action-icon">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </span>
+      Sugerir Fecha
+    </button>
+    <!-- Inline form for Sugerir Fecha -->
+    <div class="np-sugerir-form" id="np-fecha-form">
+      <div class="np-sugerir-label">¿Qué fecha debería tener esta dirección No Pasar?</div>
+      <input type="date" class="np-correccion-input" id="np-fecha-val">
+      <div class="np-sugerir-actions">
+        <button class="np-fecha-send" onclick="submitSugerirFecha()">Enviar sugerencia</button>
+        <button class="np-sugerir-cancel" onclick="toggleNpFechaForm()">Cancelar</button>
       </div>
     </div>
     <button class="np-action-btn-cancel" onclick="closeNpActionSheet()">Cancelar</button>
