@@ -1058,6 +1058,96 @@
   }
   .suggest-np-cancel:hover { background: var(--surface3); }
 
+  /* ── Live Mode ────────────────────────────────────────────────────────────── */
+  .live-btn-wrap {
+    padding: 0 1.25rem 0.75rem;
+  }
+  .live-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; padding: 0.72rem 1rem;
+    border-radius: 12px;
+    font-family: var(--font); font-size: 0.9rem; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+    background: rgba(52,199,89,0.13); color: var(--green);
+    border: 1.5px solid rgba(52,199,89,0.3);
+    letter-spacing: 0.01em;
+  }
+  .live-btn:hover { background: rgba(52,199,89,0.2); }
+  .live-btn:active { transform: scale(0.98); }
+  .live-btn.live-active {
+    background: var(--green); color: #fff;
+    border-color: var(--green);
+    box-shadow: 0 4px 16px rgba(52,199,89,0.35);
+    animation: liveBtnPulse 2.5s ease-in-out infinite;
+  }
+  .live-btn.live-active:hover { background: var(--green); opacity: 0.9; }
+  @keyframes liveBtnPulse {
+    0%, 100% { box-shadow: 0 4px 16px rgba(52,199,89,0.35); }
+    50%       { box-shadow: 0 4px 28px rgba(52,199,89,0.6); }
+  }
+  .live-btn-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: currentColor; flex-shrink: 0;
+    transition: opacity 0.2s;
+  }
+  .live-btn:not(.live-active) .live-btn-dot { opacity: 0.55; }
+  .live-btn.live-active .live-btn-dot { animation: liveDotBlink 1.2s ease-in-out infinite; }
+  @keyframes liveDotBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .live-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+  .live-street-banner {
+    display: none; align-items: center; gap: 10px;
+    margin: 0 1.25rem 0.75rem;
+    padding: 0.65rem 0.9rem;
+    background: rgba(52,199,89,0.1);
+    border: 1px solid rgba(52,199,89,0.28);
+    border-radius: 10px;
+    animation: fadeIn 0.25s ease;
+  }
+  .live-street-banner.visible { display: flex; }
+  .live-street-icon {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: rgba(52,199,89,0.18); color: var(--green);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .live-street-icon svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .live-street-info { flex: 1; min-width: 0; }
+  .live-street-label { font-size: 0.68rem; font-weight: 700; color: var(--green); letter-spacing: 0.06em; text-transform: uppercase; }
+  .live-street-name  { font-size: 0.88rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .live-street-sub   { font-size: 0.7rem; color: var(--text3); margin-top: 1px; }
+
+  .no-pasar-item.live-match {
+    background: rgba(255,59,48,0.08) !important;
+    border-color: rgba(255,59,48,0.4) !important;
+    animation: liveMatchAppear 0.3s ease;
+  }
+  @keyframes liveMatchAppear { from { transform: scale(0.97); opacity: 0.6; } to { transform: scale(1); opacity: 1; } }
+  .no-pasar-item.live-match .no-pasar-item-addr { color: var(--red); }
+  .no-pasar-item.live-no-match { opacity: 0.38; }
+  .live-match-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--red); color: #fff;
+    font-size: 0.62rem; font-weight: 800; letter-spacing: 0.05em;
+    padding: 2px 6px; border-radius: 5px; flex-shrink: 0;
+    text-transform: uppercase;
+  }
+  .live-match-badge svg { width: 9px; height: 9px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; flex-shrink: 0; }
+
+  .live-locating-wrap {
+    display: none; align-items: center; gap: 8px;
+    margin: 0 1.25rem 0.75rem;
+    padding: 0.6rem 0.9rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; font-size: 0.82rem; color: var(--text3); font-weight: 500;
+  }
+  .live-locating-wrap.visible { display: flex; }
+  .live-locating-spinner {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid var(--border-active); border-top-color: var(--green);
+    animation: spin 0.8s linear infinite; flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
   .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem; }
   .page-header-title { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; }
   .page-header-sub { font-size: 0.84rem; color: var(--text3); margin-top: 2px; }
@@ -4210,6 +4300,31 @@
     <div class="detail-map-wrap" id="detail-map-wrap" style="display:none">
       <img id="detail-map-img" alt="Mapa del territorio">
     </div>
+    <!-- Live Mode: botón -->
+    <div class="live-btn-wrap" id="live-btn-wrap" style="display:none">
+      <button class="live-btn" id="live-btn" onclick="toggleLiveMode()">
+        <span class="live-btn-dot"></span>
+        <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        <span id="live-btn-label">Live</span>
+      </button>
+    </div>
+    <!-- Live Mode: localizando... -->
+    <div class="live-locating-wrap" id="live-locating-wrap">
+      <div class="live-locating-spinner"></div>
+      <span>Obteniendo tu ubicación…</span>
+    </div>
+    <!-- Live Mode: banner de calle detectada -->
+    <div class="live-street-banner" id="live-street-banner">
+      <div class="live-street-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <div class="live-street-info">
+        <div class="live-street-label">Estás en</div>
+        <div class="live-street-name" id="live-street-name">—</div>
+        <div class="live-street-sub" id="live-street-sub">Mostrando No Pasar de esta calle</div>
+      </div>
+    </div>
+
     <div class="no-pasar-section" id="detail-no-pasar-section" style="display:none">
       <div class="no-pasar-title">Direcciones No Pasar</div>
       <div id="detail-no-pasar-list"></div>
@@ -4840,7 +4955,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.30.3.5-alpha';
+const APP_VERSION = '0.31.0-alpha';
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -6946,6 +7061,8 @@ function _renderDetailNoPasar(ter) {
   noPasarSec.style.display = ter ? '' : 'none';
   noPasarSec.dataset.territoryId   = ter ? ter.id     : '';
   noPasarSec.dataset.territoryName = ter ? `Territorio ${ter.number}` : '';
+  // Live Mode: mostrar/ocultar botón según si hay entradas
+  setTimeout(_liveUpdateBtnVisibility, 0);
 }
 
 function switchDetailTerTab(tabNum) {
@@ -7012,11 +7129,153 @@ function closeDetail() {
   const form = document.getElementById('suggest-np-form');
   if (form) { form.classList.remove('open'); }
   ['snp-calle','snp-numero','snp-motivo'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  // Live Mode: detener al cerrar el detalle
+  if (_liveActive) stopLiveMode();
 }
 
 function handleOverlayClick(e) {
   if (e.target === document.getElementById('detail-overlay')) closeDetail();
 }
+
+// ── Live Mode ──────────────────────────────────────────────────────────────────
+let _liveWatchId     = null;
+let _liveActive      = false;
+let _liveLastRoad    = null;
+let _liveGeoThrottle = null;
+
+function _liveNormStr(s) {
+  return (s || '').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
+}
+function _liveExtractRoad(addr) {
+  return _liveNormStr(addr).replace(/\b\d+\b/g, '').replace(/\s+/g, ' ').trim();
+}
+function _liveMatchAddr(detectedRoad, addr) {
+  const road = _liveNormStr(detectedRoad);
+  const a    = _liveExtractRoad(addr);
+  if (!road || !a) return false;
+  const roadTokens = road.split(' ').filter(t => t.length > 2);
+  if (!roadTokens.length) return false;
+  const matchCount = roadTokens.filter(t => a.includes(t)).length;
+  return matchCount / roadTokens.length >= 0.6;
+}
+function _liveHighlight(detectedRoad) {
+  const items = document.querySelectorAll('#detail-no-pasar-list .no-pasar-item');
+  if (!_liveActive || !detectedRoad) {
+    items.forEach(el => {
+      el.classList.remove('live-match', 'live-no-match');
+      const badge = el.querySelector('.live-match-badge');
+      if (badge) badge.remove();
+    });
+    return;
+  }
+  let matchCount = 0;
+  items.forEach(el => {
+    const addrEl = el.querySelector('.no-pasar-item-addr');
+    if (!addrEl) return;
+    const addr = addrEl.textContent || '';
+    const isMatch = _liveMatchAddr(detectedRoad, addr);
+    if (isMatch) {
+      matchCount++;
+      el.classList.add('live-match');
+      el.classList.remove('live-no-match');
+      if (!el.querySelector('.live-match-badge')) {
+        const badge = document.createElement('span');
+        badge.className = 'live-match-badge';
+        badge.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>Aqu\u00ed';
+        el.appendChild(badge);
+        el.parentElement.prepend(el);
+      }
+    } else {
+      el.classList.remove('live-match');
+      el.classList.add('live-no-match');
+      const badge = el.querySelector('.live-match-badge');
+      if (badge) badge.remove();
+    }
+  });
+  const sub = document.getElementById('live-street-sub');
+  if (sub) {
+    sub.textContent = matchCount > 0
+      ? matchCount + ' direcci\u00f3n' + (matchCount > 1 ? 'es' : '') + ' No Pasar en esta calle'
+      : 'Sin No Pasar registradas en esta calle';
+  }
+}
+async function _liveReverseGeocode(lat, lng) {
+  try {
+    const url = 'https://nominatim.openstreetmap.org/reverse?lat=' + lat + '&lon=' + lng + '&format=json&zoom=17&addressdetails=1';
+    const res = await fetch(url, { headers: { 'Accept-Language': 'es', 'User-Agent': 'CongregacionFleming/1.0' } });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data?.address?.road || data?.address?.pedestrian || data?.address?.footway || data?.address?.street || null;
+  } catch { return null; }
+}
+async function _liveOnPosition(pos) {
+  if (!_liveActive) return;
+  const { latitude, longitude } = pos.coords;
+  const banner   = document.getElementById('live-street-banner');
+  const locating = document.getElementById('live-locating-wrap');
+  if (_liveGeoThrottle) return;
+  _liveGeoThrottle = setTimeout(() => { _liveGeoThrottle = null; }, 8000);
+  const road = await _liveReverseGeocode(latitude, longitude);
+  if (!_liveActive) return;
+  locating.classList.remove('visible');
+  if (road && road !== _liveLastRoad) {
+    _liveLastRoad = road;
+    const nameEl = document.getElementById('live-street-name');
+    if (nameEl) nameEl.textContent = road;
+    banner.classList.add('visible');
+    _liveHighlight(road);
+  } else if (!road) {
+    const nameEl = document.getElementById('live-street-name');
+    if (nameEl) nameEl.textContent = 'Calle no identificada';
+    banner.classList.add('visible');
+  }
+}
+function _liveOnError(err) {
+  stopLiveMode();
+  const msgs = { 1: 'Permiso de ubicaci\u00f3n denegado.', 2: 'Ubicaci\u00f3n no disponible.', 3: 'Tiempo de espera agotado.' };
+  showToast(msgs[err.code] || 'Error de geolocalizaci\u00f3n', 'error');
+}
+function toggleLiveMode() {
+  if (_liveActive) { stopLiveMode(); } else { startLiveMode(); }
+}
+function startLiveMode() {
+  if (!navigator.geolocation) { showToast('Este dispositivo no soporta geolocalizaci\u00f3n', 'error'); return; }
+  _liveActive   = true;
+  _liveLastRoad = null;
+  const btn      = document.getElementById('live-btn');
+  const label    = document.getElementById('live-btn-label');
+  const locating = document.getElementById('live-locating-wrap');
+  btn.classList.add('live-active');
+  if (label) label.textContent = 'Live activo';
+  locating.classList.add('visible');
+  _liveWatchId = navigator.geolocation.watchPosition(_liveOnPosition, _liveOnError, { enableHighAccuracy: true, maximumAge: 5000, timeout: 12000 });
+}
+function stopLiveMode() {
+  _liveActive = false;
+  if (_liveWatchId !== null) { navigator.geolocation.clearWatch(_liveWatchId); _liveWatchId = null; }
+  if (_liveGeoThrottle) { clearTimeout(_liveGeoThrottle); _liveGeoThrottle = null; }
+  _liveLastRoad = null;
+  const btn      = document.getElementById('live-btn');
+  const label    = document.getElementById('live-btn-label');
+  const banner   = document.getElementById('live-street-banner');
+  const locating = document.getElementById('live-locating-wrap');
+  btn.classList.remove('live-active');
+  if (label) label.textContent = 'Live';
+  banner.classList.remove('visible');
+  locating.classList.remove('visible');
+  _liveHighlight(null);
+}
+function _liveUpdateBtnVisibility() {
+  const sec  = document.getElementById('detail-no-pasar-section');
+  const wrap = document.getElementById('live-btn-wrap');
+  if (!wrap) return;
+  const hasEntries = sec && sec.style.display !== 'none'
+    && document.querySelectorAll('#detail-no-pasar-list .no-pasar-item').length > 0;
+  wrap.style.display = hasEntries ? '' : 'none';
+}
+// ── Fin Live Mode ──────────────────────────────────────────────────────────────
 
 async function loadAdminData() {
   await loadSchedule();
