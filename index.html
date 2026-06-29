@@ -5082,6 +5082,25 @@ function applyTheme(theme) {
   if (currentSubTab === 'territorios') renderTerritoryView();
 }
 
+// Territory map images (map_data / map_data_dark) are large base64 blobs.
+// They're excluded from the regular `territories` fetches (schedule loads,
+// admin CRUD refreshes, etc.) and only pulled in on demand, once per session,
+// the first time something actually needs to display a map. Results are
+// merged directly onto the existing `territories` array objects so every
+// other call site that already reads `t.map_data` keeps working unchanged.
+let _territoryMapsLoaded = false;
+async function ensureTerritoryMapsLoaded() {
+  if (_territoryMapsLoaded || !territories.length) return;
+  const { data } = await sb.from('territories').select('id, map_data, map_data_dark');
+  const byId = {};
+  (data || []).forEach(r => { byId[r.id] = r; });
+  territories.forEach(t => {
+    const m = byId[t.id];
+    if (m) { t.map_data = m.map_data; t.map_data_dark = m.map_data_dark; }
+  });
+  _territoryMapsLoaded = true;
+}
+
 // Returns the correct map src for a territory object based on active theme + user preference
 function getActiveTerMapSrc(t) {
   if (!t) return null;
@@ -5748,11 +5767,14 @@ function buildAvatarHtml(name, avatarSrc, size = 28, fontSize = '0.62rem', radiu
 // Cache of name→avatar for quick lookup in grupos render
 let _avatarCache = {}; // { [name]: base64|null }
 
+let _avatarCacheLoaded = false;
 async function loadAvatarCache() {
+  if (_avatarCacheLoaded) return; // already fetched this session — avatars rarely change mid-session
   try {
     const { data } = await sb.from('platform_users').select('name, avatar');
     _avatarCache = {};
     (data || []).forEach(u => { if (u.avatar) _avatarCache[u.name] = u.avatar; });
+    _avatarCacheLoaded = true;
   } catch(e) { /* silently ignore */ }
 }
 
@@ -5775,9 +5797,9 @@ function closeProfilePage() {
 async function renderProfilePage() {
   if (!currentUser) return;
 
-  // Fetch fresh data for this user
+  // Fetch fresh data for this user (only the avatar field is used below)
   const { data: me } = await sb.from('platform_users')
-    .select('*').ilike('name', currentUser.name).single();
+    .select('avatar').ilike('name', currentUser.name).single();
 
   // Avatar big
   const bigAvatar = document.getElementById('profile-avatar-big');
@@ -6293,11 +6315,11 @@ async function enterApp() {
 
   loadSchedule();
   loadFullMap();
-  loadAvatarCache().then(() => {
-    if (currentSubTab === 'grupos') {
+  if (currentSubTab === 'grupos') {
+    loadAvatarCache().then(() => {
       loadGrupos().then(() => renderGruposView());
-    }
-  });
+    });
+  }
   startRolePolling();
 
   const taskEl = document.getElementById('dropdown-task');
@@ -6732,8 +6754,9 @@ async function loadSchedule() {
   if (aErr) { console.error('loadSchedule assignments error:', aErr.message); }
 
   assignments = aData || [];
-  const { data: tData } = await sb.from('territories').select('*').order('number');
+  const { data: tData } = await sb.from('territories').select('id, number, color, no_pasar').order('number');
   territories = tData || [];
+  _territoryMapsLoaded = false; // territories array was replaced — map images need re-merging on next use
   if (currentSubTab === 'territorios') renderTerritoryView();
   // Also refresh conductores and casas if they were loaded
   if (conductores.length || casas.length) {
@@ -6956,9 +6979,10 @@ function renderSchedule() {
   container.innerHTML = html;
 }
 
-function viewAssignment(id) {
+async function viewAssignment(id) {
   const a = assignments.find(x => x.id === id);
   if (!a) return;
+  await ensureTerritoryMapsLoaded();
   const ter  = territories.find(t => t.id === a.territory_id) || null;
   const ter2 = a.territory_id_2 ? (territories.find(t => t.id === a.territory_id_2) || null) : null;
   const d = new Date(a.date+'T00:00:00');
@@ -7505,12 +7529,14 @@ function fmtNpDate(d) {
   const MON = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
   return `${parseInt(day)} ${MON[parseInt(m)-1]} ${y}`;
 }
-function renderAdminTerritories() {
+async function renderAdminTerritories() {
   const container = document.getElementById('admin-territories-list');
   if (!territories.length) {
     container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></div><h4>Sin territorios</h4><p>Crea el primer territorio</p></div>`;
     return;
   }
+  container.innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
+  await ensureTerritoryMapsLoaded();
   container.innerHTML = `<div class="ter-grid">` + territories.map(t => {
     const color = getTerColor(t.number);
     const noPasar = parseNoPasar(t.no_pasar);
@@ -7785,10 +7811,11 @@ function wbInit() {
 }
 async function wbLoadDataAndSetMonday(monday) {
   const [{ data: tData }, { data: cData }] = await Promise.all([
-    sb.from('territories').select('*').order('number'),
+    sb.from('territories').select('id, number, color, no_pasar').order('number'),
     sb.from('conductores').select('*').order('apellido').order('nombre'),
   ]);
   territories = tData || [];
+  _territoryMapsLoaded = false; // territories array was replaced — map images need re-merging on next use
   conductores = cData || [];
   wbSetMonday(monday);
 }
@@ -8185,8 +8212,9 @@ async function saveWeekBuilder() {
   renderAdminAssignments();
 }
 
-function openTerritoryModal(t) {
+async function openTerritoryModal(t) {
   if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  await ensureTerritoryMapsLoaded();
   editingTerritoryId = t ? t.id : null;
   document.getElementById('ter-modal-title').textContent = t ? 'Editar Territorio' : 'Nuevo Territorio';
   document.getElementById('ter-num').value = t?.number || '';
@@ -8342,17 +8370,24 @@ async function saveTerritory() {
   btn.disabled = true; btn.textContent = 'Guardando...';
   const color = document.getElementById('ter-color-value').value || null;
   const payload = { number, color, no_pasar, map_data: pendingMapBase64 || null, map_data_dark: pendingMapDarkBase64 !== undefined ? pendingMapDarkBase64 : null };
-  let error;
-  if (editingTerritoryId) { ({error} = await sb.from('territories').update(payload).eq('id',editingTerritoryId)); }
-  else { ({error} = await sb.from('territories').insert(payload)); }
+  let error, savedRow;
+  if (editingTerritoryId) { ({ data: savedRow, error } = await sb.from('territories').update(payload).eq('id',editingTerritoryId).select('id, number, color, no_pasar').single()); }
+  else { ({ data: savedRow, error } = await sb.from('territories').insert(payload).select('id, number, color, no_pasar').single()); }
   btn.disabled = false; btn.textContent = 'Guardar';
   if (error) { showError('ter-error', error.message); return; }
   showToast(editingTerritoryId?'Territorio actualizado':'Territorio creado','success');
   closeTerritoryEditModal();
-  const {data} = await sb.from('territories').select('*').order('number');
-  territories = data || [];
+  // Patch the in-memory array directly instead of re-fetching the whole table:
+  // we already have the saved row's light columns (savedRow) and the map data
+  // we just uploaded (pendingMapBase64 / pendingMapDarkBase64), so no extra
+  // network round-trip is needed to keep the admin grid showing the new map.
+  const fullRow = { ...savedRow, map_data: pendingMapBase64 || null, map_data_dark: pendingMapDarkBase64 !== undefined ? pendingMapDarkBase64 : null };
+  const idx = territories.findIndex(t => t.id === fullRow.id);
+  if (idx >= 0) territories[idx] = fullRow; else territories.push(fullRow);
+  territories.sort((a,b) => a.number - b.number);
   renderAdminTerritories();
-  await loadSchedule();
+  // Note: no loadSchedule() call here — it would only re-fetch assignments
+  // (unaffected by a territory edit) and territories (already fresh above).
 }
 async function deleteTerritory(id) {
   if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
@@ -8360,8 +8395,8 @@ async function deleteTerritory(id) {
   const {error} = await sb.from('territories').delete().eq('id',id);
   if (error) { showToast('Error al eliminar','error'); return; }
   showToast('Territorio eliminado','success');
-  const {data} = await sb.from('territories').select('*').order('number');
-  territories = data || []; renderAdminTerritories();
+  territories = territories.filter(t => t.id !== id);
+  renderAdminTerritories();
 }
 
 function renderAdminConductores() {
@@ -10141,7 +10176,7 @@ async function registerUserSession(name, role) {
   } catch(e) { /* ignore — proceed normally */ }
 
   const { data: existing } = await sb.from('platform_users')
-    .select('*').ilike('name', name).single();
+    .select('id, role').ilike('name', name).single();
 
   if (existing) {
     await sb.from('platform_users').update({ last_seen: now }).eq('id', existing.id);
@@ -10290,7 +10325,7 @@ async function syncRoleFromServer() {
   }
 }
 // ── Territory public view ─────────────────────────────────────────────────────
-function renderTerritoryView() {
+async function renderTerritoryView() {
   const container = document.getElementById('territories-view-content');
   if (!container) return;
   if (!territories.length) {
@@ -10301,6 +10336,8 @@ function renderTerritoryView() {
     </div>`;
     return;
   }
+  container.innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
+  await ensureTerritoryMapsLoaded();
   container.innerHTML = `<div class="ter-grid" style="padding-top:0.25rem">` + territories.map(t => {
     const mapSrc = getActiveTerMapSrc(t);
     const mapHtml = mapSrc
@@ -10315,9 +10352,10 @@ function renderTerritoryView() {
   }).join('') + `</div>`;
 }
 
-function viewTerritory(id) {
+async function viewTerritory(id) {
   const t = territories.find(x => x.id === id);
   if (!t) return;
+  await ensureTerritoryMapsLoaded();
   const noPasar = parseNoPasar(t.no_pasar);
   const color = getTerColor(t.number);
 
