@@ -3403,6 +3403,49 @@
   .admin-miembro-name { flex: 1; font-size: 0.875rem; font-weight: 500; cursor: pointer; }
   .admin-miembro-name:hover { color: var(--accent); }
   .admin-miembro-badges { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+  /* ── Reportes de Territorio ──────────────────────────────────────────── */
+  .rep-suggest-card {
+    background: var(--card, var(--surface2));
+    border-radius: 16px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+  }
+  .rep-suggest-title {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px;
+    color: var(--text3); font-weight: 700; margin-bottom: 10px;
+  }
+  .rep-suggest-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .rep-suggest-item {
+    background: linear-gradient(135deg, var(--accent), #5856d6);
+    border-radius: 13px; padding: 12px 8px; text-align: center; color: #fff;
+  }
+  .rep-suggest-item .rep-suggest-num { font-size: 19px; font-weight: 800; display: block; }
+  .rep-suggest-item .rep-suggest-sub { font-size: 9px; opacity: 0.9; margin-top: 3px; display: block; }
+  .rep-item {
+    background: var(--card, var(--surface2));
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  }
+  .rep-item-badge {
+    width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 800; font-size: 15px;
+  }
+  .rep-item-info div:first-child { font-weight: 700; font-size: 15px; }
+  .rep-item-info div:nth-child(2) { color: var(--text3); font-size: 12.5px; margin-top: 2px; }
+  .rep-item-tag {
+    padding: 5px 12px; border-radius: 9px; font-size: 11.5px; font-weight: 700; flex-shrink: 0;
+  }
+  .rep-tag-manana { background: rgba(0,113,227,0.12); color: var(--accent); }
+  .rep-tag-tarde { background: rgba(255,159,10,0.12); color: #ff9f0a; }
+  .rep-report-btn {
+    width: 100%; margin-top: 10px; padding: 12px; border-radius: 12px; border: none;
+    background: var(--accent); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer;
+  }
+  .rep-report-btn.done { background: var(--green, #34c759); cursor: default; }
   .rol-badge {
     font-size: 0.62rem; font-weight: 700; padding: 2px 8px;
     border-radius: 20px; text-transform: uppercase; letter-spacing: 0.03em;
@@ -4490,6 +4533,7 @@
       <div class="admin-tabs-row active" data-section="predicacion">
         <button class="admin-tab active" data-tab="assignments" data-i18n="admin.tab.assignments" onclick="switchAdminTab('assignments')">Asignaciones</button>
         <button class="admin-tab" data-tab="territories" data-i18n="admin.tab.territories" onclick="switchAdminTab('territories')">Territorios</button>
+        <button class="admin-tab" data-tab="reportes" data-i18n="admin.tab.reportes" onclick="switchAdminTab('reportes')">Reportes</button>
         <button class="admin-tab" data-tab="conductores" data-i18n="admin.tab.conductores" onclick="switchAdminTab('conductores')">Conductores</button>
         <button class="admin-tab" data-tab="casas" data-i18n="admin.tab.casas" onclick="switchAdminTab('casas')">Casas</button>
         <button class="admin-tab" data-tab="grupos" data-i18n="admin.tab.grupos" onclick="switchAdminTab('grupos')">Grupos</button>
@@ -4546,6 +4590,28 @@
         </div>
 
         <div id="admin-territories-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+      </div>
+      <div class="admin-section" id="admin-reportes">
+        <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
+          <span style="flex:1;font-size:0.95rem;font-weight:700">Reportes de Territorio</span>
+          <button class="btn-secondary" onclick="openManualReportModal()">+ Nuevo reporte</button>
+        </div>
+
+        <!-- Sugerencias: territorios que llevan más tiempo sin reportarse -->
+        <div class="rep-suggest-card">
+          <div class="rep-suggest-title">Territorios pendientes hace más tiempo</div>
+          <div class="rep-suggest-grid" id="rep-suggest-grid">
+            <div class="loader-wrap"><div class="loader"></div></div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin:1.1rem 0 0.8rem;flex-wrap:wrap">
+          <input type="text" class="form-input" id="rep-filter-territorio" placeholder="Filtrar por N° territorio" style="max-width:170px" oninput="renderAdminReportes()">
+          <input type="date" class="date-input" id="rep-filter-fecha" style="max-width:170px" onchange="renderAdminReportes()">
+          <button class="btn-secondary" onclick="document.getElementById('rep-filter-territorio').value='';document.getElementById('rep-filter-fecha').value='';renderAdminReportes()">Limpiar filtros</button>
+        </div>
+
+        <div id="admin-reportes-list"><div class="loader-wrap"><div class="loader"></div></div></div>
       </div>
       <div class="admin-section" id="admin-conductores">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
@@ -4805,6 +4871,9 @@
     <div class="detail-actions" id="detail-admin-actions" style="display:none">
       <button class="detail-btn-secondary" id="detail-admin-btn" style="width:100%">Administrar</button>
     </div>
+    <div class="detail-actions" id="detail-report-wrap" style="display:none">
+      <button class="rep-report-btn" id="detail-report-btn" onclick="handleDetailReportClick()">Reportar territorio</button>
+    </div>
     <!-- Territory tabs (shown only when 2 territories assigned) -->
     <div class="detail-ter-tabs" id="detail-ter-tabs" style="display:none">
       <button class="detail-ter-tab active" id="detail-ter-tab-1" onclick="switchDetailTerTab(1)">
@@ -5036,6 +5105,56 @@
         <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="saveHermano()" id="save-herm-btn">Guardar</button>
       </div>
       <div class="auth-error" id="herm-error"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="report-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="report-modal-title">Reportar Territorio</div>
+      <button class="modal-close" onclick="closeReportModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div id="report-manual-fields" style="display:none">
+        <div class="form-group">
+          <label>Territorio</label>
+          <select class="form-select" id="rep-m-territorio"></select>
+        </div>
+        <div class="form-group">
+          <label>Fecha</label>
+          <input type="date" class="date-input" id="rep-m-fecha" style="width:100%;height:42px;border-radius:var(--radius-sm);padding:0 10px;background:var(--surface2);border:1px solid var(--border);color:var(--text)">
+        </div>
+        <div class="form-group">
+          <label>Turno</label>
+          <select class="form-select" id="rep-m-turno">
+            <option value="Mañana">Mañana</option>
+            <option value="Tarde">Tarde</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Encargado</label>
+          <input type="text" class="form-input" id="rep-m-encargado" placeholder="Nombre del encargado">
+        </div>
+      </div>
+      <div id="report-summary" style="display:none;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:12px;background:var(--surface2);border-radius:14px;padding:12px 14px">
+          <div class="rep-item-badge" id="report-summary-badge" style="background:var(--accent)">—</div>
+          <div>
+            <div style="font-weight:700;font-size:15px" id="report-summary-title">—</div>
+            <div style="color:var(--text3);font-size:12.5px" id="report-summary-sub">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Notas (opcional)</label>
+        <textarea class="task-textarea" id="rep-notas" placeholder="Ej: Faltó cubrir la calle X, casas cerradas, etc."></textarea>
+      </div>
+      <div id="report-error" class="form-error" style="display:none"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeReportModal()">Cancelar</button>
+      <button class="btn-primary" id="save-report-btn" onclick="submitTerritoryReport()">Guardar reporte</button>
     </div>
   </div>
 </div>
@@ -5492,7 +5611,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.35.2-alpha';
+const APP_VERSION = '0.36.0-alpha';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -5515,6 +5634,7 @@ const I18N = {
   'admin.section.reuniones':   { es: 'Reuniones',             en: 'Meetings' },
   'admin.tab.assignments':  { es: 'Asignaciones',            en: 'Assignments' },
   'admin.tab.territories':  { es: 'Territorios',             en: 'Territories' },
+  'admin.tab.reportes':     { es: 'Reportes',                en: 'Reports' },
   'admin.tab.conductores':  { es: 'Conductores',             en: 'Drivers' },
   'admin.tab.casas':        { es: 'Casas',                   en: 'Houses' },
   'admin.tab.grupos':       { es: 'Grupos',                  en: 'Groups' },
@@ -7290,7 +7410,7 @@ function showPage(name) {
 
 // Mapa centralizado: a qué sección (Predicación/Reuniones) pertenece cada tab de admin.
 const ADMIN_TAB_SECTION = {
-  assignments: 'predicacion', territories: 'predicacion', conductores: 'predicacion',
+  assignments: 'predicacion', territories: 'predicacion', reportes: 'predicacion', conductores: 'predicacion',
   casas: 'predicacion', grupos: 'predicacion', carritos: 'predicacion',
   vmc: 'reuniones', 'fin-semana': 'reuniones', responsabilidades: 'reuniones', 'aseo-salon': 'reuniones',
   usuarios: 'fleming', notificaciones: 'fleming',
@@ -7333,13 +7453,14 @@ async function switchAdminTab(tab) {
   if (tab === 'fin-semana') { loadFsWeeks().then(() => renderAdminFs()); }
   if (tab === 'notificaciones') { renderNotifAdminTemplates(); renderNotifAdminCategories(); }
   if (tab === 'carritos') { cartOpenAdminSection(); }
+  if (tab === 'reportes') { loadTerritoryReports().then(() => renderAdminReportes()); }
 }
 
 // Mapa de tab de admin -> clave de permiso (PERM_MODULES). Solo se restringen
 // los tabs que tienen una clave de permiso asociada; 'notificaciones' se
 // controla aparte (solo DEV).
 const ADMIN_TAB_PERM_KEY = {
-  assignments: 'assignments', territories: 'territories', conductores: 'conductores',
+  assignments: 'assignments', territories: 'territories', reportes: 'reportes', conductores: 'conductores',
   casas: 'casas', grupos: 'grupos', carritos: 'carritos',
   vmc: 'vida_ministerio', 'fin-semana': 'fin_semana', responsabilidades: 'responsabilidades',
   'aseo-salon': 'aseo_salon', usuarios: 'usuarios',
@@ -7742,8 +7863,71 @@ async function viewAssignment(id) {
     _renderDetailNoPasar(ter);
   }
 
+  // ── Botón "Reportar territorio" — visible al encargado de esta salida (o admin) ──
+  await _setupDetailReportButton(a, ter, ter2);
+
   document.getElementById('detail-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
+}
+
+// Determina si el usuario actual es el "encargado" de una asignación:
+// coincide como conductor, o pertenece al grupo asignado (sábados).
+function _isAssignmentOwner(a) {
+  if (!currentUser) return false;
+  const myName = (currentUser.name || '').trim().toLowerCase();
+  if (!myName) return false;
+  if ((a.conductor || '').trim().toLowerCase() === myName) return true;
+  if (a.grupo_id) {
+    const g = grupos.find(x => x.id === a.grupo_id);
+    if (g && g.miembros.some(m => m.nombre.trim().toLowerCase() === myName)) return true;
+  }
+  return false;
+}
+
+async function _setupDetailReportButton(a, ter, ter2) {
+  const wrap = document.getElementById('detail-report-wrap');
+  const btn  = document.getElementById('detail-report-btn');
+  if (!wrap || !btn) return;
+
+  const hasTerritory = !!(ter || ter2);
+  const isOwner = _isAssignmentOwner(a);
+  const isAdminLike = ['dev','admin'].includes(currentRole);
+
+  if (!hasTerritory || !(isOwner || isAdminLike)) {
+    wrap.style.display = 'none';
+    return;
+  }
+
+  wrap.style.display = '';
+  btn.disabled = false;
+  btn.classList.remove('done');
+  btn.textContent = 'Verificando…';
+  btn.dataset.assignmentId = a.id;
+
+  const already = await _assignmentAlreadyReported(a.id);
+  if (already) {
+    btn.textContent = 'Reporte enviado ✓';
+    btn.classList.add('done');
+    btn.disabled = true;
+  } else {
+    btn.textContent = 'Reportar territorio';
+    btn.disabled = false;
+  }
+}
+
+async function _assignmentAlreadyReported(assignmentId) {
+  try {
+    const { data, error } = await sb.from('territory_reports').select('id').eq('assignment_id', assignmentId).limit(1);
+    if (error) return false;
+    return !!(data && data.length);
+  } catch { return false; }
+}
+
+function handleDetailReportClick() {
+  const btn = document.getElementById('detail-report-btn');
+  const assignmentId = btn?.dataset.assignmentId;
+  if (!assignmentId) return;
+  openReportModal(assignmentId);
 }
 
 // Render map + no-pasar content for a given territory object
@@ -7834,6 +8018,7 @@ function closeDetail() {
   document.getElementById('detail-time-chip').style.display = '';
   document.getElementById('detail-address').style.fontSize = '';
   document.getElementById('detail-actions').style.display = '';
+  document.getElementById('detail-report-wrap').style.display = 'none';
   // Reset territory tabs
   document.getElementById('detail-ter-tabs').style.display = 'none';
   document.getElementById('detail-ter-tab-1').classList.add('active');
@@ -9085,6 +9270,221 @@ async function deleteTerritory(id) {
   renderAdminTerritories();
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// REPORTES DE TERRITORIO
+// Sistema para que el encargado de una salida de casa en casa reporte que un
+// territorio fue trabajado. Los reportes quedan ligados a la asignación
+// (assignments.id) desde la que se generaron. Solo visibles para el Admin/DEV
+// (permiso 'reportes') y para el encargado de la propia asignación.
+// ═══════════════════════════════════════════════════════════════════════════
+let territoryReports = [];
+let _reportModalMode = 'assignment'; // 'assignment' | 'manual'
+let _reportModalAssignment = null;
+
+async function loadTerritoryReports() {
+  const { data, error } = await sb.from('territory_reports')
+    .select('*')
+    .order('fecha', { ascending: false });
+  if (error) { console.warn('Error cargando reportes de territorio:', error.message); territoryReports = []; return; }
+  territoryReports = data || [];
+}
+
+function _terLabel(num) { return num ? `Territorio ${num}` : 'Territorio'; }
+
+function renderRepSuggestGrid() {
+  const grid = document.getElementById('rep-suggest-grid');
+  if (!grid) return;
+  if (!territories.length) { grid.innerHTML = `<div style="color:var(--text3);font-size:0.82rem">Crea territorios primero.</div>`; return; }
+
+  // Última fecha reportada por territorio
+  const lastByTer = {};
+  territoryReports.forEach(r => {
+    const num = r.territorio_numero;
+    if (!lastByTer[num] || r.fecha > lastByTer[num]) lastByTer[num] = r.fecha;
+  });
+
+  const estados = territories.map(t => ({
+    numero: t.number,
+    fecha: lastByTer[t.number] || '0000-00-00',
+  })).sort((a, b) => a.fecha.localeCompare(b.fecha));
+
+  const top3 = estados.slice(0, 3);
+  grid.innerHTML = top3.map(item => {
+    const sub = item.fecha === '0000-00-00' ? 'Sin reportar' : _fmtFechaCorta(item.fecha);
+    return `<div class="rep-suggest-item">
+      <span class="rep-suggest-num">${item.numero}</span>
+      <span class="rep-suggest-sub">${sub}</span>
+    </div>`;
+  }).join('');
+}
+
+function _fmtFechaCorta(f) {
+  const [y, m, d] = f.split('-');
+  return `${d}/${m}`;
+}
+
+function renderAdminReportes() {
+  renderRepSuggestGrid();
+  const container = document.getElementById('admin-reportes-list');
+  if (!container) return;
+
+  const filterTer = (document.getElementById('rep-filter-territorio')?.value || '').trim();
+  const filterFecha = (document.getElementById('rep-filter-fecha')?.value || '').trim();
+
+  let list = territoryReports.slice();
+  if (filterTer) list = list.filter(r => String(r.territorio_numero) === filterTer);
+  if (filterFecha) list = list.filter(r => r.fecha === filterFecha);
+
+  if (!list.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><h4>Sin reportes</h4><p>Todavía no se ha reportado ningún territorio</p></div>`;
+    return;
+  }
+
+  container.innerHTML = list.map(r => {
+    const [y, m, d] = r.fecha.split('-');
+    const color = getTerColor(r.territorio_numero);
+    const turnoClass = r.turno === 'Tarde' ? 'rep-tag-tarde' : 'rep-tag-manana';
+    return `<div class="rep-item">
+      <div class="rep-item-badge" style="background:${color}">${r.territorio_numero}</div>
+      <div class="rep-item-info" style="flex:1">
+        <div>${_terLabel(r.territorio_numero)}</div>
+        <div>${d}/${m}/${y} · ${r.encargado || 'Sin nombre'}${r.notas ? ' · ' + r.notas : ''}</div>
+      </div>
+      <span class="rep-item-tag ${turnoClass}">${r.turno}</span>
+      <button class="btn-icon-sm danger" title="Eliminar" onclick="deleteTerritoryReport('${r.id}')">
+        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+      </button>
+    </div>`;
+  }).join('');
+}
+
+async function deleteTerritoryReport(id) {
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.', 'error'); return; }
+  if (!confirm('¿Eliminar este reporte?')) return;
+  const { error } = await sb.from('territory_reports').delete().eq('id', id);
+  if (error) { showToast('Error al eliminar', 'error'); return; }
+  territoryReports = territoryReports.filter(r => r.id !== id);
+  renderAdminReportes();
+  showToast('Reporte eliminado', 'success');
+}
+
+// Abre el modal de reporte desde una asignación existente (flujo normal: el
+// encargado reporta el territorio de su propia salida de casa en casa).
+function openReportModal(assignmentId) {
+  const a = assignments.find(x => x.id === assignmentId);
+  if (!a) { showToast('Asignación no encontrada', 'error'); return; }
+  _reportModalMode = 'assignment';
+  _reportModalAssignment = a;
+
+  document.getElementById('report-modal-title').textContent = 'Reportar Territorio';
+  document.getElementById('report-manual-fields').style.display = 'none';
+  document.getElementById('report-summary').style.display = '';
+  document.getElementById('rep-notas').value = '';
+  document.getElementById('report-error').style.display = 'none';
+
+  const ter = territories.find(t => t.id === a.territory_id) || null;
+  const d = new Date(a.date + 'T00:00:00');
+  const DAY = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const turno = (a.time && a.time < '14:00') ? 'Mañana' : 'Tarde';
+
+  document.getElementById('report-summary-badge').textContent = ter ? ter.number : '—';
+  document.getElementById('report-summary-badge').style.background = ter ? getTerColor(ter.number) : 'var(--accent)';
+  document.getElementById('report-summary-title').textContent = ter ? _terLabel(ter.number) : 'Sin territorio asignado';
+  document.getElementById('report-summary-sub').textContent = `${DAY[d.getDay()]} ${d.getDate()} · ${turno} · ${a.conductor || currentUser?.name || ''}`;
+
+  document.getElementById('report-modal').classList.add('open');
+}
+
+// Abre el modal en modo manual (el Admin registra un reporte a mano, por si el
+// encargado no pudo hacerlo desde su asignación).
+function openManualReportModal() {
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.', 'error'); return; }
+  _reportModalMode = 'manual';
+  _reportModalAssignment = null;
+
+  document.getElementById('report-modal-title').textContent = 'Nuevo Reporte de Territorio';
+  document.getElementById('report-manual-fields').style.display = '';
+  document.getElementById('report-summary').style.display = 'none';
+  document.getElementById('rep-notas').value = '';
+  document.getElementById('rep-m-encargado').value = '';
+  document.getElementById('report-error').style.display = 'none';
+
+  const sel = document.getElementById('rep-m-territorio');
+  sel.innerHTML = territories.map(t => `<option value="${t.number}">Territorio ${t.number}</option>`).join('');
+
+  const hoy = new Date();
+  const offset = hoy.getTimezoneOffset();
+  const fechaLocal = new Date(hoy.getTime() - offset * 60000).toISOString().split('T')[0];
+  document.getElementById('rep-m-fecha').value = fechaLocal;
+
+  document.getElementById('report-modal').classList.add('open');
+}
+
+function closeReportModal() {
+  document.getElementById('report-modal').classList.remove('open');
+  _reportModalAssignment = null;
+}
+
+async function submitTerritoryReport() {
+  const btn = document.getElementById('save-report-btn');
+  const errEl = document.getElementById('report-error');
+  errEl.style.display = 'none';
+
+  let payload;
+  if (_reportModalMode === 'assignment') {
+    const a = _reportModalAssignment;
+    if (!a) { errEl.textContent = 'Asignación no válida.'; errEl.style.display = 'block'; return; }
+    const ter = territories.find(t => t.id === a.territory_id) || null;
+    if (!ter) { errEl.textContent = 'Esta asignación no tiene territorio asociado.'; errEl.style.display = 'block'; return; }
+    const turno = (a.time && a.time < '14:00') ? 'Mañana' : 'Tarde';
+    payload = {
+      assignment_id: a.id,
+      territorio_numero: ter.number,
+      fecha: a.date,
+      turno,
+      encargado: a.conductor || currentUser?.name || '',
+      notas: document.getElementById('rep-notas').value.trim() || null,
+    };
+  } else {
+    const numero = parseInt(document.getElementById('rep-m-territorio').value);
+    const fecha = document.getElementById('rep-m-fecha').value;
+    const turno = document.getElementById('rep-m-turno').value;
+    const encargado = document.getElementById('rep-m-encargado').value.trim();
+    if (!numero || !fecha) { errEl.textContent = 'Territorio y fecha son requeridos.'; errEl.style.display = 'block'; return; }
+    payload = {
+      assignment_id: null,
+      territorio_numero: numero,
+      fecha,
+      turno,
+      encargado: encargado || null,
+      notas: document.getElementById('rep-notas').value.trim() || null,
+    };
+  }
+
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  const { data, error } = await sb.from('territory_reports').insert(payload).select().single();
+  btn.disabled = false; btn.textContent = 'Guardar reporte';
+
+  if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
+
+  territoryReports.unshift(data);
+  showToast('Reporte enviado ✓', 'success');
+  closeReportModal();
+
+  // Actualiza el botón del detalle si sigue abierto
+  const detailBtn = document.getElementById('detail-report-btn');
+  if (detailBtn && detailBtn.dataset.assignmentId === payload.assignment_id) {
+    detailBtn.textContent = 'Reporte enviado ✓';
+    detailBtn.classList.add('done');
+    detailBtn.disabled = true;
+  }
+
+  // Si el panel admin de reportes está visible, refresca la lista
+  if (document.getElementById('admin-reportes')?.classList.contains('active')) {
+    renderAdminReportes();
+  }
+}
+
 function renderAdminConductores() {
   const container = document.getElementById('admin-conductores-list');
   if (!conductores.length) {
@@ -10318,6 +10718,7 @@ const PERM_MODULES = [
   // ── Predicación ────────────────────────────────────────────────────────────
   { key: 'assignments',    label: 'Asignaciones (Casa)',  group: 'predicacion', icon: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' },
   { key: 'territories',   label: 'Territorios',          group: 'predicacion', icon: '<svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>' },
+  { key: 'reportes',      label: 'Reportes de Territorio', group: 'predicacion', icon: '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>' },
   { key: 'carritos',      label: 'Carritos',             group: 'predicacion', icon: '<svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>' },
   { key: 'conductores',   label: 'Conductores',          group: 'predicacion', icon: '<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' },
   { key: 'casas',         label: 'Casas',                group: 'predicacion', icon: '<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>' },
@@ -10333,7 +10734,7 @@ const PERM_MODULES = [
 ];
 
 function parsePermissions(raw) {
-  const defaults = { territories: true, assignments: true, conductores: true, casas: true, grupos: true, carritos: true, vida_ministerio: true, fin_semana: true, hospitalidad: true, responsabilidades: true, aseo_salon: true, usuarios: false };
+  const defaults = { territories: true, reportes: true, assignments: true, conductores: true, casas: true, grupos: true, carritos: true, vida_ministerio: true, fin_semana: true, hospitalidad: true, responsabilidades: true, aseo_salon: true, usuarios: false };
   if (!raw) return { ...defaults };
   try {
     const p = typeof raw === 'string' ? JSON.parse(raw) : raw;
