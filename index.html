@@ -3748,7 +3748,7 @@
   grid-template-columns: 1fr;
   gap: 16px;
   width: 100%;
-  max-width: 1100px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 4px 0 24px;
 }
@@ -3799,34 +3799,29 @@
 }
 #sub-content-carritos .ct-header-btn:hover, #admin-carritos .ct-header-btn:hover { background: var(--bg-card-hover); box-shadow: var(--shadow-sm); }
 #sub-content-carritos .ct-header-btn:active, #admin-carritos .ct-header-btn:active { transform: scale(0.93); }
-#sub-content-carritos .ct-admin-pill, #admin-carritos .ct-admin-pill {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: var(--ct-accent-light); color: var(--ct-accent);
-  border: 1px solid var(--ct-accent-light);
-  font-weight: 800; font-size: 0.78rem;
-  padding: 9px 14px; border-radius: 99px; cursor: pointer;
-  transition: background-color var(--transition-fast);
-  white-space: nowrap;
-}
-#sub-content-carritos .ct-admin-pill:hover, #admin-carritos .ct-admin-pill:hover { background: var(--ct-accent-light); }
 
 /* ---------- SEARCH & FILTER ---------- */
 #sub-content-carritos .ct-search-wrapper, #admin-carritos .ct-search-wrapper { padding: 0 20px 12px; }
 #sub-content-carritos .ct-search-inner, #admin-carritos .ct-search-inner { position: relative; display: flex; align-items: center; }
+#sub-content-carritos .ct-search-icon, #admin-carritos .ct-search-icon {
+  position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+  width: 16px; height: 16px; stroke: var(--text-light); fill: none;
+  stroke-width: 2; stroke-linecap: round; pointer-events: none;
+}
 #sub-content-carritos .ct-search-inner input, #admin-carritos .ct-search-inner input {
-  width: 100%; padding: 13px 50px 13px 18px; border-radius: 16px;
-  border: 1.5px solid var(--border-color); background: var(--bg-card); color: var(--text-main);
-  outline: none; font-size: 0.95rem; font-family: inherit;
+  width: 100%; padding: 0.65rem 50px 0.65rem 2.6rem; border-radius: 50px;
+  border: 1px solid var(--border-color); background: var(--bg-ct-screen); color: var(--text-main);
+  outline: none; font-size: 0.9rem; font-family: inherit;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 #sub-content-carritos .ct-search-inner input:focus, #admin-carritos .ct-search-inner input:focus { border-color: var(--ct-accent); box-shadow: 0 0 0 3px var(--ct-accent-light); }
 #sub-content-carritos .ct-search-inner input::placeholder, #admin-carritos .ct-search-inner input::placeholder { color: var(--text-light); }
 #sub-content-carritos .ct-search-filter-btn, #admin-carritos .ct-search-filter-btn {
-  position: absolute; right: 12px; background: none; border: none; cursor: pointer;
-  color: var(--text-gray); padding: 4px; border-radius: 8px; display: flex; align-items: center;
-  transition: color var(--transition-fast);
+  position: absolute; right: 10px; background: var(--surface3); border: none; cursor: pointer;
+  color: var(--text-gray); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  transition: color var(--transition-fast), background var(--transition-fast);
 }
-#sub-content-carritos .ct-search-filter-btn:hover, #admin-carritos .ct-search-filter-btn:hover { color: var(--ct-accent); }
+#sub-content-carritos .ct-search-filter-btn:hover, #admin-carritos .ct-search-filter-btn:hover { color: var(--ct-accent); background: var(--ct-accent-light); }
 #sub-content-carritos #cartFilterMenu, #admin-carritos #cartFilterMenu { max-height: 0; opacity: 0; overflow: hidden; transform: translateY(-6px); transition: max-height 0.35s ease, opacity 0.25s ease, transform 0.3s ease; }
 #sub-content-carritos #cartFilterMenu.ct-open, #admin-carritos #cartFilterMenu.ct-open { max-height: 300px; opacity: 1; transform: translateY(0); }
 #sub-content-carritos .ct-filter-panel, #admin-carritos .ct-filter-panel { margin-top: 10px; padding: 14px 16px; background: var(--bg-card); border-radius: var(--radius-sm); border: 1px solid var(--border-color); }
@@ -3845,7 +3840,7 @@
 }
 
 /* ---------- LOCATION GRID ---------- */
-#sub-content-carritos .ct-grid-2x2, #admin-carritos .ct-grid-2x2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; align-items: stretch; }
+#sub-content-carritos .ct-grid-2x2, #admin-carritos .ct-grid-2x2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; align-items: stretch; }
 #sub-content-carritos .ct-location-card, #admin-carritos .ct-location-card {
   padding: 14px; border-radius: 25px; cursor: pointer; background-color: var(--bg-card);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -4032,8 +4027,10 @@
   #sub-content-carritos #detail-ct-screen.ct-active, #admin-carritos #detail-ct-screen.ct-active { transform: translateX(-100%); }
 }
 @media (min-width: 768px) {
-  #sub-content-carritos .ct-app-wrapper, #admin-carritos .ct-app-wrapper { display: grid; grid-template-columns: 380px 1fr; gap: 20px; }
+  #sub-content-carritos .ct-app-wrapper, #admin-carritos .ct-app-wrapper { display: grid; grid-template-columns: 420px 1fr; gap: 24px; }
   #sub-content-carritos #detail-ct-screen, #admin-carritos #detail-ct-screen { position: relative; opacity: 1 !important; transform: none !important; left: auto !important; display: flex !important; }
+  #sub-content-carritos .ct-scroll-container, #admin-carritos .ct-scroll-container { padding: 24px; }
+  #admin-carritos .ct-admin-tabs { flex-wrap: wrap; overflow: visible; }
 }
 #sub-content-carritos #locationsList, #admin-carritos #locationsList { flex: 1; padding-bottom: 24px; display: block; }
 
@@ -4219,18 +4216,14 @@
         <div id="schedule-content"><div class="loader-wrap"><div class="loader"></div></div></div>
       </div>
       <div id="sub-content-carritos" class="sub-page" style="display:none">
+        <div id="admin-shortcut-carritos" style="display:none"></div>
       <div class="ct-header-list">
         <h1 style="margin:0; font-size: 1.6rem;">Carritos</h1>
-        <div style="display:flex; gap:10px; align-items:center;">
-          <button class="ct-admin-pill" id="cartAdminBtn" onclick="goAdminShortcut('carritos')" style="display:none">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            Administrar
-          </button>
-        </div>
       </div>
 
       <div class="ct-search-wrapper">
         <div class="ct-search-inner">
+          <svg class="ct-search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input type="text" id="cartSearchInput" placeholder="Buscar por nombre…" aria-label="Buscar por nombre" oninput="cartHandleSearch()">
           <button onclick="cartToggleFilterMenu()" class="ct-search-filter-btn" aria-label="Abrir filtros" aria-expanded="false" aria-controls="cartFilterMenu">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="10" cy="6" r="2"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="14" cy="12" r="2"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="8" cy="18" r="2"/></svg>
@@ -5099,7 +5092,7 @@
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-value">English (Beta)</div>
+          <div class="profile-row-value">English</div>
         </div>
         <svg class="pref-lang-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
@@ -5393,7 +5386,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.34.5-alpha';
+const APP_VERSION = '0.34.7-alpha';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -5419,6 +5412,7 @@ const I18N = {
   'admin.tab.conductores':  { es: 'Conductores',             en: 'Drivers' },
   'admin.tab.casas':        { es: 'Casas',                   en: 'Houses' },
   'admin.tab.grupos':       { es: 'Grupos',                  en: 'Groups' },
+  'admin.tab.carritos':     { es: 'Carritos',                en: 'Carts' },
   'admin.tab.vmc':          { es: 'Vida y Ministerio',       en: 'Christian Life and Ministry' },
   'admin.tab.fin-semana':   { es: 'Fin de Semana',           en: 'Weekend' },
   'admin.tab.responsabilidades': { es: 'Responsabilidades', en: 'Responsibilities' },
@@ -14457,7 +14451,6 @@ async function cartLoadAllData(force) {
   cartPERSONAS = personas || [];
   cartDataLoaded = true;
 
-  document.getElementById('cartAdminBtn').style.display = cartIsAdmin() ? 'inline-flex' : 'none';
   cartRenderHome();
 }
 
