@@ -3748,7 +3748,7 @@
   grid-template-columns: 1fr;
   gap: 16px;
   width: 100%;
-  max-width: 1280px;
+  max-width: 640px;
   margin: 0 auto;
   padding: 4px 0 24px;
 }
@@ -3784,6 +3784,7 @@
 #sub-content-carritos .ct-header-list, #admin-carritos .ct-header-list {
   display: flex; justify-content: space-between; align-items: center;
   padding: 22px 20px 10px; position: relative; gap: 12px;
+  max-width: 680px; margin: 0 auto;
 }
 #sub-content-carritos .ct-header-btn, #admin-carritos .ct-header-btn {
   background: var(--bg-card);
@@ -3801,7 +3802,7 @@
 #sub-content-carritos .ct-header-btn:active, #admin-carritos .ct-header-btn:active { transform: scale(0.93); }
 
 /* ---------- SEARCH & FILTER ---------- */
-#sub-content-carritos .ct-search-wrapper, #admin-carritos .ct-search-wrapper { padding: 0 20px 12px; }
+#sub-content-carritos .ct-search-wrapper, #admin-carritos .ct-search-wrapper { padding: 0 20px 12px; max-width: 680px; margin: 0 auto; }
 #sub-content-carritos .ct-search-inner, #admin-carritos .ct-search-inner { position: relative; display: flex; align-items: center; }
 #sub-content-carritos .ct-search-icon, #admin-carritos .ct-search-icon {
   position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
@@ -4020,15 +4021,14 @@
 #sub-content-carritos .ct-empty-state, #admin-carritos .ct-empty-state { text-align: center; padding: 48px 20px; color: var(--text-gray); font-size: 0.95rem; line-height: 1.6; }
 
 /* ---------- RESPONSIVE ---------- */
-@media (max-width: 767px) {
-  #sub-content-carritos .ct-app-wrapper, #admin-carritos .ct-app-wrapper { display: block; padding: 0; }
-  #sub-content-carritos .ct-screen, #admin-carritos .ct-screen { min-height: calc(100dvh - 220px); border-radius: var(--radius); }
-  #sub-content-carritos #detail-ct-screen, #admin-carritos #detail-ct-screen { position: fixed; top: 0; left: 100%; width: 100%; height: 100%; z-index: 2000; border-radius: 0; display: flex; }
-  #sub-content-carritos #detail-ct-screen.ct-active, #admin-carritos #detail-ct-screen.ct-active { transform: translateX(-100%); }
-}
+/* Flujo de una sola pantalla a la vez (lista → detalle) en cualquier
+   tamaño de pantalla: se ve primero la lista de puntos y, al elegir uno,
+   el panel de detalle se desliza encima — sin vista dividida en escritorio. */
+#sub-content-carritos .ct-app-wrapper, #admin-carritos .ct-app-wrapper { display: block; padding: 0; position: relative; }
+#sub-content-carritos .ct-screen, #admin-carritos .ct-screen { min-height: calc(100dvh - 260px); border-radius: var(--radius); }
+#sub-content-carritos #detail-ct-screen, #admin-carritos #detail-ct-screen { position: fixed; top: 0; left: 100%; width: 100%; height: 100%; z-index: 2000; border-radius: 0; display: flex; }
+#sub-content-carritos #detail-ct-screen.ct-active, #admin-carritos #detail-ct-screen.ct-active { transform: translateX(-100%); }
 @media (min-width: 768px) {
-  #sub-content-carritos .ct-app-wrapper, #admin-carritos .ct-app-wrapper { display: grid; grid-template-columns: 420px 1fr; gap: 24px; }
-  #sub-content-carritos #detail-ct-screen, #admin-carritos #detail-ct-screen { position: relative; opacity: 1 !important; transform: none !important; left: auto !important; display: flex !important; }
   #sub-content-carritos .ct-scroll-container, #admin-carritos .ct-scroll-container { padding: 24px; }
   #admin-carritos .ct-admin-tabs { flex-wrap: wrap; overflow: visible; }
 }
@@ -5386,7 +5386,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.34.7-alpha';
+const APP_VERSION = '0.34.8-alpha';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
