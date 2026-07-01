@@ -4799,6 +4799,9 @@
       <button class="detail-btn-primary" id="detail-call-btn">Llamar</button>
       <button class="detail-btn-secondary" id="detail-map-btn">Cómo llegar</button>
     </div>
+    <div class="detail-actions" id="detail-admin-actions" style="display:none">
+      <button class="detail-btn-secondary" id="detail-admin-btn" style="width:100%">Administrar</button>
+    </div>
     <!-- Territory tabs (shown only when 2 territories assigned) -->
     <div class="detail-ter-tabs" id="detail-ter-tabs" style="display:none">
       <button class="detail-ter-tab active" id="detail-ter-tab-1" onclick="switchDetailTerTab(1)">
@@ -5219,6 +5222,19 @@
           <div id="pref-dark-maps-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
+      <!-- Toggle: función Live -->
+      <div class="profile-row" style="cursor:pointer" onclick="toggleLiveFeaturePref()">
+        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text2)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Función Live</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Detección de calles y avisos de No Pasar en tiempo real</div>
+        </div>
+        <div id="pref-live-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="pref-live-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
       <!-- Accent color — only visible when easter egg is unlocked -->
       <div id="pref-accent-section" style="display:none;animation:eggReveal 0.5s cubic-bezier(0.16,1,0.3,1) both;border-top:1px solid var(--border)">
         <div style="padding:0.75rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
@@ -5468,7 +5484,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.34.11-alpha';
+const APP_VERSION = '0.35.0-alpha';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -6017,18 +6033,12 @@ async function openGrupoDetailPage(gid) {
   // Members
   _renderGrupoDetailMembers(g);
 
-  // Map: DEV only. Photos & hospitalidad: super/aux/admin/dev
+  // Map: DEV only.
   const canEdit = _canEditGrupoContent(g);
   document.getElementById('grupo-map-actions').style.display = currentRole === 'dev' ? '' : 'none';
-  document.getElementById('grupo-photos-actions').style.display = canEdit ? '' : 'none';
-  document.getElementById('grupo-hosp-actions').style.display = canEdit ? '' : 'none';
 
-  // Load map & photos & hospitalidad from platform_config
-  await Promise.all([
-    _loadGrupoMap(gid),
-    _loadGrupoPhotos(gid),
-    _loadGrupoHosp(gid),
-  ]);
+  // Load map from platform_config (Fotos del Grupo y Fechas de Hospitalidad fueron removidas)
+  await _loadGrupoMap(gid);
 }
 
 function closeGrupoDetailPage() {
@@ -7283,6 +7293,10 @@ async function switchAdminTab(tab) {
     showToast('No tienes permisos para acceder a este módulo.', 'error');
     return;
   }
+  if (currentRole === 'admin' && ADMIN_TAB_PERM_KEY[tab] && !canAccessModule(_currentUserPermsCache, ADMIN_TAB_PERM_KEY[tab])) {
+    showToast('No tienes permisos para acceder a este módulo.', 'error');
+    return;
+  }
   document.querySelectorAll('.admin-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
   document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
   document.getElementById('admin-' + tab).classList.add('active');
@@ -7298,10 +7312,42 @@ async function switchAdminTab(tab) {
   if (tab === 'carritos') { cartOpenAdminSection(); }
 }
 
+// Mapa de tab de admin -> clave de permiso (PERM_MODULES). Solo se restringen
+// los tabs que tienen una clave de permiso asociada; 'notificaciones' se
+// controla aparte (solo DEV).
+const ADMIN_TAB_PERM_KEY = {
+  assignments: 'assignments', territories: 'territories', conductores: 'conductores',
+  casas: 'casas', grupos: 'grupos', carritos: 'carritos',
+  vmc: 'vida_ministerio', 'fin-semana': 'fin_semana', responsabilidades: 'responsabilidades',
+  'aseo-salon': 'aseo_salon', usuarios: 'usuarios',
+};
+
 async function applyAdminTabPermissions() {
-  // El cargo SemiAdmin fue eliminado: Admin ya tiene acceso completo a todos los
-  // módulos, por lo que ya no se necesita restringir tabs por permisos.
-  return;
+  // Solo el Usuario DEV decide qué módulos puede administrar cada Admin.
+  // El DEV siempre tiene acceso completo; a los Admins se les restringe según
+  // los permisos que el DEV les haya otorgado (tabla platform_users.permissions).
+  if (currentRole === 'dev') {
+    document.querySelectorAll('.admin-tab').forEach(t => { t.style.display = ''; t.style.pointerEvents = ''; t.style.opacity = ''; });
+    return;
+  }
+  await refreshCurrentUserPermsCache();
+  const perms = _currentUserPermsCache;
+  document.querySelectorAll('.admin-tab').forEach(tabBtn => {
+    const tab = tabBtn.dataset.tab;
+    if (tab === 'notificaciones') return; // controlado aparte, exclusivo DEV
+    const permKey = ADMIN_TAB_PERM_KEY[tab];
+    if (!permKey) return;
+    const allowed = canAccessModule(perms, permKey);
+    tabBtn.style.display = allowed ? '' : 'none';
+    tabBtn.style.pointerEvents = allowed ? '' : 'none';
+    tabBtn.style.opacity = allowed ? '' : '0.4';
+  });
+  // Si el tab actualmente activo quedó bloqueado, cambia al primero disponible.
+  const activeTab = document.querySelector('.admin-tab.active');
+  if (activeTab && activeTab.style.display === 'none') {
+    const firstAllowed = [...document.querySelectorAll('.admin-tab')].find(b => b.style.display !== 'none' && b.dataset.tab !== 'notificaciones');
+    if (firstAllowed) switchAdminTab(firstAllowed.dataset.tab);
+  }
 }
 
 // ── Mantener los datos frescos en sesiones largas ────────────────────────────
@@ -7446,7 +7492,13 @@ function renderSchedule() {
             return ag?.id === myGrupo.id;
           })
         : null;
-      const otherAssignments = grouped[date].filter(a => a !== myAssignment);
+      const otherAssignments = grouped[date].filter(a => a !== myAssignment)
+        .slice()
+        .sort((a, b) => {
+          const ga = _findGrupoForAssignment(a)?.numero ?? Infinity;
+          const gb = _findGrupoForAssignment(b)?.numero ?? Infinity;
+          return ga - gb;
+        });
 
       // ── My group card (normal rectangle, same style as other days) ──
       if (myAssignment) {
@@ -7612,6 +7664,23 @@ async function viewAssignment(id) {
   } else {
     mapBtn.onclick = null;
     mapBtn.style.opacity = '0.45';
+  }
+
+  // ── Botón "Administrar" — solo visible si el usuario puede editar Asignaciones ──
+  const adminActionsWrap = document.getElementById('detail-admin-actions');
+  const adminBtn = document.getElementById('detail-admin-btn');
+  let canManageAssignments = false;
+  if (currentRole === 'dev') canManageAssignments = true;
+  else if (currentRole === 'admin') {
+    await refreshCurrentUserPermsCache();
+    canManageAssignments = canAccessModule(_currentUserPermsCache, 'assignments');
+  }
+  if (canManageAssignments) {
+    adminActionsWrap.style.display = '';
+    adminBtn.onclick = () => goToAdminAssignment(a.id);
+  } else {
+    adminActionsWrap.style.display = 'none';
+    adminBtn.onclick = null;
   }
 
   // ── Territory tabs setup ──
@@ -7872,6 +7941,7 @@ function _liveOnError(err) {
   showToast(msgs[err.code] || 'Error de geolocalizaci\u00f3n', 'error');
 }
 function toggleLiveMode() {
+  if (!isLiveFeatureEnabled()) { showToast('La función Live está desactivada en Configuración.', 'error'); return; }
   if (_liveActive) { stopLiveMode(); } else { startLiveMode(); }
 }
 function startLiveMode() {
@@ -7910,6 +7980,7 @@ function _liveUpdateBtnVisibility() {
   const sec  = document.getElementById('detail-no-pasar-section');
   const wrap = document.getElementById('live-btn-wrap');
   if (!wrap) return;
+  if (!isLiveFeatureEnabled()) { wrap.style.display = 'none'; return; }
   const hasEntries = sec && sec.style.display !== 'none'
     && document.querySelectorAll('#detail-no-pasar-list .no-pasar-item').length > 0;
   wrap.style.display = hasEntries ? '' : 'none';
@@ -8194,6 +8265,16 @@ function openAssignmentModal(a) {
 }
 function closeAssignmentModal() { document.getElementById('assignment-modal').classList.remove('open'); editingAssignmentId = null; }
 function editAssignment(id) { openAssignmentModal(assignments.find(a=>a.id===id)); }
+
+// Va desde la pantalla de detalle de una asignación directo al panel de
+// administración, con esa asignación específica lista para editar.
+async function goToAdminAssignment(id) {
+  closeDetail();
+  showPage('admin');
+  await new Promise(r => setTimeout(r, 60)); // let admin page open
+  switchAdminTab('assignments');
+  editAssignment(id);
+}
 
 // Toggle grupo field based on selected date
 function asDateChanged() {
@@ -11066,6 +11147,7 @@ async function openPreferencias() {
   document.getElementById('pref-version-value').textContent = 'Versión ' + APP_VERSION;
   updatePrefThemeActive();
   updateDarkMapToggleUI();
+  updateLiveToggleUI();
   await renderPrefNotifList();
 }
 function closePreferencias() {
@@ -11098,6 +11180,27 @@ function toggleDarkMapsPref() {
   localStorage.setItem('fleming_dark_maps', current ? 'false' : 'true');
   updateDarkMapToggleUI();
   if (currentSubTab === 'territorios') renderTerritoryView();
+}
+
+// ── Función Live: activar/desactivar por completo ────────────────────────────
+function isLiveFeatureEnabled() {
+  return localStorage.getItem('fleming_live_enabled') !== 'false'; // default true
+}
+function updateLiveToggleUI() {
+  const enabled = isLiveFeatureEnabled();
+  const toggle = document.getElementById('pref-live-toggle');
+  const thumb  = document.getElementById('pref-live-thumb');
+  if (!toggle || !thumb) return;
+  toggle.style.background = enabled ? 'var(--accent)' : 'var(--surface3)';
+  thumb.style.left = enabled ? '21px' : '3px';
+}
+function toggleLiveFeaturePref() {
+  const current = isLiveFeatureEnabled();
+  const next = !current;
+  localStorage.setItem('fleming_live_enabled', next ? 'true' : 'false');
+  updateLiveToggleUI();
+  if (!next && _liveActive) stopLiveMode();
+  _liveUpdateBtnVisibility();
 }
 
 // ── Easter Egg: Accent Color Picker ────────────────────────────────────────
@@ -11307,11 +11410,17 @@ async function renderPrefNotifList() {
   const prefs = await loadNotifPrefs();
 
   let html = '';
-  Object.entries(NOTIF_GROUPS).forEach(([groupKey, g]) => {
-    const cats = NOTIF_CATEGORIES.filter(c => c.group === groupKey);
+  const SECTION_ORDER = [
+    { key: 'predicacion', label: 'Predicación' },
+    { key: 'reuniones',   label: 'Reuniones' },
+    { key: 'sistema',     label: 'Sistema' },
+  ];
+  SECTION_ORDER.forEach(sec => {
+    const cats = NOTIF_CATEGORIES.filter(c => c.section === sec.key && c.id !== 'solicitud-cuenta');
     if (!cats.length) return;
-    html += `<div class="pref-notif-group-header">${g.label}</div>`;
+    html += `<div class="pref-notif-group-header">${sec.label}</div>`;
     html += cats.map(cat => {
+      const g = NOTIF_GROUPS[cat.group] || NOTIF_GROUPS.sistema;
       const checked = cat.mandatory ? true : (prefs[cat.id] !== false);
       const lockOrToggle = cat.mandatory
         ? `<svg class="pref-notif-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
@@ -11786,18 +11895,21 @@ const NOTIF_GROUPS = {
 // categorías marcadas como mandatory NO pueden desactivarse desde Preferencias.
 // El campo "group" indica a qué macro-categoría (NOTIF_GROUPS) pertenece para
 // fines de visualización (pill con ícono y color) y filtrado.
+// `section` agrupa las categorías dentro de Configuración > Notificaciones en
+// dos sub-categorías visuales: "Predicación" y "Reuniones". No afecta el color
+// ni ícono de cada notificación en el feed (eso sigue usando `group`).
 const NOTIF_CATEGORIES = [
-  { id: 'casa',              label: 'Predicación de Casa en Casa', mandatory: false, group: 'casa' },
-  { id: 'grupo',             label: 'Grupo de Servicio',           mandatory: false, group: 'grupos' },
-  { id: 'vida-ministerio',   label: 'Vida y Ministerio',           mandatory: true,  group: 'reuniones' },
-  { id: 'fin-semana',        label: 'Fin de Semana',               mandatory: true,  group: 'reuniones' },
-  { id: 'aseo',              label: 'Aseo del Salón',               mandatory: false, group: 'reuniones' },
-  { id: 'hospitalidad',      label: 'Hospitalidad',                 mandatory: false, group: 'reuniones' },
-  { id: 'responsabilidades', label: 'Responsabilidades',           mandatory: true,  group: 'reuniones' },
-  { id: 'sistema',           label: 'Avisos de la Plataforma',     mandatory: true,  group: 'sistema' },
-  { id: 'solicitud-cuenta',  label: 'Solicitudes de cuenta',        mandatory: true,  group: 'sistema' },
-  { id: 'live',              label: 'Notificaciones Live',          mandatory: false, group: 'live'   },
-  { id: 'carritos',          label: 'Carritos',                     mandatory: false, group: 'carritos' },
+  { id: 'casa',              label: 'Predicación de Casa en Casa', mandatory: false, group: 'casa',     section: 'predicacion' },
+  { id: 'grupo',             label: 'Grupo de Servicio',           mandatory: false, group: 'grupos',   section: 'predicacion' },
+  { id: 'live',              label: 'Notificaciones Live',          mandatory: false, group: 'live',     section: 'predicacion' },
+  { id: 'carritos',          label: 'Carritos',                     mandatory: false, group: 'carritos', section: 'predicacion' },
+  { id: 'vida-ministerio',   label: 'Vida y Ministerio',           mandatory: true,  group: 'reuniones', section: 'reuniones' },
+  { id: 'fin-semana',        label: 'Fin de Semana',               mandatory: true,  group: 'reuniones', section: 'reuniones' },
+  { id: 'aseo',              label: 'Aseo del Salón',               mandatory: false, group: 'reuniones', section: 'reuniones' },
+  { id: 'hospitalidad',      label: 'Hospitalidad',                 mandatory: false, group: 'reuniones', section: 'reuniones' },
+  { id: 'responsabilidades', label: 'Responsabilidades',           mandatory: true,  group: 'reuniones', section: 'reuniones' },
+  { id: 'sistema',           label: 'Avisos de la Plataforma',     mandatory: true,  group: 'sistema',  section: 'sistema' },
+  { id: 'solicitud-cuenta',  label: 'Solicitudes de cuenta',        mandatory: true,  group: 'sistema',  section: 'sistema' },
 ];
 
 // Devuelve la key de NOTIF_GROUPS correspondiente a una notificación.
@@ -14084,34 +14196,6 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
           Eliminar mapa
         </button>
         <input type="file" id="grupo-map-file-input" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="handleGrupoMapUpload(event)">
-      </div>
-    </div>
-
-    <!-- Fotos del Grupo -->
-    <div class="grupo-section">
-      <div class="grupo-section-title">Fotos del Grupo</div>
-      <div class="grupo-photos-empty" id="grupo-photos-empty">Sin fotos del grupo aún</div>
-      <div class="grupo-photos-grid" id="grupo-photos-grid" style="display:none"></div>
-      <div class="grupo-photos-actions" id="grupo-photos-actions" style="display:none">
-        <button class="grupo-upload-btn" onclick="document.getElementById('grupo-photo-file-input').click()">
-          <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          Agregar foto
-        </button>
-        <input type="file" id="grupo-photo-file-input" accept="image/*" style="display:none" onchange="handleGrupoPhotoUpload(event)">
-      </div>
-    </div>
-
-    <!-- Hospitalidad -->
-    <div class="grupo-section">
-      <div class="grupo-section-title">Fechas de Hospitalidad</div>
-      <div id="grupo-hosp-list">
-        <div class="grupo-hosp-row" style="justify-content:center;color:var(--text3);font-size:0.82rem">Sin fechas registradas</div>
-      </div>
-      <div class="grupo-hosp-actions" id="grupo-hosp-actions" style="display:none">
-        <button class="grupo-upload-btn" onclick="openAddHospModal()">
-          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Agregar fecha
-        </button>
       </div>
     </div>
 
