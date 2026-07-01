@@ -3685,6 +3685,9 @@
 
   /* Admin labels panel inside users panel */
   .labels-grid { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 6px; }
+  .perm-modules-grid { display: flex; flex-direction: column; gap: 4px; }
+  .perm-modules-group-header { font-size: 0.7rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin: 10px 0 2px; }
+  .perm-modules-group-header:first-child { margin-top: 0; }
   .label-toggle {
     display: flex; align-items: center; gap: 6px;
     padding: 6px 12px; border-radius: 20px; cursor: pointer;
@@ -5489,7 +5492,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.35.1-alpha';
+const APP_VERSION = '0.35.2-alpha';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -6647,6 +6650,21 @@ function toggleLabel(uid, labelKey) {
   if (el) {
     el.className = `label-toggle${labels[labelKey] ? ' active-' + labelKey : ''}`;
   }
+}
+
+// Activa/desactiva un módulo del panel de Administración para un Admin
+// específico. Solo el DEV puede llamar a esto (el botón solo se renderiza
+// para isDev). El cambio se aplica en memoria; se persiste al presionar
+// "Guardar cambios" (saveProfileChanges), igual que las Etiquetas.
+function toggleUserPermissionModule(uid, key) {
+  if (currentRole !== 'dev') return;
+  const u = activeUsers.find(x => x.id === uid);
+  if (!u) return;
+  const perms = parsePermissions(u.permissions);
+  perms[key] = !perms[key];
+  u.permissions = perms;
+  const el = document.getElementById(`permtoggle-${uid}-${key}`);
+  if (el) el.classList.toggle('on', perms[key]);
 }
 
 function renderAdminGrupos() {
@@ -10456,6 +10474,27 @@ function openUserProfilePage(uid) {
         </div>
 
         </div>
+
+        ${(isDev && u.role === 'admin') ? `
+        <div style="margin-top:0.9rem">
+          <div class="form-label2" style="margin-bottom:6px">Módulos permitidos</div>
+          <div class="uprofile-row-label" style="font-size:0.76rem;color:var(--text3);margin-bottom:8px">Elige a qué secciones del panel de Administración puede acceder este Admin.</div>
+          <div class="perm-modules-grid" id="perm-grid-${u.id}">
+            ${['predicacion','reuniones','sistema'].map(grp => {
+              const modsInGroup = PERM_MODULES.filter(m => m.group === grp);
+              if (!modsInGroup.length) return '';
+              const grpLabel = grp === 'predicacion' ? 'Predicación' : (grp === 'reuniones' ? 'Reuniones' : 'Sistema');
+              return `
+                <div class="perm-modules-group-header">${grpLabel}</div>
+                ${modsInGroup.map(m => `
+                  <div class="profile-row" style="padding:0.55rem 0.7rem;cursor:pointer" onclick="toggleUserPermissionModule('${u.id}','${m.key}')">
+                    <div class="profile-row-icon" style="width:30px;height:30px;background:var(--surface3);color:var(--text2)">${m.icon}</div>
+                    <div class="profile-row-content"><div class="profile-row-label" style="font-size:0.85rem">${m.label}</div></div>
+                    <div class="toggle-switch${perms[m.key] ? ' on' : ''}" id="permtoggle-${u.id}-${m.key}" onclick="event.stopPropagation();toggleUserPermissionModule('${u.id}','${m.key}')"><div class="toggle-thumb"></div></div>
+                  </div>`).join('')}`;
+            }).join('')}
+          </div>
+        </div>` : ''}
 
         <div style="margin-top:0.9rem">
           <div class="form-label2" style="margin-bottom:6px">Etiquetas</div>
