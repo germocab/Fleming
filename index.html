@@ -3702,10 +3702,10 @@
   .label-toggle.active-siervo svg { opacity: 1; }
 
 
-/* ===== CARRITOS v0.34.5-alpha — integrado en el diseño de la plataforma ===== */
+/* ===== CARRITOS v0.34.9-alpha — integrado en el diseño de la plataforma ===== */
 
 /* =========================================================================
-   CARRITOS (v0.34.5-alpha) — estilos con ámbito bajo #sub-content-carritos.
+   CARRITOS (v0.34.9-alpha) — estilos con ámbito bajo #sub-content-carritos.
    Las variables se mapean a los tokens de diseño de la plataforma para que
    el modo claro/oscuro/automático (data-theme en <html>) se herede solo.
    ========================================================================= */
@@ -3841,11 +3841,16 @@
 }
 
 /* ---------- LOCATION GRID ---------- */
-#sub-content-carritos .ct-grid-2x2, #admin-carritos .ct-grid-2x2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; align-items: stretch; }
+/* auto-fill + minmax(…,1fr) estira cada tarjeta hasta ocupar toda la pista
+   cuando solo entra 1 columna (pantallas angostas) — por eso se limita el
+   ancho máximo y se centra cada tarjeta dentro de su celda. En móvil se fija
+   una grilla de 3 columnas (ver RESPONSIVE) para un resultado predecible. */
+#sub-content-carritos .ct-grid-2x2, #admin-carritos .ct-grid-2x2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 12px; align-items: stretch; }
 #sub-content-carritos .ct-location-card, #admin-carritos .ct-location-card {
   padding: 14px; border-radius: 25px; cursor: pointer; background-color: var(--bg-card);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; gap: 14px; border: 2px solid transparent; aspect-ratio: 1 / 1; width: 100%;
+  text-align: center; gap: 14px; border: 2px solid transparent; aspect-ratio: 1 / 1;
+  width: 100%; max-width: 180px; margin: 0 auto;
   overflow: hidden;
   transition: transform var(--transition), background-color var(--transition), border-color var(--transition), box-shadow var(--transition);
 }
@@ -3922,6 +3927,8 @@
   transition: left 0.38s cubic-bezier(0.22, 1, 0.36, 1);
   display: flex; flex-direction: column;
 }
+#sub-content-carritos .ct-turn-detail-screen.ct-turn-active, #admin-carritos .ct-turn-detail-screen.ct-turn-active { left: 0; }
+#sub-content-carritos .ct-turn-panel, #admin-carritos .ct-turn-panel { display: flex; flex-direction: column; width: 100%; height: 100%; overflow: hidden; }
 
 /* ---------- HEADER MENU / TOAST reuse note ---------- */
 /* Carritos ya no usa su propio menú de tema/logout: reutiliza el de la
@@ -4021,16 +4028,69 @@
 #sub-content-carritos .ct-empty-state, #admin-carritos .ct-empty-state { text-align: center; padding: 48px 20px; color: var(--text-gray); font-size: 0.95rem; line-height: 1.6; }
 
 /* ---------- RESPONSIVE ---------- */
-/* Flujo de una sola pantalla a la vez (lista → detalle) en cualquier
-   tamaño de pantalla: se ve primero la lista de puntos y, al elegir uno,
-   el panel de detalle se desliza encima — sin vista dividida en escritorio. */
+/* En móvil: flujo de una sola pantalla a la vez (lista → detalle); al elegir
+   un punto, el panel de detalle ocupa toda la pantalla y se desliza encima.
+   En escritorio (≥768px, ver más abajo): el detalle se abre como Pop-Up
+   centrado, igual que el resto de los modales de la plataforma (asignaciones
+   de casa en casa, etc.), en vez de ocupar toda la pantalla. */
 #sub-content-carritos .ct-app-wrapper, #admin-carritos .ct-app-wrapper { display: block; padding: 0; position: relative; }
 #sub-content-carritos .ct-screen, #admin-carritos .ct-screen { min-height: calc(100dvh - 260px); border-radius: var(--radius); }
-#sub-content-carritos #detail-ct-screen, #admin-carritos #detail-ct-screen { position: fixed; top: 0; left: 100%; width: 100%; height: 100%; z-index: 2000; border-radius: 0; display: flex; }
+#sub-content-carritos #detail-ct-screen, #admin-carritos #detail-ct-screen { position: fixed; top: 0; left: 100%; width: 100%; height: 100%; z-index: 3000; border-radius: 0; display: flex; }
 #sub-content-carritos #detail-ct-screen.ct-active, #admin-carritos #detail-ct-screen.ct-active { transform: translateX(-100%); }
+#sub-content-carritos .ct-detail-panel, #admin-carritos .ct-detail-panel { display: flex; flex-direction: column; width: 100%; height: 100%; overflow: hidden; }
+#sub-content-carritos .ct-detail-topbar, #admin-carritos .ct-detail-topbar { padding: 18px 20px 0; flex-shrink: 0; display: flex; align-items: center; gap: 12px; }
+#sub-content-carritos .ct-detail-close-btn, #admin-carritos .ct-detail-close-btn { display: none; }
+
+/* Grilla de puntos en móvil: 3 columnas fijas para que las tarjetas se vean
+   proporcionadas y no ocupen casi todo el ancho de la pantalla. */
+@media (max-width: 480px) {
+  #sub-content-carritos .ct-grid-2x2, #admin-carritos .ct-grid-2x2 { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  #sub-content-carritos .ct-location-card, #admin-carritos .ct-location-card { padding: 10px; border-radius: 20px; gap: 8px; max-width: none; }
+  #sub-content-carritos .ct-status-dot, #admin-carritos .ct-status-dot { width: 34px; height: 34px; }
+  #sub-content-carritos .ct-location-card h2, #admin-carritos .ct-location-card h2 { font-size: 0.76rem; }
+}
+
 @media (min-width: 768px) {
   #sub-content-carritos .ct-scroll-container, #admin-carritos .ct-scroll-container { padding: 24px; }
   #admin-carritos .ct-admin-tabs { flex-wrap: wrap; overflow: visible; }
+
+  /* Detalle de punto (Pop-Up centrado, coherente con el resto de los
+     modales de la plataforma: fondo atenuado + panel centrado). */
+  #sub-content-carritos #detail-ct-screen, #admin-carritos #detail-ct-screen {
+    position: fixed; inset: 0; width: 100%; height: 100%; z-index: 3000;
+    background: var(--modal-overlay-bg); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    align-items: center; justify-content: center; padding: 24px;
+    transform: none; display: none;
+  }
+  #sub-content-carritos #detail-ct-screen.ct-active, #admin-carritos #detail-ct-screen.ct-active {
+    display: flex; transform: none; animation: fadeIn 0.2s ease;
+  }
+  #sub-content-carritos .ct-detail-panel, #admin-carritos .ct-detail-panel {
+    width: 100%; max-width: 640px; max-height: 88vh;
+    background: var(--bg-ct-screen); border-radius: var(--radius);
+    border: 1px solid var(--border-color); box-shadow: var(--shadow-lg);
+    animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+  #sub-content-carritos .ct-detail-topbar, #admin-carritos .ct-detail-topbar { padding: 16px 20px 12px; border-bottom: 1px solid var(--border-color); }
+  #sub-content-carritos .ct-detail-back-btn, #admin-carritos .ct-detail-back-btn { display: none; }
+  #sub-content-carritos .ct-detail-close-btn, #admin-carritos .ct-detail-close-btn { display: flex; }
+
+  /* Ficha de turno: mismo tratamiento de Pop-Up centrado, anidado sobre el
+     detalle del punto (z-index superior). */
+  #sub-content-carritos .ct-turn-detail-screen, #admin-carritos .ct-turn-detail-screen {
+    left: 0; top: 0; background: var(--modal-overlay-bg); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    z-index: 3100; display: none; align-items: center; justify-content: center; padding: 24px;
+    transition: none;
+  }
+  #sub-content-carritos .ct-turn-detail-screen.ct-turn-active, #admin-carritos .ct-turn-detail-screen.ct-turn-active {
+    display: flex; animation: fadeIn 0.2s ease;
+  }
+  #sub-content-carritos .ct-turn-panel, #admin-carritos .ct-turn-panel {
+    width: 100%; max-width: 480px; max-height: 85vh;
+    background: var(--bg-ct-screen); border-radius: var(--radius);
+    border: 1px solid var(--border-color); box-shadow: var(--shadow-lg);
+    animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
 }
 #sub-content-carritos #locationsList, #admin-carritos #locationsList { flex: 1; padding-bottom: 24px; display: block; }
 
@@ -4248,30 +4308,37 @@
       </div>
     </section>
 
-    <section class="ct-screen" id="detail-ct-screen">
-      <div style="padding: 18px 20px 0;">
-        <button onclick="cartGoBack()" class="ct-header-btn" aria-label="Volver">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-        </button>
-      </div>
-      <div class="ct-scroll-container" id="cartDetailScrollBody">
-        <h1 id="cartCurrentPointTitle" style="margin-top:12px; margin-bottom:16px; font-size: 1.7rem; line-height:1.2;">Punto</h1>
-        <div id="cartLogisticsInfo"></div>
-        <div id="cartDaysRow" class="ct-days-row" style="margin: 16px 0;"></div>
-        <div id="cartSlotsContainer"></div>
+    <section class="ct-screen" id="detail-ct-screen" onclick="cartOverlayClick(event)">
+      <div class="ct-detail-panel" onclick="event.stopPropagation()">
+        <div class="ct-detail-topbar">
+          <button onclick="cartGoBack()" class="ct-header-btn ct-detail-back-btn" aria-label="Volver">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button onclick="cartGoBack()" class="ct-header-btn ct-detail-close-btn" aria-label="Cerrar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="ct-scroll-container" id="cartDetailScrollBody">
+          <h1 id="cartCurrentPointTitle" style="margin-top:12px; margin-bottom:16px; font-size: 1.7rem; line-height:1.2;">Punto</h1>
+          <div id="cartLogisticsInfo"></div>
+          <div id="cartDaysRow" class="ct-days-row" style="margin: 16px 0;"></div>
+          <div id="cartSlotsContainer"></div>
+        </div>
       </div>
     </section>
   </div>
 
-  <div id="cartTurnDetailScreen" class="ct-turn-detail-screen">
-    <div style="padding: 22px 20px 10px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--border-color);">
-      <button onclick="cartCloseTurnDetail()" class="ct-header-btn" aria-label="Cerrar detalle del turno">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-      <h2 style="margin:0; font-size:1.1rem;">Ficha de Turno</h2>
+  <div id="cartTurnDetailScreen" class="ct-turn-detail-screen" onclick="cartTurnOverlayClick(event)">
+    <div class="ct-turn-panel" onclick="event.stopPropagation()">
+      <div style="padding: 22px 20px 10px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--border-color);">
+        <button onclick="cartCloseTurnDetail()" class="ct-header-btn" aria-label="Cerrar detalle del turno">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <h2 style="margin:0; font-size:1.1rem;">Ficha de Turno</h2>
+      </div>
+      <div class="ct-scroll-container" id="cartTurnDetailBody"></div>
+      <div id="cartTurnActionBar" style="padding:16px 20px 24px;"></div>
     </div>
-    <div class="ct-scroll-container" id="cartTurnDetailBody"></div>
-    <div id="cartTurnActionBar" style="padding:16px 20px 24px;"></div>
   </div>
 
   <!-- FORMULARIO GENÉRICO (puntos / turnos / personas) -->
@@ -5386,7 +5453,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.34.8-alpha';
+const APP_VERSION = '0.34.9-alpha';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -14369,9 +14436,9 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
 </div>
 
 <script>
-/* ===== CARRITOS v0.34.5-alpha ===== */
+/* ===== CARRITOS v0.34.9-alpha ===== */
 // =========================================================================
-// CARRITOS (v0.34.5-alpha)
+// CARRITOS (v0.34.9-alpha)
 // Usa el cliente Supabase (`sb`), el usuario logueado (`currentUser.name`)
 // y el rol (`currentRole`) de la plataforma. Tablas propias: cart_puntos,
 // cart_turnos, cart_personas (mismo proyecto Supabase que el resto de la
@@ -14556,7 +14623,7 @@ function cartOpenTurnDetail(id) {
     }
   }
   document.getElementById('cartTurnActionBar').innerHTML = btns;
-  document.getElementById('cartTurnDetailScreen').style.left = '0';
+  document.getElementById('cartTurnDetailScreen').classList.add('ct-turn-active');
 }
 
 async function cartReservarTurno(turnoId) {
@@ -14635,7 +14702,13 @@ function cartClearFilters() {
   cartHandleSearch();
 }
 function cartGoBack() { document.getElementById('detail-ct-screen').classList.remove('ct-active'); }
-function cartCloseTurnDetail() { document.getElementById('cartTurnDetailScreen').style.left = '100%'; }
+function cartCloseTurnDetail() { document.getElementById('cartTurnDetailScreen').classList.remove('ct-turn-active'); }
+// En escritorio el detalle se muestra como Pop-Up con fondo atenuado; un
+// click fuera del panel (sobre el fondo) lo cierra, igual que el resto de
+// los modales de la plataforma. En móvil el panel ocupa toda la pantalla,
+// así que este listener no tiene efecto práctico.
+function cartOverlayClick(e) { if (e.target.id === 'detail-ct-screen') cartGoBack(); }
+function cartTurnOverlayClick(e) { if (e.target.id === 'cartTurnDetailScreen') cartCloseTurnDetail(); }
 
 // ---------- ADMINISTRACIÓN ----------
 // El panel de administración de Carritos ahora vive dentro del panel de
