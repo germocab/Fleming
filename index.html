@@ -3701,6 +3701,341 @@
   .label-toggle.active-anciano svg,
   .label-toggle.active-siervo svg { opacity: 1; }
 
+
+/* ===== CARRITOS v0.34.0-alpha ===== */
+
+/* =========================================================================
+   CARRITOS (v0.34.0-alpha) — estilos con ámbito bajo #sub-content-carritos.
+   Las variables se mapean a los tokens de diseño de la plataforma para que
+   el modo claro/oscuro/automático (data-theme en <html>) se herede solo.
+   ========================================================================= */
+#sub-content-carritos {
+  --bg-body: var(--bg);
+  --bg-ct-screen: var(--surface);
+  --bg-card: var(--surface2);
+  --bg-card-hover: var(--surface3);
+  --text-main: var(--text);
+  --text-gray: var(--text2);
+  --text-light: var(--text3);
+  --primary-ct-orange: #f36100;
+  --primary-ct-orange-light: rgba(243,97,0,0.10);
+  --primary-ct-orange-mid: rgba(243,97,0,0.18);
+  --primary-blue: #0056ff;
+  --primary-green: var(--green);
+  --ct-danger: var(--red);
+  --radius: 22px;
+  --radius-sm: 14px;
+  --radius-xs: 10px;
+  --border-color: var(--border);
+  --shadow-sm: var(--shadow);
+  --shadow: var(--shadow);
+  --shadow-lg: var(--shadow-lg);
+  --transition-fast: 0.15s ease;
+  --transition: 0.25s ease;
+  --transition-slow: 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  color: var(--text-main);
+}
+
+/* ---------- LAYOUT ---------- */
+#sub-content-carritos .ct-app-wrapper {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 4px 0 24px;
+}
+#sub-content-carritos .ct-screen {
+  background-color: var(--bg-ct-screen);
+  border-radius: var(--radius);
+  overflow: hidden;
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  position: relative;
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+#sub-content-carritos .ct-scroll-container {
+  padding: 20px;
+  overflow-y: auto;
+  flex-grow: 1;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+#sub-content-carritos .ct-scroll-container::-webkit-scrollbar { width: 5px; }
+#sub-content-carritos .ct-scroll-container::-webkit-scrollbar-track { background: transparent; }
+#sub-content-carritos .ct-scroll-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 99px; }
+
+#sub-content-carritos .ct-screen { transition: transform var(--transition-slow), opacity var(--transition); }
+#sub-content-carritos #detail-ct-screen { opacity: 0; display: none; }
+#sub-content-carritos #detail-ct-screen.ct-active { opacity: 1; display: flex; }
+
+/* ---------- HEADER ---------- */
+#sub-content-carritos .ct-header-list {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 22px 20px 10px; position: relative; gap: 12px;
+}
+#sub-content-carritos .ct-header-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  transition: background-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+#sub-content-carritos .ct-header-btn:hover { background: var(--bg-card-hover); box-shadow: var(--shadow-sm); }
+#sub-content-carritos .ct-header-btn:active { transform: scale(0.93); }
+#sub-content-carritos .ct-admin-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--primary-ct-orange-light); color: var(--primary-ct-orange);
+  border: 1px solid var(--primary-ct-orange-mid);
+  font-weight: 800; font-size: 0.78rem;
+  padding: 9px 14px; border-radius: 99px; cursor: pointer;
+  transition: background-color var(--transition-fast);
+  white-space: nowrap;
+}
+#sub-content-carritos .ct-admin-pill:hover { background: var(--primary-ct-orange-mid); }
+
+/* ---------- SEARCH & FILTER ---------- */
+#sub-content-carritos .ct-search-wrapper { padding: 0 20px 12px; }
+#sub-content-carritos .ct-search-inner { position: relative; display: flex; align-items: center; }
+#sub-content-carritos .ct-search-inner input {
+  width: 100%; padding: 13px 50px 13px 18px; border-radius: 16px;
+  border: 1.5px solid var(--border-color); background: var(--bg-card); color: var(--text-main);
+  outline: none; font-size: 0.95rem; font-family: inherit;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+#sub-content-carritos .ct-search-inner input:focus { border-color: var(--primary-ct-orange); box-shadow: 0 0 0 3px var(--primary-ct-orange-light); }
+#sub-content-carritos .ct-search-inner input::placeholder { color: var(--text-light); }
+#sub-content-carritos .ct-search-filter-btn {
+  position: absolute; right: 12px; background: none; border: none; cursor: pointer;
+  color: var(--text-gray); padding: 4px; border-radius: 8px; display: flex; align-items: center;
+  transition: color var(--transition-fast);
+}
+#sub-content-carritos .ct-search-filter-btn:hover { color: var(--primary-ct-orange); }
+#sub-content-carritos #filterMenu { max-height: 0; opacity: 0; overflow: hidden; transform: translateY(-6px); transition: max-height 0.35s ease, opacity 0.25s ease, transform 0.3s ease; }
+#sub-content-carritos #filterMenu.ct-open { max-height: 300px; opacity: 1; transform: translateY(0); }
+#sub-content-carritos .ct-filter-panel { margin-top: 10px; padding: 14px 16px; background: var(--bg-card); border-radius: var(--radius-sm); border: 1px solid var(--border-color); }
+
+/* ---------- CHIPS ---------- */
+#sub-content-carritos .ct-filter-chip {
+  padding: 8px 16px; border-radius: 99px; background: var(--bg-ct-screen);
+  border: 1.5px solid var(--border-color); font-size: 0.83rem; font-weight: 700;
+  cursor: pointer; color: var(--text-gray); transition: all var(--transition-fast);
+  white-space: nowrap; user-select: none;
+}
+#sub-content-carritos .ct-filter-chip:hover { border-color: var(--primary-ct-orange); color: var(--primary-ct-orange); }
+#sub-content-carritos .ct-filter-chip.ct-active {
+  background: var(--primary-ct-orange); color: white; border-color: var(--primary-ct-orange);
+  box-shadow: 0 2px 8px rgba(243,97,0,0.28);
+}
+
+/* ---------- LOCATION GRID ---------- */
+#sub-content-carritos .ct-grid-2x2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; align-items: stretch; }
+#sub-content-carritos .ct-location-card {
+  padding: 14px; border-radius: 25px; cursor: pointer; background-color: var(--bg-card);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; gap: 14px; border: 2px solid transparent; aspect-ratio: 1 / 1; width: 100%;
+  overflow: hidden;
+  transition: transform var(--transition), background-color var(--transition), border-color var(--transition), box-shadow var(--transition);
+}
+#sub-content-carritos .ct-location-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); background-color: var(--bg-card-hover); }
+#sub-content-carritos .ct-location-card:active { transform: scale(0.97); }
+#sub-content-carritos .ct-status-dot { width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 3px 10px rgba(0,0,0,0.18); }
+#sub-content-carritos .ct-location-card h2 { margin: 0; font-size: 0.9rem; font-weight: 800; line-height: 1.3; color: var(--text-main); }
+
+/* ---------- SECTION TITLE ---------- */
+#sub-content-carritos .ct-section-title {
+  font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px;
+  color: var(--text-gray); margin: 18px 0 10px 2px;
+}
+
+/* ---------- MY SHIFT CARD ---------- */
+#sub-content-carritos .ct-my-shift-card {
+  background: var(--bg-card); border: 1.5px solid var(--border-color); border-radius: 18px;
+  padding: 16px 18px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 6px;
+  cursor: pointer; transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+#sub-content-carritos .ct-my-shift-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+#sub-content-carritos .ct-my-shift-card:active { transform: scale(0.98); }
+
+/* ---------- LOGISTICS BOXES ---------- */
+#sub-content-carritos .ct-logistics-box {
+  background: var(--bg-card); border: 1.5px solid var(--border-color); border-radius: 18px;
+  padding: 18px 20px; margin-bottom: 12px; box-shadow: var(--shadow-sm);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+#sub-content-carritos .ct-logistics-box.ct-orange { background: var(--primary-ct-orange-light); border-color: var(--primary-ct-orange-mid); }
+#sub-content-carritos .ct-logistics-box h4 {
+  margin: 0 0 6px 0; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.2px;
+  color: var(--text-gray); font-weight: 800; display: flex; align-items: center; gap: 6px;
+}
+#sub-content-carritos .ct-logistics-box p { margin: 0; font-weight: 700; font-size: 1rem; color: var(--text-main); line-height: 1.4; }
+
+/* ---------- MINI BUTTONS ---------- */
+#sub-content-carritos .ct-btn-mini {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 10px 12px; border-radius: var(--radius-xs); text-decoration: none;
+  font-size: 0.82rem; font-weight: 700;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+  border: 1.5px solid var(--border-color); background: var(--bg-ct-screen); color: var(--text-main);
+}
+#sub-content-carritos .ct-btn-mini:hover { background: var(--bg-card-hover); box-shadow: var(--shadow-sm); }
+#sub-content-carritos .ct-btn-mini:active { transform: scale(0.95); }
+#sub-content-carritos .ct-logistics-box.ct-orange .ct-btn-mini { border-color: var(--primary-ct-orange-mid); color: var(--primary-ct-orange); background: rgba(255,255,255,0.7); }
+:root[data-theme="dark"] #sub-content-carritos .ct-logistics-box.ct-orange .ct-btn-mini { background: rgba(243,97,0,0.1); }
+#sub-content-carritos .ct-btn-whatsapp { background: #25D366 !important; color: white !important; border-color: #25D366 !important; box-shadow: 0 2px 8px rgba(37,211,102,0.28) !important; }
+#sub-content-carritos .ct-btn-whatsapp:hover { opacity: 0.92; }
+
+/* ---------- SHIFT SLOTS ---------- */
+#sub-content-carritos .ct-slot {
+  padding: 18px 20px; border-radius: 25px; margin-bottom: 10px; color: white;
+  display: flex; flex-direction: column; gap: 10px; cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast);
+}
+#sub-content-carritos .ct-slot:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
+#sub-content-carritos .ct-slot:active { transform: scale(0.98); }
+#sub-content-carritos .ct-turno-M  { background: linear-gradient(135deg, #f36100, #ff8533); box-shadow: 0 3px 10px rgba(243,97,0,0.3); }
+#sub-content-carritos .ct-turno-T  { background: linear-gradient(135deg, #0056ff, #3377ff); box-shadow: 0 3px 10px rgba(0,86,255,0.25); }
+#sub-content-carritos .ct-turno-TD { background: linear-gradient(135deg, #16a34a, #22c55e); box-shadow: 0 3px 10px rgba(22,163,74,0.25); }
+#sub-content-carritos .ct-turno-RESERVADO { background: linear-gradient(135deg, #e08600, #f5a623); box-shadow: 0 3px 10px rgba(224,134,0,0.28); }
+#sub-content-carritos .ct-slot-pill { background: rgba(255,255,255,0.22); padding: 5px 13px; border-radius: 99px; width: fit-content; font-size: 0.85rem; font-weight: 700; backdrop-filter: blur(4px); }
+
+/* ---------- DAYS ROW ---------- */
+#sub-content-carritos .ct-days-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+#sub-content-carritos .ct-days-row::-webkit-scrollbar { display: none; }
+
+/* ---------- TURN DETAIL SCREEN ---------- */
+#sub-content-carritos .ct-turn-detail-screen {
+  position: fixed; top: 0; left: 100%; width: 100%; height: 100%;
+  background: var(--bg-ct-screen); z-index: 4000;
+  transition: left 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex; flex-direction: column;
+}
+
+/* ---------- HEADER MENU / TOAST reuse note ---------- */
+/* Carritos ya no usa su propio menú de tema/logout: reutiliza el de la
+   plataforma. Tampoco usa su propio toast: reutiliza showToast() global. */
+
+/* ---------- ADMIN PANEL ---------- */
+#sub-content-carritos #cartAdminPanel {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: var(--bg-body); z-index: 6000; display: none; flex-direction: column;
+}
+#sub-content-carritos .ct-admin-panel-header { display: flex; align-items: center; gap: 14px; padding: 24px 20px 10px; }
+#sub-content-carritos .ct-admin-panel-header h1 { margin: 0; font-size: 1.5rem; }
+#sub-content-carritos .ct-admin-tabs { display: flex; gap: 7px; padding: 0 20px 16px; overflow-x: auto; scrollbar-width: none; }
+#sub-content-carritos .ct-admin-tabs::-webkit-scrollbar { display: none; }
+#sub-content-carritos .ct-admin-tab {
+  padding: 10px 18px; border-radius: 12px; background: var(--bg-card); border: 1.5px solid var(--border-color);
+  font-weight: 700; font-size: 0.85rem; cursor: pointer; white-space: nowrap; color: var(--text-gray);
+  transition: all var(--transition-fast); display: inline-flex; align-items: center; gap: 6px;
+}
+#sub-content-carritos .ct-tab-icon { display: inline-flex; align-items: center; }
+#sub-content-carritos .ct-admin-tab:hover { border-color: var(--primary-ct-orange); color: var(--primary-ct-orange); }
+#sub-content-carritos .ct-admin-tab.ct-active { background: var(--primary-ct-orange); color: white; border-color: var(--primary-ct-orange); box-shadow: 0 2px 8px rgba(243,97,0,0.3); }
+#sub-content-carritos .ct-admin-list-item {
+  background: var(--bg-card); border: 1.5px solid var(--border-color); border-radius: 18px; padding: 16px;
+  margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  transition: background-color var(--transition-fast);
+}
+#sub-content-carritos .ct-admin-list-item .ct-info { flex: 1; min-width: 0; }
+#sub-content-carritos .ct-admin-list-item .ct-info .ct-title { font-weight: 800; font-size: 0.97rem; }
+#sub-content-carritos .ct-admin-list-item .ct-info .ct-sub { color: var(--text-gray); font-size: 0.78rem; margin-top: 3px; }
+#sub-content-carritos .ct-admin-actions { display: flex; gap: 8px; flex-shrink: 0; }
+#sub-content-carritos .ct-icon-btn {
+  width: 36px; height: 36px; border-radius: 10px; border: 1.5px solid var(--border-color); background: var(--bg-ct-screen);
+  display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-main);
+  font-size: 0.9rem; font-family: inherit; padding: 0;
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+#sub-content-carritos .ct-icon-btn:hover { background: var(--bg-card-hover); }
+#sub-content-carritos .ct-icon-btn:active { transform: scale(0.92); }
+#sub-content-carritos .ct-icon-btn.ct-danger { color: var(--ct-danger); border-color: rgba(220,38,38,0.25); background: rgba(220,38,38,0.04); }
+#sub-content-carritos .ct-fab-add {
+  position: sticky; bottom: 16px; margin: 14px 0 0; padding: 16px; border-radius: 16px;
+  background: var(--primary-ct-orange); color: white; font-weight: 800; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.95rem; width: 100%;
+  box-shadow: 0 4px 14px rgba(243,97,0,0.35);
+  transition: filter var(--transition-fast), transform var(--transition-fast);
+}
+#sub-content-carritos .ct-fab-add:hover { filter: brightness(1.06); }
+#sub-content-carritos .ct-fab-add:active { transform: scale(0.97); }
+
+/* ---------- FORM OVERLAY ---------- */
+#sub-content-carritos .ct-form-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 7000; display: none;
+  align-items: flex-end; justify-content: center;
+}
+@media (min-width: 768px) { #sub-content-carritos .ct-form-overlay { align-items: center; } }
+#sub-content-carritos .ct-form-sheet {
+  background: var(--bg-ct-screen); width: 100%; max-width: 500px; border-radius: 24px 24px 0 0;
+  padding: 28px 24px; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border-color);
+  scrollbar-width: thin; scrollbar-color: var(--border-color) transparent;
+}
+@media (min-width: 768px) { #sub-content-carritos .ct-form-sheet { border-radius: 24px; } }
+#sub-content-carritos .ct-form-group { margin-bottom: 16px; text-align: left; }
+#sub-content-carritos .ct-form-group label {
+  display: block; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px;
+  color: var(--text-gray); margin-bottom: 7px;
+}
+#sub-content-carritos .ct-form-input, #sub-content-carritos .ct-form-select, #sub-content-carritos .ct-form-textarea {
+  width: 100%; padding: 13px 15px; border-radius: 12px; border: 1.5px solid var(--border-color);
+  background: var(--bg-card); color: var(--text-main); font-size: 0.95rem; outline: none; font-family: inherit;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+#sub-content-carritos .ct-form-input:focus, #sub-content-carritos .ct-form-select:focus, #sub-content-carritos .ct-form-textarea:focus {
+  border-color: var(--primary-ct-orange); box-shadow: 0 0 0 3px var(--primary-ct-orange-light);
+}
+#sub-content-carritos .ct-form-row { display: flex; gap: 10px; }
+#sub-content-carritos .ct-form-row .ct-form-group { flex: 1; }
+#sub-content-carritos .ct-chip-multi { display: flex; flex-wrap: wrap; gap: 8px; }
+#sub-content-carritos .ct-chip-multi .ct-filter-chip { margin: 0; }
+#sub-content-carritos .ct-form-actions { display: flex; gap: 10px; margin-top: 22px; }
+#sub-content-carritos .ct-admin-btn-primary {
+  width: 100%; padding: 15px; border-radius: 14px; border: none; background: var(--primary-ct-orange);
+  color: white; font-weight: 800; font-size: 1rem; cursor: pointer; box-shadow: 0 3px 12px rgba(243,97,0,0.3);
+  transition: filter var(--transition-fast), transform var(--transition-fast);
+}
+#sub-content-carritos .ct-admin-btn-primary:hover { filter: brightness(1.06); }
+#sub-content-carritos .ct-admin-btn-primary:active { transform: scale(0.97); }
+#sub-content-carritos .ct-admin-btn-secondary {
+  width: 100%; padding: 14px; border-radius: 14px; border: 1.5px solid var(--border-color); background: var(--bg-card);
+  color: var(--text-main); font-weight: 700; font-size: 0.95rem; cursor: pointer; margin-top: 10px;
+  transition: background-color var(--transition-fast);
+}
+#sub-content-carritos .ct-admin-btn-secondary:hover { background: var(--bg-card-hover); }
+
+#sub-content-carritos .ct-empty-state { text-align: center; padding: 48px 20px; color: var(--text-gray); font-size: 0.95rem; line-height: 1.6; }
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 767px) {
+  #sub-content-carritos .ct-app-wrapper { display: block; padding: 0; }
+  #sub-content-carritos .ct-screen { min-height: calc(100dvh - 220px); border-radius: var(--radius); }
+  #sub-content-carritos #detail-ct-screen { position: fixed; top: 0; left: 100%; width: 100%; height: 100%; z-index: 2000; border-radius: 0; display: flex; }
+  #sub-content-carritos #detail-ct-screen.ct-active { transform: translateX(-100%); }
+}
+@media (min-width: 768px) {
+  #sub-content-carritos .ct-app-wrapper { display: grid; grid-template-columns: 380px 1fr; gap: 20px; }
+  #sub-content-carritos #detail-ct-screen { position: relative; opacity: 1 !important; transform: none !important; left: auto !important; display: flex !important; }
+}
+#sub-content-carritos #locationsList { flex: 1; padding-bottom: 24px; display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+  #sub-content-carritos *, #sub-content-carritos *::before, #sub-content-carritos *::after {
+    transition-duration: 0.01ms !important; animation-duration: 0.01ms !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -3877,11 +4212,88 @@
         <div id="schedule-content"><div class="loader-wrap"><div class="loader"></div></div></div>
       </div>
       <div id="sub-content-carritos" class="sub-page" style="display:none">
-        <div class="coming-soon-panel">
-          <div class="coming-soon-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div>
-          <h3>Carritos</h3>
-          <p>Las asignaciones de carritos estarán disponibles pronto.</p>
+      <div class="ct-header-list">
+        <h1 style="margin:0; font-size: 1.6rem;">Carritos</h1>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button class="ct-admin-pill" id="cartAdminBtn" onclick="cartOpenAdminPanel()" style="display:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Administrar
+          </button>
         </div>
+      </div>
+
+      <div class="ct-search-wrapper">
+        <div class="ct-search-inner">
+          <input type="text" id="cartSearchInput" placeholder="Buscar por nombre…" aria-label="Buscar por nombre" oninput="cartHandleSearch()">
+          <button onclick="cartToggleFilterMenu()" class="ct-search-filter-btn" aria-label="Abrir filtros" aria-expanded="false" aria-controls="cartFilterMenu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="10" cy="6" r="2"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="14" cy="12" r="2"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="8" cy="18" r="2"/></svg>
+          </button>
+        </div>
+        <div id="cartFilterMenu">
+          <div class="ct-filter-panel">
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+              <div class="ct-filter-chip" onclick="cartToggleFilter('M', this)">Mañana</div>
+              <div class="ct-filter-chip" onclick="cartToggleFilter('T', this)">Tarde</div>
+              <div class="ct-filter-chip" onclick="cartToggleFilter('TD', this)">Disponibles</div>
+              <div onclick="cartClearFilters()" style="font-size:0.8rem; color:var(--primary-ct-orange); cursor:pointer; font-weight:800; margin-left:6px; text-decoration:underline;">Quitar filtros</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+  <div class="ct-app-wrapper">
+    <section class="ct-screen" id="cart-list-screen">
+      <div class="ct-scroll-container" id="cartLocationsList" style="padding-top:8px;">
+        <div class="ct-empty-state">Cargando…</div>
+      </div>
+    </section>
+
+    <section class="ct-screen" id="detail-ct-screen">
+      <div style="padding: 18px 20px 0;">
+        <button onclick="cartGoBack()" class="ct-header-btn" aria-label="Volver">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+      </div>
+      <div class="ct-scroll-container" id="cartDetailScrollBody">
+        <h1 id="cartCurrentPointTitle" style="margin-top:12px; margin-bottom:16px; font-size: 1.7rem; line-height:1.2;">Punto</h1>
+        <div id="cartLogisticsInfo"></div>
+        <div id="cartDaysRow" class="ct-days-row" style="margin: 16px 0;"></div>
+        <div id="cartSlotsContainer"></div>
+      </div>
+    </section>
+  </div>
+
+  <div id="cartTurnDetailScreen" class="ct-turn-detail-screen">
+    <div style="padding: 22px 20px 10px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--border-color);">
+      <button onclick="cartCloseTurnDetail()" class="ct-header-btn" aria-label="Cerrar detalle del turno">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <h2 style="margin:0; font-size:1.1rem;">Ficha de Turno</h2>
+    </div>
+    <div class="ct-scroll-container" id="cartTurnDetailBody"></div>
+    <div id="cartTurnActionBar" style="padding:16px 20px 24px;"></div>
+  </div>
+
+  <!-- PANEL DE ADMINISTRACIÓN DE CARRITOS (rol admin/dev de la plataforma) -->
+  <div id="cartAdminPanel">
+    <div class="ct-admin-panel-header">
+      <button class="ct-header-btn" onclick="cartCloseAdminPanel()" aria-label="Cerrar administración">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <h1>Administración de Carritos</h1>
+    </div>
+    <div class="ct-admin-tabs" role="tablist" aria-label="Secciones de administración">
+      <div class="ct-admin-tab ct-active" data-tab="puntos" role="tab" aria-selected="true" tabindex="0" onclick="cartSwitchAdminTab('puntos')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); cartSwitchAdminTab('puntos');}"><span class="ct-tab-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span> Puntos</div>
+      <div class="ct-admin-tab" data-tab="turnos" role="tab" aria-selected="false" tabindex="0" onclick="cartSwitchAdminTab('turnos')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); cartSwitchAdminTab('turnos');}"><span class="ct-tab-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg></span> Turnos</div>
+      <div class="ct-admin-tab" data-tab="personas" role="tab" aria-selected="false" tabindex="0" onclick="cartSwitchAdminTab('personas')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); cartSwitchAdminTab('personas');}"><span class="ct-tab-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Personas</div>
+    </div>
+    <div class="ct-scroll-container" id="cartAdminBody" style="padding-top:5px;"></div>
+  </div>
+
+  <!-- FORMULARIO GENÉRICO (puntos / turnos / personas) -->
+  <div class="ct-form-overlay" id="cartFormOverlay" role="dialog" aria-modal="true">
+    <div class="ct-form-sheet" id="cartFormSheet"></div>
+  </div>
       </div>
       <div id="sub-content-territorios" class="sub-page" style="display:none">
         <div id="admin-shortcut-territorios" style="display:none"></div>
@@ -4979,7 +5391,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.33.0-alpha';
+const APP_VERSION = '0.34.0-alpha';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -6663,6 +7075,7 @@ function switchSubTab(tabId) {
   updateAdminShortcuts();
   if (tabId === 'casa') refreshScheduleIfStale();
   if (tabId === 'territorios') renderTerritoryView();
+  if (tabId === 'carritos') cartLoadAllData();
   if (tabId === 'responsabilidades') renderRespUserView();
   if (tabId === 'aseo-salon') renderAseoUserView();
   if (tabId === 'vida-ministerio') loadAndRenderVmcUserView();
@@ -13954,6 +14367,614 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
     <button id="egg-unlock-btn" onclick="closeEggUnlock()">¡Genial!</button>
   </div>
 </div>
+
+<script>
+/* ===== CARRITOS v0.34.0-alpha ===== */
+// =========================================================================
+// CARRITOS (v0.34.0-alpha)
+// Usa el cliente Supabase (`sb`), el usuario logueado (`currentUser.name`)
+// y el rol (`currentRole`) de la plataforma. Tablas propias: cart_puntos,
+// cart_turnos, cart_personas (mismo proyecto Supabase que el resto de la
+// plataforma). El acceso de administración se gatilla igual que el resto
+// de la app: currentRole === 'admin' || currentRole === 'dev'.
+// =========================================================================
+
+let cartPUNTOS = [];
+let cartTURNOS = [];
+let cartPERSONAS = [];
+let cartCurrentDay = '';
+let cartCurrentPointId = null;
+let cartActiveFilters = [];
+let cartAdminTab = 'puntos';
+let cartDataLoaded = false;
+let cartLoading = false;
+
+const cartICONS = {
+  pin: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+  clock: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg>',
+  user: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  phone: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.98.33 1.94.6 2.87a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.21-1.27a2 2 0 0 1 2.11-.45c.93.27 1.89.47 2.87.6A2 2 0 0 1 22 16.92z"/></svg>',
+  map: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>',
+  chat: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>',
+  edit: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+  trash: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>',
+  plus: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
+};
+
+// Contacto de WhatsApp usado para solicitar un turno disponible.
+const CART_WHATSAPP_TEL = '56996377733';
+const CART_MAX_PERSONAS_POR_TURNO = 3;
+const CART_DIAS = ['Lunes','Martes','Miercoles','Jueves','Viernes','Sabado','Domingo'];
+
+function cartIsAdmin() {
+  return !!(currentUser && ['admin','dev'].includes(currentRole));
+}
+
+function cartUserName() {
+  return (currentUser && currentUser.name) || '';
+}
+
+// ---------- CARGA DE DATOS ----------
+async function cartLoadAllData(force) {
+  if (cartDataLoaded && !force) { cartRenderHome(); return; }
+  if (cartLoading) return;
+  cartLoading = true;
+  const [{ data: puntos, error: errP }, { data: turnos, error: errT }, { data: personas, error: errPe }] = await Promise.all([
+    sb.from('cart_puntos').select('*').order('orden', { ascending: true }),
+    sb.from('cart_turnos').select('*'),
+    sb.from('cart_personas').select('*').order('nombre', { ascending: true })
+  ]);
+  cartLoading = false;
+
+  if (errP || errT || errPe) {
+    console.error(errP || errT || errPe);
+    showToast('Error cargando Carritos. Revisa la conexión.', 'error');
+    return;
+  }
+
+  cartPUNTOS = puntos || [];
+  cartTURNOS = (turnos || []).map(t => {
+    const punto = cartPUNTOS.find(p => p.id === t.punto_id);
+    return {
+      id: t.id,
+      dia: t.dia,
+      tipo: t.tipo,
+      nombres: t.nombres || '',
+      hora: t.hora,
+      punto: punto ? punto.nombre : '',
+      punto_id: t.punto_id,
+      estado: t.estado,
+      reservado_por: t.reservado_por,
+      persona_ids: Array.isArray(t.persona_ids) ? t.persona_ids : []
+    };
+  });
+  cartPERSONAS = personas || [];
+  cartDataLoaded = true;
+
+  document.getElementById('cartAdminBtn').style.display = cartIsAdmin() ? 'inline-flex' : 'none';
+  cartRenderHome();
+}
+
+// ---------- INICIO ----------
+function cartRenderHome() {
+  const home = document.getElementById('cartLocationsList');
+  if (!home) return;
+  home.innerHTML = '';
+
+  const myName = cartUserName().toLowerCase();
+  const myShifts = myName ? cartTURNOS.filter(d => (d.nombres || '').toLowerCase().includes(myName)) : [];
+  if (myShifts.length > 0) {
+    home.innerHTML += `<div class="ct-section-title">Mis Turnos</div>`;
+    myShifts.forEach(s => {
+      const color = s.tipo.includes('TD') ? (s.estado === 'reservado' ? '#e08600' : 'var(--primary-green)') : (s.tipo.startsWith('M') ? 'var(--primary-ct-orange)' : 'var(--primary-blue)');
+      home.innerHTML += `
+        <div class="ct-my-shift-card" onclick="cartOpenTurnDetail('${s.id}')">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:12px; height:12px; border-radius:50%; background:${color};"></div>
+            <span style="font-weight:800; font-size:1.1rem;">${s.punto}</span>
+          </div>
+          <div style="color:var(--text-gray); font-size:0.9rem; font-weight:600; padding-left:22px;">${s.dia} • ${s.hora}</div>
+          <div style="background:var(--bg-ct-screen); border-radius:12px; padding:10px; margin-top:4px; font-size:0.85rem; border:1px solid var(--border-color);">
+            <span style="color:var(--text-gray); font-weight:bold; display:block; margin-bottom:2px; font-size:0.7rem; text-transform:uppercase;">Turno de:</span>
+            <span style="font-weight:700;">${s.nombres}</span>
+          </div>
+        </div>`;
+    });
+  }
+
+  home.innerHTML += `<div class="ct-section-title">Locaciones</div>`;
+  const grid = document.createElement('div');
+  grid.className = 'ct-grid-2x2';
+  if (cartPUNTOS.length === 0) {
+    grid.innerHTML = `<div class="ct-empty-state" style="grid-column:1/-1;">Aún no hay puntos cargados.</div>`;
+  } else {
+    grid.innerHTML = cartPUNTOS.map(p => `
+      <div class="ct-location-card" onclick="cartSelectPoint('${p.id}')">
+        <div class="ct-status-dot" style="background:${p.color}"></div>
+        <h2>${p.nombre}</h2>
+      </div>`).join('');
+  }
+  home.appendChild(grid);
+}
+
+function cartSelectPoint(id) {
+  cartCurrentPointId = id;
+  const p = cartPUNTOS.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('cartCurrentPointTitle').innerText = p.nombre;
+  document.getElementById('cartLogisticsInfo').innerHTML = `<div class="ct-logistics-box ct-orange"><h4>${cartICONS.pin} Retiro</h4><p>${p.retiro_nombre || ''}</p><div style="display:flex; gap:8px; margin-top:12px;"><a href="tel:${p.retiro_tel || ''}" class="ct-btn-mini">${cartICONS.phone} Llamar</a><a href="http://maps.google.com/?q=${encodeURIComponent(p.retiro_nombre || '')}" target="_blank" class="ct-btn-mini">${cartICONS.map} Mapa</a></div></div><div class="ct-logistics-box"><h4>${cartICONS.user} Encargado</h4><p>${p.encargado_nombre || ''}</p><div style="display:flex; gap:8px; margin-top:12px;"><a href="tel:${p.encargado_tel || ''}" class="ct-btn-mini">${cartICONS.phone} Llamar</a></div></div>`;
+  const dRow = document.getElementById('cartDaysRow');
+  dRow.innerHTML = '';
+  cartCurrentDay = (p.dias || [])[0] || '';
+  (p.dias || []).forEach(d => {
+    const b = document.createElement('div');
+    b.className = `ct-filter-chip ${d === cartCurrentDay ? 'ct-active' : ''}`;
+    b.innerText = d.substring(0, 3);
+    b.onclick = () => {
+      document.querySelectorAll('#cartDaysRow .ct-filter-chip').forEach(x => x.classList.remove('ct-active'));
+      b.classList.add('ct-active');
+      cartCurrentDay = d;
+      cartRenderShifts();
+    };
+    dRow.appendChild(b);
+  });
+  document.getElementById('detail-ct-screen').classList.add('ct-active');
+  cartRenderShifts();
+}
+
+function cartRenderShifts() {
+  const cont = document.getElementById('cartSlotsContainer');
+  const pNombre = (cartPUNTOS.find(x => x.id === cartCurrentPointId) || {}).nombre;
+  const filtered = cartTURNOS.filter(d => (d.dia || '').toLowerCase() === cartCurrentDay.toLowerCase() && d.punto === pNombre);
+  cont.innerHTML = filtered.map(s => {
+    const isTD = s.tipo.includes('TD');
+    const isReservado = isTD && s.estado === 'reservado';
+    const claseColor = isReservado ? 'ct-turno-RESERVADO' : (isTD ? 'ct-turno-TD' : (s.tipo.startsWith('T') ? 'ct-turno-T' : 'ct-turno-M'));
+    const etiqueta = isReservado ? `Reservado por ${s.reservado_por || 'alguien'}` : s.hora;
+    return `<div class="ct-slot ${claseColor}" onclick="cartOpenTurnDetail('${s.id}')"><div style="display:flex; justify-content:space-between; align-items:center;"><b style="font-size:1rem;">${s.nombres || (isTD ? 'Disponible' : '')}</b><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div><div class="ct-slot-pill">${etiqueta}</div></div>`;
+  }).join('') || '<p style="text-align:center; opacity:0.5; margin-top:20px;">No hay turnos hoy.</p>';
+}
+
+function cartOpenTurnDetail(id) {
+  const s = cartTURNOS.find(x => x.id === id);
+  if (!s) return;
+  const p = cartPUNTOS.find(x => x.nombre === s.punto);
+  const isTD = s.tipo.includes('TD'), isM = s.tipo.startsWith('M');
+  const isReservado = isTD && s.estado === 'reservado';
+  const estadoColor = isReservado ? '#e08600' : (isTD ? 'var(--primary-green)' : 'var(--primary-blue)');
+  const estadoTexto = isReservado ? `Reservado por ${s.reservado_por || 'alguien'}` : (isTD ? 'Disponible' : 'Ocupado');
+  document.getElementById('cartTurnDetailBody').innerHTML = `<div style="background:var(--bg-card); border-radius:20px; padding:25px; margin-bottom:20px;"><div style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;"><span style="width:fit-content; font-size:0.75rem; font-weight:800; color:${estadoColor}; border:1px solid ${estadoColor}; padding:4px 10px; border-radius:8px;">${estadoTexto}</span><span style="display:flex; align-items:center; gap:6px; font-size:0.85rem; color:var(--text-gray); font-weight:700;">${cartICONS.clock} ${isM ? 'Turno Mañana' : (isTD ? 'Turno Disponible' : 'Turno Tarde')}</span></div><h1 style="margin:0;">${s.nombres || (isTD ? 'Disponible' : '')}</h1><h3 style="margin:0;">${s.hora}</h3></div><div class="ct-logistics-box ct-orange"><h4>${cartICONS.pin} Retiro</h4><p>${p ? (p.retiro_nombre || '') : ''}</p><div style="display:flex; gap:8px; margin-top:12px;"><a href="tel:${p ? (p.retiro_tel || '') : ''}" class="ct-btn-mini">${cartICONS.phone} Llamar</a><a href="http://maps.google.com/?q=${encodeURIComponent(p ? (p.retiro_nombre || '') : '')}" target="_blank" class="ct-btn-mini">${cartICONS.map} Mapa</a></div></div><div class="ct-logistics-box"><h4>${cartICONS.user} Encargado</h4><p>${p ? (p.encargado_nombre || '') : ''}</p><div style="display:flex; gap:8px; margin-top:12px;"><a href="https://wa.me/${p ? (p.encargado_tel || '').replace('+', '') : ''}" target="_blank" class="ct-btn-mini">${cartICONS.chat} WhatsApp</a><a href="tel:${p ? (p.encargado_tel || '') : ''}" class="ct-btn-mini">${cartICONS.phone} Llamar</a></div></div>`;
+
+  let btns = `<a href="http://maps.google.com/?q=${encodeURIComponent(s.punto)}" target="_blank" style="background:var(--bg-card); color:var(--text-main); border:1px solid var(--border-color); margin-bottom:12px; display:flex; align-items:center; gap:8px; padding:15px; border-radius:15px; justify-content:center; text-decoration:none; font-weight:bold;">${cartICONS.pin} Cómo llegar</a>`;
+  if (isTD && s.estado === 'libre') {
+    const mensaje = `Hola! Quiero inscribirme en el turno disponible:\nPunto: ${s.punto}\nDía: ${s.dia}\nHora: ${s.hora}\nNombre: ${cartUserName()}`;
+    btns += `<button onclick="cartReservarTurno('${s.id}')" style="background:#25D366; color:white; padding:18px; border-radius:16px; font-weight:800; width:100%; display:flex; justify-content:center; border:none; cursor:pointer; font-size:1rem;">Solicitar Turno</button>`;
+    window._cartPendingWhatsappMsg = mensaje;
+  } else if (isReservado) {
+    btns += `<div style="text-align:center; color:var(--text-gray); font-weight:700; padding:14px; font-size:0.9rem;">Este turno ya fue solicitado y está pendiente de confirmación.</div>`;
+    if (cartIsAdmin()) {
+      btns += `<button onclick="cartLiberarTurnoAdmin('${s.id}')" style="margin-top:10px; background:var(--bg-card); color:var(--text-main); border:1px solid var(--border-color); padding:14px; border-radius:15px; font-weight:700; width:100%; cursor:pointer;">Liberar turno (admin)</button>`;
+    }
+  }
+  document.getElementById('cartTurnActionBar').innerHTML = btns;
+  document.getElementById('cartTurnDetailScreen').style.left = '0';
+}
+
+async function cartReservarTurno(turnoId) {
+  const { error } = await sb.from('cart_turnos')
+    .update({ estado: 'reservado', reservado_por: cartUserName(), reservado_at: new Date().toISOString() })
+    .eq('id', turnoId)
+    .eq('estado', 'libre');
+
+  if (error) {
+    console.error(error);
+    showToast('No se pudo reservar el turno. Intenta de nuevo.', 'error');
+    return;
+  }
+
+  if (window._cartPendingWhatsappMsg) {
+    window.open(`https://api.whatsapp.com/send?phone=${CART_WHATSAPP_TEL}&text=${encodeURIComponent(window._cartPendingWhatsappMsg)}`, '_blank');
+  }
+
+  showToast('Turno reservado. Quedó marcado para que nadie más lo tome.', 'success');
+  await cartLoadAllData(true);
+  cartCloseTurnDetail();
+}
+
+async function cartLiberarTurnoAdmin(turnoId) {
+  if (!cartIsAdmin()) { showToast('No tienes permisos de administrador.', 'error'); return; }
+  const { error } = await sb.from('cart_turnos')
+    .update({ estado: 'libre', reservado_por: null, reservado_at: null })
+    .eq('id', turnoId);
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  showToast('Turno liberado.', 'success');
+  await cartLoadAllData(true);
+  cartCloseTurnDetail();
+}
+
+// ---------- BÚSQUEDA Y FILTROS ----------
+function cartHandleSearch() {
+  const q = (document.getElementById('cartSearchInput').value || '').toLowerCase().trim();
+  const home = document.getElementById('cartLocationsList');
+  if (!q && !cartActiveFilters.length) { cartRenderHome(); return; }
+
+  let res = cartTURNOS.filter(r => (r.nombres || '').toLowerCase().includes(q));
+
+  if (cartActiveFilters.length > 0) {
+    res = res.filter(r => cartActiveFilters.some(filter => {
+      if (filter === 'M') return r.tipo.startsWith('M');
+      if (filter === 'T') return r.tipo.startsWith('T') && !r.tipo.includes('TD');
+      if (filter === 'TD') return r.tipo.includes('TD') && r.estado === 'libre';
+      return false;
+    }));
+  }
+
+  home.innerHTML = res.length ? `<div style="display:grid; gap:10px">${res.map(r => {
+    const isTD = r.tipo.includes('TD');
+    const isM = r.tipo.startsWith('M');
+    const isReservado = isTD && r.estado === 'reservado';
+    const color = isReservado ? '#e08600' : (isTD ? 'var(--primary-green)' : (isM ? 'var(--primary-ct-orange)' : 'var(--primary-blue)'));
+    return `<div class="ct-logistics-box" onclick="cartOpenTurnDetail('${r.id}')" style="cursor:pointer; display:flex; align-items:center; gap:14px;"><div style="width:14px; height:14px; border-radius:50%; background:${color}; flex-shrink:0;"></div><div><div style="font-weight:800">${r.nombres || (isTD ? 'Disponible' : '')}</div><div style="font-size:0.8rem; color:var(--text-gray)">${r.punto} • ${r.dia}</div></div></div>`;
+  }).join('')}</div>` : '<p style="text-align:center; opacity:0.5; margin-top:20px;">Sin resultados.</p>';
+}
+
+function cartToggleFilterMenu() {
+  const menu = document.getElementById('cartFilterMenu');
+  const abrir = menu.classList.toggle('ct-open');
+  const btn = document.querySelector('#sub-content-carritos .ct-search-filter-btn');
+  if (btn) btn.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+}
+function cartToggleFilter(f, el) {
+  el.classList.toggle('ct-active');
+  const i = cartActiveFilters.indexOf(f);
+  if (i > -1) cartActiveFilters.splice(i, 1); else cartActiveFilters.push(f);
+  cartHandleSearch();
+}
+function cartClearFilters() {
+  cartActiveFilters = [];
+  document.querySelectorAll('#cartFilterMenu .ct-filter-chip').forEach(chip => chip.classList.remove('ct-active'));
+  cartHandleSearch();
+}
+function cartGoBack() { document.getElementById('detail-ct-screen').classList.remove('ct-active'); }
+function cartCloseTurnDetail() { document.getElementById('cartTurnDetailScreen').style.left = '100%'; }
+
+// ---------- ADMINISTRACIÓN ----------
+function cartOpenAdminPanel() {
+  if (!cartIsAdmin()) { showToast('No tienes permisos de administrador.', 'error'); return; }
+  document.getElementById('cartAdminPanel').style.display = 'flex';
+  cartSwitchAdminTab('puntos');
+}
+function cartCloseAdminPanel() { document.getElementById('cartAdminPanel').style.display = 'none'; }
+
+function cartSwitchAdminTab(tab) {
+  cartAdminTab = tab;
+  document.querySelectorAll('#sub-content-carritos .ct-admin-tab').forEach(t => {
+    const activo = t.dataset.tab === tab;
+    t.classList.toggle('ct-active', activo);
+    t.setAttribute('aria-selected', activo ? 'true' : 'false');
+  });
+  if (tab === 'puntos') cartRenderAdminPuntos();
+  if (tab === 'turnos') cartRenderAdminTurnos();
+  if (tab === 'personas') cartRenderAdminPersonas();
+}
+
+// ---------- PUNTOS ----------
+function cartRenderAdminPuntos() {
+  const body = document.getElementById('cartAdminBody');
+  const items = cartPUNTOS.map(p => `
+    <div class="ct-admin-list-item">
+      <div style="width:34px; height:34px; border-radius:50%; background:${p.color}; flex-shrink:0;"></div>
+      <div class="ct-info">
+        <div class="ct-title">${p.nombre}</div>
+        <div class="ct-sub">${(p.dias || []).join(', ')}</div>
+      </div>
+      <div class="ct-admin-actions">
+        <button class="ct-icon-btn" onclick="cartOpenPuntoForm('${p.id}')" aria-label="Editar ${(p.nombre || '').replace(/"/g, '&quot;')}">${cartICONS.edit}</button>
+        <button class="ct-icon-btn ct-danger" onclick="cartConfirmDeletePunto('${p.id}')" aria-label="Borrar ${(p.nombre || '').replace(/"/g, '&quot;')}">${cartICONS.trash}</button>
+      </div>
+    </div>`).join('') || `<div class="ct-empty-state">No hay puntos creados aún.</div>`;
+  body.innerHTML = items + `<button class="ct-fab-add" onclick="cartOpenPuntoForm()">${cartICONS.plus} Agregar punto</button>`;
+}
+
+function cartOpenPuntoForm(id) {
+  const p = id ? cartPUNTOS.find(x => x.id === id) : null;
+  const selDias = p ? (p.dias || []) : [];
+  document.getElementById('cartFormSheet').innerHTML = `
+    <h2 style="margin-top:0;">${p ? 'Editar punto' : 'Nuevo punto'}</h2>
+    <div class="ct-form-group"><label for="cf_nombre">Nombre del punto</label><input class="ct-form-input" id="cf_nombre" value="${p ? p.nombre.replace(/"/g, '&quot;') : ''}"></div>
+    <div class="ct-form-group"><label for="cf_color">Color identificador</label><input class="ct-form-input" id="cf_color" type="color" value="${p ? p.color : '#f36100'}" style="height:46px; padding:6px;"></div>
+    <div class="ct-form-group">
+      <label id="cf_dias_label">Días activos</label>
+      <div class="ct-chip-multi" id="cf_dias" role="group" aria-labelledby="cf_dias_label">
+        ${CART_DIAS.map(d => `<div class="ct-filter-chip ${selDias.includes(d) ? 'ct-active' : ''}" data-dia="${d}" role="button" tabindex="0" aria-pressed="${selDias.includes(d)}" onclick="this.classList.toggle('ct-active'); this.setAttribute('aria-pressed', this.classList.contains('ct-active'));" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); this.click();}">${d}</div>`).join('')}
+      </div>
+    </div>
+    <div class="ct-form-group"><label for="cf_retiro_nombre">Dirección de retiro</label><input class="ct-form-input" id="cf_retiro_nombre" value="${p ? (p.retiro_nombre || '').replace(/"/g, '&quot;') : ''}"></div>
+    <div class="ct-form-group"><label for="cf_retiro_tel">Teléfono de retiro</label><input class="ct-form-input" id="cf_retiro_tel" placeholder="+569..." value="${p ? (p.retiro_tel || '') : ''}"></div>
+    <div class="ct-form-group"><label for="cf_encargado_nombre">Nombre del encargado</label><input class="ct-form-input" id="cf_encargado_nombre" value="${p ? (p.encargado_nombre || '').replace(/"/g, '&quot;') : ''}"></div>
+    <div class="ct-form-group"><label for="cf_encargado_tel">Teléfono del encargado</label><input class="ct-form-input" id="cf_encargado_tel" placeholder="+569..." value="${p ? (p.encargado_tel || '') : ''}"></div>
+    <div class="ct-form-group"><label for="cf_orden">Orden (posición en la grilla)</label><input class="ct-form-input" id="cf_orden" type="number" value="${p ? p.orden : (cartPUNTOS.length + 1)}"></div>
+    <div class="ct-section-title" style="margin-top:18px; margin-bottom:6px;">Horarios predeterminados</div>
+    <div class="ct-form-group"><label for="cf_horario_m">Horario Mañana (M)</label><input class="ct-form-input" id="cf_horario_m" placeholder="ej: 09:00 - 11:00" value="${p ? (p.horario_m || '').replace(/"/g, '&quot;') : ''}"></div>
+    <div class="ct-form-group"><label for="cf_horario_t">Horario Tarde (T)</label><input class="ct-form-input" id="cf_horario_t" placeholder="ej: 16:00 - 18:00" value="${p ? (p.horario_t || '').replace(/"/g, '&quot;') : ''}"></div>
+    <div class="ct-form-group"><label for="cf_horario_td">Horario Disponible (TD)</label><input class="ct-form-input" id="cf_horario_td" placeholder="ej: 11:00 - 13:00" value="${p ? (p.horario_td || '').replace(/"/g, '&quot;') : ''}"></div>
+    <div class="ct-form-actions">
+      <button class="ct-admin-btn-secondary" style="margin:0;" onclick="cartCloseForm()">Cancelar</button>
+      <button class="ct-admin-btn-primary" onclick="cartSavePunto('${p ? p.id : ''}')">${p ? 'Guardar cambios' : 'Crear punto'}</button>
+    </div>`;
+  cartOpenForm();
+}
+
+async function cartSavePunto(id) {
+  if (!cartIsAdmin()) { showToast('No tienes permisos de administrador.', 'error'); return; }
+  const nombre = document.getElementById('cf_nombre').value.trim();
+  if (!nombre) { showToast('El nombre es obligatorio.', 'error'); return; }
+  const payload = {
+    nombre,
+    color: document.getElementById('cf_color').value,
+    dias: Array.from(document.querySelectorAll('#cf_dias .ct-filter-chip.ct-active')).map(c => c.dataset.dia),
+    retiro_nombre: document.getElementById('cf_retiro_nombre').value.trim(),
+    retiro_tel: document.getElementById('cf_retiro_tel').value.trim(),
+    encargado_nombre: document.getElementById('cf_encargado_nombre').value.trim(),
+    encargado_tel: document.getElementById('cf_encargado_tel').value.trim(),
+    orden: parseInt(document.getElementById('cf_orden').value || '0', 10),
+    horario_m: document.getElementById('cf_horario_m').value.trim(),
+    horario_t: document.getElementById('cf_horario_t').value.trim(),
+    horario_td: document.getElementById('cf_horario_td').value.trim()
+  };
+
+  const res = id ? await sb.from('cart_puntos').update(payload).eq('id', id)
+                 : await sb.from('cart_puntos').insert(payload);
+
+  if (res.error) { showToast('Error: ' + res.error.message, 'error'); return; }
+  showToast(id ? 'Punto actualizado.' : 'Punto creado.', 'success');
+  cartCloseForm();
+  await cartLoadAllData(true);
+  cartRenderAdminPuntos();
+}
+
+function cartConfirmDeletePunto(id) {
+  const p = cartPUNTOS.find(x => x.id === id);
+  if (!confirm(`¿Borrar "${p ? p.nombre : 'este punto'}"? Esto también borrará sus turnos asociados.`)) return;
+  cartDeletePunto(id);
+}
+async function cartDeletePunto(id) {
+  if (!cartIsAdmin()) { showToast('No tienes permisos de administrador.', 'error'); return; }
+  // Primero se borran los turnos asociados (la tabla puede no tener ON DELETE CASCADE).
+  await sb.from('cart_turnos').delete().eq('punto_id', id);
+  const { error } = await sb.from('cart_puntos').delete().eq('id', id);
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  showToast('Punto eliminado.', 'success');
+  await cartLoadAllData(true);
+  cartRenderAdminPuntos();
+}
+
+// ---------- TURNOS ----------
+function cartRenderAdminTurnos() {
+  const body = document.getElementById('cartAdminBody');
+  if (cartPUNTOS.length === 0) {
+    body.innerHTML = `<div class="ct-empty-state">Primero crea un punto en la pestaña "Puntos".</div>`;
+    return;
+  }
+  const items = cartTURNOS.map(t => {
+    const isTD = t.tipo.includes('TD');
+    const isReservado = isTD && t.estado === 'reservado';
+    const color = isReservado ? '#e08600' : (isTD ? 'var(--primary-green)' : (t.tipo.startsWith('M') ? 'var(--primary-ct-orange)' : 'var(--primary-blue)'));
+    const estadoTxt = isReservado ? `Reservado (${t.reservado_por || ''})` : (isTD ? 'Disponible' : 'Ocupado');
+    return `
+      <div class="ct-admin-list-item">
+        <div style="width:12px; height:12px; border-radius:50%; background:${color}; flex-shrink:0;"></div>
+        <div class="ct-info">
+          <div class="ct-title">${t.nombres || estadoTxt}</div>
+          <div class="ct-sub">${t.punto} • ${t.dia} • ${t.hora || ''} ${isTD ? '• ' + estadoTxt : ''}</div>
+        </div>
+        <div class="ct-admin-actions">
+          <button class="ct-icon-btn" onclick="cartOpenTurnoForm('${t.id}')" aria-label="Editar turno">${cartICONS.edit}</button>
+          <button class="ct-icon-btn ct-danger" onclick="cartConfirmDeleteTurno('${t.id}')" aria-label="Borrar turno">${cartICONS.trash}</button>
+        </div>
+      </div>`;
+  }).join('') || `<div class="ct-empty-state">No hay turnos creados aún.</div>`;
+  body.innerHTML = items + `<button class="ct-fab-add" onclick="cartOpenTurnoForm()">${cartICONS.plus} Agregar turno</button>`;
+}
+
+function cartOpenTurnoForm(id) {
+  const t = id ? cartTURNOS.find(x => x.id === id) : null;
+  const puntoIdActual = t ? (cartPUNTOS.find(p => p.nombre === t.punto) || {}).id : (cartPUNTOS[0] && cartPUNTOS[0].id);
+  document.getElementById('cartFormSheet').innerHTML = `
+    <h2 style="margin-top:0;">${t ? 'Editar turno' : 'Nuevo turno'}</h2>
+    <div class="ct-form-group">
+      <label for="ct_punto">Punto</label>
+      <select class="ct-form-select" id="ct_punto" onchange="cartAplicarHorarioAutomatico()">
+        ${cartPUNTOS.map(p => `<option value="${p.id}" ${p.id === puntoIdActual ? 'selected' : ''}>${p.nombre}</option>`).join('')}
+      </select>
+    </div>
+    <div class="ct-form-row">
+      <div class="ct-form-group">
+        <label for="ct_dia">Día</label>
+        <select class="ct-form-select" id="ct_dia">
+          ${CART_DIAS.map(d => `<option value="${d}" ${t && t.dia === d ? 'selected' : ''}>${d}</option>`).join('')}
+        </select>
+      </div>
+      <div class="ct-form-group">
+        <label for="ct_tipo">Tipo</label>
+        <select class="ct-form-select" id="ct_tipo" onchange="cartOnTipoTurnoChange()">
+          <option value="M" ${t && t.tipo === 'M' ? 'selected' : ''}>Mañana</option>
+          <option value="T" ${t && t.tipo === 'T' ? 'selected' : ''}>Tarde</option>
+          <option value="TD" ${t && t.tipo === 'TD' ? 'selected' : ''}>Disponible (TD)</option>
+        </select>
+      </div>
+    </div>
+    <div class="ct-form-group"><label for="ct_hora">Horario</label><input class="ct-form-input" id="ct_hora" placeholder="ej: 09:00 - 11:00" value="${t ? (t.hora || '').replace(/"/g, '&quot;') : ''}"></div>
+    <div class="ct-form-group">
+      <label id="ct_personas_label">Personas asignadas (máx. ${CART_MAX_PERSONAS_POR_TURNO})</label>
+      <div class="ct-chip-multi" id="ct_personas" role="group" aria-labelledby="ct_personas_label">
+        ${cartPERSONAS.map(p => `<div class="ct-filter-chip ${t && (t.persona_ids || []).includes(p.id) ? 'ct-active' : ''}" data-persona-id="${p.id}" role="button" tabindex="0" aria-pressed="${t && (t.persona_ids || []).includes(p.id) ? 'true' : 'false'}" onclick="cartTogglePersonaChip(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); cartTogglePersonaChip(this);}">${p.nombre}</div>`).join('') || '<span style="font-size:0.85rem; color:var(--text-gray);">No hay personas en el catálogo todavía.</span>'}
+      </div>
+    </div>
+    <div class="ct-form-group" id="ct_estado_group" style="${(t && t.tipo === 'TD') || !t ? '' : 'display:none;'}">
+      <label for="ct_estado">Estado (solo turnos Disponibles)</label>
+      <select class="ct-form-select" id="ct_estado">
+        <option value="libre" ${(!t || t.estado === 'libre') ? 'selected' : ''}>Libre</option>
+        <option value="reservado" ${t && t.estado === 'reservado' ? 'selected' : ''}>Reservado</option>
+      </select>
+    </div>
+    <div class="ct-form-actions">
+      <button class="ct-admin-btn-secondary" style="margin:0;" onclick="cartCloseForm()">Cancelar</button>
+      <button class="ct-admin-btn-primary" onclick="cartSaveTurno('${t ? t.id : ''}')">${t ? 'Guardar cambios' : 'Crear turno'}</button>
+    </div>`;
+  cartOpenForm();
+  cartOnTipoTurnoChange();
+  if (!t) cartAplicarHorarioAutomatico();
+}
+
+function cartTogglePersonaChip(el) {
+  const yaActivo = el.classList.contains('ct-active');
+  if (!yaActivo) {
+    const activos = document.querySelectorAll('#ct_personas .ct-filter-chip.ct-active').length;
+    if (activos >= CART_MAX_PERSONAS_POR_TURNO) {
+      showToast(`Máximo ${CART_MAX_PERSONAS_POR_TURNO} personas por turno.`, 'error');
+      return;
+    }
+  }
+  el.classList.toggle('ct-active');
+  el.setAttribute('aria-pressed', el.classList.contains('ct-active') ? 'true' : 'false');
+}
+
+function cartAplicarHorarioAutomatico() {
+  const puntoSel = document.getElementById('ct_punto');
+  const tipoSel = document.getElementById('ct_tipo');
+  const horaInput = document.getElementById('ct_hora');
+  if (!puntoSel || !tipoSel || !horaInput) return;
+  const punto = cartPUNTOS.find(p => p.id === puntoSel.value);
+  if (!punto) return;
+  const horarioPorTipo = { M: punto.horario_m, T: punto.horario_t, TD: punto.horario_td };
+  const horarioSugerido = horarioPorTipo[tipoSel.value] || '';
+  const eraAutomatico = horaInput.value === '' || horaInput.dataset.autollenado === '1';
+  if (horarioSugerido && eraAutomatico) {
+    horaInput.value = horarioSugerido;
+    horaInput.dataset.autollenado = '1';
+  }
+}
+
+function cartOnTipoTurnoChange() {
+  const tipo = document.getElementById('ct_tipo').value;
+  document.getElementById('ct_estado_group').style.display = tipo === 'TD' ? '' : 'none';
+  cartAplicarHorarioAutomatico();
+}
+
+async function cartSaveTurno(id) {
+  if (!cartIsAdmin()) { showToast('No tienes permisos de administrador.', 'error'); return; }
+  const punto_id = document.getElementById('ct_punto').value;
+  const dia = document.getElementById('ct_dia').value;
+  const tipo = document.getElementById('ct_tipo').value;
+  const hora = document.getElementById('ct_hora').value.trim();
+  const persona_ids = Array.from(document.querySelectorAll('#ct_personas .ct-filter-chip.ct-active')).map(c => c.dataset.personaId);
+  const nombres = persona_ids.map(pid => (cartPERSONAS.find(p => p.id === pid) || {}).nombre).filter(Boolean).join(', ');
+  const estadoSel = document.getElementById('ct_estado') ? document.getElementById('ct_estado').value : null;
+  const estado = tipo === 'TD' ? (estadoSel || 'libre') : 'ocupado';
+
+  if (!punto_id || !dia || !tipo) { showToast('Completa punto, día y tipo.', 'error'); return; }
+
+  const payload = { punto_id, dia, tipo, hora, nombres, persona_ids, estado };
+  const res = id ? await sb.from('cart_turnos').update(payload).eq('id', id)
+                 : await sb.from('cart_turnos').insert(payload);
+
+  if (res.error) { showToast('Error: ' + res.error.message, 'error'); return; }
+  showToast(id ? 'Turno actualizado.' : 'Turno creado.', 'success');
+  cartCloseForm();
+  await cartLoadAllData(true);
+  cartRenderAdminTurnos();
+}
+
+function cartConfirmDeleteTurno(id) {
+  if (!confirm('¿Borrar este turno?')) return;
+  cartDeleteTurno(id);
+}
+async function cartDeleteTurno(id) {
+  if (!cartIsAdmin()) { showToast('No tienes permisos de administrador.', 'error'); return; }
+  const { error } = await sb.from('cart_turnos').delete().eq('id', id);
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  showToast('Turno eliminado.', 'success');
+  await cartLoadAllData(true);
+  cartRenderAdminTurnos();
+}
+
+// ---------- PERSONAS ----------
+function cartRenderAdminPersonas() {
+  const body = document.getElementById('cartAdminBody');
+  const items = cartPERSONAS.map(p => `
+    <div class="ct-admin-list-item">
+      <div style="width:34px; height:34px; border-radius:50%; background:${p.activo ? 'var(--primary-green)' : 'var(--text-gray)'}; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:white; font-weight:800;">${(p.nombre || '?').charAt(0).toUpperCase()}</div>
+      <div class="ct-info">
+        <div class="ct-title">${p.nombre}</div>
+        <div class="ct-sub">${p.telefono || 'Sin teléfono'} ${p.activo ? '' : '• Inactivo'}</div>
+      </div>
+      <div class="ct-admin-actions">
+        <button class="ct-icon-btn" onclick="cartOpenPersonaForm('${p.id}')" aria-label="Editar ${(p.nombre || '').replace(/"/g, '&quot;')}">${cartICONS.edit}</button>
+        <button class="ct-icon-btn ct-danger" onclick="cartConfirmDeletePersona('${p.id}')" aria-label="Borrar ${(p.nombre || '').replace(/"/g, '&quot;')}">${cartICONS.trash}</button>
+      </div>
+    </div>`).join('') || `<div class="ct-empty-state">No hay personas registradas aún.</div>`;
+  body.innerHTML = items + `<button class="ct-fab-add" onclick="cartOpenPersonaForm()">${cartICONS.plus} Agregar persona</button>`;
+}
+
+function cartOpenPersonaForm(id) {
+  const p = id ? cartPERSONAS.find(x => x.id === id) : null;
+  document.getElementById('cartFormSheet').innerHTML = `
+    <h2 style="margin-top:0;">${p ? 'Editar persona' : 'Nueva persona'}</h2>
+    <div class="ct-form-group"><label for="cpe_nombre">Nombre</label><input class="ct-form-input" id="cpe_nombre" value="${p ? p.nombre.replace(/"/g, '&quot;') : ''}"></div>
+    <div class="ct-form-group"><label for="cpe_telefono">Teléfono (opcional)</label><input class="ct-form-input" id="cpe_telefono" placeholder="+569..." value="${p ? (p.telefono || '') : ''}"></div>
+    ${p ? `<div class="ct-form-group"><label for="cpe_activo">Estado</label>
+      <select class="ct-form-select" id="cpe_activo">
+        <option value="true" ${p.activo ? 'selected' : ''}>Activo</option>
+        <option value="false" ${!p.activo ? 'selected' : ''}>Inactivo</option>
+      </select>
+    </div>` : ''}
+    <div class="ct-form-actions">
+      <button class="ct-admin-btn-secondary" style="margin:0;" onclick="cartCloseForm()">Cancelar</button>
+      <button class="ct-admin-btn-primary" onclick="cartSavePersona('${p ? p.id : ''}')">${p ? 'Guardar cambios' : 'Agregar persona'}</button>
+    </div>`;
+  cartOpenForm();
+}
+
+async function cartSavePersona(id) {
+  if (!cartIsAdmin()) { showToast('No tienes permisos de administrador.', 'error'); return; }
+  const nombre = document.getElementById('cpe_nombre').value.trim();
+  if (!nombre) { showToast('El nombre es obligatorio.', 'error'); return; }
+  const telefono = document.getElementById('cpe_telefono').value.trim();
+
+  let res;
+  if (id) {
+    const activo = document.getElementById('cpe_activo').value === 'true';
+    res = await sb.from('cart_personas').update({ nombre, telefono, activo }).eq('id', id);
+  } else {
+    res = await sb.from('cart_personas').insert({ nombre, telefono, activo: true });
+  }
+
+  if (res.error) { showToast('Error: ' + res.error.message, 'error'); return; }
+  showToast(id ? 'Persona actualizada.' : 'Persona agregada.', 'success');
+  cartCloseForm();
+  await cartLoadAllData(true);
+  cartRenderAdminPersonas();
+}
+
+function cartConfirmDeletePersona(id) {
+  if (!confirm('¿Borrar esta persona del catálogo?')) return;
+  cartDeletePersona(id);
+}
+async function cartDeletePersona(id) {
+  if (!cartIsAdmin()) { showToast('No tienes permisos de administrador.', 'error'); return; }
+  const { error } = await sb.from('cart_personas').delete().eq('id', id);
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  showToast('Persona eliminada.', 'success');
+  await cartLoadAllData(true);
+  cartRenderAdminPersonas();
+}
+
+// ---------- FORM OVERLAY HELPERS ----------
+function cartOpenForm() { document.getElementById('cartFormOverlay').style.display = 'flex'; }
+function cartCloseForm() { document.getElementById('cartFormOverlay').style.display = 'none'; }
+
+</script>
 
 <script>
 if ('serviceWorker' in navigator) {
