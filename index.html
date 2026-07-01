@@ -3702,10 +3702,10 @@
   .label-toggle.active-siervo svg { opacity: 1; }
 
 
-/* ===== CARRITOS v0.34.9-alpha — integrado en el diseño de la plataforma ===== */
+/* ===== CARRITOS v0.34.11-alpha — integrado en el diseño de la plataforma ===== */
 
 /* =========================================================================
-   CARRITOS (v0.34.9-alpha) — estilos con ámbito bajo #sub-content-carritos.
+   CARRITOS (v0.34.11-alpha) — estilos con ámbito bajo #sub-content-carritos.
    Las variables se mapean a los tokens de diseño de la plataforma para que
    el modo claro/oscuro/automático (data-theme en <html>) se herede solo.
    ========================================================================= */
@@ -4100,6 +4100,18 @@
 }
 #sub-content-carritos #locationsList, #admin-carritos #locationsList { flex: 1; padding-bottom: 24px; display: block; }
 
+/* ---------- COHERENCIA VISUAL CON "GRUPOS" (solo vista pública) ----------
+   Grupos muestra sus tarjetas directamente sobre el fondo de la página, sin
+   una "pantalla" con borde/sombra propia y sin título de sección. Estas
+   reglas quitan ese marco solo de la lista de Carritos (no del panel de
+   Administración, que sí necesita su propio contenedor). */
+#sub-content-carritos .ct-app-wrapper { max-width: none; padding: 0; }
+#sub-content-carritos #cart-list-screen {
+  background: transparent; border: none; box-shadow: none; min-height: 0; border-radius: 0;
+}
+#sub-content-carritos #cart-list-screen .ct-scroll-container { padding: 0; overflow: visible; }
+#sub-content-carritos .ct-search-wrapper { padding: 0 0 1rem; max-width: none; margin: 0; }
+
 @media (prefers-reduced-motion: reduce) {
   #sub-content-carritos *, #admin-carritos *, #sub-content-carritos *::before, #admin-carritos *::before, #sub-content-carritos *::after, #admin-carritos *::after {
     transition-duration: 0.01ms !important; animation-duration: 0.01ms !important;
@@ -4283,9 +4295,6 @@
       </div>
       <div id="sub-content-carritos" class="sub-page" style="display:none">
         <div id="admin-shortcut-carritos" style="display:none"></div>
-      <div class="ct-header-list">
-        <h1 style="margin:0; font-size: 1.6rem;">Carritos</h1>
-      </div>
 
       <div class="ct-search-wrapper">
         <div class="ct-search-inner">
@@ -5459,7 +5468,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.34.10-alpha';
+const APP_VERSION = '0.34.11-alpha';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -11764,6 +11773,12 @@ const NOTIF_GROUPS = {
     bg: 'rgba(52,199,89,0.12)',
     icon: '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>',
   },
+  carritos: {
+    label: 'Carritos',
+    color: '#f36100',
+    bg: 'rgba(243,97,0,0.12)',
+    icon: '<svg viewBox="0 0 24 24"><circle cx="8" cy="19" r="1.8"/><circle cx="17" cy="19" r="1.8"/><path d="M2 3h2l2.4 12.2a2 2 0 0 0 2 1.8h7.2a2 2 0 0 0 2-1.6L20 8H6"/></svg>',
+  },
 };
 
 // ── Notification categories & preferences ───────────────────────────────────
@@ -11782,6 +11797,7 @@ const NOTIF_CATEGORIES = [
   { id: 'sistema',           label: 'Avisos de la Plataforma',     mandatory: true,  group: 'sistema' },
   { id: 'solicitud-cuenta',  label: 'Solicitudes de cuenta',        mandatory: true,  group: 'sistema' },
   { id: 'live',              label: 'Notificaciones Live',          mandatory: false, group: 'live'   },
+  { id: 'carritos',          label: 'Carritos',                     mandatory: false, group: 'carritos' },
 ];
 
 // Devuelve la key de NOTIF_GROUPS correspondiente a una notificación.
@@ -12215,6 +12231,12 @@ function isNotifForMe(n, myNameLower) {
     if (currentRole === 'admin') return !!(_currentUserPermsCache && _currentUserPermsCache.usuarios === true);
     return false;
   }
+  if (n.notif_audience === 'carritos_admin') {
+    if (!isNotifCategoryEnabled(n)) return false;
+    if (currentRole === 'dev') return true;
+    if (currentRole === 'admin') return !!(_currentUserPermsCache && _currentUserPermsCache.carritos !== false);
+    return false;
+  }
   if (!isNotifCategoryEnabled(n)) return false;
   if (!n.target_names || !Array.isArray(n.target_names) || n.target_names.length === 0) return true;
   if (!myNameLower) return false;
@@ -12373,24 +12395,45 @@ async function loadNotifications(target) {
 // eliminada). Solo se muestran mientras la solicitud sigue pendiente —
 // una vez resuelta, se reemplazan por un estado final.
 function _accountRequestActionsHTML(n, variant) {
-  if (n.notif_type !== 'account_request') return '';
-  const name = n.notif_payload?.name || '';
-  if (!name) return '';
-  const resolved = n._resolvedAs; // 'accepted' | 'denied' | undefined
   const wrapStyle = variant === 'desktop'
     ? 'display:flex;gap:8px;margin-top:4px'
     : 'display:flex;gap:8px;margin-top:10px';
-  if (resolved === 'accepted') {
-    return `<div style="${wrapStyle}"><span style="font-size:0.78rem;font-weight:600;color:var(--green)">✓ Solicitud aceptada</span></div>`;
-  }
-  if (resolved === 'denied') {
-    return `<div style="${wrapStyle}"><span style="font-size:0.78rem;font-weight:600;color:var(--red)">✕ Solicitud denegada</span></div>`;
-  }
   const btnBase = 'flex:1;padding:0.45rem 0.7rem;border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer;border:none;font-family:var(--font)';
-  return `<div style="${wrapStyle}">
-    <button style="${btnBase};background:var(--green);color:#fff" onclick="resolveAccountRequest('${n.id}','${name.replace(/'/g,"\\'")}',true)">Aceptar</button>
-    <button style="${btnBase};background:var(--surface3);color:var(--text)" onclick="resolveAccountRequest('${n.id}','${name.replace(/'/g,"\\'")}',false)">Denegar</button>
-  </div>`;
+
+  if (n.notif_type === 'account_request') {
+    const name = n.notif_payload?.name || '';
+    if (!name) return '';
+    const resolved = n._resolvedAs; // 'accepted' | 'denied' | undefined
+    if (resolved === 'accepted') {
+      return `<div style="${wrapStyle}"><span style="font-size:0.78rem;font-weight:600;color:var(--green)">✓ Solicitud aceptada</span></div>`;
+    }
+    if (resolved === 'denied') {
+      return `<div style="${wrapStyle}"><span style="font-size:0.78rem;font-weight:600;color:var(--red)">✕ Solicitud denegada</span></div>`;
+    }
+    return `<div style="${wrapStyle}">
+      <button style="${btnBase};background:var(--green);color:#fff" onclick="resolveAccountRequest('${n.id}','${name.replace(/'/g,"\\'")}',true)">Aceptar</button>
+      <button style="${btnBase};background:var(--surface3);color:var(--text)" onclick="resolveAccountRequest('${n.id}','${name.replace(/'/g,"\\'")}',false)">Denegar</button>
+    </div>`;
+  }
+
+  if (n.notif_type === 'cart_shift_request') {
+    const p = n.notif_payload || {};
+    if (!p.turnoId || !p.name) return '';
+    const resolved = n._resolvedAs; // 'accepted' | 'denied' | undefined
+    if (resolved === 'accepted') {
+      return `<div style="${wrapStyle}"><span style="font-size:0.78rem;font-weight:600;color:var(--green)">✓ Turno confirmado</span></div>`;
+    }
+    if (resolved === 'denied') {
+      return `<div style="${wrapStyle}"><span style="font-size:0.78rem;font-weight:600;color:var(--red)">✕ Turno rechazado</span></div>`;
+    }
+    const nameEsc = p.name.replace(/'/g, "\\'");
+    return `<div style="${wrapStyle}">
+      <button style="${btnBase};background:var(--green);color:#fff" onclick="resolveCartShiftRequest('${n.id}','${p.turnoId}','${nameEsc}',true)">Aceptar</button>
+      <button style="${btnBase};background:var(--surface3);color:var(--text)" onclick="resolveCartShiftRequest('${n.id}','${p.turnoId}','${nameEsc}',false)">Rechazar</button>
+    </div>`;
+  }
+
+  return '';
 }
 
 async function resolveAccountRequest(notifId, name, accept) {
@@ -12403,6 +12446,50 @@ async function resolveAccountRequest(notifId, name, accept) {
   if (!ok) { showToast('No se pudo procesar la solicitud.', 'error'); _renderNotifAllTargets(); return; }
   if (n) n._resolvedAs = accept ? 'accepted' : 'denied';
   showToast(accept ? `Acceso de ${name.split(' ')[0]} aceptado` : `Solicitud de ${name.split(' ')[0]} denegada`, 'success');
+  await deleteNotification(notifId);
+}
+
+// Acepta o rechaza una solicitud de turno de Carritos desde el Panel de
+// Administración / centro de notificaciones. Si se acepta, el turno queda
+// confirmado (ya estaba en estado "reservado") y se le notifica a quien lo
+// pidió. Si se rechaza, el turno vuelve a quedar libre para otros.
+async function resolveCartShiftRequest(notifId, turnoId, name, accept) {
+  if (!cartIsAdmin()) { showToast('No tienes permisos de administrador.', 'error'); return; }
+  const n = _notifAllData.find(x => x.id === notifId);
+  ['notif-d-actions-', 'notif-m-actions-'].forEach(prefix => {
+    const el = document.getElementById(prefix + notifId);
+    if (el) el.innerHTML = '<span style="font-size:0.78rem;color:var(--text3)">Procesando…</span>';
+  });
+
+  if (accept) {
+    const { error } = await sb.from('cart_turnos')
+      .update({ estado: 'reservado', reservado_por: name })
+      .eq('id', turnoId);
+    if (error) { showToast('Error: ' + error.message, 'error'); _renderNotifAllTargets(); return; }
+    await sb.from('notifications').insert({
+      title: 'Turno confirmado',
+      body: `Tu solicitud de turno en Carritos fue aprobada. ¡Nos vemos ahí!`,
+      target_names: [name.trim().toLowerCase()],
+      notif_category: 'carritos',
+    });
+    cartNotifyPush('Turno confirmado', 'Tu solicitud de turno en Carritos fue aprobada.', [name.trim().toLowerCase()]);
+  } else {
+    const { error } = await sb.from('cart_turnos')
+      .update({ estado: 'libre', reservado_por: null, reservado_at: null })
+      .eq('id', turnoId);
+    if (error) { showToast('Error: ' + error.message, 'error'); _renderNotifAllTargets(); return; }
+    await sb.from('notifications').insert({
+      title: 'Turno rechazado',
+      body: `Tu solicitud de turno en Carritos no fue aprobada. El turno quedó disponible nuevamente.`,
+      target_names: [name.trim().toLowerCase()],
+      notif_category: 'carritos',
+    });
+    cartNotifyPush('Turno rechazado', 'Tu solicitud de turno en Carritos no fue aprobada.', [name.trim().toLowerCase()]);
+  }
+
+  if (n) n._resolvedAs = accept ? 'accepted' : 'denied';
+  showToast(accept ? `Turno de ${name.split(' ')[0]} confirmado` : `Turno de ${name.split(' ')[0]} rechazado`, 'success');
+  if (cartDataLoaded) await cartLoadAllData(true);
   await deleteNotification(notifId);
 }
 
@@ -14442,9 +14529,9 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
 </div>
 
 <script>
-/* ===== CARRITOS v0.34.9-alpha ===== */
+/* ===== CARRITOS v0.34.11-alpha ===== */
 // =========================================================================
-// CARRITOS (v0.34.9-alpha)
+// CARRITOS (v0.34.11-alpha)
 // Usa el cliente Supabase (`sb`), el usuario logueado (`currentUser.name`)
 // y el rol (`currentRole`) de la plataforma. Tablas propias: cart_puntos,
 // cart_turnos, cart_personas (mismo proyecto Supabase que el resto de la
@@ -14471,13 +14558,30 @@ const cartICONS = {
   chat: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>',
   edit: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
   trash: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>',
-  plus: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
+  plus: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  bell: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>'
 };
 
 // Contacto de WhatsApp usado para solicitar un turno disponible.
 const CART_WHATSAPP_TEL = '56996377733';
 const CART_MAX_PERSONAS_POR_TURNO = 3;
 const CART_DIAS = ['Lunes','Martes','Miercoles','Jueves','Viernes','Sabado','Domingo'];
+
+// Envía el push de una notificación de Carritos ya insertada en la tabla
+// `notifications` (best-effort: si falla, la notificación in-app ya quedó
+// guardada igual). target_names vacío/omitido = para todos.
+async function cartNotifyPush(title, body, targetNames) {
+  try {
+    const EDGE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users';
+    await fetch(EDGE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+      body: JSON.stringify({ title, body, target_names: targetNames || [] })
+    });
+  } catch (err) {
+    console.warn('No se pudo enviar el push de Carritos:', err.message);
+  }
+}
 
 function cartIsAdmin() {
   return !!(currentUser && ['admin','dev'].includes(currentRole));
@@ -14646,21 +14750,49 @@ async function cartReservarTurno(turnoId) {
     return;
   }
 
+  // Avisar al administrador encargado para que apruebe o rechace la solicitud.
+  const s = cartTURNOS.find(x => x.id === turnoId);
+  const nombre = cartUserName();
+  const title = 'Nueva solicitud de turno — Carritos';
+  const body = `${nombre} solicitó el turno de ${s ? s.punto : ''} (${s ? s.dia : ''}, ${s ? s.hora : ''}). Revisa el Panel de Administración para aprobarlo o rechazarlo.`;
+  try {
+    await sb.from('notifications').insert({
+      title, body,
+      notif_category: 'carritos',
+      notif_audience: 'carritos_admin',
+      notif_type: 'cart_shift_request',
+      notif_payload: { turnoId, name: nombre, punto: s ? s.punto : '', dia: s ? s.dia : '', hora: s ? s.hora : '' },
+    });
+    cartNotifyPush(title, body);
+  } catch (err) {
+    console.warn('No se pudo notificar al administrador de Carritos:', err.message);
+  }
+
   if (window._cartPendingWhatsappMsg) {
     window.open(`https://api.whatsapp.com/send?phone=${CART_WHATSAPP_TEL}&text=${encodeURIComponent(window._cartPendingWhatsappMsg)}`, '_blank');
   }
 
-  showToast('Turno reservado. Quedó marcado para que nadie más lo tome.', 'success');
+  showToast('Solicitud enviada. Te avisaremos cuando el administrador la confirme.', 'success');
   await cartLoadAllData(true);
   cartCloseTurnDetail();
 }
 
 async function cartLiberarTurnoAdmin(turnoId) {
   if (!cartIsAdmin()) { showToast('No tienes permisos de administrador.', 'error'); return; }
+  const s = cartTURNOS.find(x => x.id === turnoId);
+  const nombrePrevio = s ? s.reservado_por : null;
   const { error } = await sb.from('cart_turnos')
     .update({ estado: 'libre', reservado_por: null, reservado_at: null })
     .eq('id', turnoId);
   if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  if (nombrePrevio) {
+    const title = 'Turno liberado';
+    const body = `Tu turno en Carritos (${s.punto}, ${s.dia}) fue liberado por un administrador.`;
+    try {
+      await sb.from('notifications').insert({ title, body, target_names: [nombrePrevio.trim().toLowerCase()], notif_category: 'carritos' });
+      cartNotifyPush(title, body, [nombrePrevio.trim().toLowerCase()]);
+    } catch (err) { console.warn('No se pudo notificar la liberación del turno:', err.message); }
+  }
   showToast('Turno liberado.', 'success');
   await cartLoadAllData(true);
   cartCloseTurnDetail();
@@ -14751,11 +14883,43 @@ function cartRenderAdminPuntos() {
         <div class="ct-sub">${(p.dias || []).join(', ')}</div>
       </div>
       <div class="ct-admin-actions">
+        <button class="ct-icon-btn" onclick="cartOpenUrgentForm('${p.id}')" aria-label="Aviso urgente sobre ${(p.nombre || '').replace(/"/g, '&quot;')}" title="Aviso urgente">${cartICONS.bell}</button>
         <button class="ct-icon-btn" onclick="cartOpenPuntoForm('${p.id}')" aria-label="Editar ${(p.nombre || '').replace(/"/g, '&quot;')}">${cartICONS.edit}</button>
         <button class="ct-icon-btn ct-danger" onclick="cartConfirmDeletePunto('${p.id}')" aria-label="Borrar ${(p.nombre || '').replace(/"/g, '&quot;')}">${cartICONS.trash}</button>
       </div>
     </div>`).join('') || `<div class="ct-empty-state">No hay puntos creados aún.</div>`;
   body.innerHTML = items + `<button class="ct-fab-add" onclick="cartOpenPuntoForm()">${cartICONS.plus} Agregar punto</button>`;
+}
+
+// Aviso urgente: informa a todos los que siguen Carritos sobre algo puntual
+// relacionado a un punto (ej. cancelación por lluvia, cambio de última hora).
+function cartOpenUrgentForm(puntoId) {
+  if (!cartIsAdmin()) { showToast('No tienes permisos de administrador.', 'error'); return; }
+  const p = puntoId ? cartPUNTOS.find(x => x.id === puntoId) : null;
+  document.getElementById('cartFormSheet').innerHTML = `
+    <h2 style="margin-top:0;">Aviso urgente${p ? ' — ' + p.nombre : ''}</h2>
+    <div class="ct-form-group">
+      <label for="ct_urgent_msg">Mensaje</label>
+      <textarea class="ct-form-textarea" id="ct_urgent_msg" rows="4" placeholder="Ej: El punto no funcionará hoy por lluvia"></textarea>
+    </div>
+    <div class="ct-form-actions">
+      <button class="ct-admin-btn-secondary" style="margin:0;" onclick="cartCloseForm()">Cancelar</button>
+      <button class="ct-admin-btn-primary" onclick="cartSendUrgentNotice('${p ? p.id : ''}')">Enviar aviso</button>
+    </div>`;
+  cartOpenForm();
+}
+
+async function cartSendUrgentNotice(puntoId) {
+  if (!cartIsAdmin()) { showToast('No tienes permisos de administrador.', 'error'); return; }
+  const msg = (document.getElementById('ct_urgent_msg').value || '').trim();
+  if (!msg) { showToast('Escribe un mensaje.', 'error'); return; }
+  const p = puntoId ? cartPUNTOS.find(x => x.id === puntoId) : null;
+  const title = p ? `Aviso urgente — ${p.nombre}` : 'Aviso urgente de Carritos';
+  const { error } = await sb.from('notifications').insert({ title, body: msg, notif_category: 'carritos' });
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  cartNotifyPush(title, msg);
+  showToast('Aviso enviado.', 'success');
+  cartCloseForm();
 }
 
 function cartOpenPuntoForm(id) {
@@ -14957,11 +15121,33 @@ async function cartSaveTurno(id) {
 
   if (!punto_id || !dia || !tipo) { showToast('Completa punto, día y tipo.', 'error'); return; }
 
+  const puntoNombre = (cartPUNTOS.find(x => x.id === punto_id) || {}).nombre || '';
+  const turnoPrevio = id ? cartTURNOS.find(x => x.id === id) : null;
+  const horaCambio = turnoPrevio && turnoPrevio.hora !== hora;
+
   const payload = { punto_id, dia, tipo, hora, nombres, persona_ids, estado };
   const res = id ? await sb.from('cart_turnos').update(payload).eq('id', id)
                  : await sb.from('cart_turnos').insert(payload);
 
   if (res.error) { showToast('Error: ' + res.error.message, 'error'); return; }
+
+  // Avisar a todos los que siguen Carritos sobre turnos nuevos o cambios de horario.
+  try {
+    if (!id) {
+      const title = 'Nuevo turno en Carritos';
+      const body = `Se añadió un nuevo turno en ${puntoNombre} (${dia}, ${hora}).`;
+      await sb.from('notifications').insert({ title, body, notif_category: 'carritos' });
+      cartNotifyPush(title, body);
+    } else if (horaCambio) {
+      const title = 'Cambio de horario en Carritos';
+      const body = `El turno de ${puntoNombre} (${dia}) cambió su horario a ${hora}.`;
+      await sb.from('notifications').insert({ title, body, notif_category: 'carritos' });
+      cartNotifyPush(title, body);
+    }
+  } catch (err) {
+    console.warn('No se pudo notificar el cambio de turno:', err.message);
+  }
+
   showToast(id ? 'Turno actualizado.' : 'Turno creado.', 'success');
   cartCloseForm();
   await cartLoadAllData(true);
