@@ -5222,19 +5222,6 @@
           <div id="pref-dark-maps-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
-      <!-- Toggle: función Live -->
-      <div class="profile-row" style="cursor:pointer" onclick="toggleLiveFeaturePref()">
-        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text2)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label">Función Live</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Detección de calles y avisos de No Pasar en tiempo real</div>
-        </div>
-        <div id="pref-live-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="pref-live-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
-      </div>
       <!-- Accent color — only visible when easter egg is unlocked -->
       <div id="pref-accent-section" style="display:none;animation:eggReveal 0.5s cubic-bezier(0.16,1,0.3,1) both;border-top:1px solid var(--border)">
         <div style="padding:0.75rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
@@ -5247,6 +5234,24 @@
           <button class="accent-swatch" id="accent-sw-pink"   onclick="setAccentColor('pink')"   style="--sw:#e040a0" title="Rosa"></button>
           <button class="accent-swatch" id="accent-sw-yellow" onclick="setAccentColor('yellow')" style="--sw:#f5a623" title="Amarillo"></button>
           <button class="accent-swatch" id="accent-sw-purple" onclick="setAccentColor('purple')" style="--sw:#a855f7" title="Morado"></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Funciones Especiales -->
+    <div class="profile-section">
+      <div class="profile-section-title">Funciones Especiales</div>
+      <!-- Toggle: función Live -->
+      <div class="profile-row" style="cursor:pointer" onclick="toggleLiveFeaturePref()">
+        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text2)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Función Live</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Detección de calles y avisos de No Pasar en tiempo real</div>
+        </div>
+        <div id="pref-live-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="pref-live-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
     </div>
@@ -5484,7 +5489,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.35.0-alpha';
+const APP_VERSION = '0.35.1-alpha';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
