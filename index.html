@@ -3802,15 +3802,17 @@
 #sub-content-carritos .ct-header-btn:active, #admin-carritos .ct-header-btn:active { transform: scale(0.93); }
 
 /* ---------- SEARCH & FILTER ---------- */
+/* Mismo tratamiento visual que la barra de búsqueda de "Grupos"; la única
+   diferencia funcional es el botón de filtros a la derecha. */
 #sub-content-carritos .ct-search-wrapper, #admin-carritos .ct-search-wrapper { padding: 0 20px 12px; max-width: 680px; margin: 0 auto; }
 #sub-content-carritos .ct-search-inner, #admin-carritos .ct-search-inner { position: relative; display: flex; align-items: center; }
 #sub-content-carritos .ct-search-icon, #admin-carritos .ct-search-icon {
-  position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
   width: 16px; height: 16px; stroke: var(--text-light); fill: none;
   stroke-width: 2; stroke-linecap: round; pointer-events: none;
 }
 #sub-content-carritos .ct-search-inner input, #admin-carritos .ct-search-inner input {
-  width: 100%; padding: 0.65rem 50px 0.65rem 2.6rem; border-radius: 50px;
+  width: 100%; padding: 0.65rem 46px 0.65rem 2.4rem; border-radius: 50px;
   border: 1px solid var(--border-color); background: var(--bg-ct-screen); color: var(--text-main);
   outline: none; font-size: 0.9rem; font-family: inherit;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
@@ -3841,23 +3843,35 @@
 }
 
 /* ---------- LOCATION GRID ---------- */
-/* auto-fill + minmax(…,1fr) estira cada tarjeta hasta ocupar toda la pista
-   cuando solo entra 1 columna (pantallas angostas) — por eso se limita el
-   ancho máximo y se centra cada tarjeta dentro de su celda. En móvil se fija
-   una grilla de 3 columnas (ver RESPONSIVE) para un resultado predecible. */
-#sub-content-carritos .ct-grid-2x2, #admin-carritos .ct-grid-2x2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 12px; align-items: stretch; }
+/* Mismo patrón visual que la grilla de "Grupos" (auto-fill con
+   minmax(120px,1fr), tarjetas con eyebrow + contenido alineado abajo) para
+   que ambas sub-secciones se vean coherentes entre sí. */
+#sub-content-carritos .ct-grid-2x2, #admin-carritos .ct-grid-2x2 {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px; padding: 0.25rem 0 1rem;
+}
 #sub-content-carritos .ct-location-card, #admin-carritos .ct-location-card {
-  padding: 14px; border-radius: 25px; cursor: pointer; background-color: var(--bg-card);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; gap: 14px; border: 2px solid transparent; aspect-ratio: 1 / 1;
-  width: 100%; max-width: 180px; margin: 0 auto;
-  overflow: hidden;
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end;
+  gap: 0; padding: 1rem 1rem 0.85rem;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  cursor: pointer;
+  text-align: left; width: 100%; position: relative; overflow: hidden;
+  min-height: 110px;
   transition: transform var(--transition), background-color var(--transition), border-color var(--transition), box-shadow var(--transition);
 }
 #sub-content-carritos .ct-location-card:hover, #admin-carritos .ct-location-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); background-color: var(--bg-card-hover); }
 #sub-content-carritos .ct-location-card:active, #admin-carritos .ct-location-card:active { transform: scale(0.97); }
-#sub-content-carritos .ct-status-dot, #admin-carritos .ct-status-dot { width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 3px 10px rgba(0,0,0,0.18); }
-#sub-content-carritos .ct-location-card h2, #admin-carritos .ct-location-card h2 { margin: 0; font-size: 0.9rem; font-weight: 800; line-height: 1.3; color: var(--text-main); }
+#sub-content-carritos .ct-location-eyebrow, #admin-carritos .ct-location-eyebrow {
+  font-size: 0.65rem; font-weight: 700; color: var(--text-light);
+  text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: auto;
+}
+#sub-content-carritos .ct-location-name-row, #admin-carritos .ct-location-name-row {
+  display: flex; align-items: center; gap: 8px; margin-top: 0.6rem; min-width: 0;
+}
+#sub-content-carritos .ct-status-dot, #admin-carritos .ct-status-dot { width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.18); }
+#sub-content-carritos .ct-location-card h2, #admin-carritos .ct-location-card h2 { margin: 0; font-size: 1rem; font-weight: 800; line-height: 1.25; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ---------- SECTION TITLE ---------- */
 #sub-content-carritos .ct-section-title, #admin-carritos .ct-section-title {
@@ -4041,14 +4055,6 @@
 #sub-content-carritos .ct-detail-topbar, #admin-carritos .ct-detail-topbar { padding: 18px 20px 0; flex-shrink: 0; display: flex; align-items: center; gap: 12px; }
 #sub-content-carritos .ct-detail-close-btn, #admin-carritos .ct-detail-close-btn { display: none; }
 
-/* Grilla de puntos en móvil: 3 columnas fijas para que las tarjetas se vean
-   proporcionadas y no ocupen casi todo el ancho de la pantalla. */
-@media (max-width: 480px) {
-  #sub-content-carritos .ct-grid-2x2, #admin-carritos .ct-grid-2x2 { grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  #sub-content-carritos .ct-location-card, #admin-carritos .ct-location-card { padding: 10px; border-radius: 20px; gap: 8px; max-width: none; }
-  #sub-content-carritos .ct-status-dot, #admin-carritos .ct-status-dot { width: 34px; height: 34px; }
-  #sub-content-carritos .ct-location-card h2, #admin-carritos .ct-location-card h2 { font-size: 0.76rem; }
-}
 
 @media (min-width: 768px) {
   #sub-content-carritos .ct-scroll-container, #admin-carritos .ct-scroll-container { padding: 24px; }
@@ -5453,7 +5459,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.34.9-alpha';
+const APP_VERSION = '0.34.9.5-alpha';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -14548,17 +14554,19 @@ function cartRenderHome() {
     });
   }
 
-  home.innerHTML += `<div class="ct-section-title">Locaciones</div>`;
   const grid = document.createElement('div');
   grid.className = 'ct-grid-2x2';
   if (cartPUNTOS.length === 0) {
     grid.innerHTML = `<div class="ct-empty-state" style="grid-column:1/-1;">Aún no hay puntos cargados.</div>`;
   } else {
     grid.innerHTML = cartPUNTOS.map(p => `
-      <div class="ct-location-card" onclick="cartSelectPoint('${p.id}')">
-        <div class="ct-status-dot" style="background:${p.color}"></div>
-        <h2>${p.nombre}</h2>
-      </div>`).join('');
+      <button class="ct-location-card" onclick="cartSelectPoint('${p.id}')">
+        <div class="ct-location-eyebrow">Punto</div>
+        <div class="ct-location-name-row">
+          <span class="ct-status-dot" style="background:${p.color}"></span>
+          <h2>${p.nombre}</h2>
+        </div>
+      </button>`).join('');
   }
   home.appendChild(grid);
 }
