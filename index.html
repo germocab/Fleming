@@ -4130,6 +4130,7 @@
      sola cuando la URL trae ?rtoken=... (enlace enviado por WhatsApp).
 ════════════════════════════════════════════════════════════ -->
 <div id="trep-public-screen" style="display:none;position:fixed;inset:0;z-index:99999;background:var(--bg);color:var(--text);font-family:inherit;overflow-y:auto">
+  <button id="trep-pub-inapp-close" onclick="trepCloseInAppScreen()" style="display:none;position:absolute;top:1rem;right:1rem;z-index:1;background:var(--surface2);border:1px solid var(--border);border-radius:10px;width:36px;height:36px;align-items:center;justify-content:center;cursor:pointer;color:var(--text)"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
   <div style="max-width:480px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;padding:1.25rem 1.1rem 2.5rem">
 
     <div id="trep-pub-step-0" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:0.4rem">
@@ -4883,6 +4884,9 @@
     <div class="detail-actions" id="detail-admin-actions" style="display:none">
       <button class="detail-btn-secondary" id="detail-admin-btn" style="width:100%">Administrar</button>
     </div>
+    <div class="detail-actions" id="detail-report-actions" style="display:none">
+      <button class="detail-btn-secondary" id="detail-report-btn" style="width:100%">Reportar Territorio</button>
+    </div>
     <!-- Territory tabs (shown only when 2 territories assigned) -->
     <div class="detail-ter-tabs" id="detail-ter-tabs" style="display:none">
       <button class="detail-ter-tab active" id="detail-ter-tab-1" onclick="switchDetailTerTab(1)">
@@ -5590,7 +5594,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.36.0-alpha';
+const APP_VERSION = '0.36.5-alpha';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -5623,6 +5627,7 @@ const I18N = {
   'admin.tab.aseo-salon':   { es: 'Aseo Salón',              en: 'Hall Cleaning' },
   'admin.tab.usuarios':     { es: 'Usuarios',                en: 'Users' },
   'admin.tab.notificaciones': { es: 'Notificaciones',        en: 'Notifications' },
+  'admin.tab.reports':      { es: 'Reportes',                en: 'Reports' },
   'btn.guardar':            { es: 'Guardar',                 en: 'Save' },
   'btn.cancelar':           { es: 'Cancelar',                en: 'Cancel' },
   'btn.editar':             { es: 'Editar',                  en: 'Edit' },
@@ -7804,6 +7809,17 @@ async function viewAssignment(id) {
   } else {
     adminActionsWrap.style.display = 'none';
     adminBtn.onclick = null;
+  }
+
+  // ── Botón "Reportar Territorio" — visible cuando la asignación tiene territorio(s) ──
+  const reportActionsWrap = document.getElementById('detail-report-actions');
+  const reportBtn = document.getElementById('detail-report-btn');
+  if (ter) {
+    reportActionsWrap.style.display = '';
+    reportBtn.onclick = () => reportarTerritorioDesdeAsignacion(a.id);
+  } else {
+    reportActionsWrap.style.display = 'none';
+    reportBtn.onclick = null;
   }
 
   // ── Territory tabs setup ──
@@ -15640,10 +15656,10 @@ async function trepCreateForm() {
   const payload = {
     token, host_name: host, assignment_date: date || null,
     territory_id: ter1, territory_id_2: ter2 || null,
-    notes: notes || null, source: 'admin', created_by: currentUser?.name || null,
+    notes: notes || null,
   };
   const { error } = await sb.from('territory_report_forms').insert(payload);
-  if (error) { showToast('Error al crear el formulario', 'error'); console.error(error); return; }
+  if (error) { showToast('Error al crear el formulario' + (error.message ? ': ' + error.message : ''), 'error'); console.error(error); return; }
   const link = `${location.href.split('?')[0]}?rtoken=${token}`;
   const linkBox = document.getElementById('trep-created-link-box');
   const linkText = document.getElementById('trep-created-link-text');
@@ -15807,7 +15823,15 @@ async function trepInitPublicScreen(token) {
     c.innerHTML = '<h2 style="font-size:1.3rem;margin-bottom:6px">Enlace inválido</h2><p style="color:var(--text3);font-size:0.85rem">Este enlace no existe o ya expiró.</p>';
     return;
   }
-  trepPubForm = forms[0];
+  await trepLoadPublicFormRow(forms[0]);
+}
+
+// Carga los datos de territorio + reportes ya enviados para un form (fila de territory_report_forms)
+// y renderiza la pantalla pública. Compartido entre el flujo por enlace (?rtoken=) y el flujo
+// en-app (botón "Reportar Territorio" dentro del detalle de una asignación).
+async function trepLoadPublicFormRow(formRow) {
+  trepPubForm = formRow;
+  trepPubTerritories = {};
   const ids = [trepPubForm.territory_id, trepPubForm.territory_id_2].filter(Boolean);
 
   const [{ data: ters }, { data: subs }] = await Promise.all([
@@ -15819,6 +15843,53 @@ async function trepInitPublicScreen(token) {
 
   document.getElementById('trep-pub-loading').style.display = 'none';
   trepPubRenderOverview();
+}
+
+// Entrada en-app: el encargado de una asignación con territorio toca "Reportar Territorio"
+// dentro del detalle. Busca (o crea si no existe aún) el formulario de reporte para ese
+// territorio/fecha/encargado y abre la misma pantalla de reporte que se usa vía enlace.
+let _trepInAppOpen = false;
+async function reportarTerritorioDesdeAsignacion(assignmentId) {
+  const a = assignments.find(x => x.id === assignmentId);
+  if (!a || !a.territory_id) return;
+  const hostName = a.conductor || currentUser?.name || 'Publicador';
+
+  showToast('Cargando reporte...', 'info');
+
+  let query = sb.from('territory_report_forms').select('*')
+    .eq('territory_id', a.territory_id)
+    .eq('host_name', hostName);
+  query = a.date ? query.eq('assignment_date', a.date) : query.is('assignment_date', null);
+  const { data: existing } = await query.limit(1);
+
+  let formRow = existing && existing[0];
+  if (!formRow) {
+    const payload = {
+      token: trepGenToken(), host_name: hostName, assignment_date: a.date || null,
+      territory_id: a.territory_id, territory_id_2: a.territory_id_2 || null,
+      notes: null,
+    };
+    const { data: created, error } = await sb.from('territory_report_forms').insert(payload).select().single();
+    if (error) { showToast('Error al crear el formulario' + (error.message ? ': ' + error.message : ''), 'error'); console.error(error); return; }
+    formRow = created;
+  }
+
+  closeDetail();
+  _trepInAppOpen = true;
+  document.getElementById('trep-pub-inapp-close').style.display = 'flex';
+  document.getElementById('trep-public-screen').style.display = 'block';
+  document.getElementById('trep-pub-step-0').style.display = 'flex';
+  document.getElementById('trep-pub-content').style.display = 'none';
+  document.getElementById('trep-pub-loading').style.display = '';
+  document.body.style.overflow = 'hidden';
+  await trepLoadPublicFormRow(formRow);
+}
+
+function trepCloseInAppScreen() {
+  _trepInAppOpen = false;
+  document.getElementById('trep-public-screen').style.display = 'none';
+  document.getElementById('trep-pub-inapp-close').style.display = 'none';
+  document.body.style.overflow = '';
 }
 
 function trepPubRenderOverview() {
