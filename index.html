@@ -3702,14 +3702,14 @@
   .label-toggle.active-siervo svg { opacity: 1; }
 
 
-/* ===== CARRITOS v0.34.0-alpha ===== */
+/* ===== CARRITOS v0.34.5-alpha — integrado en el diseño de la plataforma ===== */
 
 /* =========================================================================
-   CARRITOS (v0.34.0-alpha) — estilos con ámbito bajo #sub-content-carritos.
+   CARRITOS (v0.34.5-alpha) — estilos con ámbito bajo #sub-content-carritos.
    Las variables se mapean a los tokens de diseño de la plataforma para que
    el modo claro/oscuro/automático (data-theme en <html>) se herede solo.
    ========================================================================= */
-#sub-content-carritos {
+#sub-content-carritos, #admin-carritos {
   --bg-body: var(--bg);
   --bg-ct-screen: var(--surface);
   --bg-card: var(--surface2);
@@ -3722,6 +3722,12 @@
   --primary-ct-orange-mid: rgba(243,97,0,0.18);
   --primary-blue: #0056ff;
   --primary-green: var(--green);
+  /* Color de acento de la UI (botones, pestañas activas, foco de inputs).
+     Se mapea al acento de la plataforma para que Carritos sea visualmente
+     coherente con el resto de la app; el naranja queda reservado como
+     color semántico para el turno de Mañana. */
+  --ct-accent: var(--accent);
+  --ct-accent-light: var(--accent-light);
   --ct-danger: var(--red);
   --radius: 22px;
   --radius-sm: 14px;
@@ -3737,7 +3743,7 @@
 }
 
 /* ---------- LAYOUT ---------- */
-#sub-content-carritos .ct-app-wrapper {
+#sub-content-carritos .ct-app-wrapper, #admin-carritos .ct-app-wrapper {
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
@@ -3746,7 +3752,7 @@
   margin: 0 auto;
   padding: 4px 0 24px;
 }
-#sub-content-carritos .ct-screen {
+#sub-content-carritos .ct-screen, #admin-carritos .ct-screen {
   background-color: var(--bg-ct-screen);
   border-radius: var(--radius);
   overflow: hidden;
@@ -3758,7 +3764,7 @@
   position: relative;
   transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
-#sub-content-carritos .ct-scroll-container {
+#sub-content-carritos .ct-scroll-container, #admin-carritos .ct-scroll-container {
   padding: 20px;
   overflow-y: auto;
   flex-grow: 1;
@@ -3766,20 +3772,20 @@
   scrollbar-width: thin;
   scrollbar-color: var(--border-color) transparent;
 }
-#sub-content-carritos .ct-scroll-container::-webkit-scrollbar { width: 5px; }
-#sub-content-carritos .ct-scroll-container::-webkit-scrollbar-track { background: transparent; }
-#sub-content-carritos .ct-scroll-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 99px; }
+#sub-content-carritos .ct-scroll-container::-webkit-scrollbar, #admin-carritos .ct-scroll-container::-webkit-scrollbar { width: 5px; }
+#sub-content-carritos .ct-scroll-container::-webkit-scrollbar-track, #admin-carritos .ct-scroll-container::-webkit-scrollbar-track { background: transparent; }
+#sub-content-carritos .ct-scroll-container::-webkit-scrollbar-thumb, #admin-carritos .ct-scroll-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 99px; }
 
-#sub-content-carritos .ct-screen { transition: transform var(--transition-slow), opacity var(--transition); }
-#sub-content-carritos #detail-ct-screen { opacity: 0; display: none; }
-#sub-content-carritos #detail-ct-screen.ct-active { opacity: 1; display: flex; }
+#sub-content-carritos .ct-screen, #admin-carritos .ct-screen { transition: transform var(--transition-slow), opacity var(--transition); }
+#sub-content-carritos #detail-ct-screen, #admin-carritos #detail-ct-screen { opacity: 0; display: none; }
+#sub-content-carritos #detail-ct-screen.ct-active, #admin-carritos #detail-ct-screen.ct-active { opacity: 1; display: flex; }
 
 /* ---------- HEADER ---------- */
-#sub-content-carritos .ct-header-list {
+#sub-content-carritos .ct-header-list, #admin-carritos .ct-header-list {
   display: flex; justify-content: space-between; align-items: center;
   padding: 22px 20px 10px; position: relative; gap: 12px;
 }
-#sub-content-carritos .ct-header-btn {
+#sub-content-carritos .ct-header-btn, #admin-carritos .ct-header-btn {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   color: var(--text-main);
@@ -3791,130 +3797,130 @@
   position: relative;
   transition: background-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
 }
-#sub-content-carritos .ct-header-btn:hover { background: var(--bg-card-hover); box-shadow: var(--shadow-sm); }
-#sub-content-carritos .ct-header-btn:active { transform: scale(0.93); }
-#sub-content-carritos .ct-admin-pill {
+#sub-content-carritos .ct-header-btn:hover, #admin-carritos .ct-header-btn:hover { background: var(--bg-card-hover); box-shadow: var(--shadow-sm); }
+#sub-content-carritos .ct-header-btn:active, #admin-carritos .ct-header-btn:active { transform: scale(0.93); }
+#sub-content-carritos .ct-admin-pill, #admin-carritos .ct-admin-pill {
   display: inline-flex; align-items: center; gap: 6px;
-  background: var(--primary-ct-orange-light); color: var(--primary-ct-orange);
-  border: 1px solid var(--primary-ct-orange-mid);
+  background: var(--ct-accent-light); color: var(--ct-accent);
+  border: 1px solid var(--ct-accent-light);
   font-weight: 800; font-size: 0.78rem;
   padding: 9px 14px; border-radius: 99px; cursor: pointer;
   transition: background-color var(--transition-fast);
   white-space: nowrap;
 }
-#sub-content-carritos .ct-admin-pill:hover { background: var(--primary-ct-orange-mid); }
+#sub-content-carritos .ct-admin-pill:hover, #admin-carritos .ct-admin-pill:hover { background: var(--ct-accent-light); }
 
 /* ---------- SEARCH & FILTER ---------- */
-#sub-content-carritos .ct-search-wrapper { padding: 0 20px 12px; }
-#sub-content-carritos .ct-search-inner { position: relative; display: flex; align-items: center; }
-#sub-content-carritos .ct-search-inner input {
+#sub-content-carritos .ct-search-wrapper, #admin-carritos .ct-search-wrapper { padding: 0 20px 12px; }
+#sub-content-carritos .ct-search-inner, #admin-carritos .ct-search-inner { position: relative; display: flex; align-items: center; }
+#sub-content-carritos .ct-search-inner input, #admin-carritos .ct-search-inner input {
   width: 100%; padding: 13px 50px 13px 18px; border-radius: 16px;
   border: 1.5px solid var(--border-color); background: var(--bg-card); color: var(--text-main);
   outline: none; font-size: 0.95rem; font-family: inherit;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
-#sub-content-carritos .ct-search-inner input:focus { border-color: var(--primary-ct-orange); box-shadow: 0 0 0 3px var(--primary-ct-orange-light); }
-#sub-content-carritos .ct-search-inner input::placeholder { color: var(--text-light); }
-#sub-content-carritos .ct-search-filter-btn {
+#sub-content-carritos .ct-search-inner input:focus, #admin-carritos .ct-search-inner input:focus { border-color: var(--ct-accent); box-shadow: 0 0 0 3px var(--ct-accent-light); }
+#sub-content-carritos .ct-search-inner input::placeholder, #admin-carritos .ct-search-inner input::placeholder { color: var(--text-light); }
+#sub-content-carritos .ct-search-filter-btn, #admin-carritos .ct-search-filter-btn {
   position: absolute; right: 12px; background: none; border: none; cursor: pointer;
   color: var(--text-gray); padding: 4px; border-radius: 8px; display: flex; align-items: center;
   transition: color var(--transition-fast);
 }
-#sub-content-carritos .ct-search-filter-btn:hover { color: var(--primary-ct-orange); }
-#sub-content-carritos #filterMenu { max-height: 0; opacity: 0; overflow: hidden; transform: translateY(-6px); transition: max-height 0.35s ease, opacity 0.25s ease, transform 0.3s ease; }
-#sub-content-carritos #filterMenu.ct-open { max-height: 300px; opacity: 1; transform: translateY(0); }
-#sub-content-carritos .ct-filter-panel { margin-top: 10px; padding: 14px 16px; background: var(--bg-card); border-radius: var(--radius-sm); border: 1px solid var(--border-color); }
+#sub-content-carritos .ct-search-filter-btn:hover, #admin-carritos .ct-search-filter-btn:hover { color: var(--ct-accent); }
+#sub-content-carritos #cartFilterMenu, #admin-carritos #cartFilterMenu { max-height: 0; opacity: 0; overflow: hidden; transform: translateY(-6px); transition: max-height 0.35s ease, opacity 0.25s ease, transform 0.3s ease; }
+#sub-content-carritos #cartFilterMenu.ct-open, #admin-carritos #cartFilterMenu.ct-open { max-height: 300px; opacity: 1; transform: translateY(0); }
+#sub-content-carritos .ct-filter-panel, #admin-carritos .ct-filter-panel { margin-top: 10px; padding: 14px 16px; background: var(--bg-card); border-radius: var(--radius-sm); border: 1px solid var(--border-color); }
 
 /* ---------- CHIPS ---------- */
-#sub-content-carritos .ct-filter-chip {
+#sub-content-carritos .ct-filter-chip, #admin-carritos .ct-filter-chip {
   padding: 8px 16px; border-radius: 99px; background: var(--bg-ct-screen);
   border: 1.5px solid var(--border-color); font-size: 0.83rem; font-weight: 700;
   cursor: pointer; color: var(--text-gray); transition: all var(--transition-fast);
   white-space: nowrap; user-select: none;
 }
-#sub-content-carritos .ct-filter-chip:hover { border-color: var(--primary-ct-orange); color: var(--primary-ct-orange); }
-#sub-content-carritos .ct-filter-chip.ct-active {
-  background: var(--primary-ct-orange); color: white; border-color: var(--primary-ct-orange);
-  box-shadow: 0 2px 8px rgba(243,97,0,0.28);
+#sub-content-carritos .ct-filter-chip:hover, #admin-carritos .ct-filter-chip:hover { border-color: var(--ct-accent); color: var(--ct-accent); }
+#sub-content-carritos .ct-filter-chip.ct-active, #admin-carritos .ct-filter-chip.ct-active {
+  background: var(--ct-accent); color: white; border-color: var(--ct-accent);
+  box-shadow: 0 2px 8px var(--ct-accent-light);
 }
 
 /* ---------- LOCATION GRID ---------- */
-#sub-content-carritos .ct-grid-2x2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; align-items: stretch; }
-#sub-content-carritos .ct-location-card {
+#sub-content-carritos .ct-grid-2x2, #admin-carritos .ct-grid-2x2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; align-items: stretch; }
+#sub-content-carritos .ct-location-card, #admin-carritos .ct-location-card {
   padding: 14px; border-radius: 25px; cursor: pointer; background-color: var(--bg-card);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   text-align: center; gap: 14px; border: 2px solid transparent; aspect-ratio: 1 / 1; width: 100%;
   overflow: hidden;
   transition: transform var(--transition), background-color var(--transition), border-color var(--transition), box-shadow var(--transition);
 }
-#sub-content-carritos .ct-location-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); background-color: var(--bg-card-hover); }
-#sub-content-carritos .ct-location-card:active { transform: scale(0.97); }
-#sub-content-carritos .ct-status-dot { width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 3px 10px rgba(0,0,0,0.18); }
-#sub-content-carritos .ct-location-card h2 { margin: 0; font-size: 0.9rem; font-weight: 800; line-height: 1.3; color: var(--text-main); }
+#sub-content-carritos .ct-location-card:hover, #admin-carritos .ct-location-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); background-color: var(--bg-card-hover); }
+#sub-content-carritos .ct-location-card:active, #admin-carritos .ct-location-card:active { transform: scale(0.97); }
+#sub-content-carritos .ct-status-dot, #admin-carritos .ct-status-dot { width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 3px 10px rgba(0,0,0,0.18); }
+#sub-content-carritos .ct-location-card h2, #admin-carritos .ct-location-card h2 { margin: 0; font-size: 0.9rem; font-weight: 800; line-height: 1.3; color: var(--text-main); }
 
 /* ---------- SECTION TITLE ---------- */
-#sub-content-carritos .ct-section-title {
+#sub-content-carritos .ct-section-title, #admin-carritos .ct-section-title {
   font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px;
   color: var(--text-gray); margin: 18px 0 10px 2px;
 }
 
 /* ---------- MY SHIFT CARD ---------- */
-#sub-content-carritos .ct-my-shift-card {
+#sub-content-carritos .ct-my-shift-card, #admin-carritos .ct-my-shift-card {
   background: var(--bg-card); border: 1.5px solid var(--border-color); border-radius: 18px;
   padding: 16px 18px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 6px;
   cursor: pointer; transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
-#sub-content-carritos .ct-my-shift-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
-#sub-content-carritos .ct-my-shift-card:active { transform: scale(0.98); }
+#sub-content-carritos .ct-my-shift-card:hover, #admin-carritos .ct-my-shift-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+#sub-content-carritos .ct-my-shift-card:active, #admin-carritos .ct-my-shift-card:active { transform: scale(0.98); }
 
 /* ---------- LOGISTICS BOXES ---------- */
-#sub-content-carritos .ct-logistics-box {
+#sub-content-carritos .ct-logistics-box, #admin-carritos .ct-logistics-box {
   background: var(--bg-card); border: 1.5px solid var(--border-color); border-radius: 18px;
   padding: 18px 20px; margin-bottom: 12px; box-shadow: var(--shadow-sm);
   transition: background-color 0.3s ease, border-color 0.3s ease;
 }
-#sub-content-carritos .ct-logistics-box.ct-orange { background: var(--primary-ct-orange-light); border-color: var(--primary-ct-orange-mid); }
-#sub-content-carritos .ct-logistics-box h4 {
+#sub-content-carritos .ct-logistics-box.ct-orange, #admin-carritos .ct-logistics-box.ct-orange { background: var(--primary-ct-orange-light); border-color: var(--primary-ct-orange-mid); }
+#sub-content-carritos .ct-logistics-box h4, #admin-carritos .ct-logistics-box h4 {
   margin: 0 0 6px 0; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.2px;
   color: var(--text-gray); font-weight: 800; display: flex; align-items: center; gap: 6px;
 }
-#sub-content-carritos .ct-logistics-box p { margin: 0; font-weight: 700; font-size: 1rem; color: var(--text-main); line-height: 1.4; }
+#sub-content-carritos .ct-logistics-box p, #admin-carritos .ct-logistics-box p { margin: 0; font-weight: 700; font-size: 1rem; color: var(--text-main); line-height: 1.4; }
 
 /* ---------- MINI BUTTONS ---------- */
-#sub-content-carritos .ct-btn-mini {
+#sub-content-carritos .ct-btn-mini, #admin-carritos .ct-btn-mini {
   flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
   padding: 10px 12px; border-radius: var(--radius-xs); text-decoration: none;
   font-size: 0.82rem; font-weight: 700;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
   border: 1.5px solid var(--border-color); background: var(--bg-ct-screen); color: var(--text-main);
 }
-#sub-content-carritos .ct-btn-mini:hover { background: var(--bg-card-hover); box-shadow: var(--shadow-sm); }
-#sub-content-carritos .ct-btn-mini:active { transform: scale(0.95); }
-#sub-content-carritos .ct-logistics-box.ct-orange .ct-btn-mini { border-color: var(--primary-ct-orange-mid); color: var(--primary-ct-orange); background: rgba(255,255,255,0.7); }
-:root[data-theme="dark"] #sub-content-carritos .ct-logistics-box.ct-orange .ct-btn-mini { background: rgba(243,97,0,0.1); }
-#sub-content-carritos .ct-btn-whatsapp { background: #25D366 !important; color: white !important; border-color: #25D366 !important; box-shadow: 0 2px 8px rgba(37,211,102,0.28) !important; }
-#sub-content-carritos .ct-btn-whatsapp:hover { opacity: 0.92; }
+#sub-content-carritos .ct-btn-mini:hover, #admin-carritos .ct-btn-mini:hover { background: var(--bg-card-hover); box-shadow: var(--shadow-sm); }
+#sub-content-carritos .ct-btn-mini:active, #admin-carritos .ct-btn-mini:active { transform: scale(0.95); }
+#sub-content-carritos .ct-logistics-box.ct-orange .ct-btn-mini, #admin-carritos .ct-logistics-box.ct-orange .ct-btn-mini { border-color: var(--primary-ct-orange-mid); color: var(--primary-ct-orange); background: rgba(255,255,255,0.7); }
+:root[data-theme="dark"] #sub-content-carritos .ct-logistics-box.ct-orange .ct-btn-mini, #admin-carritos .ct-logistics-box.ct-orange .ct-btn-mini { background: rgba(243,97,0,0.1); }
+#sub-content-carritos .ct-btn-whatsapp, #admin-carritos .ct-btn-whatsapp { background: #25D366 !important; color: white !important; border-color: #25D366 !important; box-shadow: 0 2px 8px rgba(37,211,102,0.28) !important; }
+#sub-content-carritos .ct-btn-whatsapp:hover, #admin-carritos .ct-btn-whatsapp:hover { opacity: 0.92; }
 
 /* ---------- SHIFT SLOTS ---------- */
-#sub-content-carritos .ct-slot {
+#sub-content-carritos .ct-slot, #admin-carritos .ct-slot {
   padding: 18px 20px; border-radius: 25px; margin-bottom: 10px; color: white;
   display: flex; flex-direction: column; gap: 10px; cursor: pointer;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast);
 }
-#sub-content-carritos .ct-slot:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
-#sub-content-carritos .ct-slot:active { transform: scale(0.98); }
-#sub-content-carritos .ct-turno-M  { background: linear-gradient(135deg, #f36100, #ff8533); box-shadow: 0 3px 10px rgba(243,97,0,0.3); }
-#sub-content-carritos .ct-turno-T  { background: linear-gradient(135deg, #0056ff, #3377ff); box-shadow: 0 3px 10px rgba(0,86,255,0.25); }
-#sub-content-carritos .ct-turno-TD { background: linear-gradient(135deg, #16a34a, #22c55e); box-shadow: 0 3px 10px rgba(22,163,74,0.25); }
-#sub-content-carritos .ct-turno-RESERVADO { background: linear-gradient(135deg, #e08600, #f5a623); box-shadow: 0 3px 10px rgba(224,134,0,0.28); }
-#sub-content-carritos .ct-slot-pill { background: rgba(255,255,255,0.22); padding: 5px 13px; border-radius: 99px; width: fit-content; font-size: 0.85rem; font-weight: 700; backdrop-filter: blur(4px); }
+#sub-content-carritos .ct-slot:hover, #admin-carritos .ct-slot:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
+#sub-content-carritos .ct-slot:active, #admin-carritos .ct-slot:active { transform: scale(0.98); }
+#sub-content-carritos .ct-turno-M , #admin-carritos .ct-turno-M  { background: linear-gradient(135deg, #f36100, #ff8533); box-shadow: 0 3px 10px rgba(243,97,0,0.3); }
+#sub-content-carritos .ct-turno-T , #admin-carritos .ct-turno-T  { background: linear-gradient(135deg, #0056ff, #3377ff); box-shadow: 0 3px 10px rgba(0,86,255,0.25); }
+#sub-content-carritos .ct-turno-TD, #admin-carritos .ct-turno-TD { background: linear-gradient(135deg, #16a34a, #22c55e); box-shadow: 0 3px 10px rgba(22,163,74,0.25); }
+#sub-content-carritos .ct-turno-RESERVADO, #admin-carritos .ct-turno-RESERVADO { background: linear-gradient(135deg, #e08600, #f5a623); box-shadow: 0 3px 10px rgba(224,134,0,0.28); }
+#sub-content-carritos .ct-slot-pill, #admin-carritos .ct-slot-pill { background: rgba(255,255,255,0.22); padding: 5px 13px; border-radius: 99px; width: fit-content; font-size: 0.85rem; font-weight: 700; backdrop-filter: blur(4px); }
 
 /* ---------- DAYS ROW ---------- */
-#sub-content-carritos .ct-days-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
-#sub-content-carritos .ct-days-row::-webkit-scrollbar { display: none; }
+#sub-content-carritos .ct-days-row, #admin-carritos .ct-days-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+#sub-content-carritos .ct-days-row::-webkit-scrollbar, #admin-carritos .ct-days-row::-webkit-scrollbar { display: none; }
 
 /* ---------- TURN DETAIL SCREEN ---------- */
-#sub-content-carritos .ct-turn-detail-screen {
+#sub-content-carritos .ct-turn-detail-screen, #admin-carritos .ct-turn-detail-screen {
   position: fixed; top: 0; left: 100%; width: 100%; height: 100%;
   background: var(--bg-ct-screen); z-index: 4000;
   transition: left 0.38s cubic-bezier(0.22, 1, 0.36, 1);
@@ -3926,112 +3932,113 @@
    plataforma. Tampoco usa su propio toast: reutiliza showToast() global. */
 
 /* ---------- ADMIN PANEL ---------- */
-#sub-content-carritos #cartAdminPanel {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: var(--bg-body); z-index: 6000; display: none; flex-direction: column;
+/* Ya no es un overlay propio: vive embebido dentro de #admin-carritos,
+   dentro del panel de Administración general de la plataforma. */
+#admin-carritos #cartAdminPanel {
+  display: flex; flex-direction: column;
 }
-#sub-content-carritos .ct-admin-panel-header { display: flex; align-items: center; gap: 14px; padding: 24px 20px 10px; }
-#sub-content-carritos .ct-admin-panel-header h1 { margin: 0; font-size: 1.5rem; }
-#sub-content-carritos .ct-admin-tabs { display: flex; gap: 7px; padding: 0 20px 16px; overflow-x: auto; scrollbar-width: none; }
-#sub-content-carritos .ct-admin-tabs::-webkit-scrollbar { display: none; }
-#sub-content-carritos .ct-admin-tab {
+#sub-content-carritos .ct-admin-panel-header, #admin-carritos .ct-admin-panel-header { display: flex; align-items: center; gap: 14px; padding: 24px 20px 10px; }
+#sub-content-carritos .ct-admin-panel-header h1, #admin-carritos .ct-admin-panel-header h1 { margin: 0; font-size: 1.5rem; }
+#sub-content-carritos .ct-admin-tabs, #admin-carritos .ct-admin-tabs { display: flex; gap: 7px; padding: 0 20px 16px; overflow-x: auto; scrollbar-width: none; }
+#sub-content-carritos .ct-admin-tabs::-webkit-scrollbar, #admin-carritos .ct-admin-tabs::-webkit-scrollbar { display: none; }
+#sub-content-carritos .ct-admin-tab, #admin-carritos .ct-admin-tab {
   padding: 10px 18px; border-radius: 12px; background: var(--bg-card); border: 1.5px solid var(--border-color);
   font-weight: 700; font-size: 0.85rem; cursor: pointer; white-space: nowrap; color: var(--text-gray);
   transition: all var(--transition-fast); display: inline-flex; align-items: center; gap: 6px;
 }
-#sub-content-carritos .ct-tab-icon { display: inline-flex; align-items: center; }
-#sub-content-carritos .ct-admin-tab:hover { border-color: var(--primary-ct-orange); color: var(--primary-ct-orange); }
-#sub-content-carritos .ct-admin-tab.ct-active { background: var(--primary-ct-orange); color: white; border-color: var(--primary-ct-orange); box-shadow: 0 2px 8px rgba(243,97,0,0.3); }
-#sub-content-carritos .ct-admin-list-item {
+#sub-content-carritos .ct-tab-icon, #admin-carritos .ct-tab-icon { display: inline-flex; align-items: center; }
+#sub-content-carritos .ct-admin-tab:hover, #admin-carritos .ct-admin-tab:hover { border-color: var(--ct-accent); color: var(--ct-accent); }
+#sub-content-carritos .ct-admin-tab.ct-active, #admin-carritos .ct-admin-tab.ct-active { background: var(--ct-accent); color: white; border-color: var(--ct-accent); box-shadow: 0 2px 8px var(--ct-accent-light); }
+#sub-content-carritos .ct-admin-list-item, #admin-carritos .ct-admin-list-item {
   background: var(--bg-card); border: 1.5px solid var(--border-color); border-radius: 18px; padding: 16px;
   margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px;
   transition: background-color var(--transition-fast);
 }
-#sub-content-carritos .ct-admin-list-item .ct-info { flex: 1; min-width: 0; }
-#sub-content-carritos .ct-admin-list-item .ct-info .ct-title { font-weight: 800; font-size: 0.97rem; }
-#sub-content-carritos .ct-admin-list-item .ct-info .ct-sub { color: var(--text-gray); font-size: 0.78rem; margin-top: 3px; }
-#sub-content-carritos .ct-admin-actions { display: flex; gap: 8px; flex-shrink: 0; }
-#sub-content-carritos .ct-icon-btn {
+#sub-content-carritos .ct-admin-list-item .ct-info, #admin-carritos .ct-admin-list-item .ct-info { flex: 1; min-width: 0; }
+#sub-content-carritos .ct-admin-list-item .ct-info .ct-title, #admin-carritos .ct-admin-list-item .ct-info .ct-title { font-weight: 800; font-size: 0.97rem; }
+#sub-content-carritos .ct-admin-list-item .ct-info .ct-sub, #admin-carritos .ct-admin-list-item .ct-info .ct-sub { color: var(--text-gray); font-size: 0.78rem; margin-top: 3px; }
+#sub-content-carritos .ct-admin-actions, #admin-carritos .ct-admin-actions { display: flex; gap: 8px; flex-shrink: 0; }
+#sub-content-carritos .ct-icon-btn, #admin-carritos .ct-icon-btn {
   width: 36px; height: 36px; border-radius: 10px; border: 1.5px solid var(--border-color); background: var(--bg-ct-screen);
   display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-main);
   font-size: 0.9rem; font-family: inherit; padding: 0;
   transition: background-color var(--transition-fast), transform var(--transition-fast);
 }
-#sub-content-carritos .ct-icon-btn:hover { background: var(--bg-card-hover); }
-#sub-content-carritos .ct-icon-btn:active { transform: scale(0.92); }
-#sub-content-carritos .ct-icon-btn.ct-danger { color: var(--ct-danger); border-color: rgba(220,38,38,0.25); background: rgba(220,38,38,0.04); }
-#sub-content-carritos .ct-fab-add {
+#sub-content-carritos .ct-icon-btn:hover, #admin-carritos .ct-icon-btn:hover { background: var(--bg-card-hover); }
+#sub-content-carritos .ct-icon-btn:active, #admin-carritos .ct-icon-btn:active { transform: scale(0.92); }
+#sub-content-carritos .ct-icon-btn.ct-danger, #admin-carritos .ct-icon-btn.ct-danger { color: var(--ct-danger); border-color: rgba(220,38,38,0.25); background: rgba(220,38,38,0.04); }
+#sub-content-carritos .ct-fab-add, #admin-carritos .ct-fab-add {
   position: sticky; bottom: 16px; margin: 14px 0 0; padding: 16px; border-radius: 16px;
-  background: var(--primary-ct-orange); color: white; font-weight: 800; border: none; cursor: pointer;
+  background: var(--ct-accent); color: white; font-weight: 800; border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.95rem; width: 100%;
   box-shadow: 0 4px 14px rgba(243,97,0,0.35);
   transition: filter var(--transition-fast), transform var(--transition-fast);
 }
-#sub-content-carritos .ct-fab-add:hover { filter: brightness(1.06); }
-#sub-content-carritos .ct-fab-add:active { transform: scale(0.97); }
+#sub-content-carritos .ct-fab-add:hover, #admin-carritos .ct-fab-add:hover { filter: brightness(1.06); }
+#sub-content-carritos .ct-fab-add:active, #admin-carritos .ct-fab-add:active { transform: scale(0.97); }
 
 /* ---------- FORM OVERLAY ---------- */
-#sub-content-carritos .ct-form-overlay {
+#sub-content-carritos .ct-form-overlay, #admin-carritos .ct-form-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.55);
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 7000; display: none;
   align-items: flex-end; justify-content: center;
 }
-@media (min-width: 768px) { #sub-content-carritos .ct-form-overlay { align-items: center; } }
-#sub-content-carritos .ct-form-sheet {
+@media (min-width: 768px) { #sub-content-carritos .ct-form-overlay, #admin-carritos .ct-form-overlay { align-items: center; } }
+#sub-content-carritos .ct-form-sheet, #admin-carritos .ct-form-sheet {
   background: var(--bg-ct-screen); width: 100%; max-width: 500px; border-radius: 24px 24px 0 0;
   padding: 28px 24px; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border-color);
   scrollbar-width: thin; scrollbar-color: var(--border-color) transparent;
 }
-@media (min-width: 768px) { #sub-content-carritos .ct-form-sheet { border-radius: 24px; } }
-#sub-content-carritos .ct-form-group { margin-bottom: 16px; text-align: left; }
-#sub-content-carritos .ct-form-group label {
+@media (min-width: 768px) { #sub-content-carritos .ct-form-sheet, #admin-carritos .ct-form-sheet { border-radius: 24px; } }
+#sub-content-carritos .ct-form-group, #admin-carritos .ct-form-group { margin-bottom: 16px; text-align: left; }
+#sub-content-carritos .ct-form-group label, #admin-carritos .ct-form-group label {
   display: block; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px;
   color: var(--text-gray); margin-bottom: 7px;
 }
-#sub-content-carritos .ct-form-input, #sub-content-carritos .ct-form-select, #sub-content-carritos .ct-form-textarea {
+#sub-content-carritos .ct-form-input, #admin-carritos .ct-form-input, #sub-content-carritos .ct-form-select, #admin-carritos .ct-form-select, #sub-content-carritos .ct-form-textarea, #admin-carritos .ct-form-textarea {
   width: 100%; padding: 13px 15px; border-radius: 12px; border: 1.5px solid var(--border-color);
   background: var(--bg-card); color: var(--text-main); font-size: 0.95rem; outline: none; font-family: inherit;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
-#sub-content-carritos .ct-form-input:focus, #sub-content-carritos .ct-form-select:focus, #sub-content-carritos .ct-form-textarea:focus {
-  border-color: var(--primary-ct-orange); box-shadow: 0 0 0 3px var(--primary-ct-orange-light);
+#sub-content-carritos .ct-form-input:focus, #admin-carritos .ct-form-input:focus, #sub-content-carritos .ct-form-select:focus, #admin-carritos .ct-form-select:focus, #sub-content-carritos .ct-form-textarea:focus, #admin-carritos .ct-form-textarea:focus {
+  border-color: var(--ct-accent); box-shadow: 0 0 0 3px var(--ct-accent-light);
 }
-#sub-content-carritos .ct-form-row { display: flex; gap: 10px; }
-#sub-content-carritos .ct-form-row .ct-form-group { flex: 1; }
-#sub-content-carritos .ct-chip-multi { display: flex; flex-wrap: wrap; gap: 8px; }
-#sub-content-carritos .ct-chip-multi .ct-filter-chip { margin: 0; }
-#sub-content-carritos .ct-form-actions { display: flex; gap: 10px; margin-top: 22px; }
-#sub-content-carritos .ct-admin-btn-primary {
-  width: 100%; padding: 15px; border-radius: 14px; border: none; background: var(--primary-ct-orange);
+#sub-content-carritos .ct-form-row, #admin-carritos .ct-form-row { display: flex; gap: 10px; }
+#sub-content-carritos .ct-form-row .ct-form-group, #admin-carritos .ct-form-row .ct-form-group { flex: 1; }
+#sub-content-carritos .ct-chip-multi, #admin-carritos .ct-chip-multi { display: flex; flex-wrap: wrap; gap: 8px; }
+#sub-content-carritos .ct-chip-multi .ct-filter-chip, #admin-carritos .ct-chip-multi .ct-filter-chip { margin: 0; }
+#sub-content-carritos .ct-form-actions, #admin-carritos .ct-form-actions { display: flex; gap: 10px; margin-top: 22px; }
+#sub-content-carritos .ct-admin-btn-primary, #admin-carritos .ct-admin-btn-primary {
+  width: 100%; padding: 15px; border-radius: 14px; border: none; background: var(--ct-accent);
   color: white; font-weight: 800; font-size: 1rem; cursor: pointer; box-shadow: 0 3px 12px rgba(243,97,0,0.3);
   transition: filter var(--transition-fast), transform var(--transition-fast);
 }
-#sub-content-carritos .ct-admin-btn-primary:hover { filter: brightness(1.06); }
-#sub-content-carritos .ct-admin-btn-primary:active { transform: scale(0.97); }
-#sub-content-carritos .ct-admin-btn-secondary {
+#sub-content-carritos .ct-admin-btn-primary:hover, #admin-carritos .ct-admin-btn-primary:hover { filter: brightness(1.06); }
+#sub-content-carritos .ct-admin-btn-primary:active, #admin-carritos .ct-admin-btn-primary:active { transform: scale(0.97); }
+#sub-content-carritos .ct-admin-btn-secondary, #admin-carritos .ct-admin-btn-secondary {
   width: 100%; padding: 14px; border-radius: 14px; border: 1.5px solid var(--border-color); background: var(--bg-card);
   color: var(--text-main); font-weight: 700; font-size: 0.95rem; cursor: pointer; margin-top: 10px;
   transition: background-color var(--transition-fast);
 }
-#sub-content-carritos .ct-admin-btn-secondary:hover { background: var(--bg-card-hover); }
+#sub-content-carritos .ct-admin-btn-secondary:hover, #admin-carritos .ct-admin-btn-secondary:hover { background: var(--bg-card-hover); }
 
-#sub-content-carritos .ct-empty-state { text-align: center; padding: 48px 20px; color: var(--text-gray); font-size: 0.95rem; line-height: 1.6; }
+#sub-content-carritos .ct-empty-state, #admin-carritos .ct-empty-state { text-align: center; padding: 48px 20px; color: var(--text-gray); font-size: 0.95rem; line-height: 1.6; }
 
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 767px) {
-  #sub-content-carritos .ct-app-wrapper { display: block; padding: 0; }
-  #sub-content-carritos .ct-screen { min-height: calc(100dvh - 220px); border-radius: var(--radius); }
-  #sub-content-carritos #detail-ct-screen { position: fixed; top: 0; left: 100%; width: 100%; height: 100%; z-index: 2000; border-radius: 0; display: flex; }
-  #sub-content-carritos #detail-ct-screen.ct-active { transform: translateX(-100%); }
+  #sub-content-carritos .ct-app-wrapper, #admin-carritos .ct-app-wrapper { display: block; padding: 0; }
+  #sub-content-carritos .ct-screen, #admin-carritos .ct-screen { min-height: calc(100dvh - 220px); border-radius: var(--radius); }
+  #sub-content-carritos #detail-ct-screen, #admin-carritos #detail-ct-screen { position: fixed; top: 0; left: 100%; width: 100%; height: 100%; z-index: 2000; border-radius: 0; display: flex; }
+  #sub-content-carritos #detail-ct-screen.ct-active, #admin-carritos #detail-ct-screen.ct-active { transform: translateX(-100%); }
 }
 @media (min-width: 768px) {
-  #sub-content-carritos .ct-app-wrapper { display: grid; grid-template-columns: 380px 1fr; gap: 20px; }
-  #sub-content-carritos #detail-ct-screen { position: relative; opacity: 1 !important; transform: none !important; left: auto !important; display: flex !important; }
+  #sub-content-carritos .ct-app-wrapper, #admin-carritos .ct-app-wrapper { display: grid; grid-template-columns: 380px 1fr; gap: 20px; }
+  #sub-content-carritos #detail-ct-screen, #admin-carritos #detail-ct-screen { position: relative; opacity: 1 !important; transform: none !important; left: auto !important; display: flex !important; }
 }
-#sub-content-carritos #locationsList { flex: 1; padding-bottom: 24px; display: block; }
+#sub-content-carritos #locationsList, #admin-carritos #locationsList { flex: 1; padding-bottom: 24px; display: block; }
 
 @media (prefers-reduced-motion: reduce) {
-  #sub-content-carritos *, #sub-content-carritos *::before, #sub-content-carritos *::after {
+  #sub-content-carritos *, #admin-carritos *, #sub-content-carritos *::before, #admin-carritos *::before, #sub-content-carritos *::after, #admin-carritos *::after {
     transition-duration: 0.01ms !important; animation-duration: 0.01ms !important;
   }
 }
@@ -4215,7 +4222,7 @@
       <div class="ct-header-list">
         <h1 style="margin:0; font-size: 1.6rem;">Carritos</h1>
         <div style="display:flex; gap:10px; align-items:center;">
-          <button class="ct-admin-pill" id="cartAdminBtn" onclick="cartOpenAdminPanel()" style="display:none">
+          <button class="ct-admin-pill" id="cartAdminBtn" onclick="goAdminShortcut('carritos')" style="display:none">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             Administrar
           </button>
@@ -4235,7 +4242,7 @@
               <div class="ct-filter-chip" onclick="cartToggleFilter('M', this)">Mañana</div>
               <div class="ct-filter-chip" onclick="cartToggleFilter('T', this)">Tarde</div>
               <div class="ct-filter-chip" onclick="cartToggleFilter('TD', this)">Disponibles</div>
-              <div onclick="cartClearFilters()" style="font-size:0.8rem; color:var(--primary-ct-orange); cursor:pointer; font-weight:800; margin-left:6px; text-decoration:underline;">Quitar filtros</div>
+              <div onclick="cartClearFilters()" style="font-size:0.8rem; color:var(--ct-accent); cursor:pointer; font-weight:800; margin-left:6px; text-decoration:underline;">Quitar filtros</div>
             </div>
           </div>
         </div>
@@ -4272,22 +4279,6 @@
     </div>
     <div class="ct-scroll-container" id="cartTurnDetailBody"></div>
     <div id="cartTurnActionBar" style="padding:16px 20px 24px;"></div>
-  </div>
-
-  <!-- PANEL DE ADMINISTRACIÓN DE CARRITOS (rol admin/dev de la plataforma) -->
-  <div id="cartAdminPanel">
-    <div class="ct-admin-panel-header">
-      <button class="ct-header-btn" onclick="cartCloseAdminPanel()" aria-label="Cerrar administración">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <h1>Administración de Carritos</h1>
-    </div>
-    <div class="ct-admin-tabs" role="tablist" aria-label="Secciones de administración">
-      <div class="ct-admin-tab ct-active" data-tab="puntos" role="tab" aria-selected="true" tabindex="0" onclick="cartSwitchAdminTab('puntos')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); cartSwitchAdminTab('puntos');}"><span class="ct-tab-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span> Puntos</div>
-      <div class="ct-admin-tab" data-tab="turnos" role="tab" aria-selected="false" tabindex="0" onclick="cartSwitchAdminTab('turnos')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); cartSwitchAdminTab('turnos');}"><span class="ct-tab-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg></span> Turnos</div>
-      <div class="ct-admin-tab" data-tab="personas" role="tab" aria-selected="false" tabindex="0" onclick="cartSwitchAdminTab('personas')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); cartSwitchAdminTab('personas');}"><span class="ct-tab-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Personas</div>
-    </div>
-    <div class="ct-scroll-container" id="cartAdminBody" style="padding-top:5px;"></div>
   </div>
 
   <!-- FORMULARIO GENÉRICO (puntos / turnos / personas) -->
@@ -4424,6 +4415,7 @@
         <button class="admin-tab" data-tab="conductores" data-i18n="admin.tab.conductores" onclick="switchAdminTab('conductores')">Conductores</button>
         <button class="admin-tab" data-tab="casas" data-i18n="admin.tab.casas" onclick="switchAdminTab('casas')">Casas</button>
         <button class="admin-tab" data-tab="grupos" data-i18n="admin.tab.grupos" onclick="switchAdminTab('grupos')">Grupos</button>
+        <button class="admin-tab" data-tab="carritos" data-i18n="admin.tab.carritos" onclick="switchAdminTab('carritos')">Carritos</button>
       </div>
       <div class="admin-tabs-row" data-section="reuniones">
         <button class="admin-tab" data-tab="vmc" data-i18n="admin.tab.vmc" onclick="switchAdminTab('vmc')">Vida y Ministerio</button>
@@ -4497,6 +4489,16 @@
           <button class="btn-secondary" onclick="openGrupoModal()">+ Nuevo grupo</button>
         </div>
         <div id="admin-grupos-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+      </div>
+      <div class="admin-section" id="admin-carritos">
+        <div id="cartAdminPanel">
+          <div class="ct-admin-tabs" role="tablist" aria-label="Secciones de administración de Carritos">
+            <div class="ct-admin-tab ct-active" data-tab="puntos" role="tab" aria-selected="true" tabindex="0" onclick="cartSwitchAdminTab('puntos')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); cartSwitchAdminTab('puntos');}"><span class="ct-tab-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span> Puntos</div>
+            <div class="ct-admin-tab" data-tab="turnos" role="tab" aria-selected="false" tabindex="0" onclick="cartSwitchAdminTab('turnos')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); cartSwitchAdminTab('turnos');}"><span class="ct-tab-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg></span> Turnos</div>
+            <div class="ct-admin-tab" data-tab="personas" role="tab" aria-selected="false" tabindex="0" onclick="cartSwitchAdminTab('personas')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); cartSwitchAdminTab('personas');}"><span class="ct-tab-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Personas</div>
+          </div>
+          <div class="ct-scroll-container" id="cartAdminBody" style="padding-top:5px;"></div>
+        </div>
       </div>
       <div class="admin-section" id="admin-responsabilidades">
         <div class="sub-tabs" style="margin-bottom:1.1rem">
@@ -5391,7 +5393,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.34.1.2-alpha';
+const APP_VERSION = '0.34.5-alpha';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -7097,6 +7099,7 @@ const VIEWER_TO_ADMIN_TAB = {
   'casa':              'assignments',
   'territorios':       'territories',
   'grupos':            'grupos',
+  'carritos':          'carritos',
   'vida-ministerio':   'vmc',
   'fin-semana':        'fin-semana',
   'aseo-salon':        'aseo-salon',
@@ -7107,6 +7110,7 @@ const VIEWER_SECTION_LABELS = {
   'casa':              'Asignaciones',
   'territorios':       'Territorios',
   'grupos':            'Grupos',
+  'carritos':          'Carritos',
   'vida-ministerio':   'Vida y Ministerio',
   'fin-semana':        'Fin de Semana',
   'aseo-salon':        'Aseo del Salón',
@@ -7117,6 +7121,7 @@ const VIEWER_PERM_KEY = {
   'casa':              'assignments',
   'territorios':       'territories',
   'grupos':            'grupos',
+  'carritos':          'carritos',
   'vida-ministerio':   'vida_ministerio',
   'fin-semana':        'fin_semana',
   'aseo-salon':        'aseo_salon',
@@ -7177,7 +7182,7 @@ function showPage(name) {
 // Mapa centralizado: a qué sección (Predicación/Reuniones) pertenece cada tab de admin.
 const ADMIN_TAB_SECTION = {
   assignments: 'predicacion', territories: 'predicacion', conductores: 'predicacion',
-  casas: 'predicacion', grupos: 'predicacion',
+  casas: 'predicacion', grupos: 'predicacion', carritos: 'predicacion',
   vmc: 'reuniones', 'fin-semana': 'reuniones', responsabilidades: 'reuniones', 'aseo-salon': 'reuniones',
   usuarios: 'fleming', notificaciones: 'fleming',
 };
@@ -7214,6 +7219,7 @@ async function switchAdminTab(tab) {
   if (tab === 'vmc') { loadVmcWeeks().then(() => renderAdminVmc()); }
   if (tab === 'fin-semana') { loadFsWeeks().then(() => renderAdminFs()); }
   if (tab === 'notificaciones') { renderNotifAdminTemplates(); renderNotifAdminCategories(); }
+  if (tab === 'carritos') { cartOpenAdminSection(); }
 }
 
 async function applyAdminTabPermissions() {
@@ -14369,9 +14375,9 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
 </div>
 
 <script>
-/* ===== CARRITOS v0.34.0-alpha ===== */
+/* ===== CARRITOS v0.34.5-alpha ===== */
 // =========================================================================
-// CARRITOS (v0.34.0-alpha)
+// CARRITOS (v0.34.5-alpha)
 // Usa el cliente Supabase (`sb`), el usuario logueado (`currentUser.name`)
 // y el rol (`currentRole`) de la plataforma. Tablas propias: cart_puntos,
 // cart_turnos, cart_personas (mismo proyecto Supabase que el resto de la
@@ -14639,16 +14645,18 @@ function cartGoBack() { document.getElementById('detail-ct-screen').classList.re
 function cartCloseTurnDetail() { document.getElementById('cartTurnDetailScreen').style.left = '100%'; }
 
 // ---------- ADMINISTRACIÓN ----------
-function cartOpenAdminPanel() {
-  if (!cartIsAdmin()) { showToast('No tienes permisos de administrador.', 'error'); return; }
-  document.getElementById('cartAdminPanel').style.display = 'flex';
+// El panel de administración de Carritos ahora vive dentro del panel de
+// Administración general (sección Predicación → pestaña Carritos), igual
+// que Territorios, Casas y Grupos. Se abre a través del acceso directo
+// estándar (goAdminShortcut) en vez de un overlay propio.
+async function cartOpenAdminSection() {
+  await cartLoadAllData();
   cartSwitchAdminTab('puntos');
 }
-function cartCloseAdminPanel() { document.getElementById('cartAdminPanel').style.display = 'none'; }
 
 function cartSwitchAdminTab(tab) {
   cartAdminTab = tab;
-  document.querySelectorAll('#sub-content-carritos .ct-admin-tab').forEach(t => {
+  document.querySelectorAll('#cartAdminPanel .ct-admin-tab').forEach(t => {
     const activo = t.dataset.tab === tab;
     t.classList.toggle('ct-active', activo);
     t.setAttribute('aria-selected', activo ? 'true' : 'false');
