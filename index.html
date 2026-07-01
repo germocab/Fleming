@@ -4125,6 +4125,44 @@
 </head>
 <body>
 
+<!-- ════════════════════════════════════════════════════════════
+     REPORTE DE TERRITORIO — pantalla pública (sin login), se activa
+     sola cuando la URL trae ?rtoken=... (enlace enviado por WhatsApp).
+════════════════════════════════════════════════════════════ -->
+<div id="trep-public-screen" style="display:none;position:fixed;inset:0;z-index:99999;background:var(--bg);color:var(--text);font-family:inherit;overflow-y:auto">
+  <div style="max-width:480px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;padding:1.25rem 1.1rem 2.5rem">
+
+    <div id="trep-pub-step-0" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:0.4rem">
+      <div id="trep-pub-loading" style="color:var(--text3);font-size:0.9rem">Cargando...</div>
+      <div id="trep-pub-content" style="display:none;width:100%"></div>
+    </div>
+
+    <div id="trep-pub-step-1" style="display:none;flex-direction:column;gap:1rem;flex:1">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button onclick="trepPubStep(0)" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text)"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <div style="font-weight:700;font-size:1rem" id="trep-pub-ter-title">Territorio</div>
+      </div>
+      <div style="font-size:0.82rem;color:var(--text3)">Toca las manzanas que hiciste hoy. Si hiciste todo el territorio, usa "Todo". Si no alcanzaste a hacer nada, usa "Nada".</div>
+      <div id="trep-pub-svg-container" style="flex:1;display:flex;align-items:center;justify-content:center;min-height:220px;background:var(--surface2);border-radius:14px;padding:0.75rem"></div>
+      <div style="display:flex;gap:8px">
+        <button onclick="trepPubToggleAll()" id="trep-pub-all-toggle" style="flex:1;padding:0.6rem;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-weight:600;cursor:pointer">Todo</button>
+        <button onclick="trepPubToggleNone()" id="trep-pub-none-toggle" style="flex:1;padding:0.6rem;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-weight:600;cursor:pointer">Nada</button>
+      </div>
+      <button class="btn-primary" id="trep-pub-continue-btn" onclick="trepPubStep(2)" disabled style="padding:0.8rem;border-radius:12px;font-weight:700">Continuar</button>
+    </div>
+
+    <div id="trep-pub-step-2" style="display:none;flex-direction:column;gap:1.1rem;flex:1;align-items:center;justify-content:center;text-align:center">
+      <div id="trep-pub-confirm-title" style="font-size:1.15rem;font-weight:700"></div>
+      <div id="trep-pub-confirm-sub" style="color:var(--text3);font-size:0.85rem">¿Confirmas el envío de este reporte?</div>
+      <div style="display:flex;gap:10px;width:100%">
+        <button onclick="trepPubStep(1)" style="flex:1;padding:0.8rem;border-radius:12px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-weight:600;cursor:pointer">Volver</button>
+        <button class="btn-primary" id="trep-pub-submit-btn" onclick="trepPubSubmit()" style="flex:1;padding:0.8rem;border-radius:12px;font-weight:700">Enviar</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <div id="auth-screen">
   <div class="auth-card">
     <div class="auth-logo">
@@ -4490,6 +4528,7 @@
       <div class="admin-tabs-row active" data-section="predicacion">
         <button class="admin-tab active" data-tab="assignments" data-i18n="admin.tab.assignments" onclick="switchAdminTab('assignments')">Asignaciones</button>
         <button class="admin-tab" data-tab="territories" data-i18n="admin.tab.territories" onclick="switchAdminTab('territories')">Territorios</button>
+        <button class="admin-tab" data-tab="reports" data-i18n="admin.tab.reports" onclick="switchAdminTab('reports')">Reportes</button>
         <button class="admin-tab" data-tab="conductores" data-i18n="admin.tab.conductores" onclick="switchAdminTab('conductores')">Conductores</button>
         <button class="admin-tab" data-tab="casas" data-i18n="admin.tab.casas" onclick="switchAdminTab('casas')">Casas</button>
         <button class="admin-tab" data-tab="grupos" data-i18n="admin.tab.grupos" onclick="switchAdminTab('grupos')">Grupos</button>
@@ -4546,6 +4585,45 @@
         </div>
 
         <div id="admin-territories-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+      </div>
+      <div class="admin-section" id="admin-reports">
+        <div class="sub-tabs" style="margin-bottom:1.1rem">
+          <button class="sub-tab active" id="trep-admin-tab-forms" onclick="trepSwitchAdminTab('forms')">Formularios</button>
+          <button class="sub-tab" id="trep-admin-tab-received" onclick="trepSwitchAdminTab('received')">Reportes recibidos</button>
+        </div>
+
+        <!-- Formularios -->
+        <div id="trep-admin-forms">
+          <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
+            <span style="flex:1;font-size:0.95rem;font-weight:700">Formularios de reporte</span>
+            <button class="btn-secondary" onclick="trepToggleCreateForm()" id="trep-btn-toggle-create">+ Nuevo</button>
+          </div>
+          <div id="trep-create-form-inline" class="hidden" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius,14px);padding:1rem;margin-bottom:1.1rem">
+            <div class="form-group2" style="margin-bottom:0.7rem"><label class="form-label2">Encargado</label><input type="text" class="form-input" id="trep-cf-host" placeholder="Ej: Nico"></div>
+            <div class="form-group2" style="margin-bottom:0.7rem"><label class="form-label2">Fecha de asignación</label><input type="date" class="form-input" id="trep-cf-date"></div>
+            <div class="form-group2" style="margin-bottom:0.7rem"><label class="form-label2">Territorio</label><select class="form-select" id="trep-cf-territory-1"><option value="">Seleccionar territorio...</option></select></div>
+            <div class="form-group2" style="margin-bottom:0.7rem"><label class="form-label2">Segundo territorio <span style="font-weight:400;color:var(--text3)">(opcional)</span></label><select class="form-select" id="trep-cf-territory-2"><option value="">Sin segundo territorio</option></select></div>
+            <div class="form-group2" style="margin-bottom:0.9rem"><label class="form-label2">Notas <span style="font-weight:400;color:var(--text3)">(opcional)</span></label><textarea class="form-input" id="trep-cf-notes" rows="2" placeholder="Instrucciones especiales..."></textarea></div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+              <button class="btn-primary" onclick="trepCreateForm()">Generar enlace</button>
+              <button class="btn-secondary" onclick="trepToggleCreateForm()">Cancelar</button>
+            </div>
+            <div id="trep-created-link-box" class="hidden" style="margin-top:0.9rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius,14px);padding:0.8rem">
+              <div style="font-size:0.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Enlace generado — cópialo y envíalo por WhatsApp</div>
+              <div id="trep-created-link-text" onclick="trepCopyCreatedLink()" style="cursor:pointer;font-size:0.82rem;word-break:break-all;color:var(--accent)"></div>
+            </div>
+          </div>
+          <div id="trep-forms-grid"><div class="loader-wrap"><div class="loader"></div></div></div>
+        </div>
+
+        <!-- Reportes recibidos -->
+        <div id="trep-admin-received" style="display:none">
+          <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
+            <span style="flex:1;font-size:0.95rem;font-weight:700">Reportes recibidos</span>
+            <span id="trep-reports-count" style="font-size:0.78rem;color:var(--text3)"></span>
+          </div>
+          <div id="trep-reports-cards"><div class="loader-wrap"><div class="loader"></div></div></div>
+        </div>
       </div>
       <div class="admin-section" id="admin-conductores">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
@@ -4998,6 +5076,26 @@
         </div>
         <div style="display:flex;justify-content:flex-end;align-items:center;margin-top:5px">
           <div id="img-size-warn-dark" style="font-size:0.74rem;color:var(--red);display:none;flex:1;align-items:center;gap:4px"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Se comprimirá automáticamente.</div>
+      </div>
+      <div class="form-group2" style="margin-bottom:1.1rem;border-top:1px solid var(--border);padding-top:1.1rem">
+        <label class="form-label2" style="display:flex;align-items:center;gap:6px">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg>
+          Mapa SVG por manzanas <span style="font-weight:400;color:var(--text3)">(para Reportes de Territorio)</span>
+        </label>
+        <div class="img-upload-area" id="ter-svg-upload-area" onclick="document.getElementById('ter-svg-file').click()" style="border-style:dashed">
+          <input type="file" id="ter-svg-file" accept="image/svg+xml,.svg" style="display:none" onchange="handleTerritorySvg(event)">
+          <div id="ter-svg-placeholder">
+            <div class="img-upload-icon"><svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg></div>
+            <div class="img-upload-text">Sube el SVG con cada manzana como forma separada</div>
+            <div class="img-upload-sub">SVG · cada manzana debe tener un id (ej: id="a", id="b"…)</div>
+          </div>
+          <div id="ter-svg-preview" style="display:none;max-height:140px;overflow:hidden;display:flex;justify-content:center"></div>
+          <div class="img-change-btn" id="ter-svg-change-btn" style="display:none">Cambiar SVG</div>
+        </div>
+        <div class="form-group2" style="margin-top:0.7rem">
+          <label class="form-label2">Manzanas <span style="font-weight:400;color:var(--text3)">(separadas por coma, deben coincidir con los id del SVG)</span></label>
+          <input type="text" class="form-input" id="ter-manzanas" placeholder="Ej: A,B,C,D">
+        </div>
           <button type="button" id="ter-map-dark-remove-btn" onclick="removeDarkMapImage()" style="display:none;background:none;border:none;font-size:0.74rem;color:var(--red);cursor:pointer;padding:0">Quitar imagen oscura</button>
         </div>
       </div>
@@ -5492,7 +5590,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.35.2-alpha';
+const APP_VERSION = '0.36.0-alpha';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -5636,6 +5734,7 @@ let editingConductorId = null;
 let editingCasaId = null;
 let noPasarCount = 0;
 let pendingMapBase64 = null;
+let pendingSvgData = null;
 let pendingMapDarkBase64 = null;
 let currentMainTab = 'predicacion';
 let currentSubTab  = 'casa';
@@ -7291,7 +7390,7 @@ function showPage(name) {
 // Mapa centralizado: a qué sección (Predicación/Reuniones) pertenece cada tab de admin.
 const ADMIN_TAB_SECTION = {
   assignments: 'predicacion', territories: 'predicacion', conductores: 'predicacion',
-  casas: 'predicacion', grupos: 'predicacion', carritos: 'predicacion',
+  casas: 'predicacion', grupos: 'predicacion', carritos: 'predicacion', reports: 'predicacion',
   vmc: 'reuniones', 'fin-semana': 'reuniones', responsabilidades: 'reuniones', 'aseo-salon': 'reuniones',
   usuarios: 'fleming', notificaciones: 'fleming',
 };
@@ -7333,6 +7432,7 @@ async function switchAdminTab(tab) {
   if (tab === 'fin-semana') { loadFsWeeks().then(() => renderAdminFs()); }
   if (tab === 'notificaciones') { renderNotifAdminTemplates(); renderNotifAdminCategories(); }
   if (tab === 'carritos') { cartOpenAdminSection(); }
+  if (tab === 'reports') { trepOpenAdminSection(); }
 }
 
 // Mapa de tab de admin -> clave de permiso (PERM_MODULES). Solo se restringen
@@ -7340,7 +7440,7 @@ async function switchAdminTab(tab) {
 // controla aparte (solo DEV).
 const ADMIN_TAB_PERM_KEY = {
   assignments: 'assignments', territories: 'territories', conductores: 'conductores',
-  casas: 'casas', grupos: 'grupos', carritos: 'carritos',
+  casas: 'casas', grupos: 'grupos', carritos: 'carritos', reports: 'territory_reports',
   vmc: 'vida_ministerio', 'fin-semana': 'fin_semana', responsabilidades: 'responsabilidades',
   'aseo-salon': 'aseo_salon', usuarios: 'usuarios',
 };
@@ -8937,6 +9037,20 @@ async function openTerritoryModal(t) {
     areaDark.classList.remove('has-image'); pendingMapDarkBase64 = null;
     removeBtn.style.display = 'none';
   }
+  // Mapa SVG por manzanas (Reportes de Territorio)
+  document.getElementById('ter-svg-file').value = '';
+  document.getElementById('ter-manzanas').value = (t && Array.isArray(t.manzanas)) ? t.manzanas.join(',') : '';
+  const svgPrev = document.getElementById('ter-svg-preview');
+  const svgPh = document.getElementById('ter-svg-placeholder');
+  const svgChangeBtn = document.getElementById('ter-svg-change-btn');
+  if (t && t.svg_data) {
+    pendingSvgData = t.svg_data;
+    svgPrev.innerHTML = t.svg_data;
+    svgPrev.style.display = 'flex'; svgPh.style.display = 'none'; svgChangeBtn.style.display = 'block';
+  } else {
+    pendingSvgData = null;
+    svgPrev.innerHTML = ''; svgPrev.style.display = 'none'; svgPh.style.display = 'block'; svgChangeBtn.style.display = 'none';
+  }
   noPasarCount = 0;
   const npContainer = document.getElementById('no-pasar-inputs');
   npContainer.innerHTML = '';
@@ -8967,7 +9081,7 @@ function selectTerColor(color) {
     s.classList.toggle('selected', s.style.background === color || s.title === color);
   });
 }
-function closeTerritoryEditModal() { document.getElementById('territory-edit-modal').classList.remove('open'); editingTerritoryId=null; pendingMapBase64=null; pendingMapDarkBase64=null; }
+function closeTerritoryEditModal() { document.getElementById('territory-edit-modal').classList.remove('open'); editingTerritoryId=null; pendingMapBase64=null; pendingMapDarkBase64=null; pendingSvgData=null; }
 function handleMapImage(event) {
   const file = event.target.files[0]; if (!file) return;
   const warn = document.getElementById('img-size-warn');
@@ -9019,6 +9133,22 @@ function handleMapImageDark(event) {
   };
   reader.readAsDataURL(file);
 }
+function handleTerritorySvg(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (!/\.svg$/i.test(file.name) && file.type !== 'image/svg+xml') { showToast('Debe ser un archivo .svg','error'); return; }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const svgText = e.target.result;
+    pendingSvgData = svgText;
+    const svgPrev = document.getElementById('ter-svg-preview');
+    svgPrev.innerHTML = svgText;
+    svgPrev.style.display = 'flex';
+    document.getElementById('ter-svg-placeholder').style.display = 'none';
+    document.getElementById('ter-svg-change-btn').style.display = 'block';
+  };
+  reader.readAsText(file);
+}
 function removeDarkMapImage() {
   pendingMapDarkBase64 = null;
   document.getElementById('img-preview-dark').src = '';
@@ -9055,7 +9185,8 @@ async function saveTerritory() {
   const btn = document.getElementById('save-ter-btn');
   btn.disabled = true; btn.textContent = 'Guardando...';
   const color = document.getElementById('ter-color-value').value || null;
-  const payload = { number, color, no_pasar, map_data: pendingMapBase64 || null, map_data_dark: pendingMapDarkBase64 !== undefined ? pendingMapDarkBase64 : null };
+  const manzanas = (document.getElementById('ter-manzanas').value || '').split(',').map(s => s.trim()).filter(Boolean);
+  const payload = { number, color, no_pasar, map_data: pendingMapBase64 || null, map_data_dark: pendingMapDarkBase64 !== undefined ? pendingMapDarkBase64 : null, svg_data: pendingSvgData || null, manzanas };
   let error, savedRow;
   if (editingTerritoryId) { ({ data: savedRow, error } = await sb.from('territories').update(payload).eq('id',editingTerritoryId).select('id, number, color, no_pasar').single()); }
   else { ({ data: savedRow, error } = await sb.from('territories').insert(payload).select('id, number, color, no_pasar').single()); }
@@ -10322,6 +10453,7 @@ const PERM_MODULES = [
   { key: 'conductores',   label: 'Conductores',          group: 'predicacion', icon: '<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' },
   { key: 'casas',         label: 'Casas',                group: 'predicacion', icon: '<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>' },
   { key: 'grupos',        label: 'Grupos',               group: 'predicacion', icon: '<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
+  { key: 'territory_reports', label: 'Reportes de Territorio', group: 'predicacion', icon: '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="11" x2="15" y2="11"/></svg>' },
   // ── Reuniones ──────────────────────────────────────────────────────────────
   { key: 'vida_ministerio',   label: 'Vida y Ministerio',  group: 'reuniones', icon: '<svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>' },
   { key: 'fin_semana',        label: 'Fin de Semana',      group: 'reuniones', icon: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/></svg>' },
@@ -10333,7 +10465,7 @@ const PERM_MODULES = [
 ];
 
 function parsePermissions(raw) {
-  const defaults = { territories: true, assignments: true, conductores: true, casas: true, grupos: true, carritos: true, vida_ministerio: true, fin_semana: true, hospitalidad: true, responsabilidades: true, aseo_salon: true, usuarios: false };
+  const defaults = { territories: true, assignments: true, conductores: true, casas: true, grupos: true, carritos: true, territory_reports: false, vida_ministerio: true, fin_semana: true, hospitalidad: true, responsabilidades: true, aseo_salon: true, usuarios: false };
   if (!raw) return { ...defaults };
   try {
     const p = typeof raw === 'string' ? JSON.parse(raw) : raw;
@@ -10344,6 +10476,7 @@ function parsePermissions(raw) {
       casas:             p.casas             !== false,
       grupos:            p.grupos            !== false,
       carritos:          p.carritos          !== false,
+      territory_reports: p.territory_reports === true,
       vida_ministerio:   p.vida_ministerio   !== false,
       fin_semana:        p.fin_semana        !== false,
       hospitalidad:      p.hospitalidad      !== false,
@@ -15389,6 +15522,495 @@ if ('serviceWorker' in navigator) {
     }).catch(err => console.warn('SW registration failed:', err));
   });
 }
+</script>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// REPORTES DE TERRITORIO — v0.36.0-alpha
+// Admin: crear enlaces de reporte + ver reportes recibidos.
+// Público: pantalla sin login vía ?rtoken=... para publicadores
+// que no usan la plataforma (se envía el link por WhatsApp).
+// Usa las mismas tablas Supabase de Index 69 (sb = supabase-js).
+// ════════════════════════════════════════════════════════════════
+
+// ── Utilidades compartidas de matching SVG↔manzanas ──
+// (adaptado del prototipo de reportes de territorio)
+function trepBuildPreviewSvg(svgData, allManzanas, doneManzanas, allDone) {
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(svgData, 'image/svg+xml');
+    const svg = doc.querySelector('svg');
+    if (!svg) return '';
+    svg.removeAttribute('width'); svg.removeAttribute('height');
+    svg.style.width = '100%'; svg.style.maxHeight = '150px'; svg.style.pointerEvents = 'none';
+    const manzanaSet = new Set((allManzanas||[]).map(m => m.toLowerCase()));
+    const matched = new Map();
+    svg.querySelectorAll('g[id]').forEach(g => {
+      const gid = g.getAttribute('id').toLowerCase();
+      if (manzanaSet.has(gid)) matched.set(gid, g);
+    });
+    if (matched.size === 0) {
+      svg.querySelectorAll('path[id], polygon[id]').forEach(el => {
+        const elId = el.getAttribute('id').toLowerCase();
+        (allManzanas||[]).forEach(m => {
+          const ml = m.toLowerCase();
+          if (!matched.has(ml) && (elId === ml || elId.startsWith(ml + '_') || elId.startsWith(ml + '-'))) matched.set(ml, el);
+        });
+      });
+    }
+    matched.forEach((el, letter) => {
+      const isDone = allDone || doneManzanas.has(letter);
+      const fillEl = el.tagName.toLowerCase() === 'g' ? (el.querySelector('[id$="_2"]') || el.querySelector('path,polygon')) : el;
+      if (!fillEl) return;
+      if (isDone) { fillEl.setAttribute('fill', '#22c55e'); fillEl.removeAttribute('fill-opacity'); }
+      else { fillEl.setAttribute('fill-opacity', '0.25'); }
+    });
+    return new XMLSerializer().serializeToString(svg);
+  } catch(e) { return ''; }
+}
+function trepMatchManzanaElements(svg, manzanas) {
+  const manzanaSet = new Set(manzanas.map(m => m.toLowerCase()));
+  const matched = new Map();
+  svg.querySelectorAll('g[id]').forEach(g => {
+    const gid = g.getAttribute('id').toLowerCase();
+    if (manzanaSet.has(gid)) matched.set(gid, g);
+  });
+  if (matched.size === 0) {
+    svg.querySelectorAll('path[id], polygon[id]').forEach(el => {
+      const elId = el.getAttribute('id').toLowerCase();
+      manzanas.forEach(m => {
+        const ml = m.toLowerCase();
+        if (!matched.has(ml) && (elId === ml || elId.startsWith(ml + '_') || elId.startsWith(ml + '-'))) matched.set(ml, el);
+      });
+    });
+  }
+  return matched;
+}
+
+// ════════════════════════════════════════════════════════════════
+// ADMIN — Formularios
+// ════════════════════════════════════════════════════════════════
+let trepFormsCache = [];
+
+function trepSwitchAdminTab(tab) {
+  document.getElementById('trep-admin-tab-forms').classList.toggle('active', tab === 'forms');
+  document.getElementById('trep-admin-tab-received').classList.toggle('active', tab === 'received');
+  document.getElementById('trep-admin-forms').style.display = tab === 'forms' ? '' : 'none';
+  document.getElementById('trep-admin-received').style.display = tab === 'received' ? '' : 'none';
+  if (tab === 'received') trepLoadReports();
+}
+
+async function trepOpenAdminSection() {
+  await trepPopulateTerritorySelect();
+  trepLoadForms();
+}
+
+async function trepPopulateTerritorySelect() {
+  const sel1 = document.getElementById('trep-cf-territory-1');
+  const sel2 = document.getElementById('trep-cf-territory-2');
+  if (!sel1) return;
+  const { data } = await sb.from('territories').select('id, number').order('number');
+  const opts = (data || []).map(t => `<option value="${t.id}">Territorio ${t.number}</option>`).join('');
+  sel1.innerHTML = '<option value="">Seleccionar territorio...</option>' + opts;
+  sel2.innerHTML = '<option value="">Sin segundo territorio</option>' + opts;
+}
+
+function trepToggleCreateForm() {
+  const box = document.getElementById('trep-create-form-inline');
+  box.classList.toggle('hidden');
+  if (!box.classList.contains('hidden')) {
+    document.getElementById('trep-cf-date').value = todayStr();
+    document.getElementById('trep-created-link-box').classList.add('hidden');
+  }
+}
+
+function trepGenToken() {
+  return Math.random().toString(36).substr(2,10) + Date.now().toString(36);
+}
+
+async function trepCreateForm() {
+  const host = document.getElementById('trep-cf-host').value.trim();
+  const date = document.getElementById('trep-cf-date').value;
+  const ter1 = document.getElementById('trep-cf-territory-1').value;
+  const ter2 = document.getElementById('trep-cf-territory-2').value;
+  const notes = document.getElementById('trep-cf-notes').value.trim();
+  if (!host) { showToast('Ingresa el nombre del encargado', 'error'); return; }
+  if (!ter1) { showToast('Selecciona al menos un territorio', 'error'); return; }
+  const token = trepGenToken();
+  const payload = {
+    token, host_name: host, assignment_date: date || null,
+    territory_id: ter1, territory_id_2: ter2 || null,
+    notes: notes || null, source: 'admin', created_by: currentUser?.name || null,
+  };
+  const { error } = await sb.from('territory_report_forms').insert(payload);
+  if (error) { showToast('Error al crear el formulario', 'error'); console.error(error); return; }
+  const link = `${location.href.split('?')[0]}?rtoken=${token}`;
+  const linkBox = document.getElementById('trep-created-link-box');
+  const linkText = document.getElementById('trep-created-link-text');
+  linkText.textContent = link;
+  linkText.dataset.link = link;
+  linkBox.classList.remove('hidden');
+  showToast('Enlace generado', 'success');
+  trepLoadForms();
+}
+
+function trepCopyCreatedLink() {
+  const el = document.getElementById('trep-created-link-text');
+  navigator.clipboard.writeText(el.dataset.link || el.textContent).then(() => showToast('Enlace copiado', 'success'));
+}
+
+async function trepLoadForms() {
+  const grid = document.getElementById('trep-forms-grid');
+  const { data: forms, error } = await sb.from('territory_report_forms').select('*').order('created_at', { ascending: false });
+  if (error) { grid.innerHTML = '<div class="empty-state"><p>Error al cargar formularios</p></div>'; return; }
+  trepFormsCache = forms || [];
+  if (!trepFormsCache.length) { grid.innerHTML = '<div class="empty-state"><p>Sin formularios aún. Crea el primero con "+ Nuevo".</p></div>'; return; }
+
+  const { data: subs } = await sb.from('territory_report_submissions').select('form_id, territory_id');
+  const reportedByForm = {};
+  (subs || []).forEach(s => {
+    if (!reportedByForm[s.form_id]) reportedByForm[s.form_id] = new Set();
+    reportedByForm[s.form_id].add(s.territory_id);
+  });
+
+  const terById = {};
+  territories.forEach(t => terById[t.id] = t);
+
+  grid.innerHTML = `<div style="display:flex;flex-direction:column;gap:10px">` + trepFormsCache.map(f => {
+    const slots = [f.territory_id, f.territory_id_2].filter(Boolean);
+    const reported = reportedByForm[f.id] || new Set();
+    const allDone = slots.length > 0 && slots.every(s => reported.has(s));
+    const someDone = slots.some(s => reported.has(s));
+    const statusHtml = allDone
+      ? `<span style="font-size:0.7rem;font-weight:700;color:var(--green);background:var(--green-light,rgba(52,199,89,.12));padding:3px 9px;border-radius:20px">✓ Completado</span>`
+      : someDone
+        ? `<span style="font-size:0.7rem;font-weight:700;color:var(--accent);background:var(--accent-light);padding:3px 9px;border-radius:20px">En progreso</span>`
+        : `<span style="font-size:0.7rem;font-weight:700;color:var(--text3);background:var(--surface3);padding:3px 9px;border-radius:20px">Pendiente</span>`;
+    const link = `${location.href.split('?')[0]}?rtoken=${f.token}`;
+    const terLabels = slots.map(s => `T${terById[s]?.number ?? '?'}${reported.has(s) ? ' ✓' : ''}`).join(' · ');
+    return `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius,14px);padding:0.9rem 1rem">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:4px">
+        <div>
+          <div style="font-weight:700;font-size:0.92rem">${f.host_name}</div>
+          <div style="font-size:0.76rem;color:var(--text3);margin-top:2px">${terLabels} ${f.assignment_date ? '· ' + formatDateEs(f.assignment_date) : ''}</div>
+        </div>
+        ${statusHtml}
+      </div>
+      <div onclick="trepCopyLink('${link}')" style="cursor:pointer;font-size:0.76rem;color:var(--accent);word-break:break-all;margin-top:6px">${link}</div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button onclick="trepCopyLink('${link}')" class="btn-secondary" style="padding:0.35rem 0.7rem;font-size:0.75rem">Copiar enlace</button>
+        <button onclick="trepDeleteForm('${f.id}')" class="btn-danger" style="padding:0.35rem 0.7rem;font-size:0.75rem">Eliminar</button>
+      </div>
+    </div>`;
+  }).join('') + `</div>`;
+}
+
+function trepCopyLink(link) { navigator.clipboard.writeText(link).then(() => showToast('Enlace copiado', 'success')); }
+
+async function trepDeleteForm(id) {
+  if (!confirm('¿Eliminar este formulario? También se eliminarán sus reportes.')) return;
+  const { error } = await sb.from('territory_report_forms').delete().eq('id', id);
+  if (error) { showToast('Error al eliminar', 'error'); return; }
+  showToast('Formulario eliminado', 'success');
+  trepLoadForms();
+}
+
+function formatDateEs(dateStr) {
+  if (!dateStr) return '';
+  const [y,m,d] = dateStr.split('-').map(Number);
+  const MON = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  return `${d} ${MON[m-1]} ${y}`;
+}
+
+// ════════════════════════════════════════════════════════════════
+// ADMIN — Reportes recibidos
+// ════════════════════════════════════════════════════════════════
+async function trepLoadReports() {
+  const container = document.getElementById('trep-reports-cards');
+  const countEl = document.getElementById('trep-reports-count');
+  const [{ data: subs, error }, { data: forms }] = await Promise.all([
+    sb.from('territory_report_submissions').select('*').order('submitted_at', { ascending: false }),
+    sb.from('territory_report_forms').select('*'),
+  ]);
+  if (error) { container.innerHTML = '<div class="empty-state"><p>Error al cargar reportes</p></div>'; return; }
+  if (!subs || !subs.length) { container.innerHTML = '<div class="empty-state"><p>Sin reportes aún</p></div>'; countEl.textContent = ''; return; }
+  countEl.textContent = `${subs.length} reporte${subs.length !== 1 ? 's' : ''}`;
+
+  const formMap = {}; (forms || []).forEach(f => formMap[f.id] = f);
+  const terById = {}; territories.forEach(t => terById[t.id] = t);
+
+  const byDate = {};
+  subs.forEach(s => {
+    const f = formMap[s.form_id];
+    const dk = f?.assignment_date || 'Sin fecha';
+    if (!byDate[dk]) byDate[dk] = [];
+    byDate[dk].push(s);
+  });
+  const sortedDates = Object.keys(byDate).sort((a,b) => a === 'Sin fecha' ? 1 : b === 'Sin fecha' ? -1 : b.localeCompare(a));
+
+  container.innerHTML = sortedDates.map(dk => {
+    const items = byDate[dk];
+    const dateLabel = dk === 'Sin fecha' ? 'Sin fecha' : formatDateEs(dk);
+    const cards = items.map(s => {
+      const t = terById[s.territory_id];
+      const done = new Set((s.manzanas_done||[]).map(m => m.toLowerCase()));
+      const svgHtml = t?.svg_data ? trepBuildPreviewSvg(t.svg_data, t.manzanas||[], done, s.all_territory) : '';
+      const coverage = s.not_covered ? 0 : (s.all_territory ? 100 : Math.round(((s.manzanas_done||[]).length/(s.total_manzanas||1))*100));
+      return `
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius,14px);padding:0.8rem;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div style="font-weight:700;font-size:0.86rem">${s.host_name || '—'} · Territorio ${t?.number ?? '?'}</div>
+          <button onclick="trepDeleteReport('${s.id}')" class="btn-danger" style="padding:0.2rem 0.55rem;font-size:0.68rem">Eliminar</button>
+        </div>
+        ${svgHtml ? `<div style="display:flex;justify-content:center;margin-bottom:6px">${svgHtml}</div>` : ''}
+        <div style="font-size:0.78rem;color:var(--text3)">
+          ${s.not_covered ? 'No abarcado' : s.all_territory ? 'Territorio completo ✓' : `${coverage}% · ${(s.manzanas_done||[]).join(', ')}`}
+        </div>
+      </div>`;
+    }).join('');
+    return `<div style="margin-bottom:1.1rem">
+      <div style="font-weight:700;font-size:0.88rem;margin-bottom:8px">${dateLabel}</div>
+      ${cards}
+    </div>`;
+  }).join('');
+}
+
+async function trepDeleteReport(id) {
+  if (!confirm('¿Eliminar este reporte?')) return;
+  const { error } = await sb.from('territory_report_submissions').delete().eq('id', id);
+  if (error) { showToast('Error al eliminar', 'error'); return; }
+  showToast('Reporte eliminado', 'success');
+  trepLoadReports();
+}
+
+// ════════════════════════════════════════════════════════════════
+// PÚBLICO — pantalla sin login vía ?rtoken=...
+// ════════════════════════════════════════════════════════════════
+let trepPubForm = null;
+let trepPubTerritories = {};   // territory_id -> territory row
+let trepPubReported = new Set();
+let trepPubCurrentTer = null;
+let trepPubSelected = [];
+let trepPubAllSelected = false;
+let trepPubNoneSelected = false;
+
+async function trepInitPublicScreen(token) {
+  document.getElementById('trep-public-screen').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+
+  const { data: forms, error } = await sb.from('territory_report_forms').select('*').eq('token', token);
+  if (error || !forms || !forms.length) {
+    document.getElementById('trep-pub-loading').style.display = 'none';
+    const c = document.getElementById('trep-pub-content');
+    c.style.display = 'block';
+    c.innerHTML = '<h2 style="font-size:1.3rem;margin-bottom:6px">Enlace inválido</h2><p style="color:var(--text3);font-size:0.85rem">Este enlace no existe o ya expiró.</p>';
+    return;
+  }
+  trepPubForm = forms[0];
+  const ids = [trepPubForm.territory_id, trepPubForm.territory_id_2].filter(Boolean);
+
+  const [{ data: ters }, { data: subs }] = await Promise.all([
+    sb.from('territories').select('*').in('id', ids),
+    sb.from('territory_report_submissions').select('territory_id').eq('form_id', trepPubForm.id),
+  ]);
+  (ters || []).forEach(t => trepPubTerritories[t.id] = t);
+  trepPubReported = new Set((subs || []).map(s => s.territory_id));
+
+  document.getElementById('trep-pub-loading').style.display = 'none';
+  trepPubRenderOverview();
+}
+
+function trepPubRenderOverview() {
+  const c = document.getElementById('trep-pub-content');
+  c.style.display = 'block';
+  document.getElementById('trep-pub-step-1').style.display = 'none';
+  document.getElementById('trep-pub-step-2').style.display = 'none';
+  document.getElementById('trep-pub-step-0').style.display = 'flex';
+
+  const ids = [trepPubForm.territory_id, trepPubForm.territory_id_2].filter(Boolean);
+  const pending = ids.filter(id => !trepPubReported.has(id));
+
+  if (!pending.length) {
+    c.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+      <div style="font-size:2.2rem">✓</div>
+      <h2 style="font-size:1.25rem;font-weight:700">¡Gracias, ${trepPubForm.host_name}!</h2>
+      <p style="color:var(--text3);font-size:0.85rem">Ya enviaste el reporte de todos tus territorios de hoy.</p>
+    </div>`;
+    return;
+  }
+
+  c.innerHTML = `
+    <h1 style="font-size:1.4rem;font-weight:700;margin-bottom:4px">¡Hola, ${trepPubForm.host_name}!</h1>
+    <p style="color:var(--text3);font-size:0.85rem;margin-bottom:1.2rem">Toca un territorio para reportarlo.</p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+    ${pending.map(id => {
+      const t = trepPubTerritories[id] || {};
+      return `<div onclick="trepPubStartReporting('${id}')" style="cursor:pointer;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:0.9rem 1rem;display:flex;align-items:center;gap:12px">
+        <div style="width:38px;height:38px;border-radius:10px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700">${t.number ?? '?'}</div>
+        <div style="flex:1;text-align:left;font-weight:600">Territorio ${t.number ?? '?'}</div>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--text3)" stroke-width="2.2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>`;
+    }).join('')}
+    </div>`;
+}
+
+function trepPubStartReporting(terId) {
+  trepPubCurrentTer = terId;
+  trepPubSelected = []; trepPubAllSelected = false; trepPubNoneSelected = false;
+  document.getElementById('trep-pub-all-toggle').style.background = 'var(--surface2)';
+  document.getElementById('trep-pub-none-toggle').style.background = 'var(--surface2)';
+  const t = trepPubTerritories[terId] || {};
+  document.getElementById('trep-pub-ter-title').textContent = `Territorio ${t.number ?? '?'}`;
+  trepPubRenderMap(t);
+  trepPubUpdateContinueBtn();
+  trepPubStep(1);
+}
+
+function trepPubStep(step) {
+  [0,1,2].forEach(s => document.getElementById(`trep-pub-step-${s}`).style.display = 'none');
+  if (step === 0) { trepPubRenderOverview(); return; }
+  document.getElementById(`trep-pub-step-${step}`).style.display = 'flex';
+  if (step === 2) trepPubRenderConfirm();
+}
+
+function trepPubRenderMap(t) {
+  const container = document.getElementById('trep-pub-svg-container');
+  const manzanas = t.manzanas || [];
+  if (!t.svg_data || !manzanas.length) {
+    if (!manzanas.length) { container.innerHTML = '<p style="color:var(--text3);font-size:0.8rem">Sin manzanas configuradas para este territorio. Usa "Todo" o "Nada".</p>'; return; }
+    container.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">${manzanas.map(m =>
+      `<div class="trep-pub-tile" data-m="${m}" onclick="trepPubToggleManzana(this,'${m}')" style="width:52px;height:52px;border-radius:12px;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-weight:700;cursor:pointer;border:2px solid transparent">${m}</div>`
+    ).join('')}</div>`;
+    return;
+  }
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(t.svg_data, 'image/svg+xml');
+  const svg = doc.querySelector('svg');
+  if (!svg) { container.innerHTML = ''; return; }
+  svg.removeAttribute('width'); svg.removeAttribute('height');
+  svg.style.width = '100%'; svg.style.maxHeight = '260px';
+  const matched = trepMatchManzanaElements(svg, manzanas);
+  matched.forEach((el, letter) => {
+    const mName = manzanas.find(m => m.toLowerCase() === letter) || letter;
+    const fillEl = el.tagName.toLowerCase() === 'g' ? (el.querySelector('[id$="_2"]') || el.querySelector('path,polygon')) : el;
+    if (!fillEl) return;
+    const orig = fillEl.getAttribute('fill') || '#999';
+    fillEl._trepOrig = orig;
+    el.style.cursor = 'pointer';
+    el._trepFillEl = fillEl;
+    const onTap = (e) => {
+      e.preventDefault(); e.stopPropagation();
+      trepPubNoneSelected = false; document.getElementById('trep-pub-none-toggle').style.background = 'var(--surface2)';
+      if (trepPubSelected.includes(mName)) {
+        trepPubSelected = trepPubSelected.filter(x => x !== mName);
+        fillEl.setAttribute('fill', orig); fillEl.removeAttribute('fill-opacity');
+      } else {
+        trepPubSelected.push(mName);
+        fillEl.setAttribute('fill', '#22c55e'); fillEl.removeAttribute('fill-opacity');
+      }
+      trepPubAllSelected = manzanas.length > 0 && manzanas.every(m => trepPubSelected.includes(m));
+      document.getElementById('trep-pub-all-toggle').style.background = trepPubAllSelected ? 'var(--green-light,rgba(52,199,89,.15))' : 'var(--surface2)';
+      trepPubUpdateContinueBtn();
+    };
+    el.addEventListener('click', onTap);
+  });
+  container._trepMatched = matched; container._trepManzanas = manzanas;
+  container.innerHTML = ''; container.appendChild(svg);
+}
+
+function trepPubToggleManzana(el, mName) {
+  trepPubNoneSelected = false; document.getElementById('trep-pub-none-toggle').style.background = 'var(--surface2)';
+  const manzanas = document.getElementById('trep-pub-svg-container')._trepManzanas || [];
+  if (trepPubSelected.includes(mName)) {
+    trepPubSelected = trepPubSelected.filter(x => x !== mName);
+    el.style.background = 'var(--surface3)'; el.style.borderColor = 'transparent';
+  } else {
+    trepPubSelected.push(mName);
+    el.style.background = '#22c55e'; el.style.borderColor = '#22c55e';
+  }
+  trepPubAllSelected = manzanas.length > 0 && manzanas.every(m => trepPubSelected.includes(m));
+  trepPubUpdateContinueBtn();
+}
+
+function trepPubToggleAll() {
+  const container = document.getElementById('trep-pub-svg-container');
+  const manzanas = container._trepManzanas || (trepPubTerritories[trepPubCurrentTer]?.manzanas || []);
+  trepPubAllSelected = !trepPubAllSelected;
+  document.getElementById('trep-pub-all-toggle').style.background = trepPubAllSelected ? 'var(--green-light,rgba(52,199,89,.15))' : 'var(--surface2)';
+  if (trepPubAllSelected) {
+    trepPubNoneSelected = false; document.getElementById('trep-pub-none-toggle').style.background = 'var(--surface2)';
+    trepPubSelected = [...manzanas];
+    const matched = container._trepMatched;
+    if (matched) matched.forEach(el => { const f = el._trepFillEl || el; f.setAttribute('fill', '#22c55e'); f.removeAttribute('fill-opacity'); });
+    container.querySelectorAll('.trep-pub-tile').forEach(el => { el.style.background = '#22c55e'; el.style.borderColor = '#22c55e'; });
+  } else {
+    trepPubSelected = [];
+    const matched = container._trepMatched;
+    if (matched) matched.forEach(el => { const f = el._trepFillEl || el; f.setAttribute('fill', f._trepOrig || '#999'); f.removeAttribute('fill-opacity'); });
+    container.querySelectorAll('.trep-pub-tile').forEach(el => { el.style.background = 'var(--surface3)'; el.style.borderColor = 'transparent'; });
+  }
+  trepPubUpdateContinueBtn();
+}
+
+function trepPubToggleNone() {
+  trepPubNoneSelected = !trepPubNoneSelected;
+  document.getElementById('trep-pub-none-toggle').style.background = trepPubNoneSelected ? 'var(--red-light,rgba(255,59,48,.15))' : 'var(--surface2)';
+  if (trepPubNoneSelected) {
+    trepPubAllSelected = false; trepPubSelected = [];
+    document.getElementById('trep-pub-all-toggle').style.background = 'var(--surface2)';
+    const container = document.getElementById('trep-pub-svg-container');
+    const matched = container._trepMatched;
+    if (matched) matched.forEach(el => { const f = el._trepFillEl || el; f.setAttribute('fill', f._trepOrig || '#999'); f.removeAttribute('fill-opacity'); });
+    container.querySelectorAll('.trep-pub-tile').forEach(el => { el.style.background = 'var(--surface3)'; el.style.borderColor = 'transparent'; });
+  }
+  trepPubUpdateContinueBtn();
+}
+
+function trepPubUpdateContinueBtn() {
+  document.getElementById('trep-pub-continue-btn').disabled = trepPubSelected.length === 0 && !trepPubAllSelected && !trepPubNoneSelected;
+}
+
+function trepPubRenderConfirm() {
+  const t = trepPubTerritories[trepPubCurrentTer] || {};
+  const isAll = trepPubAllSelected || (t.manzanas && trepPubSelected.length === t.manzanas.length && t.manzanas.length > 0);
+  document.getElementById('trep-pub-confirm-title').textContent = isAll
+    ? `Territorio ${t.number} completado`
+    : trepPubNoneSelected
+      ? `Territorio ${t.number} — No abarcado`
+      : `Territorio ${t.number} — ${trepPubSelected.join(', ')}`;
+}
+
+async function trepPubSubmit() {
+  const btn = document.getElementById('trep-pub-submit-btn');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  const t = trepPubTerritories[trepPubCurrentTer] || {};
+  const manzanas = t.manzanas || [];
+  const isAll = trepPubAllSelected || (manzanas.length > 0 && trepPubSelected.length === manzanas.length);
+  const payload = {
+    form_id: trepPubForm.id,
+    territory_id: trepPubCurrentTer,
+    host_name: trepPubForm.host_name,
+    manzanas_done: isAll ? manzanas : (trepPubNoneSelected ? [] : trepPubSelected),
+    all_territory: isAll,
+    not_covered: trepPubNoneSelected,
+    total_manzanas: manzanas.length,
+  };
+  const { error } = await sb.from('territory_report_submissions').insert(payload);
+  btn.disabled = false; btn.textContent = 'Enviar';
+  if (error) { alert('Error al enviar el reporte. Intenta de nuevo.'); console.error(error); return; }
+  trepPubReported.add(trepPubCurrentTer);
+  trepPubStep(0);
+}
+
+// ── Router: activa la pantalla pública si la URL trae ?rtoken= ──
+(function trepCheckPublicRoute() {
+  const params = new URLSearchParams(location.search);
+  const rtoken = params.get('rtoken');
+  if (rtoken) {
+    window.addEventListener('DOMContentLoaded', () => trepInitPublicScreen(rtoken));
+  }
+})();
 </script>
 </body>
 </html>
