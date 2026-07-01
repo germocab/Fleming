@@ -798,6 +798,11 @@
     font-size: 0.72rem; font-weight: 800; color: #fff; flex-shrink: 0;
   }
   .sabado-grupo-body { display: flex; flex-direction: column; gap: 2px; }
+  .sabado-grupo-address {
+    font-size: 0.9rem; font-weight: 700; color: var(--text); line-height: 1.32;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden; text-overflow: ellipsis;
+  }
   .sabado-grupo-label {
     font-size: 0.65rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.04em;
   }
@@ -3783,8 +3788,8 @@
 
     <div class="main-segment" id="main-segment">
       <div class="main-seg-thumb" id="main-seg-thumb"></div>
-      <button class="main-seg-btn active" data-tab="predicacion" onclick="switchMainTab('predicacion',this)">Predicación</button>
-      <button class="main-seg-btn" data-tab="reuniones" onclick="switchMainTab('reuniones',this)">Reuniones</button>
+      <button class="main-seg-btn active" data-tab="predicacion" data-i18n="nav.predicacion" onclick="switchMainTab('predicacion',this)">Predicación</button>
+      <button class="main-seg-btn" data-tab="reuniones" data-i18n="nav.reuniones" onclick="switchMainTab('reuniones',this)">Reuniones</button>
     </div>
 
     <div class="nav-icons">
@@ -3992,31 +3997,31 @@
       <div class="admin-body">
       <div class="page-header">
         <div>
-          <div class="page-header-title">Administración</div>
-          <div class="page-header-sub">Gestiona asignaciones, territorios, conductores y casas</div>
+          <div class="page-header-title" data-i18n="admin.title">Administración</div>
+          <div class="page-header-sub" data-i18n="admin.subtitle">Gestiona asignaciones, territorios, conductores y casas</div>
         </div>
       </div>
       <div class="admin-section-tabs">
-        <button class="admin-section-tab active" data-section="predicacion" onclick="switchAdminSection('predicacion')">Predicación</button>
-        <button class="admin-section-tab" data-section="reuniones" onclick="switchAdminSection('reuniones')">Reuniones</button>
+        <button class="admin-section-tab active" data-section="predicacion" data-i18n="admin.section.predicacion" onclick="switchAdminSection('predicacion')">Predicación</button>
+        <button class="admin-section-tab" data-section="reuniones" data-i18n="admin.section.reuniones" onclick="switchAdminSection('reuniones')">Reuniones</button>
         <button class="admin-section-tab" id="admin-section-tab-fleming" data-section="fleming" onclick="switchAdminSection('fleming')" style="display:none">Fleming App</button>
       </div>
       <div class="admin-tabs-row active" data-section="predicacion">
-        <button class="admin-tab active" data-tab="assignments" onclick="switchAdminTab('assignments')">Asignaciones</button>
-        <button class="admin-tab" data-tab="territories" onclick="switchAdminTab('territories')">Territorios</button>
-        <button class="admin-tab" data-tab="conductores" onclick="switchAdminTab('conductores')">Conductores</button>
-        <button class="admin-tab" data-tab="casas" onclick="switchAdminTab('casas')">Casas</button>
-        <button class="admin-tab" data-tab="grupos" onclick="switchAdminTab('grupos')">Grupos</button>
+        <button class="admin-tab active" data-tab="assignments" data-i18n="admin.tab.assignments" onclick="switchAdminTab('assignments')">Asignaciones</button>
+        <button class="admin-tab" data-tab="territories" data-i18n="admin.tab.territories" onclick="switchAdminTab('territories')">Territorios</button>
+        <button class="admin-tab" data-tab="conductores" data-i18n="admin.tab.conductores" onclick="switchAdminTab('conductores')">Conductores</button>
+        <button class="admin-tab" data-tab="casas" data-i18n="admin.tab.casas" onclick="switchAdminTab('casas')">Casas</button>
+        <button class="admin-tab" data-tab="grupos" data-i18n="admin.tab.grupos" onclick="switchAdminTab('grupos')">Grupos</button>
       </div>
       <div class="admin-tabs-row" data-section="reuniones">
-        <button class="admin-tab" data-tab="vmc" onclick="switchAdminTab('vmc')">Vida y Ministerio</button>
-        <button class="admin-tab" data-tab="fin-semana" onclick="switchAdminTab('fin-semana')">Fin de Semana</button>
-        <button class="admin-tab" data-tab="responsabilidades" onclick="switchAdminTab('responsabilidades')">Responsabilidades</button>
-        <button class="admin-tab" data-tab="aseo-salon" onclick="switchAdminTab('aseo-salon')">Aseo Salón</button>
+        <button class="admin-tab" data-tab="vmc" data-i18n="admin.tab.vmc" onclick="switchAdminTab('vmc')">Vida y Ministerio</button>
+        <button class="admin-tab" data-tab="fin-semana" data-i18n="admin.tab.fin-semana" onclick="switchAdminTab('fin-semana')">Fin de Semana</button>
+        <button class="admin-tab" data-tab="responsabilidades" data-i18n="admin.tab.responsabilidades" onclick="switchAdminTab('responsabilidades')">Responsabilidades</button>
+        <button class="admin-tab" data-tab="aseo-salon" data-i18n="admin.tab.aseo-salon" onclick="switchAdminTab('aseo-salon')">Aseo Salón</button>
       </div>
       <div class="admin-tabs-row" data-section="fleming">
-        <button class="admin-tab" data-tab="usuarios" onclick="switchAdminTab('usuarios')">Usuarios</button>
-        <button class="admin-tab" id="admin-tab-notificaciones" data-tab="notificaciones" onclick="switchAdminTab('notificaciones')" style="display:none">Notificaciones</button>
+        <button class="admin-tab" data-tab="usuarios" data-i18n="admin.tab.usuarios" onclick="switchAdminTab('usuarios')">Usuarios</button>
+        <button class="admin-tab" id="admin-tab-notificaciones" data-tab="notificaciones" data-i18n="admin.tab.notificaciones" onclick="switchAdminTab('notificaciones')" style="display:none">Notificaciones</button>
       </div>
       <div class="admin-section active" id="admin-assignments">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
@@ -4665,7 +4670,7 @@
 
     <!-- Idioma -->
     <div class="profile-section">
-      <div class="profile-section-title">Idioma</div>
+      <div class="profile-section-title" data-i18n="pref.idioma">Idioma</div>
       <div class="pref-lang-row active" data-lang="es" onclick="setPrefLanguage('es')">
         <div class="profile-row-icon" style="background:var(--accent-light);color:var(--accent)">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
@@ -4675,14 +4680,14 @@
         </div>
         <svg class="pref-lang-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
-      <div class="pref-lang-row disabled">
-        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text3)">
+      <div class="pref-lang-row" data-lang="en" onclick="setPrefLanguage('en')">
+        <div class="profile-row-icon" style="background:var(--accent-light);color:var(--accent)">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-value" style="color:var(--text3)">English</div>
+          <div class="profile-row-value">English</div>
         </div>
-        <span class="pref-soon-badge">Próximamente</span>
+        <svg class="pref-lang-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
       <div class="pref-lang-row disabled">
         <div class="profile-row-icon" style="background:var(--surface3);color:var(--text3)">
@@ -4691,7 +4696,7 @@
         <div class="profile-row-content">
           <div class="profile-row-value" style="color:var(--text3)">Nederlands</div>
         </div>
-        <span class="pref-soon-badge">Próximamente</span>
+        <span class="pref-soon-badge" data-i18n="pref.proximamente">Próximamente</span>
       </div>
     </div>
 
@@ -4974,7 +4979,87 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.31.0-alpha';
+const APP_VERSION = '0.33.0-alpha';
+
+// ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
+// cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
+// El Holandés queda pendiente (ver panel de Preferencias).
+const I18N = {
+  'nav.predicacion':        { es: 'Predicación',            en: 'Preaching' },
+  'nav.reuniones':          { es: 'Reuniones',               en: 'Meetings' },
+  'subtab.casa':            { es: 'Casa en casa',            en: 'House to House' },
+  'subtab.territorios':     { es: 'Territorios',             en: 'Territories' },
+  'subtab.carritos':        { es: 'Carritos',                en: 'Carts' },
+  'subtab.grupos':          { es: 'Grupos',                  en: 'Groups' },
+  'subtab.vida-ministerio': { es: 'Vida y Ministerio',       en: 'Christian Life and Ministry' },
+  'subtab.fin-semana':      { es: 'Fin de Semana',           en: 'Weekend' },
+  'subtab.aseo-salon':      { es: 'Aseo del Salón',          en: 'Hall Cleaning' },
+  'subtab.hospitalidad':    { es: 'Hospitalidad',            en: 'Hospitality' },
+  'subtab.responsabilidades': { es: 'Responsabilidades',     en: 'Responsibilities' },
+  'admin.title':            { es: 'Administración',          en: 'Administration' },
+  'admin.subtitle':         { es: 'Gestiona asignaciones, territorios, conductores y casas', en: 'Manage assignments, territories, drivers and houses' },
+  'admin.section.predicacion': { es: 'Predicación',           en: 'Preaching' },
+  'admin.section.reuniones':   { es: 'Reuniones',             en: 'Meetings' },
+  'admin.tab.assignments':  { es: 'Asignaciones',            en: 'Assignments' },
+  'admin.tab.territories':  { es: 'Territorios',             en: 'Territories' },
+  'admin.tab.conductores':  { es: 'Conductores',             en: 'Drivers' },
+  'admin.tab.casas':        { es: 'Casas',                   en: 'Houses' },
+  'admin.tab.grupos':       { es: 'Grupos',                  en: 'Groups' },
+  'admin.tab.vmc':          { es: 'Vida y Ministerio',       en: 'Christian Life and Ministry' },
+  'admin.tab.fin-semana':   { es: 'Fin de Semana',           en: 'Weekend' },
+  'admin.tab.responsabilidades': { es: 'Responsabilidades', en: 'Responsibilities' },
+  'admin.tab.aseo-salon':   { es: 'Aseo Salón',              en: 'Hall Cleaning' },
+  'admin.tab.usuarios':     { es: 'Usuarios',                en: 'Users' },
+  'admin.tab.notificaciones': { es: 'Notificaciones',        en: 'Notifications' },
+  'btn.guardar':            { es: 'Guardar',                 en: 'Save' },
+  'btn.cancelar':           { es: 'Cancelar',                en: 'Cancel' },
+  'btn.editar':             { es: 'Editar',                  en: 'Edit' },
+  'btn.eliminar':           { es: 'Eliminar',                en: 'Delete' },
+  'btn.nuevo':              { es: '+ Nuevo',                 en: '+ New' },
+  'btn.buscar':             { es: 'Buscar persona…',         en: 'Search person…' },
+  'btn.cerrar-sesion':      { es: 'Cerrar sesión',           en: 'Log out' },
+  'btn.llamar':             { es: 'Llamar',                  en: 'Call' },
+  'btn.como-llegar':        { es: 'Cómo llegar',             en: 'Directions' },
+  'live.btn':               { es: 'Live',                    en: 'Live' },
+  'live.activo':            { es: 'Live activo',             en: 'Live active' },
+  'live.estas-en':          { es: 'Estás en',                en: 'You are on' },
+  'sin.direccion':          { es: 'Sin dirección',           en: 'No address' },
+  'sin.conductor':          { es: 'Sin conductor',           en: 'No driver' },
+  'pref.title':             { es: 'Preferencias',            en: 'Preferences' },
+  'pref.idioma':            { es: 'Idioma',                  en: 'Language' },
+  'pref.apariencia':        { es: 'Apariencia',              en: 'Appearance' },
+  'pref.proximamente':      { es: 'Próximamente',            en: 'Coming soon' },
+};
+let currentLang = localStorage.getItem('fleming_lang') || 'es';
+function t(key) {
+  const entry = I18N[key];
+  if (!entry) return key;
+  return entry[currentLang] || entry.es || key;
+}
+function applyLanguage(lang) {
+  currentLang = lang;
+  localStorage.setItem('fleming_lang', lang);
+  document.documentElement.setAttribute('lang', lang);
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    el.textContent = t(k);
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const k = el.getAttribute('data-i18n-ph');
+    el.placeholder = t(k);
+  });
+  // Refrescar vistas dinámicas ya montadas para que también respeten el idioma.
+  try { renderSubTabs(currentMainTab); } catch {}
+  try { if (currentSubTab === 'territorios') renderTerritoryView(); } catch {}
+  try { if (currentSubTab === 'grupos' && typeof renderGruposView === 'function') renderGruposView(); } catch {}
+  try { if (typeof refreshScheduleIfStale === 'function') refreshScheduleIfStale(true); } catch {}
+  updateLangPrefUI();
+}
+function updateLangPrefUI() {
+  document.querySelectorAll('.pref-lang-row[data-lang]').forEach(row => {
+    row.classList.toggle('active', row.getAttribute('data-lang') === currentLang);
+  });
+}
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
@@ -6243,6 +6328,9 @@ function urlBase64ToUint8Array(base64String) {
 async function enterApp() {
   document.getElementById('auth-screen').style.display = 'none';
 
+  // Aplicar idioma guardado (solo afecta la interfaz, nunca el contenido).
+  applyLanguage(currentLang);
+
   // Register/update in Supabase — may update currentRole if admin changed it,
   // or set it to 'pending' if this is a re-entry request from a deleted account.
   await registerUserSession(currentUser.name, currentRole);
@@ -6475,17 +6563,17 @@ async function checkPendingApproval() {
 
 const SUB_TABS = {
   predicacion: [
-    { id: 'casa',        label: 'Casa en casa' },
-    { id: 'territorios', label: 'Territorios' },
-    { id: 'carritos',    label: 'Carritos' },
-    { id: 'grupos',      label: 'Grupos' },
+    { id: 'casa',        get label() { return t('subtab.casa'); } },
+    { id: 'territorios', get label() { return t('subtab.territorios'); } },
+    { id: 'carritos',    get label() { return t('subtab.carritos'); } },
+    { id: 'grupos',      get label() { return t('subtab.grupos'); } },
   ],
   reuniones: [
-    { id: 'vida-ministerio',    label: 'Vida y Ministerio' },
-    { id: 'fin-semana',         label: 'Fin de Semana' },
-    { id: 'aseo-salon',         label: 'Aseo del Salón' },
-    { id: 'hospitalidad',       label: 'Hospitalidad' },
-    { id: 'responsabilidades',  label: 'Responsabilidades' },
+    { id: 'vida-ministerio',    get label() { return t('subtab.vida-ministerio'); } },
+    { id: 'fin-semana',         get label() { return t('subtab.fin-semana'); } },
+    { id: 'aseo-salon',         get label() { return t('subtab.aseo-salon'); } },
+    { id: 'hospitalidad',       get label() { return t('subtab.hospitalidad'); } },
+    { id: 'responsabilidades',  get label() { return t('subtab.responsabilidades'); } },
   ]
 };
 
@@ -6913,18 +7001,17 @@ function renderSchedule() {
               <div class="sabado-grupo-ter-pills">${terPills}</div>
             </div>
             <div class="sabado-grupo-body">
-              <div class="sabado-grupo-label">Grupo ${grupoNum ?? '—'}</div>
-              <div class="sabado-grupo-conductor">${conductorDisplay}</div>
+              <div class="sabado-grupo-address">${a.address || 'Sin dirección'}</div>
             </div>
             <div class="sabado-grupo-footer">
               <div class="sabado-grupo-meta-row">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 <span>${timeStr}hrs</span>
               </div>
-              ${a.address ? `<div class="sabado-grupo-meta-row">
-                <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                <span>${a.address}</span>
-              </div>` : ''}
+              <div class="sabado-grupo-meta-row">
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>${conductorDisplay}</span>
+              </div>
             </div>
           </div>`;
         });
@@ -10407,6 +10494,12 @@ async function viewTerritory(id) {
   noPasarSec.dataset.territoryId = t.id;
   noPasarSec.dataset.territoryName = `Territorio ${t.number}`;
 
+  // Live Mode: no disponible en la sub-sección Territorios, solo en asignaciones
+  // de predicación de casa en casa. Se detiene si estaba activo y se oculta el botón.
+  if (_liveActive) stopLiveMode();
+  const liveWrap = document.getElementById('live-btn-wrap');
+  if (liveWrap) liveWrap.style.display = 'none';
+
   document.getElementById('detail-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -10485,9 +10578,11 @@ function closePreferencias() {
   document.body.style.overflow = '';
 }
 function setPrefLanguage(lang) {
-  // Por ahora solo Español está disponible; los otros idiomas muestran "Próximamente".
-  if (lang !== 'es') return;
-  showToast('El idioma Español ya está activo.', '');
+  // Holandés sigue pendiente.
+  if (lang !== 'es' && lang !== 'en') return;
+  if (lang === currentLang) return;
+  applyLanguage(lang);
+  showToast(lang === 'en' ? 'Language switched to English' : 'Idioma cambiado a Español', 'success');
 }
 function updatePrefThemeActive() {
   const theme = document.documentElement.getAttribute('data-theme') || 'auto';
