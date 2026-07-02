@@ -57,6 +57,40 @@
     --tab-bar-bg: rgba(242,242,247,0.92);
   }
 
+  /* ── Quita el resaltado azul de selección/tap que el navegador dibuja por
+     defecto sobre cualquier elemento tocable (botones, links, tarjetas, SVG,
+     inputs, etc.). Antes solo se aplicaba a un componente puntual (mapa de
+     Reportes de Territorio); ahora es global para toda la plataforma. ── */
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  *, *::before, *::after {
+    -webkit-tap-highlight-color: transparent;
+    tap-highlight-color: transparent;
+  }
+  button, a, [onclick], input, textarea, select, summary {
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+  }
+  button:focus, a:focus, [onclick]:focus {
+    outline: none;
+  }
+  /* Mantiene accesibilidad de teclado: solo se ve el foco cuando se navega
+     con Tab (no al tocar/hacer clic con mouse). */
+  button:focus-visible, a:focus-visible, [onclick]:focus-visible,
+  input:focus-visible, textarea:focus-visible, select:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* ── Transparencias (Configuración > desactivar transparencias) ──────────────
+     Al activarse, apaga el efecto de vidrio esmerilado (backdrop-filter) en
+     toda la plataforma. Los fondos semitransparentes (--nav-bg, etc.) siguen
+     viéndose, pero sin el desenfoque encima. ── */
+  html.no-transparency * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
 
   /* ── DEV Version Pill ─────────────────────────────────────────────────────── */
   #dev-version-pill {
@@ -1931,38 +1965,43 @@
   }
   .notif-pill svg { width: 10px; height: 10px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
 
-  /* ── Notif search bar ── */
+  /* ── Notif search bar ── (alineada al estilo estándar de búsqueda de la
+     plataforma, mismo look que .grupos-search-input) */
   .notif-search-wrap {
-    position: relative; padding: 0 0 0.6rem;
+    position: relative; padding: 0 0 0.85rem;
   }
   .notif-search-wrap .notif-search-icon {
-    position: absolute; left: 0.65rem; top: 50%; transform: translateY(-50%);
-    width: 14px; height: 14px; stroke: var(--text3); fill: none; stroke-width: 2; stroke-linecap: round; pointer-events: none;
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    width: 16px; height: 16px; stroke: var(--text3); fill: none; stroke-width: 2; stroke-linecap: round; pointer-events: none;
   }
   .notif-search-input {
-    width: 100%; padding: 0.5rem 0.65rem 0.5rem 2rem;
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: var(--radius-sm); font-family: var(--font);
-    font-size: 0.82rem; color: var(--text); outline: none;
+    width: 100%; padding: 0.65rem 1rem 0.65rem 2.4rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 50px; font-family: var(--font);
+    font-size: 0.9rem; color: var(--text); outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
   }
   .notif-search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
   .notif-search-input::placeholder { color: var(--text3); }
 
-  /* ── Notif filter chips ── */
+  /* ── Notif filter chips → ahora un slider horizontal de categorías,
+     igual al segmented-control/slider usado en el resto de la plataforma. ── */
   .notif-filter-chips {
-    display: flex; gap: 6px; flex-wrap: wrap; padding-bottom: 0.7rem;
+    display: flex; gap: 6px; flex-wrap: nowrap; overflow-x: auto;
+    padding-bottom: 0.85rem; scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
   }
+  .notif-filter-chips::-webkit-scrollbar { display: none; }
   .notif-filter-chip {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 0.32rem 0.7rem 0.32rem 0.55rem; border-radius: 20px;
-    font-size: 0.72rem; font-weight: 700; cursor: pointer;
-    border: 1.5px solid var(--border); background: var(--surface);
-    color: var(--text3); transition: border-color 0.18s, background 0.18s, color 0.18s;
+    display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;
+    padding: 0.4rem 0.85rem 0.4rem 0.65rem; border-radius: 20px;
+    font-size: 0.78rem; font-weight: 600; cursor: pointer;
+    border: none; background: var(--surface3);
+    color: var(--text2); transition: background 0.18s, color 0.18s;
     user-select: none;
   }
   .notif-filter-chip svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
-  .notif-filter-chip.active { color: #fff; border-color: transparent; }
+  .notif-filter-chip.active { color: #fff; background: var(--accent); box-shadow: 0 2px 8px rgba(0,122,255,0.3); }
 
   /* ── Notif empty (sin resultados de filtro/búsqueda) ── */
   .notif-empty-filtered { text-align: center; padding: 2rem 1rem; color: var(--text3); font-size: 0.85rem; }
@@ -3020,6 +3059,91 @@
   }
   .admin-back-btn:hover { opacity: 0.72; }
   .admin-back-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ── Header "pill" de las secciones (Móvil + Desktop) ─────────────────────────
+     Reemplaza la barra sólida de arriba por: botón Back circular + título
+     dentro de un pill con transparencia y background blur, ambos flotando
+     sobre el contenido. Se usa en Notificaciones, Configuración, Perfil,
+     Grupo, Administración, etc. ── */
+  .subpage-topbar {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 1rem;
+    background: transparent;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    flex-shrink: 0;
+  }
+  .subpage-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+  .pill-back-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--nav-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    color: var(--text);
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .pill-back-btn:hover { opacity: 0.75; }
+  .pill-back-btn:active { transform: scale(0.92); }
+  .pill-back-btn svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+  .pill-header-title {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    padding: 0 1.15rem;
+    border-radius: 999px;
+    background: var(--nav-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pill-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    padding: 0 1rem;
+    border-radius: 999px;
+    background: var(--nav-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    font-family: var(--font);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--red);
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .pill-action-btn:hover { opacity: 0.75; }
+  @media (max-width: 639px) {
+    .subpage-topbar { padding: 0.7rem 0.85rem; }
+  }
   .admin-topbar-title {
     font-size: 1rem;
     font-weight: 700;
@@ -4689,13 +4813,12 @@
     </div>
 
     <div id="page-admin">
-      <div class="admin-topbar">
-        <button class="admin-back-btn" onclick="closeAdminPage()">
+      <div class="subpage-topbar">
+        <button class="pill-back-btn" onclick="closeAdminPage()" title="Inicio">
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-          Inicio
         </button>
-        <span class="admin-topbar-title">Administración</span>
-        <div class="admin-topbar-right options-wrap">
+        <span class="pill-header-title">Administración</span>
+        <div class="subpage-topbar-right options-wrap">
           <button class="nav-icon-btn" title="Opciones" onclick="toggleAdminOptionsMenu()">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.2" fill="currentColor" stroke="none"/></svg>
           </button>
@@ -5454,13 +5577,11 @@
 
 <!-- ── User Profile fullscreen page ── -->
 <div id="page-user-profile" class="">
-  <nav class="topnav" style="position:sticky;top:0;flex-shrink:0;z-index:10">
-    <button class="admin-back-btn" onclick="closeUserProfilePage()">
+  <nav class="subpage-topbar">
+    <button class="pill-back-btn" onclick="closeUserProfilePage()" title="Usuarios">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      Usuarios
     </button>
-    <span style="font-size:1rem;font-weight:700">Perfil</span>
-    <div style="width:80px"></div>
+    <span class="pill-header-title">Perfil</span>
   </nav>
 
   <!-- Hero -->
@@ -5479,13 +5600,11 @@
 
 <!-- ── Preferencias (fullscreen overlay) ── -->
 <div id="page-preferencias" class="">
-  <nav class="topnav" style="position:sticky;top:0;flex-shrink:0;z-index:10">
-    <button class="admin-back-btn" onclick="closePreferencias()">
+  <nav class="subpage-topbar">
+    <button class="pill-back-btn" onclick="closePreferencias()" title="Inicio">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      Inicio
     </button>
-    <span style="font-size:1rem;font-weight:700;letter-spacing:-0.01em">Preferencias</span>
-    <div style="width:80px"></div>
+    <span class="pill-header-title">Configuración</span>
   </nav>
 
   <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 0 2.5rem">
@@ -5550,6 +5669,19 @@
         </div>
         <div id="pref-dark-maps-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
           <div id="pref-dark-maps-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
+      <!-- Toggle: transparencias -->
+      <div class="profile-row" style="cursor:pointer" onclick="toggleTransparencyPref()">
+        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text2)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" opacity="0.5"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Transparencias</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Activa el efecto de vidrio esmerilado (blur) en los paneles y encabezados</div>
+        </div>
+        <div id="pref-transparency-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="pref-transparency-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
       <!-- Accent color — only visible when Modo Experimentos is unlocked -->
@@ -5851,7 +5983,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.1.3-beta';
+const APP_VERSION = '1.2-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -5899,7 +6031,7 @@ const I18N = {
   'live.estas-en':          { es: 'Estás en',                en: 'You are on' },
   'sin.direccion':          { es: 'Sin dirección',           en: 'No address' },
   'sin.conductor':          { es: 'Sin conductor',           en: 'No driver' },
-  'pref.title':             { es: 'Preferencias',            en: 'Preferences' },
+  'pref.title':             { es: 'Configuración',           en: 'Preferences' },
   'pref.idioma':            { es: 'Idioma',                  en: 'Language' },
   'pref.apariencia':        { es: 'Apariencia',              en: 'Appearance' },
   'pref.proximamente':      { es: 'Próximamente',            en: 'Coming soon' },
@@ -6020,6 +6152,7 @@ function initTheme() {
   applyTheme(saved);
   initAccentColor();
   initAnimationsMode();
+  applyTransparencyPref();
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
     if (document.documentElement.getAttribute('data-theme') === 'auto') {
       _updateThemeActive('auto');
@@ -11645,6 +11778,7 @@ async function openPreferencias() {
   updatePrefThemeActive();
   updateDarkMapToggleUI();
   updateLiveToggleUI();
+  updateTransparencyToggleUI();
   await renderPrefNotifList();
 }
 function closePreferencias() {
@@ -11677,6 +11811,28 @@ function toggleDarkMapsPref() {
   localStorage.setItem('fleming_dark_maps', current ? 'false' : 'true');
   updateDarkMapToggleUI();
   if (currentSubTab === 'territorios') renderTerritoryView();
+}
+
+// ── Transparencias: activa/desactiva el efecto de blur global ───────────────
+function isTransparencyEnabled() {
+  return localStorage.getItem('fleming_transparency') !== 'false'; // default true
+}
+function applyTransparencyPref() {
+  document.documentElement.classList.toggle('no-transparency', !isTransparencyEnabled());
+}
+function updateTransparencyToggleUI() {
+  const enabled = isTransparencyEnabled();
+  const toggle = document.getElementById('pref-transparency-toggle');
+  const thumb  = document.getElementById('pref-transparency-thumb');
+  if (!toggle || !thumb) return;
+  toggle.style.background = enabled ? 'var(--accent)' : 'var(--surface3)';
+  thumb.style.left = enabled ? '21px' : '3px';
+}
+function toggleTransparencyPref() {
+  const current = isTransparencyEnabled();
+  localStorage.setItem('fleming_transparency', current ? 'false' : 'true');
+  applyTransparencyPref();
+  updateTransparencyToggleUI();
 }
 
 // ── Función Live: activar/desactivar por completo ────────────────────────────
@@ -14623,13 +14779,11 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
 </script>
 <!-- ── Profile fullscreen page ── -->
 <div id="page-profile" class="">
-  <nav class="topnav" style="position:sticky;top:0;flex-shrink:0">
-    <button class="admin-back-btn" onclick="closeProfilePage()">
+  <nav class="subpage-topbar">
+    <button class="pill-back-btn" onclick="closeProfilePage()" title="Inicio">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      Inicio
     </button>
-    <span style="font-size:1rem;font-weight:700;letter-spacing:-0.01em">Mi Perfil</span>
-    <div style="width:80px"></div>
+    <span class="pill-header-title">Mi Perfil</span>
   </nav>
 
   <div style="max-width:600px;width:100%;margin:0 auto;padding-bottom:2rem">
@@ -14730,13 +14884,11 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
 
 <!-- ── Grupo Detail fullscreen page ── -->
 <div id="page-grupo" class="">
-  <nav class="topnav" style="position:sticky;top:0;flex-shrink:0">
-    <button class="admin-back-btn" onclick="closeGrupoDetailPage()">
+  <nav class="subpage-topbar">
+    <button class="pill-back-btn" onclick="closeGrupoDetailPage()" title="Grupos">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      Grupos
     </button>
-    <span id="grupo-detail-nav-title" style="font-size:1rem;font-weight:700;letter-spacing:-0.01em">Grupo</span>
-    <div style="width:80px"></div>
+    <span id="grupo-detail-nav-title" class="pill-header-title">Grupo</span>
   </nav>
 
   <!-- Hero -->
@@ -14901,13 +15053,14 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
 
 <!-- ── Notifications fullscreen page ── -->
 <div id="page-notifications" style="display:none;position:fixed;inset:0;z-index:250;background:var(--bg);flex-direction:column;animation:fadeIn 0.2s ease">
-  <nav class="topnav" style="position:sticky;top:0">
-    <button class="admin-back-btn" onclick="closeNotificationsPage()">
+  <nav class="subpage-topbar">
+    <button class="pill-back-btn" onclick="closeNotificationsPage()" title="Inicio">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      Inicio
     </button>
-    <span style="font-size:1rem;font-weight:700;letter-spacing:-0.01em">Notificaciones</span>
-    <button id="notif-clear-btn" onclick="deleteAllNotifications()" style="background:none;border:none;font-family:var(--font);font-size:0.8rem;font-weight:600;color:var(--red);cursor:pointer;padding:0.35rem 0.65rem;border-radius:8px;transition:background 0.15s" onmouseover="this.style.background='rgba(255,59,48,0.08)'" onmouseout="this.style.background='none'">Borrar todo</button>
+    <span class="pill-header-title">Notificaciones</span>
+    <div class="subpage-topbar-right">
+      <button id="notif-clear-btn" class="pill-action-btn" onclick="deleteAllNotifications()">Borrar todo</button>
+    </div>
   </nav>
   <div style="padding:0.85rem 1rem 0;max-width:640px;width:100%;margin:0 auto">
     <div class="notif-search-wrap">
