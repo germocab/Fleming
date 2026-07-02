@@ -93,6 +93,23 @@
      comporta como siempre. ── */
   .pref-blur-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--surface3); transition: background 0.2s, transform 0.2s; }
   .pref-blur-dot.active { background: var(--accent); transform: scale(1.25); }
+  /* ── Vista previa del Slider de blur/transparencia: foto colorida de fondo
+     para poder apreciar con claridad cuánto blur y transparencia aplica
+     cada nivel sobre los elementos flotantes reales de la plataforma. ── */
+  .pref-blur-preview-bg {
+    margin-top: 0.9rem; height: 150px; border-radius: 18px; overflow: hidden;
+    position: relative; display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border);
+    background:
+      radial-gradient(circle at 12% 22%, #ff5f6d 0%, transparent 42%),
+      radial-gradient(circle at 82% 15%, #36d1dc 0%, transparent 46%),
+      radial-gradient(circle at 25% 85%, #ffd200 0%, transparent 44%),
+      radial-gradient(circle at 88% 80%, #a044ff 0%, transparent 48%),
+      radial-gradient(circle at 52% 50%, #43e97b 0%, transparent 55%),
+      linear-gradient(135deg, #1e3c72 0%, #ff6a00 100%);
+  }
+  .pref-blur-preview-row { display: flex; align-items: center; gap: 10px; }
+
   html.no-transparency * {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -6167,6 +6184,19 @@
           <div class="pref-blur-dot" id="pref-blur-dot-4"></div>
           <div class="pref-blur-dot" id="pref-blur-dot-5"></div>
         </div>
+        <!-- Vista previa en vivo: usa los mismos elementos (pill-back-btn /
+             pill-header-title) y variables (--ui-blur, --nav-bg) que el
+             resto de la plataforma, así que reflejan el nivel elegido al
+             instante, incluso mientras se arrastra el slider. ── -->
+        <div class="pref-blur-preview-bg" id="pref-blur-preview-bg">
+          <div class="pref-blur-preview-row">
+            <button class="pill-back-btn" style="position:static" tabindex="-1">
+              <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <span class="pill-header-title" style="position:static;transform:none;max-width:none">Vista previa</span>
+          </div>
+        </div>
+        <div style="padding:0.55rem 0.1rem 0;font-size:0.75rem;color:var(--text3);line-height:1.4">Así se verán los encabezados y paneles flotantes de la plataforma con este nivel.</div>
       </div>
       <!-- Accent color -->
       <div id="pref-accent-section" style="border-top:1px solid var(--border)">
@@ -6406,7 +6436,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.6.5-beta';
+const APP_VERSION = '1.6.5.2-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
