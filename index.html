@@ -1027,8 +1027,9 @@
   .sabado-grupos-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(172px, 1fr));
-    gap: 0.65rem;
+    gap: 0.85rem 0.65rem;
     margin-bottom: 0.5rem;
+    padding-top: 6px;
   }
   @media (max-width: 420px) { .sabado-grupos-grid { grid-template-columns: 1fr 1fr; gap: 0.5rem; } }
 
@@ -1039,29 +1040,30 @@
     padding: 0.95rem 0.9rem 0.85rem;
     cursor: pointer;
     transition: transform 0.13s, box-shadow 0.13s, border-color 0.13s;
-    display: flex; flex-direction: column; gap: 0.6rem;
-    position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+    position: relative; overflow: visible;
   }
   .sabado-grupo-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: var(--border-active); }
   .sabado-grupo-card:active { transform: scale(0.97); }
 
-  .sabado-grupo-top {
-    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  .sabado-grupo-tag {
+    display: inline-flex; align-items: center; align-self: flex-start;
+    font-size: 0.66rem; font-weight: 800; letter-spacing: 0.02em;
+    padding: 3px 9px 4px; border-radius: 20px; margin-bottom: 0.55rem;
+    max-width: calc(100% - 40px);
   }
-  .sabado-grupo-num-circle {
-    width: 32px; height: 32px; border-radius: 50%;
+  .sabado-grupo-ter-badges {
+    position: absolute; top: -10px; right: -8px;
+    display: flex; align-items: center;
+  }
+  .sabado-grupo-ter-circle {
+    width: 38px; height: 38px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 0.88rem; font-weight: 800; color: #fff; flex-shrink: 0;
+    font-size: 0.92rem; font-weight: 800; color: #fff; flex-shrink: 0;
+    border: 3px solid var(--surface); box-shadow: 0 3px 8px rgba(0,0,0,0.18);
   }
-  .sabado-grupo-ter-pills {
-    display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end;
-  }
-  .sabado-grupo-ter-pill {
-    display: inline-flex; align-items: center; justify-content: center;
-    min-width: 22px; height: 22px; padding: 0 5px; border-radius: 6px;
-    font-size: 0.72rem; font-weight: 800; color: #fff; flex-shrink: 0;
-  }
-  .sabado-grupo-body { display: flex; flex-direction: column; gap: 2px; }
+  .sabado-grupo-ter-circle + .sabado-grupo-ter-circle { margin-left: -14px; }
+  .sabado-grupo-body { display: flex; flex-direction: column; gap: 2px; padding-right: 34px; }
   .sabado-grupo-address {
     font-size: 0.9rem; font-weight: 700; color: var(--text); line-height: 1.32;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
@@ -1075,16 +1077,16 @@
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .sabado-grupo-footer {
-    display: flex; flex-direction: column; gap: 3px;
-    border-top: 1px solid var(--border); padding-top: 0.55rem; margin-top: 0.1rem;
+    display: flex; flex-direction: column; gap: 4px;
+    border-top: 1px solid var(--border); padding-top: 0.6rem; margin-top: 0.6rem;
   }
   .sabado-grupo-meta-row {
-    display: flex; align-items: center; gap: 5px;
-    font-size: 0.75rem; color: var(--text3); font-weight: 500; line-height: 1.3;
+    display: flex; align-items: center; gap: 6px;
+    font-size: 0.8rem; color: var(--text2); font-weight: 500; line-height: 1.3;
   }
   .sabado-grupo-meta-row svg {
-    width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2.2;
-    stroke-linecap: round; flex-shrink: 0; opacity: 0.7;
+    width: 13px; height: 13px; stroke: var(--text3); fill: none; stroke-width: 2.2;
+    stroke-linecap: round; flex-shrink: 0;
   }
   .sabado-grupo-meta-row span {
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -6513,7 +6515,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.7-beta';
+const APP_VERSION = '1.7.1-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -6928,6 +6930,19 @@ async function debugPush() {
 
 // ── Grupos de Servicio ────────────────────────────────────────────────────────
 let grupos = [];
+
+// ── Paleta de colores de Grupos de Servicio (compartida entre la sub-sección
+//    "Grupos" y las mini-cards de "Otros grupos" del sábado en Casa en casa,
+//    para que el color de un grupo sea siempre el mismo en toda la plataforma). ──
+const GRUPO_COLORS = [
+  '#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6',
+  '#06b6d4','#ec4899','#f97316','#84cc16','#64748b',
+  '#6366f1','#14b8a6','#eab308','#dc2626','#a855f7',
+];
+function grupoColorFor(numero) {
+  const idx = grupos.findIndex(g => g.numero === numero);
+  return GRUPO_COLORS[(idx >= 0 ? idx : 0) % GRUPO_COLORS.length];
+}
 let editingGrupoId = null;
 let editingMiembroId = null;
 
@@ -6969,13 +6984,8 @@ function renderGruposView() {
   </div>
   <div id="grupos-search-results" style="display:none"></div>`;
 
-  const GRUPO_COLORS = [
-    '#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6',
-    '#06b6d4','#ec4899','#f97316','#84cc16','#64748b',
-    '#6366f1','#14b8a6','#eab308','#dc2626','#a855f7',
-  ];
   const btnsHtml = '<div class="grupos-btn-grid" id="grupos-cards-grid">' + grupos.map((g, i) => {
-    const color = GRUPO_COLORS[i % GRUPO_COLORS.length];
+    const color = grupoColorFor(g.numero);
     const cnt = g.miembros.length;
     return `<button class="grupo-btn" style="--grupo-color:${color}" onclick="openGrupoDetailPage('${g.id}')">
       <div class="grupo-btn-eyebrow">Grupo</div>
@@ -8905,19 +8915,17 @@ function renderSchedule() {
           const ter2 = a.territory_id_2 ? (territories.find(t => t.id === a.territory_id_2) || null) : null;
           const grupoAsoc = _findGrupoForAssignment(a);
           const grupoNum = grupoAsoc ? grupoAsoc.numero : null;
-          const terColor = ter ? getTerColor(ter.number) : (grupoNum ? getTerColor(grupoNum) : '#64748b');
+          const tagColor = grupoNum != null ? grupoColorFor(grupoNum) : '#64748b';
           const timeStr = a.time ? a.time.substring(0,5) : '--:--';
           const conductorDisplay = a.conductor || 'Sin conductor';
 
-          const terPills = [ter, ter2].filter(Boolean).map(t =>
-            `<div class="sabado-grupo-ter-pill" style="background:${getTerColor(t.number)}">${t.number}</div>`
+          const terCircles = [ter, ter2].filter(Boolean).map(t =>
+            `<div class="sabado-grupo-ter-circle" style="background:${getTerColor(t.number)}">${t.number}</div>`
           ).join('');
 
           html += `<div class="sabado-grupo-card" onclick="viewAssignment('${a.id}')">
-            <div class="sabado-grupo-top">
-              <div class="sabado-grupo-num-circle" style="background:${terColor}">${grupoNum ?? '?'}</div>
-              <div class="sabado-grupo-ter-pills">${terPills}</div>
-            </div>
+            ${terCircles ? `<div class="sabado-grupo-ter-badges">${terCircles}</div>` : ''}
+            <div class="sabado-grupo-tag" style="color:${tagColor};background:${tagColor}26">${grupoNum != null ? 'Grupo ' + grupoNum : 'Grupo'}</div>
             <div class="sabado-grupo-body">
               <div class="sabado-grupo-address">${a.address || 'Sin dirección'}</div>
             </div>
