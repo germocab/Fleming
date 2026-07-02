@@ -420,6 +420,10 @@
     background: var(--accent); color: #fff;
     box-shadow: 0 2px 12px rgba(0,122,255,0.4);
   }
+  .main-seg-btn-icon {
+    padding: 9px 14px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
 
   @media (min-width: 640px) {
     /* Desktop: el thumb se desliza detrás del botón activo con una animación fluida;
@@ -596,6 +600,44 @@
   .page { display: none; }
   .page.active { display: block; animation: fadeIn 0.25s ease; }
   @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+  /* ── Pantalla de Inicio (experimental) ── */
+  .inicio-header { margin-bottom: 1.4rem; }
+  .inicio-header-title { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text); }
+  .inicio-header-sub { font-size: 0.88rem; color: var(--text3); margin-top: 2px; }
+  .inicio-section { margin-bottom: 1.5rem; }
+  .inicio-section-title {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.78rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--text3); margin-bottom: 0.6rem; padding: 0 0.2rem;
+  }
+  .inicio-card-list { display: flex; flex-direction: column; gap: 10px; }
+  .inicio-card {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 0.9rem 1rem;
+    box-shadow: var(--shadow); cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .inicio-card:active { transform: scale(0.98); }
+  .inicio-card-icon {
+    flex-shrink: 0; width: 42px; height: 42px; border-radius: 13px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .inicio-card-icon svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .inicio-card-body { min-width: 0; flex: 1; }
+  .inicio-card-label { font-weight: 700; font-size: 0.95rem; color: var(--text); }
+  .inicio-card-sub { font-size: 0.82rem; color: var(--text3); margin-top: 2px; }
+  .inicio-card-chevron { flex-shrink: 0; width: 16px; height: 16px; stroke: var(--text3); fill: none; stroke-width: 2.5; stroke-linecap: round; }
+  .inicio-empty {
+    text-align: center; padding: 3.5rem 1.5rem; color: var(--text3);
+  }
+  .inicio-empty svg { width: 48px; height: 48px; stroke: var(--text3); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; opacity: 0.5; margin-bottom: 0.85rem; }
+  .inicio-empty h4 { font-size: 1rem; font-weight: 700; color: var(--text2); margin-bottom: 0.3rem; }
+  .inicio-empty p { font-size: 0.85rem; line-height: 1.5; }
+  .inicio-badge-reminder {
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase;
+    color: var(--orange); background: rgba(255,149,0,0.12); border-radius: 8px; padding: 2px 8px; margin-left: 6px;
+  }
 
   .date-section { margin-bottom: 1.75rem; }
   .date-section-header {
@@ -4846,6 +4888,9 @@
     <div class="nav-center-row" id="nav-center-row">
     <div class="main-segment" id="main-segment">
       <div class="main-seg-thumb" id="main-seg-thumb"></div>
+      <button class="main-seg-btn main-seg-btn-icon" id="main-seg-btn-inicio" data-tab="inicio" title="Inicio" style="display:none" onclick="switchMainTab('inicio',this)">
+        <svg viewBox="0 0 24 24" style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </button>
       <button class="main-seg-btn active" data-tab="predicacion" data-i18n="nav.predicacion" onclick="switchMainTab('predicacion',this)">Predicación</button>
       <button class="main-seg-btn" data-tab="reuniones" data-i18n="nav.reuniones" onclick="switchMainTab('reuniones',this)">Reuniones</button>
     </div>
@@ -5073,6 +5118,17 @@
         <div id="resp-user-view"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Responsabilidades</div></div></div>
       </div>
 
+    </div>
+
+    <!-- ══ Inicio (experimental) — resumen de todas las asignaciones del usuario ══ -->
+    <div class="page" id="page-inicio">
+      <div class="inicio-header">
+        <div class="inicio-header-title">Inicio</div>
+        <div class="inicio-header-sub">Todo lo que tienes asignado, en un solo lugar</div>
+      </div>
+      <div id="inicio-content">
+        <div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Inicio</div></div>
+      </div>
     </div>
 
     <div id="page-admin">
@@ -6163,6 +6219,19 @@
   </nav>
   <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 0 2.5rem">
     <div class="profile-section">
+      <!-- Toggle: pantalla de Inicio (experimental, OFF por defecto) -->
+      <div class="profile-row" style="cursor:pointer" onclick="toggleHomeScreenPref()">
+        <div class="profile-row-icon" style="background:var(--ter-2-bg);color:var(--ter-2)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Pantalla de Inicio</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Muestra todas tus asignaciones en una sección nueva</div>
+        </div>
+        <div id="pref-home-screen-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="pref-home-screen-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
       <!-- Toggle: transparencias / blur (ahora vive en Experimentos, ON por defecto) -->
       <div class="profile-row" style="cursor:pointer" onclick="toggleTransparencyPref()">
         <div class="profile-row-icon" style="background:var(--ter-3-bg);color:var(--ter-3)">
@@ -6444,7 +6513,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.6.5.3-beta';
+const APP_VERSION = '1.7-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -7554,6 +7623,251 @@ function findMembershipForName(name) {
   return null;
 }
 
+// ══════════════════════════════════════════════════════════════════════════
+// ── Pantalla de Inicio (experimental) ───────────────────────────────────────
+// Reúne, en una sola vista, todas las asignaciones/cargos vigentes del
+// usuario conectado: Casa en casa, Carritos, Aseo del Salón, Vida y
+// Ministerio, Fin de Semana, Responsabilidades y recordatorios de reporte
+// de territorio. Reutiliza los mismos criterios de "coincidencia" que ya
+// usa cada módulo por separado (conductor de la asignación, integrante de
+// grupo, nombre en cart_turnos.nombres, etc.) para no duplicar reglas.
+// ══════════════════════════════════════════════════════════════════════════
+function inicioGoTo(mainTab, subTab, after) {
+  const btn = document.querySelector(`.main-seg-btn[data-tab="${mainTab}"]`);
+  if (btn) switchMainTab(mainTab, btn);
+  if (subTab) switchSubTab(subTab);
+  if (typeof after === 'function') setTimeout(after, 60);
+}
+
+async function renderInicio() {
+  const wrap = document.getElementById('inicio-content');
+  if (!wrap || !currentUser) return;
+  wrap.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Inicio</div></div>';
+
+  const myName = currentUser.name.trim().toLowerCase();
+  const today = todayStr();
+  const sections = [];
+
+  await loadGruposIfNeeded();
+  const myMembership = findMembershipForName(currentUser.name);
+
+  // ── Casa en casa: próximas asignaciones donde soy el conductor/encargado ──
+  try {
+    const { data } = await sb.from('assignments')
+      .select('id,date,time,conductor,territory_id')
+      .gte('date', today).order('date').order('time');
+    const mine = (data || []).filter(a => _namesMatch(a.conductor, currentUser.name));
+    if (mine.length) {
+      sections.push({
+        key: 'casa', title: 'Predicación de Casa en Casa', color: 'var(--ter-2)', bg: 'var(--ter-2-bg)',
+        icon: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+        items: mine.slice(0, 5).map(a => ({
+          label: 'Asignación de predicación',
+          sub: `${fmtInicioDate(a.date)}${a.time ? ' • ' + a.time : ''}`,
+          onClick: () => inicioGoTo('predicacion', 'casa'),
+        })),
+      });
+    }
+  } catch (e) { console.warn('Inicio (casa en casa):', e); }
+
+  // ── Carritos: turnos fijos donde aparezco como encargado ──
+  try {
+    const [{ data: turnos }, { data: puntos }] = await Promise.all([
+      sb.from('cart_turnos').select('*'),
+      sb.from('cart_puntos').select('id,nombre'),
+    ]);
+    const mine = (turnos || []).filter(t => (t.nombres || '').toLowerCase().includes(myName));
+    if (mine.length) {
+      sections.push({
+        key: 'carritos', title: 'Turnos en los Carritos', color: 'var(--ter-9)', bg: 'var(--ter-9-bg)',
+        icon: '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>',
+        items: mine.slice(0, 5).map(t => {
+          const punto = (puntos || []).find(p => p.id === t.punto_id);
+          return {
+            label: punto ? punto.nombre : 'Punto de carrito',
+            sub: `${t.dia || ''}${t.hora ? ' • ' + t.hora : ''}`,
+            onClick: () => inicioGoTo('predicacion', 'carritos'),
+          };
+        }),
+      });
+    }
+  } catch (e) { console.warn('Inicio (carritos):', e); }
+
+  // ── Aseo del Salón: próximas fechas donde soy encargado o mi grupo está asignado ──
+  try {
+    const { data } = await sb.from('aseo_salon').select('*').gte('fecha', today).order('fecha');
+    const myGroupNum = myMembership ? myMembership.grupo.numero : null;
+    const mine = (data || []).filter(r =>
+      _namesMatch(r.encargado_nombre, currentUser.name) ||
+      (myGroupNum != null && (r.grupo1_numero === myGroupNum || r.grupo2_numero === myGroupNum))
+    );
+    if (mine.length) {
+      sections.push({
+        key: 'aseo', title: 'Aseo del Salón', color: 'var(--ter-6)', bg: 'var(--ter-6-bg)',
+        icon: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+        items: mine.slice(0, 5).map(r => ({
+          label: _namesMatch(r.encargado_nombre, currentUser.name) ? 'Encargado del aseo' : 'Tu grupo de servicio limpia el salón',
+          sub: fmtInicioDate(r.fecha),
+          onClick: () => inicioGoTo('reuniones', 'aseo-salon'),
+        })),
+      });
+    }
+  } catch (e) { console.warn('Inicio (aseo):', e); }
+
+  // ── Vida y Ministerio: partes y roles de cabecera en semanas vigentes ──
+  try {
+    const { data } = await sb.from('vmc_weeks')
+      .select('id,date_start,date_end,parts,presidente,prayer_open,prayer_close')
+      .gte('date_end', today).order('date_start');
+    const items = [];
+    for (const w of (data || [])) {
+      const rango = vmcFormatRange(w);
+      const parts = Array.isArray(w.parts) ? w.parts : [];
+      for (const p of parts) {
+        const a1 = (p.assigned || '').trim().toLowerCase();
+        const a2 = (p.assigned2 || '').trim().toLowerCase();
+        if (a1 === myName || a2 === myName) items.push({ label: p.name || 'Parte', sub: rango, onClick: () => inicioGoTo('reuniones', 'vida-ministerio') });
+      }
+      const roles = [
+        { field: 'presidente',   label: 'Presidente' },
+        { field: 'prayer_open',  label: 'Oración de apertura' },
+        { field: 'prayer_close', label: 'Oración de cierre' },
+      ];
+      for (const rol of roles) {
+        if ((w[rol.field] || '').trim().toLowerCase() === myName) items.push({ label: rol.label, sub: rango, onClick: () => inicioGoTo('reuniones', 'vida-ministerio') });
+      }
+    }
+    if (items.length) {
+      sections.push({
+        key: 'vmc', title: 'Reunión Vida y Ministerio', color: 'var(--accent)', bg: 'var(--accent-light)',
+        icon: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+        items: items.slice(0, 5),
+      });
+    }
+  } catch (e) { console.warn('Inicio (VMC):', e); }
+
+  // ── Fin de Semana: roles de cabecera en semanas vigentes ──
+  try {
+    const { data } = await sb.from('fs_weeks')
+      .select('id,date_start,date_end,presidente,watchtower_reader')
+      .gte('date_end', today).order('date_start');
+    const items = [];
+    for (const w of (data || [])) {
+      const rango = fsFormatRange(w);
+      const roles = [
+        { field: 'presidente',        label: 'Presidente' },
+        { field: 'watchtower_reader', label: 'Lector de La Atalaya' },
+      ];
+      for (const rol of roles) {
+        if ((w[rol.field] || '').trim().toLowerCase() === myName) items.push({ label: rol.label, sub: rango, onClick: () => inicioGoTo('reuniones', 'fin-semana') });
+      }
+    }
+    if (items.length) {
+      sections.push({
+        key: 'fs', title: 'Reunión del Fin de Semana', color: '#34c759', bg: 'rgba(52,199,89,0.12)',
+        icon: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+        items: items.slice(0, 5),
+      });
+    }
+  } catch (e) { console.warn('Inicio (FS):', e); }
+
+  // ── Responsabilidades: próximos cargos (Audio/Video, Micrófonos, Plataforma, Acomodadores, etc.) ──
+  try {
+    const { data } = await sb.from('responsabilidades')
+      .select('*').ilike('hermano', currentUser.name).gte('fecha', today).order('fecha');
+    if ((data || []).length) {
+      sections.push({
+        key: 'resp', title: 'Responsabilidades', color: 'var(--ter-4)', bg: 'var(--ter-4-bg)',
+        icon: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+        items: data.slice(0, 5).map(r => ({
+          label: r.cargo || 'Responsabilidad',
+          sub: typeof respDiaLabel === 'function' ? respDiaLabel(r.fecha) : fmtInicioDate(r.fecha),
+          onClick: () => inicioGoTo('reuniones', 'responsabilidades'),
+        })),
+      });
+    }
+  } catch (e) { console.warn('Inicio (responsabilidades):', e); }
+
+  // ── Recordatorios: predicación pasada como conductor sin reporte de territorio enviado ──
+  try {
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 45);
+    const cutoffStr = cutoff.toISOString().slice(0, 10);
+    const [{ data: pastAssignments }, { data: submissions }, { data: territories }] = await Promise.all([
+      sb.from('assignments').select('id,date,conductor,territory_id').lt('date', today).gte('date', cutoffStr).order('date', { ascending: false }),
+      sb.from('territory_report_submissions').select('territory_id,submitted_at'),
+      sb.from('territories').select('id,number'),
+    ]);
+    const mine = (pastAssignments || []).filter(a => a.territory_id && _namesMatch(a.conductor, currentUser.name));
+    const pending = mine.filter(a => {
+      const reported = (submissions || []).some(s => s.territory_id === a.territory_id && s.submitted_at && s.submitted_at.slice(0, 10) >= a.date);
+      return !reported;
+    });
+    // Evitar duplicados si el mismo territorio aparece en varias asignaciones recientes
+    const seenTer = new Set();
+    const pendingUnique = pending.filter(a => (seenTer.has(a.territory_id) ? false : (seenTer.add(a.territory_id), true)));
+    if (pendingUnique.length) {
+      sections.push({
+        key: 'recordatorios', title: 'Recordatorios', color: 'var(--red)', bg: 'rgba(255,59,48,0.12)',
+        icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="11" x2="15" y2="11"/>',
+        items: pendingUnique.slice(0, 5).map(a => {
+          const ter = (territories || []).find(t => t.id === a.territory_id);
+          return {
+            label: `Reportar territorio${ter ? ' N.º ' + ter.number : ''}`,
+            sub: `Predicaste el ${fmtInicioDate(a.date)}`,
+            badge: 'Pendiente',
+            onClick: () => inicioGoTo('predicacion', 'casa'),
+          };
+        }),
+      });
+    }
+  } catch (e) { console.warn('Inicio (recordatorios territorio):', e); }
+
+  renderInicioSections(sections);
+}
+
+function fmtInicioDate(dateStr) {
+  if (!dateStr) return '';
+  try {
+    return new Date(dateStr + 'T00:00:00').toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
+  } catch { return dateStr; }
+}
+
+function renderInicioSections(sections) {
+  const wrap = document.getElementById('inicio-content');
+  if (!wrap) return;
+  if (!sections.length) {
+    wrap.innerHTML = `<div class="inicio-empty">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <h4>Sin asignaciones por ahora</h4>
+      <p>Cuando tengas una asignación de predicación, un turno, un cargo o una parte en el programa, aparecerá aquí.</p>
+    </div>`;
+    return;
+  }
+  wrap.innerHTML = sections.map(sec => `
+    <div class="inicio-section">
+      <div class="inicio-section-title">${sec.title}</div>
+      <div class="inicio-card-list">
+        ${sec.items.map((it, i) => `
+          <div class="inicio-card" onclick="_inicioCardClick('${sec.key}',${i})">
+            <div class="inicio-card-icon" style="background:${sec.bg};color:${sec.color}">
+              <svg viewBox="0 0 24 24">${sec.icon}</svg>
+            </div>
+            <div class="inicio-card-body">
+              <div class="inicio-card-label">${it.label}${it.badge ? `<span class="inicio-badge-reminder">${it.badge}</span>` : ''}</div>
+              ${it.sub ? `<div class="inicio-card-sub">${it.sub}</div>` : ''}
+            </div>
+            <svg class="inicio-card-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+  window._inicioSections = sections;
+}
+function _inicioCardClick(key, idx) {
+  const sec = (window._inicioSections || []).find(s => s.key === key);
+  const it = sec && sec.items[idx];
+  if (it && typeof it.onClick === 'function') it.onClick();
+}
+
 async function handleProfilePhotoUpload(event) {
   const file = event.target.files[0];
   event.target.value = '';
@@ -7870,6 +8184,14 @@ async function enterApp() {
     currentSubTab  = _nav.subTab || 'casa';
   }
 
+  // La pantalla de Inicio es experimental: nunca se restaura activa si el
+  // toggle de Experimentos no está encendido en este dispositivo/cuenta.
+  updateHomeNavVisibility();
+  if (currentMainTab === 'inicio' && !isHomeScreenEnabled()) {
+    currentMainTab = 'predicacion';
+    currentSubTab = 'casa';
+  }
+
   // Sync main segment button
   document.querySelectorAll('.main-seg-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.tab === currentMainTab);
@@ -7885,6 +8207,9 @@ async function enterApp() {
       const el = document.getElementById('sub-content-' + id);
       if (el) el.style.display = id === currentSubTab ? '' : 'none';
     });
+  } else if (currentMainTab === 'inicio') {
+    showPage('inicio');
+    renderInicio();
   } else {
     showPage('reuniones');
     const reunTabs = ['vida-ministerio','fin-semana','aseo-salon','hospitalidad','responsabilidades'];
@@ -8112,6 +8437,10 @@ function switchMainTab(tab, btn) {
     renderSubTabs(tab);
     showPage('schedule');
     switchSubTab(currentSubTab);
+  } else if (tab === 'inicio') {
+    renderSubTabs(tab); // SUB_TABS.inicio no existe → limpia el slider de sub-secciones
+    showPage('inicio');
+    renderInicio();
   } else {
     const reunTabs = ['vida-ministerio','fin-semana','aseo-salon','hospitalidad','responsabilidades'];
     currentSubTab = currentSubTab && reunTabs.includes(currentSubTab) ? currentSubTab : 'vida-ministerio';
@@ -12331,7 +12660,7 @@ function openPrefScreen(name) {
   if (name === 'preferencias') updateNavbarShrinkToggleUI();
   if (name === 'funciones') updateH2HViewModeUI();
   if (name === 'notificaciones') renderPrefNotifList();
-  if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); }
+  if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); updateHomeScreenToggleUI(); }
 }
 function closePrefScreen() {
   PREF_SCREENS.forEach(name => document.getElementById('page-pref-' + name)?.classList.remove('open'));
@@ -12514,6 +12843,37 @@ function toggleTransparencyPref() {
   localStorage.setItem('fleming_transparency', current ? 'false' : 'true');
   applyTransparencyPref();
   updateTransparencyToggleUI();
+}
+
+// ── Modo Experimentos: pantalla de Inicio (OFF por defecto, ni activa ni visible en ningún dispositivo hasta que se activa manualmente) ──
+function isHomeScreenEnabled() {
+  return localStorage.getItem('fleming_home_screen_enabled') === 'true';
+}
+function updateHomeScreenToggleUI() {
+  const enabled = isHomeScreenEnabled();
+  const toggle = document.getElementById('pref-home-screen-toggle');
+  const thumb  = document.getElementById('pref-home-screen-thumb');
+  if (toggle) toggle.style.background = enabled ? 'var(--accent)' : 'var(--surface3)';
+  if (thumb)  thumb.style.left = enabled ? '21px' : '3px';
+}
+function toggleHomeScreenPref() {
+  const current = isHomeScreenEnabled();
+  localStorage.setItem('fleming_home_screen_enabled', current ? 'false' : 'true');
+  updateHomeScreenToggleUI();
+  updateHomeNavVisibility();
+  showToast(!current ? 'Pantalla de Inicio activada. Búscala junto a Predicación y Reuniones.' : 'Pantalla de Inicio desactivada.', 'success');
+}
+// Muestra u oculta el botón "Inicio" del segmento principal según el toggle de Experimentos.
+// Si el usuario estaba viendo Inicio y lo desactiva, lo devuelve a Predicación.
+function updateHomeNavVisibility() {
+  const enabled = isHomeScreenEnabled();
+  const btn = document.getElementById('main-seg-btn-inicio');
+  if (btn) btn.style.display = enabled ? '' : 'none';
+  if (!enabled && currentMainTab === 'inicio') {
+    const predBtn = document.querySelector('.main-seg-btn[data-tab="predicacion"]');
+    if (predBtn) switchMainTab('predicacion', predBtn);
+  }
+  updateMainSegThumb(true);
 }
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
   if (isTransparencyEnabled()) applyTransparencyPref();
