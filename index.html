@@ -3988,31 +3988,33 @@
    minmax(120px,1fr), tarjetas con eyebrow + contenido alineado abajo) para
    que ambas sub-secciones se vean coherentes entre sí. */
 #sub-content-carritos .ct-grid-2x2, #admin-carritos .ct-grid-2x2 {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
   gap: 12px; padding: 0.25rem 0 1rem;
 }
 #sub-content-carritos .ct-location-card, #admin-carritos .ct-location-card {
-  display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end;
-  gap: 0; padding: 1rem 1rem 0.85rem;
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start;
+  gap: 0; padding: 1.1rem 1.1rem 1rem;
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 20px;
   cursor: pointer;
   text-align: left; width: 100%; position: relative; overflow: hidden;
-  min-height: 110px;
+  min-height: 124px;
   transition: transform var(--transition), background-color var(--transition), border-color var(--transition), box-shadow var(--transition);
 }
 #sub-content-carritos .ct-location-card:hover, #admin-carritos .ct-location-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); background-color: var(--bg-card-hover); }
 #sub-content-carritos .ct-location-card:active, #admin-carritos .ct-location-card:active { transform: scale(0.97); }
-#sub-content-carritos .ct-location-eyebrow, #admin-carritos .ct-location-eyebrow {
-  font-size: 0.65rem; font-weight: 700; color: var(--text-light);
-  text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: auto;
-}
 #sub-content-carritos .ct-location-name-row, #admin-carritos .ct-location-name-row {
-  display: flex; align-items: center; gap: 8px; margin-top: 0.6rem; min-width: 0;
+  display: flex; align-items: flex-start; gap: 8px; min-width: 0;
 }
-#sub-content-carritos .ct-status-dot, #admin-carritos .ct-status-dot { width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.18); }
-#sub-content-carritos .ct-location-card h2, #admin-carritos .ct-location-card h2 { margin: 0; font-size: 1rem; font-weight: 800; line-height: 1.25; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#sub-content-carritos .ct-status-dot, #admin-carritos .ct-status-dot { width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.18); }
+/* El nombre del punto ahora es lo primero que se ve en la tarjeta (ya no hay
+   "PUNTO" arriba), así que se le da todo el espacio disponible y se permite
+   que use hasta 3 líneas en vez de cortarse con "…" en una sola línea. */
+#sub-content-carritos .ct-location-card h2, #admin-carritos .ct-location-card h2 {
+  margin: 0; font-size: 1.05rem; font-weight: 800; line-height: 1.28; color: var(--text-main);
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;
+}
 
 /* ---------- SECTION TITLE ---------- */
 #sub-content-carritos .ct-section-title, #admin-carritos .ct-section-title {
@@ -5766,7 +5768,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.37.5-alpha';
+const APP_VERSION = '0.37.6-alpha';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -15124,7 +15126,6 @@ function cartRenderHome() {
   } else {
     grid.innerHTML = cartPUNTOS.map(p => `
       <button class="ct-location-card" onclick="cartSelectPoint('${p.id}')">
-        <div class="ct-location-eyebrow">Punto</div>
         <div class="ct-location-name-row">
           <span class="ct-status-dot" style="background:${p.color}"></span>
           <h2>${p.nombre}</h2>
