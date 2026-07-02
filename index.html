@@ -6129,7 +6129,7 @@
         </div>
       </div>
       <!-- Selector: NavBar Grow&Shrink (solo Desktop) — Grow fijo, Shrink fijo,
-           o Automático (encoge al bajar, crece al subir; por defecto). ── -->
+           o Automático (crece solo en el extremo superior; se encoge con cualquier scroll y no vuelve a crecer hasta llegar arriba del todo). ── -->
       <div class="pref-desktop-only-row" style="padding:0.85rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
         <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
         <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">NavBar Grow &amp; Shrink (Escritorio)</span>
@@ -6148,7 +6148,7 @@
           Automático
         </button>
       </div>
-      <div class="pref-desktop-only-row" style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">En "Automático" (por defecto), la barra se encoge al bajar en la página y recupera su tamaño al subir.</div>
+      <div class="pref-desktop-only-row" style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">En "Automático" (por defecto), la barra se encoge apenas haces scroll y solo recupera su tamaño al volver hasta arriba del todo.</div>
     </div>
   </div>
 </div>
@@ -6515,7 +6515,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.7.1-beta';
+const APP_VERSION = '1.7.2-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -12712,12 +12712,13 @@ function toggleDarkMapsPref() {
 // el contenido; al subir, recupera tamaño y distribución original. El efecto
 // de blur/transparencia en sí sigue respetando el toggle de Configuración.
 (function initNavbarShrinkOnScroll() {
-  // ── Histéresis: el umbral para encoger (ENTER) es mayor que el umbral para
-  //    recuperar el tamaño (EXIT). Esto evita que, cuando scrollY queda justo
-  //    en el límite (p.ej. por el "rebote" del scroll o un rueditazo chico),
-  //    la barra entre en un loop de encoger/crecer sin parar. ──
-  const ENTER_THRESHOLD = 40;
-  const EXIT_THRESHOLD  = 12;
+  // ── Nueva lógica (1.7.2-beta): para evitar lag y comportamientos confusos,
+  //    la NavBar solo "crece" cuando se está en el extremo superior absoluto
+  //    de la página. Apenas hay scroll hacia abajo, se encoge — y se queda
+  //    encogida aunque luego se haga scroll hacia arriba, mientras no se
+  //    llegue de nuevo hasta arriba del todo. Un pequeño margen (en vez de
+  //    exigir y === 0) evita parpadeos por el rebote elástico del scroll. ──
+  const TOP_THRESHOLD = 4;
   // ── Margen mínimo de contenido "scrolleable" para siquiera permitir el
   //    modo compacto. Si la página es tan corta que casi no hay nada que
   //    recorrer (apenas el rebote elástico del navegador), la NavBar se queda
@@ -12770,11 +12771,7 @@ function toggleDarkMapsPref() {
       return;
     }
     const y = window.scrollY || document.documentElement.scrollTop;
-    if (!isCompact && y > ENTER_THRESHOLD) {
-      setCompact(shell, true);
-    } else if (isCompact && y < EXIT_THRESHOLD) {
-      setCompact(shell, false);
-    }
+    setCompact(shell, y > TOP_THRESHOLD);
   }
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onScroll);
