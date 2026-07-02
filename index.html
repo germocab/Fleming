@@ -360,6 +360,22 @@
   .nav-spacer { min-width: 0; } /* left ghost — grid balances it with nav-icons */
   .nav-icons  { display: flex; align-items: center; gap: 10px; justify-self: end; min-width: 0; }
 
+  .nav-center-row {
+    display: flex; align-items: center; justify-content: center; gap: 0;
+    min-width: 0;
+  }
+  /* ── Sub-secciones (Territorios/Cartitos/Grupos, días de la semana, etc.)
+     en modo compacto (Desktop, tras hacer scroll): se mueven junto al
+     segmento principal (Predicación/Reuniones) en la misma fila, en vez de
+     ocupar su propia fila debajo — así la NavBar puede encogerse más.
+     El reacomodo real del nodo (moverlo dentro de #nav-center-row) lo hace
+     JS; estas reglas sólo definen su apariencia una vez movido. ── */
+  .shell-compact .nav-center-row { gap: 0.6rem; }
+  .shell-compact .nav-center-row .sub-tabs-wrap {
+    padding: 0; overflow: visible; display: flex;
+  }
+  .shell-compact .nav-center-row .sub-tabs { transform: scale(0.9); transform-origin: left center; }
+
   .main-segment {
     display: flex; background: var(--surface3);
     border-radius: 26px; padding: 4px; gap: 0;
@@ -739,7 +755,7 @@
      centrado) que el resto de las pantallas de la plataforma (Notificaciones,
      Configuración, etc.), en vez del header de fecha/cerrar por defecto del
      panel de detalle. Se activa vía .detail-panel.territory-mode. ── */
-  .detail-territory-topbar { display: none; }
+  .detail-panel .detail-territory-topbar { display: none; }
   .detail-panel.territory-mode .detail-territory-topbar { display: flex; }
   .detail-panel.territory-mode .detail-header-bar,
   .detail-panel.territory-mode .detail-mobile-topbar,
@@ -755,7 +771,7 @@
     display: flex; align-items: center; justify-content: space-between;
     padding: 1rem 1.25rem 0.5rem;
   }
-  .detail-mobile-topbar { display: none; }
+  .detail-panel .detail-mobile-topbar { display: none; }
   .detail-date-label { font-size: 0.8rem; font-weight: 600; color: var(--text3); letter-spacing: 0.02em; }
   .detail-close {
     width: 30px; height: 30px; border-radius: 50%;
@@ -780,7 +796,7 @@
     }
     .detail-handle { display: none; }
     .detail-header-bar { display: none; }
-    .detail-mobile-topbar { display: flex; }
+    .detail-panel .detail-mobile-topbar { display: flex; }
   }
 
   .detail-main-row {
@@ -4700,10 +4716,12 @@
       </div>
     </div>
 
+    <div class="nav-center-row" id="nav-center-row">
     <div class="main-segment" id="main-segment">
       <div class="main-seg-thumb" id="main-seg-thumb"></div>
       <button class="main-seg-btn active" data-tab="predicacion" data-i18n="nav.predicacion" onclick="switchMainTab('predicacion',this)">Predicación</button>
       <button class="main-seg-btn" data-tab="reuniones" data-i18n="nav.reuniones" onclick="switchMainTab('reuniones',this)">Reuniones</button>
+    </div>
     </div>
 
     <div class="nav-icons">
@@ -4783,6 +4801,7 @@
     </div>
   </nav>
 
+  <div id="sub-tabs-anchor" style="display:none"></div>
   <div class="sub-tabs-wrap" id="sub-tabs-wrap">
   </div>
   </div>
@@ -6113,7 +6132,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.4.1-beta';
+const APP_VERSION = '1.4.1.2-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -11966,15 +11985,30 @@ function toggleDarkMapsPref() {
 // el contenido; al subir, recupera tamaño y distribución original. El efecto
 // de blur/transparencia en sí sigue respetando el toggle de Configuración.
 (function initNavbarShrinkOnScroll() {
-  let lastY = 0;
   const THRESHOLD = 24;
+  function relocateSubTabs(compact) {
+    const subTabs = document.getElementById('sub-tabs-wrap');
+    const centerRow = document.getElementById('nav-center-row');
+    const anchor = document.getElementById('sub-tabs-anchor');
+    if (!subTabs || !centerRow || !anchor) return;
+    if (compact && subTabs.parentElement !== centerRow) {
+      centerRow.appendChild(subTabs);
+    } else if (!compact && subTabs.parentElement === centerRow) {
+      anchor.insertAdjacentElement('afterend', subTabs);
+    }
+  }
   function onScroll() {
     const shell = document.getElementById('app-header-shell');
     if (!shell) return;
-    if (window.innerWidth < 640) { shell.classList.remove('shell-compact'); return; }
+    if (window.innerWidth < 640) {
+      shell.classList.remove('shell-compact');
+      relocateSubTabs(false);
+      return;
+    }
     const y = window.scrollY || document.documentElement.scrollTop;
-    shell.classList.toggle('shell-compact', y > THRESHOLD);
-    lastY = y;
+    const compact = y > THRESHOLD;
+    shell.classList.toggle('shell-compact', compact);
+    relocateSubTabs(compact);
   }
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onScroll);
