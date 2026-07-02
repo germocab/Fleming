@@ -3455,6 +3455,16 @@
   .notif-cat-row-label { flex: 1; font-size: 0.85rem; font-weight: 500; }
   .notif-cat-row input { flex: 1; }
 
+  /* Reportes de Territorio — animación al tocar una manzana del mapa */
+  @keyframes trepManzanaPulse {
+    0%   { transform: scale(1); }
+    45%  { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+  .trep-pulse { animation: trepManzanaPulse 0.35s cubic-bezier(.34,1.56,.64,1); }
+  .trep-pub-tile { transition: background 0.25s ease, border-color 0.25s ease, transform 0.15s ease; }
+  .trep-pub-tile:active { transform: scale(0.94); }
+
   /* Toggle switch */
   .toggle-switch {
     width: 44px; height: 26px; border-radius: 13px;
@@ -4140,16 +4150,29 @@
 
     <div id="trep-pub-step-1" style="display:none;flex-direction:column;gap:1rem;flex:1">
       <div style="display:flex;align-items:center;gap:10px">
-        <button onclick="trepPubStep(0)" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text)"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
-        <div style="font-weight:700;font-size:1rem" id="trep-pub-ter-title">Territorio</div>
+        <button onclick="trepPubStep(0)" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);flex-shrink:0"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:800;font-size:1.15rem" id="trep-pub-ter-title">Territorio</div>
+          <div style="font-size:0.78rem;color:var(--text3);margin-top:1px">Selecciona las manzanas abarcadas</div>
+        </div>
+        <button onclick="toggleTheme()" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);flex-shrink:0" title="Modo claro/oscuro"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg></button>
       </div>
-      <div style="font-size:0.82rem;color:var(--text3)">Toca las manzanas que hiciste hoy. Si hiciste todo el territorio, usa "Todo". Si no alcanzaste a hacer nada, usa "Nada".</div>
-      <div id="trep-pub-svg-container" style="flex:1;display:flex;align-items:center;justify-content:center;min-height:220px;background:var(--surface2);border-radius:14px;padding:0.75rem"></div>
-      <div style="display:flex;gap:8px">
-        <button onclick="trepPubToggleAll()" id="trep-pub-all-toggle" style="flex:1;padding:0.6rem;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-weight:600;cursor:pointer">Todo</button>
-        <button onclick="trepPubToggleNone()" id="trep-pub-none-toggle" style="flex:1;padding:0.6rem;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-weight:600;cursor:pointer">Nada</button>
+      <div id="trep-pub-svg-container" style="flex:1;display:flex;align-items:center;justify-content:center;min-height:240px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius,14px);padding:1rem"></div>
+      <div id="trep-pub-all-row" onclick="trepPubToggleAll()" style="display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm,12px);padding:0.75rem 0.9rem;cursor:pointer">
+        <div style="flex:1;font-size:0.88rem;font-weight:600">Todo el territorio</div>
+        <div class="toggle-switch" id="trep-pub-all-toggle"><div class="toggle-thumb"></div></div>
       </div>
-      <button class="btn-primary" id="trep-pub-continue-btn" onclick="trepPubStep(2)" disabled style="padding:0.8rem;border-radius:12px;font-weight:700">Continuar</button>
+      <div id="trep-pub-none-row" onclick="trepPubToggleNone()" style="display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm,12px);padding:0.75rem 0.9rem;cursor:pointer">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:0.88rem;font-weight:600">No abarcado</div>
+          <div style="font-size:0.74rem;color:var(--text3);margin-top:1px">Enviar sin manzanas seleccionadas</div>
+        </div>
+        <div class="toggle-switch" id="trep-pub-none-toggle"><div class="toggle-thumb"></div></div>
+      </div>
+      <button class="btn-primary" id="trep-pub-continue-btn" onclick="trepPubStep(2)" disabled style="padding:0.8rem;border-radius:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px">
+        Siguiente
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
     </div>
 
     <div id="trep-pub-step-2" style="display:none;flex-direction:column;gap:1.1rem;flex:1;align-items:center;justify-content:center;text-align:center">
@@ -5600,7 +5623,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.36.8-alpha';
+const APP_VERSION = '0.36.9-alpha';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -15942,8 +15965,8 @@ function trepPubRenderOverview() {
 function trepPubStartReporting(terId) {
   trepPubCurrentTer = terId;
   trepPubSelected = []; trepPubAllSelected = false; trepPubNoneSelected = false;
-  document.getElementById('trep-pub-all-toggle').style.background = 'var(--surface2)';
-  document.getElementById('trep-pub-none-toggle').style.background = 'var(--surface2)';
+  document.getElementById('trep-pub-all-toggle').classList.remove('on');
+  document.getElementById('trep-pub-none-toggle').classList.remove('on');
   const t = trepPubTerritories[terId] || {};
   document.getElementById('trep-pub-ter-title').textContent = `Territorio ${t.number ?? '?'}`;
   trepPubRenderMap(t);
@@ -15956,6 +15979,13 @@ function trepPubStep(step) {
   if (step === 0) { trepPubRenderOverview(); return; }
   document.getElementById(`trep-pub-step-${step}`).style.display = 'flex';
   if (step === 2) trepPubRenderConfirm();
+}
+
+// Pulso rápido y fluido al tocar una manzana (mapa SVG o tiles de respaldo)
+function _trepPulse(el) {
+  el.classList.remove('trep-pulse');
+  void el.offsetWidth; // reinicia la animación aunque se toque muy seguido
+  el.classList.add('trep-pulse');
 }
 
 function trepPubRenderMap(t) {
@@ -15981,11 +16011,15 @@ function trepPubRenderMap(t) {
     if (!fillEl) return;
     const orig = fillEl.getAttribute('fill') || '#999';
     fillEl._trepOrig = orig;
+    fillEl.style.transition = 'fill 0.25s ease, fill-opacity 0.25s ease';
+    fillEl.style.transformBox = 'fill-box';
+    fillEl.style.transformOrigin = 'center';
     el.style.cursor = 'pointer';
     el._trepFillEl = fillEl;
     const onTap = (e) => {
       e.preventDefault(); e.stopPropagation();
-      trepPubNoneSelected = false; document.getElementById('trep-pub-none-toggle').style.background = 'var(--surface2)';
+      _trepPulse(fillEl);
+      trepPubNoneSelected = false; document.getElementById('trep-pub-none-toggle').classList.remove('on');
       if (trepPubSelected.includes(mName)) {
         trepPubSelected = trepPubSelected.filter(x => x !== mName);
         fillEl.setAttribute('fill', orig); fillEl.removeAttribute('fill-opacity');
@@ -15994,7 +16028,7 @@ function trepPubRenderMap(t) {
         fillEl.setAttribute('fill', '#22c55e'); fillEl.removeAttribute('fill-opacity');
       }
       trepPubAllSelected = manzanas.length > 0 && manzanas.every(m => trepPubSelected.includes(m));
-      document.getElementById('trep-pub-all-toggle').style.background = trepPubAllSelected ? 'var(--green-light,rgba(52,199,89,.15))' : 'var(--surface2)';
+      document.getElementById('trep-pub-all-toggle').classList.toggle('on', trepPubAllSelected);
       trepPubUpdateContinueBtn();
     };
     el.addEventListener('click', onTap);
@@ -16004,7 +16038,8 @@ function trepPubRenderMap(t) {
 }
 
 function trepPubToggleManzana(el, mName) {
-  trepPubNoneSelected = false; document.getElementById('trep-pub-none-toggle').style.background = 'var(--surface2)';
+  _trepPulse(el);
+  trepPubNoneSelected = false; document.getElementById('trep-pub-none-toggle').classList.remove('on');
   const manzanas = document.getElementById('trep-pub-svg-container')._trepManzanas || [];
   if (trepPubSelected.includes(mName)) {
     trepPubSelected = trepPubSelected.filter(x => x !== mName);
@@ -16014,6 +16049,7 @@ function trepPubToggleManzana(el, mName) {
     el.style.background = '#22c55e'; el.style.borderColor = '#22c55e';
   }
   trepPubAllSelected = manzanas.length > 0 && manzanas.every(m => trepPubSelected.includes(m));
+  document.getElementById('trep-pub-all-toggle').classList.toggle('on', trepPubAllSelected);
   trepPubUpdateContinueBtn();
 }
 
@@ -16021,9 +16057,9 @@ function trepPubToggleAll() {
   const container = document.getElementById('trep-pub-svg-container');
   const manzanas = container._trepManzanas || (trepPubTerritories[trepPubCurrentTer]?.manzanas || []);
   trepPubAllSelected = !trepPubAllSelected;
-  document.getElementById('trep-pub-all-toggle').style.background = trepPubAllSelected ? 'var(--green-light,rgba(52,199,89,.15))' : 'var(--surface2)';
+  document.getElementById('trep-pub-all-toggle').classList.toggle('on', trepPubAllSelected);
   if (trepPubAllSelected) {
-    trepPubNoneSelected = false; document.getElementById('trep-pub-none-toggle').style.background = 'var(--surface2)';
+    trepPubNoneSelected = false; document.getElementById('trep-pub-none-toggle').classList.remove('on');
     trepPubSelected = [...manzanas];
     const matched = container._trepMatched;
     if (matched) matched.forEach(el => { const f = el._trepFillEl || el; f.setAttribute('fill', '#22c55e'); f.removeAttribute('fill-opacity'); });
@@ -16039,10 +16075,10 @@ function trepPubToggleAll() {
 
 function trepPubToggleNone() {
   trepPubNoneSelected = !trepPubNoneSelected;
-  document.getElementById('trep-pub-none-toggle').style.background = trepPubNoneSelected ? 'var(--red-light,rgba(255,59,48,.15))' : 'var(--surface2)';
+  document.getElementById('trep-pub-none-toggle').classList.toggle('on', trepPubNoneSelected);
   if (trepPubNoneSelected) {
     trepPubAllSelected = false; trepPubSelected = [];
-    document.getElementById('trep-pub-all-toggle').style.background = 'var(--surface2)';
+    document.getElementById('trep-pub-all-toggle').classList.remove('on');
     const container = document.getElementById('trep-pub-svg-container');
     const matched = container._trepMatched;
     if (matched) matched.forEach(el => { const f = el._trepFillEl || el; f.setAttribute('fill', f._trepOrig || '#999'); f.removeAttribute('fill-opacity'); });
