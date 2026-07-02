@@ -3465,6 +3465,31 @@
   .trep-pub-tile { transition: background 0.25s ease, border-color 0.25s ease, transform 0.15s ease; }
   .trep-pub-tile:active { transform: scale(0.94); }
 
+  /* Reportes de Territorio — el mapa de manzanas es tappable: se quita el
+     rectángulo azul de "tap highlight" que el navegador (Chrome/Android sobre
+     todo) dibuja por defecto sobre cualquier elemento con evento click.
+     Sin esto, cada <path>/<g> del SVG y cada tile de respaldo muestra ese
+     recuadro azul al tocar, algo que la app anterior de reportes no hacía. */
+  #trep-pub-svg-container,
+  #trep-pub-svg-container * ,
+  .trep-pub-tile {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    outline: none;
+  }
+  #trep-pub-svg-container svg,
+  #trep-pub-svg-container svg * {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  #trep-pub-svg-container svg *:focus,
+  #trep-pub-svg-container svg *:active,
+  .trep-pub-tile:focus {
+    outline: none;
+  }
+
   /* Toggle switch */
   .toggle-switch {
     width: 44px; height: 26px; border-radius: 13px;
@@ -5623,7 +5648,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.36.10-alpha';
+const APP_VERSION = '0.36.15-alpha';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -15995,7 +16020,7 @@ function trepPubRenderMap(t) {
   if (!t.svg_data || !manzanas.length) {
     if (!manzanas.length) { container.innerHTML = '<p style="color:var(--text3);font-size:0.8rem">Sin manzanas configuradas para este territorio. Usa "Todo" o "Nada".</p>'; return; }
     container.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">${manzanas.map(m =>
-      `<div class="trep-pub-tile" data-m="${m}" onclick="trepPubToggleManzana(this,'${m}')" style="width:52px;height:52px;border-radius:12px;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-weight:700;cursor:pointer;border:2px solid transparent">${m}</div>`
+      `<div class="trep-pub-tile" data-m="${m}" onclick="trepPubToggleManzana(this,'${m}')" style="width:52px;height:52px;border-radius:12px;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-weight:700;cursor:pointer;border:2px solid transparent;-webkit-tap-highlight-color:transparent;outline:none">${m}</div>`
     ).join('')}</div>`;
     return;
   }
@@ -16005,6 +16030,10 @@ function trepPubRenderMap(t) {
   if (!svg) { container.innerHTML = ''; return; }
   svg.removeAttribute('width'); svg.removeAttribute('height');
   svg.style.width = '100%'; svg.style.maxHeight = '260px';
+  // Refuerzo inline: algunos WebView de Android ignoran el CSS externo la
+  // primera vez que el SVG se pinta, así que se fija también aquí.
+  svg.style.webkitTapHighlightColor = 'transparent';
+  svg.style.outline = 'none';
   const matched = trepMatchManzanaElements(svg, manzanas);
   matched.forEach((el, letter) => {
     const mName = manzanas.find(m => m.toLowerCase() === letter) || letter;
@@ -16016,6 +16045,9 @@ function trepPubRenderMap(t) {
     fillEl.style.transformBox = 'fill-box';
     fillEl.style.transformOrigin = 'center';
     el.style.cursor = 'pointer';
+    el.style.webkitTapHighlightColor = 'transparent';
+    el.style.outline = 'none';
+    fillEl.style.webkitTapHighlightColor = 'transparent';
     el._trepFillEl = fillEl;
     const onTap = (e) => {
       e.preventDefault(); e.stopPropagation();
