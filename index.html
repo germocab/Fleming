@@ -3490,6 +3490,77 @@
     outline: none;
   }
 
+  /* ── Reportes de Territorio — gestor de enlaces (grid de tarjetas) ── */
+  .trep-forms-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px;
+  }
+  .trep-form-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius, 14px);
+    padding: 0.9rem 1rem; display: flex; flex-direction: column; gap: 8px;
+  }
+  .trep-form-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
+  .trep-ter-chip {
+    font-size: 0.72rem; font-weight: 700; padding: 3px 9px; border-radius: 20px;
+    background: var(--surface3); color: var(--text2); white-space: nowrap;
+  }
+  .trep-ter-chip.done { background: var(--green-light, rgba(52,199,89,.12)); color: var(--green); }
+  .trep-status-chip { font-size: 0.7rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+  .trep-status-chip.pending { color: var(--text3); background: var(--surface3); }
+  .trep-status-chip.progress { color: var(--accent); background: var(--accent-light); }
+  .trep-status-chip.done { color: var(--green); background: var(--green-light, rgba(52,199,89,.12)); }
+  .trep-form-card-name { font-weight: 800; font-size: 1.05rem; }
+  .trep-form-card-date { font-size: 0.78rem; color: var(--text3); margin-top: -4px; }
+  .trep-form-card-link {
+    display: flex; align-items: center; gap: 6px; cursor: pointer;
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 9px;
+    padding: 0.45rem 0.6rem; font-size: 0.74rem; color: var(--text3);
+  }
+  .trep-form-card-link svg { flex-shrink: 0; width: 13px; height: 13px; stroke: var(--text3); fill: none; stroke-width: 2; }
+  .trep-form-card-link span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .trep-form-card-link:hover { border-color: var(--border-active); color: var(--text2); }
+  .btn-danger-outline {
+    border: 1px solid rgba(255,59,48,0.4); color: var(--red); background: transparent;
+    border-radius: 20px; padding: 0.4rem 0.9rem; font-size: 0.78rem; font-weight: 700; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-danger-outline:hover { background: rgba(255,59,48,0.08); }
+
+  /* ── Reportes de Territorio — reportes recibidos (grid visual) ── */
+  .trep-day-header {
+    display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;
+    margin-bottom: 10px;
+  }
+  .trep-day-header-title { font-weight: 700; font-size: 0.9rem; }
+  .trep-day-header-count { font-size: 0.78rem; color: var(--text3); }
+  .trep-day-chevron { width: 14px; height: 14px; stroke: var(--text3); fill: none; stroke-width: 2.4; stroke-linecap: round; transition: transform 0.2s; margin-left: auto; }
+  .trep-day-chevron.open { transform: rotate(90deg); }
+  .trep-day-collapsed-hint { font-size: 0.8rem; color: var(--text3); padding: 0.6rem 0; }
+  .trep-reports-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px;
+  }
+  .trep-report-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius, 14px);
+    padding: 0.85rem; display: flex; flex-direction: column; gap: 8px;
+  }
+  .trep-report-card-top { display: flex; justify-content: space-between; align-items: center; }
+  .trep-report-card-name { font-weight: 700; font-size: 0.92rem; }
+  .trep-report-card-sent { font-size: 0.7rem; font-weight: 700; color: var(--green); background: var(--green-light, rgba(52,199,89,.12)); padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+  .trep-report-ter-boxes { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+  .trep-report-ter-box { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .trep-report-ter-label { font-size: 0.74rem; color: var(--text3); font-weight: 600; }
+  .trep-report-pct-row { display: flex; align-items: center; gap: 6px; width: 100%; }
+  .trep-report-pct-num { font-size: 0.76rem; font-weight: 700; white-space: nowrap; }
+  .trep-report-pct-bar { flex: 1; height: 4px; border-radius: 2px; background: var(--surface3); overflow: hidden; }
+  .trep-report-pct-bar-fill { height: 100%; border-radius: 2px; }
+  .trep-report-complete-pill { font-size: 0.72rem; font-weight: 700; color: var(--green); background: var(--green-light, rgba(52,199,89,.12)); padding: 2px 10px; border-radius: 20px; }
+  .trep-report-not-covered-pill { font-size: 0.72rem; font-weight: 700; color: var(--text3); background: var(--surface3); padding: 2px 10px; border-radius: 20px; }
+  .trep-report-chips { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+  .trep-report-chip { font-size: 0.68rem; font-weight: 700; color: var(--orange); background: rgba(255,149,0,0.12); padding: 2px 7px; border-radius: 6px; }
+  .trep-report-mini-map { width: 100%; max-width: 130px; }
+  .trep-report-mini-map svg { width: 100%; height: auto; display: block; }
+  .trep-bar-map { display: flex; align-items: flex-end; gap: 2px; height: 60px; width: 100%; max-width: 130px; }
+  .trep-bar-map-seg { flex: 1; border-radius: 3px 3px 0 0; min-height: 10px; }
+
   /* Toggle switch */
   .toggle-switch {
     width: 44px; height: 26px; border-radius: 13px;
@@ -5648,7 +5719,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.36.15-alpha';
+const APP_VERSION = '0.36.30-alpha';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -15645,6 +15716,19 @@ function trepBuildPreviewSvg(svgData, allManzanas, doneManzanas, allDone) {
     return new XMLSerializer().serializeToString(svg);
   } catch(e) { return ''; }
 }
+
+// Cuando un territorio no tiene un SVG de manzanas cargado, se arma una vista
+// visual de todos modos: una barra por manzana, verde si fue abarcada y
+// violeta si no, en vez de solo mostrar el número/porcentaje en texto.
+function trepBuildPreviewBars(allManzanas, doneManzanas, allDone) {
+  const list = allManzanas || [];
+  if (!list.length) return '';
+  const bars = list.map(m => {
+    const isDone = allDone || doneManzanas.has(m.toLowerCase());
+    return `<div class="trep-bar-map-seg" style="background:${isDone ? '#22c55e' : '#7c5cff'};height:${isDone ? '100%' : '55%'}"></div>`;
+  }).join('');
+  return `<div class="trep-bar-map">${bars}</div>`;
+}
 function trepMatchManzanaElements(svg, manzanas) {
   const manzanaSet = new Set(manzanas.map(m => m.toLowerCase()));
   const matched = new Map();
@@ -15753,34 +15837,38 @@ async function trepLoadForms() {
   const terById = {};
   territories.forEach(t => terById[t.id] = t);
 
-  grid.innerHTML = `<div style="display:flex;flex-direction:column;gap:10px">` + trepFormsCache.map(f => {
+  // Una tarjeta por CADA territorio dentro de un formulario (un formulario puede
+  // traer 1 o 2 territorios), tal como en la plataforma anterior.
+  const cardsHtml = [];
+  trepFormsCache.forEach(f => {
     const slots = [f.territory_id, f.territory_id_2].filter(Boolean);
     const reported = reportedByForm[f.id] || new Set();
-    const allDone = slots.length > 0 && slots.every(s => reported.has(s));
-    const someDone = slots.some(s => reported.has(s));
-    const statusHtml = allDone
-      ? `<span style="font-size:0.7rem;font-weight:700;color:var(--green);background:var(--green-light,rgba(52,199,89,.12));padding:3px 9px;border-radius:20px">✓ Completado</span>`
-      : someDone
-        ? `<span style="font-size:0.7rem;font-weight:700;color:var(--accent);background:var(--accent-light);padding:3px 9px;border-radius:20px">En progreso</span>`
-        : `<span style="font-size:0.7rem;font-weight:700;color:var(--text3);background:var(--surface3);padding:3px 9px;border-radius:20px">Pendiente</span>`;
     const link = `${location.href.split('?')[0]}?rtoken=${f.token}`;
-    const terLabels = slots.map(s => `T${terById[s]?.number ?? '?'}${reported.has(s) ? ' ✓' : ''}`).join(' · ');
-    return `
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius,14px);padding:0.9rem 1rem">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:4px">
-        <div>
-          <div style="font-weight:700;font-size:0.92rem">${f.host_name}</div>
-          <div style="font-size:0.76rem;color:var(--text3);margin-top:2px">${terLabels} ${f.assignment_date ? '· ' + formatDateEs(f.assignment_date) : ''}</div>
+    slots.forEach(terId => {
+      const t = terById[terId];
+      const isDone = reported.has(terId);
+      const chipHtml = `<span class="trep-ter-chip${isDone ? ' done' : ''}">T${t?.number ?? '?'} – Territorio ${t?.number ?? '?'}${isDone ? ' ✓' : ''}</span>`;
+      const statusHtml = isDone
+        ? `<span class="trep-status-chip done">✓ Completado</span>`
+        : `<span class="trep-status-chip pending">Pendiente</span>`;
+      cardsHtml.push(`
+      <div class="trep-form-card">
+        <div class="trep-form-card-top">
+          ${chipHtml}
+          ${statusHtml}
         </div>
-        ${statusHtml}
-      </div>
-      <div onclick="trepCopyLink('${link}')" style="cursor:pointer;font-size:0.76rem;color:var(--accent);word-break:break-all;margin-top:6px">${link}</div>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button onclick="trepCopyLink('${link}')" class="btn-secondary" style="padding:0.35rem 0.7rem;font-size:0.75rem">Copiar enlace</button>
-        <button onclick="trepDeleteForm('${f.id}')" class="btn-danger" style="padding:0.35rem 0.7rem;font-size:0.75rem">Eliminar</button>
-      </div>
-    </div>`;
-  }).join('') + `</div>`;
+        <div class="trep-form-card-name">${f.host_name}</div>
+        <div class="trep-form-card-date">${f.assignment_date ? formatDateEs(f.assignment_date) : 'Sin fecha'}</div>
+        <div class="trep-form-card-link" onclick="trepCopyLink('${link}')">
+          <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <span>${link}</span>
+        </div>
+        <button class="btn-danger-outline" onclick="trepDeleteForm('${f.id}')">Eliminar</button>
+      </div>`);
+    });
+  });
+
+  grid.innerHTML = `<div class="trep-forms-grid">${cardsHtml.join('')}</div>`;
 }
 
 function trepCopyLink(link) { navigator.clipboard.writeText(link).then(() => showToast('Enlace copiado', 'success')); }
@@ -15826,31 +15914,81 @@ async function trepLoadReports() {
   });
   const sortedDates = Object.keys(byDate).sort((a,b) => a === 'Sin fecha' ? 1 : b === 'Sin fecha' ? -1 : b.localeCompare(a));
 
-  container.innerHTML = sortedDates.map(dk => {
+  container.innerHTML = sortedDates.map((dk, idx) => {
     const items = byDate[dk];
     const dateLabel = dk === 'Sin fecha' ? 'Sin fecha' : formatDateEs(dk);
-    const cards = items.map(s => {
-      const t = terById[s.territory_id];
-      const done = new Set((s.manzanas_done||[]).map(m => m.toLowerCase()));
-      const svgHtml = t?.svg_data ? trepBuildPreviewSvg(t.svg_data, t.manzanas||[], done, s.all_territory) : '';
-      const coverage = s.not_covered ? 0 : (s.all_territory ? 100 : Math.round(((s.manzanas_done||[]).length/(s.total_manzanas||1))*100));
+    // Agrupa por publicador dentro del mismo día: si un publicador reportó
+    // más de un territorio ese día, se muestran juntos en una sola tarjeta
+    // con un mapa visual por territorio (igual que la plataforma anterior).
+    const byHost = {};
+    const hostOrder = [];
+    items.forEach(s => {
+      const key = s.host_name || '—';
+      if (!byHost[key]) { byHost[key] = []; hostOrder.push(key); }
+      byHost[key].push(s);
+    });
+
+    const cards = hostOrder.map(host => {
+      const hostSubs = byHost[host];
+      const boxes = hostSubs.map(s => {
+        const t = terById[s.territory_id];
+        const done = new Set((s.manzanas_done||[]).map(m => m.toLowerCase()));
+        const mapHtml = t?.svg_data
+          ? trepBuildPreviewSvg(t.svg_data, t.manzanas||[], done, s.all_territory)
+          : trepBuildPreviewBars(t?.manzanas||[], done, s.all_territory);
+        const coverage = s.not_covered ? 0 : (s.all_territory ? 100 : Math.round(((s.manzanas_done||[]).length/(s.total_manzanas||1))*100));
+        const isComplete = !s.not_covered && (s.all_territory || coverage >= 100);
+        const statusBlock = s.not_covered
+          ? `<span class="trep-report-not-covered-pill">No abarcado</span>`
+          : isComplete
+            ? `<span class="trep-report-complete-pill">Completo</span>`
+            : `
+              <div class="trep-report-pct-row">
+                <span class="trep-report-pct-num" style="color:${coverage >= 100 ? 'var(--green)' : 'var(--orange)'}">${coverage}%</span>
+                <div class="trep-report-pct-bar"><div class="trep-report-pct-bar-fill" style="width:${coverage}%;background:${coverage >= 100 ? 'var(--green)' : 'var(--orange)'}"></div></div>
+              </div>
+              <div class="trep-report-chips">${(s.manzanas_done||[]).map(m => `<span class="trep-report-chip">${m}</span>`).join('')}</div>
+            `;
+        return `
+        <div class="trep-report-ter-box">
+          <div class="trep-report-ter-label">Territorio ${t?.number ?? '?'}</div>
+          ${mapHtml ? `<div class="trep-report-mini-map">${mapHtml}</div>` : ''}
+          ${statusBlock}
+          <button onclick="trepDeleteReport('${s.id}')" class="btn-danger-outline" style="padding:0.25rem 0.7rem;font-size:0.68rem">Eliminar</button>
+        </div>`;
+      }).join('');
       return `
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius,14px);padding:0.8rem;margin-bottom:8px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-          <div style="font-weight:700;font-size:0.86rem">${s.host_name || '—'} · Territorio ${t?.number ?? '?'}</div>
-          <button onclick="trepDeleteReport('${s.id}')" class="btn-danger" style="padding:0.2rem 0.55rem;font-size:0.68rem">Eliminar</button>
+      <div class="trep-report-card">
+        <div class="trep-report-card-top">
+          <div class="trep-report-card-name">${host}</div>
+          <span class="trep-report-card-sent">✓ Enviado</span>
         </div>
-        ${svgHtml ? `<div style="display:flex;justify-content:center;margin-bottom:6px">${svgHtml}</div>` : ''}
-        <div style="font-size:0.78rem;color:var(--text3)">
-          ${s.not_covered ? 'No abarcado' : s.all_territory ? 'Territorio completo ✓' : `${coverage}% · ${(s.manzanas_done||[]).join(', ')}`}
-        </div>
+        <div class="trep-report-ter-boxes">${boxes}</div>
       </div>`;
     }).join('');
+
+    // Si un día tiene muchos reportes, se colapsa por defecto para no saturar
+    // la vista; se puede expandir tocando el encabezado del día.
+    const dayKey = 'trep-day-' + idx;
+    const shouldCollapse = items.length > 4;
+    const isOpen = !shouldCollapse || _trepOpenDays.has(dayKey);
     return `<div style="margin-bottom:1.1rem">
-      <div style="font-weight:700;font-size:0.88rem;margin-bottom:8px">${dateLabel}</div>
-      ${cards}
+      <div class="trep-day-header" onclick="trepToggleDay('${dayKey}')">
+        <span class="trep-day-header-title">${dateLabel}</span>
+        <span class="trep-day-header-count">${items.length} reporte${items.length !== 1 ? 's' : ''}</span>
+        <svg class="trep-day-chevron${isOpen ? ' open' : ''}" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      ${isOpen
+        ? `<div class="trep-reports-grid">${cards}</div>`
+        : `<div class="trep-day-collapsed-hint" onclick="trepToggleDay('${dayKey}')">Toca para ver ${items.length} reportes</div>`}
     </div>`;
   }).join('');
+}
+
+const _trepOpenDays = new Set();
+function trepToggleDay(dayKey) {
+  if (_trepOpenDays.has(dayKey)) _trepOpenDays.delete(dayKey); else _trepOpenDays.add(dayKey);
+  trepLoadReports();
 }
 
 async function trepDeleteReport(id) {
