@@ -4581,6 +4581,55 @@
   #scroll-top-fab { right: 14px; bottom: 18px; width: 42px; height: 42px; }
 }
 
+/* ── Tutorial de bienvenida (onboarding paso a paso) ─────────────────────
+   Overlay + "spotlight" que resalta el elemento del que se está hablando
+   (recorte transparente sobre fondo oscuro vía box-shadow gigante) y una
+   tarjeta con la explicación, navegación Anterior/Siguiente y botón Saltar. ── */
+#tutorial-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  display: none; background: transparent;
+}
+#tutorial-overlay.active { display: block; }
+#tutorial-spot {
+  position: fixed; border-radius: 18px; pointer-events: none;
+  box-shadow: 0 0 0 5px rgba(255,255,255,0.85), 0 0 0 9999px rgba(10,12,18,0.62);
+  transition: top 0.32s cubic-bezier(0.4,0,0.2,1), left 0.32s cubic-bezier(0.4,0,0.2,1),
+              width 0.32s cubic-bezier(0.4,0,0.2,1), height 0.32s cubic-bezier(0.4,0,0.2,1),
+              opacity 0.2s ease;
+  opacity: 0;
+}
+#tutorial-spot.has-target { opacity: 1; }
+#tutorial-card {
+  position: fixed; z-index: 2; width: 320px; max-width: calc(100vw - 2rem);
+  background: var(--surface); border-radius: 20px; padding: 1.25rem 1.35rem 1.1rem;
+  box-shadow: var(--shadow-lg); border: 1px solid var(--border);
+  transition: top 0.32s cubic-bezier(0.4,0,0.2,1), left 0.32s cubic-bezier(0.4,0,0.2,1);
+}
+#tutorial-card-eyebrow {
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 0.3rem;
+}
+#tutorial-card-title { font-size: 1.05rem; font-weight: 800; color: var(--text); margin-bottom: 0.45rem; letter-spacing: -0.01em; }
+#tutorial-card-text { font-size: 0.87rem; color: var(--text2); line-height: 1.5; margin-bottom: 1rem; }
+.tutorial-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.tutorial-dots { display: flex; gap: 5px; }
+.tutorial-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--surface3); transition: background 0.2s, transform 0.2s; }
+.tutorial-dot.active { background: var(--accent); transform: scale(1.25); }
+.tutorial-btn-row { display: flex; align-items: center; gap: 8px; }
+.tutorial-btn {
+  border: none; border-radius: 12px; font-family: var(--font); font-weight: 700;
+  font-size: 0.82rem; cursor: pointer; padding: 8px 16px; transition: all 0.15s;
+}
+.tutorial-btn-skip { background: transparent; color: var(--text3); padding: 8px 6px; }
+.tutorial-btn-skip:hover { color: var(--text2); }
+.tutorial-btn-prev { background: var(--surface3); color: var(--text2); }
+.tutorial-btn-prev:hover { background: var(--surface2); }
+.tutorial-btn-next { background: var(--accent); color: #fff; box-shadow: 0 2px 10px rgba(0,122,255,0.35); }
+.tutorial-btn-next:hover { filter: brightness(1.08); }
+@media (max-width: 639px) {
+  #tutorial-card { width: calc(100vw - 2rem); }
+}
+
 </style>
 </head>
 <body>
@@ -5773,14 +5822,14 @@
         </div>
         <svg class="pref-lang-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
-      <div class="pref-lang-row" data-lang="en" onclick="setPrefLanguage('en')">
-        <div class="profile-row-icon" style="background:var(--accent-light);color:var(--accent)">
+      <div class="pref-lang-row disabled">
+        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text3)">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-value">English (Beta)</div>
+          <div class="profile-row-value" style="color:var(--text3)">English</div>
         </div>
-        <svg class="pref-lang-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <span class="pref-soon-badge" data-i18n="pref.proximamente">Próximamente</span>
       </div>
       <div class="pref-lang-row disabled">
         <div class="profile-row-icon" style="background:var(--surface3);color:var(--text3)">
@@ -5892,6 +5941,21 @@
     <div class="profile-section">
       <div class="profile-section-title">Notificaciones</div>
       <div id="pref-notif-list"></div>
+    </div>
+
+    <!-- Ayuda -->
+    <div class="profile-section">
+      <div class="profile-section-title">Ayuda</div>
+      <div class="profile-row" style="cursor:pointer" onclick="closePreferencias();startTutorial()">
+        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text2)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Ver tutorial</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Repasa cómo funcionan las secciones y funciones principales</div>
+        </div>
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
     </div>
 
     <!-- Acerca de / Versión -->
@@ -6135,7 +6199,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.4.4-beta';
+const APP_VERSION = '1.5-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -6188,7 +6252,15 @@ const I18N = {
   'pref.apariencia':        { es: 'Apariencia',              en: 'Appearance' },
   'pref.proximamente':      { es: 'Próximamente',            en: 'Coming soon' },
 };
-let currentLang = localStorage.getItem('fleming_lang') || 'es';
+// El Inglés vuelve a estado "Próximamente" (deshabilitado); si algún usuario
+// había quedado con 'en' guardado de una versión anterior, se restaura a 'es'.
+let currentLang = 'es';
+try {
+  const _savedLang = localStorage.getItem('fleming_lang');
+  if (_savedLang === 'es') currentLang = 'es';
+  else if (_savedLang && _savedLang !== 'en') currentLang = _savedLang;
+  if (_savedLang === 'en') localStorage.setItem('fleming_lang', 'es');
+} catch {}
 function t(key) {
   const entry = I18N[key];
   if (!entry) return key;
@@ -7599,6 +7671,13 @@ async function enterApp() {
   await subscribeToPush();
   updateAdminShortcuts();
   initDevPill();
+
+  // Tutorial de bienvenida: solo la primera vez que este dispositivo ve una
+  // sesión iniciada. Se retrasa un poco para que la interfaz (asignaciones,
+  // navbar, etc.) ya esté montada antes de resaltar cualquier elemento.
+  if (typeof shouldAutoShowTutorial === 'function' && shouldAutoShowTutorial()) {
+    setTimeout(() => { try { startTutorial(); } catch {} }, 900);
+  }
 }
   
 async function doAccess() {
@@ -7824,6 +7903,30 @@ function updateMainSegThumb(instant) {
   }
 }
 window.addEventListener('resize', () => updateMainSegThumb(true));
+
+// ── Mantiene el thumb del pill Predicación/Reuniones pegado al botón mientras
+//    la NavBar cambia de tamaño (grow/shrink en Desktop). El grow/shrink anima
+//    el padding/font-size del botón vía CSS (ver .shell-compact .main-seg-btn),
+//    así que el ancho/posición real del botón cambia cuadro a cuadro durante
+//    esa transición; aquí "seguimos" ese cambio en vivo (sin easing propio,
+//    solo leyendo la posición real en cada frame) para que el fondo azul del
+//    pill nunca quede desalineado ni al encogerse ni al recuperar su tamaño. ──
+let _navShellThumbRaf = null;
+function syncMainSegThumbDuringShellTransition() {
+  if (window.innerWidth < 640) return;
+  if (_navShellThumbRaf) cancelAnimationFrame(_navShellThumbRaf);
+  const DURATION = 340; // ligeramente mayor que la transición de padding/font-size (0.25s)
+  const start = performance.now();
+  function step(now) {
+    updateMainSegThumb(true);
+    if (now - start < DURATION) {
+      _navShellThumbRaf = requestAnimationFrame(step);
+    } else {
+      _navShellThumbRaf = null;
+    }
+  }
+  _navShellThumbRaf = requestAnimationFrame(step);
+}
 
 function switchSubTab(tabId) {
   currentSubTab = tabId;
@@ -8101,6 +8204,9 @@ function renderSchedule() {
   // Today's date string in YYYY-MM-DD local time
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  // Tomorrow's date string in YYYY-MM-DD local time (para el título "Mañana")
+  const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const tomorrowStr = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth()+1).padStart(2,'0')}-${String(tomorrowDate.getDate()).padStart(2,'0')}`;
 
   let html = '';
   // Helper: find grupo for an assignment — prefers grupo_id, falls back to conductor name match
@@ -8143,6 +8249,7 @@ function renderSchedule() {
   Object.keys(grouped).sort().filter(date => date >= todayStr).forEach(date => {
     const d = new Date(date+'T00:00:00');
     const isToday = date === todayStr;
+    const isTomorrow = !isToday && date === tomorrowStr;
     const isSabado = d.getDay() === 6;
     const dayName  = DAY[d.getDay()];
     const dateLabel = `${dayName} ${d.getDate()} de ${MON[d.getMonth()]}`;
@@ -8151,6 +8258,12 @@ function renderSchedule() {
       html += `<div class="date-section">
         <div class="date-section-header-today">
           <span class="today-label">Hoy</span>
+          <span class="today-date">${dateLabel}</span>
+        </div>`;
+    } else if (isTomorrow) {
+      html += `<div class="date-section">
+        <div class="date-section-header-today">
+          <span class="today-label">Mañana</span>
           <span class="today-date">${dateLabel}</span>
         </div>`;
     } else {
@@ -11988,7 +12101,20 @@ function toggleDarkMapsPref() {
 // el contenido; al subir, recupera tamaño y distribución original. El efecto
 // de blur/transparencia en sí sigue respetando el toggle de Configuración.
 (function initNavbarShrinkOnScroll() {
-  const THRESHOLD = 24;
+  // ── Histéresis: el umbral para encoger (ENTER) es mayor que el umbral para
+  //    recuperar el tamaño (EXIT). Esto evita que, cuando scrollY queda justo
+  //    en el límite (p.ej. por el "rebote" del scroll o un rueditazo chico),
+  //    la barra entre en un loop de encoger/crecer sin parar. ──
+  const ENTER_THRESHOLD = 40;
+  const EXIT_THRESHOLD  = 12;
+  // ── Margen mínimo de contenido "scrolleable" para siquiera permitir el
+  //    modo compacto. Si la página es tan corta que casi no hay nada que
+  //    recorrer (apenas el rebote elástico del navegador), la NavBar se queda
+  //    siempre en su tamaño completo — encogerse ahí no aporta nada y es
+  //    justamente lo que causaba el parpadeo/loop descrito. ──
+  const MIN_SCROLLABLE = 120;
+  let isCompact = false;
+
   function relocateSubTabs(compact) {
     const subTabs = document.getElementById('sub-tabs-wrap');
     const centerRow = document.getElementById('nav-center-row');
@@ -12000,18 +12126,39 @@ function toggleDarkMapsPref() {
       anchor.insertAdjacentElement('afterend', subTabs);
     }
   }
+
+  function setCompact(shell, compact) {
+    if (isCompact === compact) return;
+    isCompact = compact;
+    shell.classList.toggle('shell-compact', compact);
+    relocateSubTabs(compact);
+    // El pill de Predicación/Reuniones debe seguir el cambio de tamaño en vivo
+    // (ver syncMainSegThumbDuringShellTransition), tanto al encoger como al crecer.
+    if (typeof syncMainSegThumbDuringShellTransition === 'function') {
+      syncMainSegThumbDuringShellTransition();
+    }
+  }
+
   function onScroll() {
     const shell = document.getElementById('app-header-shell');
     if (!shell) return;
     if (window.innerWidth < 640) {
-      shell.classList.remove('shell-compact');
-      relocateSubTabs(false);
+      setCompact(shell, false);
+      return;
+    }
+    const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+    if (scrollable < MIN_SCROLLABLE) {
+      // No hay suficiente contenido como para justificar el modo compacto:
+      // se mantiene siempre expandida, sin importar el scrollY momentáneo.
+      setCompact(shell, false);
       return;
     }
     const y = window.scrollY || document.documentElement.scrollTop;
-    const compact = y > THRESHOLD;
-    shell.classList.toggle('shell-compact', compact);
-    relocateSubTabs(compact);
+    if (!isCompact && y > ENTER_THRESHOLD) {
+      setCompact(shell, true);
+    } else if (isCompact && y < EXIT_THRESHOLD) {
+      setCompact(shell, false);
+    }
   }
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onScroll);
@@ -12328,6 +12475,178 @@ function _scrollFabHide() {
   if (_scrollFabWatchId) { cancelAnimationFrame(_scrollFabWatchId); _scrollFabWatchId = null; }
   _scrollFabActiveEl = null;
 }
+// ══════════════════════════════════════════════════════════════════════════
+// Tutorial de bienvenida — se muestra automáticamente la primera vez que un
+// usuario inicia sesión, y puede reactivarse a voluntad desde Configuración.
+// Cada paso resalta ("spotlight") el elemento del que habla; si el elemento
+// no existe o no es visible en ese momento (p.ej. Live, que solo aparece
+// dentro del detalle de una asignación), la tarjeta se muestra centrada.
+// ══════════════════════════════════════════════════════════════════════════
+const TUTORIAL_SEEN_KEY = 'fleming_tutorial_seen';
+const TUTORIAL_STEPS = [
+  {
+    selector: '#main-segment',
+    title: 'Secciones principales',
+    text: 'Con esta barra cambias entre las dos grandes áreas de la plataforma: Predicación y Reuniones.'
+  },
+  {
+    selector: '#sub-tabs-wrap',
+    title: 'Sub-secciones',
+    text: 'Aquí encuentras las categorías dentro de cada sección — por ejemplo Casa en casa, Territorios, Carritos o Grupos en Predicación.',
+    waitFor: true
+  },
+  {
+    selector: '.assignment-card, .assignment-card-today',
+    title: 'Tarjetas de asignación',
+    text: 'Cada tarjeta es una asignación de casa en casa: dirección, horario, conductor y territorio. Tócala para ver todos los detalles.',
+    waitFor: true
+  },
+  {
+    selector: null,
+    title: 'Función Live',
+    text: 'Dentro del detalle de una asignación encontrarás el botón Live: detecta las calles cercanas en tiempo real y te avisa si alguna dirección está marcada como "No pasar".'
+  },
+  {
+    selector: '.options-wrap .nav-icon-btn[title="Notificaciones"]',
+    title: 'Panel de Notificaciones',
+    text: 'Desde la campanita revisas los avisos de nuevas asignaciones, cambios de última hora y recordatorios importantes.'
+  },
+  {
+    selector: '.options-wrap .nav-icon-btn[title="Opciones"]',
+    title: 'Menú de Opciones',
+    text: 'Aquí accedes a tu perfil, la apariencia de la plataforma, Configuración y el cierre de sesión.'
+  },
+];
+let _tutorialIndex = 0;
+let _tutorialResizeHandler = null;
+
+function shouldAutoShowTutorial() {
+  try { return !localStorage.getItem(TUTORIAL_SEEN_KEY); } catch { return false; }
+}
+
+function markTutorialSeen() {
+  try { localStorage.setItem(TUTORIAL_SEEN_KEY, 'true'); } catch {}
+}
+
+function startTutorial() {
+  const overlay = document.getElementById('tutorial-overlay');
+  if (!overlay) return;
+  _tutorialIndex = 0;
+  // Nos aseguramos de partir desde Predicación → Casa en casa, para que la
+  // tarjeta de ejemplo (paso 3) tenga algo real que resaltar.
+  try {
+    const predBtn = document.querySelector('.main-seg-btn[data-tab="predicacion"]');
+    if (predBtn && typeof currentMainTab !== 'undefined' && currentMainTab !== 'predicacion') {
+      switchMainTab('predicacion', predBtn);
+    }
+    if (typeof currentSubTab !== 'undefined' && currentSubTab !== 'casa' && typeof switchSubTab === 'function') {
+      switchSubTab('casa');
+    }
+  } catch {}
+  overlay.classList.add('active');
+  if (!_tutorialResizeHandler) {
+    _tutorialResizeHandler = () => renderTutorialStep(_tutorialIndex, true);
+    window.addEventListener('resize', _tutorialResizeHandler);
+    window.addEventListener('scroll', _tutorialResizeHandler, { passive: true });
+  }
+  requestAnimationFrame(() => renderTutorialStep(0));
+}
+
+function skipTutorial() {
+  endTutorial();
+}
+
+function endTutorial() {
+  const overlay = document.getElementById('tutorial-overlay');
+  if (overlay) overlay.classList.remove('active');
+  if (_tutorialResizeHandler) {
+    window.removeEventListener('resize', _tutorialResizeHandler);
+    window.removeEventListener('scroll', _tutorialResizeHandler);
+    _tutorialResizeHandler = null;
+  }
+  markTutorialSeen();
+}
+
+function tutorialGo(delta) {
+  const next = _tutorialIndex + delta;
+  if (next < 0) return;
+  if (next >= TUTORIAL_STEPS.length) { endTutorial(); return; }
+  renderTutorialStep(next);
+}
+
+// Espera brevemente (hasta ~1.1s) a que aparezca un selector antes de rendirse
+// — útil para el paso de las tarjetas de asignación, que dependen de datos
+// que aún pueden estar cargando en el primer inicio de sesión.
+function _waitForTutorialTarget(selector, attempts = 8) {
+  return new Promise(resolve => {
+    const tryFind = (n) => {
+      const el = document.querySelector(selector);
+      if (el && el.offsetParent !== null) { resolve(el); return; }
+      if (n <= 0) { resolve(null); return; }
+      setTimeout(() => tryFind(n - 1), 140);
+    };
+    tryFind(attempts);
+  });
+}
+
+async function renderTutorialStep(i, isReflow) {
+  if (!document.getElementById('tutorial-overlay')?.classList.contains('active')) return;
+  _tutorialIndex = i;
+  const step = TUTORIAL_STEPS[i];
+  const spot = document.getElementById('tutorial-spot');
+  const card = document.getElementById('tutorial-card');
+
+  let target = null;
+  if (step.selector) {
+    target = document.querySelector(step.selector);
+    if ((!target || target.offsetParent === null) && step.waitFor && !isReflow) {
+      target = await _waitForTutorialTarget(step.selector);
+    }
+    if (target && target.offsetParent === null) target = null;
+    // Si es la reflow (resize/scroll) puede que el índice ya haya cambiado mientras esperábamos.
+    if (_tutorialIndex !== i) return;
+  }
+
+  if (target) {
+    const r = target.getBoundingClientRect();
+    const pad = 8;
+    spot.classList.add('has-target');
+    spot.style.top = (r.top - pad) + 'px';
+    spot.style.left = (r.left - pad) + 'px';
+    spot.style.width = (r.width + pad * 2) + 'px';
+    spot.style.height = (r.height + pad * 2) + 'px';
+
+    const cardWidth = card.offsetWidth || 320;
+    const spaceBelow = window.innerHeight - r.bottom;
+    const spaceAbove = r.top;
+    let top;
+    if (spaceBelow > 200 || spaceBelow >= spaceAbove) {
+      top = Math.min(r.bottom + 16, window.innerHeight - 20);
+    } else {
+      top = Math.max(16, r.top - 16 - (card.offsetHeight || 160));
+    }
+    let left = r.left + r.width / 2 - cardWidth / 2;
+    left = Math.max(16, Math.min(left, window.innerWidth - cardWidth - 16));
+    card.style.top = top + 'px';
+    card.style.left = left + 'px';
+  } else {
+    spot.classList.remove('has-target');
+    const cardWidth = card.offsetWidth || 320;
+    card.style.top = (window.innerHeight / 2 - (card.offsetHeight || 160) / 2) + 'px';
+    card.style.left = (window.innerWidth / 2 - cardWidth / 2) + 'px';
+  }
+
+  document.getElementById('tutorial-card-title').textContent = step.title;
+  document.getElementById('tutorial-card-text').textContent = step.text;
+  document.getElementById('tutorial-step-counter').textContent = `${i + 1} / ${TUTORIAL_STEPS.length}`;
+  document.getElementById('tutorial-prev-btn').style.visibility = i === 0 ? 'hidden' : 'visible';
+  document.getElementById('tutorial-next-btn').textContent = i === TUTORIAL_STEPS.length - 1 ? 'Entendido' : 'Siguiente';
+
+  const dotsWrap = document.getElementById('tutorial-dots');
+  dotsWrap.innerHTML = TUTORIAL_STEPS.map((_, idx) =>
+    `<div class="tutorial-dot${idx === i ? ' active' : ''}"></div>`).join('');
+}
+
 function initScrollTopFab() {
   window.addEventListener('scroll', (e) => {
     const raw = e.target;
@@ -15565,6 +15884,24 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
 <button id="scroll-top-fab" onclick="scrollActiveListToTop()" title="Volver arriba" aria-label="Volver arriba">
   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="6 11 12 5 18 11"/></svg>
 </button>
+
+<!-- ══ Tutorial de bienvenida (onboarding paso a paso) ══ -->
+<div id="tutorial-overlay">
+  <div id="tutorial-spot"></div>
+  <div id="tutorial-card">
+    <div id="tutorial-card-eyebrow">Tutorial · <span id="tutorial-step-counter">1 / 6</span></div>
+    <div id="tutorial-card-title">Título</div>
+    <div id="tutorial-card-text">Descripción</div>
+    <div class="tutorial-card-footer">
+      <div class="tutorial-dots" id="tutorial-dots"></div>
+      <div class="tutorial-btn-row">
+        <button class="tutorial-btn tutorial-btn-skip" onclick="skipTutorial()">Saltar</button>
+        <button class="tutorial-btn tutorial-btn-prev" id="tutorial-prev-btn" onclick="tutorialGo(-1)">Atrás</button>
+        <button class="tutorial-btn tutorial-btn-next" id="tutorial-next-btn" onclick="tutorialGo(1)">Siguiente</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 /* ===== CARRITOS v0.34.11-alpha ===== */
