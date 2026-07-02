@@ -51,10 +51,10 @@
     --shadow: 0 2px 12px rgba(0,0,0,0.08);
     --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
     --font: -apple-system, 'SF Pro Display', 'Inter', sans-serif;
-    --nav-bg: rgba(242,242,247,0.85);
+    --nav-bg: rgba(242,242,247,0.5);
     --modal-overlay-bg: rgba(0,0,0,0.35);
     --tab-active-bg: #ffffff;
-    --tab-bar-bg: rgba(242,242,247,0.92);
+    --tab-bar-bg: rgba(242,242,247,0.5);
   }
 
   /* ── Quita el resaltado azul de selección/tap que el navegador dibuja por
@@ -196,10 +196,10 @@
       --text3: #636366;
       --shadow: 0 2px 12px rgba(0,0,0,0.5);
       --shadow-lg: 0 8px 40px rgba(0,0,0,0.6);
-      --nav-bg: rgba(28,28,30,0.85);
+      --nav-bg: rgba(28,28,30,0.5);
       --modal-overlay-bg: rgba(0,0,0,0.6);
       --tab-active-bg: #3a3a3c;
-      --tab-bar-bg: rgba(28,28,30,0.92);
+      --tab-bar-bg: rgba(28,28,30,0.5);
     }
   }
 
@@ -221,10 +221,10 @@
     --text3: #636366;
     --shadow: 0 2px 12px rgba(0,0,0,0.5);
     --shadow-lg: 0 8px 40px rgba(0,0,0,0.6);
-    --nav-bg: rgba(28,28,30,0.85);
+    --nav-bg: rgba(28,28,30,0.5);
     --modal-overlay-bg: rgba(0,0,0,0.6);
     --tab-active-bg: #3a3a3c;
-    --tab-bar-bg: rgba(28,28,30,0.92);
+    --tab-bar-bg: rgba(28,28,30,0.5);
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -326,8 +326,8 @@
       position: sticky; top: 0; z-index: 100;
       margin: 1.1rem 1.1rem 0;
       background: var(--nav-bg);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      backdrop-filter: blur(34px) saturate(180%);
+      -webkit-backdrop-filter: blur(34px) saturate(180%);
       border: 1px solid var(--border);
       border-radius: 26px;
       box-shadow: var(--shadow-lg);
@@ -3140,7 +3140,7 @@
     padding: 0 1.25rem;
     height: 64px;
     background: var(--nav-bg);
-    backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(34px) saturate(180%);
     border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
@@ -3197,8 +3197,8 @@
     border-radius: 50%;
     flex-shrink: 0;
     background: var(--nav-bg);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(34px) saturate(180%);
+    -webkit-backdrop-filter: blur(34px) saturate(180%);
     border: 1px solid var(--border);
     box-shadow: var(--shadow);
     color: var(--text);
@@ -3221,8 +3221,8 @@
     padding: 0 1.15rem;
     border-radius: 999px;
     background: var(--nav-bg);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(34px) saturate(180%);
+    -webkit-backdrop-filter: blur(34px) saturate(180%);
     border: 1px solid var(--border);
     box-shadow: var(--shadow);
     font-size: 1rem;
@@ -3248,8 +3248,8 @@
     padding: 0 1rem;
     border-radius: 999px;
     background: var(--nav-bg);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(34px) saturate(180%);
+    -webkit-backdrop-filter: blur(34px) saturate(180%);
     border: 1px solid var(--border);
     box-shadow: var(--shadow);
     font-family: var(--font);
@@ -6135,7 +6135,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.4.2-beta';
+const APP_VERSION = '1.4.4-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
