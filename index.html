@@ -4270,6 +4270,25 @@
   scroll-behavior: auto !important;
 }
 
+/* ── Botón flotante "Volver arriba" ── */
+#scroll-top-fab {
+  position: fixed; right: 18px; bottom: 22px; z-index: 950;
+  width: 46px; height: 46px; border-radius: 50%;
+  background: var(--accent); color: #fff; border: none; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.28);
+  cursor: pointer; opacity: 0; visibility: hidden;
+  transform: translateY(14px) scale(0.85); pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.16,1,0.3,1), visibility 0.25s;
+}
+#scroll-top-fab.visible { opacity: 1; visibility: visible; transform: translateY(0) scale(1); pointer-events: all; }
+#scroll-top-fab:hover { filter: brightness(1.08); }
+#scroll-top-fab:active { transform: scale(0.92); }
+#scroll-top-fab svg { flex-shrink: 0; }
+@media (max-width: 640px) {
+  #scroll-top-fab { right: 14px; bottom: 18px; width: 42px; height: 42px; }
+}
+
 </style>
 </head>
 <body>
@@ -5490,7 +5509,7 @@
         </div>
         <div class="profile-row-content">
           <div class="profile-row-label">Mapas adaptados al tema oscuro</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Usa la versión oscura del mapa cuando está disponible</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Usa la versión oscura de los mapas de territorios</div>
         </div>
         <div id="pref-dark-maps-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
           <div id="pref-dark-maps-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
@@ -5795,7 +5814,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.0.1-beta';
+const APP_VERSION = '1.0.2-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -11711,7 +11730,7 @@ function triggerEggUnlock() {
     applyAnimationsMode('fluid');
     const animSec = document.getElementById('pref-animations-section');
     if (animSec) animSec.style.display = 'none';
-    showToast('Modo Experimentos desactivado. ¡Encuéntralo de nuevo!', '');
+    showToast('Experimentos desactivado.', '');
     return;
   }
   // First unlock!
@@ -11874,6 +11893,69 @@ function revealAnimationsSection() {
   if (sec) { sec.style.display = 'block'; }
   updateAnimationsModeUI();
 }
+
+// ── Botón flotante "Volver arriba" ────────────────────────────────────────
+// Genérico: detecta scroll tanto en la página principal (window) como en
+// cualquier contenedor interno con su propio overflow (listas, overlays,
+// paneles de administración, etc.) mediante un listener en fase de captura,
+// que sí recibe eventos "scroll" aunque estos no hagan bubbling.
+const SCROLL_FAB_THRESHOLD = 400; // px de scroll antes de mostrar el botón
+let _scrollFabActiveEl = null;
+let _scrollFabWatchId = null;
+
+function _scrollFabGetScrollTop(el) {
+  if (!el || el === document || el === document.documentElement || el === document.body) {
+    return (document.scrollingElement || document.documentElement).scrollTop;
+  }
+  return el.scrollTop;
+}
+function _scrollFabIsVisible(el) {
+  if (!el) return false;
+  if (el === document.documentElement || el === document.body) return true;
+  return !!(el.isConnected && (el.offsetParent || el.getClientRects().length));
+}
+function _scrollFabWatch() {
+  const fab = document.getElementById('scroll-top-fab');
+  if (!fab || !_scrollFabActiveEl || !_scrollFabIsVisible(_scrollFabActiveEl) || _scrollFabGetScrollTop(_scrollFabActiveEl) < SCROLL_FAB_THRESHOLD) {
+    _scrollFabHide();
+    return; // se detiene; el próximo scroll relevante lo reactivará
+  }
+  _scrollFabWatchId = requestAnimationFrame(_scrollFabWatch);
+}
+function _scrollFabShow() {
+  document.getElementById('scroll-top-fab')?.classList.add('visible');
+  if (!_scrollFabWatchId) _scrollFabWatchId = requestAnimationFrame(_scrollFabWatch);
+}
+function _scrollFabHide() {
+  document.getElementById('scroll-top-fab')?.classList.remove('visible');
+  if (_scrollFabWatchId) { cancelAnimationFrame(_scrollFabWatchId); _scrollFabWatchId = null; }
+  _scrollFabActiveEl = null;
+}
+function initScrollTopFab() {
+  window.addEventListener('scroll', (e) => {
+    const raw = e.target;
+    const el = (raw === document || raw === window) ? document.documentElement : raw;
+    const top = _scrollFabGetScrollTop(el);
+    if (top >= SCROLL_FAB_THRESHOLD) {
+      _scrollFabActiveEl = (el === document.documentElement || el === document.body) ? document.documentElement : el;
+      _scrollFabShow();
+    } else if (el === _scrollFabActiveEl || (el === document.documentElement && _scrollFabActiveEl === document.documentElement)) {
+      _scrollFabHide();
+    }
+  }, true); // captura: detecta el scroll de cualquier contenedor descendiente, no solo el de window
+}
+function scrollActiveListToTop() {
+  const reduced = document.documentElement.getAttribute('data-animations') === 'reduced';
+  const behavior = reduced ? 'auto' : 'smooth';
+  const el = _scrollFabActiveEl;
+  if (!el || el === document.documentElement || el === document.body) {
+    window.scrollTo({ top: 0, behavior });
+  } else {
+    el.scrollTo({ top: 0, behavior });
+  }
+}
+document.addEventListener('DOMContentLoaded', initScrollTopFab);
+
 async function renderPrefNotifList() {
   const list = document.getElementById('pref-notif-list');
   if (!list) return;
@@ -15082,6 +15164,11 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
     <button id="egg-unlock-btn" onclick="closeEggUnlock()">¡Genial!</button>
   </div>
 </div>
+
+<!-- ══ Botón flotante "Volver arriba" — aparece en listas largas ══ -->
+<button id="scroll-top-fab" onclick="scrollActiveListToTop()" title="Volver arriba" aria-label="Volver arriba">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="6 11 12 5 18 11"/></svg>
+</button>
 
 <script>
 /* ===== CARRITOS v0.34.11-alpha ===== */
