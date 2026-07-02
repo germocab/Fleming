@@ -5594,7 +5594,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.36.5-alpha';
+const APP_VERSION = '0.36.7-alpha';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -7741,6 +7741,12 @@ function renderSchedule() {
   container.innerHTML = html;
 }
 
+function _namesMatch(a, b) {
+  if (!a || !b) return false;
+  const norm = s => s.toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+  return norm(a) === norm(b);
+}
+
 async function viewAssignment(id) {
   const a = assignments.find(x => x.id === id);
   if (!a) return;
@@ -7811,10 +7817,11 @@ async function viewAssignment(id) {
     adminBtn.onclick = null;
   }
 
-  // ── Botón "Reportar Territorio" — visible cuando la asignación tiene territorio(s) ──
+  // ── Botón "Reportar Territorio" — visible solo para el encargado de ESTA asignación ──
   const reportActionsWrap = document.getElementById('detail-report-actions');
   const reportBtn = document.getElementById('detail-report-btn');
-  if (ter) {
+  const esEncargadoDeEstaAsignacion = _namesMatch(currentUser?.name, a.conductor);
+  if (ter && esEncargadoDeEstaAsignacion) {
     reportActionsWrap.style.display = '';
     reportBtn.onclick = () => reportarTerritorioDesdeAsignacion(a.id);
   } else {
