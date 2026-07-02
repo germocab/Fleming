@@ -83,13 +83,21 @@
     outline-offset: 2px;
   }
 
-  /* ── Transparencias (Configuración > desactivar transparencias) ──────────────
-     Al activarse, apaga el efecto de vidrio esmerilado (backdrop-filter) en
-     toda la plataforma. Los fondos semitransparentes (--nav-bg, etc.) siguen
-     viéndose, pero sin el desenfoque encima. ── */
+  /* ── Transparencias (Configuración > "Activa el efecto blur") ─────────────────
+     Cuando el switch está APAGADO, se quita el desenfoque (backdrop-filter) Y
+     además se fuerzan a opacos los fondos que normalmente usan transparencia
+     (--nav-bg, --modal-overlay-bg, --tab-bar-bg), para que el resultado sea
+     realmente "sin transparencias" y no un vidrio sin desenfocar (que se ve
+     incluso más transparente). Cuando está ENCENDIDO (por defecto), todo se
+     comporta como siempre. ── */
   html.no-transparency * {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+  }
+  html.no-transparency {
+    --nav-bg: var(--surface) !important;
+    --modal-overlay-bg: rgba(0,0,0,0.6) !important;
+    --tab-bar-bg: var(--surface) !important;
   }
 
   /* ── DEV Version Pill ─────────────────────────────────────────────────────── */
@@ -709,6 +717,7 @@
     display: flex; align-items: center; justify-content: space-between;
     padding: 1rem 1.25rem 0.5rem;
   }
+  .detail-mobile-topbar { display: none; }
   .detail-date-label { font-size: 0.8rem; font-weight: 600; color: var(--text3); letter-spacing: 0.02em; }
   .detail-close {
     width: 30px; height: 30px; border-radius: 50%;
@@ -716,6 +725,25 @@
     display: flex; align-items: center; justify-content: center; color: var(--text3);
   }
   .detail-close svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+
+  /* ── En Móvil, el detalle de la asignación ya no es una card parcial: se
+     abre como una pantalla propia a pantalla completa, con el mismo header
+     de botón Back + título en pill (transparencia + blur) que el resto de
+     las pantallas de la plataforma. ── */
+  @media (max-width: 639px) {
+    .detail-overlay {
+      align-items: stretch; justify-content: stretch; padding: 0;
+      background: var(--bg); backdrop-filter: none; -webkit-backdrop-filter: none;
+    }
+    .detail-panel {
+      width: 100%; max-width: none; height: 100%; max-height: none;
+      border-radius: 0; overflow-y: auto;
+      animation: fadeIn 0.2s ease;
+    }
+    .detail-handle { display: none; }
+    .detail-header-bar { display: none; }
+    .detail-mobile-topbar { display: flex; }
+  }
 
   .detail-main-row {
     display: flex; align-items: flex-start; gap: 1rem;
@@ -3081,6 +3109,8 @@
     align-items: center;
     gap: 8px;
     margin-left: auto;
+    position: relative;
+    z-index: 2;
   }
   .pill-back-btn {
     display: flex;
@@ -3098,13 +3128,19 @@
     color: var(--text);
     cursor: pointer;
     transition: opacity 0.2s, transform 0.15s;
+    position: relative;
+    z-index: 2;
   }
   .pill-back-btn:hover { opacity: 0.75; }
   .pill-back-btn:active { transform: scale(0.92); }
   .pill-back-btn svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+  /* El título se centra respecto a la barra completa (no respecto al espacio
+     libre entre el back-btn y las acciones), igual que en el resto de la
+     plataforma. Se posiciona en absoluto sobre .subpage-topbar. */
   .pill-header-title {
     display: flex;
     align-items: center;
+    justify-content: center;
     height: 40px;
     padding: 0 1.15rem;
     border-radius: 999px;
@@ -3120,6 +3156,13 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    max-width: calc(100% - 7.5rem);
+    z-index: 1;
+    pointer-events: none;
   }
   .pill-action-btn {
     display: flex;
@@ -3139,6 +3182,8 @@
     color: var(--red);
     cursor: pointer;
     transition: opacity 0.2s;
+    position: relative;
+    z-index: 2;
   }
   .pill-action-btn:hover { opacity: 0.75; }
   @media (max-width: 639px) {
@@ -5201,6 +5246,13 @@
 <div class="detail-overlay" id="detail-overlay" onclick="handleOverlayClick(event)">
   <div class="detail-panel" id="detail-panel">
     <div class="detail-handle"></div>
+    <!-- Header tipo pantalla completa — solo visible en Móvil -->
+    <nav class="subpage-topbar detail-mobile-topbar">
+      <button class="pill-back-btn" onclick="closeDetail()" title="Cerrar">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="pill-header-title" id="detail-mobile-date-label">—</span>
+    </nav>
     <div class="detail-header-bar">
       <span class="detail-date-label" id="detail-date-label">—</span>
       <button class="detail-close" onclick="closeDetail()">
@@ -5677,8 +5729,8 @@
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" opacity="0.5"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label">Transparencias</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Activa el efecto de vidrio esmerilado (blur) en los paneles y encabezados</div>
+          <div class="profile-row-label">Activa el efecto blur</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Muestra los paneles y encabezados con transparencia y desenfoque</div>
         </div>
         <div id="pref-transparency-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
           <div id="pref-transparency-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
@@ -5983,7 +6035,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.2-beta';
+const APP_VERSION = '1.3-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -7906,8 +7958,11 @@ async function loadSchedule() {
   territories = tData || [];
   _territoryMapsLoaded = false; // territories array was replaced — map images need re-merging on next use
   if (currentSubTab === 'territorios') renderTerritoryView();
-  // Also refresh conductores and casas if they were loaded
-  if (conductores.length || casas.length) {
+  // Refrescar conductores y casas siempre: la etiqueta "Casa de"/"Depto de" en
+  // las tarjetas y el detalle de asignaciones depende de `casas` para saber el
+  // tipo de cada dirección, y debe resolverse para todos los usuarios (no solo
+  // cuando el panel de Administración ya los había cargado antes).
+  {
     const [{ data: cData }, { data: hData }] = await Promise.all([
       sb.from('conductores').select('*').order('apellido').order('nombre'),
       sb.from('casas').select('*').order('direccion'),
@@ -8151,6 +8206,7 @@ async function viewAssignment(id) {
   const MON = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 
   document.getElementById('detail-date-label').textContent = `${DAY[d.getDay()]} ${d.getDate()} de ${MON[d.getMonth()]}`;
+  document.getElementById('detail-mobile-date-label').textContent = `${DAY[d.getDay()]} ${d.getDate()} de ${MON[d.getMonth()]}`;
   document.getElementById('detail-time').textContent = (a.time ? a.time.substring(0,5) : '--:--') + 'hrs';
     const _casaTipo3 = a.casa_id ? (casas.find(c=>c.id===a.casa_id)?.tipo || 'casa') : 'casa';
   const _houseLabel3 = a.house ? (_casaTipo3 === 'departamento' ? 'Depto de ' : 'Casa de ') + a.house : '';
@@ -11653,6 +11709,7 @@ async function viewTerritory(id) {
 
   // Header: territory number + name
   document.getElementById('detail-date-label').textContent = '';
+  document.getElementById('detail-mobile-date-label').textContent = '';
   document.getElementById('detail-time-chip').style.display = 'none';
   const addressEl = document.getElementById('detail-address');
   addressEl.textContent = `Territorio ${t.number}`;
