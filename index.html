@@ -5623,7 +5623,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.36.9-alpha';
+const APP_VERSION = '0.36.10-alpha';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -15976,6 +15976,7 @@ function trepPubStartReporting(terId) {
 
 function trepPubStep(step) {
   [0,1,2].forEach(s => document.getElementById(`trep-pub-step-${s}`).style.display = 'none');
+  if (_trepInAppOpen) document.getElementById('trep-pub-inapp-close').style.display = step === 0 ? 'flex' : 'none';
   if (step === 0) { trepPubRenderOverview(); return; }
   document.getElementById(`trep-pub-step-${step}`).style.display = 'flex';
   if (step === 2) trepPubRenderConfirm();
