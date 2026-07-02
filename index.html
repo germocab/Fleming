@@ -3565,6 +3565,34 @@
   .trep-bar-map { display: flex; align-items: flex-end; gap: 2px; height: 60px; width: 100%; max-width: 130px; }
   .trep-bar-map-seg { flex: 1; border-radius: 3px 3px 0 0; min-height: 10px; }
 
+  .trep-report-ter-box {
+    cursor: pointer; border-radius: 12px; transition: transform 0.15s ease, background 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .trep-report-ter-box:hover { background: var(--surface2); }
+  .trep-report-ter-box:active { transform: scale(0.97); }
+
+  /* ── Zoom de un reporte recibido: mapa grande ── */
+  .trep-report-zoom-overlay {
+    display: none; position: fixed; inset: 0; z-index: 260;
+    background: var(--modal-overlay-bg); backdrop-filter: blur(10px);
+    align-items: center; justify-content: center; padding: 1.25rem;
+  }
+  .trep-report-zoom-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+  .trep-report-zoom-panel {
+    position: relative; width: 100%; max-width: 420px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+    padding: 1.5rem 1.25rem 1.25rem; display: flex; flex-direction: column; align-items: center; gap: 6px;
+    max-height: 90vh; overflow-y: auto;
+    animation: slideUp 0.25s cubic-bezier(0.16,1,0.3,1);
+  }
+  .trep-report-zoom-host { font-weight: 800; font-size: 1.15rem; text-align: center; }
+  .trep-report-zoom-ter { font-size: 0.9rem; color: var(--text3); font-weight: 600; margin-bottom: 6px; }
+  .trep-report-zoom-map { width: 100%; max-width: 320px; margin: 0.4rem 0 0.8rem; }
+  .trep-report-zoom-map svg { width: 100%; height: auto; display: block; }
+  .trep-report-zoom-map .trep-bar-map { max-width: 100%; height: 130px; }
+  .trep-report-zoom-status { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; }
+
   /* Toggle switch */
   .toggle-switch {
     width: 44px; height: 26px; border-radius: 13px;
@@ -5557,6 +5585,20 @@
   </div>
 </div>
 
+<!-- Zoom de un reporte de territorio recibido: mapa grande con el detalle de manzanas -->
+<div class="trep-report-zoom-overlay" id="trep-report-zoom-overlay" onclick="trepReportZoomOverlayClick(event)">
+  <div class="trep-report-zoom-panel">
+    <button class="detail-close" style="position:absolute;top:0.9rem;right:0.9rem" onclick="trepCloseReportZoom()">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="trep-report-zoom-host" id="trep-zoom-host">—</div>
+    <div class="trep-report-zoom-ter" id="trep-zoom-ter">—</div>
+    <div class="trep-report-zoom-map" id="trep-zoom-map"></div>
+    <div class="trep-report-zoom-status" id="trep-zoom-status"></div>
+    <button class="btn-danger-outline" id="trep-zoom-delete-btn" style="margin:0.6rem auto 0">Eliminar</button>
+  </div>
+</div>
+
 <div class="img-lightbox" id="img-lightbox" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">
     <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -5724,7 +5766,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.37.1-alpha';
+const APP_VERSION = '0.37.5-alpha';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -15691,14 +15733,14 @@ if ('serviceWorker' in navigator) {
 
 // ── Utilidades compartidas de matching SVG↔manzanas ──
 // (adaptado del prototipo de reportes de territorio)
-function trepBuildPreviewSvg(svgData, allManzanas, doneManzanas, allDone) {
+function trepBuildPreviewSvg(svgData, allManzanas, doneManzanas, allDone, maxHeight) {
   try {
     const parser = new DOMParser();
     const doc = parser.parseFromString(svgData, 'image/svg+xml');
     const svg = doc.querySelector('svg');
     if (!svg) return '';
     svg.removeAttribute('width'); svg.removeAttribute('height');
-    svg.style.width = '100%'; svg.style.maxHeight = '150px'; svg.style.pointerEvents = 'none';
+    svg.style.width = '100%'; svg.style.maxHeight = (maxHeight || '150px'); svg.style.pointerEvents = 'none';
     const manzanaSet = new Set((allManzanas||[]).map(m => m.toLowerCase()));
     const matched = new Map();
     svg.querySelectorAll('g[id]').forEach(g => {
@@ -15916,6 +15958,10 @@ async function trepLoadReports() {
 
   const formMap = {}; (forms || []).forEach(f => formMap[f.id] = f);
   const terById = {}; (terFull || []).forEach(t => terById[t.id] = t);
+  // Cache para poder reabrir el detalle ampliado (zoom) de un reporte puntual
+  // sin tener que volver a pedirlo a Supabase.
+  _trepReportsCache.subsById = {}; subs.forEach(s => _trepReportsCache.subsById[s.id] = s);
+  _trepReportsCache.terById = terById;
 
   const byDate = {};
   subs.forEach(s => {
@@ -15962,11 +16008,11 @@ async function trepLoadReports() {
               <div class="trep-report-chips">${(s.manzanas_done||[]).map(m => `<span class="trep-report-chip">${m}</span>`).join('')}</div>
             `;
         return `
-        <div class="trep-report-ter-box">
+        <div class="trep-report-ter-box" onclick="trepOpenReportZoom('${s.id}')">
           <div class="trep-report-ter-label">Territorio ${t?.number ?? '?'}</div>
           ${mapHtml ? `<div class="trep-report-mini-map">${mapHtml}</div>` : ''}
           ${statusBlock}
-          <button onclick="trepDeleteReport('${s.id}')" class="btn-danger-outline" style="padding:0.25rem 0.7rem;font-size:0.68rem">Eliminar</button>
+          <button onclick="event.stopPropagation();trepDeleteReport('${s.id}')" class="btn-danger-outline" style="padding:0.25rem 0.7rem;font-size:0.68rem">Eliminar</button>
         </div>`;
       }).join('');
       return `
@@ -15998,6 +16044,46 @@ async function trepLoadReports() {
 }
 
 const _trepOpenDays = new Set();
+const _trepReportsCache = { subsById: {}, terById: {} };
+
+// Abre un modal grande con el mapa del territorio para ese reporte puntual,
+// para poder ver con detalle qué manzanas fueron abarcadas.
+function trepOpenReportZoom(subId) {
+  const s = _trepReportsCache.subsById[subId];
+  if (!s) return;
+  const t = _trepReportsCache.terById[s.territory_id];
+  const done = new Set((s.manzanas_done||[]).map(m => m.toLowerCase()));
+  const mapHtml = t?.svg_data
+    ? trepBuildPreviewSvg(t.svg_data, t.manzanas||[], done, s.all_territory, '360px')
+    : trepBuildPreviewBars(t?.manzanas||[], done, s.all_territory);
+  const coverage = s.not_covered ? 0 : (s.all_territory ? 100 : Math.round(((s.manzanas_done||[]).length/(s.total_manzanas||1))*100));
+  const isComplete = !s.not_covered && (s.all_territory || coverage >= 100);
+  const statusBlock = s.not_covered
+    ? `<span class="trep-report-not-covered-pill">No abarcado</span>`
+    : isComplete
+      ? `<span class="trep-report-complete-pill">Completo</span>`
+      : `
+        <div class="trep-report-pct-row" style="max-width:220px;margin:0 auto">
+          <span class="trep-report-pct-num" style="color:${coverage >= 100 ? 'var(--green)' : 'var(--orange)'}">${coverage}%</span>
+          <div class="trep-report-pct-bar"><div class="trep-report-pct-bar-fill" style="width:${coverage}%;background:${coverage >= 100 ? 'var(--green)' : 'var(--orange)'}"></div></div>
+        </div>
+        <div class="trep-report-chips">${(s.manzanas_done||[]).map(m => `<span class="trep-report-chip">${m}</span>`).join('')}</div>
+      `;
+  document.getElementById('trep-zoom-host').textContent = s.host_name || '—';
+  document.getElementById('trep-zoom-ter').textContent = `Territorio ${t?.number ?? '?'}`;
+  document.getElementById('trep-zoom-map').innerHTML = mapHtml || '<p style="color:var(--text3);font-size:0.85rem">Sin mapa disponible para este territorio.</p>';
+  document.getElementById('trep-zoom-status').innerHTML = statusBlock;
+  document.getElementById('trep-zoom-delete-btn').onclick = () => { trepCloseReportZoom(); trepDeleteReport(s.id); };
+  document.getElementById('trep-report-zoom-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function trepCloseReportZoom() {
+  document.getElementById('trep-report-zoom-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function trepReportZoomOverlayClick(e) {
+  if (e.target.id === 'trep-report-zoom-overlay') trepCloseReportZoom();
+}
 function trepToggleDay(dayKey) {
   if (_trepOpenDays.has(dayKey)) _trepOpenDays.delete(dayKey); else _trepOpenDays.add(dayKey);
   trepLoadReports();
