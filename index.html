@@ -751,7 +751,23 @@
       box-shadow: 0 20px 60px rgba(0,0,0,0.25);
       animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1);
     }
+    /* ── Vista Lateral (Tablet/Desktop): la asignación se abre en un panel
+       lateral no-bloqueante, dejando la lista de asignaciones visible y
+       usable a la izquierda, en vez de un popup centrado y modal. ── */
+    .detail-overlay.sidebar-mode {
+      background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none;
+      align-items: stretch; justify-content: flex-end; padding: 0;
+      pointer-events: none;
+    }
+    .detail-overlay.sidebar-mode .detail-panel {
+      pointer-events: all;
+      width: 420px; max-width: 40vw; height: 100vh; max-height: 100vh;
+      border-radius: 0; box-shadow: -8px 0 40px rgba(0,0,0,0.18);
+      animation: slideInDetailSidebar 0.28s cubic-bezier(0.16,1,0.3,1);
+      border-left: 1px solid var(--border);
+    }
   }
+  @keyframes slideInDetailSidebar { from{transform:translateX(100%)} to{transform:translateX(0)} }
 
   .detail-handle { width: 36px; height: 4px; background: var(--surface3); border-radius: 2px; margin: 10px auto 0; }
   /* ── Detalle de Territorio: usa el mismo header estándar (back + título
@@ -1982,8 +1998,9 @@
   }
   .aseo-mode-cancel:hover { background: var(--surface2); }
 
-  .loader-wrap { display: flex; align-items: center; justify-content: center; padding: 3rem; }
+  .loader-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.7rem; padding: 3rem; }
   .loader { width: 32px; height: 32px; border: 2.5px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.75s linear infinite; }
+  .loader-caption { font-size: 0.82rem; font-weight: 600; color: var(--text3); text-align: center; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .toast-wrap { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
@@ -3994,13 +4011,23 @@
   .profile-row-value { font-size: 0.9rem; font-weight: 600; color: var(--text); }
   .profile-row-empty { font-size: 0.88rem; color: var(--text3); font-style: italic; }
 
-  /* ── Preferencias page ────────────────────────────────────────────────────── */
-  #page-preferencias {
+  /* ── Preferencias page (y sub-pantallas: Idioma, Apariencia, Funciones y
+     Notificaciones, Experimentos) ──────────────────────────────────────────── */
+  #page-preferencias, .pref-subpage {
     display: none; position: fixed; inset: 0; z-index: 250;
     background: var(--bg); flex-direction: column; animation: fadeIn 0.2s ease;
     overflow-y: auto;
   }
-  #page-preferencias.open { display: flex; }
+  #page-preferencias.open, .pref-subpage.open { display: flex; }
+  .pref-subpage { z-index: 255; }
+
+  .pref-nav-row { display: flex; align-items: center; gap: 12px; padding: 0.85rem 1rem; border-top: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+  .pref-nav-row:first-of-type { border-top: none; }
+  .pref-nav-row:active { background: var(--surface2); }
+  .pref-nav-row .profile-row-icon { flex-shrink: 0; }
+  .pref-nav-row .profile-row-chevron { flex-shrink: 0; }
+  .pref-desktop-only-row { display: none; }
+  @media (min-width: 640px) { .pref-desktop-only-row { display: flex; } }
 
   .pref-lang-row {
     display: flex; align-items: center; gap: 12px;
@@ -4799,7 +4826,7 @@
       <div class="notif-filter-chips" id="notif-filter-chips-desktop"></div>
     </div>
     <div id="notifications-list-desktop">
-      <div class="loader-wrap"><div class="loader"></div></div>
+      <div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Notificaciones</div></div>
     </div>
   </div>
 </div>
@@ -4844,9 +4871,10 @@
             <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             Administración
           </button>
-          <button class="dropdown-item" onclick="openPreferencias();closeOptionsMenu()">
+          <button class="dropdown-item" style="position:relative" onclick="openPreferencias();closeOptionsMenu()">
             <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             Configuración
+            <span id="config-update-dot" style="display:none;width:8px;height:8px;border-radius:50%;background:var(--green,#30c97a);margin-left:auto;flex-shrink:0;box-shadow:0 0 0 2px var(--surface)"></span>
           </button>
         </div>
       </div>
@@ -4862,7 +4890,7 @@
     <div class="page active" id="page-schedule">
       <div id="sub-content-casa" class="sub-page active-sub">
         <div id="admin-shortcut-casa" style="display:none"></div>
-        <div id="schedule-content"><div class="loader-wrap"><div class="loader"></div></div></div>
+        <div id="schedule-content"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Asignaciones</div></div></div>
       </div>
       <div id="sub-content-carritos" class="sub-page" style="display:none">
         <div id="admin-shortcut-carritos" style="display:none"></div>
@@ -4890,7 +4918,7 @@
   <div class="ct-app-wrapper">
     <section class="ct-screen" id="cart-list-screen">
       <div class="ct-scroll-container" id="cartLocationsList" style="padding-top:8px;">
-        <div class="ct-empty-state">Cargando…</div>
+        <div class="ct-empty-state">Cargando Puntos</div>
       </div>
     </section>
 
@@ -4952,7 +4980,7 @@
 
       <div id="sub-content-grupos" class="sub-page" style="display:none">
         <div id="admin-shortcut-grupos" style="display:none"></div>
-        <div id="grupos-view-content"><div class="loader-wrap"><div class="loader"></div></div></div>
+        <div id="grupos-view-content"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Grupos</div></div></div>
       </div>
     </div>
 
@@ -4962,7 +4990,7 @@
       <div id="sub-content-vida-ministerio" class="sub-page active-sub">
         <div id="admin-shortcut-vida-ministerio" style="display:none"></div>
         <div id="vmc-user-view">
-          <div class="loader-wrap"><div class="loader"></div></div>
+          <div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Vida y Ministerio</div></div>
         </div>
       </div>
 
@@ -4970,14 +4998,14 @@
       <div id="sub-content-fin-semana" class="sub-page" style="display:none">
         <div id="admin-shortcut-fin-semana" style="display:none"></div>
         <div id="fs-user-view">
-          <div class="loader-wrap"><div class="loader"></div></div>
+          <div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Fin de Semana</div></div>
         </div>
       </div>
 
       <!-- Aseo del Salón -->
       <div id="sub-content-aseo-salon" class="sub-page" style="display:none">
         <div id="admin-shortcut-aseo-salon" style="display:none"></div>
-        <div id="aseo-user-view"><div class="loader-wrap"><div class="loader"></div></div></div>
+        <div id="aseo-user-view"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Aseo</div></div></div>
       </div>
 
       <!-- Hospitalidad -->
@@ -4994,7 +5022,7 @@
       <!-- Responsabilidades -->
       <div id="sub-content-responsabilidades" class="sub-page" style="display:none">
         <div id="admin-shortcut-responsabilidades" style="display:none"></div>
-        <div id="resp-user-view"><div class="loader-wrap"><div class="loader"></div></div></div>
+        <div id="resp-user-view"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Responsabilidades</div></div></div>
       </div>
 
     </div>
@@ -5082,7 +5110,7 @@
           </button>
           <button class="btn-secondary" onclick="openAssignmentModal()">+ Nueva</button>
         </div>
-        <div id="admin-assignments-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+        <div id="admin-assignments-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Asignaciones</div></div></div>
       </div>
       <div class="admin-section" id="admin-territories">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
@@ -5113,7 +5141,7 @@
           </div>
         </div>
 
-        <div id="admin-territories-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+        <div id="admin-territories-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Territorios</div></div></div>
       </div>
       <div class="admin-section" id="admin-reports">
         <div class="sub-tabs" style="margin-bottom:1.1rem">
@@ -5142,7 +5170,7 @@
               <div id="trep-created-link-text" onclick="trepCopyCreatedLink()" style="cursor:pointer;font-size:0.82rem;word-break:break-all;color:var(--accent)"></div>
             </div>
           </div>
-          <div id="trep-forms-grid"><div class="loader-wrap"><div class="loader"></div></div></div>
+          <div id="trep-forms-grid"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Formularios</div></div></div>
         </div>
 
         <!-- Reportes recibidos -->
@@ -5151,7 +5179,7 @@
             <span style="flex:1;font-size:0.95rem;font-weight:700">Reportes recibidos</span>
             <span id="trep-reports-count" style="font-size:0.78rem;color:var(--text3)"></span>
           </div>
-          <div id="trep-reports-cards"><div class="loader-wrap"><div class="loader"></div></div></div>
+          <div id="trep-reports-cards"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Reportes</div></div></div>
         </div>
       </div>
       <div class="admin-section" id="admin-conductores">
@@ -5159,21 +5187,21 @@
           <span style="flex:1;font-size:0.95rem;font-weight:700">Conductores</span>
           <button class="btn-secondary" onclick="openConductorModal()">+ Nuevo</button>
         </div>
-        <div id="admin-conductores-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+        <div id="admin-conductores-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Conductores</div></div></div>
       </div>
       <div class="admin-section" id="admin-casas">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
           <span style="flex:1;font-size:0.95rem;font-weight:700">Casas registradas</span>
           <button class="btn-secondary" onclick="openCasaModal()">+ Nueva</button>
         </div>
-        <div id="admin-casas-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+        <div id="admin-casas-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Casas</div></div></div>
       </div>
       <div class="admin-section" id="admin-grupos">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
           <span style="flex:1;font-size:0.95rem;font-weight:700">Grupos de Servicio</span>
           <button class="btn-secondary" onclick="openGrupoModal()">+ Nuevo grupo</button>
         </div>
-        <div id="admin-grupos-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+        <div id="admin-grupos-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Grupos</div></div></div>
       </div>
       <div class="admin-section" id="admin-carritos">
         <div id="cartAdminPanel">
@@ -5197,7 +5225,7 @@
             <span style="flex:1;font-size:0.95rem;font-weight:700">Hermanos habilitados</span>
             <button class="btn-secondary" onclick="openHermanoModal()">+ Nuevo</button>
           </div>
-          <div id="admin-hermanos-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+          <div id="admin-hermanos-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Hermanos</div></div></div>
         </div>
 
         <!-- Asignar -->
@@ -5223,7 +5251,7 @@
 
           <div style="margin-top:0.4rem">
             <div class="resp-history-title">Historial de asignaciones</div>
-            <div id="admin-resp-upcoming-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+            <div id="admin-resp-upcoming-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Responsabilidades</div></div></div>
           </div>
         </div>
       </div>
@@ -5276,7 +5304,7 @@
 
         <div style="margin-top:0.4rem">
           <div class="resp-history-title">Historial de aseos</div>
-          <div id="admin-aseo-upcoming-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+          <div id="admin-aseo-upcoming-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Aseo</div></div></div>
         </div>
       </div>
       <!-- ── VMC Admin Section ── -->
@@ -5285,7 +5313,7 @@
           <span style="flex:1;font-size:0.95rem;font-weight:700">Vida y Ministerio</span>
           <button class="btn-secondary" onclick="openVmcWeekModal(null)">+ Nueva semana</button>
         </div>
-        <div id="admin-vmc-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+        <div id="admin-vmc-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando VMC</div></div></div>
       </div>
 
       <!-- ── Fin de Semana Admin Section ── -->
@@ -5294,7 +5322,7 @@
           <span style="flex:1;font-size:0.95rem;font-weight:700">Fin de Semana</span>
           <button class="btn-secondary" onclick="openFsWeekModal(null)">+ Nueva semana</button>
         </div>
-        <div id="admin-fs-list"><div class="loader-wrap"><div class="loader"></div></div></div>
+        <div id="admin-fs-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Servicio de Campo</div></div></div>
       </div>
 
       <div class="admin-section" id="admin-usuarios">
@@ -5365,7 +5393,7 @@
             <div id="live-admin-session-info" style="display:none;padding:0.75rem;background:rgba(52,199,89,0.07);border:1px solid rgba(52,199,89,0.22);border-radius:10px;font-size:0.82rem;color:var(--text2);line-height:1.5"></div>
           </div>
           <div style="font-size:0.8rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;margin:0 0 0.6rem">Historial de alertas Live</div>
-          <div id="live-admin-history"><div class="loader-wrap"><div class="loader"></div></div></div>
+          <div id="live-admin-history"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Historial de Live</div></div></div>
         </div>
 
         <!-- Plantillas -->
@@ -5771,7 +5799,7 @@
       </div>
     </div>
     <div class="users-panel-body" id="users-panel-body">
-      <div class="loader-wrap"><div class="loader"></div></div>
+      <div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Usuarios</div></div>
     </div>
   </div>
 </div>
@@ -5799,7 +5827,7 @@
   <div class="uprofile-body" id="uprofile-body"></div>
 </div>
 
-<!-- ── Preferencias (fullscreen overlay) ── -->
+<!-- ── Preferencias (fullscreen overlay) — pantalla principal ── -->
 <div id="page-preferencias" class="">
   <nav class="subpage-topbar">
     <button class="pill-back-btn" onclick="closePreferencias()" title="Inicio">
@@ -5810,9 +5838,117 @@
 
   <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 0 2.5rem">
 
-    <!-- Idioma -->
+    <!-- Accesos a cada apartado -->
     <div class="profile-section">
-      <div class="profile-section-title" data-i18n="pref.idioma">Idioma</div>
+      <div class="pref-nav-row" onclick="openPrefScreen('idioma')">
+        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text2)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="pref.idioma">Idioma</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Español</div>
+        </div>
+        <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="pref-nav-row" onclick="openPrefScreen('apariencia')">
+        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text2)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Apariencia</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Tema, mapas, transparencia y NavBar</div>
+        </div>
+        <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="pref-nav-row" onclick="openPrefScreen('funciones')">
+        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text2)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Funciones y Notificaciones</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Live, avisos y vista de asignaciones</div>
+        </div>
+        <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="pref-nav-row" id="pref-experimentos-nav-row" style="display:none" onclick="openPrefScreen('experimentos')">
+        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text2)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Experimentos</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Color de acento, animaciones y blur</div>
+        </div>
+        <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+
+    <!-- Ayuda -->
+    <div class="profile-section">
+      <div class="profile-section-title">Ayuda</div>
+      <div class="profile-row" style="cursor:pointer" onclick="closePreferencias();startTutorial()">
+        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text2)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Ver tutorial</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Repasa cómo funcionan las secciones y funciones principales</div>
+        </div>
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="profile-row" style="cursor:pointer" onclick="openReportIssueModal()">
+        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text2)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Reportar un problema</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Esta plataforma está en fase Beta — cuéntanos si algo falla</div>
+        </div>
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+
+    <!-- Acerca de / Versión -->
+    <div class="profile-section">
+      <div class="profile-section-title">Acerca de</div>
+      <div class="profile-row" id="pref-version-row" style="user-select:none;-webkit-user-select:none;cursor:default;position:relative"
+        onmousedown="startVersionHold()" onmouseup="cancelVersionHold()" onmouseleave="cancelVersionHold()"
+        ontouchstart="startVersionHold(event)" ontouchend="cancelVersionHold()" ontouchcancel="cancelVersionHold()">
+        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text3)" id="pref-version-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Versión de la plataforma</div>
+          <div class="profile-row-value" id="pref-version-value">—</div>
+        </div>
+        <span class="pref-alpha-badge" id="pref-alpha-badge">BETA</span>
+        <!-- Hold progress ring -->
+        <svg id="ver-hold-ring" viewBox="0 0 36 36" style="position:absolute;right:12px;width:28px;height:28px;opacity:0;transition:opacity 0.2s;pointer-events:none">
+          <circle cx="18" cy="18" r="15" fill="none" stroke="var(--surface3)" stroke-width="3"/>
+          <circle id="ver-hold-arc" cx="18" cy="18" r="15" fill="none" stroke="var(--accent)" stroke-width="3"
+            stroke-dasharray="94.25" stroke-dashoffset="94.25" stroke-linecap="round"
+            transform="rotate(-90 18 18)" style="transition:stroke-dashoffset 0.05s linear"/>
+        </svg>
+      </div>
+      <!-- Botón Actualizar: solo visible cuando hay una nueva versión disponible -->
+      <button id="pref-update-btn" style="display:none;width:calc(100% - 2rem);margin:0.6rem 1rem 0;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:#fff;border:none;border-radius:12px;padding:0.7rem 1rem;font-family:var(--font);font-size:0.88rem;font-weight:700;cursor:pointer" onclick="applyAppUpdate()">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Actualizar
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Sub-pantalla: Idioma ── -->
+<div id="page-pref-idioma" class="pref-subpage">
+  <nav class="subpage-topbar">
+    <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span class="pill-header-title" data-i18n="pref.idioma">Idioma</span>
+  </nav>
+  <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 0 2.5rem">
+    <div class="profile-section">
       <div class="pref-lang-row active" data-lang="es" onclick="setPrefLanguage('es')">
         <div class="profile-row-icon" style="background:var(--accent-light);color:var(--accent)">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
@@ -5841,10 +5977,19 @@
         <span class="pref-soon-badge" data-i18n="pref.proximamente">Próximamente</span>
       </div>
     </div>
+  </div>
+</div>
 
-    <!-- Apariencia -->
+<!-- ── Sub-pantalla: Apariencia ── -->
+<div id="page-pref-apariencia" class="pref-subpage">
+  <nav class="subpage-topbar">
+    <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span class="pill-header-title">Apariencia</span>
+  </nav>
+  <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 0 2.5rem">
     <div class="profile-section">
-      <div class="profile-section-title">Apariencia</div>
       <div class="pref-theme-row" id="pref-theme-row">
         <button class="pref-theme-opt" id="pref-theme-light" onclick="applyTheme('light');updatePrefThemeActive()">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -5872,7 +6017,85 @@
           <div id="pref-dark-maps-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
-      <!-- Toggle: transparencias -->
+      <!-- Toggle: NavBar Grow/Shrink (solo Desktop) -->
+      <div class="profile-row pref-desktop-only-row" style="cursor:pointer" onclick="toggleNavbarShrinkPref()">
+        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text2)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Encoger NavBar al hacer scroll</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Solo en Escritorio — la barra se reduce al bajar en la página</div>
+        </div>
+        <div id="pref-navbar-shrink-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="pref-navbar-shrink-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Sub-pantalla: Funciones y Notificaciones ── -->
+<div id="page-pref-funciones" class="pref-subpage">
+  <nav class="subpage-topbar">
+    <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span class="pill-header-title">Funciones y Notificaciones</span>
+  </nav>
+  <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 0 2.5rem">
+    <!-- Funciones Especiales -->
+    <div class="profile-section">
+      <div class="profile-section-title">Funciones Especiales</div>
+      <!-- Toggle: función Live -->
+      <div class="profile-row" style="cursor:pointer" onclick="toggleLiveFeaturePref()">
+        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text2)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Función Live</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Detección de calles y avisos de No Pasar en tiempo real</div>
+        </div>
+        <div id="pref-live-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="pref-live-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
+      <!-- Vista de asignaciones casa en casa: PopUp o Lateral (Tablet/Desktop) -->
+      <div class="pref-desktop-only-row" style="padding:0.85rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
+        <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+        <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">Vista de asignaciones (Tablet / Escritorio)</span>
+      </div>
+      <div class="pref-theme-row pref-desktop-only-row" id="pref-h2h-view-row" style="margin:0 1rem 0.4rem">
+        <button class="pref-theme-opt" id="pref-h2h-popup" onclick="setHouseToHouseViewMode('popup')">
+          <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12h8"/></svg>
+          PopUp
+        </button>
+        <button class="pref-theme-opt" id="pref-h2h-sidebar" onclick="setHouseToHouseViewMode('sidebar')">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="10" y1="4" x2="10" y2="20"/></svg>
+          Lateral
+        </button>
+      </div>
+      <div class="pref-desktop-only-row" style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">En "Lateral", el detalle de la asignación se abre a la derecha, dejando la lista visible a la izquierda.</div>
+    </div>
+
+    <!-- Notificaciones -->
+    <div class="profile-section">
+      <div class="profile-section-title">Notificaciones</div>
+      <div id="pref-notif-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Sub-pantalla: Experimentos (solo si se ha desbloqueado) ── -->
+<div id="page-pref-experimentos" class="pref-subpage">
+  <nav class="subpage-topbar">
+    <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span class="pill-header-title">Experimentos</span>
+  </nav>
+  <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 0 2.5rem">
+    <div class="profile-section">
+      <!-- Toggle: transparencias / blur (ahora vive en Experimentos, ON por defecto) -->
       <div class="profile-row" style="cursor:pointer" onclick="toggleTransparencyPref()">
         <div class="profile-row-icon" style="background:var(--surface3);color:var(--text2)">
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" opacity="0.5"/></svg>
@@ -5885,8 +6108,8 @@
           <div id="pref-transparency-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
-      <!-- Accent color — only visible when Modo Experimentos is unlocked -->
-      <div id="pref-accent-section" style="display:none;animation:eggReveal 0.5s cubic-bezier(0.16,1,0.3,1) both;border-top:1px solid var(--border)">
+      <!-- Accent color -->
+      <div id="pref-accent-section" style="border-top:1px solid var(--border)">
         <div style="padding:0.75rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
           <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
           <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">Color de acento</span>
@@ -5899,8 +6122,8 @@
           <button class="accent-swatch" id="accent-sw-purple" onclick="setAccentColor('purple')" style="--sw:#a855f7" title="Morado"></button>
         </div>
       </div>
-      <!-- Animaciones — only visible when Modo Experimentos is unlocked -->
-      <div id="pref-animations-section" style="display:none;animation:eggReveal 0.5s cubic-bezier(0.16,1,0.3,1) both;border-top:1px solid var(--border)">
+      <!-- Animaciones -->
+      <div id="pref-animations-section" style="border-top:1px solid var(--border)">
         <div style="padding:0.75rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
           <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
           <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">Animaciones</span>
@@ -5918,82 +6141,6 @@
         <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">Elige "Reducidas" si eres sensible al movimiento en pantalla.</div>
       </div>
     </div>
-
-    <!-- Funciones Especiales -->
-    <div class="profile-section">
-      <div class="profile-section-title">Funciones Especiales</div>
-      <!-- Toggle: función Live -->
-      <div class="profile-row" style="cursor:pointer" onclick="toggleLiveFeaturePref()">
-        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text2)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label">Función Live</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Detección de calles y avisos de No Pasar en tiempo real</div>
-        </div>
-        <div id="pref-live-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="pref-live-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Notificaciones -->
-    <div class="profile-section">
-      <div class="profile-section-title">Notificaciones</div>
-      <div id="pref-notif-list"></div>
-    </div>
-
-    <!-- Ayuda -->
-    <div class="profile-section">
-      <div class="profile-section-title">Ayuda</div>
-      <div class="profile-row" style="cursor:pointer" onclick="closePreferencias();startTutorial()">
-        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text2)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label">Ver tutorial</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Repasa cómo funcionan las secciones y funciones principales</div>
-        </div>
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>
-    </div>
-
-    <!-- Acerca de / Versión -->
-    <div class="profile-section">
-      <div class="profile-section-title">Acerca de</div>
-      <div class="profile-row" id="pref-version-row" style="user-select:none;-webkit-user-select:none;cursor:default;position:relative"
-        onmousedown="startVersionHold()" onmouseup="cancelVersionHold()" onmouseleave="cancelVersionHold()"
-        ontouchstart="startVersionHold(event)" ontouchend="cancelVersionHold()" ontouchcancel="cancelVersionHold()">
-        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text3)" id="pref-version-icon">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label">Versión de la plataforma</div>
-          <div class="profile-row-value" id="pref-version-value">—</div>
-        </div>
-        <span class="pref-alpha-badge" id="pref-alpha-badge">BETA</span>
-        <!-- Hold progress ring -->
-        <svg id="ver-hold-ring" viewBox="0 0 36 36" style="position:absolute;right:12px;width:28px;height:28px;opacity:0;transition:opacity 0.2s;pointer-events:none">
-          <circle cx="18" cy="18" r="15" fill="none" stroke="var(--surface3)" stroke-width="3"/>
-          <circle id="ver-hold-arc" cx="18" cy="18" r="15" fill="none" stroke="var(--accent)" stroke-width="3"
-            stroke-dasharray="94.25" stroke-dashoffset="94.25" stroke-linecap="round"
-            transform="rotate(-90 18 18)" style="transition:stroke-dashoffset 0.05s linear"/>
-        </svg>
-      </div>
-      <!-- Hidden accent color section — revealed by Modo Experimentos, now lives in Apariencia -->
-    </div>
-
-    <!-- Reportar un problema -->
-    <div style="padding:0 1.25rem">
-      <button class="btn-secondary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px" onclick="openReportIssueModal()">
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        Reportar un problema
-      </button>
-      <p style="font-size:0.76rem;color:var(--text3);text-align:center;margin-top:0.6rem;line-height:1.4">
-        Esta plataforma está en fase Beta. Si encuentras algún error o algo no funciona como esperas, repórtalo y lo revisaremos.
-      </p>
-    </div>
-
   </div>
 </div>
 
@@ -6199,7 +6346,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.5-beta';
+const APP_VERSION = '1.6-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -8156,7 +8303,7 @@ window.addEventListener('pageshow', () => refreshScheduleIfStale());
 
 async function loadSchedule() {
   _lastScheduleLoad = Date.now();
-  document.getElementById('schedule-content').innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
+  document.getElementById('schedule-content').innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Asignaciones</div></div>';
 
   // Fetch assignments without embedded territory join to avoid PostgREST
   // ambiguous-relationship error (two FKs pointing to the same 'territories' table).
@@ -8530,8 +8677,11 @@ async function viewAssignment(id) {
   // ── Abrimos la pantalla de inmediato: el mapa del territorio y los permisos ──
   // de admin (ambos requieren red) se resuelven después, sin bloquear el tap.
   panel._openAssignmentId = id;
-  document.getElementById('detail-overlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  const _detailOverlay = document.getElementById('detail-overlay');
+  const _useSidebarMode = window.innerWidth >= 640 && typeof getHouseToHouseViewMode === 'function' && getHouseToHouseViewMode() === 'sidebar';
+  _detailOverlay.classList.toggle('sidebar-mode', _useSidebarMode);
+  _detailOverlay.classList.add('open');
+  document.body.style.overflow = _useSidebarMode ? '' : 'hidden';
 
   // ── Mapa del territorio (map_data/map_data_dark son blobs pesados) ──
   (async () => {
@@ -8667,6 +8817,7 @@ function closeDetail() {
   const panel = document.getElementById('detail-panel');
   panel._ter1 = null; panel._ter2 = null;
   document.getElementById('detail-overlay').classList.remove('open');
+  document.getElementById('detail-overlay').classList.remove('sidebar-mode');
   document.body.style.overflow = '';
   // Reset suggest form
   const form = document.getElementById('suggest-np-form');
@@ -8931,7 +9082,7 @@ async function renderLiveAdminPanel() {
     if (sessionInfo) sessionInfo.style.display = 'none';
   }
   if (!historyEl) return;
-  historyEl.innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
+  historyEl.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Historial de Live</div></div>';
   try {
     var myName = currentUser && currentUser.name ? currentUser.name.trim().toLowerCase() : '';
     var result = await sb.from('notifications')
@@ -9037,7 +9188,7 @@ async function renderAdminTerritories() {
     container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></div><h4>Sin territorios</h4><p>Crea el primer territorio</p></div>`;
     return;
   }
-  container.innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
+  container.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Territorios</div></div>';
   await ensureTerritoryMapsLoaded();
   container.innerHTML = `<div class="ter-grid">` + territories.map(t => {
     const color = getTerColor(t.number);
@@ -9317,7 +9468,7 @@ function wbInit() {
   const monday = wbMondayOf(wbTodayStr());
   document.getElementById('wb-monday-input').value = monday;
   document.getElementById('wb-overlay').classList.add('open');
-  document.getElementById('wb-suggested-row').innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
+  document.getElementById('wb-suggested-row').innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Sugerencias</div></div>';
   document.getElementById('wb-days-grid').innerHTML = '';
   wbLoadDataAndSetMonday(monday);
 }
@@ -10363,7 +10514,7 @@ async function deleteRespDate(dateStr, isPast) {
 // ── Vista del usuario final (sub-tab Responsabilidades) ──
 async function renderRespUserView() {
   const el = document.getElementById('resp-user-view');
-  el.innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
+  el.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Responsabilidades</div></div>';
   const { data } = await sb.from('responsabilidades').select('*').gte('fecha', todayStr()).order('fecha').order('cargo');
   const rows = data || [];
   const dates = [...new Set(rows.map(r => r.fecha))].sort();
@@ -10665,7 +10816,7 @@ let _aseoUserRows = [];
 async function renderAseoUserView() {
   const el = document.getElementById('aseo-user-view');
   if (!el) return;
-  el.innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
+  el.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Aseo</div></div>';
   const { data } = await sb.from('aseo_salon').select('*').gte('fecha', todayStr()).order('fecha');
   const rows = data || [];
   _aseoUserRows = rows;
@@ -11234,7 +11385,7 @@ async function loadUsers() {
 async function openUsersPanel() {
   if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   document.getElementById('users-panel-overlay').classList.add('open');
-  document.getElementById('users-panel-body').innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
+  document.getElementById('users-panel-body').innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Usuarios</div></div>';
   await loadUsers();
   renderUsersPanel();
 }
@@ -11908,7 +12059,7 @@ async function renderTerritoryView() {
     </div>`;
     return;
   }
-  container.innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
+  container.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Territorio</div></div>';
   await ensureTerritoryMapsLoaded();
   container.innerHTML = `<div class="ter-grid" style="padding-top:0.25rem">` + territories.map(t => {
     const mapSrc = getActiveTerMapSrc(t);
@@ -12062,11 +12213,35 @@ async function openPreferencias() {
   updateDarkMapToggleUI();
   updateLiveToggleUI();
   updateTransparencyToggleUI();
+  updateNavbarShrinkToggleUI();
+  updateH2HViewModeUI();
+  updateExperimentosNavVisibility();
+  if (typeof _updateAppUpdateUI === 'function') _updateAppUpdateUI();
   await renderPrefNotifList();
 }
 function closePreferencias() {
   document.getElementById('page-preferencias').classList.remove('open');
+  closePrefScreen();
   document.body.style.overflow = '';
+}
+// ── Navegación entre las sub-pantallas de Configuración ──────────────────────
+const PREF_SCREENS = ['idioma', 'apariencia', 'funciones', 'experimentos'];
+function openPrefScreen(name) {
+  if (!PREF_SCREENS.includes(name)) return;
+  if (name === 'experimentos' && localStorage.getItem('fleming_egg_unlocked') !== '1') return;
+  document.getElementById('page-pref-' + name)?.classList.add('open');
+  if (name === 'apariencia') updateNavbarShrinkToggleUI();
+  if (name === 'funciones') updateH2HViewModeUI();
+  if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); }
+}
+function closePrefScreen() {
+  PREF_SCREENS.forEach(name => document.getElementById('page-pref-' + name)?.classList.remove('open'));
+}
+function updateExperimentosNavVisibility() {
+  const unlocked = localStorage.getItem('fleming_egg_unlocked') === '1';
+  const row = document.getElementById('pref-experimentos-nav-row');
+  if (row) row.style.display = unlocked ? 'flex' : 'none';
+  if (!unlocked) document.getElementById('page-pref-experimentos')?.classList.remove('open');
 }
 function setPrefLanguage(lang) {
   // Holandés sigue pendiente.
@@ -12146,6 +12321,10 @@ function toggleDarkMapsPref() {
       setCompact(shell, false);
       return;
     }
+    if (typeof isNavbarShrinkEnabled === 'function' && !isNavbarShrinkEnabled()) {
+      setCompact(shell, false);
+      return;
+    }
     const scrollable = document.documentElement.scrollHeight - window.innerHeight;
     if (scrollable < MIN_SCROLLABLE) {
       // No hay suficiente contenido como para justificar el modo compacto:
@@ -12184,6 +12363,61 @@ function toggleTransparencyPref() {
   localStorage.setItem('fleming_transparency', current ? 'false' : 'true');
   applyTransparencyPref();
   updateTransparencyToggleUI();
+}
+
+// ── NavBar Grow/Shrink en Desktop: activar/desactivar ───────────────────────
+function isNavbarShrinkEnabled() {
+  return localStorage.getItem('fleming_navbar_shrink') !== 'false'; // default true
+}
+function updateNavbarShrinkToggleUI() {
+  const enabled = isNavbarShrinkEnabled();
+  const toggle = document.getElementById('pref-navbar-shrink-toggle');
+  const thumb  = document.getElementById('pref-navbar-shrink-thumb');
+  if (!toggle || !thumb) return;
+  toggle.style.background = enabled ? 'var(--accent)' : 'var(--surface3)';
+  thumb.style.left = enabled ? '21px' : '3px';
+}
+function toggleNavbarShrinkPref() {
+  const current = isNavbarShrinkEnabled();
+  localStorage.setItem('fleming_navbar_shrink', current ? 'false' : 'true');
+  updateNavbarShrinkToggleUI();
+  const shell = document.getElementById('app-header-shell');
+  if (shell && current) shell.classList.remove('shell-compact');
+  window.dispatchEvent(new Event('scroll'));
+}
+
+// ── Casa en casa: vista de detalle en PopUp o en panel Lateral (Tablet/Desktop) ──
+function getHouseToHouseViewMode() {
+  return localStorage.getItem('fleming_h2h_view') || 'popup'; // 'popup' | 'sidebar'
+}
+function setHouseToHouseViewMode(mode) {
+  localStorage.setItem('fleming_h2h_view', mode === 'sidebar' ? 'sidebar' : 'popup');
+  updateH2HViewModeUI();
+}
+function updateH2HViewModeUI() {
+  const mode = getHouseToHouseViewMode();
+  document.getElementById('pref-h2h-popup')?.classList.toggle('active', mode === 'popup');
+  document.getElementById('pref-h2h-sidebar')?.classList.toggle('active', mode === 'sidebar');
+}
+
+// ── Actualizaciones de la plataforma ─────────────────────────────────────────
+let _swUpdateAvailable = false;
+let _swWaitingWorker = null;
+function _updateAppUpdateUI() {
+  const btn = document.getElementById('pref-update-btn');
+  const dot = document.getElementById('config-update-dot');
+  if (btn) btn.style.display = _swUpdateAvailable ? 'flex' : 'none';
+  if (dot) dot.style.display = _swUpdateAvailable ? 'block' : 'none';
+}
+function applyAppUpdate() {
+  const btn = document.getElementById('pref-update-btn');
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
+  if (_swWaitingWorker) {
+    _swWaitingWorker.postMessage({ type: 'SKIP_WAITING' });
+    setTimeout(() => location.reload(), 600);
+  } else {
+    location.reload(true);
+  }
 }
 
 // ── Función Live: activar/desactivar por completo ────────────────────────────
@@ -12268,19 +12502,17 @@ function triggerEggUnlock() {
     localStorage.removeItem('fleming_egg_unlocked');
     localStorage.removeItem('fleming_accent');
     applyAccentColor('blue');
-    const sec = document.getElementById('pref-accent-section');
-    if (sec) sec.style.display = 'none';
     localStorage.removeItem('fleming_animations');
     applyAnimationsMode('fluid');
-    const animSec = document.getElementById('pref-animations-section');
-    if (animSec) animSec.style.display = 'none';
-    showToast('Modo Experimentos desactivado. ¡Encuéntralo de nuevo!', '');
+    updateExperimentosNavVisibility();
+    showToast('Experimentos desactivado. ¡Encuéntralo de nuevo!', '');
     return;
   }
   // First unlock!
   localStorage.setItem('fleming_egg_unlocked', '1');
   revealAccentSection();
   revealAnimationsSection();
+  updateExperimentosNavVisibility();
   const overlay = document.getElementById('egg-unlock-overlay');
   overlay.classList.add('active');
   launchConfetti();
@@ -12405,6 +12637,7 @@ function initAccentColor() {
     revealAccentSection();
     revealAnimationsSection();
   }
+  updateExperimentosNavVisibility();
 }
 
 function updateAccentSwatchesUI() {
@@ -12502,11 +12735,6 @@ const TUTORIAL_STEPS = [
     waitFor: true
   },
   {
-    selector: null,
-    title: 'Función Live',
-    text: 'Dentro del detalle de una asignación encontrarás el botón Live: detecta las calles cercanas en tiempo real y te avisa si alguna dirección está marcada como "No pasar".'
-  },
-  {
     selector: '.options-wrap .nav-icon-btn[title="Notificaciones"]',
     title: 'Panel de Notificaciones',
     text: 'Desde la campanita revisas los avisos de nuevas asignaciones, cambios de última hora y recordatorios importantes.'
@@ -12554,6 +12782,15 @@ function startTutorial() {
 
 function skipTutorial() {
   endTutorial();
+}
+
+function tutorialBackgroundClick(e) {
+  // Solo reacciona si el clic fue directamente sobre el fondo del overlay
+  // (no sobre la tarjeta del tutorial ni sus botones).
+  if (e.target !== e.currentTarget) return;
+  if (confirm('¿Quieres saltar el tutorial? Podrás verlo más tarde en Configuración.')) {
+    skipTutorial();
+  }
 }
 
 function endTutorial() {
@@ -12675,7 +12912,7 @@ document.addEventListener('DOMContentLoaded', initScrollTopFab);
 async function renderPrefNotifList() {
   const list = document.getElementById('pref-notif-list');
   if (!list) return;
-  list.innerHTML = '<div class="loader-wrap" style="padding:1rem"><div class="loader"></div></div>';
+  list.innerHTML = '<div class="loader-wrap" style="padding:1rem"><div class="loader"></div><div class="loader-caption">Cargando Notificaciones</div></div>';
   const prefs = await loadNotifPrefs();
 
   let html = '';
@@ -15595,7 +15832,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
     <div class="notif-filter-chips" id="notif-filter-chips-mobile"></div>
   </div>
   <div style="flex:1;overflow-y:auto;padding:0 1rem 1rem;max-width:640px;width:100%;margin:0 auto" id="notifications-list-mobile">
-    <div class="loader-wrap"><div class="loader"></div></div>
+    <div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Notificaciones</div></div>
   </div>
 </div>
 
@@ -15874,7 +16111,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
         <circle cx="36" cy="36" r="34" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.35"/>
       </svg>
     </div>
-    <div id="egg-unlock-title">¡Modo Experimentos activado!</div>
+    <div id="egg-unlock-title">¡Experimentos activado!</div>
     <div id="egg-unlock-sub">Has descubierto una función oculta. Ahora puedes personalizar el color de acento de toda la plataforma y ajustar la fluidez de las animaciones.</div>
     <button id="egg-unlock-btn" onclick="closeEggUnlock()">¡Genial!</button>
   </div>
@@ -15886,7 +16123,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
 </button>
 
 <!-- ══ Tutorial de bienvenida (onboarding paso a paso) ══ -->
-<div id="tutorial-overlay">
+<div id="tutorial-overlay" onclick="tutorialBackgroundClick(event)">
   <div id="tutorial-spot"></div>
   <div id="tutorial-card">
     <div id="tutorial-card-eyebrow">Tutorial · <span id="tutorial-step-counter">1 / 6</span></div>
@@ -16622,15 +16859,25 @@ function cartCloseForm() { document.getElementById('cartFormOverlay').style.disp
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').then(reg => {
+      if (reg.waiting && navigator.serviceWorker.controller) {
+        _swWaitingWorker = reg.waiting; _swUpdateAvailable = true;
+        if (typeof _updateAppUpdateUI === 'function') _updateAppUpdateUI();
+      }
       reg.addEventListener('updatefound', () => {
         const newWorker = reg.installing;
         if (newWorker) {
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              newWorker.postMessage({ type: 'SKIP_WAITING' });
+              // En vez de activar de inmediato, se notifica al usuario y se
+              // deja el botón "Actualizar" en Configuración para que decida.
+              _swWaitingWorker = newWorker; _swUpdateAvailable = true;
+              if (typeof _updateAppUpdateUI === 'function') _updateAppUpdateUI();
             }
           });
         }
+      });
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        location.reload();
       });
     }).catch(err => console.warn('SW registration failed:', err));
   });
