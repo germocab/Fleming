@@ -6070,19 +6070,27 @@
           <div id="pref-dark-maps-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
-      <!-- Toggle: NavBar Grow/Shrink (solo Desktop) -->
-      <div class="profile-row pref-desktop-only-row" style="cursor:pointer" onclick="toggleNavbarShrinkPref()">
-        <div class="profile-row-icon" style="background:var(--ter-4-bg);color:var(--ter-4)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label">Encoger NavBar al hacer scroll</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Solo en Escritorio — la barra se reduce al bajar en la página</div>
-        </div>
-        <div id="pref-navbar-shrink-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="pref-navbar-shrink-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
+      <!-- Selector: NavBar Grow&Shrink (solo Desktop) — Grow fijo, Shrink fijo,
+           o Automático (encoge al bajar, crece al subir; por defecto). ── -->
+      <div class="pref-desktop-only-row" style="padding:0.85rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
+        <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
+        <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">NavBar Grow &amp; Shrink (Escritorio)</span>
       </div>
+      <div class="pref-theme-row pref-desktop-only-row" id="pref-navbar-mode-row" style="margin:0 1rem 0.4rem">
+        <button class="pref-theme-opt" id="pref-navbar-mode-grow" onclick="setNavbarGrowMode('grow')">
+          <svg viewBox="0 0 24 24"><polyline points="7 8 12 3 17 8"/><polyline points="7 16 12 21 17 16"/></svg>
+          Grow
+        </button>
+        <button class="pref-theme-opt" id="pref-navbar-mode-shrink" onclick="setNavbarGrowMode('shrink')">
+          <svg viewBox="0 0 24 24"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
+          Shrink
+        </button>
+        <button class="pref-theme-opt" id="pref-navbar-mode-auto" onclick="setNavbarGrowMode('auto')">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/><path d="M21 12.79A9 9 0 1 1 11.21 3" opacity="0.35"/></svg>
+          Automático
+        </button>
+      </div>
+      <div class="pref-desktop-only-row" style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">En "Automático" (por defecto), la barra se encoge al bajar en la página y recupera su tamaño al subir.</div>
     </div>
   </div>
 </div>
@@ -6436,7 +6444,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.6.5.2-beta';
+const APP_VERSION = '1.6.5.3-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -12412,9 +12420,10 @@ function toggleDarkMapsPref() {
       setCompact(shell, false);
       return;
     }
-    if (typeof isNavbarShrinkEnabled === 'function' && !isNavbarShrinkEnabled()) {
-      setCompact(shell, false);
-      return;
+    if (typeof getNavbarGrowMode === 'function') {
+      const mode = getNavbarGrowMode();
+      if (mode === 'grow') { setCompact(shell, false); return; }
+      if (mode === 'shrink') { setCompact(shell, true); return; }
     }
     const scrollable = document.documentElement.scrollHeight - window.innerHeight;
     if (scrollable < MIN_SCROLLABLE) {
@@ -12510,24 +12519,23 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () 
   if (isTransparencyEnabled()) applyTransparencyPref();
 });
 
-// ── NavBar Grow/Shrink en Desktop: activar/desactivar ───────────────────────
-function isNavbarShrinkEnabled() {
-  return localStorage.getItem('fleming_navbar_shrink') !== 'false'; // default true
+// ── NavBar Grow & Shrink en Desktop: Grow fijo / Shrink fijo / Automático ──
+// Por defecto es 'auto' (el comportamiento clásico: se encoge al bajar en la
+// página y recupera su tamaño al subir).
+function getNavbarGrowMode() {
+  const v = localStorage.getItem('fleming_navbar_mode');
+  return (v === 'grow' || v === 'shrink' || v === 'auto') ? v : 'auto';
 }
 function updateNavbarShrinkToggleUI() {
-  const enabled = isNavbarShrinkEnabled();
-  const toggle = document.getElementById('pref-navbar-shrink-toggle');
-  const thumb  = document.getElementById('pref-navbar-shrink-thumb');
-  if (!toggle || !thumb) return;
-  toggle.style.background = enabled ? 'var(--accent)' : 'var(--surface3)';
-  thumb.style.left = enabled ? '21px' : '3px';
+  const mode = getNavbarGrowMode();
+  ['grow', 'shrink', 'auto'].forEach(m => {
+    document.getElementById('pref-navbar-mode-' + m)?.classList.toggle('active', m === mode);
+  });
 }
-function toggleNavbarShrinkPref() {
-  const current = isNavbarShrinkEnabled();
-  localStorage.setItem('fleming_navbar_shrink', current ? 'false' : 'true');
+function setNavbarGrowMode(mode) {
+  if (mode !== 'grow' && mode !== 'shrink' && mode !== 'auto') return;
+  localStorage.setItem('fleming_navbar_mode', mode);
   updateNavbarShrinkToggleUI();
-  const shell = document.getElementById('app-header-shell');
-  if (shell && current) shell.classList.remove('shell-compact');
   window.dispatchEvent(new Event('scroll'));
 }
 
