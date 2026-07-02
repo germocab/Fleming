@@ -313,14 +313,17 @@
 
   #app { display: none; flex-direction: column; min-height: 100vh; }
 
-  /* ── Header shell: envuelve topnav + sub-tabs. En desktop es una card
-     flotante con esquinas redondeadas y separación de los bordes; en mobile
-     es completamente transparente — los botones "flotan" sobre el fondo. ── */
+  /* ── Header shell: envuelve topnav + sub-tabs. En Desktop queda "fixed"
+     (sticky) arriba de la pantalla al hacer scroll, encogiéndose con
+     transparencia/blur. En Móvil NO es fijo: se desplaza junto con el
+     contenido igual que el resto de la página, para que la información no
+     quede tapada detrás de la barra. ── */
   .app-header-shell {
-    position: sticky; top: 0; z-index: 100;
+    position: static;
   }
   @media (min-width: 640px) {
     .app-header-shell {
+      position: sticky; top: 0; z-index: 100;
       margin: 1.1rem 1.1rem 0;
       background: var(--nav-bg);
       backdrop-filter: blur(20px) saturate(180%);
@@ -6132,7 +6135,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.4.1.2-beta';
+const APP_VERSION = '1.4.2-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
