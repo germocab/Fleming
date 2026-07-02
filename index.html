@@ -5724,7 +5724,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.37.0-alpha';
+const APP_VERSION = '0.37.1-alpha';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -15902,16 +15902,20 @@ function formatDateEs(dateStr) {
 async function trepLoadReports() {
   const container = document.getElementById('trep-reports-cards');
   const countEl = document.getElementById('trep-reports-count');
-  const [{ data: subs, error }, { data: forms }] = await Promise.all([
+  const [{ data: subs, error }, { data: forms }, { data: terFull }] = await Promise.all([
     sb.from('territory_report_submissions').select('*').order('submitted_at', { ascending: false }),
     sb.from('territory_report_forms').select('*'),
+    // El arreglo global `territories` se carga en otras pantallas con un
+    // select() recortado (id, number, color, no_pasar) que NO trae svg_data
+    // ni manzanas, así que aquí se piden completos para poder dibujar el mapa.
+    sb.from('territories').select('id, number, svg_data, manzanas'),
   ]);
   if (error) { container.innerHTML = '<div class="empty-state"><p>Error al cargar reportes</p></div>'; return; }
   if (!subs || !subs.length) { container.innerHTML = '<div class="empty-state"><p>Sin reportes aún</p></div>'; countEl.textContent = ''; return; }
   countEl.textContent = `${subs.length} reporte${subs.length !== 1 ? 's' : ''}`;
 
   const formMap = {}; (forms || []).forEach(f => formMap[f.id] = f);
-  const terById = {}; territories.forEach(t => terById[t.id] = t);
+  const terById = {}; (terFull || []).forEach(t => terById[t.id] = t);
 
   const byDate = {};
   subs.forEach(s => {
