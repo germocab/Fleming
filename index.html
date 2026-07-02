@@ -3731,7 +3731,7 @@
     padding: 3px 9px; border-radius: 20px; flex-shrink: 0; white-space: nowrap;
   }
 
-  /* ── Easter egg: accent color swatches ── */
+  /* ── Modo Experimentos: accent color swatches ── */
   .accent-swatch {
     width: 36px; height: 36px; border-radius: 50%; border: 3px solid transparent;
     background: var(--sw); cursor: pointer; transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
@@ -3748,7 +3748,7 @@
     to   { opacity:1; transform: translateY(0) scale(1); }
   }
 
-  /* ── Easter egg: unlock overlay ── */
+  /* ── Modo Experimentos: unlock overlay ── */
   #egg-unlock-overlay {
     position: fixed; inset: 0; z-index: 9999;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -4259,6 +4259,15 @@
   #sub-content-carritos *, #admin-carritos *, #sub-content-carritos *::before, #admin-carritos *::before, #sub-content-carritos *::after, #admin-carritos *::after {
     transition-duration: 0.01ms !important; animation-duration: 0.01ms !important;
   }
+}
+
+/* ── Modo Experimentos: animaciones reducidas (elección manual, para personas sensibles al movimiento) ── */
+:root[data-animations="reduced"] *,
+:root[data-animations="reduced"] *::before,
+:root[data-animations="reduced"] *::after {
+  transition-duration: 0.01ms !important;
+  animation-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
 }
 
 </style>
@@ -5487,7 +5496,7 @@
           <div id="pref-dark-maps-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
-      <!-- Accent color — only visible when easter egg is unlocked -->
+      <!-- Accent color — only visible when Modo Experimentos is unlocked -->
       <div id="pref-accent-section" style="display:none;animation:eggReveal 0.5s cubic-bezier(0.16,1,0.3,1) both;border-top:1px solid var(--border)">
         <div style="padding:0.75rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
           <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
@@ -5500,6 +5509,24 @@
           <button class="accent-swatch" id="accent-sw-yellow" onclick="setAccentColor('yellow')" style="--sw:#f5a623" title="Amarillo"></button>
           <button class="accent-swatch" id="accent-sw-purple" onclick="setAccentColor('purple')" style="--sw:#a855f7" title="Morado"></button>
         </div>
+      </div>
+      <!-- Animaciones — only visible when Modo Experimentos is unlocked -->
+      <div id="pref-animations-section" style="display:none;animation:eggReveal 0.5s cubic-bezier(0.16,1,0.3,1) both;border-top:1px solid var(--border)">
+        <div style="padding:0.75rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
+          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">Animaciones</span>
+        </div>
+        <div class="pref-theme-row" id="pref-animations-row">
+          <button class="pref-theme-opt" id="pref-anim-fluid" onclick="setAnimationsMode('fluid')">
+            <svg viewBox="0 0 24 24"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+            Fluidas
+          </button>
+          <button class="pref-theme-opt" id="pref-anim-reduced" onclick="setAnimationsMode('reduced')">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+            Reducidas
+          </button>
+        </div>
+        <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">Elige "Reducidas" si eres sensible al movimiento en pantalla.</div>
       </div>
     </div>
 
@@ -5549,7 +5576,7 @@
             transform="rotate(-90 18 18)" style="transition:stroke-dashoffset 0.05s linear"/>
         </svg>
       </div>
-      <!-- Hidden accent color section — revealed by easter egg, now lives in Apariencia -->
+      <!-- Hidden accent color section — revealed by Modo Experimentos, now lives in Apariencia -->
     </div>
 
     <!-- Reportar un problema -->
@@ -5768,7 +5795,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.0-beta';
+const APP_VERSION = '1.0.1-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -5936,6 +5963,7 @@ function initTheme() {
   const saved = localStorage.getItem('fleming_theme') || 'auto';
   applyTheme(saved);
   initAccentColor();
+  initAnimationsMode();
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
     if (document.documentElement.getAttribute('data-theme') === 'auto') {
       _updateThemeActive('auto');
@@ -7924,7 +7952,9 @@ function _namesMatch(a, b) {
 async function viewAssignment(id) {
   const a = assignments.find(x => x.id === id);
   if (!a) return;
-  await ensureTerritoryMapsLoaded();
+  // La búsqueda de territorios en memoria no requiere red; el mapa (map_data,
+  // que sí es pesado) se resuelve más abajo en segundo plano, sin bloquear
+  // la apertura de la pantalla.
   const ter  = territories.find(t => t.id === a.territory_id) || null;
   const ter2 = a.territory_id_2 ? (territories.find(t => t.id === a.territory_id_2) || null) : null;
   const d = new Date(a.date+'T00:00:00');
@@ -7976,15 +8006,11 @@ async function viewAssignment(id) {
   }
 
   // ── Botón "Administrar" — solo visible si el usuario puede editar Asignaciones ──
+  // Para DEV se resuelve al instante (sin red). Para admin, se resuelve en segundo
+  // plano más abajo (usa caché con TTL) para no retrasar la apertura de la pantalla.
   const adminActionsWrap = document.getElementById('detail-admin-actions');
   const adminBtn = document.getElementById('detail-admin-btn');
-  let canManageAssignments = false;
-  if (currentRole === 'dev') canManageAssignments = true;
-  else if (currentRole === 'admin') {
-    await refreshCurrentUserPermsCache();
-    canManageAssignments = canAccessModule(_currentUserPermsCache, 'assignments');
-  }
-  if (canManageAssignments) {
+  if (currentRole === 'dev') {
     adminActionsWrap.style.display = '';
     adminBtn.onclick = () => goToAdminAssignment(a.id);
   } else {
@@ -8004,8 +8030,10 @@ async function viewAssignment(id) {
     reportBtn.onclick = null;
   }
 
-  // ── Territory tabs setup ──
+  // ── Territory tabs setup — las etiquetas/badges no dependen del mapa (map_data),
+  // así que se pintan de inmediato; el mapa en sí se carga en segundo plano ──
   const tabsBar = document.getElementById('detail-ter-tabs');
+  const panel = document.getElementById('detail-panel');
   if (ter && ter2) {
     // Show tabs bar
     const tab1 = document.getElementById('detail-ter-tab-1');
@@ -8018,30 +8046,60 @@ async function viewAssignment(id) {
     document.getElementById('detail-ter-tab-label-2').textContent = `Territorio ${ter2.number}`;
     tabsBar.style.display = '';
     // Store both territories on panel for tab switching
-    const panel = document.getElementById('detail-panel');
     panel._ter1 = ter; panel._ter2 = ter2;
     // Activate tab 1 by default
     tab1.classList.add('active'); tab2.classList.remove('active');
-    _renderDetailTerContent(ter);
   } else {
     tabsBar.style.display = 'none';
-    // Single territory or none
-    const mapWrap = document.getElementById('detail-map-wrap');
-    const mapImg  = document.getElementById('detail-map-img');
-    const terMapSrc = ter ? getActiveTerMapSrc(ter) : null;
-    if (terMapSrc) {
-      mapImg.src = terMapSrc;
-      mapWrap.style.display = '';
-      mapWrap.onclick = () => openLightbox(terMapSrc, ter ? `Territorio ${ter.number}` : '');
-    } else {
-      mapWrap.style.display = 'none';
-      mapWrap.onclick = null;
-    }
-    _renderDetailNoPasar(ter);
   }
+  // "No pasar" no depende del mapa, se pinta de inmediato
+  _renderDetailNoPasar(ter);
+  // Oculta el mapa mientras se resuelve en segundo plano, para no mostrar por
+  // un instante el mapa de la asignación anterior.
+  const mapWrap = document.getElementById('detail-map-wrap');
+  if (mapWrap) mapWrap.style.display = 'none';
 
+  // ── Abrimos la pantalla de inmediato: el mapa del territorio y los permisos ──
+  // de admin (ambos requieren red) se resuelven después, sin bloquear el tap.
+  panel._openAssignmentId = id;
   document.getElementById('detail-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
+
+  // ── Mapa del territorio (map_data/map_data_dark son blobs pesados) ──
+  (async () => {
+    await ensureTerritoryMapsLoaded();
+    if (panel._openAssignmentId !== id) return; // el usuario ya cambió de tarjeta
+    if (ter && ter2) {
+      _renderDetailTerContent(ter);
+    } else {
+      const mapImg = document.getElementById('detail-map-img');
+      const terMapSrc = ter ? getActiveTerMapSrc(ter) : null;
+      if (terMapSrc) {
+        mapImg.src = terMapSrc;
+        mapWrap.style.display = '';
+        mapWrap.onclick = () => openLightbox(terMapSrc, ter ? `Territorio ${ter.number}` : '');
+      } else {
+        mapWrap.style.display = 'none';
+        mapWrap.onclick = null;
+      }
+    }
+  })();
+
+  // ── Permisos de admin (usa caché con TTL, normalmente no requiere red) ──
+  if (currentRole === 'admin') {
+    (async () => {
+      await refreshCurrentUserPermsCache();
+      if (panel._openAssignmentId !== id) return;
+      const canManageAssignments = canAccessModule(_currentUserPermsCache, 'assignments');
+      if (canManageAssignments) {
+        adminActionsWrap.style.display = '';
+        adminBtn.onclick = () => goToAdminAssignment(a.id);
+      } else {
+        adminActionsWrap.style.display = 'none';
+        adminBtn.onclick = null;
+      }
+    })();
+  }
 }
 
 // Render map + no-pasar content for a given territory object
@@ -11177,14 +11235,19 @@ async function getUserPermissions() {
 // notificaciones de solicitudes de cuenta). Los DEV siempre lo tienen.
 // A diferencia de getUserPermissions(), esto SÍ consulta permisos para admin,
 // ya que "usuarios" es el único módulo restringible para ese rol.
-async function refreshCurrentUserPermsCache() {
+let _permsCacheTime = 0;
+const PERMS_CACHE_TTL_MS = 60000; // evita re-consultar Supabase cada vez que se abre un detalle (p.ej. tarjetas de Asignaciones)
+async function refreshCurrentUserPermsCache(force) {
   if (currentRole === 'dev') { _currentUserPermsCache = { usuarios: true }; return; }
   if (currentRole !== 'admin') { _currentUserPermsCache = null; return; }
+  if (!force && _currentUserPermsCache && (Date.now() - _permsCacheTime) < PERMS_CACHE_TTL_MS) return; // caché reciente, sin round-trip
   try {
     const { data } = await sb.from('platform_users').select('permissions').ilike('name', currentUser.name).single();
     _currentUserPermsCache = data ? parsePermissions(data.permissions) : parsePermissions(null);
+    _permsCacheTime = Date.now();
   } catch (e) {
     _currentUserPermsCache = parsePermissions(null);
+    _permsCacheTime = Date.now();
   }
 }
 
@@ -11320,6 +11383,7 @@ async function syncRoleFromServer() {
     // Mantener el caché de permisos al día (usado para notificaciones del módulo "Usuarios").
     if (['admin'].includes(currentRole)) {
       _currentUserPermsCache = parsePermissions(data.permissions);
+      _permsCacheTime = Date.now();
     }
     if (data.role !== currentRole) {
       const prevRole = currentRole;
@@ -11580,7 +11644,7 @@ function toggleLiveFeaturePref() {
   _liveUpdateBtnVisibility();
 }
 
-// ── Easter Egg: Accent Color Picker ────────────────────────────────────────
+// ── Modo Experimentos: Accent Color Picker ──────────────────────────────────
 const ACCENT_PALETTES = {
   blue:   { light: { accent: '#007AFF', light: 'rgba(0,122,255,0.12)'   }, dark: { accent: '#0a84ff', light: 'rgba(10,132,255,0.15)'  } },
   green:  { light: { accent: '#28cd41', light: 'rgba(40,205,65,0.12)'   }, dark: { accent: '#30d158', light: 'rgba(48,209,88,0.15)'   } },
@@ -11591,7 +11655,7 @@ const ACCENT_PALETTES = {
 let _versionHoldTimer = null;
 let _versionHoldRaf   = null;
 let _versionHoldStart = null;
-const VERSION_HOLD_MS = 5000;
+const VERSION_HOLD_MS = 3000;
 
 function startVersionHold(e) {
   if (e) e.preventDefault();
@@ -11643,12 +11707,17 @@ function triggerEggUnlock() {
     applyAccentColor('blue');
     const sec = document.getElementById('pref-accent-section');
     if (sec) sec.style.display = 'none';
-    showToast('Easter egg desactivado. ¡Encuéntralo de nuevo!', '');
+    localStorage.removeItem('fleming_animations');
+    applyAnimationsMode('fluid');
+    const animSec = document.getElementById('pref-animations-section');
+    if (animSec) animSec.style.display = 'none';
+    showToast('Modo Experimentos desactivado. ¡Encuéntralo de nuevo!', '');
     return;
   }
   // First unlock!
   localStorage.setItem('fleming_egg_unlocked', '1');
   revealAccentSection();
+  revealAnimationsSection();
   const overlay = document.getElementById('egg-unlock-overlay');
   overlay.classList.add('active');
   launchConfetti();
@@ -11771,6 +11840,7 @@ function initAccentColor() {
   applyAccentColor(saved);
   if (localStorage.getItem('fleming_egg_unlocked') === '1') {
     revealAccentSection();
+    revealAnimationsSection();
   }
 }
 
@@ -11779,6 +11849,30 @@ function updateAccentSwatchesUI() {
   ['blue','green','pink','yellow','purple'].forEach(name => {
     document.getElementById('accent-sw-' + name)?.classList.toggle('active', name === active);
   });
+}
+
+// ── Modo Experimentos: Animaciones (más fluidas / reducidas para personas sensibles) ──
+function initAnimationsMode() {
+  const saved = localStorage.getItem('fleming_animations') || 'fluid';
+  applyAnimationsMode(saved);
+}
+function applyAnimationsMode(mode) {
+  document.documentElement.setAttribute('data-animations', mode === 'reduced' ? 'reduced' : 'fluid');
+  updateAnimationsModeUI();
+}
+function setAnimationsMode(mode) {
+  localStorage.setItem('fleming_animations', mode === 'reduced' ? 'reduced' : 'fluid');
+  applyAnimationsMode(mode);
+}
+function updateAnimationsModeUI() {
+  const active = localStorage.getItem('fleming_animations') || 'fluid';
+  document.getElementById('pref-anim-fluid')?.classList.toggle('active', active === 'fluid');
+  document.getElementById('pref-anim-reduced')?.classList.toggle('active', active === 'reduced');
+}
+function revealAnimationsSection() {
+  const sec = document.getElementById('pref-animations-section');
+  if (sec) { sec.style.display = 'block'; }
+  updateAnimationsModeUI();
 }
 async function renderPrefNotifList() {
   const list = document.getElementById('pref-notif-list');
@@ -14966,7 +15060,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
   </div>
 </div>
 
-<!-- ══ Easter Egg: Unlock overlay + confetti ══ -->
+<!-- ══ Modo Experimentos: Unlock overlay + confetti ══ -->
 <canvas id="egg-confetti-canvas" style="display:none"></canvas>
 <div id="egg-unlock-overlay">
   <div id="egg-unlock-card">
@@ -14983,8 +15077,8 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
         <circle cx="36" cy="36" r="34" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.35"/>
       </svg>
     </div>
-    <div id="egg-unlock-title">¡Easter egg encontrado!</div>
-    <div id="egg-unlock-sub">Has descubierto una función oculta. Ahora puedes personalizar el color de acento de toda la plataforma.</div>
+    <div id="egg-unlock-title">¡Modo Experimentos activado!</div>
+    <div id="egg-unlock-sub">Has descubierto una función oculta. Ahora puedes personalizar el color de acento de toda la plataforma y ajustar la fluidez de las animaciones.</div>
     <button id="egg-unlock-btn" onclick="closeEggUnlock()">¡Genial!</button>
   </div>
 </div>
