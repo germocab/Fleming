@@ -322,7 +322,23 @@
       border: 1px solid var(--border);
       border-radius: 26px;
       box-shadow: var(--shadow-lg);
+      transition: margin 0.25s ease, border-radius 0.25s ease, box-shadow 0.25s ease;
     }
+    /* ── Navbar compacta al hacer scroll (solo Desktop): al bajar, la barra
+       se "encoge" (menos alto, más pegada al borde) manteniendo el efecto de
+       transparencia y blur para ver el contenido detrás; al subir, recupera
+       su tamaño y distribución original. El efecto de transparencia/blur en
+       sí respeta el toggle de "Activa el efecto blur" de Configuración
+       (clase html.no-transparency, definida arriba). ── */
+    .app-header-shell.shell-compact {
+      margin: 0.55rem 0.55rem 0;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+    }
+    .app-header-shell.shell-compact .topnav { height: 56px; }
+    .app-header-shell .topnav { transition: height 0.25s ease; }
+    .app-header-shell.shell-compact .main-seg-btn { padding: 6px 18px; font-size: 0.84rem; }
+    .app-header-shell .main-seg-btn { transition: padding 0.25s ease, font-size 0.25s ease; }
   }
 
   /* 3-column grid: [left ghost 1fr] [toggle auto] [icons 1fr]
@@ -713,6 +729,22 @@
   }
 
   .detail-handle { width: 36px; height: 4px; background: var(--surface3); border-radius: 2px; margin: 10px auto 0; }
+  /* ── Detalle de Territorio: usa el mismo header estándar (back + título
+     centrado) que el resto de las pantallas de la plataforma (Notificaciones,
+     Configuración, etc.), en vez del header de fecha/cerrar por defecto del
+     panel de detalle. Se activa vía .detail-panel.territory-mode. ── */
+  .detail-territory-topbar { display: none; }
+  .detail-panel.territory-mode .detail-territory-topbar { display: flex; }
+  .detail-panel.territory-mode .detail-header-bar,
+  .detail-panel.territory-mode .detail-mobile-topbar,
+  .detail-panel.territory-mode .detail-handle { display: none; }
+  .detail-panel.territory-mode .detail-address { display: none; }
+  .detail-panel.territory-mode .detail-ter-badge {
+    display: flex !important; position: static; margin: 0.75rem auto 0.25rem;
+  }
+  .detail-panel.territory-mode .detail-main-row {
+    flex-direction: column; align-items: center; padding-top: 0.25rem;
+  }
   .detail-header-bar {
     display: flex; align-items: center; justify-content: space-between;
     padding: 1rem 1.25rem 0.5rem;
@@ -747,7 +779,7 @@
 
   .detail-main-row {
     display: flex; align-items: flex-start; gap: 1rem;
-    padding: 0.5rem 1.25rem 1rem;
+    padding: 1.1rem 1.25rem 1rem;
   }
   .detail-info { flex: 1; }
   .detail-time-chip {
@@ -1995,11 +2027,30 @@
 
   /* ── Notif search bar ── (alineada al estilo estándar de búsqueda de la
      plataforma, mismo look que .grupos-search-input) */
+  /* Botón circular "Borrar todo" — reemplaza el botón de texto por un ícono
+     de basurero rojo, tanto en el dropdown de Escritorio como en la pantalla
+     completa de Notificaciones en Móvil. */
+  .notif-clear-icon-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    background: rgba(255,59,48,0.1); border: none; color: var(--red);
+    cursor: pointer; transition: background 0.15s, transform 0.15s;
+  }
+  .notif-clear-icon-btn:hover { background: rgba(255,59,48,0.18); }
+  .notif-clear-icon-btn:active { transform: scale(0.92); }
+  .notif-clear-icon-btn svg {
+    width: 15px; height: 15px; stroke: currentColor; fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
   .notif-search-wrap {
     position: relative; padding: 0 0 0.85rem;
   }
   .notif-search-wrap .notif-search-icon {
-    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    /* El wrap tiene padding sólo abajo (0.85rem) para separar del contenido
+       siguiente, así que su 50% no coincide con el centro real del input;
+       se descuenta la mitad de ese padding para centrar el ícono respecto
+       al input, no respecto al wrap completo. */
+    position: absolute; left: 12px; top: calc(50% - 0.425rem); transform: translateY(-50%);
     width: 16px; height: 16px; stroke: var(--text3); fill: none; stroke-width: 2; stroke-linecap: round; pointer-events: none;
   }
   .notif-search-input {
@@ -3300,6 +3351,18 @@
     overflow-y: auto; animation: fadeIn 0.22s ease;
   }
   #page-grupo.open { display: flex; }
+
+  /* El título "Grupo X" en pill (con blur/transparencia) del header estándar
+     permanece oculto mientras se ve el hero grande (círculo + título + nº de
+     miembros); aparece con una transición suave recién cuando el usuario
+     baja por la lista de miembros, para no duplicar la información. */
+  #page-grupo .pill-header-title {
+    opacity: 0; transform: translate(-50%, -46%);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  #page-grupo.grupo-scrolled .pill-header-title {
+    opacity: 1; transform: translate(-50%, -50%);
+  }
 
   .grupo-detail-hero {
     display: flex; flex-direction: column; align-items: center;
@@ -4648,7 +4711,9 @@
   <div class="options-dropdown notif-desktop-dropdown" id="notifications-dropdown" style="width:340px;max-height:520px;overflow-y:auto;">
     <div style="padding:0.85rem 1rem 0.4rem;font-weight:700;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
       <span>Notificaciones</span>
-      <button id="notif-clear-btn-desktop" onclick="deleteAllNotifications()" style="background:none;border:none;font-family:var(--font);font-size:0.75rem;font-weight:600;color:var(--red);cursor:pointer;padding:2px 6px;border-radius:6px;transition:background 0.15s" onmouseover="this.style.background='rgba(255,59,48,0.08)'" onmouseout="this.style.background='none'">Borrar todo</button>
+      <button id="notif-clear-btn-desktop" class="notif-clear-icon-btn" onclick="deleteAllNotifications()" title="Borrar todo" aria-label="Borrar todo">
+        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+      </button>
     </div>
     <div style="padding:0.6rem 1rem 0;border-bottom:1px solid var(--border)">
       <div class="notif-search-wrap">
@@ -5246,6 +5311,13 @@
 <div class="detail-overlay" id="detail-overlay" onclick="handleOverlayClick(event)">
   <div class="detail-panel" id="detail-panel">
     <div class="detail-handle"></div>
+    <!-- Header estándar de la plataforma — solo visible en modo Territorio -->
+    <nav class="subpage-topbar detail-territory-topbar" id="detail-territory-topbar">
+      <button class="pill-back-btn" onclick="closeDetail()" title="Cerrar">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="pill-header-title" id="detail-territory-title">Territorio</span>
+    </nav>
     <!-- Header tipo pantalla completa — solo visible en Móvil -->
     <nav class="subpage-topbar detail-mobile-topbar">
       <button class="pill-back-btn" onclick="closeDetail()" title="Cerrar">
@@ -6035,7 +6107,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.3-beta';
+const APP_VERSION = '1.4-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -6577,7 +6649,17 @@ async function openGrupoDetailPage(gid) {
 
   const page = document.getElementById('page-grupo');
   page.classList.add('open');
+  page.classList.remove('grupo-scrolled');
+  page.scrollTop = 0;
   document.body.style.overflow = 'hidden';
+  // El título en pill (con blur/transparencia) del header estándar solo
+  // aparece una vez que el usuario baja más allá del hero grande.
+  if (!page._scrollHandlerAttached) {
+    page.addEventListener('scroll', () => {
+      page.classList.toggle('grupo-scrolled', page.scrollTop > 90);
+    });
+    page._scrollHandlerAttached = true;
+  }
 
   // Hero
   document.getElementById('grupo-detail-nav-title').textContent = `Grupo ${g.numero}`;
@@ -8432,6 +8514,7 @@ async function submitSuggestNp() {
 
 function closeDetail() {
   // Reset any state that viewTerritory may have changed
+  document.getElementById('detail-panel').classList.remove('territory-mode');
   document.getElementById('detail-time-chip').style.display = '';
   document.getElementById('detail-address').style.fontSize = '';
   document.getElementById('detail-house-label').textContent = '';
@@ -11707,17 +11790,19 @@ async function viewTerritory(id) {
   const noPasar = parseNoPasar(t.no_pasar);
   const color = getTerColor(t.number);
 
-  // Header: territory number + name
+  // Header: título estándar de la plataforma (back + "Territorio X" centrado),
+  // igual que en Notificaciones y Configuración.
+  document.getElementById('detail-panel').classList.add('territory-mode');
+  document.getElementById('detail-territory-title').textContent = `Territorio ${t.number}`;
   document.getElementById('detail-date-label').textContent = '';
   document.getElementById('detail-mobile-date-label').textContent = '';
   document.getElementById('detail-time-chip').style.display = 'none';
   const addressEl = document.getElementById('detail-address');
-  addressEl.textContent = `Territorio ${t.number}`;
-  addressEl.style.fontSize = '1.4rem';
+  addressEl.textContent = '';
   document.getElementById('detail-house-label').textContent = '';
   document.getElementById('detail-conductor').textContent = '';
 
-  // Badge
+  // Badge — número del territorio en su círculo de color distintivo, debajo del título
   const badge = document.getElementById('detail-ter-badge');
   badge.textContent = t.number;
   badge.style.background = color;
@@ -11869,6 +11954,25 @@ function toggleDarkMapsPref() {
   updateDarkMapToggleUI();
   if (currentSubTab === 'territorios') renderTerritoryView();
 }
+
+// ── Navbar compacta al hacer scroll (solo Desktop, ≥640px) ──────────────────
+// Al bajar, .app-header-shell se encoge y flota con blur/transparencia sobre
+// el contenido; al subir, recupera tamaño y distribución original. El efecto
+// de blur/transparencia en sí sigue respetando el toggle de Configuración.
+(function initNavbarShrinkOnScroll() {
+  let lastY = 0;
+  const THRESHOLD = 24;
+  function onScroll() {
+    const shell = document.getElementById('app-header-shell');
+    if (!shell) return;
+    if (window.innerWidth < 640) { shell.classList.remove('shell-compact'); return; }
+    const y = window.scrollY || document.documentElement.scrollTop;
+    shell.classList.toggle('shell-compact', y > THRESHOLD);
+    lastY = y;
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+})();
 
 // ── Transparencias: activa/desactiva el efecto de blur global ───────────────
 function isTransparencyEnabled() {
@@ -15116,7 +15220,9 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
     </button>
     <span class="pill-header-title">Notificaciones</span>
     <div class="subpage-topbar-right">
-      <button id="notif-clear-btn" class="pill-action-btn" onclick="deleteAllNotifications()">Borrar todo</button>
+      <button id="notif-clear-btn" class="notif-clear-icon-btn" onclick="deleteAllNotifications()" title="Borrar todo" aria-label="Borrar todo">
+        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+      </button>
     </div>
   </nav>
   <div style="padding:0.85rem 1rem 0;max-width:640px;width:100%;margin:0 auto">
