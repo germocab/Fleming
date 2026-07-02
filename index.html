@@ -64,12 +64,12 @@
     align-items: center;
     gap: 5px;
     padding: 5px 10px 5px 8px;
-    background: rgba(255,149,0,0.13);
-    border: 1px solid rgba(255,149,0,0.35);
+    background: var(--accent-light);
+    border: 1px solid rgba(0,122,255,0.35);
     border-radius: 20px;
     font-size: 0.72rem;
     font-weight: 700;
-    color: var(--orange);
+    color: var(--accent);
     cursor: pointer;
     white-space: nowrap;
     transition: background 0.18s, box-shadow 0.18s;
@@ -81,11 +81,11 @@
     transform: translateY(-50%);
     width: fit-content;
   }
-  #dev-version-pill:hover { background: rgba(255,149,0,0.2); box-shadow: 0 2px 8px rgba(255,149,0,0.18); }
+  #dev-version-pill:hover { background: rgba(0,122,255,0.2); box-shadow: 0 2px 8px rgba(0,122,255,0.18); }
   #dev-version-pill svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; flex-shrink: 0; }
   #dev-version-pill .dev-pill-dot {
     width: 6px; height: 6px; border-radius: 50%;
-    background: var(--orange); flex-shrink: 0;
+    background: var(--accent); flex-shrink: 0;
     animation: devPillPulse 2s ease-in-out infinite;
   }
   @keyframes devPillPulse {
@@ -3727,7 +3727,7 @@
   }
   .pref-alpha-badge {
     font-size: 0.66rem; font-weight: 700; letter-spacing: 0.04em;
-    color: var(--orange); background: rgba(255,149,0,0.12); border: 1px solid rgba(255,149,0,0.3);
+    color: var(--accent); background: var(--accent-light); border: 1px solid rgba(0,122,255,0.3);
     padding: 3px 9px; border-radius: 20px; flex-shrink: 0; white-space: nowrap;
   }
 
@@ -5540,7 +5540,7 @@
           <div class="profile-row-label">Versión de la plataforma</div>
           <div class="profile-row-value" id="pref-version-value">—</div>
         </div>
-        <span class="pref-alpha-badge" id="pref-alpha-badge">ALPHA</span>
+        <span class="pref-alpha-badge" id="pref-alpha-badge">BETA</span>
         <!-- Hold progress ring -->
         <svg id="ver-hold-ring" viewBox="0 0 36 36" style="position:absolute;right:12px;width:28px;height:28px;opacity:0;transition:opacity 0.2s;pointer-events:none">
           <circle cx="18" cy="18" r="15" fill="none" stroke="var(--surface3)" stroke-width="3"/>
@@ -5559,7 +5559,7 @@
         Reportar un problema
       </button>
       <p style="font-size:0.76rem;color:var(--text3);text-align:center;margin-top:0.6rem;line-height:1.4">
-        Esta plataforma está en fase Alpha. Si encuentras algún error o algo no funciona como esperas, repórtalo y lo revisaremos.
+        Esta plataforma está en fase Beta. Si encuentras algún error o algo no funciona como esperas, repórtalo y lo revisaremos.
       </p>
     </div>
 
@@ -5768,7 +5768,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '0.37.6-alpha';
+const APP_VERSION = '1.0-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
