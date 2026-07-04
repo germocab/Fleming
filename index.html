@@ -4934,26 +4934,33 @@
   padding: 10px 14px; cursor: pointer;
 }
 .simp-option-pill:active { background: var(--surface2); }
-/* "Menú" (hamburguesa): fila de pills que se despliega hacia abajo ── */
+/* "Menú" (hamburguesa): tarjeta que se despliega hacia abajo, con las
+   opciones apiladas una bajo la otra (mismo lenguaje visual que
+   .simp-options-dropdown: sombra marcada, esquinas redondeadas, se nota
+   que "flotan" sobre el contenido). Anclado a la derecha, bajo el botón
+   hamburguesa. ── */
 .simp-menu-row {
-  display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden;
-  padding: 0 1rem; scrollbar-width: none;
-  max-height: 0; opacity: 0; transform: translateY(-8px);
-  pointer-events: none;
-  transition: max-height 0.32s cubic-bezier(.4,0,.2,1), opacity 0.24s ease,
-              transform 0.32s cubic-bezier(.2,.9,.25,1.1), padding-bottom 0.32s ease;
+  position: absolute; top: 52px; right: 0.85rem; z-index: 61;
+  display: flex; flex-direction: column; gap: 8px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  padding: 10px; box-shadow: var(--shadow-lg); min-width: 200px; max-width: calc(100vw - 1.7rem);
+  transform-origin: top right;
+  opacity: 0; transform: translateY(-10px) scale(0.96);
+  pointer-events: none; max-height: 70vh; overflow-y: auto;
+  transition: opacity 0.22s ease, transform 0.3s cubic-bezier(.2,.9,.25,1.15);
 }
 .simp-menu-row.open {
-  max-height: 64px; opacity: 1; transform: translateY(0);
-  padding: 0.3rem 1rem 0.85rem;
+  opacity: 1; transform: translateY(0) scale(1);
   pointer-events: auto;
 }
 .simp-menu-row::-webkit-scrollbar { display: none; }
 .simp-pill {
-  flex-shrink: 0; font-family: var(--font); font-size: 0.85rem; font-weight: 700;
-  color: var(--text2); background: var(--surface3); border: none; border-radius: 20px;
-  padding: 8px 16px; cursor: pointer; white-space: nowrap; transition: background 0.15s, color 0.15s;
+  flex-shrink: 0; font-family: var(--font); font-size: 0.88rem; font-weight: 700;
+  text-align: left; color: var(--text2); background: var(--surface3); border: none;
+  border-radius: 12px; padding: 10px 14px; cursor: pointer; white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
 }
+.simp-pill:active { background: var(--surface2); }
 .simp-pill.active { background: var(--text); color: var(--bg); }
 /* Leve sombra sobre el contenido de abajo mientras Opciones/Menú están abiertos.
    El header tiene z-index mayor y fondo propio, así que queda sin oscurecer;
@@ -6816,7 +6823,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.10.1-beta';
+const APP_VERSION = '1.10.5-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
