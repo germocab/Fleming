@@ -836,6 +836,21 @@
   }
   .detail-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
 
+  /* ── Animación "Morph": la tarjeta de una asignación de Casa en Casa
+     crece y se transforma en la pantalla de detalles (View Transitions API,
+     solo móvil, activable/desactivable desde Experimentos). El nombre
+     'morph-card' se asigna dinámicamente por JS solo a la tarjeta tocada y
+     al panel de detalle, así el navegador anima ambas formas entre sí. ── */
+  ::view-transition-group(morph-card) {
+    animation-duration: 0.42s;
+    animation-timing-function: cubic-bezier(.32,.9,.28,1);
+  }
+  ::view-transition-old(morph-card),
+  ::view-transition-new(morph-card) {
+    animation-duration: 0.32s;
+    animation-timing-function: ease;
+  }
+
   .detail-panel {
     background: var(--surface); width: 100%; max-width: 560px;
     border-radius: 20px 20px 0 0;
@@ -6597,6 +6612,22 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">Elige "Reducidas" si eres sensible al movimiento en pantalla.</div>
       </div>
     </div>
+    <!-- Animación Morph: tarjeta de asignación → pantalla de detalles (solo móvil) -->
+    <div class="profile-section">
+      <div class="profile-section-title">Animaciones de transición</div>
+      <div class="profile-row" style="cursor:pointer" onclick="toggleMorphPref()">
+        <div class="profile-row-icon" style="background:var(--ter-1-bg);color:var(--ter-1)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><path d="M13 6.5h8M13 17.5h8M17 3v7M17 14v7" opacity="0.55"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Morph</div>
+          <div class="profile-row-value" style="font-size:0.8rem" id="morph-anim-desc">La tarjeta de una asignación de Casa en Casa se transforma fluidamente en la pantalla de detalles. Solo disponible en móvil.</div>
+        </div>
+        <div id="morph-anim-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="morph-anim-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
+    </div>
     <!-- Versión Simplificada de la plataforma (solo móvil) -->
     <div class="profile-section">
       <div class="profile-section-title">Layout</div>
@@ -6823,7 +6854,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.11.1-beta';
+const APP_VERSION = '1.11.5-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -9338,7 +9369,7 @@ function renderSchedule() {
         const mainWrapClose = isToday ? '' : '</div>';
         html += `
           <div class="sabado-section-label mine">Mi grupo · Grupo ${myGrupo.numero}</div>
-          <div class="${cardClass}" onclick="viewAssignment('${myAssignment.id}')">
+          <div class="${cardClass}" onclick="viewAssignment('${myAssignment.id}', this)">
             ${infoWrapOpen}${mainWrapOpen}
               <div class="${addressClass}">${myAssignment.address||'Sin dirección'}${houseLabel?`<br><span class="${houseClass}">${houseLabel}</span>`:''}</div>
               <div class="${metaClass}">
@@ -9371,7 +9402,7 @@ function renderSchedule() {
             `<div class="sabado-grupo-ter-circle" style="background:${getTerColor(t.number)}">${t.number}</div>`
           ).join('');
 
-          html += `<div class="sabado-grupo-card" onclick="viewAssignment('${a.id}')">
+          html += `<div class="sabado-grupo-card" onclick="viewAssignment('${a.id}', this)">
             ${terCircles ? `<div class="sabado-grupo-ter-badges">${terCircles}</div>` : ''}
             <div class="sabado-grupo-tag" style="color:${tagColor};background:${tagColor}26">${grupoNum != null ? 'Grupo ' + grupoNum : 'Grupo'}</div>
             <div class="sabado-grupo-body">
@@ -9402,7 +9433,7 @@ function renderSchedule() {
         const houseLabel = a.house ? ((_c && _c.tipo === 'departamento' ? 'Depto' : 'Casa') + ' de ') + a.house : '';
 
         if (isToday) {
-          html += `<div class="assignment-card-today" onclick="viewAssignment('${a.id}')">
+          html += `<div class="assignment-card-today" onclick="viewAssignment('${a.id}', this)">
             <div class="today-card-info">
               <div class="today-card-address">${a.address||'Sin dirección'}${houseLabel?`<br><span class="today-card-house">${houseLabel}</span>`:''}</div>
               <div class="today-card-meta">
@@ -9417,7 +9448,7 @@ function renderSchedule() {
             ${rightBadge}
           </div>`;
         } else {
-          html += `<div class="assignment-card" onclick="viewAssignment('${a.id}')">
+          html += `<div class="assignment-card" onclick="viewAssignment('${a.id}', this)">
             <div class="card-main">
               <div class="card-address">${a.address||'Sin dirección'}${houseLabel?`<br><span class="card-house">${houseLabel}</span>`:''}</div>
               <div class="card-meta">
@@ -9446,9 +9477,10 @@ function _namesMatch(a, b) {
   return norm(a) === norm(b);
 }
 
-async function viewAssignment(id) {
+async function viewAssignment(id, cardEl) {
   const a = assignments.find(x => x.id === id);
   if (!a) return;
+  _morphCardEl = (cardEl && cardEl.nodeType === 1) ? cardEl : null;
   // La búsqueda de territorios en memoria no requiere red; el mapa (map_data,
   // que sí es pesado) se resuelve más abajo en segundo plano, sin bloquear
   // la apertura de la pantalla.
@@ -9576,11 +9608,27 @@ async function viewAssignment(id) {
   panel._openAssignmentId = id;
   const _detailOverlay = document.getElementById('detail-overlay');
   const _useSidebarMode = window.innerWidth >= 640 && typeof getHouseToHouseViewMode === 'function' && getHouseToHouseViewMode() === 'sidebar';
-  _detailOverlay.classList.toggle('sidebar-mode', _useSidebarMode);
-  document.body.classList.toggle('h2h-sidebar-open', _useSidebarMode);
-  _detailOverlay.classList.add('open');
-  document.body.style.overflow = _useSidebarMode ? '' : 'hidden';
-  if (typeof updateH2HSidebarFabIcon === 'function') updateH2HSidebarFabIcon();
+  const _openOverlayNow = () => {
+    _detailOverlay.classList.toggle('sidebar-mode', _useSidebarMode);
+    document.body.classList.toggle('h2h-sidebar-open', _useSidebarMode);
+    _detailOverlay.classList.add('open');
+    document.body.style.overflow = _useSidebarMode ? '' : 'hidden';
+    if (typeof updateH2HSidebarFabIcon === 'function') updateH2HSidebarFabIcon();
+  };
+  // ── Animación "Morph": la tarjeta crece y se transforma en la pantalla de
+  // detalles. Solo aplica en móvil, con la opción activada en Experimentos,
+  // y si el navegador soporta la View Transitions API. ──
+  if (_morphCardEl && !_useSidebarMode && isMorphActive()) {
+    _morphCardEl.style.viewTransitionName = 'morph-card';
+    panel.style.viewTransitionName = 'morph-card';
+    const _morphTransition = document.startViewTransition(_openOverlayNow);
+    _morphTransition.finished.finally(() => {
+      if (_morphCardEl) _morphCardEl.style.viewTransitionName = '';
+      panel.style.viewTransitionName = '';
+    });
+  } else {
+    _openOverlayNow();
+  }
 
   // ── Mapa del territorio (map_data/map_data_dark son blobs pesados) ──
   (async () => {
@@ -9701,28 +9749,48 @@ async function submitSuggestNp() {
 
 
 function closeDetail() {
-  // Reset any state that viewTerritory may have changed
-  document.getElementById('detail-panel').classList.remove('territory-mode');
-  document.getElementById('detail-time-chip').style.display = '';
-  document.getElementById('detail-address').style.fontSize = '';
-  document.getElementById('detail-house-label').textContent = '';
-  document.getElementById('detail-actions').style.display = '';
-  // Reset territory tabs
-  document.getElementById('detail-ter-tabs').style.display = 'none';
-  document.getElementById('detail-ter-tab-1').classList.add('active');
-  document.getElementById('detail-ter-tab-2').classList.remove('active');
-  const panel = document.getElementById('detail-panel');
-  panel._ter1 = null; panel._ter2 = null;
-  document.getElementById('detail-overlay').classList.remove('open');
-  document.getElementById('detail-overlay').classList.remove('sidebar-mode');
-  document.body.classList.remove('h2h-sidebar-open');
-  document.body.style.overflow = '';
-  // Reset suggest form
-  const form = document.getElementById('suggest-np-form');
-  if (form) { form.classList.remove('open'); }
-  ['snp-calle','snp-numero','snp-motivo'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-  // Live Mode: detener al cerrar el detalle
-  if (_liveActive) stopLiveMode();
+  const _closeNow = () => {
+    // Reset any state that viewTerritory may have changed
+    document.getElementById('detail-panel').classList.remove('territory-mode');
+    document.getElementById('detail-time-chip').style.display = '';
+    document.getElementById('detail-address').style.fontSize = '';
+    document.getElementById('detail-house-label').textContent = '';
+    document.getElementById('detail-actions').style.display = '';
+    // Reset territory tabs
+    document.getElementById('detail-ter-tabs').style.display = 'none';
+    document.getElementById('detail-ter-tab-1').classList.add('active');
+    document.getElementById('detail-ter-tab-2').classList.remove('active');
+    const panel = document.getElementById('detail-panel');
+    panel._ter1 = null; panel._ter2 = null;
+    document.getElementById('detail-overlay').classList.remove('open');
+    document.getElementById('detail-overlay').classList.remove('sidebar-mode');
+    document.body.classList.remove('h2h-sidebar-open');
+    document.body.style.overflow = '';
+    // Reset suggest form
+    const form = document.getElementById('suggest-np-form');
+    if (form) { form.classList.remove('open'); }
+    ['snp-calle','snp-numero','snp-motivo'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    // Live Mode: detener al cerrar el detalle
+    if (_liveActive) stopLiveMode();
+  };
+  // ── Animación "Morph" en reversa: la pantalla de detalles se encoge de
+  // vuelta hacia la tarjeta que la originó, si esta sigue en el DOM. ──
+  const _overlay = document.getElementById('detail-overlay');
+  const _wasSidebar = _overlay.classList.contains('sidebar-mode');
+  if (_morphCardEl && _morphCardEl.isConnected && !_wasSidebar && isMorphActive()) {
+    const panel = document.getElementById('detail-panel');
+    _morphCardEl.style.viewTransitionName = 'morph-card';
+    panel.style.viewTransitionName = 'morph-card';
+    const _cardRef = _morphCardEl;
+    const _morphTransition = document.startViewTransition(_closeNow);
+    _morphTransition.finished.finally(() => {
+      _cardRef.style.viewTransitionName = '';
+      panel.style.viewTransitionName = '';
+    });
+  } else {
+    _closeNow();
+  }
+  _morphCardEl = null;
 }
 
 function handleOverlayClick(e) {
@@ -13025,6 +13093,7 @@ async function renderTerritoryView() {
 async function viewTerritory(id) {
   const t = territories.find(x => x.id === id);
   if (!t) return;
+  _morphCardEl = null; // Morph es exclusivo de las tarjetas de Casa en Casa
   await ensureTerritoryMapsLoaded();
   const noPasar = parseNoPasar(t.no_pasar);
   const color = getTerColor(t.number);
@@ -13195,7 +13264,7 @@ function openPrefScreen(name) {
   document.getElementById('page-pref-' + name)?.classList.add('open');
   if (name === 'funciones') { updateH2HViewModeUI(); updateNavbarShrinkToggleUI(); }
   if (name === 'notificaciones') renderPrefNotifList();
-  if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); }
+  if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateMorphToggleUI(); }
 }
 function closePrefScreen() {
   PREF_SCREENS.forEach(name => document.getElementById('page-pref-' + name)?.classList.remove('open'));
@@ -15326,6 +15395,34 @@ function scheduleMidnightRefresh() {
 }
 
 function isMobile() { return window.innerWidth < 640; }
+
+// ══════════════════════════ Animación "Morph" ══════════════════════════════
+// Al tocar una tarjeta de asignación de Casa en Casa, la tarjeta crece y se
+// transforma fluidamente en la pantalla de detalles (View Transitions API).
+// Exclusiva de móvil y opcional desde Experimentos (ON por defecto).
+function isMorphEnabled() {
+  return localStorage.getItem('fleming_morph_anim') !== 'false';
+}
+function isMorphActive() {
+  return isMorphEnabled() && isMobile() && typeof document.startViewTransition === 'function';
+}
+function updateMorphToggleUI() {
+  const toggle = document.getElementById('morph-anim-toggle');
+  const thumb  = document.getElementById('morph-anim-thumb');
+  if (!toggle || !thumb) return;
+  const on = isMorphEnabled();
+  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
+  thumb.style.left = on ? '21px' : '3px';
+}
+function toggleMorphPref() {
+  const next = !isMorphEnabled();
+  localStorage.setItem('fleming_morph_anim', next ? 'true' : 'false');
+  updateMorphToggleUI();
+  showToast(next ? 'Animación Morph activada' : 'Animación Morph desactivada', next ? 'success' : '');
+}
+// Tarjeta que originó la apertura del detalle actual, para poder revertir el
+// morph al cerrar (si sigue presente en el DOM tras un re-render de la lista).
+let _morphCardEl = null;
 
 // ══════════════════════════ Versión Simplificada ═══════════════════════════
 // Layout alternativo (título + hamburguesa) que reemplaza el NavBar dinámico.
