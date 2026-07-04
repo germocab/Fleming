@@ -5595,6 +5595,10 @@
         <span id="detail-ter-tab-label-2">Territorio 2</span>
       </button>
     </div>
+    <div class="detail-manzanas-line" id="detail-manzanas-line" style="display:none;align-items:center;gap:6px;font-size:0.84rem;color:var(--text2);font-weight:600;margin:2px 0 0.6rem">
+      <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span>Manzanas: <span id="detail-manzanas-value" style="color:var(--text)"></span></span>
+    </div>
     <div class="detail-map-wrap" id="detail-map-wrap" style="display:none">
       <img id="detail-map-img" alt="Mapa del territorio">
     </div>
@@ -5690,6 +5694,10 @@
       </div>
       <div class="form-group2"><label class="form-label2">Territorio (2º) <span style="font-weight:400;color:var(--text3)">— opcional</span></label>
         <select class="form-select" id="as-territory2"><option value="">Sin segundo territorio</option></select>
+      </div>
+      <div class="form-group2"><label class="form-label2">Manzanas a abarcar <span style="font-weight:400;color:var(--text3)">— opcional</span></label>
+        <input type="text" class="form-input" id="as-manzanas" placeholder="Ej: A, D, G, H">
+        <div style="font-size:0.74rem;color:var(--text3);margin-top:4px">Úsalo cuando solo se deban cubrir ciertas manzanas del territorio (por ejemplo, las que quedaron pendientes de una asignación pasada).</div>
       </div>
       <div class="form-group2"><label class="form-label2">Notas</label><textarea class="form-textarea" id="as-notes" placeholder="Observaciones adicionales..."></textarea></div>
       <div style="display:flex;gap:10px;margin-top:1.1rem;justify-content:flex-end">
@@ -6514,7 +6522,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.7.3-beta';
+const APP_VERSION = '1.7.5-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -9102,6 +9110,18 @@ async function viewAssignment(id) {
   } else {
     tabsBar.style.display = 'none';
   }
+  // ── Manzanas asignadas (si la asignación solo cubre ciertas manzanas del territorio) ──
+  const manzanasLine = document.getElementById('detail-manzanas-line');
+  const manzanasList = Array.isArray(a.manzanas_asignadas) ? a.manzanas_asignadas.filter(Boolean) : [];
+  if (manzanasLine) {
+    if (manzanasList.length) {
+      document.getElementById('detail-manzanas-value').textContent = manzanasList.join(', ');
+      manzanasLine.style.display = 'flex';
+    } else {
+      manzanasLine.style.display = 'none';
+    }
+  }
+
   // "No pasar" no depende del mapa, se pinta de inmediato
   _renderDetailNoPasar(ter);
   // Oculta el mapa mientras se resuelve en segundo plano, para no mostrar por
@@ -9665,6 +9685,7 @@ function openAssignmentModal(a) {
   document.getElementById('as-time').value = a?.time || '';
   document.getElementById('as-type').value = a?.type || 'presencial';
   document.getElementById('as-notes').value = a?.notes || '';
+  document.getElementById('as-manzanas').value = Array.isArray(a?.manzanas_asignadas) ? a.manzanas_asignadas.join(', ') : (a?.manzanas_asignadas || '');
 
   const selConductor = document.getElementById('as-conductor-select');
   selConductor.innerHTML = '<option value="">Sin conductor</option>' +
@@ -9742,6 +9763,8 @@ async function saveAssignment() {
     notes: document.getElementById('as-notes').value.trim(),
     phone: conductor?.telefono || null,
     grupo_id: grupoId,
+    manzanas_asignadas: (document.getElementById('as-manzanas').value || '')
+      .split(',').map(s => s.trim().toUpperCase()).filter(Boolean),
   };
   if (!payload.date || !payload.time) { showError('as-error','Fecha y hora son requeridos'); return; }
 
@@ -9780,6 +9803,14 @@ async function saveAssignment() {
     }
     if (res.error && res.error.message && res.error.message.includes('grupo_id')) {
       const pl2 = { ...pl }; delete pl2.grupo_id;
+      if (editingAssignmentId) {
+        res = await sb.from('assignments').update(pl2).eq('id', editingAssignmentId);
+      } else {
+        res = await sb.from('assignments').insert(pl2);
+      }
+    }
+    if (res.error && res.error.message && res.error.message.includes('manzanas_asignadas')) {
+      const pl2 = { ...pl }; delete pl2.manzanas_asignadas;
       if (editingAssignmentId) {
         res = await sb.from('assignments').update(pl2).eq('id', editingAssignmentId);
       } else {
