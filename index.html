@@ -6213,6 +6213,27 @@
           Automático
         </button>
       </div>
+      <!-- Slider de 3 niveles: tamaño de la Interfaz de Usuario -->
+      <div style="border-top:1px solid var(--border);padding:0.85rem 1rem 1rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem">
+          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">Tamaño de la interfaz</span>
+          <span id="pref-ui-size-label" style="font-size:0.78rem;font-weight:700;color:var(--accent)">Normal</span>
+        </div>
+        <input type="range" id="pref-ui-size-slider" min="1" max="3" step="1" value="2"
+          oninput="setUiSizeLevel(parseInt(this.value,10))"
+          style="width:100%;accent-color:var(--accent);cursor:pointer">
+        <div style="display:flex;justify-content:space-between;margin-top:0.4rem">
+          <div class="pref-blur-dot" id="pref-ui-size-dot-1"></div>
+          <div class="pref-blur-dot" id="pref-ui-size-dot-2"></div>
+          <div class="pref-blur-dot" id="pref-ui-size-dot-3"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:0.3rem">
+          <span style="font-size:0.68rem;color:var(--text3)">Pequeño</span>
+          <span style="font-size:0.68rem;color:var(--text3)">Normal</span>
+          <span style="font-size:0.68rem;color:var(--text3)">Grande</span>
+        </div>
+        <div style="padding:0.55rem 0.1rem 0;font-size:0.75rem;color:var(--text3);line-height:1.4">Agranda el texto y los elementos del UI (botones, sliders, tarjetas) en toda la plataforma. Ideal si tienes dificultad para ver bien la pantalla.</div>
+      </div>
       <!-- Toggle: mapas en modo oscuro -->
       <div class="profile-row" style="cursor:pointer" onclick="toggleDarkMapsPref()">
         <div class="profile-row-icon" style="background:var(--ter-6-bg);color:var(--ter-6)">
@@ -6617,7 +6638,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.9.1-beta';
+const APP_VERSION = '1.9.2-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -6810,6 +6831,7 @@ function initTheme() {
   initAccentColor();
   initAnimationsMode();
   applyTransparencyPref();
+  applyUiSizePref();
   initPeakMode();
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
     if (document.documentElement.getAttribute('data-theme') === 'auto') {
@@ -12876,6 +12898,7 @@ async function openPreferencias() {
   updateLiveToggleUI();
   updatePeakModeUI();
   updateTransparencyToggleUI();
+  updateUiSizeToggleUI();
   updateNavbarShrinkToggleUI();
   updateH2HViewModeUI();
   updateExperimentosNavVisibility();
@@ -13076,6 +13099,37 @@ function toggleTransparencyPref() {
   localStorage.setItem('fleming_transparency', current ? 'false' : 'true');
   applyTransparencyPref();
   updateTransparencyToggleUI();
+}
+
+// ── Tamaño de la Interfaz: 3 niveles (Pequeño, Normal, Grande) ──────────────
+// Escala el tamaño de fuente raíz; como casi toda la plataforma usa unidades
+// rem, esto agranda de forma proporcional tanto el texto como botones,
+// tarjetas, sliders y demás elementos del UI. Pensado especialmente para
+// personas con dificultades de visión.
+const UI_SIZE_LEVELS = { 1: '14px', 2: '16px', 3: '19px' };
+const UI_SIZE_LABELS = ['Pequeño', 'Normal', 'Grande'];
+function getUiSizeLevel() {
+  const v = parseInt(localStorage.getItem('fleming_ui_size') || '2', 10);
+  return Math.min(3, Math.max(1, isNaN(v) ? 2 : v));
+}
+function setUiSizeLevel(level) {
+  localStorage.setItem('fleming_ui_size', String(Math.min(3, Math.max(1, level))));
+  applyUiSizePref();
+  updateUiSizeToggleUI();
+}
+function applyUiSizePref() {
+  document.documentElement.style.fontSize = UI_SIZE_LEVELS[getUiSizeLevel()];
+}
+function updateUiSizeToggleUI() {
+  const level = getUiSizeLevel();
+  const slider = document.getElementById('pref-ui-size-slider');
+  if (slider) slider.value = String(level);
+  for (let i = 1; i <= 3; i++) {
+    const dot = document.getElementById('pref-ui-size-dot-' + i);
+    if (dot) dot.classList.toggle('active', i <= level);
+  }
+  const label = document.getElementById('pref-ui-size-label');
+  if (label) label.textContent = UI_SIZE_LABELS[level - 1];
 }
 
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
