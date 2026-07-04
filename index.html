@@ -840,15 +840,19 @@
      crece y se transforma en la pantalla de detalles (View Transitions API,
      solo móvil, activable/desactivable desde Experimentos). El nombre
      'morph-card' se asigna dinámicamente por JS solo a la tarjeta tocada y
-     al panel de detalle, así el navegador anima ambas formas entre sí. ── */
+     al panel de detalle, así el navegador anima ambas formas entre sí.
+     Timing inspirado en Liquid Glass: lenta, elástica, muy evidente. ── */
   ::view-transition-group(morph-card) {
-    animation-duration: 0.42s;
-    animation-timing-function: cubic-bezier(.32,.9,.28,1);
+    animation-duration: 0.85s;
+    animation-timing-function: cubic-bezier(.22,1,.36,1);
   }
   ::view-transition-old(morph-card),
   ::view-transition-new(morph-card) {
-    animation-duration: 0.32s;
-    animation-timing-function: ease;
+    animation-duration: 0.62s;
+    animation-timing-function: cubic-bezier(.4,0,.2,1);
+  }
+  ::view-transition-image-pair(morph-card) {
+    border-radius: inherit;
   }
 
   .detail-panel {
@@ -6854,7 +6858,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.11.5-beta';
+const APP_VERSION = '1.11.5.1-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
