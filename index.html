@@ -6166,9 +6166,9 @@
     <!-- Acerca de / Versión -->
     <div class="profile-section">
       <div class="profile-section-title">Acerca de</div>
-      <div class="profile-row" id="pref-version-row" style="user-select:none;-webkit-user-select:none;cursor:default;position:relative"
-        onmousedown="startVersionHold()" onmouseup="cancelVersionHold()" onmouseleave="cancelVersionHold()"
-        ontouchstart="startVersionHold(event)" ontouchend="cancelVersionHold()" ontouchcancel="cancelVersionHold()">
+      <div class="profile-row" id="pref-version-row" style="user-select:none;-webkit-user-select:none;cursor:pointer;position:relative"
+        onmousedown="startVersionHold()" onmouseup="endVersionHold(true)" onmouseleave="endVersionHold(false)"
+        ontouchstart="startVersionHold(event)" ontouchend="endVersionHold(true)" ontouchcancel="endVersionHold(false)">
         <div class="profile-row-icon" style="background:var(--surface3);color:var(--text3)" id="pref-version-icon">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
         </div>
@@ -6682,7 +6682,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.9.4-beta';
+const APP_VERSION = '1.9.5-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -9076,8 +9076,12 @@ function renderSchedule() {
       html += `<div class="date-section"><div class="date-section-header">${dateLabel}</div>`;
     }
 
-    if (isSabado && !isToday) {
+    if (isSabado) {
       // ── SÁBADO: Vista especial por Grupos de Servicio ──────────────────────
+      // Se mantiene esta vista (mi grupo con tarjeta normal + demás grupos en
+      // mini-cards) incluso cuando el Sábado es "Hoy". Antes, al ser hoy, se
+      // caía en la rama de "días regulares" y se mostraban todas las
+      // asignaciones (de todos los grupos) con la tarjeta grande normal.
       const myName = (currentUser?.name || '').trim().toLowerCase();
 
       // Identify user's group
@@ -9103,19 +9107,28 @@ function renderSchedule() {
           return ga - gb;
         });
 
-      // ── My group card (normal rectangle, same style as other days) ──
+      // ── My group card (normal rectangle, same style as other days; usa el
+      //    estilo destacado "Hoy" cuando el Sábado además es el día actual) ──
       if (myAssignment) {
         const timeStr = myAssignment.time ? myAssignment.time.substring(0,5) : '--:--';
         const rightBadge = _buildRightBadge(myAssignment);
         const typeChip = _buildTypeChip(myAssignment);
         const _c = casas.find(c => c.id === myAssignment.casa_id);
         const houseLabel = myAssignment.house ? ((_c && _c.tipo === 'departamento' ? 'Depto' : 'Casa') + ' de ') + myAssignment.house : '';
+        const cardClass = isToday ? 'assignment-card-today' : 'assignment-card';
+        const infoWrapOpen = isToday ? '<div class="today-card-info">' : '';
+        const infoWrapClose = isToday ? '</div>' : '';
+        const addressClass = isToday ? 'today-card-address' : 'card-address';
+        const houseClass = isToday ? 'today-card-house' : 'card-house';
+        const metaClass = isToday ? 'today-card-meta' : 'card-meta';
+        const mainWrapOpen = isToday ? '' : '<div class="card-main">';
+        const mainWrapClose = isToday ? '' : '</div>';
         html += `
           <div class="sabado-section-label mine">Mi grupo · Grupo ${myGrupo.numero}</div>
-          <div class="assignment-card" onclick="viewAssignment('${myAssignment.id}')">
-            <div class="card-main">
-              <div class="card-address">${myAssignment.address||'Sin dirección'}${houseLabel?`<br><span class="card-house">${houseLabel}</span>`:''}</div>
-              <div class="card-meta">
+          <div class="${cardClass}" onclick="viewAssignment('${myAssignment.id}')">
+            ${infoWrapOpen}${mainWrapOpen}
+              <div class="${addressClass}">${myAssignment.address||'Sin dirección'}${houseLabel?`<br><span class="${houseClass}">${houseLabel}</span>`:''}</div>
+              <div class="${metaClass}">
                 <span class="card-time-chip">
                   <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                   ${timeStr}hrs
@@ -9123,7 +9136,7 @@ function renderSchedule() {
                 <span class="card-conductor">${myAssignment.conductor||'Sin conductor'}</span>
                 ${typeChip}
               </div>
-            </div>
+            ${mainWrapClose}${infoWrapClose}
             ${rightBadge}
           </div>`;
       }
@@ -13335,6 +13348,36 @@ function cancelVersionHold(completed) {
     if (arc)  arc.setAttribute('stroke-dashoffset', '94.25');
     if (icon) icon.style.transform = '';
   }
+}
+
+// Umbral (ms) por debajo del cual soltar el número de versión se considera un
+// "toque" simple (un solo click/tap) en vez del inicio de un mantener
+// presionado. Por encima de este umbral y por debajo de VERSION_HOLD_MS
+// (3000ms) no ocurre nada al soltar, igual que antes de esta función.
+const VERSION_TAP_MAX_MS = 350;
+
+// Se llama al soltar (mouseup/touchend) o al abandonar el elemento
+// (mouseleave/touchcancel). `isRelease` indica si fue una liberación real
+// sobre el propio elemento (true) o un abandono/cancelación (false, no debe
+// disparar la recarga por búsqueda de actualizaciones).
+function endVersionHold(isRelease) {
+  const start = _versionHoldStart;
+  const wasPressing = _versionHoldStart !== null;
+  cancelVersionHold();
+  if (isRelease && wasPressing && start != null) {
+    const elapsed = Date.now() - start;
+    if (elapsed < VERSION_TAP_MAX_MS) {
+      reloadToCheckForUpdate();
+    }
+  }
+}
+
+// Un solo toque/click (no mantenido) sobre el número de versión recarga la
+// plataforma para buscar actualizaciones (por ejemplo, una nueva versión del
+// Service Worker o del propio archivo servido).
+function reloadToCheckForUpdate() {
+  try { showToast('Buscando actualizaciones…', 'info'); } catch (e) {}
+  setTimeout(() => location.reload(true), 300);
 }
 
 function triggerEggUnlock() {
