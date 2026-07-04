@@ -100,13 +100,9 @@
     margin-top: 0.9rem; height: 150px; border-radius: 18px; overflow: hidden;
     position: relative; display: flex; align-items: center; justify-content: center;
     border: 1px solid var(--border);
-    background:
-      radial-gradient(circle at 12% 22%, #ff5f6d 0%, transparent 42%),
-      radial-gradient(circle at 82% 15%, #36d1dc 0%, transparent 46%),
-      radial-gradient(circle at 25% 85%, #ffd200 0%, transparent 44%),
-      radial-gradient(circle at 88% 80%, #a044ff 0%, transparent 48%),
-      radial-gradient(circle at 52% 50%, #43e97b 0%, transparent 55%),
-      linear-gradient(135deg, #1e3c72 0%, #ff6a00 100%);
+    background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=800&q=80');
+    background-size: cover;
+    background-position: center;
   }
   .pref-blur-preview-row { display: flex; align-items: center; gap: 10px; }
 
@@ -5200,17 +5196,6 @@
 
     </div>
 
-    <!-- ══ Inicio (experimental) — resumen de todas las asignaciones del usuario ══ -->
-    <div class="page" id="page-inicio">
-      <div class="inicio-header">
-        <div class="inicio-header-title">Inicio</div>
-        <div class="inicio-header-sub">Todo lo que tienes asignado, en un solo lugar</div>
-      </div>
-      <div id="inicio-content">
-        <div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Inicio</div></div>
-      </div>
-    </div>
-
     <div id="page-admin">
       <div class="subpage-topbar">
         <button class="pill-back-btn" onclick="closeAdminPage()" title="Inicio">
@@ -6321,19 +6306,6 @@
   </nav>
   <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 0 2.5rem">
     <div class="profile-section">
-      <!-- Toggle: pantalla de Inicio (experimental, OFF por defecto) -->
-      <div class="profile-row" style="cursor:pointer" onclick="toggleHomeScreenPref()">
-        <div class="profile-row-icon" style="background:var(--ter-2-bg);color:var(--ter-2)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label">Pantalla de Inicio</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Muestra todas tus asignaciones en una sección nueva</div>
-        </div>
-        <div id="pref-home-screen-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="pref-home-screen-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
-      </div>
       <!-- Toggle: transparencias / blur (ahora vive en Experimentos, ON por defecto) -->
       <div class="profile-row" style="cursor:pointer" onclick="toggleTransparencyPref()">
         <div class="profile-row-icon" style="background:var(--ter-3-bg);color:var(--ter-3)">
@@ -6383,12 +6355,27 @@
           <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
           <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">Color de acento</span>
         </div>
-        <div style="padding:0.4rem 1rem 1rem;display:flex;gap:14px;align-items:center">
-          <button class="accent-swatch" id="accent-sw-blue"   onclick="setAccentColor('blue')"   style="--sw:#007AFF" title="Azul"></button>
-          <button class="accent-swatch" id="accent-sw-green"  onclick="setAccentColor('green')"  style="--sw:#30c97a" title="Verde"></button>
-          <button class="accent-swatch" id="accent-sw-pink"   onclick="setAccentColor('pink')"   style="--sw:#e040a0" title="Rosa"></button>
-          <button class="accent-swatch" id="accent-sw-yellow" onclick="setAccentColor('yellow')" style="--sw:#f5a623" title="Amarillo"></button>
-          <button class="accent-swatch" id="accent-sw-purple" onclick="setAccentColor('purple')" style="--sw:#a855f7" title="Morado"></button>
+        <div style="padding:0.4rem 1rem 1rem;display:flex;gap:14px;align-items:flex-start">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+            <button class="accent-swatch" id="accent-sw-blue"   onclick="setAccentColor('blue')"   style="--sw:#007AFF" title="Sky"></button>
+            <span style="font-size:0.62rem;color:var(--text3);font-weight:500">Sky</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+            <button class="accent-swatch" id="accent-sw-green"  onclick="setAccentColor('green')"  style="--sw:#30c97a" title="Forest"></button>
+            <span style="font-size:0.62rem;color:var(--text3);font-weight:500">Forest</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+            <button class="accent-swatch" id="accent-sw-pink"   onclick="setAccentColor('pink')"   style="--sw:#e040a0" title="Ribbon"></button>
+            <span style="font-size:0.62rem;color:var(--text3);font-weight:500">Ribbon</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+            <button class="accent-swatch" id="accent-sw-yellow" onclick="setAccentColor('yellow')" style="--sw:#f5a623" title="Desert"></button>
+            <span style="font-size:0.62rem;color:var(--text3);font-weight:500">Desert</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+            <button class="accent-swatch" id="accent-sw-purple" onclick="setAccentColor('purple')" style="--sw:#a855f7" title="Lavender"></button>
+            <span style="font-size:0.62rem;color:var(--text3);font-weight:500">Lavender</span>
+          </div>
         </div>
       </div>
       <!-- Animaciones -->
@@ -6619,7 +6606,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.8.5-beta';
+const APP_VERSION = '1.9-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -7680,6 +7667,7 @@ async function renderProfilePage() {
 
   // Partes asignadas: Vida y Ministerio + Fin de Semana
   await renderProfilePartes();
+  await renderInicio();
 
 }
 
@@ -7794,7 +7782,29 @@ function findMembershipForName(name) {
 // usa cada módulo por separado (conductor de la asignación, integrante de
 // grupo, nombre en cart_turnos.nombres, etc.) para no duplicar reglas.
 // ══════════════════════════════════════════════════════════════════════════
+// ── Accesos directos del ícono (manifest "shortcuts", mantener presionado el
+// ícono de la app): abren directo la sub-sección "Casa en Casa" o la sección
+// "Reuniones" según el parámetro ?shortcut= de la URL. ──
+function applyPwaShortcut() {
+  try {
+    const params = new URLSearchParams(location.search);
+    const shortcut = params.get('shortcut');
+    if (!shortcut) return;
+    if (shortcut === 'casa-en-casa') {
+      inicioGoTo('predicacion', 'casa');
+    } else if (shortcut === 'reuniones') {
+      const btn = document.querySelector('.main-seg-btn[data-tab="reuniones"]');
+      if (btn) switchMainTab('reuniones', btn);
+    }
+    // Limpia el parámetro de la URL para que no se repita al recargar.
+    params.delete('shortcut');
+    const clean = location.pathname + (params.toString() ? '?' + params.toString() : '');
+    window.history.replaceState({}, '', clean);
+  } catch {}
+}
+
 function inicioGoTo(mainTab, subTab, after) {
+  if (typeof closeProfilePage === 'function') closeProfilePage();
   const btn = document.querySelector(`.main-seg-btn[data-tab="${mainTab}"]`);
   if (btn) switchMainTab(mainTab, btn);
   if (subTab) switchSubTab(subTab);
@@ -8349,10 +8359,7 @@ async function enterApp() {
     currentSubTab  = _nav.subTab || 'casa';
   }
 
-  // La pantalla de Inicio es experimental: nunca se restaura activa si el
-  // toggle de Experimentos no está encendido en este dispositivo/cuenta.
-  updateHomeNavVisibility();
-  if (currentMainTab === 'inicio' && !isHomeScreenEnabled()) {
+  if (currentMainTab === 'inicio') {
     currentMainTab = 'predicacion';
     currentSubTab = 'casa';
   }
@@ -8372,9 +8379,6 @@ async function enterApp() {
       const el = document.getElementById('sub-content-' + id);
       if (el) el.style.display = id === currentSubTab ? '' : 'none';
     });
-  } else if (currentMainTab === 'inicio') {
-    showPage('inicio');
-    renderInicio();
   } else {
     showPage('reuniones');
     const reunTabs = ['vida-ministerio','fin-semana','aseo-salon','hospitalidad','responsabilidades'];
@@ -8396,6 +8400,10 @@ async function enterApp() {
     });
   }
   startRolePolling();
+
+  // ── Accesos directos del ícono de la app (long-press): navega directo a
+  // Casa en Casa o a Reuniones si la URL trae ?shortcut=... ──
+  applyPwaShortcut();
 
   const taskEl = document.getElementById('dropdown-task');
   if (taskEl) taskEl.style.display = 'none';
@@ -12896,7 +12904,7 @@ function openPrefScreen(name) {
   if (name === 'preferencias') updateNavbarShrinkToggleUI();
   if (name === 'funciones') updateH2HViewModeUI();
   if (name === 'notificaciones') renderPrefNotifList();
-  if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); updateHomeScreenToggleUI(); }
+  if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); }
 }
 function closePrefScreen() {
   PREF_SCREENS.forEach(name => document.getElementById('page-pref-' + name)?.classList.remove('open'));
@@ -13078,36 +13086,6 @@ function toggleTransparencyPref() {
   updateTransparencyToggleUI();
 }
 
-// ── Modo Experimentos: pantalla de Inicio (OFF por defecto, ni activa ni visible en ningún dispositivo hasta que se activa manualmente) ──
-function isHomeScreenEnabled() {
-  return localStorage.getItem('fleming_home_screen_enabled') === 'true';
-}
-function updateHomeScreenToggleUI() {
-  const enabled = isHomeScreenEnabled();
-  const toggle = document.getElementById('pref-home-screen-toggle');
-  const thumb  = document.getElementById('pref-home-screen-thumb');
-  if (toggle) toggle.style.background = enabled ? 'var(--accent)' : 'var(--surface3)';
-  if (thumb)  thumb.style.left = enabled ? '21px' : '3px';
-}
-function toggleHomeScreenPref() {
-  const current = isHomeScreenEnabled();
-  localStorage.setItem('fleming_home_screen_enabled', current ? 'false' : 'true');
-  updateHomeScreenToggleUI();
-  updateHomeNavVisibility();
-  showToast(!current ? 'Pantalla de Inicio activada. Búscala junto a Predicación y Reuniones.' : 'Pantalla de Inicio desactivada.', 'success');
-}
-// Muestra u oculta el botón "Inicio" del segmento principal según el toggle de Experimentos.
-// Si el usuario estaba viendo Inicio y lo desactiva, lo devuelve a Predicación.
-function updateHomeNavVisibility() {
-  const enabled = isHomeScreenEnabled();
-  const btn = document.getElementById('main-seg-btn-inicio');
-  if (btn) btn.style.display = enabled ? '' : 'none';
-  if (!enabled && currentMainTab === 'inicio') {
-    const predBtn = document.querySelector('.main-seg-btn[data-tab="predicacion"]');
-    if (predBtn) switchMainTab('predicacion', predBtn);
-  }
-  updateMainSegThumb(true);
-}
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
   if (isTransparencyEnabled()) applyTransparencyPref();
 });
@@ -16708,6 +16686,14 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
     <div class="profile-section" id="profile-partes-section" style="display:none">
       <div class="profile-section-title">Partes asignadas</div>
       <div id="profile-partes-list"></div>
+    </div>
+
+    <!-- Mis Asignaciones: agrega todo lo asignado a este usuario en cualquier sección/sub-sección -->
+    <div class="profile-section" id="profile-assignments-section">
+      <div class="profile-section-title">Mis Asignaciones</div>
+      <div id="inicio-content">
+        <div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando asignaciones</div></div>
+      </div>
     </div>
 
     <!-- Cerrar sesión -->
