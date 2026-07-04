@@ -5137,7 +5137,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
   <!-- Desktop dropdown (hidden on mobile via CSS) -->
   <div class="options-dropdown notif-desktop-dropdown" id="notifications-dropdown" style="width:340px;max-height:520px;overflow-y:auto;">
     <div style="padding:0.85rem 1rem 0.4rem;font-weight:700;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-      <span>Notificaciones</span>
+      <span data-i18n="notif.title">Notificaciones</span>
       <button id="notif-clear-btn-desktop" class="notif-clear-icon-btn" onclick="deleteAllNotifications()" title="Borrar todo" aria-label="Borrar todo">
         <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
       </button>
@@ -5145,12 +5145,12 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
     <div style="padding:0.6rem 1rem 0;border-bottom:1px solid var(--border)">
       <div class="notif-search-wrap">
         <svg class="notif-search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" class="notif-search-input" placeholder="Buscar notificaciones…" autocomplete="off" oninput="notifSearchInput(this.value,'desktop')">
+        <input type="text" class="notif-search-input" data-i18n-ph="notif.buscar" placeholder="Buscar notificaciones…" autocomplete="off" oninput="notifSearchInput(this.value,'desktop')">
       </div>
       <div class="notif-filter-chips" id="notif-filter-chips-desktop"></div>
     </div>
     <div id="notifications-list-desktop">
-      <div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Notificaciones</div></div>
+      <div class="loader-wrap"><div class="loader"></div><div class="loader-caption" data-i18n="notif.cargando">Cargando Notificaciones</div></div>
     </div>
   </div>
 </div>
@@ -5234,7 +5234,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
     <div class="page active" id="page-schedule">
       <div id="sub-content-casa" class="sub-page active-sub">
         <div id="admin-shortcut-casa" style="display:none"></div>
-        <div id="schedule-content"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Asignaciones</div></div></div>
+        <div id="schedule-content"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption" data-i18n="casa.cargando">Cargando Asignaciones</div></div></div>
       </div>
       <div id="sub-content-carritos" class="sub-page" style="display:none">
         <div id="admin-shortcut-carritos" style="display:none"></div>
@@ -6201,7 +6201,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
     <button class="pill-back-btn" onclick="closePreferencias()" title="Inicio">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
-    <span class="pill-header-title">Configuración</span>
+    <span class="pill-header-title" data-i18n="settings.title">Configuración</span>
   </nav>
 
   <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 0 2.5rem">
@@ -6213,8 +6213,8 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label">Preferencias</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Idioma, tema, mapas, transparencia y NavBar</div>
+          <div class="profile-row-label" data-i18n="settings.preferencias">Preferencias</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.preferencias.desc">Idioma, tema, mapas, transparencia y NavBar</div>
         </div>
         <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
@@ -6223,8 +6223,8 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label">Funciones especiales</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Live y vista de asignaciones</div>
+          <div class="profile-row-label" data-i18n="settings.funciones">Funciones especiales</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.funciones.desc">Live y vista de asignaciones</div>
         </div>
         <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
@@ -6233,8 +6233,8 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label">Notificaciones</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Avisos de la plataforma</div>
+          <div class="profile-row-label" data-i18n="settings.notificaciones">Notificaciones</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.notificaciones.desc">Avisos de la plataforma</div>
         </div>
         <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
@@ -6243,8 +6243,8 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label">Experimentos</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Color de acento, animaciones y blur</div>
+          <div class="profile-row-label" data-i18n="settings.experimentos">Experimentos</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.experimentos.desc">Color de acento, animaciones y blur</div>
         </div>
         <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
@@ -6252,14 +6252,14 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 
     <!-- Ayuda -->
     <div class="profile-section">
-      <div class="profile-section-title">Ayuda</div>
+      <div class="profile-section-title" data-i18n="settings.ayuda">Ayuda</div>
       <div class="profile-row" id="pref-tutorial-row" style="cursor:pointer" onclick="closePreferencias();startTutorial()">
         <div class="profile-row-icon" style="background:var(--ter-2-bg);color:var(--ter-2)">
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label">Ver tutorial</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Repasa cómo funcionan las secciones y funciones principales</div>
+          <div class="profile-row-label" data-i18n="settings.tutorial">Ver tutorial</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.tutorial.desc">Repasa cómo funcionan las secciones y funciones principales</div>
         </div>
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
@@ -6268,8 +6268,8 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label">Reportar un problema</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Esta plataforma está en fase Beta — cuéntanos si algo falla</div>
+          <div class="profile-row-label" data-i18n="settings.reportar">Reportar un problema</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.reportar.desc">Esta plataforma está en fase Beta — cuéntanos si algo falla</div>
         </div>
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
@@ -6277,7 +6277,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 
     <!-- Acerca de / Versión -->
     <div class="profile-section">
-      <div class="profile-section-title">Acerca de</div>
+      <div class="profile-section-title" data-i18n="settings.acercade">Acerca de</div>
       <div class="profile-row" id="pref-version-row" style="user-select:none;-webkit-user-select:none;cursor:pointer;position:relative"
         onmousedown="startVersionHold()" onmouseup="endVersionHold(true)" onmouseleave="endVersionHold(false)"
         ontouchstart="startVersionHold(event)" ontouchend="endVersionHold(true)" ontouchcancel="endVersionHold(false)">
@@ -6285,7 +6285,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label">Versión de la plataforma</div>
+          <div class="profile-row-label" data-i18n="settings.version">Versión de la plataforma</div>
           <div class="profile-row-value" id="pref-version-value">—</div>
         </div>
         <span class="pref-alpha-badge" id="pref-alpha-badge">BETA</span>
@@ -6300,7 +6300,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       <!-- Botón Actualizar: solo visible cuando hay una nueva versión disponible -->
       <button id="pref-update-btn" style="display:none;width:calc(100% - 2rem);margin:0.6rem 1rem 0;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:#fff;border:none;border-radius:12px;padding:0.7rem 1rem;font-family:var(--font);font-size:0.88rem;font-weight:700;cursor:pointer" onclick="applyAppUpdate()">
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-        Actualizar
+        <span data-i18n="settings.actualizar">Actualizar</span>
       </button>
     </div>
 
@@ -6313,7 +6313,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
     <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
-    <span class="pill-header-title">Preferencias</span>
+    <span class="pill-header-title" data-i18n="settings.preferencias">Preferencias</span>
   </nav>
   <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 0 2.5rem">
     <div class="profile-section">
@@ -6327,14 +6327,14 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         </div>
         <svg class="pref-lang-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
-      <div class="pref-lang-row disabled">
-        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text3)">
+      <div class="pref-lang-row" data-lang="en" onclick="setPrefLanguage('en')">
+        <div class="profile-row-icon" style="background:var(--accent-light);color:var(--accent)">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-value" style="color:var(--text3)">English</div>
+          <div class="profile-row-value">English</div>
         </div>
-        <span class="pref-soon-badge" data-i18n="pref.proximamente">Próximamente</span>
+        <svg class="pref-lang-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
       <div class="pref-lang-row disabled">
         <div class="profile-row-icon" style="background:var(--surface3);color:var(--text3)">
@@ -6347,19 +6347,19 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       </div>
     </div>
     <div class="profile-section">
-      <div class="profile-section-title">Apariencia</div>
+      <div class="profile-section-title" data-i18n="pref.apariencia">Apariencia</div>
       <div class="pref-theme-row" id="pref-theme-row">
         <button class="pref-theme-opt" id="pref-theme-light" onclick="applyTheme('light');updatePrefThemeActive()">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-          Claro
+          <span data-i18n="pref.theme.claro">Claro</span>
         </button>
         <button class="pref-theme-opt" id="pref-theme-dark" onclick="applyTheme('dark');updatePrefThemeActive()">
           <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
-          Oscuro
+          <span data-i18n="pref.theme.oscuro">Oscuro</span>
         </button>
         <button class="pref-theme-opt" id="pref-theme-auto" onclick="applyTheme('auto');updatePrefThemeActive()">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/><path d="M21 12.79A9 9 0 1 1 11.21 3" opacity="0.35"/></svg>
-          Automático
+          <span data-i18n="pref.theme.auto">Automático</span>
         </button>
       </div>
       <!-- Toggle: mapas en modo oscuro (vive junto al selector de tema) -->
@@ -6368,8 +6368,8 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label">Mapas adaptados al tema oscuro</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Usa la versión oscura del mapa cuando está disponible</div>
+          <div class="profile-row-label" data-i18n="pref.darkmaps">Mapas adaptados al tema oscuro</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="pref.darkmaps.desc">Usa la versión oscura del mapa cuando está disponible</div>
         </div>
         <div id="pref-dark-maps-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
           <div id="pref-dark-maps-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
@@ -6378,11 +6378,11 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
     </div>
     <!-- Tamaño de la interfaz: al final de Preferencias, en su propia sección -->
     <div class="profile-section">
-      <div class="profile-section-title">Tamaño de la interfaz</div>
+      <div class="profile-section-title" data-i18n="pref.uisize">Tamaño de la interfaz</div>
       <div style="padding:0.2rem 1rem 1rem">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem">
-          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">Nivel</span>
-          <span id="pref-ui-size-label" style="font-size:0.78rem;font-weight:700;color:var(--accent)">Normal</span>
+          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase" data-i18n="pref.uisize.nivel">Nivel</span>
+          <span id="pref-ui-size-label" style="font-size:0.78rem;font-weight:700;color:var(--accent)" data-i18n="pref.uisize.normal">Normal</span>
         </div>
         <input type="range" id="pref-ui-size-slider" min="1" max="3" step="1" value="2"
           oninput="setUiSizeLevel(parseInt(this.value,10))"
@@ -6393,11 +6393,11 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <div class="pref-blur-dot" id="pref-ui-size-dot-3"></div>
         </div>
         <div style="display:flex;justify-content:space-between;margin-top:0.3rem">
-          <span style="font-size:0.68rem;color:var(--text3)">Pequeño</span>
-          <span style="font-size:0.68rem;color:var(--text3)">Normal</span>
-          <span style="font-size:0.68rem;color:var(--text3)">Grande</span>
+          <span style="font-size:0.68rem;color:var(--text3)" data-i18n="pref.uisize.pequeno">Pequeño</span>
+          <span style="font-size:0.68rem;color:var(--text3)" data-i18n="pref.uisize.normal">Normal</span>
+          <span style="font-size:0.68rem;color:var(--text3)" data-i18n="pref.uisize.grande">Grande</span>
         </div>
-        <div style="padding:0.55rem 0.1rem 0;font-size:0.75rem;color:var(--text3);line-height:1.4">Agranda el texto y los elementos del UI (botones, sliders, tarjetas) en toda la plataforma. Ideal si tienes dificultad para ver bien la pantalla.</div>
+        <div style="padding:0.55rem 0.1rem 0;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="pref.uisize.help">Agranda el texto y los elementos del UI (botones, sliders, tarjetas) en toda la plataforma. Ideal si tienes dificultad para ver bien la pantalla.</div>
       </div>
     </div>
   </div>
@@ -6409,7 +6409,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
     <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
-    <span class="pill-header-title">Funciones especiales</span>
+    <span class="pill-header-title" data-i18n="settings.funciones">Funciones especiales</span>
   </nav>
   <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 0 2.5rem">
     <!-- Vista de Contenido + NavBar Grow&Shrink: comparten zona (ambos son
@@ -6417,7 +6417,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
     <div class="profile-section">
       <div class="pref-desktop-only-row" style="padding:0.85rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
         <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
-        <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">Vista de Contenido (Tablet / Escritorio)</span>
+        <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase" data-i18n="func.vistacontenido">Vista de Contenido (Tablet / Escritorio)</span>
       </div>
       <div class="pref-theme-row pref-desktop-only-row" id="pref-h2h-view-row" style="margin:0 1rem 0.4rem">
         <button class="pref-theme-opt" id="pref-h2h-popup" onclick="setHouseToHouseViewMode('popup')">
@@ -6426,15 +6426,15 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         </button>
         <button class="pref-theme-opt" id="pref-h2h-sidebar" onclick="setHouseToHouseViewMode('sidebar')">
           <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="10" y1="4" x2="10" y2="20"/></svg>
-          Lateral
+          <span data-i18n="func.lateral">Lateral</span>
         </button>
       </div>
-      <div class="pref-desktop-only-row" style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">En "Lateral", el detalle de la asignación se abre a la derecha, dejando la lista visible a la izquierda.</div>
+      <div class="pref-desktop-only-row" style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="func.lateral.help">En "Lateral", el detalle de la asignación se abre a la derecha, dejando la lista visible a la izquierda.</div>
       <!-- Selector: NavBar Grow&Shrink (solo Desktop) — Grow fijo, Shrink fijo,
            o Automático (crece solo en el extremo superior; se encoge con cualquier scroll y no vuelve a crecer hasta llegar arriba del todo). ── -->
       <div class="pref-desktop-only-row" style="padding:0.85rem 1rem 0.2rem;display:flex;align-items:center;gap:7px;border-top:1px solid var(--border)">
         <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
-        <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">NavBar Grow &amp; Shrink (Escritorio)</span>
+        <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">NavBar Grow &amp; Shrink (<span data-i18n="func.escritorio">Escritorio</span>)</span>
       </div>
       <div class="pref-theme-row pref-desktop-only-row" id="pref-navbar-mode-row" style="margin:0 1rem 0.4rem">
         <button class="pref-theme-opt" id="pref-navbar-mode-grow" onclick="setNavbarGrowMode('grow')">
@@ -6447,10 +6447,10 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         </button>
         <button class="pref-theme-opt" id="pref-navbar-mode-auto" onclick="setNavbarGrowMode('auto')">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/><path d="M21 12.79A9 9 0 1 1 11.21 3" opacity="0.35"/></svg>
-          Automático
+          <span data-i18n="pref.theme.auto">Automático</span>
         </button>
       </div>
-      <div class="pref-desktop-only-row" style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">En "Automático" (por defecto), la barra se encoge apenas haces scroll y solo recupera su tamaño al volver hasta arriba del todo.</div>
+      <div class="pref-desktop-only-row" style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="func.auto.help">En "Automático" (por defecto), la barra se encoge apenas haces scroll y solo recupera su tamaño al volver hasta arriba del todo.</div>
     </div>
     <!-- Función Live + Modo Peak: comparten apartado -->
     <div class="profile-section">
@@ -6460,8 +6460,8 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label">Función Live</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Detección de calles y avisos de No Pasar en tiempo real</div>
+          <div class="profile-row-label" data-i18n="func.live">Función Live</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="func.live.desc">Detección de calles y avisos de No Pasar en tiempo real</div>
         </div>
         <div id="pref-live-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
           <div id="pref-live-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
@@ -6473,8 +6473,8 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label">Modo Peak</div>
-          <div class="profile-row-value" style="font-size:0.8rem" id="peak-mode-desc">Mantén presionado para ver previews rápidos (Notificaciones y Asignaciones)</div>
+          <div class="profile-row-label" data-i18n="func.peak">Modo Peak</div>
+          <div class="profile-row-value" style="font-size:0.8rem" id="peak-mode-desc" data-i18n="func.peak.desc">Mantén presionado para ver previews rápidos (Notificaciones y Asignaciones)</div>
         </div>
         <div id="peak-mode-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
           <div id="peak-mode-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
@@ -6490,7 +6490,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
     <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
-    <span class="pill-header-title">Notificaciones</span>
+    <span class="pill-header-title" data-i18n="settings.notificaciones">Notificaciones</span>
   </nav>
   <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 0 2.5rem">
     <div class="profile-section">
@@ -6823,7 +6823,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.10.5-beta';
+const APP_VERSION = '1.11.0-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -6875,15 +6875,80 @@ const I18N = {
   'pref.idioma':            { es: 'Idioma',                  en: 'Language' },
   'pref.apariencia':        { es: 'Apariencia',              en: 'Appearance' },
   'pref.proximamente':      { es: 'Próximamente',            en: 'Coming soon' },
+  'pref.theme.claro':       { es: 'Claro',                   en: 'Light' },
+  'pref.theme.oscuro':      { es: 'Oscuro',                  en: 'Dark' },
+  'pref.theme.auto':        { es: 'Automático',              en: 'Automatic' },
+  'pref.darkmaps':          { es: 'Mapas adaptados al tema oscuro', en: 'Maps adapted to dark theme' },
+  'pref.darkmaps.desc':     { es: 'Usa la versión oscura del mapa cuando está disponible', en: 'Use the dark version of the map when available' },
+  'pref.uisize':            { es: 'Tamaño de la interfaz',   en: 'Interface size' },
+  'pref.uisize.nivel':      { es: 'Nivel',                   en: 'Level' },
+  'pref.uisize.pequeno':    { es: 'Pequeño',                 en: 'Small' },
+  'pref.uisize.normal':     { es: 'Normal',                  en: 'Normal' },
+  'pref.uisize.grande':     { es: 'Grande',                  en: 'Large' },
+  'pref.uisize.help':       { es: 'Agranda el texto y los elementos del UI (botones, sliders, tarjetas) en toda la plataforma. Ideal si tienes dificultad para ver bien la pantalla.', en: 'Enlarges text and UI elements (buttons, sliders, cards) across the platform. Ideal if you have trouble seeing the screen clearly.' },
+  // ── Configuración (menú principal) ──
+  'settings.title':             { es: 'Configuración',            en: 'Settings' },
+  'settings.preferencias':      { es: 'Preferencias',             en: 'Preferences' },
+  'settings.preferencias.desc': { es: 'Idioma, tema, mapas, transparencia y NavBar', en: 'Language, theme, maps, transparency and NavBar' },
+  'settings.funciones':         { es: 'Funciones especiales',     en: 'Special Features' },
+  'settings.funciones.desc':    { es: 'Live y vista de asignaciones', en: 'Live and assignment view' },
+  'settings.notificaciones':    { es: 'Notificaciones',           en: 'Notifications' },
+  'settings.notificaciones.desc': { es: 'Avisos de la plataforma', en: 'Platform alerts' },
+  'settings.experimentos':      { es: 'Experimentos',             en: 'Experiments' },
+  'settings.experimentos.desc': { es: 'Color de acento, animaciones y blur', en: 'Accent color, animations and blur' },
+  'settings.ayuda':             { es: 'Ayuda',                    en: 'Help' },
+  'settings.tutorial':          { es: 'Ver tutorial',             en: 'View tutorial' },
+  'settings.tutorial.desc':     { es: 'Repasa cómo funcionan las secciones y funciones principales', en: 'Review how the main sections and features work' },
+  'settings.reportar':          { es: 'Reportar un problema',     en: 'Report a problem' },
+  'settings.reportar.desc':     { es: 'Esta plataforma está en fase Beta — cuéntanos si algo falla', en: 'This platform is in Beta — let us know if something breaks' },
+  'settings.acercade':          { es: 'Acerca de',                en: 'About' },
+  'settings.version':           { es: 'Versión de la plataforma', en: 'Platform version' },
+  'settings.actualizar':        { es: 'Actualizar',               en: 'Update' },
+  // ── Funciones especiales ──
+  'func.vistacontenido':   { es: 'Vista de Contenido (Tablet / Escritorio)', en: 'Content View (Tablet / Desktop)' },
+  'func.lateral':          { es: 'Lateral',                 en: 'Sidebar' },
+  'func.lateral.help':     { es: 'En "Lateral", el detalle de la asignación se abre a la derecha, dejando la lista visible a la izquierda.', en: 'In "Sidebar", the assignment detail opens on the right, keeping the list visible on the left.' },
+  'func.escritorio':       { es: 'Escritorio',              en: 'Desktop' },
+  'func.auto.help':        { es: 'En "Automático" (por defecto), la barra se encoge apenas haces scroll y solo recupera su tamaño al volver hasta arriba del todo.', en: 'In "Automatic" (default), the bar shrinks as soon as you scroll and only returns to full size when you reach the very top.' },
+  'func.live':             { es: 'Función Live',            en: 'Live Feature' },
+  'func.live.desc':        { es: 'Detección de calles y avisos de No Pasar en tiempo real', en: 'Real-time street detection and Do-Not-Pass alerts' },
+  'func.peak':             { es: 'Modo Peak',               en: 'Peak Mode' },
+  'func.peak.desc':        { es: 'Mantén presionado para ver previews rápidos (Notificaciones y Asignaciones)', en: 'Press and hold to see quick previews (Notifications and Assignments)' },
+  // ── Mi Perfil ──
+  'profile.title':          { es: 'Mi Perfil',               en: 'My Profile' },
+  'profile.grupo':          { es: 'Grupo de Servicio',       en: 'Service Group' },
+  'profile.grupo.asignado': { es: 'Grupo asignado',          en: 'Assigned group' },
+  'profile.rolgrupo':       { es: 'Rol en el grupo',         en: 'Role in group' },
+  'profile.partes':         { es: 'Partes asignadas',        en: 'Assigned parts' },
+  'profile.misasignaciones':{ es: 'Mis Asignaciones',        en: 'My Assignments' },
+  'profile.cargando':       { es: 'Cargando asignaciones',   en: 'Loading assignments' },
+  'profile.foto':           { es: 'Foto de perfil',          en: 'Profile photo' },
+  'profile.elegeaccion':    { es: 'Elige una acción',        en: 'Choose an action' },
+  'profile.cambiarfoto':    { es: 'Cambiar foto',            en: 'Change photo' },
+  'profile.eliminarfoto':   { es: 'Eliminar foto de perfil', en: 'Remove profile photo' },
+  // ── Notificaciones ──
+  'notif.title':            { es: 'Notificaciones',          en: 'Notifications' },
+  'notif.buscar':           { es: 'Buscar notificaciones…',  en: 'Search notifications…' },
+  'notif.cargando':         { es: 'Cargando Notificaciones', en: 'Loading Notifications' },
+  'notif.vacio.titulo':     { es: 'Sin notificaciones',      en: 'No notifications' },
+  'notif.vacio.desc':       { es: 'No hay notificaciones por ahora', en: 'There are no notifications right now' },
+  'notif.vacio.filtro':     { es: 'No hay notificaciones que coincidan con la búsqueda o el filtro.', en: 'No notifications match the search or filter.' },
+  'notif.vacio.recientes':  { es: 'Sin notificaciones recientes', en: 'No recent notifications' },
+  'notif.group.grupos':     { es: 'Grupos de Servicio',      en: 'Service Groups' },
+  'notif.group.sistema':    { es: 'Sistema',                 en: 'System' },
+  // ── Casa en Casa ──
+  'casa.cargando':          { es: 'Cargando Asignaciones',   en: 'Loading Assignments' },
+  'casa.sinasignaciones':   { es: 'Sin asignaciones',        en: 'No assignments' },
+  'casa.sinasignaciones.desc': { es: 'Sin asignaciones por ahora. Cuando tengas una asignación de predicación, un turno, un cargo o una parte en el programa, aparecerá aquí.', en: 'No assignments right now. Once you have a preaching assignment, a shift, a role, or a program part, it will appear here.' },
+  'casa.sinpredicaciones':  { es: 'No hay predicaciones programadas', en: 'No preaching scheduled' },
+  'casa.hoy':               { es: 'Hoy',                     en: 'Today' },
+  'casa.manana':            { es: 'Mañana',                  en: 'Tomorrow' },
 };
-// El Inglés vuelve a estado "Próximamente" (deshabilitado); si algún usuario
-// había quedado con 'en' guardado de una versión anterior, se restaura a 'es'.
+// Idiomas disponibles: Español e Inglés (Holandés sigue "Próximamente").
 let currentLang = 'es';
 try {
   const _savedLang = localStorage.getItem('fleming_lang');
-  if (_savedLang === 'es') currentLang = 'es';
-  else if (_savedLang && _savedLang !== 'en') currentLang = _savedLang;
-  if (_savedLang === 'en') localStorage.setItem('fleming_lang', 'es');
+  if (_savedLang === 'es' || _savedLang === 'en') currentLang = _savedLang;
 } catch {}
 function t(key) {
   const entry = I18N[key];
@@ -8214,7 +8279,7 @@ function renderInicioSections(sections) {
   if (!sections.length) {
     wrap.innerHTML = `<div class="pia-empty">
       <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <p>Sin asignaciones por ahora. Cuando tengas una asignación de predicación, un turno, un cargo o una parte en el programa, aparecerá aquí.</p>
+      <p data-i18n="casa.sinasignaciones.desc">Sin asignaciones por ahora. Cuando tengas una asignación de predicación, un turno, un cargo o una parte en el programa, aparecerá aquí.</p>
     </div>`;
     return;
   }
@@ -9110,7 +9175,7 @@ window.addEventListener('pageshow', () => refreshScheduleIfStale());
 
 async function loadSchedule() {
   _lastScheduleLoad = Date.now();
-  document.getElementById('schedule-content').innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Asignaciones</div></div>';
+  document.getElementById('schedule-content').innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">' + t('casa.cargando') + '</div></div>';
 
   // Fetch assignments without embedded territory join to avoid PostgREST
   // ambiguous-relationship error (two FKs pointing to the same 'territories' table).
@@ -9145,7 +9210,7 @@ async function loadSchedule() {
 function renderSchedule() {
   const container = document.getElementById('schedule-content');
   if (!assignments.length) {
-    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><h4>Sin asignaciones</h4><p>No hay predicaciones programadas</p></div>`;
+    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><h4>${t("casa.sinasignaciones")}</h4><p>${t("casa.sinpredicaciones")}</p></div>`;
     return;
   }
 
@@ -9211,13 +9276,13 @@ function renderSchedule() {
     if (isToday) {
       html += `<div class="date-section">
         <div class="date-section-header-today">
-          <span class="today-label">Hoy</span>
+          <span class="today-label">${t("casa.hoy")}</span>
           <span class="today-date">${dateLabel}</span>
         </div>`;
     } else if (isTomorrow) {
       html += `<div class="date-section">
         <div class="date-section-header-today">
-          <span class="today-label">Mañana</span>
+          <span class="today-label">${t("casa.manana")}</span>
           <span class="today-date">${dateLabel}</span>
         </div>`;
     } else {
@@ -13841,7 +13906,7 @@ async function showNotifPeakPreview(x, y) {
         <div class="peak-preview-icon">${bellIcon}</div>
         <div><div class="peak-preview-kicker">Notificaciones</div><div class="peak-preview-title">Nada por aquí</div></div>
       </div>
-      <div class="peak-preview-empty">Sin notificaciones recientes</div>`;
+      <div class="peak-preview-empty">${t('notif.vacio.recientes')}</div>`;
   } else {
     let when = '';
     if (n.created_at) {
@@ -14730,37 +14795,37 @@ init();
 // (ver NOTIF_CATEGORIES → group) o cae en 'sistema' si no tiene categoría.
 const NOTIF_GROUPS = {
   casa: {
-    label: 'Casa en Casa',
+    label: 'subtab.casa',
     color: '#34c759',
     bg: 'rgba(52,199,89,0.12)',
     icon: '<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
   },
   grupos: {
-    label: 'Grupos de Servicio',
+    label: 'notif.group.grupos',
     color: '#af52de',
     bg: 'rgba(175,82,222,0.12)',
     icon: '<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
   },
   reuniones: {
-    label: 'Reuniones',
+    label: 'nav.reuniones',
     color: '#007AFF',
     bg: 'rgba(0,122,255,0.12)',
     icon: '<svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>',
   },
   sistema: {
-    label: 'Sistema',
+    label: 'notif.group.sistema',
     color: '#ff9500',
     bg: 'rgba(255,149,0,0.12)',
     icon: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
   },
   live: {
-    label: 'Live',
+    label: 'live.btn',
     color: '#34c759',
     bg: 'rgba(52,199,89,0.12)',
     icon: '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>',
   },
   carritos: {
-    label: 'Carritos',
+    label: 'subtab.carritos',
     color: '#f36100',
     bg: 'rgba(243,97,0,0.12)',
     icon: '<svg viewBox="0 0 24 24"><circle cx="8" cy="19" r="1.8"/><circle cx="17" cy="19" r="1.8"/><path d="M2 3h2l2.4 12.2a2 2 0 0 0 2 1.8h7.2a2 2 0 0 0 2-1.6L20 8H6"/></svg>',
@@ -14799,7 +14864,7 @@ function getNotifGroupKey(n) {
 function notifGroupPillHTML(n) {
   const key = getNotifGroupKey(n);
   const g = NOTIF_GROUPS[key];
-  return `<span class="notif-pill" style="background:${g.bg};color:${g.color}">${g.icon}${g.label}</span>`;
+  return `<span class="notif-pill" style="background:${g.bg};color:${g.color}">${g.icon}${t(g.label)}</span>`;
 }
 
 // ── Etiquetas de categoría personalizables ───────────────────────────────────
@@ -15485,15 +15550,15 @@ function _notifEmptyHTML(target) {
   const pad = target === 'desktop' ? 'padding:1.5rem 1rem' : 'margin-top:3rem';
   return `<div class="empty-state" style="${pad}">
     <div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-    <h4>Sin notificaciones</h4>
-    <p>No hay notificaciones por ahora</p>
+    <h4>${t('notif.vacio.titulo')}</h4>
+    <p>${t('notif.vacio.desc')}</p>
   </div>`;
 }
 
 function _notifEmptyFilteredHTML() {
   return `<div class="notif-empty-filtered">
     <svg viewBox="0 0 24 24" style="width:32px;height:32px;stroke:var(--text3);fill:none;stroke-width:1.5;stroke-linecap:round;opacity:0.4;margin-bottom:0.5rem;display:block;margin-left:auto;margin-right:auto"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    No hay notificaciones que coincidan con la búsqueda o el filtro.
+    ${t('notif.vacio.filtro')}
   </div>`;
 }
 
@@ -15521,7 +15586,7 @@ function notifFilterChipsHTML() {
   return Object.entries(NOTIF_GROUPS).map(([key, g]) => {
     const active = _notifActiveGroups.has(key);
     const style = active ? `background:${g.color};border-color:${g.color}` : '';
-    return `<button type="button" class="notif-filter-chip${active ? ' active' : ''}" style="${style}" onclick="notifToggleFilterChip('${key}')">${g.icon}${g.label}</button>`;
+    return `<button type="button" class="notif-filter-chip${active ? ' active' : ''}" style="${style}" onclick="notifToggleFilterChip('${key}')">${g.icon}${t(g.label)}</button>`;
   }).join('');
 }
 
@@ -17100,7 +17165,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
     <button class="pill-back-btn" onclick="closeProfilePage()" title="Inicio">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
-    <span class="pill-header-title">Mi Perfil</span>
+    <span class="pill-header-title" data-i18n="profile.title">Mi Perfil</span>
   </nav>
 
   <div style="max-width:600px;width:100%;margin:0 auto;padding-bottom:2rem">
@@ -17122,13 +17187,13 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
 
     <!-- Grupo -->
     <div class="profile-section" id="profile-group-section">
-      <div class="profile-section-title">Grupo de Servicio</div>
+      <div class="profile-section-title" data-i18n="profile.grupo">Grupo de Servicio</div>
       <div class="profile-row">
         <div class="profile-row-icon" style="background:var(--accent-light);color:var(--accent)">
           <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label">Grupo asignado</div>
+          <div class="profile-row-label" data-i18n="profile.grupo.asignado">Grupo asignado</div>
           <div id="profile-group-value" class="profile-row-value">—</div>
         </div>
       </div>
@@ -17137,7 +17202,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label">Rol en el grupo</div>
+          <div class="profile-row-label" data-i18n="profile.rolgrupo">Rol en el grupo</div>
           <div id="profile-group-role-value" class="profile-row-value">—</div>
         </div>
       </div>
@@ -17145,15 +17210,15 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
 
     <!-- Partes asignadas (VMC y Fin de Semana) -->
     <div class="profile-section" id="profile-partes-section" style="display:none">
-      <div class="profile-section-title">Partes asignadas</div>
+      <div class="profile-section-title" data-i18n="profile.partes">Partes asignadas</div>
       <div id="profile-partes-list"></div>
     </div>
 
     <!-- Mis Asignaciones: agrega todo lo asignado a este usuario en cualquier sección/sub-sección -->
     <div class="profile-section" id="profile-assignments-section">
-      <div class="profile-section-title">Mis Asignaciones</div>
+      <div class="profile-section-title" data-i18n="profile.misasignaciones">Mis Asignaciones</div>
       <div id="inicio-content">
-        <div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando asignaciones</div></div>
+        <div class="loader-wrap"><div class="loader"></div><div class="loader-caption" data-i18n="profile.cargando">Cargando asignaciones</div></div>
       </div>
     </div>
 
@@ -17161,7 +17226,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
     <div style="padding:0 1.25rem;margin-bottom:1.25rem">
       <button onclick="doLogout()" style="width:100%;padding:0.75rem;border:1px solid rgba(255,59,48,0.25);border-radius:var(--radius-sm);background:none;color:var(--red);font-family:var(--font);font-size:0.9rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.15s" onmouseover="this.style.background='rgba(255,59,48,0.06)'" onmouseout="this.style.background='none'">
         <svg viewBox="0 0 24 24" style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Cerrar sesión
+        <span data-i18n="btn.cerrar-sesion">Cerrar sesión</span>
       </button>
     </div>
 
@@ -17173,23 +17238,23 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
   <div class="np-action-sheet" id="profile-photo-sheet">
     <div class="np-action-handle"></div>
     <div class="np-action-header">
-      <div class="np-action-addr">Foto de perfil</div>
-      <div class="np-action-sub">Elige una acción</div>
+      <div class="np-action-addr" data-i18n="profile.foto">Foto de perfil</div>
+      <div class="np-action-sub" data-i18n="profile.elegeaccion">Elige una acción</div>
     </div>
     <button class="np-action-btn" onclick="document.getElementById('profile-photo-input').click();closeProfilePhotoSheet()">
       <span class="np-action-icon" style="background:var(--accent-light);color:var(--accent)">
         <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
       </span>
-      Cambiar foto
+      <span data-i18n="profile.cambiarfoto">Cambiar foto</span>
     </button>
     <div class="np-action-divider"></div>
     <button class="np-action-btn" id="profile-photo-remove-btn" onclick="removeProfilePhoto();closeProfilePhotoSheet()" style="color:var(--red);display:none">
       <span class="np-action-icon" style="background:rgba(255,59,48,0.1);color:var(--red)">
         <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
       </span>
-      Eliminar foto de perfil
+      <span data-i18n="profile.eliminarfoto">Eliminar foto de perfil</span>
     </button>
-    <button class="np-action-btn-cancel" onclick="closeProfilePhotoSheet()">Cancelar</button>
+    <button class="np-action-btn-cancel" onclick="closeProfilePhotoSheet()" data-i18n="btn.cancelar">Cancelar</button>
   </div>
 </div>
 
@@ -17377,7 +17442,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
     <button class="pill-back-btn" onclick="closeNotificationsPage()" title="Inicio">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
-    <span class="pill-header-title">Notificaciones</span>
+    <span class="pill-header-title" data-i18n="notif.title">Notificaciones</span>
     <div class="subpage-topbar-right">
       <button id="notif-clear-btn" class="notif-clear-icon-btn" onclick="deleteAllNotifications()" title="Borrar todo" aria-label="Borrar todo">
         <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
@@ -17387,12 +17452,12 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
   <div style="padding:0.85rem 1rem 0;max-width:640px;width:100%;margin:0 auto">
     <div class="notif-search-wrap">
       <svg class="notif-search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" class="notif-search-input" placeholder="Buscar notificaciones…" autocomplete="off" oninput="notifSearchInput(this.value,'mobile')">
+      <input type="text" class="notif-search-input" data-i18n-ph="notif.buscar" placeholder="Buscar notificaciones…" autocomplete="off" oninput="notifSearchInput(this.value,'mobile')">
     </div>
     <div class="notif-filter-chips" id="notif-filter-chips-mobile"></div>
   </div>
   <div style="flex:1;overflow-y:auto;padding:0 1rem 1rem;max-width:640px;width:100%;margin:0 auto" id="notifications-list-mobile">
-    <div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Notificaciones</div></div>
+    <div class="loader-wrap"><div class="loader"></div><div class="loader-caption" data-i18n="notif.cargando">Cargando Notificaciones</div></div>
   </div>
 </div>
 
