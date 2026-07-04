@@ -4041,6 +4041,25 @@
     flex-shrink: 0;
   }
   .toggle-switch.on { background: var(--accent); border-color: var(--accent); }
+
+  /* ── Modo Peak: preview overlay para long-press (Notificaciones / Asignaciones) ── */
+  .peak-preview-overlay {
+    position: fixed; z-index: 9999; display: none; pointer-events: none;
+    max-width: 300px; min-width: 220px;
+  }
+  .peak-preview-overlay.open { display: block; animation: peakPreviewIn 0.14s ease; }
+  @keyframes peakPreviewIn { from { opacity:0; transform: scale(0.94); } to { opacity:1; transform: scale(1); } }
+  .peak-preview-box {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25); padding: 12px 14px; font-family: var(--font);
+  }
+  .peak-preview-title { font-weight: 700; font-size: 0.9rem; color: var(--text); margin-bottom: 4px; }
+  .peak-preview-body { font-size: 0.8rem; color: var(--text2); line-height: 1.4; margin-bottom: 4px; }
+  .peak-preview-meta { font-size: 0.7rem; color: var(--text3); }
+  .peak-preview-row { font-size: 0.8rem; color: var(--text2); margin-bottom: 3px; }
+  .peak-preview-row strong { color: var(--text3); font-weight: 600; margin-right: 4px; }
+  .peak-preview-empty { font-size: 0.8rem; color: var(--text3); }
+  .peak-preview-map { width: 100%; border-radius: 10px; margin-top: 6px; max-height: 140px; object-fit: cover; display: block; }
   .toggle-thumb {
     position: absolute; top: 3px; left: 3px;
     width: 18px; height: 18px; border-radius: 50%;
@@ -5354,6 +5373,7 @@
             <div class="ct-admin-tab ct-active" data-tab="puntos" role="tab" aria-selected="true" tabindex="0" onclick="cartSwitchAdminTab('puntos')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); cartSwitchAdminTab('puntos');}"><span class="ct-tab-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span> Puntos</div>
             <div class="ct-admin-tab" data-tab="turnos" role="tab" aria-selected="false" tabindex="0" onclick="cartSwitchAdminTab('turnos')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); cartSwitchAdminTab('turnos');}"><span class="ct-tab-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg></span> Turnos</div>
             <div class="ct-admin-tab" data-tab="personas" role="tab" aria-selected="false" tabindex="0" onclick="cartSwitchAdminTab('personas')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); cartSwitchAdminTab('personas');}"><span class="ct-tab-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Personas</div>
+            <div class="ct-admin-tab" data-tab="acceso" role="tab" aria-selected="false" tabindex="0" onclick="cartSwitchAdminTab('acceso')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); cartSwitchAdminTab('acceso');}"><span class="ct-tab-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span> Acceso</div>
           </div>
           <div class="ct-scroll-container" id="cartAdminBody" style="padding-top:5px;"></div>
         </div>
@@ -6356,6 +6376,23 @@
         </div>
         <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">Elige "Reducidas" si eres sensible al movimiento en pantalla.</div>
       </div>
+      <!-- Funciones Especiales -->
+      <div id="pref-special-features-section" style="border-top:1px solid var(--border)">
+        <div style="padding:0.75rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
+          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">Funciones Especiales</span>
+        </div>
+        <div class="profile-row" style="padding:0.6rem 1rem" id="peak-mode-row">
+          <div class="profile-row-icon" style="background:var(--surface3);color:var(--text2)">
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+          </div>
+          <div class="profile-row-content">
+            <div class="profile-row-label">Modo Peak</div>
+            <div class="profile-row-value" style="font-size:0.74rem;color:var(--text3);white-space:normal">Mantén presionado (1.5s) para ver previews rápidos. Exclusivo de pantallas táctiles.</div>
+          </div>
+          <div class="toggle-switch" id="peak-mode-toggle" onclick="togglePeakModeSetting(this)"><div class="toggle-thumb"></div></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -6394,6 +6431,8 @@
     <button class="btn-danger-outline" id="trep-zoom-delete-btn" style="margin:0.6rem auto 0">Eliminar</button>
   </div>
 </div>
+
+<div class="peak-preview-overlay" id="peak-preview-overlay"><div class="peak-preview-box" id="peak-preview-box"></div></div>
 
 <div class="img-lightbox" id="img-lightbox" onclick="handleLightboxClick(event)">
   <button class="lightbox-close" onclick="closeLightbox()">
@@ -6564,7 +6603,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.7.6.9-beta';
+const APP_VERSION = '1.8-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -6757,10 +6796,12 @@ function initTheme() {
   initAccentColor();
   initAnimationsMode();
   applyTransparencyPref();
+  initPeakMode();
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
     if (document.documentElement.getAttribute('data-theme') === 'auto') {
       _updateThemeActive('auto');
       if (currentSubTab === 'territorios') renderTerritoryView();
+      if (document.getElementById('page-grupo')?.classList.contains('open')) _updateGrupoMapUI();
     }
   });
 }
@@ -6778,6 +6819,8 @@ function applyTheme(theme) {
   _updateThemeActive(theme);
   // Refresh territory maps if currently visible
   if (currentSubTab === 'territorios') renderTerritoryView();
+  // Refresh sector map (Mapa de Sector) if a grupo detail page is open
+  if (document.getElementById('page-grupo')?.classList.contains('open')) _updateGrupoMapUI();
 }
 
 // Territory map images (map_data / map_data_dark) are large base64 blobs.
@@ -7227,31 +7270,58 @@ function _memberRowHtml(m) {
 }
 
 // ── Grupo Map ─────────────────────────────────────────────────────────────────
+// El Mapa de Sector admite, igual que los Mapas de Territorio, una versión
+// opcional para Modo Oscuro. Se guardan ambas variantes en platform_config
+// (`grupo_map_<gid>` y `grupo_map_<gid>_dark`) y se elige cuál mostrar según
+// el tema activo de la plataforma (getActiveGrupoMapSrc), reaccionando a
+// cambios de tema en tiempo real igual que los mapas de territorio.
+let _grupoMapLightSrc = null;
+let _grupoMapDarkSrc  = null;
+
 async function _loadGrupoMap(gid) {
   try {
-    const { data } = await sb.from('platform_config').select('value').eq('key', `grupo_map_${gid}`);
-    const src = data && data.length ? data[0].value : null;
-    _updateGrupoMapUI(src);
-  } catch(e) { _updateGrupoMapUI(null); }
+    const { data } = await sb.from('platform_config').select('key,value').in('key', [`grupo_map_${gid}`, `grupo_map_${gid}_dark`]);
+    _grupoMapLightSrc = null; _grupoMapDarkSrc = null;
+    (data || []).forEach(r => {
+      if (r.key === `grupo_map_${gid}`) _grupoMapLightSrc = r.value;
+      if (r.key === `grupo_map_${gid}_dark`) _grupoMapDarkSrc = r.value;
+    });
+    _updateGrupoMapUI();
+  } catch(e) { _grupoMapLightSrc = null; _grupoMapDarkSrc = null; _updateGrupoMapUI(); }
 }
 
-function _updateGrupoMapUI(src) {
+// Devuelve la imagen que corresponde según el tema activo (igual criterio
+// que getActiveTerMapSrc para los Mapas de Territorio).
+function getActiveGrupoMapSrc() {
+  const theme = document.documentElement.getAttribute('data-theme') || 'auto';
+  const isDark = theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  if (isDark && _grupoMapDarkSrc) return _grupoMapDarkSrc;
+  return _grupoMapLightSrc || null;
+}
+
+function _updateGrupoMapUI() {
+  const src     = getActiveGrupoMapSrc();
   const img     = document.getElementById('grupo-map-img');
   const empty   = document.getElementById('grupo-map-empty');
   const delBtn  = document.getElementById('grupo-map-delete-btn');
   const label   = document.getElementById('grupo-map-upload-label');
   const wrap    = document.getElementById('grupo-map-wrap');
+  const delBtnDark = document.getElementById('grupo-map-delete-btn-dark');
+  const labelDark  = document.getElementById('grupo-map-upload-label-dark');
+  if (!img) return; // página aún no montada
   if (src) {
     img.src = src; img.style.display = 'block'; empty.style.display = 'none';
     wrap.style.cursor = 'zoom-in';
-    if (delBtn) delBtn.style.display = '';
-    if (label)  label.textContent = 'Cambiar mapa';
+    if (delBtn) delBtn.style.display = _grupoMapLightSrc ? '' : 'none';
+    if (label)  label.textContent = _grupoMapLightSrc ? 'Cambiar mapa' : 'Subir mapa PNG';
   } else {
     img.src = ''; img.style.display = 'none'; empty.style.display = 'flex';
     wrap.style.cursor = 'default';
     if (delBtn) delBtn.style.display = 'none';
     if (label)  label.textContent = 'Subir mapa PNG';
   }
+  if (delBtnDark) delBtnDark.style.display = _grupoMapDarkSrc ? '' : 'none';
+  if (labelDark)  labelDark.textContent = _grupoMapDarkSrc ? 'Cambiar versión oscura' : 'Subir versión oscura (opcional)';
 }
 
 function openGrupoMapLightbox() {
@@ -7260,7 +7330,7 @@ function openGrupoMapLightbox() {
   openLightbox(img.src);
 }
 
-async function handleGrupoMapUpload(event) {
+async function handleGrupoMapUpload(event, isDark) {
   const file = event.target.files[0]; event.target.value = '';
   if (!file) return;
   if (!file.type.startsWith('image/')) { showToast('Solo imágenes','error'); return; }
@@ -7275,25 +7345,27 @@ async function handleGrupoMapUpload(event) {
       canvas.getContext('2d').drawImage(img2,0,0,w,h);
       let b64 = canvas.toDataURL('image/jpeg',0.85);
       if(b64.length>3*1024*1024) b64=canvas.toDataURL('image/jpeg',0.65);
-      const key = `grupo_map_${_currentGrupoId}`;
+      const key = `grupo_map_${_currentGrupoId}${isDark ? '_dark' : ''}`;
       const { data: ex } = await sb.from('platform_config').select('key').eq('key',key);
       let err;
       if(ex&&ex.length){ ({error:err}=await sb.from('platform_config').update({value:b64}).eq('key',key)); }
       else { ({error:err}=await sb.from('platform_config').insert({key,value:b64})); }
       if(err){ showToast('Error: '+err.message,'error'); return; }
-      _updateGrupoMapUI(b64);
-      showToast('Mapa de sector guardado ✓','success');
+      if (isDark) _grupoMapDarkSrc = b64; else _grupoMapLightSrc = b64;
+      _updateGrupoMapUI();
+      showToast(isDark ? 'Mapa de sector (oscuro) guardado ✓' : 'Mapa de sector guardado ✓','success');
     };
     img2.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
 
-async function deleteGrupoMap() {
-  if(!confirm('¿Eliminar el mapa de sector?')) return;
-  const key = `grupo_map_${_currentGrupoId}`;
+async function deleteGrupoMap(isDark) {
+  if(!confirm(isDark ? '¿Eliminar la versión oscura del mapa de sector?' : '¿Eliminar el mapa de sector?')) return;
+  const key = `grupo_map_${_currentGrupoId}${isDark ? '_dark' : ''}`;
   await sb.from('platform_config').delete().eq('key',key);
-  _updateGrupoMapUI(null);
+  if (isDark) _grupoMapDarkSrc = null; else _grupoMapLightSrc = null;
+  _updateGrupoMapUI();
   showToast('Mapa eliminado','success');
 }
 
@@ -7746,6 +7818,7 @@ async function renderInicio() {
 
   // ── Carritos: turnos fijos donde aparezco como encargado ──
   try {
+    if (carritosVisibleForCurrentUser()) {
     const [{ data: turnos }, { data: puntos }] = await Promise.all([
       sb.from('cart_turnos').select('*'),
       sb.from('cart_puntos').select('id,nombre'),
@@ -7764,6 +7837,7 @@ async function renderInicio() {
           };
         }),
       });
+    }
     }
   } catch (e) { console.warn('Inicio (carritos):', e); }
 
@@ -8237,6 +8311,7 @@ async function enterApp() {
   loadNotifPrefs();
   loadNotifTemplates();
   refreshCurrentUserPermsCache();
+  loadCarritosVisibility();
 
   // Update UI based on final role
   const roleLabelsMap = { dev:'DEV', admin:'Administrador', viewer:'Visitante' };
@@ -8482,7 +8557,7 @@ const SUB_TABS = {
 
 function renderSubTabs(mainTab) {
   const wrap = document.getElementById('sub-tabs-wrap');
-  const tabs = SUB_TABS[mainTab] || [];
+  const tabs = (SUB_TABS[mainTab] || []).filter(t => t.id !== 'carritos' || carritosVisibleForCurrentUser());
   if (!tabs.length) { wrap.innerHTML = ''; return; }
   wrap.innerHTML = '<div class="sub-tabs">' +
     tabs.map(t => `<button class="sub-tab${currentSubTab===t.id?' active':''}" onclick="switchSubTab('${t.id}')">${t.label}</button>`).join('') +
@@ -8577,6 +8652,7 @@ function syncMainSegThumbDuringShellTransition() {
 }
 
 function switchSubTab(tabId) {
+  if (tabId === 'carritos' && !carritosVisibleForCurrentUser()) { tabId = 'casa'; }
   currentSubTab = tabId;
   renderSubTabs(currentMainTab);
 
@@ -12402,6 +12478,41 @@ function canAccessModule(permissions, moduleKey) {
   return permissions[moduleKey] !== false;
 }
 
+// ── Visibilidad de la Sub-sección Carritos ──────────────────────────────────
+// A diferencia de las demás sub-secciones de Predicación, Carritos ya no es
+// visible para todos los usuarios por defecto. El DEV y el/los Admin con el
+// módulo "carritos" habilitado eligen, desde el Panel de Administración, qué
+// perfiles (usuarios) pueden ver esta sub-sección. La lista se guarda en
+// platform_config bajo la key 'carritos_visible_users' (array de nombres).
+let _carritosAllowedUsers = null; // null = aún no cargado
+async function loadCarritosVisibility() {
+  try {
+    const { data } = await sb.from('platform_config').select('value').eq('key','carritos_visible_users');
+    const raw = data && data.length ? data[0].value : null;
+    _carritosAllowedUsers = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : [];
+  } catch(e) { _carritosAllowedUsers = []; }
+  // Si ya se había pintado la barra de sub-tabs antes de que esto resolviera,
+  // se vuelve a pintar para reflejar la visibilidad correcta sin recargar.
+  if (typeof currentMainTab !== 'undefined' && currentMainTab) renderSubTabs(currentMainTab);
+}
+function carritosVisibleForCurrentUser() {
+  if (currentRole === 'dev') return true;
+  if (currentRole === 'admin') return !!(_currentUserPermsCache && _currentUserPermsCache.carritos !== false);
+  if (!currentUser || !Array.isArray(_carritosAllowedUsers)) return false;
+  const myName = (currentUser.name || '').trim().toLowerCase();
+  return _carritosAllowedUsers.some(n => (n || '').trim().toLowerCase() === myName);
+}
+async function saveCarritosVisibleUsers(names) {
+  const value = JSON.stringify(names);
+  const { data: ex } = await sb.from('platform_config').select('key').eq('key','carritos_visible_users');
+  let err;
+  if (ex && ex.length) { ({ error: err } = await sb.from('platform_config').update({ value }).eq('key','carritos_visible_users')); }
+  else { ({ error: err } = await sb.from('platform_config').insert({ key:'carritos_visible_users', value })); }
+  if (err) { showToast('Error: '+err.message,'error'); return false; }
+  _carritosAllowedUsers = names;
+  return true;
+}
+
 async function registerUserSession(name, role) {
   const now = new Date().toISOString();
   if (role === 'dev') return;
@@ -13313,6 +13424,160 @@ function revealAnimationsSection() {
   const sec = document.getElementById('pref-animations-section');
   if (sec) { sec.style.display = 'block'; }
   updateAnimationsModeUI();
+}
+
+// ── Modo Peak ────────────────────────────────────────────────────────────────
+// Mantener presionado (≥1.5s) el botón de Notificaciones o una asignación de
+// casa en casa muestra un preview rápido ("Notificaciones en Peak" /
+// "Asignaciones en Peak"). Exclusivo de pantallas táctiles; se puede
+// deshabilitar desde Configuración > Funciones Especiales.
+const PEAK_HOLD_MS = 1500;
+const PEAK_MOVE_TOLERANCE = 12;
+let _peakTimer = null;
+let _peakActive = false;
+let _peakStartXY = null;
+
+function isTouchDevice() {
+  return ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+}
+function isPeakModeEnabled() {
+  return localStorage.getItem('fleming_peak_mode') !== 'false'; // default: activado
+}
+function setPeakModeEnabled(on) {
+  localStorage.setItem('fleming_peak_mode', on ? 'true' : 'false');
+}
+function updatePeakModeUI() {
+  const row = document.getElementById('peak-mode-row');
+  const toggle = document.getElementById('peak-mode-toggle');
+  if (!row || !toggle) return;
+  const touchOk = isTouchDevice();
+  toggle.classList.toggle('on', isPeakModeEnabled());
+  row.style.opacity = touchOk ? '1' : '0.5';
+  toggle.style.pointerEvents = touchOk ? '' : 'none';
+  const sub = row.querySelector('.profile-row-value');
+  if (sub && !touchOk) sub.textContent = 'Disponible solo en dispositivos con pantalla táctil.';
+}
+function togglePeakModeSetting(el) {
+  if (!isTouchDevice()) return;
+  const on = !el.classList.contains('on');
+  el.classList.toggle('on', on);
+  setPeakModeEnabled(on);
+}
+
+function initPeakMode() {
+  updatePeakModeUI();
+  if (!isTouchDevice()) return;
+  document.addEventListener('touchstart', _peakOnTouchStart, { passive: true });
+  document.addEventListener('touchmove', _peakOnTouchMove, { passive: true });
+  document.addEventListener('touchend', _peakOnTouchEnd, { passive: true });
+  document.addEventListener('touchcancel', _peakOnTouchEnd, { passive: true });
+}
+
+function _peakOnTouchStart(e) {
+  if (!isPeakModeEnabled() || e.touches.length !== 1) return;
+  const notifBtn   = e.target.closest('.nav-icon-btn[title="Notificaciones"]');
+  const assignCard = e.target.closest('.assignment-card, .assignment-card-today, .sabado-grupo-card');
+  if (!notifBtn && !assignCard) return;
+  const touch = e.touches[0];
+  _peakStartXY = { x: touch.clientX, y: touch.clientY };
+  clearTimeout(_peakTimer);
+  _peakActive = false;
+  _peakTimer = setTimeout(() => {
+    _peakActive = true;
+    if (navigator.vibrate) { try { navigator.vibrate(12); } catch(err) {} }
+    if (notifBtn) {
+      showNotifPeakPreview(touch.clientX, touch.clientY);
+    } else if (assignCard) {
+      const match = (assignCard.getAttribute('onclick') || '').match(/viewAssignment\('([^']+)'\)/);
+      if (match) showAssignmentPeakPreview(match[1], touch.clientX, touch.clientY);
+    }
+  }, PEAK_HOLD_MS);
+}
+function _peakOnTouchMove(e) {
+  if (!_peakStartXY || _peakActive || !e.touches.length) return;
+  const touch = e.touches[0];
+  const dx = Math.abs(touch.clientX - _peakStartXY.x), dy = Math.abs(touch.clientY - _peakStartXY.y);
+  if (dx > PEAK_MOVE_TOLERANCE || dy > PEAK_MOVE_TOLERANCE) { clearTimeout(_peakTimer); _peakStartXY = null; }
+}
+function _peakOnTouchEnd(e) {
+  clearTimeout(_peakTimer);
+  _peakStartXY = null;
+  if (_peakActive) {
+    // Evita que el "click" sintético posterior al touchend dispare la acción
+    // normal del elemento (abrir notificaciones / la asignación completa).
+    const target = e.target;
+    const suppress = (ev) => { ev.preventDefault(); ev.stopPropagation(); };
+    target.addEventListener('click', suppress, { capture: true, once: true });
+    hidePeakPreview();
+    _peakActive = false;
+  }
+}
+function _positionPeakOverlay(overlay, x, y) {
+  overlay.style.left = '0px'; overlay.style.top = '0px';
+  overlay.classList.add('open');
+  requestAnimationFrame(() => {
+    const rect = overlay.getBoundingClientRect();
+    let left = x - rect.width / 2;
+    let top  = y - rect.height - 18;
+    left = Math.max(10, Math.min(left, window.innerWidth - rect.width - 10));
+    if (top < 10) top = y + 18;
+    overlay.style.left = left + 'px';
+    overlay.style.top  = top + 'px';
+  });
+}
+function hidePeakPreview() {
+  document.getElementById('peak-preview-overlay')?.classList.remove('open');
+}
+async function showNotifPeakPreview(x, y) {
+  const overlay = document.getElementById('peak-preview-overlay');
+  const box = document.getElementById('peak-preview-box');
+  box.innerHTML = `<div class="peak-preview-title">Notificaciones</div><div class="peak-preview-empty">Cargando…</div>`;
+  _positionPeakOverlay(overlay, x, y);
+  let n = null;
+  try {
+    const { data } = await sb.from('notifications').select('*').order('created_at', { ascending: false }).limit(20);
+    const myName = currentUser?.name?.trim().toLowerCase();
+    n = (data || []).find(item => isNotifForMe(item, myName)) || null;
+  } catch(e) { /* silencioso */ }
+  if (!overlay.classList.contains('open')) return; // el usuario ya soltó/cerró
+  if (!n) {
+    box.innerHTML = `<div class="peak-preview-title">Notificaciones</div><div class="peak-preview-empty">Sin notificaciones recientes</div>`;
+  } else {
+    const esc = s => (s || '').replace(/</g,'&lt;');
+    let when = '';
+    if (n.created_at) {
+      const mins = Math.round((Date.now() - new Date(n.created_at)) / 60000);
+      when = mins < 2 ? 'Ahora mismo' : mins < 60 ? `Hace ${mins} min` : mins < 1440 ? `Hace ${Math.round(mins/60)}h` : new Date(n.created_at).toLocaleDateString('es-CL',{day:'numeric',month:'short'});
+    }
+    box.innerHTML = `<div class="peak-preview-title">${esc(n.title) || 'Notificación'}</div>${n.body ? `<div class="peak-preview-body">${esc(n.body)}</div>` : ''}${when ? `<div class="peak-preview-meta">${when}</div>` : ''}`;
+  }
+  _positionPeakOverlay(overlay, x, y);
+}
+function showAssignmentPeakPreview(id, x, y) {
+  const a = (typeof assignments !== 'undefined' ? assignments : []).find(z => z.id === id);
+  const overlay = document.getElementById('peak-preview-overlay');
+  const box = document.getElementById('peak-preview-box');
+  if (!a) return;
+  const ter = territories.find(t => t.id === a.territory_id) || null;
+  const timeStr = a.time ? a.time.substring(0,5) + 'hrs' : '--:--';
+  const esc = s => (s || '').replace(/</g,'&lt;');
+  const mapSrc = ter ? getActiveTerMapSrc(ter) : null;
+  box.innerHTML = `
+    <div class="peak-preview-title">${esc(a.address) || 'Sin dirección'}</div>
+    <div class="peak-preview-row"><strong>Territorio:</strong> ${ter ? 'T' + ter.number : '—'}</div>
+    <div class="peak-preview-row"><strong>Encargado:</strong> ${esc(a.conductor) || 'Sin conductor'}</div>
+    <div class="peak-preview-row"><strong>Hora:</strong> ${timeStr}</div>
+    ${mapSrc ? `<img class="peak-preview-map" src="${mapSrc}">` : ''}`;
+  _positionPeakOverlay(overlay, x, y);
+  if (ter && !mapSrc) {
+    ensureTerritoryMapsLoaded().then(() => {
+      const src2 = getActiveTerMapSrc(ter);
+      if (src2 && overlay.classList.contains('open')) {
+        box.insertAdjacentHTML('beforeend', `<img class="peak-preview-map" src="${src2}">`);
+        _positionPeakOverlay(overlay, x, y);
+      }
+    });
+  }
 }
 
 // ── Botón flotante "Volver arriba" ────────────────────────────────────────
@@ -16489,6 +16754,15 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
           Eliminar mapa
         </button>
         <input type="file" id="grupo-map-file-input" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="handleGrupoMapUpload(event)">
+        <button class="grupo-upload-btn" onclick="document.getElementById('grupo-map-file-input-dark').click()" style="border-style:dashed">
+          <svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+          <span id="grupo-map-upload-label-dark">Subir versión oscura (opcional)</span>
+        </button>
+        <button class="grupo-upload-btn" id="grupo-map-delete-btn-dark" onclick="deleteGrupoMap(true)" style="display:none;border-color:rgba(255,59,48,0.3);color:var(--red)">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          Eliminar versión oscura
+        </button>
+        <input type="file" id="grupo-map-file-input-dark" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="handleGrupoMapUpload(event,true)">
       </div>
     </div>
 
@@ -17272,6 +17546,39 @@ function cartSwitchAdminTab(tab) {
   if (tab === 'puntos') cartRenderAdminPuntos();
   if (tab === 'turnos') cartRenderAdminTurnos();
   if (tab === 'personas') cartRenderAdminPersonas();
+  if (tab === 'acceso') cartRenderAdminAcceso();
+}
+
+// ---------- ACCESO (visibilidad de la sub-sección Carritos) ----------
+async function cartRenderAdminAcceso() {
+  const body = document.getElementById('cartAdminBody');
+  body.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando usuarios</div></div>';
+  if (!activeUsers || !activeUsers.length) await loadUsers();
+  if (_carritosAllowedUsers === null) await loadCarritosVisibility();
+  const allowed = new Set((_carritosAllowedUsers || []).map(n => (n || '').trim().toLowerCase()));
+  const users = (activeUsers || []).filter(u => u.role !== 'pending').sort((a,b) => a.name.localeCompare(b.name));
+  body.innerHTML = `
+    <div style="padding:0 20px 10px;font-size:0.8rem;color:var(--text-gray);line-height:1.5">
+      Elige qué perfiles pueden ver la Sub-sección Carritos. El DEV y los Administradores con este módulo habilitado siempre tienen acceso.
+    </div>
+    <div id="cartAccesoList">
+      ${users.map(u => `
+        <div class="ct-admin-list-item">
+          <div class="ct-info">
+            <div class="ct-title">${u.name}</div>
+            <div class="ct-sub">${u.role === 'dev' ? 'DEV' : u.role === 'admin' ? 'Administrador' : 'Visitante'}</div>
+          </div>
+          <div class="toggle-switch${allowed.has(u.name.trim().toLowerCase()) ? ' on' : ''}" data-user="${u.name.replace(/"/g,'&quot;')}" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+        </div>`).join('')}
+    </div>
+    <div style="padding:16px 20px">
+      <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="cartSaveAdminAcceso()">Guardar acceso</button>
+    </div>`;
+}
+async function cartSaveAdminAcceso() {
+  const names = Array.from(document.querySelectorAll('#cartAccesoList .toggle-switch.on')).map(el => el.dataset.user);
+  const ok = await saveCarritosVisibleUsers(names);
+  if (ok) { showToast('Acceso a Carritos actualizado ✓','success'); renderSubTabs(currentMainTab); }
 }
 
 // ---------- PUNTOS ----------
