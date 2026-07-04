@@ -6823,7 +6823,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.11.0-beta';
+const APP_VERSION = '1.11.1-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -13051,6 +13051,11 @@ async function viewTerritory(id) {
   document.getElementById('detail-actions').style.display = 'none';
   // Hide territory tabs — single territory view
   document.getElementById('detail-ter-tabs').style.display = 'none';
+  // "Manzanas a Abarcar" es exclusivo de las asignaciones de Casa en Casa
+  // (viewAssignment); en la vista de un Territorio individual nunca se muestra,
+  // incluso si quedó visible de una asignación vista previamente.
+  const manzanasLine = document.getElementById('detail-manzanas-line');
+  if (manzanasLine) manzanasLine.style.display = 'none';
 
   // Map
   const mapWrap = document.getElementById('detail-map-wrap');
