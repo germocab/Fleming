@@ -4042,24 +4042,44 @@
   }
   .toggle-switch.on { background: var(--accent); border-color: var(--accent); }
 
+  /* Modo Peak: evita que el long-press seleccione texto en las tarjetas de asignación */
+  html.peak-selection-guard .assignment-card,
+  html.peak-selection-guard .assignment-card-today,
+  html.peak-selection-guard .sabado-grupo-card {
+    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+  }
+
   /* ── Modo Peak: preview overlay para long-press (Notificaciones / Asignaciones) ── */
   .peak-preview-overlay {
     position: fixed; z-index: 9999; display: none; pointer-events: none;
-    max-width: 300px; min-width: 220px;
+    max-width: 300px; min-width: 240px;
   }
-  .peak-preview-overlay.open { display: block; animation: peakPreviewIn 0.14s ease; }
-  @keyframes peakPreviewIn { from { opacity:0; transform: scale(0.94); } to { opacity:1; transform: scale(1); } }
+  .peak-preview-overlay.open { display: block; animation: peakPreviewIn 0.16s cubic-bezier(.2,.9,.3,1.2); }
+  @keyframes peakPreviewIn { from { opacity:0; transform: scale(0.92) translateY(4px); } to { opacity:1; transform: scale(1) translateY(0); } }
   .peak-preview-box {
-    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.25); padding: 12px 14px; font-family: var(--font);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 22px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.28), 0 2px 8px rgba(0,0,0,0.08);
+    padding: 0; font-family: var(--font); overflow: hidden; backdrop-filter: blur(20px);
   }
-  .peak-preview-title { font-weight: 700; font-size: 0.9rem; color: var(--text); margin-bottom: 4px; }
-  .peak-preview-body { font-size: 0.8rem; color: var(--text2); line-height: 1.4; margin-bottom: 4px; }
-  .peak-preview-meta { font-size: 0.7rem; color: var(--text3); }
-  .peak-preview-row { font-size: 0.8rem; color: var(--text2); margin-bottom: 3px; }
-  .peak-preview-row strong { color: var(--text3); font-weight: 600; margin-right: 4px; }
-  .peak-preview-empty { font-size: 0.8rem; color: var(--text3); }
-  .peak-preview-map { width: 100%; border-radius: 10px; margin-top: 6px; max-height: 140px; object-fit: cover; display: block; }
+  .peak-preview-head {
+    display: flex; align-items: center; gap: 10px; padding: 14px 16px 10px;
+  }
+  .peak-preview-icon {
+    flex-shrink: 0; width: 34px; height: 34px; border-radius: 11px; display: flex;
+    align-items: center; justify-content: center; background: var(--accent-light); color: var(--accent);
+  }
+  .peak-preview-icon svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .peak-preview-title { font-weight: 700; font-size: 0.92rem; color: var(--text); line-height: 1.25; }
+  .peak-preview-kicker { font-size: 0.68rem; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 1px; }
+  .peak-preview-body { font-size: 0.82rem; color: var(--text2); line-height: 1.4; padding: 0 16px 12px; }
+  .peak-preview-meta { font-size: 0.7rem; color: var(--text3); padding: 0 16px 14px; }
+  .peak-preview-rows { padding: 0 16px 4px; }
+  .peak-preview-row { display: flex; align-items: center; gap: 8px; font-size: 0.81rem; color: var(--text2); padding: 5px 0; border-top: 1px solid var(--border); }
+  .peak-preview-row:first-child { border-top: none; }
+  .peak-preview-row svg { flex-shrink: 0; width: 14px; height: 14px; stroke: var(--text3); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .peak-preview-row-value { font-weight: 600; color: var(--text); }
+  .peak-preview-empty { font-size: 0.82rem; color: var(--text3); padding: 0 16px 14px; }
+  .peak-preview-map { width: 100%; display: block; max-height: 150px; object-fit: cover; }
   .toggle-thumb {
     position: absolute; top: 3px; left: 3px;
     width: 18px; height: 18px; border-radius: 50%;
@@ -6259,6 +6279,19 @@
         </button>
       </div>
       <div class="pref-desktop-only-row" style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">En "Lateral", el detalle de la asignación se abre a la derecha, dejando la lista visible a la izquierda.</div>
+      <!-- Toggle: Modo Peak -->
+      <div class="profile-row" id="peak-mode-row" style="cursor:pointer;border-top:1px solid var(--border)" onclick="togglePeakModeSetting()">
+        <div class="profile-row-icon" style="background:var(--ter-9-bg);color:var(--ter-9)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Modo Peak</div>
+          <div class="profile-row-value" style="font-size:0.8rem" id="peak-mode-desc">Mantén presionado para ver previews rápidos (Notificaciones y Asignaciones)</div>
+        </div>
+        <div id="peak-mode-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="peak-mode-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -6375,23 +6408,6 @@
           </button>
         </div>
         <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">Elige "Reducidas" si eres sensible al movimiento en pantalla.</div>
-      </div>
-      <!-- Funciones Especiales -->
-      <div id="pref-special-features-section" style="border-top:1px solid var(--border)">
-        <div style="padding:0.75rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
-          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">Funciones Especiales</span>
-        </div>
-        <div class="profile-row" style="padding:0.6rem 1rem" id="peak-mode-row">
-          <div class="profile-row-icon" style="background:var(--surface3);color:var(--text2)">
-            <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-          </div>
-          <div class="profile-row-content">
-            <div class="profile-row-label">Modo Peak</div>
-            <div class="profile-row-value" style="font-size:0.74rem;color:var(--text3);white-space:normal">Mantén presionado (1.5s) para ver previews rápidos. Exclusivo de pantallas táctiles.</div>
-          </div>
-          <div class="toggle-switch" id="peak-mode-toggle" onclick="togglePeakModeSetting(this)"><div class="toggle-thumb"></div></div>
-        </div>
       </div>
     </div>
   </div>
@@ -6603,7 +6619,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.8-beta';
+const APP_VERSION = '1.8.5-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -12858,6 +12874,7 @@ async function openPreferencias() {
   updatePrefThemeActive();
   updateDarkMapToggleUI();
   updateLiveToggleUI();
+  updatePeakModeUI();
   updateTransparencyToggleUI();
   updateNavbarShrinkToggleUI();
   updateH2HViewModeUI();
@@ -13441,31 +13458,40 @@ function isTouchDevice() {
   return ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 }
 function isPeakModeEnabled() {
-  return localStorage.getItem('fleming_peak_mode') !== 'false'; // default: activado
+  return localStorage.getItem('fleming_peak_mode') === 'true'; // default: desactivado
 }
 function setPeakModeEnabled(on) {
   localStorage.setItem('fleming_peak_mode', on ? 'true' : 'false');
+  _applyPeakSelectionGuard();
 }
 function updatePeakModeUI() {
-  const row = document.getElementById('peak-mode-row');
   const toggle = document.getElementById('peak-mode-toggle');
-  if (!row || !toggle) return;
-  const touchOk = isTouchDevice();
-  toggle.classList.toggle('on', isPeakModeEnabled());
-  row.style.opacity = touchOk ? '1' : '0.5';
-  toggle.style.pointerEvents = touchOk ? '' : 'none';
-  const sub = row.querySelector('.profile-row-value');
-  if (sub && !touchOk) sub.textContent = 'Disponible solo en dispositivos con pantalla táctil.';
+  const thumb  = document.getElementById('peak-mode-thumb');
+  const desc   = document.getElementById('peak-mode-desc');
+  if (!toggle || !thumb) return;
+  const enabled = isPeakModeEnabled();
+  toggle.style.background = enabled ? 'var(--accent)' : 'var(--surface3)';
+  thumb.style.left = enabled ? '21px' : '3px';
+  if (desc) desc.textContent = isTouchDevice()
+    ? 'Mantén presionado para ver previews rápidos (Notificaciones y Asignaciones)'
+    : 'Disponible solo en dispositivos con pantalla táctil';
 }
-function togglePeakModeSetting(el) {
-  if (!isTouchDevice()) return;
-  const on = !el.classList.contains('on');
-  el.classList.toggle('on', on);
-  setPeakModeEnabled(on);
+function togglePeakModeSetting() {
+  const next = !isPeakModeEnabled();
+  setPeakModeEnabled(next);
+  updatePeakModeUI();
+}
+// Mientras el Modo Peak está activo, el long-press sobre una tarjeta de
+// asignación no debe disparar la selección de texto nativa del dispositivo
+// (que compite con el gesto de mantener presionado para el preview).
+function _applyPeakSelectionGuard() {
+  const on = isPeakModeEnabled() && isTouchDevice();
+  document.documentElement.classList.toggle('peak-selection-guard', on);
 }
 
 function initPeakMode() {
   updatePeakModeUI();
+  _applyPeakSelectionGuard();
   if (!isTouchDevice()) return;
   document.addEventListener('touchstart', _peakOnTouchStart, { passive: true });
   document.addEventListener('touchmove', _peakOnTouchMove, { passive: true });
@@ -13531,7 +13557,12 @@ function hidePeakPreview() {
 async function showNotifPeakPreview(x, y) {
   const overlay = document.getElementById('peak-preview-overlay');
   const box = document.getElementById('peak-preview-box');
-  box.innerHTML = `<div class="peak-preview-title">Notificaciones</div><div class="peak-preview-empty">Cargando…</div>`;
+  const bellIcon = '<svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>';
+  box.innerHTML = `
+    <div class="peak-preview-head">
+      <div class="peak-preview-icon">${bellIcon}</div>
+      <div><div class="peak-preview-kicker">Notificaciones</div><div class="peak-preview-title">Cargando…</div></div>
+    </div>`;
   _positionPeakOverlay(overlay, x, y);
   let n = null;
   try {
@@ -13540,16 +13571,27 @@ async function showNotifPeakPreview(x, y) {
     n = (data || []).find(item => isNotifForMe(item, myName)) || null;
   } catch(e) { /* silencioso */ }
   if (!overlay.classList.contains('open')) return; // el usuario ya soltó/cerró
+  const esc = s => (s || '').replace(/</g,'&lt;');
   if (!n) {
-    box.innerHTML = `<div class="peak-preview-title">Notificaciones</div><div class="peak-preview-empty">Sin notificaciones recientes</div>`;
+    box.innerHTML = `
+      <div class="peak-preview-head">
+        <div class="peak-preview-icon">${bellIcon}</div>
+        <div><div class="peak-preview-kicker">Notificaciones</div><div class="peak-preview-title">Nada por aquí</div></div>
+      </div>
+      <div class="peak-preview-empty">Sin notificaciones recientes</div>`;
   } else {
-    const esc = s => (s || '').replace(/</g,'&lt;');
     let when = '';
     if (n.created_at) {
       const mins = Math.round((Date.now() - new Date(n.created_at)) / 60000);
       when = mins < 2 ? 'Ahora mismo' : mins < 60 ? `Hace ${mins} min` : mins < 1440 ? `Hace ${Math.round(mins/60)}h` : new Date(n.created_at).toLocaleDateString('es-CL',{day:'numeric',month:'short'});
     }
-    box.innerHTML = `<div class="peak-preview-title">${esc(n.title) || 'Notificación'}</div>${n.body ? `<div class="peak-preview-body">${esc(n.body)}</div>` : ''}${when ? `<div class="peak-preview-meta">${when}</div>` : ''}`;
+    box.innerHTML = `
+      <div class="peak-preview-head">
+        <div class="peak-preview-icon">${bellIcon}</div>
+        <div><div class="peak-preview-kicker">Notificaciones</div><div class="peak-preview-title">${esc(n.title) || 'Notificación'}</div></div>
+      </div>
+      ${n.body ? `<div class="peak-preview-body">${esc(n.body)}</div>` : ''}
+      ${when ? `<div class="peak-preview-meta">${when}</div>` : ''}`;
   }
   _positionPeakOverlay(overlay, x, y);
 }
@@ -13559,14 +13601,20 @@ function showAssignmentPeakPreview(id, x, y) {
   const box = document.getElementById('peak-preview-box');
   if (!a) return;
   const ter = territories.find(t => t.id === a.territory_id) || null;
-  const timeStr = a.time ? a.time.substring(0,5) + 'hrs' : '--:--';
+  const timeStr = a.time ? a.time.substring(0,5) + ' hrs' : '--:--';
   const esc = s => (s || '').replace(/</g,'&lt;');
   const mapSrc = ter ? getActiveTerMapSrc(ter) : null;
+  const homeIcon = '<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
   box.innerHTML = `
-    <div class="peak-preview-title">${esc(a.address) || 'Sin dirección'}</div>
-    <div class="peak-preview-row"><strong>Territorio:</strong> ${ter ? 'T' + ter.number : '—'}</div>
-    <div class="peak-preview-row"><strong>Encargado:</strong> ${esc(a.conductor) || 'Sin conductor'}</div>
-    <div class="peak-preview-row"><strong>Hora:</strong> ${timeStr}</div>
+    <div class="peak-preview-head">
+      <div class="peak-preview-icon">${homeIcon}</div>
+      <div><div class="peak-preview-kicker">Asignación</div><div class="peak-preview-title">${esc(a.address) || 'Sin dirección'}</div></div>
+    </div>
+    <div class="peak-preview-rows">
+      <div class="peak-preview-row"><svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg><span class="peak-preview-row-value">${ter ? 'Territorio ' + ter.number : 'Sin territorio'}</span></div>
+      <div class="peak-preview-row"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="peak-preview-row-value">${esc(a.conductor) || 'Sin conductor'}</span></div>
+      <div class="peak-preview-row"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span class="peak-preview-row-value">${timeStr}</span></div>
+    </div>
     ${mapSrc ? `<img class="peak-preview-map" src="${mapSrc}">` : ''}`;
   _positionPeakOverlay(overlay, x, y);
   if (ter && !mapSrc) {
