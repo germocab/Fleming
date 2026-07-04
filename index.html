@@ -835,19 +835,21 @@
     z-index: 200; align-items: flex-end; justify-content: center;
   }
   .detail-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+  .detail-overlay.morphing { animation: none !important; }
 
   /* ── Animación "Morph": la tarjeta de una asignación de Casa en Casa se
-     transforma de forma continua (forma, tono y bordes) en la pantalla de
-     detalles — no es un crossfade entre dos capturas, es un único elemento
-     "fantasma" (.morph-ghost) cuya posición, tamaño, radio y color se
-     interpolan cuadro a cuadro con la Web Animations API, igual que un
-     Smart Animate de Figma. Solo aplica en móvil y es opcional desde
-     Experimentos. Mientras corre, la tarjeta real y el contenido del panel
-     quedan ocultos: solo se ve la forma transformándose. ── */
+     transforma de forma continua en la pantalla de detalles — nada
+     desaparece de golpe. El "fantasma" (.morph-ghost) es un CLON real de la
+     tarjeta (o del panel, al cerrar), con su contenido, que crece/encoge y
+     cambia de tono mientras su propio texto se desvanece con un fade suave;
+     la tarjeta original y las demás tarjetas de la lista nunca se ocultan,
+     simplemente quedan cubiertas por el fantasma a medida que crece (igual
+     que un Smart Animate de Figma). El fondo oscurecido del overlay también
+     se sincroniza con la misma duración, para que no haya un "pop" final. ── */
   .morph-ghost {
-    position: fixed; top: 0; left: 0; z-index: 205;
-    pointer-events: none; box-sizing: border-box;
-    will-change: left, top, width, height, border-radius, background-color, border-color;
+    position: fixed; z-index: 205; margin: 0 !important;
+    pointer-events: none; box-sizing: border-box; overflow: hidden;
+    will-change: left, top, width, height, border-radius, background-color;
   }
   .detail-panel.morphing { animation: none !important; }
 
@@ -6854,7 +6856,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.11.5.2-beta';
+const APP_VERSION = '1.11.5.3-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -15383,11 +15385,11 @@ function isMobile() { return window.innerWidth < 640; }
 
 // ══════════════════════════ Animación "Morph" ══════════════════════════════
 // Al tocar una tarjeta de asignación de Casa en Casa, la tarjeta se
-// transforma de forma continua (forma, tono y bordes) en la pantalla de
-// detalles, como un Smart Animate de Figma (sin crossfade entre capturas).
-// Exclusiva de móvil y opcional desde Experimentos (ON por defecto).
+// transforma de forma continua en la pantalla de detalles — nada desaparece
+// de golpe, todo se desvanece o se cubre gradualmente (Smart Animate style).
+// Exclusiva de móvil y opcional desde Experimentos (OFF por defecto).
 function isMorphEnabled() {
-  return localStorage.getItem('fleming_morph_anim') !== 'false';
+  return localStorage.getItem('fleming_morph_anim') === 'true';
 }
 function isMorphActive() {
   return isMorphEnabled() && isMobile() && typeof Element.prototype.animate === 'function';
@@ -15412,50 +15414,34 @@ let _morphCardEl = null;
 
 // Duración de la animación Morph: lenta y elegante a propósito (estilo
 // Liquid Glass / Smart Animate de Figma), para que el cambio de forma y tono
-// se perciba con claridad en vez de sentirse como un corte.
+// se perciba con claridad, sin sentirse como un corte.
 const MORPH_DURATION = 700;
 const MORPH_EASING = 'cubic-bezier(.22,1,.36,1)';
 
 function _rectOf(el) { return el.getBoundingClientRect(); }
 
-// Anima un único elemento "fantasma" desde la forma/tono de `fromEl` hacia la
-// forma/tono de `toEl` (posición, tamaño, radio, color de fondo y borde), sin
-// crossfade de contenido: por eso se ve como una transformación continua y no
-// como un corte entre dos capturas.
-function _animateMorphGhost(fromRect, fromStyle, toRect, toStyle) {
-  const ghost = document.createElement('div');
-  ghost.className = 'morph-ghost';
-  document.body.appendChild(ghost);
-  const anim = ghost.animate([
-    {
-      left: fromRect.left + 'px', top: fromRect.top + 'px',
-      width: fromRect.width + 'px', height: fromRect.height + 'px',
-      borderRadius: fromStyle.borderRadius,
-      backgroundColor: fromStyle.backgroundColor,
-      borderColor: fromStyle.borderColor,
-      borderWidth: fromStyle.borderWidth,
-      borderStyle: 'solid',
-    },
-    {
-      left: toRect.left + 'px', top: toRect.top + 'px',
-      width: toRect.width + 'px', height: toRect.height + 'px',
-      borderRadius: toStyle.borderRadius,
-      backgroundColor: toStyle.backgroundColor,
-      borderColor: toStyle.borderColor,
-      borderWidth: toStyle.borderWidth,
-      borderStyle: 'solid',
-    },
+// Aplica al "fantasma" (clon real, con contenido) la interpolación continua
+// de posición/tamaño/radio/color desde su forma inicial hacia la final.
+function _morphBox(ghost, fromRect, fromCs, toRect, toCs) {
+  return ghost.animate([
+    { left: fromRect.left+'px', top: fromRect.top+'px', width: fromRect.width+'px', height: fromRect.height+'px', borderRadius: fromCs.borderRadius, backgroundColor: fromCs.backgroundColor },
+    { left: toRect.left+'px',   top: toRect.top+'px',   width: toRect.width+'px',   height: toRect.height+'px',   borderRadius: toCs.borderRadius,   backgroundColor: toCs.backgroundColor },
   ], { duration: MORPH_DURATION, easing: MORPH_EASING, fill: 'forwards' });
-  return { ghost, anim };
 }
 
-// Abre el detalle con Morph: la tarjeta se transforma en la forma del panel;
-// el contenido del panel solo aparece (fade corto) una vez que la forma ya
-// casi terminó de transformarse, para que lo evidente sea el cambio de forma.
+// Abre el detalle con Morph. Nada desaparece de golpe:
+// - La tarjeta original y el resto de la lista NUNCA se ocultan: el clon
+//   ("fantasma") simplemente crece por encima y las va cubriendo.
+// - El texto de la tarjeta clonada se desvanece con un fade corto al inicio.
+// - El fondo oscurecido del overlay se sincroniza con toda la duración.
+// - El contenido real del panel aparece con fade-in recién cuando el
+//   fantasma ya casi ocupa toda la pantalla, y el fantasma se desvanece al
+//   mismo tiempo — como para entonces comparten casi el mismo tono, el
+//   cruce entre ambos es imperceptible (no hay pantalla en blanco).
 function runMorphOpen(cardEl, openFn) {
-  const fromRect  = _rectOf(cardEl);
-  const fromCs    = getComputedStyle(cardEl);
-  const fromStyle = { borderRadius: fromCs.borderRadius, backgroundColor: fromCs.backgroundColor, borderColor: fromCs.borderColor, borderWidth: fromCs.borderWidth };
+  const fromRect = _rectOf(cardEl);
+  const fromCs   = getComputedStyle(cardEl);
+  const overlay  = document.getElementById('detail-overlay');
 
   openFn(); // monta el overlay/panel en su posición y tamaño final
 
@@ -15463,51 +15449,93 @@ function runMorphOpen(cardEl, openFn) {
   panel.classList.add('morphing');
   panel.style.opacity = '0';
   void panel.offsetHeight; // fuerza reflow para medir la geometría final real
-  const toRect  = _rectOf(panel);
-  const toCs    = getComputedStyle(panel);
-  const toStyle = { borderRadius: toCs.borderRadius, backgroundColor: toCs.backgroundColor, borderColor: toCs.borderColor || 'transparent', borderWidth: toCs.borderWidth || '0px' };
+  const toRect = _rectOf(panel);
+  const toCs   = getComputedStyle(panel);
 
-  cardEl.style.visibility = 'hidden';
-  const { ghost, anim } = _animateMorphGhost(fromRect, fromStyle, toRect, toStyle);
+  overlay.classList.add('morphing');
+  overlay.style.opacity = '0';
+  const overlayAnim = overlay.animate([{ opacity: 0 }, { opacity: 1 }], { duration: MORPH_DURATION, easing: 'ease', fill: 'forwards' });
 
-  // El contenido real del panel se revela recién en el último tercio de la
-  // transformación, cuando la forma ya se parece mucho a la pantalla final.
-  panel.style.transition = `opacity ${Math.round(MORPH_DURATION * 0.4)}ms ease`;
-  setTimeout(() => { panel.style.opacity = '1'; }, Math.round(MORPH_DURATION * 0.6));
+  // Clon real de la tarjeta (con su contenido), que crecerá hasta ocupar la
+  // pantalla. La tarjeta original queda intacta y visible debajo — el clon
+  // solo la va cubriendo a medida que crece.
+  const ghost = cardEl.cloneNode(true);
+  ghost.removeAttribute('onclick');
+  ghost.className = (cardEl.className + ' morph-ghost').trim();
+  ghost.style.cssText = `position:fixed;margin:0;z-index:205;pointer-events:none;box-sizing:border-box;overflow:hidden;left:${fromRect.left}px;top:${fromRect.top}px;width:${fromRect.width}px;height:${fromRect.height}px;`;
+  document.body.appendChild(ghost);
 
-  anim.finished.catch(() => {}).finally(() => {
+  // El texto/ícono clonado se desvanece suavemente (no de golpe).
+  Array.from(ghost.children).forEach(child => {
+    child.animate([{ opacity: 1 }, { opacity: 0 }], { duration: MORPH_DURATION * 0.4, easing: 'ease', fill: 'forwards' });
+  });
+
+  const boxAnim = _morphBox(ghost, fromRect, fromCs, toRect, toCs);
+
+  // Revelado final: el contenido real del panel entra con fade-in mientras
+  // el fantasma (ya sin texto, con un tono casi idéntico al del panel) se
+  // desvanece — ambos terminan exactamente juntos, sin salto perceptible.
+  const revealDelay = MORPH_DURATION * 0.55;
+  const revealDur   = MORPH_DURATION - revealDelay;
+  panel.style.transition = `opacity ${revealDur}ms ease`;
+  setTimeout(() => {
+    panel.style.opacity = '1';
+    ghost.animate([{ opacity: 1 }, { opacity: 0 }], { duration: revealDur, easing: 'ease', fill: 'forwards' });
+  }, revealDelay);
+
+  Promise.allSettled([boxAnim.finished, overlayAnim.finished]).finally(() => {
     ghost.remove();
     panel.classList.remove('morphing');
     panel.style.transition = '';
     panel.style.opacity = '';
-    if (cardEl) cardEl.style.visibility = '';
+    overlay.classList.remove('morphing');
+    overlay.style.opacity = '';
   });
 }
 
-// Cierra el detalle con Morph en reversa: la pantalla se transforma de vuelta
-// en la tarjeta que la originó.
+// Cierra el detalle con Morph en reversa: el panel se transforma de vuelta
+// en la tarjeta que lo originó. Como la tarjeta original nunca se ocultó al
+// abrir, basta con desvanecer el fantasma sobre ella al final — no hace
+// falta "traer de vuelta" ningún contenido, ya estaba ahí todo el tiempo.
 function runMorphClose(cardEl, closeFn) {
-  const panel = document.getElementById('detail-panel');
-  const fromRect  = _rectOf(panel);
-  const fromCs    = getComputedStyle(panel);
-  const fromStyle = { borderRadius: fromCs.borderRadius, backgroundColor: fromCs.backgroundColor, borderColor: fromCs.borderColor || 'transparent', borderWidth: fromCs.borderWidth || '0px' };
-  const toRect    = _rectOf(cardEl);
-  const toCs      = getComputedStyle(cardEl);
-  const toStyle   = { borderRadius: toCs.borderRadius, backgroundColor: toCs.backgroundColor, borderColor: toCs.borderColor, borderWidth: toCs.borderWidth };
+  const panel   = document.getElementById('detail-panel');
+  const overlay = document.getElementById('detail-overlay');
+  const fromRect = _rectOf(panel);
+  const fromCs   = getComputedStyle(panel);
+  const toRect   = _rectOf(cardEl);
+  const toCs     = getComputedStyle(cardEl);
 
-  panel.classList.add('morphing');
-  // El contenido del panel se desvanece de inmediato: lo evidente al cerrar
-  // también debe ser el cambio de forma, no el contenido superpuesto.
-  panel.style.transition = `opacity ${Math.round(MORPH_DURATION * 0.3)}ms ease`;
+  overlay.classList.add('morphing');
+  const overlayAnim = overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: MORPH_DURATION, easing: 'ease', fill: 'forwards' });
+
+  // Clon real del panel (con su contenido), que se irá encogiendo. El panel
+  // real se oculta de inmediato para que, a medida que el clon se encoge,
+  // lo que quede a la vista sea la lista real de tarjetas (a través del
+  // fondo que se está aclarando), no un panel completo aún visible.
+  const ghost = panel.cloneNode(true);
+  ghost.className = (panel.className + ' morph-ghost').trim();
+  ghost.style.cssText = `position:fixed;margin:0;z-index:205;pointer-events:none;box-sizing:border-box;overflow:hidden;left:${fromRect.left}px;top:${fromRect.top}px;width:${fromRect.width}px;height:${fromRect.height}px;`;
+  document.body.appendChild(ghost);
   panel.style.opacity = '0';
 
-  const { ghost, anim } = _animateMorphGhost(fromRect, fromStyle, toRect, toStyle);
+  // El contenido clonado del panel se desvanece suavemente al inicio.
+  Array.from(ghost.children).forEach(child => {
+    child.animate([{ opacity: 1 }, { opacity: 0 }], { duration: MORPH_DURATION * 0.35, easing: 'ease', fill: 'forwards' });
+  });
 
-  anim.finished.catch(() => {}).finally(() => {
+  const boxAnim = _morphBox(ghost, fromRect, fromCs, toRect, toCs);
+
+  // El fantasma se desvanece en el tramo final — para entonces su tono ya
+  // casi calza con la tarjeta real de abajo (que siempre estuvo visible),
+  // así que al desaparecer no se nota ningún salto.
+  const fadeDelay = MORPH_DURATION * 0.6;
+  ghost.animate([{ opacity: 1 }, { opacity: 0 }], { duration: MORPH_DURATION - fadeDelay, delay: fadeDelay, easing: 'ease', fill: 'forwards' });
+
+  Promise.allSettled([boxAnim.finished, overlayAnim.finished]).finally(() => {
     ghost.remove();
     closeFn(); // desmonta el overlay ya con la forma de vuelta en la tarjeta
-    panel.classList.remove('morphing');
-    panel.style.transition = '';
+    overlay.classList.remove('morphing');
+    overlay.style.opacity = '';
     panel.style.opacity = '';
   });
 }
