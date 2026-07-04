@@ -4913,11 +4913,20 @@
   transition: background 0.15s, transform 0.15s;
 }
 .simp-hamburger-btn:active { transform: scale(0.92); background: var(--surface2); }
+/* "Opciones" (título Fleming): despliega hacia abajo con fade + leve escala ── */
 .simp-options-dropdown {
   position: absolute; top: 52px; left: 0.85rem; z-index: 61;
   display: flex; flex-direction: column; gap: 8px;
   background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
   padding: 10px; box-shadow: var(--shadow-lg); min-width: 180px;
+  transform-origin: top left;
+  opacity: 0; transform: translateY(-10px) scale(0.96);
+  pointer-events: none;
+  transition: opacity 0.22s ease, transform 0.3s cubic-bezier(.2,.9,.25,1.15);
+}
+.simp-options-dropdown.open {
+  opacity: 1; transform: translateY(0) scale(1);
+  pointer-events: auto;
 }
 .simp-option-pill {
   font-family: var(--font); font-size: 0.88rem; font-weight: 700; text-align: left;
@@ -4925,9 +4934,19 @@
   padding: 10px 14px; cursor: pointer;
 }
 .simp-option-pill:active { background: var(--surface2); }
+/* "Menú" (hamburguesa): fila de pills que se despliega hacia abajo ── */
 .simp-menu-row {
-  display: flex; gap: 8px; overflow-x: auto; padding: 0 1rem 0.85rem;
-  scrollbar-width: none;
+  display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden;
+  padding: 0 1rem; scrollbar-width: none;
+  max-height: 0; opacity: 0; transform: translateY(-8px);
+  pointer-events: none;
+  transition: max-height 0.32s cubic-bezier(.4,0,.2,1), opacity 0.24s ease,
+              transform 0.32s cubic-bezier(.2,.9,.25,1.1), padding-bottom 0.32s ease;
+}
+.simp-menu-row.open {
+  max-height: 64px; opacity: 1; transform: translateY(0);
+  padding: 0.3rem 1rem 0.85rem;
+  pointer-events: auto;
 }
 .simp-menu-row::-webkit-scrollbar { display: none; }
 .simp-pill {
@@ -4936,8 +4955,18 @@
   padding: 8px 16px; cursor: pointer; white-space: nowrap; transition: background 0.15s, color 0.15s;
 }
 .simp-pill.active { background: var(--text); color: var(--bg); }
+/* Leve sombra sobre el contenido de abajo mientras Opciones/Menú están abiertos.
+   El header tiene z-index mayor y fondo propio, así que queda sin oscurecer;
+   solo se oscurece el contenido debajo de él. ── */
 .simp-overlay-backdrop {
-  position: fixed; inset: 0; z-index: 55; background: transparent;
+  position: fixed; inset: 0; z-index: 55;
+  background: rgba(0,0,0,0);
+  pointer-events: none;
+  transition: background 0.32s ease;
+}
+.simp-overlay-backdrop.open {
+  background: rgba(0,0,0,0.32);
+  pointer-events: auto;
 }
 html.simplified-mode .app-header-shell { display: none !important; }
 html.simplified-mode .simplified-header-shell { display: flex !important; }
@@ -5183,16 +5212,16 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       </button>
     </div>
     <!-- "Opciones": aparece al tocar el título "Fleming" -->
-    <div class="simp-options-dropdown" id="simp-options-dropdown" style="display:none">
+    <div class="simp-options-dropdown" id="simp-options-dropdown">
       <button class="simp-option-pill" onclick="simplifiedOpenAppearance()">Apariencia</button>
       <button class="simp-option-pill" onclick="simplifiedOpenConfig()">Configuración</button>
     </div>
     <!-- "Menú": aparece al tocar el botón hamburguesa; muestra las secciones
-         principales y, al elegir una, sus sub-secciones. ── -->
-    <div class="simp-menu-row" id="simp-menu-row" style="display:none"></div>
+         principales y, al elegir una, sus sub-secciones. Cada opción es un pill (.simp-pill). ── -->
+    <div class="simp-menu-row" id="simp-menu-row"></div>
   </div>
-  <!-- Fondo semitransparente para cerrar Opciones/Menú al tocar fuera -->
-  <div class="simp-overlay-backdrop" id="simp-overlay-backdrop" onclick="simplifiedCloseAll()" style="display:none"></div>
+  <!-- Fondo semitransparente (con leve sombra) para cerrar Opciones/Menú al tocar fuera -->
+  <div class="simp-overlay-backdrop" id="simp-overlay-backdrop" onclick="simplifiedCloseAll()"></div>
 
   <div class="main-content">
     <div class="page active" id="page-schedule">
@@ -6787,7 +6816,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.10-beta';
+const APP_VERSION = '1.10.1-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -15307,20 +15336,22 @@ window.addEventListener('resize', () => { try { applySimplifiedModeUI(); } catch
 
 // ── Interacción: título "Fleming" → Opciones (Apariencia / Configuración) ──
 let _simpOptionsOpen = false;
+function _simpSyncBackdrop() {
+  const backdrop = document.getElementById('simp-overlay-backdrop');
+  if (backdrop) backdrop.classList.toggle('open', _simpOptionsOpen || _simpMenuOpen);
+}
 function simplifiedToggleOptions() {
   if (_simpMenuOpen) simplifiedCloseMenu();
   _simpOptionsOpen = !_simpOptionsOpen;
   const dd = document.getElementById('simp-options-dropdown');
-  const backdrop = document.getElementById('simp-overlay-backdrop');
-  if (dd) dd.style.display = _simpOptionsOpen ? 'flex' : 'none';
-  if (backdrop) backdrop.style.display = (_simpOptionsOpen || _simpMenuOpen) ? 'block' : 'none';
+  if (dd) dd.classList.toggle('open', _simpOptionsOpen);
+  _simpSyncBackdrop();
 }
 function simplifiedCloseOptions() {
   _simpOptionsOpen = false;
   const dd = document.getElementById('simp-options-dropdown');
-  if (dd) dd.style.display = 'none';
-  const backdrop = document.getElementById('simp-overlay-backdrop');
-  if (backdrop && !_simpMenuOpen) backdrop.style.display = 'none';
+  if (dd) dd.classList.remove('open');
+  _simpSyncBackdrop();
 }
 function simplifiedOpenAppearance() {
   simplifiedCloseOptions();
@@ -15346,24 +15377,22 @@ function simplifiedToggleMenu() {
   _simpMenuOpen = !_simpMenuOpen;
   const row = document.getElementById('simp-menu-row');
   const icon = document.getElementById('simp-hamburger-icon');
-  const backdrop = document.getElementById('simp-overlay-backdrop');
   if (_simpMenuOpen) {
     _simpMenuLevel = null;
     renderSimplifiedMenu();
   }
-  if (row) row.style.display = _simpMenuOpen ? 'flex' : 'none';
+  if (row) row.classList.toggle('open', _simpMenuOpen);
   if (icon) icon.innerHTML = _simpMenuOpen ? SIMP_CLOSE_SVG : SIMP_HAMBURGER_SVG;
-  if (backdrop) backdrop.style.display = (_simpMenuOpen || _simpOptionsOpen) ? 'block' : 'none';
+  _simpSyncBackdrop();
 }
 function simplifiedCloseMenu() {
   _simpMenuOpen = false;
   _simpMenuLevel = null;
   const row = document.getElementById('simp-menu-row');
   const icon = document.getElementById('simp-hamburger-icon');
-  const backdrop = document.getElementById('simp-overlay-backdrop');
-  if (row) row.style.display = 'none';
+  if (row) row.classList.remove('open');
   if (icon) icon.innerHTML = SIMP_HAMBURGER_SVG;
-  if (backdrop && !_simpOptionsOpen) backdrop.style.display = 'none';
+  _simpSyncBackdrop();
 }
 function simplifiedCloseAll() {
   simplifiedCloseMenu();
