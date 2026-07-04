@@ -4886,6 +4886,62 @@
   #tutorial-card { width: calc(100vw - 2rem); }
 }
 
+/* ══════════════════════════ Versión Simplificada ══════════════════════════
+   Header alternativo, solo móvil: título "Fleming" (izquierda, clickeable →
+   Opciones) + botón hamburguesa (derecha, clickeable → Menú de secciones).
+   Reemplaza por completo al NavBar dinámico (.app-header-shell) mientras
+   está activa. ────────────────────────────────────────────────────────── */
+.simplified-header-shell {
+  position: sticky; top: 0; z-index: 60;
+  background: var(--nav-bg, var(--surface));
+  border-bottom: 1px solid var(--border);
+  flex-direction: column;
+}
+.simp-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px; padding: 0 1rem;
+}
+.simp-title-btn {
+  font-family: var(--font); font-size: 1.05rem; font-weight: 800; letter-spacing: -0.01em;
+  color: var(--text); background: none; border: none; padding: 6px 4px; cursor: pointer;
+}
+.simp-title-btn:active { opacity: 0.6; }
+.simp-hamburger-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; border-radius: 10px; border: none;
+  background: var(--surface3); color: var(--text); cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+.simp-hamburger-btn:active { transform: scale(0.92); background: var(--surface2); }
+.simp-options-dropdown {
+  position: absolute; top: 52px; left: 0.85rem; z-index: 61;
+  display: flex; flex-direction: column; gap: 8px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  padding: 10px; box-shadow: var(--shadow-lg); min-width: 180px;
+}
+.simp-option-pill {
+  font-family: var(--font); font-size: 0.88rem; font-weight: 700; text-align: left;
+  color: var(--text); background: var(--surface3); border: none; border-radius: 12px;
+  padding: 10px 14px; cursor: pointer;
+}
+.simp-option-pill:active { background: var(--surface2); }
+.simp-menu-row {
+  display: flex; gap: 8px; overflow-x: auto; padding: 0 1rem 0.85rem;
+  scrollbar-width: none;
+}
+.simp-menu-row::-webkit-scrollbar { display: none; }
+.simp-pill {
+  flex-shrink: 0; font-family: var(--font); font-size: 0.85rem; font-weight: 700;
+  color: var(--text2); background: var(--surface3); border: none; border-radius: 20px;
+  padding: 8px 16px; cursor: pointer; white-space: nowrap; transition: background 0.15s, color 0.15s;
+}
+.simp-pill.active { background: var(--text); color: var(--bg); }
+.simp-overlay-backdrop {
+  position: fixed; inset: 0; z-index: 55; background: transparent;
+}
+html.simplified-mode .app-header-shell { display: none !important; }
+html.simplified-mode .simplified-header-shell { display: flex !important; }
+
 </style>
 </head>
 <body>
@@ -5117,6 +5173,26 @@
   <div class="sub-tabs-wrap" id="sub-tabs-wrap">
   </div>
   </div>
+
+  <!-- ══ Versión Simplificada: header alternativo (solo móvil + Experimentos) ══ -->
+  <div class="simplified-header-shell" id="simplified-header-shell" style="display:none">
+    <div class="simp-topbar">
+      <button class="simp-title-btn" onclick="simplifiedToggleOptions()">Fleming</button>
+      <button class="simp-hamburger-btn" id="simp-hamburger-btn" onclick="simplifiedToggleMenu()" title="Menú" aria-label="Menú">
+        <svg id="simp-hamburger-icon" viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+    <!-- "Opciones": aparece al tocar el título "Fleming" -->
+    <div class="simp-options-dropdown" id="simp-options-dropdown" style="display:none">
+      <button class="simp-option-pill" onclick="simplifiedOpenAppearance()">Apariencia</button>
+      <button class="simp-option-pill" onclick="simplifiedOpenConfig()">Configuración</button>
+    </div>
+    <!-- "Menú": aparece al tocar el botón hamburguesa; muestra las secciones
+         principales y, al elegir una, sus sub-secciones. ── -->
+    <div class="simp-menu-row" id="simp-menu-row" style="display:none"></div>
+  </div>
+  <!-- Fondo semitransparente para cerrar Opciones/Menú al tocar fuera -->
+  <div class="simp-overlay-backdrop" id="simp-overlay-backdrop" onclick="simplifiedCloseAll()" style="display:none"></div>
 
   <div class="main-content">
     <div class="page active" id="page-schedule">
@@ -6106,7 +6182,7 @@
         </div>
         <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
-      <div class="pref-nav-row" onclick="openPrefScreen('funciones')">
+      <div class="pref-nav-row" id="pref-nav-row-funciones" onclick="openPrefScreen('funciones')">
         <div class="profile-row-icon" style="background:var(--ter-1-bg);color:var(--ter-1)">
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
         </div>
@@ -6116,7 +6192,7 @@
         </div>
         <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
-      <div class="pref-nav-row" onclick="openPrefScreen('notificaciones')">
+      <div class="pref-nav-row" id="pref-nav-row-notificaciones" onclick="openPrefScreen('notificaciones')">
         <div class="profile-row-icon" style="background:var(--ter-5-bg);color:var(--ter-5)">
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         </div>
@@ -6141,7 +6217,7 @@
     <!-- Ayuda -->
     <div class="profile-section">
       <div class="profile-section-title">Ayuda</div>
-      <div class="profile-row" style="cursor:pointer" onclick="closePreferencias();startTutorial()">
+      <div class="profile-row" id="pref-tutorial-row" style="cursor:pointer" onclick="closePreferencias();startTutorial()">
         <div class="profile-row-icon" style="background:var(--ter-2-bg);color:var(--ter-2)">
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
@@ -6396,7 +6472,19 @@
     <span class="pill-header-title">Experimentos</span>
   </nav>
   <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 0 2.5rem">
-    <div class="profile-section">
+    <!-- Aviso: en la Versión Simplificada, blur/color de acento/animaciones no están disponibles -->
+    <div class="profile-section" id="exp-appearance-restricted-notice" style="display:none">
+      <div class="profile-row" style="cursor:default">
+        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text3)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Blur, color de acento y animaciones</div>
+          <div class="profile-row-value" style="font-size:0.8rem">No están disponibles mientras la Versión Simplificada está activa</div>
+        </div>
+      </div>
+    </div>
+    <div class="profile-section" id="exp-appearance-restricted">
       <!-- Toggle: transparencias / blur (ahora vive en Experimentos, ON por defecto) -->
       <div class="profile-row" style="cursor:pointer" onclick="toggleTransparencyPref()">
         <div class="profile-row-icon" style="background:var(--ter-3-bg);color:var(--ter-3)">
@@ -6472,6 +6560,23 @@
         </div>
         <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">Elige "Reducidas" si eres sensible al movimiento en pantalla.</div>
       </div>
+    </div>
+    <!-- Versión Simplificada de la plataforma (solo móvil) -->
+    <div class="profile-section">
+      <div class="profile-section-title">Layout</div>
+      <div class="profile-row" style="cursor:pointer" onclick="toggleSimplifiedModePref()">
+        <div class="profile-row-icon" style="background:var(--ter-2-bg);color:var(--ter-2)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Versión Simplificada</div>
+          <div class="profile-row-value" style="font-size:0.8rem" id="simplified-mode-desc">Reemplaza el NavBar por un menú simple. Solo disponible en móvil.</div>
+        </div>
+        <div id="simplified-mode-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="simplified-mode-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
+      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">Al activarla, se desactivan las Notificaciones, Live, Modo Peak, el Tutorial y el panel de administración. Para volver a la versión normal, entra a Configuración desde el título "Fleming".</div>
     </div>
   </div>
 </div>
@@ -6682,7 +6787,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.9.5-beta';
+const APP_VERSION = '1.10-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -8430,6 +8535,8 @@ async function enterApp() {
 
   renderSubTabs(currentMainTab);
 
+  if (typeof applySimplifiedModeUI === 'function') applySimplifiedModeUI();
+
   // Restore sub-page visibility
   if (currentMainTab === 'predicacion') {
     showPage('schedule');
@@ -8804,7 +8911,8 @@ const VIEWER_PERM_KEY = {
 };
 
 async function updateAdminShortcuts() {
-  if (!currentUser || !['dev','admin'].includes(currentRole)) {
+  const simplified = typeof isSimplifiedModeActive === 'function' && isSimplifiedModeActive();
+  if (!currentUser || !['dev','admin'].includes(currentRole) || simplified) {
     // Hide all banners for viewers
     Object.keys(VIEWER_TO_ADMIN_TAB).forEach(sub => {
       const el = document.getElementById('admin-shortcut-' + sub);
@@ -8838,6 +8946,10 @@ async function goAdminShortcut(adminTab) {
 
 function showPage(name) {
   if (name === 'admin') {
+    if (typeof isSimplifiedModeActive === 'function' && isSimplifiedModeActive()) {
+      showToast('El panel de administración no está disponible en la Versión Simplificada.', 'error');
+      return;
+    }
     if (!['dev','admin'].includes(currentRole)) {
       showToast('No tienes permisos para acceder a esta sección.', 'error');
       return;
@@ -12977,7 +13089,7 @@ function openPrefScreen(name) {
   document.getElementById('page-pref-' + name)?.classList.add('open');
   if (name === 'funciones') { updateH2HViewModeUI(); updateNavbarShrinkToggleUI(); }
   if (name === 'notificaciones') renderPrefNotifList();
-  if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); }
+  if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); }
 }
 function closePrefScreen() {
   PREF_SCREENS.forEach(name => document.getElementById('page-pref-' + name)?.classList.remove('open'));
@@ -13277,6 +13389,7 @@ function applyAppUpdate() {
 
 // ── Función Live: activar/desactivar por completo ────────────────────────────
 function isLiveFeatureEnabled() {
+  if (typeof isSimplifiedModeActive === 'function' && isSimplifiedModeActive()) return false;
   return localStorage.getItem('fleming_live_enabled') !== 'false'; // default true
 }
 function updateLiveToggleUI() {
@@ -13571,6 +13684,7 @@ function isTouchDevice() {
   return ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
 }
 function isPeakModeEnabled() {
+  if (typeof isSimplifiedModeActive === 'function' && isSimplifiedModeActive()) return false;
   return localStorage.getItem('fleming_peak_mode') === 'true'; // default: desactivado
 }
 function setPeakModeEnabled(on) {
@@ -13819,7 +13933,7 @@ let _tutorialIndex = 0;
 let _tutorialResizeHandler = null;
 
 function shouldAutoShowTutorial() {
-  try { return !localStorage.getItem(TUTORIAL_SEEN_KEY); } catch { return false; }
+  try { return !(typeof isSimplifiedModeActive === 'function' && isSimplifiedModeActive()) && !localStorage.getItem(TUTORIAL_SEEN_KEY); } catch { return false; }
 }
 
 function markTutorialSeen() {
@@ -13827,6 +13941,10 @@ function markTutorialSeen() {
 }
 
 function startTutorial() {
+  if (typeof isSimplifiedModeActive === 'function' && isSimplifiedModeActive()) {
+    showToast('El tutorial no está disponible en la Versión Simplificada.', 'error');
+    return;
+  }
   const overlay = document.getElementById('tutorial-overlay');
   if (!overlay) return;
   _tutorialIndex = 0;
@@ -15102,6 +15220,192 @@ function scheduleMidnightRefresh() {
 }
 
 function isMobile() { return window.innerWidth < 640; }
+
+// ══════════════════════════ Versión Simplificada ═══════════════════════════
+// Layout alternativo (título + hamburguesa) que reemplaza el NavBar dinámico.
+// Solo disponible en móvil y solo si el usuario la activó desde Experimentos.
+function isSimplifiedModeSelected() {
+  return localStorage.getItem('fleming_simplified_mode') === 'true';
+}
+function isSimplifiedModeActive() {
+  return isSimplifiedModeSelected() && isMobile();
+}
+
+function updateSimplifiedModeToggleUI() {
+  const toggle = document.getElementById('simplified-mode-toggle');
+  const thumb  = document.getElementById('simplified-mode-thumb');
+  const desc   = document.getElementById('simplified-mode-desc');
+  if (!toggle || !thumb) return;
+  const on = isSimplifiedModeSelected();
+  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
+  thumb.style.left = on ? '21px' : '3px';
+  if (desc) {
+    desc.textContent = isMobile()
+      ? 'Reemplaza el NavBar por un menú simple con título y hamburguesa.'
+      : 'Disponible solo en dispositivos móviles. Actívala y ábrela desde tu teléfono.';
+  }
+}
+
+function toggleSimplifiedModePref() {
+  const next = !isSimplifiedModeSelected();
+  localStorage.setItem('fleming_simplified_mode', next ? 'true' : 'false');
+  updateSimplifiedModeToggleUI();
+  applySimplifiedModeUI();
+  if (next) {
+    showToast(isMobile() ? 'Versión Simplificada activada' : 'Versión Simplificada activada (se verá en móvil)', 'success');
+  } else {
+    showToast('Versión Simplificada desactivada', '');
+  }
+}
+
+// Aplica/retira el layout simplificado y las restricciones de funciones
+// asociadas. Se llama al activar/desactivar el toggle, al cargar la app y al
+// cambiar el tamaño de la ventana (por si se cruza el umbral móvil/escritorio).
+function applySimplifiedModeUI() {
+  const active = isSimplifiedModeActive();
+  document.documentElement.classList.toggle('simplified-mode', active);
+
+  const stdShell  = document.getElementById('app-header-shell');
+  const simpShell = document.getElementById('simplified-header-shell');
+  if (stdShell)  stdShell.style.display  = active ? 'none' : '';
+  if (simpShell) simpShell.style.display = active ? 'flex' : 'none';
+
+  simplifiedCloseAll();
+
+  // Configuración: ocultar accesos a funciones no disponibles en Simplificada
+  const notifRow = document.getElementById('pref-nav-row-notificaciones');
+  if (notifRow) notifRow.style.display = active ? 'none' : '';
+  const funcRow = document.getElementById('pref-nav-row-funciones');
+  if (funcRow) funcRow.style.display = active ? 'none' : '';
+  const tutorialRow = document.getElementById('pref-tutorial-row');
+  if (tutorialRow) tutorialRow.style.display = active ? 'none' : '';
+
+  // Experimentos: ocultar blur / color de acento / animaciones
+  const expBlock  = document.getElementById('exp-appearance-restricted');
+  const expNotice = document.getElementById('exp-appearance-restricted-notice');
+  if (expBlock)  expBlock.style.display  = active ? 'none' : '';
+  if (expNotice) expNotice.style.display = active ? '' : 'none';
+
+  // Notificaciones: cortar el polling y ocultar el badge
+  if (active) {
+    if (typeof _notifPollInterval !== 'undefined' && _notifPollInterval) { clearInterval(_notifPollInterval); _notifPollInterval = null; }
+    const badge = document.getElementById('notif-badge');
+    if (badge) badge.style.display = 'none';
+  } else if (currentUser && typeof startNotifPolling === 'function') {
+    startNotifPolling();
+  }
+
+  // Live: si estaba activa una sesión, detenerla
+  if (active && typeof _liveActive !== 'undefined' && _liveActive && typeof stopLiveMode === 'function') {
+    try { stopLiveMode(); } catch {}
+  }
+
+  if (typeof updateAdminShortcuts === 'function') updateAdminShortcuts();
+  if (typeof simplifiedSyncHeaderTitle === 'function') simplifiedSyncHeaderTitle();
+}
+window.addEventListener('resize', () => { try { applySimplifiedModeUI(); } catch {} });
+
+// ── Interacción: título "Fleming" → Opciones (Apariencia / Configuración) ──
+let _simpOptionsOpen = false;
+function simplifiedToggleOptions() {
+  if (_simpMenuOpen) simplifiedCloseMenu();
+  _simpOptionsOpen = !_simpOptionsOpen;
+  const dd = document.getElementById('simp-options-dropdown');
+  const backdrop = document.getElementById('simp-overlay-backdrop');
+  if (dd) dd.style.display = _simpOptionsOpen ? 'flex' : 'none';
+  if (backdrop) backdrop.style.display = (_simpOptionsOpen || _simpMenuOpen) ? 'block' : 'none';
+}
+function simplifiedCloseOptions() {
+  _simpOptionsOpen = false;
+  const dd = document.getElementById('simp-options-dropdown');
+  if (dd) dd.style.display = 'none';
+  const backdrop = document.getElementById('simp-overlay-backdrop');
+  if (backdrop && !_simpMenuOpen) backdrop.style.display = 'none';
+}
+function simplifiedOpenAppearance() {
+  simplifiedCloseOptions();
+  openPreferencias();
+  setTimeout(() => openPrefScreen('preferencias'), 30);
+}
+function simplifiedOpenConfig() {
+  simplifiedCloseOptions();
+  openPreferencias();
+}
+
+// ── Interacción: botón hamburguesa → Menú (secciones → sub-secciones) ──
+let _simpMenuOpen = false;
+let _simpMenuLevel = null; // null = lista de secciones principales; si no, main tab activo
+const SIMP_HAMBURGER_SVG = '<line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>';
+const SIMP_CLOSE_SVG = '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>';
+const SIMP_MAIN_TABS = [
+  { id: 'predicacion', label: 'Predicación' },
+  { id: 'reuniones',   label: 'Reuniones' },
+];
+function simplifiedToggleMenu() {
+  if (_simpOptionsOpen) simplifiedCloseOptions();
+  _simpMenuOpen = !_simpMenuOpen;
+  const row = document.getElementById('simp-menu-row');
+  const icon = document.getElementById('simp-hamburger-icon');
+  const backdrop = document.getElementById('simp-overlay-backdrop');
+  if (_simpMenuOpen) {
+    _simpMenuLevel = null;
+    renderSimplifiedMenu();
+  }
+  if (row) row.style.display = _simpMenuOpen ? 'flex' : 'none';
+  if (icon) icon.innerHTML = _simpMenuOpen ? SIMP_CLOSE_SVG : SIMP_HAMBURGER_SVG;
+  if (backdrop) backdrop.style.display = (_simpMenuOpen || _simpOptionsOpen) ? 'block' : 'none';
+}
+function simplifiedCloseMenu() {
+  _simpMenuOpen = false;
+  _simpMenuLevel = null;
+  const row = document.getElementById('simp-menu-row');
+  const icon = document.getElementById('simp-hamburger-icon');
+  const backdrop = document.getElementById('simp-overlay-backdrop');
+  if (row) row.style.display = 'none';
+  if (icon) icon.innerHTML = SIMP_HAMBURGER_SVG;
+  if (backdrop && !_simpOptionsOpen) backdrop.style.display = 'none';
+}
+function simplifiedCloseAll() {
+  simplifiedCloseMenu();
+  simplifiedCloseOptions();
+}
+function renderSimplifiedMenu() {
+  const row = document.getElementById('simp-menu-row');
+  if (!row) return;
+  if (!_simpMenuLevel) {
+    row.innerHTML = SIMP_MAIN_TABS.map(m =>
+      `<button class="simp-pill${typeof currentMainTab !== 'undefined' && currentMainTab === m.id ? ' active' : ''}" onclick="simplifiedSelectMain('${m.id}')">${m.label}</button>`
+    ).join('');
+  } else {
+    const mainInfo = SIMP_MAIN_TABS.find(m => m.id === _simpMenuLevel);
+    const subs = (typeof SUB_TABS !== 'undefined' ? (SUB_TABS[_simpMenuLevel] || []) : [])
+      .filter(t => t.id !== 'carritos' || (typeof carritosVisibleForCurrentUser === 'function' && carritosVisibleForCurrentUser()));
+    let html = `<button class="simp-pill active" onclick="simplifiedBackToMain()">${mainInfo ? mainInfo.label : ''}</button>`;
+    html += subs.map(t =>
+      `<button class="simp-pill${typeof currentSubTab !== 'undefined' && currentSubTab === t.id ? ' active' : ''}" onclick="simplifiedSelectSub('${t.id}')">${t.label}</button>`
+    ).join('');
+    row.innerHTML = html;
+  }
+}
+function simplifiedSelectMain(tab) {
+  const btn = document.querySelector(`.main-seg-btn[data-tab="${tab}"]`);
+  if (btn) switchMainTab(tab, btn);
+  _simpMenuLevel = tab;
+  renderSimplifiedMenu();
+  if (typeof simplifiedSyncHeaderTitle === 'function') simplifiedSyncHeaderTitle();
+}
+function simplifiedBackToMain() {
+  _simpMenuLevel = null;
+  renderSimplifiedMenu();
+}
+function simplifiedSelectSub(subId) {
+  switchSubTab(subId);
+  simplifiedCloseMenu();
+}
+// El título "Fleming" siempre queda igual (nombre de la plataforma); no se
+// reemplaza por el nombre de la sección para mantener fiel el wireframe.
+function simplifiedSyncHeaderTitle() {}
+
 
 function toggleNotificationsMenu() {
   if (isMobile()) {
