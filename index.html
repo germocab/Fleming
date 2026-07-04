@@ -3192,6 +3192,7 @@
   .full-map-lb-header {
     display: flex; align-items: center; justify-content: space-between;
     width: 100%; max-width: 900px; margin-bottom: 0.75rem;
+    flex-wrap: wrap; gap: 8px;
   }
   .full-map-lb-title {
     font-size: 1rem; font-weight: 700; color: #fff;
@@ -3208,16 +3209,38 @@
   .full-map-lb-btn.close-btn { background: rgba(255,255,255,0.18); color: #fff; border: 1px solid rgba(255,255,255,0.3); }
   .full-map-lb-btn:hover { opacity: 0.85; }
   .full-map-lb-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+  @media (max-width: 480px) {
+    .full-map-lb-btn.download span.fm-label { display: none; }
+    .full-map-lb-btn.download { padding: 0.45rem 0.65rem; }
+  }
+  .full-map-lb-zoom-group { display: flex; align-items: center; gap: 2px; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 3px; }
+  .full-map-lb-zoom-btn {
+    width: 28px; height: 28px; border-radius: 50%; border: none; background: transparent; color: #fff;
+    display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.15s;
+  }
+  .full-map-lb-zoom-btn:hover { background: rgba(255,255,255,0.22); }
+  .full-map-lb-zoom-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
   .full-map-lb-img-wrap {
     width: 100%; max-width: 900px; max-height: calc(100vh - 120px);
-    overflow: auto; border-radius: var(--radius);
+    overflow: hidden; border-radius: var(--radius);
     box-shadow: var(--shadow-lg);
     background: var(--surface2);
     display: flex; align-items: center; justify-content: center;
+    position: relative; touch-action: none; cursor: grab;
   }
+  .full-map-lb-img-wrap.fm-dragging { cursor: grabbing; }
   .full-map-lb-img-wrap img {
     max-width: 100%; display: block; border-radius: var(--radius);
+    will-change: transform; user-select: none; -webkit-user-drag: none;
+    transform-origin: center center;
   }
+  .full-map-lb-hint {
+    position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,0.55); color: #fff; font-size: 0.7rem; font-weight: 600;
+    padding: 4px 12px; border-radius: 20px; pointer-events: none; opacity: 1;
+    transition: opacity 0.4s ease;
+  }
+  .full-map-lb-hint.fm-hidden { opacity: 0; }
 
   /* ── Admin full map card ── */
   .full-map-admin-card {
@@ -6465,9 +6488,20 @@
   <div class="full-map-lb-header">
     <span class="full-map-lb-title">Mapa completo de la congregación</span>
     <div class="full-map-lb-actions">
+      <div class="full-map-lb-zoom-group">
+        <button class="full-map-lb-zoom-btn" onclick="event.stopPropagation();fmZoomBy(-0.5)" title="Alejar">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+        </button>
+        <button class="full-map-lb-zoom-btn" onclick="event.stopPropagation();fmResetZoom()" title="Restablecer zoom">
+          <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        </button>
+        <button class="full-map-lb-zoom-btn" onclick="event.stopPropagation();fmZoomBy(0.5)" title="Acercar">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+        </button>
+      </div>
       <button class="full-map-lb-btn download" onclick="downloadFullMap()">
         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Descargar PNG
+        <span class="fm-label">Descargar PNG</span>
       </button>
       <button class="full-map-lb-btn close-btn" onclick="closeFullMap()">
         <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -6475,8 +6509,9 @@
       </button>
     </div>
   </div>
-  <div class="full-map-lb-img-wrap">
+  <div class="full-map-lb-img-wrap" id="full-map-lb-wrap">
     <img id="full-map-lb-img" src="" alt="Mapa completo de la congregación">
+    <div class="full-map-lb-hint" id="full-map-lb-hint">Pellizca o usa la rueda para hacer zoom</div>
   </div>
 </div>
 
@@ -6544,7 +6579,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.7.6-beta';
+const APP_VERSION = '1.7.6.5-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -13928,16 +13963,159 @@ async function deleteFullMap() {
   showToast('Mapa eliminado','success');
 }
 
+// ── Zoom/Pan nativo del mapa completo de la congregación ──
+// Permite hacer zoom (pellizco, rueda del mouse o botones) y arrastrar la
+// imagen SOLO dentro de su contenedor, sin afectar el zoom de toda la
+// interfaz como ocurre con el zoom nativo del navegador.
+const fmZoom = { scale: 1, x: 0, y: 0, minScale: 1, maxScale: 6 };
+let _fmPointers = new Map();   // pointerId -> {x,y}
+let _fmPinchStartDist = 0;
+let _fmPinchStartScale = 1;
+let _fmPinchStartMid = { x: 0, y: 0 };
+let _fmPinchStartOffset = { x: 0, y: 0 };
+let _fmDragging = false;
+let _fmDragStart = { x: 0, y: 0 };
+let _fmDragStartOffset = { x: 0, y: 0 };
+let _fmHintTimer = null;
+
+function applyFmTransform() {
+  const img = document.getElementById('full-map-lb-img');
+  if (img) img.style.transform = `translate(${fmZoom.x}px, ${fmZoom.y}px) scale(${fmZoom.scale})`;
+}
+
+function fmClampScale(s) { return Math.min(fmZoom.maxScale, Math.max(fmZoom.minScale, s)); }
+
+function fmResetZoom() {
+  fmZoom.scale = 1; fmZoom.x = 0; fmZoom.y = 0;
+  applyFmTransform();
+}
+
+function fmZoomBy(delta, centerX, centerY) {
+  const wrap = document.getElementById('full-map-lb-wrap');
+  const rect = wrap.getBoundingClientRect();
+  const cx = centerX !== undefined ? centerX - rect.left - rect.width / 2  : 0;
+  const cy = centerY !== undefined ? centerY  - rect.top  - rect.height / 2 : 0;
+  const prevScale = fmZoom.scale;
+  const newScale = fmClampScale(prevScale + delta);
+  if (newScale === prevScale) return;
+  const factor = newScale / prevScale;
+  fmZoom.x = cx - (cx - fmZoom.x) * factor;
+  fmZoom.y = cy - (cy - fmZoom.y) * factor;
+  fmZoom.scale = newScale;
+  if (fmZoom.scale <= fmZoom.minScale) { fmZoom.scale = fmZoom.minScale; fmZoom.x = 0; fmZoom.y = 0; }
+  applyFmTransform();
+  fmHideHint();
+}
+
+function fmHideHint() {
+  const hint = document.getElementById('full-map-lb-hint');
+  if (hint && !hint.classList.contains('fm-hidden')) {
+    clearTimeout(_fmHintTimer);
+    _fmHintTimer = setTimeout(() => hint.classList.add('fm-hidden'), 150);
+  }
+}
+
+function fmInitZoomPan() {
+  const wrap = document.getElementById('full-map-lb-wrap');
+  if (!wrap || wrap._fmBound) return;
+  wrap._fmBound = true;
+
+  // Rueda del mouse / trackpad: zoom centrado en el cursor, sin scrollear la página.
+  wrap.addEventListener('wheel', e => {
+    e.preventDefault();
+    const delta = -e.deltaY * 0.0025 * Math.max(1, fmZoom.scale);
+    fmZoomBy(delta, e.clientX, e.clientY);
+  }, { passive: false });
+
+  // Doble click / doble tap: alterna entre 1x y 2.5x centrado en el punto tocado.
+  wrap.addEventListener('dblclick', e => {
+    e.preventDefault();
+    if (fmZoom.scale > fmZoom.minScale + 0.01) fmResetZoom();
+    else fmZoomBy(1.5, e.clientX, e.clientY);
+  });
+
+  // Pointer events cubren tanto mouse (arrastrar) como touch (un dedo arrastra,
+  // dos dedos hacen pinch-zoom), todo contenido dentro del wrap del mapa.
+  wrap.addEventListener('pointerdown', e => {
+    wrap.setPointerCapture(e.pointerId);
+    _fmPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    fmHideHint();
+    if (_fmPointers.size === 1) {
+      _fmDragging = true;
+      wrap.classList.add('fm-dragging');
+      _fmDragStart = { x: e.clientX, y: e.clientY };
+      _fmDragStartOffset = { x: fmZoom.x, y: fmZoom.y };
+    } else if (_fmPointers.size === 2) {
+      _fmDragging = false;
+      wrap.classList.remove('fm-dragging');
+      const pts = [..._fmPointers.values()];
+      _fmPinchStartDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      _fmPinchStartScale = fmZoom.scale;
+      _fmPinchStartMid = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+      _fmPinchStartOffset = { x: fmZoom.x, y: fmZoom.y };
+    }
+  });
+
+  wrap.addEventListener('pointermove', e => {
+    if (!_fmPointers.has(e.pointerId)) return;
+    _fmPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (_fmPointers.size === 2) {
+      const pts = [..._fmPointers.values()];
+      const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      if (_fmPinchStartDist > 0) {
+        const newScale = fmClampScale(_fmPinchStartScale * (dist / _fmPinchStartDist));
+        const rect = wrap.getBoundingClientRect();
+        const cx = _fmPinchStartMid.x - rect.left - rect.width / 2;
+        const cy = _fmPinchStartMid.y - rect.top  - rect.height / 2;
+        const factor = newScale / _fmPinchStartScale;
+        fmZoom.x = cx - (cx - _fmPinchStartOffset.x) * factor;
+        fmZoom.y = cy - (cy - _fmPinchStartOffset.y) * factor;
+        fmZoom.scale = newScale;
+        if (fmZoom.scale <= fmZoom.minScale) { fmZoom.scale = fmZoom.minScale; fmZoom.x = 0; fmZoom.y = 0; }
+        applyFmTransform();
+      }
+    } else if (_fmDragging && fmZoom.scale > fmZoom.minScale + 0.01) {
+      fmZoom.x = _fmDragStartOffset.x + (e.clientX - _fmDragStart.x);
+      fmZoom.y = _fmDragStartOffset.y + (e.clientY - _fmDragStart.y);
+      applyFmTransform();
+    }
+  });
+
+  function endPointer(e) {
+    _fmPointers.delete(e.pointerId);
+    if (_fmPointers.size < 2) _fmPinchStartDist = 0;
+    if (_fmPointers.size === 0) { _fmDragging = false; wrap.classList.remove('fm-dragging'); }
+    else if (_fmPointers.size === 1) {
+      // Queda un dedo tras un pinch: retoma el arrastre desde ahí sin saltos.
+      const [p] = [..._fmPointers.values()];
+      _fmDragging = true;
+      _fmDragStart = { x: p.x, y: p.y };
+      _fmDragStartOffset = { x: fmZoom.x, y: fmZoom.y };
+    }
+  }
+  wrap.addEventListener('pointerup', endPointer);
+  wrap.addEventListener('pointercancel', endPointer);
+  wrap.addEventListener('pointerleave', e => { if (_fmPointers.has(e.pointerId)) endPointer(e); });
+}
+
 function openFullMap() {
   const src = document.getElementById('full-map-lb-img').src;
   if (!src || src === window.location.href) return;
+  fmResetZoom();
+  const hint = document.getElementById('full-map-lb-hint');
+  if (hint) hint.classList.remove('fm-hidden');
   document.getElementById('full-map-lightbox').classList.add('open');
   document.body.style.overflow = 'hidden';
+  fmInitZoomPan();
+  clearTimeout(_fmHintTimer);
+  _fmHintTimer = setTimeout(() => { if (hint) hint.classList.add('fm-hidden'); }, 2600);
 }
 
 function closeFullMap() {
   document.getElementById('full-map-lightbox').classList.remove('open');
   document.body.style.overflow = '';
+  fmResetZoom();
 }
 
 function handleFullMapClick(e) {
