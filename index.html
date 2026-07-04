@@ -954,6 +954,23 @@
   }
   .detail-map-wrap img { width: 100%; display: block; max-height: 260px; object-fit: contain; }
 
+  .detail-manzanas-card {
+    margin: 0 1.25rem 1.25rem; padding: 1rem 1.1rem;
+    background: var(--surface2); border-radius: var(--radius);
+    border: 1px solid var(--border);
+    display: flex; flex-direction: column; align-items: center; gap: 0.7rem;
+  }
+  .detail-manzanas-title {
+    font-size: 0.9rem; font-weight: 700; color: var(--text); text-align: center;
+  }
+  .detail-manzanas-pills { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
+  .detail-manzanas-pill {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--surface3); color: var(--text);
+    font-size: 0.88rem; font-weight: 700;
+  }
+
   .img-lightbox {
     display: none; position: fixed; inset: 0; z-index: 999;
     background: rgba(0,0,0,0.92); backdrop-filter: blur(12px);
@@ -5595,9 +5612,9 @@
         <span id="detail-ter-tab-label-2">Territorio 2</span>
       </button>
     </div>
-    <div class="detail-manzanas-line" id="detail-manzanas-line" style="display:none;align-items:center;gap:6px;font-size:0.84rem;color:var(--text2);font-weight:600;margin:2px 0 0.6rem">
-      <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      <span>Manzanas: <span id="detail-manzanas-value" style="color:var(--text)"></span></span>
+    <div class="detail-manzanas-card" id="detail-manzanas-line" style="display:none">
+      <div class="detail-manzanas-title">Manzanas a Abarcar</div>
+      <div class="detail-manzanas-pills" id="detail-manzanas-value"></div>
     </div>
     <div class="detail-map-wrap" id="detail-map-wrap" style="display:none">
       <img id="detail-map-img" alt="Mapa del territorio">
@@ -9115,7 +9132,8 @@ async function viewAssignment(id) {
   const manzanasList = Array.isArray(a.manzanas_asignadas) ? a.manzanas_asignadas.filter(Boolean) : [];
   if (manzanasLine) {
     if (manzanasList.length) {
-      document.getElementById('detail-manzanas-value').textContent = manzanasList.join(', ');
+      document.getElementById('detail-manzanas-value').innerHTML =
+        manzanasList.map(m => `<span class="detail-manzanas-pill">${m}</span>`).join('');
       manzanasLine.style.display = 'flex';
     } else {
       manzanasLine.style.display = 'none';
