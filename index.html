@@ -836,24 +836,20 @@
   }
   .detail-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
 
-  /* ── Animación "Morph": la tarjeta de una asignación de Casa en Casa
-     crece y se transforma en la pantalla de detalles (View Transitions API,
-     solo móvil, activable/desactivable desde Experimentos). El nombre
-     'morph-card' se asigna dinámicamente por JS solo a la tarjeta tocada y
-     al panel de detalle, así el navegador anima ambas formas entre sí.
-     Timing inspirado en Liquid Glass: lenta, elástica, muy evidente. ── */
-  ::view-transition-group(morph-card) {
-    animation-duration: 0.85s;
-    animation-timing-function: cubic-bezier(.22,1,.36,1);
+  /* ── Animación "Morph": la tarjeta de una asignación de Casa en Casa se
+     transforma de forma continua (forma, tono y bordes) en la pantalla de
+     detalles — no es un crossfade entre dos capturas, es un único elemento
+     "fantasma" (.morph-ghost) cuya posición, tamaño, radio y color se
+     interpolan cuadro a cuadro con la Web Animations API, igual que un
+     Smart Animate de Figma. Solo aplica en móvil y es opcional desde
+     Experimentos. Mientras corre, la tarjeta real y el contenido del panel
+     quedan ocultos: solo se ve la forma transformándose. ── */
+  .morph-ghost {
+    position: fixed; top: 0; left: 0; z-index: 205;
+    pointer-events: none; box-sizing: border-box;
+    will-change: left, top, width, height, border-radius, background-color, border-color;
   }
-  ::view-transition-old(morph-card),
-  ::view-transition-new(morph-card) {
-    animation-duration: 0.62s;
-    animation-timing-function: cubic-bezier(.4,0,.2,1);
-  }
-  ::view-transition-image-pair(morph-card) {
-    border-radius: inherit;
-  }
+  .detail-panel.morphing { animation: none !important; }
 
   .detail-panel {
     background: var(--surface); width: 100%; max-width: 560px;
@@ -6858,7 +6854,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.11.5.1-beta';
+const APP_VERSION = '1.11.5.2-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -9619,17 +9615,10 @@ async function viewAssignment(id, cardEl) {
     document.body.style.overflow = _useSidebarMode ? '' : 'hidden';
     if (typeof updateH2HSidebarFabIcon === 'function') updateH2HSidebarFabIcon();
   };
-  // ── Animación "Morph": la tarjeta crece y se transforma en la pantalla de
-  // detalles. Solo aplica en móvil, con la opción activada en Experimentos,
-  // y si el navegador soporta la View Transitions API. ──
+  // ── Animación "Morph": la tarjeta se transforma en la pantalla de
+  // detalles. Solo aplica en móvil y con la opción activada en Experimentos. ──
   if (_morphCardEl && !_useSidebarMode && isMorphActive()) {
-    _morphCardEl.style.viewTransitionName = 'morph-card';
-    panel.style.viewTransitionName = 'morph-card';
-    const _morphTransition = document.startViewTransition(_openOverlayNow);
-    _morphTransition.finished.finally(() => {
-      if (_morphCardEl) _morphCardEl.style.viewTransitionName = '';
-      panel.style.viewTransitionName = '';
-    });
+    runMorphOpen(_morphCardEl, _openOverlayNow);
   } else {
     _openOverlayNow();
   }
@@ -9777,20 +9766,12 @@ function closeDetail() {
     // Live Mode: detener al cerrar el detalle
     if (_liveActive) stopLiveMode();
   };
-  // ── Animación "Morph" en reversa: la pantalla de detalles se encoge de
+  // ── Animación "Morph" en reversa: la pantalla de detalles se transforma de
   // vuelta hacia la tarjeta que la originó, si esta sigue en el DOM. ──
   const _overlay = document.getElementById('detail-overlay');
   const _wasSidebar = _overlay.classList.contains('sidebar-mode');
   if (_morphCardEl && _morphCardEl.isConnected && !_wasSidebar && isMorphActive()) {
-    const panel = document.getElementById('detail-panel');
-    _morphCardEl.style.viewTransitionName = 'morph-card';
-    panel.style.viewTransitionName = 'morph-card';
-    const _cardRef = _morphCardEl;
-    const _morphTransition = document.startViewTransition(_closeNow);
-    _morphTransition.finished.finally(() => {
-      _cardRef.style.viewTransitionName = '';
-      panel.style.viewTransitionName = '';
-    });
+    runMorphClose(_morphCardEl, _closeNow);
   } else {
     _closeNow();
   }
@@ -15401,14 +15382,15 @@ function scheduleMidnightRefresh() {
 function isMobile() { return window.innerWidth < 640; }
 
 // ══════════════════════════ Animación "Morph" ══════════════════════════════
-// Al tocar una tarjeta de asignación de Casa en Casa, la tarjeta crece y se
-// transforma fluidamente en la pantalla de detalles (View Transitions API).
+// Al tocar una tarjeta de asignación de Casa en Casa, la tarjeta se
+// transforma de forma continua (forma, tono y bordes) en la pantalla de
+// detalles, como un Smart Animate de Figma (sin crossfade entre capturas).
 // Exclusiva de móvil y opcional desde Experimentos (ON por defecto).
 function isMorphEnabled() {
   return localStorage.getItem('fleming_morph_anim') !== 'false';
 }
 function isMorphActive() {
-  return isMorphEnabled() && isMobile() && typeof document.startViewTransition === 'function';
+  return isMorphEnabled() && isMobile() && typeof Element.prototype.animate === 'function';
 }
 function updateMorphToggleUI() {
   const toggle = document.getElementById('morph-anim-toggle');
@@ -15427,6 +15409,108 @@ function toggleMorphPref() {
 // Tarjeta que originó la apertura del detalle actual, para poder revertir el
 // morph al cerrar (si sigue presente en el DOM tras un re-render de la lista).
 let _morphCardEl = null;
+
+// Duración de la animación Morph: lenta y elegante a propósito (estilo
+// Liquid Glass / Smart Animate de Figma), para que el cambio de forma y tono
+// se perciba con claridad en vez de sentirse como un corte.
+const MORPH_DURATION = 700;
+const MORPH_EASING = 'cubic-bezier(.22,1,.36,1)';
+
+function _rectOf(el) { return el.getBoundingClientRect(); }
+
+// Anima un único elemento "fantasma" desde la forma/tono de `fromEl` hacia la
+// forma/tono de `toEl` (posición, tamaño, radio, color de fondo y borde), sin
+// crossfade de contenido: por eso se ve como una transformación continua y no
+// como un corte entre dos capturas.
+function _animateMorphGhost(fromRect, fromStyle, toRect, toStyle) {
+  const ghost = document.createElement('div');
+  ghost.className = 'morph-ghost';
+  document.body.appendChild(ghost);
+  const anim = ghost.animate([
+    {
+      left: fromRect.left + 'px', top: fromRect.top + 'px',
+      width: fromRect.width + 'px', height: fromRect.height + 'px',
+      borderRadius: fromStyle.borderRadius,
+      backgroundColor: fromStyle.backgroundColor,
+      borderColor: fromStyle.borderColor,
+      borderWidth: fromStyle.borderWidth,
+      borderStyle: 'solid',
+    },
+    {
+      left: toRect.left + 'px', top: toRect.top + 'px',
+      width: toRect.width + 'px', height: toRect.height + 'px',
+      borderRadius: toStyle.borderRadius,
+      backgroundColor: toStyle.backgroundColor,
+      borderColor: toStyle.borderColor,
+      borderWidth: toStyle.borderWidth,
+      borderStyle: 'solid',
+    },
+  ], { duration: MORPH_DURATION, easing: MORPH_EASING, fill: 'forwards' });
+  return { ghost, anim };
+}
+
+// Abre el detalle con Morph: la tarjeta se transforma en la forma del panel;
+// el contenido del panel solo aparece (fade corto) una vez que la forma ya
+// casi terminó de transformarse, para que lo evidente sea el cambio de forma.
+function runMorphOpen(cardEl, openFn) {
+  const fromRect  = _rectOf(cardEl);
+  const fromCs    = getComputedStyle(cardEl);
+  const fromStyle = { borderRadius: fromCs.borderRadius, backgroundColor: fromCs.backgroundColor, borderColor: fromCs.borderColor, borderWidth: fromCs.borderWidth };
+
+  openFn(); // monta el overlay/panel en su posición y tamaño final
+
+  const panel = document.getElementById('detail-panel');
+  panel.classList.add('morphing');
+  panel.style.opacity = '0';
+  void panel.offsetHeight; // fuerza reflow para medir la geometría final real
+  const toRect  = _rectOf(panel);
+  const toCs    = getComputedStyle(panel);
+  const toStyle = { borderRadius: toCs.borderRadius, backgroundColor: toCs.backgroundColor, borderColor: toCs.borderColor || 'transparent', borderWidth: toCs.borderWidth || '0px' };
+
+  cardEl.style.visibility = 'hidden';
+  const { ghost, anim } = _animateMorphGhost(fromRect, fromStyle, toRect, toStyle);
+
+  // El contenido real del panel se revela recién en el último tercio de la
+  // transformación, cuando la forma ya se parece mucho a la pantalla final.
+  panel.style.transition = `opacity ${Math.round(MORPH_DURATION * 0.4)}ms ease`;
+  setTimeout(() => { panel.style.opacity = '1'; }, Math.round(MORPH_DURATION * 0.6));
+
+  anim.finished.catch(() => {}).finally(() => {
+    ghost.remove();
+    panel.classList.remove('morphing');
+    panel.style.transition = '';
+    panel.style.opacity = '';
+    if (cardEl) cardEl.style.visibility = '';
+  });
+}
+
+// Cierra el detalle con Morph en reversa: la pantalla se transforma de vuelta
+// en la tarjeta que la originó.
+function runMorphClose(cardEl, closeFn) {
+  const panel = document.getElementById('detail-panel');
+  const fromRect  = _rectOf(panel);
+  const fromCs    = getComputedStyle(panel);
+  const fromStyle = { borderRadius: fromCs.borderRadius, backgroundColor: fromCs.backgroundColor, borderColor: fromCs.borderColor || 'transparent', borderWidth: fromCs.borderWidth || '0px' };
+  const toRect    = _rectOf(cardEl);
+  const toCs      = getComputedStyle(cardEl);
+  const toStyle   = { borderRadius: toCs.borderRadius, backgroundColor: toCs.backgroundColor, borderColor: toCs.borderColor, borderWidth: toCs.borderWidth };
+
+  panel.classList.add('morphing');
+  // El contenido del panel se desvanece de inmediato: lo evidente al cerrar
+  // también debe ser el cambio de forma, no el contenido superpuesto.
+  panel.style.transition = `opacity ${Math.round(MORPH_DURATION * 0.3)}ms ease`;
+  panel.style.opacity = '0';
+
+  const { ghost, anim } = _animateMorphGhost(fromRect, fromStyle, toRect, toStyle);
+
+  anim.finished.catch(() => {}).finally(() => {
+    ghost.remove();
+    closeFn(); // desmonta el overlay ya con la forma de vuelta en la tarjeta
+    panel.classList.remove('morphing');
+    panel.style.transition = '';
+    panel.style.opacity = '';
+  });
+}
 
 // ══════════════════════════ Versión Simplificada ═══════════════════════════
 // Layout alternativo (título + hamburguesa) que reemplaza el NavBar dinámico.
