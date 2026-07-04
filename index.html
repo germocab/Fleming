@@ -58,6 +58,26 @@
     --ui-blur: 34px;
   }
 
+  /* ── Barra de desplazamiento propia de la plataforma: reemplaza la barra
+     nativa del sistema por una delgada, redondeada y "flotante" (con
+     padding transparente vía background-clip), que se adapta al alto/ancho
+     de cualquier contenedor con scroll (no solo la página completa) y
+     respeta el tema claro/oscuro. ── */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-active) transparent;
+  }
+  *::-webkit-scrollbar { width: 9px; height: 9px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--border-active);
+    border-radius: 20px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  *::-webkit-scrollbar-thumb:hover { background-color: var(--text3); }
+  *::-webkit-scrollbar-corner { background: transparent; }
+
   /* ── Quita el resaltado azul de selección/tap que el navegador dibuja por
      defecto sobre cualquier elemento tocable (botones, links, tarjetas, SVG,
      inputs, etc.). Antes solo se aplicaba a un componente puntual (mapa de
@@ -6230,10 +6250,26 @@
           Automático
         </button>
       </div>
-      <!-- Slider de 3 niveles: tamaño de la Interfaz de Usuario -->
-      <div style="border-top:1px solid var(--border);padding:0.85rem 1rem 1rem">
+      <!-- Toggle: mapas en modo oscuro (vive junto al selector de tema) -->
+      <div class="profile-row" style="cursor:pointer;border-top:1px solid var(--border)" onclick="toggleDarkMapsPref()">
+        <div class="profile-row-icon" style="background:var(--ter-6-bg);color:var(--ter-6)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Mapas adaptados al tema oscuro</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Usa la versión oscura del mapa cuando está disponible</div>
+        </div>
+        <div id="pref-dark-maps-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="pref-dark-maps-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
+    </div>
+    <!-- Tamaño de la interfaz: al final de Preferencias, en su propia sección -->
+    <div class="profile-section">
+      <div class="profile-section-title">Tamaño de la interfaz</div>
+      <div style="padding:0.2rem 1rem 1rem">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem">
-          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">Tamaño de la interfaz</span>
+          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">Nivel</span>
           <span id="pref-ui-size-label" style="font-size:0.78rem;font-weight:700;color:var(--accent)">Normal</span>
         </div>
         <input type="range" id="pref-ui-size-slider" min="1" max="3" step="1" value="2"
@@ -6251,22 +6287,40 @@
         </div>
         <div style="padding:0.55rem 0.1rem 0;font-size:0.75rem;color:var(--text3);line-height:1.4">Agranda el texto y los elementos del UI (botones, sliders, tarjetas) en toda la plataforma. Ideal si tienes dificultad para ver bien la pantalla.</div>
       </div>
-      <!-- Toggle: mapas en modo oscuro -->
-      <div class="profile-row" style="cursor:pointer" onclick="toggleDarkMapsPref()">
-        <div class="profile-row-icon" style="background:var(--ter-6-bg);color:var(--ter-6)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label">Mapas adaptados al tema oscuro</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Usa la versión oscura del mapa cuando está disponible</div>
-        </div>
-        <div id="pref-dark-maps-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="pref-dark-maps-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Sub-pantalla: Funciones especiales ── -->
+<div id="page-pref-funciones" class="pref-subpage">
+  <nav class="subpage-topbar">
+    <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span class="pill-header-title">Funciones especiales</span>
+  </nav>
+  <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 0 2.5rem">
+    <!-- Vista de Contenido + NavBar Grow&Shrink: comparten zona (ambos son
+         ajustes de presentación en Tablet/Escritorio) -->
+    <div class="profile-section">
+      <div class="pref-desktop-only-row" style="padding:0.85rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
+        <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+        <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">Vista de Contenido (Tablet / Escritorio)</span>
       </div>
+      <div class="pref-theme-row pref-desktop-only-row" id="pref-h2h-view-row" style="margin:0 1rem 0.4rem">
+        <button class="pref-theme-opt" id="pref-h2h-popup" onclick="setHouseToHouseViewMode('popup')">
+          <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12h8"/></svg>
+          PopUp
+        </button>
+        <button class="pref-theme-opt" id="pref-h2h-sidebar" onclick="setHouseToHouseViewMode('sidebar')">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="10" y1="4" x2="10" y2="20"/></svg>
+          Lateral
+        </button>
+      </div>
+      <div class="pref-desktop-only-row" style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">En "Lateral", el detalle de la asignación se abre a la derecha, dejando la lista visible a la izquierda.</div>
       <!-- Selector: NavBar Grow&Shrink (solo Desktop) — Grow fijo, Shrink fijo,
            o Automático (crece solo en el extremo superior; se encoge con cualquier scroll y no vuelve a crecer hasta llegar arriba del todo). ── -->
-      <div class="pref-desktop-only-row" style="padding:0.85rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
+      <div class="pref-desktop-only-row" style="padding:0.85rem 1rem 0.2rem;display:flex;align-items:center;gap:7px;border-top:1px solid var(--border)">
         <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
         <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">NavBar Grow &amp; Shrink (Escritorio)</span>
       </div>
@@ -6286,18 +6340,7 @@
       </div>
       <div class="pref-desktop-only-row" style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">En "Automático" (por defecto), la barra se encoge apenas haces scroll y solo recupera su tamaño al volver hasta arriba del todo.</div>
     </div>
-  </div>
-</div>
-
-<!-- ── Sub-pantalla: Funciones especiales ── -->
-<div id="page-pref-funciones" class="pref-subpage">
-  <nav class="subpage-topbar">
-    <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración">
-      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-    </button>
-    <span class="pill-header-title">Funciones especiales</span>
-  </nav>
-  <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 0 2.5rem">
+    <!-- Función Live + Modo Peak: comparten apartado -->
     <div class="profile-section">
       <!-- Toggle: función Live -->
       <div class="profile-row" style="cursor:pointer" onclick="toggleLiveFeaturePref()">
@@ -6312,22 +6355,6 @@
           <div id="pref-live-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
-      <!-- Vista de asignaciones casa en casa: PopUp o Lateral (Tablet/Desktop) -->
-      <div class="pref-desktop-only-row" style="padding:0.85rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
-        <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
-        <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">Vista de Contenido (Tablet / Escritorio)</span>
-      </div>
-      <div class="pref-theme-row pref-desktop-only-row" id="pref-h2h-view-row" style="margin:0 1rem 0.4rem">
-        <button class="pref-theme-opt" id="pref-h2h-popup" onclick="setHouseToHouseViewMode('popup')">
-          <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12h8"/></svg>
-          PopUp
-        </button>
-        <button class="pref-theme-opt" id="pref-h2h-sidebar" onclick="setHouseToHouseViewMode('sidebar')">
-          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="10" y1="4" x2="10" y2="20"/></svg>
-          Lateral
-        </button>
-      </div>
-      <div class="pref-desktop-only-row" style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">En "Lateral", el detalle de la asignación se abre a la derecha, dejando la lista visible a la izquierda.</div>
       <!-- Toggle: Modo Peak -->
       <div class="profile-row" id="peak-mode-row" style="cursor:pointer;border-top:1px solid var(--border)" onclick="togglePeakModeSetting()">
         <div class="profile-row-icon" style="background:var(--ter-9-bg);color:var(--ter-9)">
@@ -6655,7 +6682,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.9.3-beta';
+const APP_VERSION = '1.9.4-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -12935,8 +12962,7 @@ function openPrefScreen(name) {
   if (!PREF_SCREENS.includes(name)) return;
   if (name === 'experimentos' && localStorage.getItem('fleming_egg_unlocked') !== '1') return;
   document.getElementById('page-pref-' + name)?.classList.add('open');
-  if (name === 'preferencias') updateNavbarShrinkToggleUI();
-  if (name === 'funciones') updateH2HViewModeUI();
+  if (name === 'funciones') { updateH2HViewModeUI(); updateNavbarShrinkToggleUI(); }
   if (name === 'notificaciones') renderPrefNotifList();
   if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); }
 }
