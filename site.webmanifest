@@ -8,20 +8,15 @@
   "icons": [
     { "src": "icons/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "icons/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png" }
-  ]
-},
-"shortcuts": [
+  ],
+  "shortcuts": [
     {
       "name": "Casa en Casa",
       "short_name": "Casa en Casa",
       "description": "Ir directo a Predicación de Casa en Casa",
       "url": "/?shortcut=casa-en-casa",
       "icons": [
-        {
-          "src": "icons/shortcut-casa.png",
-          "sizes": "96x96",
-          "type": "image/png"
-        }
+        { "src": "icons/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" }
       ]
     },
     {
@@ -30,11 +25,7 @@
       "description": "Ir directo a la sección Reuniones",
       "url": "/?shortcut=reuniones",
       "icons": [
-        {
-          "src": "icons/shortcut-reuniones.png",
-          "sizes": "96x96",
-          "type": "image/png"
-        }
+        { "src": "icons/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" }
       ]
     }
   ]
