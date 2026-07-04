@@ -1886,6 +1886,11 @@
     background: var(--surface2); border-radius: var(--radius-xs); margin-bottom: 6px;
   }
   .resp-cargo-row:last-child { margin-bottom: 0; }
+  .resp-cargo-icon {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .resp-cargo-icon svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .resp-cargo-name { flex-shrink: 0; font-size: 0.82rem; color: var(--text2); min-width: 118px; }
   .resp-cargo-select {
     flex: 1; padding: 6px 28px 6px 8px; background: var(--surface); border: 1px solid var(--border);
@@ -6539,7 +6544,7 @@
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.7.5-beta';
+const APP_VERSION = '1.7.6-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -6666,26 +6671,41 @@ const RESP_CARGOS = [
   'Acomodador 2',
 ];
 // Agrupación visual de los cargos en categorías para el formulario de asignación.
+// Cada categoría tiene su propio color e ícono distintivo, que se usa tanto en
+// el panel de administración como en la vista del usuario final.
 const RESP_CATEGORIAS = [
   {
-    nombre: 'Audio y video',
-    cargos: ['Encargado de Audio y Video', 'Auxiliar de Audio y Video', 'Micrófono 1', 'Micrófono 2'],
-    color: 'var(--accent)',
-    icon: '<svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>',
+    nombre: 'Audio y Video',
+    cargos: ['Encargado de Audio y Video', 'Auxiliar de Audio y Video'],
+    color: '#a855f7',
+    icon: '<path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>',
+  },
+  {
+    nombre: 'Micrófonos',
+    cargos: ['Micrófono 1', 'Micrófono 2'],
+    color: '#22c55e',
+    icon: '<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/>',
   },
   {
     nombre: 'Plataforma',
     cargos: ['Plataforma'],
-    color: '#a855f7',
-    icon: '<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+    color: '#f59e0b',
+    icon: '<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
   },
   {
     nombre: 'Acomodadores',
     cargos: ['Acomodador 1', 'Acomodador 2'],
-    color: '#f59e0b',
-    icon: '<svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>',
+    color: '#3b82f6',
+    icon: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
   },
 ];
+// Devuelve { color, icon } para un cargo específico, buscando la categoría a la
+// que pertenece. Se usa para pintar el ícono sobre una base de color distintiva
+// tanto en el formulario de asignación como en la vista del usuario final.
+function getCargoStyle(cargo) {
+  const cat = RESP_CATEGORIAS.find(c => c.cargos.includes(cargo));
+  return cat ? { color: cat.color, icon: cat.icon } : { color: 'var(--text3)', icon: '<circle cx="12" cy="12" r="9"/>' };
+}
 let editingAssignmentId = null;
 let editingTerritoryId = null;
 let editingConductorId = null;
@@ -10747,7 +10767,8 @@ function respDiaLabelLong(dateStr) {
 
 // Agrupa el cargo específico en una categoría más general para el título de la notificación.
 function respCargoCategoria(cargo) {
-  if (cargo.includes('Audio') || cargo.includes('Micrófono')) return 'Audio y Video';
+  if (cargo.includes('Audio')) return 'Audio y Video';
+  if (cargo.includes('Micrófono')) return 'Micrófonos';
   if (cargo === 'Plataforma') return 'Plataforma';
   if (cargo.startsWith('Acomodador')) return 'Acomodadores';
   return cargo;
@@ -10848,13 +10869,14 @@ function renderRespCargosForm(dateStr) {
       const opts = hermanoOptions.replace(`value="${(found?.hermano||'').replace(/"/g,'')}"`, `value="${(found?.hermano||'').replace(/"/g,'')}" selected`);
       return `
       <div class="resp-cargo-row">
+        <div class="resp-cargo-icon" style="background:${cat.color}22;color:${cat.color}"><svg viewBox="0 0 24 24">${cat.icon}</svg></div>
         <span class="resp-cargo-name">${cargo}</span>
         <select class="resp-cargo-select" id="resp-cargo-sel-${i}" data-cargo="${cargo}">${found?.hermano ? opts : hermanoOptions}</select>
       </div>`;
     }).join('');
     return `
     <div class="resp-cat-block">
-      <div class="resp-cat-title" style="color:${cat.color}">${cat.icon}${cat.nombre}</div>
+      <div class="resp-cat-title" style="color:${cat.color}"><svg viewBox="0 0 24 24">${cat.icon}</svg>${cat.nombre}</div>
       ${rowsHtml}
     </div>`;
   }).join('');
@@ -11015,10 +11037,11 @@ async function renderRespUserView() {
         const r = cargosDia.find(x => x.cargo === cargo);
         const name = r?.hermano || null;
         const isMe = name && myName && name.trim().toLowerCase() === myName;
+        const style = getCargoStyle(cargo);
         return `
         <div class="profile-row" style="${isMe ? 'background:var(--accent-light);border-radius:var(--radius-sm)' : ''}">
-          <div class="profile-row-icon" style="background:${isMe?'var(--accent)':'var(--surface3)'};color:${isMe?'#fff':'var(--text3)'}">
-            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          <div class="profile-row-icon" style="background:${isMe ? style.color : style.color+'22'};color:${isMe?'#fff':style.color}">
+            <svg viewBox="0 0 24 24">${style.icon}</svg>
           </div>
           <div class="profile-row-content">
             <div class="profile-row-label">${cargo}</div>
