@@ -1200,17 +1200,22 @@
     margin-bottom: 0.6rem; color: var(--text);
   }
   .no-pasar-item {
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex; flex-direction: column; align-items: stretch;
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 0.55rem 0.85rem;
     margin-bottom: 6px;
     font-size: 0.875rem; color: var(--text2);
-    gap: 8px;
+    gap: 2px;
   }
+  .no-pasar-item-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
   .no-pasar-item-addr { font-weight: 500; color: var(--text); }
   .no-pasar-item-date { font-size: 0.72rem; color: var(--text3); font-weight: 500; flex-shrink: 0; }
+  .no-pasar-item-desc {
+    font-size: 0.75rem; color: var(--text3); font-weight: 400;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
 
   /* ── No Pasar item: clickable ─────────────────────────────────────────────── */
   .no-pasar-item {
@@ -1301,6 +1306,13 @@
     cursor: pointer; transition: opacity 0.18s;
   }
   .np-fecha-send:hover { opacity: 0.88; }
+  .np-descripcion-send {
+    flex:1; padding: 0.65rem; border: none; border-radius: 10px;
+    background: #a855f7; color: #fff;
+    font-family: var(--font); font-size: 0.88rem; font-weight: 700;
+    cursor: pointer; transition: opacity 0.18s;
+  }
+  .np-descripcion-send:hover { opacity: 0.88; }
   .np-sugerir-cancel {
     padding: 0.65rem 0.9rem; border: none; border-radius: 10px;
     background: var(--surface3); color: var(--text2);
@@ -1312,6 +1324,7 @@
   /* ── Sugerir Corrección ────────────────────────────────────────────────────── */
   .np-action-btn-correccion .np-action-icon { background: rgba(59,130,246,0.12); color: var(--ter-2); }
   .np-action-btn-fecha .np-action-icon { background: rgba(52,199,89,0.12); color: var(--green); }
+  .np-action-btn-descripcion .np-action-icon { background: rgba(168,85,247,0.12); color: #a855f7; }
   .np-correccion-form {
     display: none; flex-direction: column; gap: 0.6rem;
     padding: 0.9rem 1.25rem 0;
@@ -6826,7 +6839,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.12.0-beta';
+const APP_VERSION = '1.12.5-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -9643,9 +9656,12 @@ function _renderDetailNoPasar(ter) {
     const entries = parseNoPasar(ter.no_pasar);
     if (entries.length) {
       noPasarList.innerHTML = entries.map(e => `
-        <div class="no-pasar-item" onclick="openNpActionSheet('${e.addr.replace(/'/g,"\\'")}','${ter ? ter.number : ''}',${e.date ? 'true' : 'false'})">
-          <span class="no-pasar-item-addr">${e.addr}</span>
-          ${e.date ? `<span class="no-pasar-item-date">${fmtNpDate(e.date)}</span>` : ''}
+        <div class="no-pasar-item" onclick="openNpActionSheet('${e.addr.replace(/'/g,"\\'")}','${ter ? ter.number : ''}',${e.date ? 'true' : 'false'},${e.desc ? 'true' : 'false'})">
+          <div class="no-pasar-item-top">
+            <span class="no-pasar-item-addr">${e.addr}</span>
+            ${e.date ? `<span class="no-pasar-item-date">${fmtNpDate(e.date)}</span>` : ''}
+          </div>
+          ${e.desc ? `<span class="no-pasar-item-desc">${e.desc}</span>` : ''}
         </div>`).join('');
     } else { noPasarList.innerHTML = ''; }
   } else { noPasarList.innerHTML = ''; }
@@ -10855,7 +10871,7 @@ async function openTerritoryModal(t) {
   const npFiltered = noPasar.filter(e => e && (typeof e === 'object' ? e.addr : e));
   if (npFiltered.length) {
     npFiltered.forEach(e => {
-      if (typeof e === 'object') addNoPasarInput(e.addr || '', e.date || '');
+      if (typeof e === 'object') addNoPasarInput(e.addr || '', e.date || '', e.desc || '');
       else addNoPasarInput(e, ''); // backwards compat with old string entries
     });
   } else { addNoPasarInput(); }
@@ -10956,28 +10972,32 @@ function removeDarkMapImage() {
   document.getElementById('ter-map-dark-remove-btn').style.display = 'none';
   document.getElementById('ter-map-file-dark').value = '';
 }
-function addNoPasarInput(addr = '', date = '') {
+function addNoPasarInput(addr = '', date = '', desc = '') {
   noPasarCount++;
   const n = noPasarCount;
   const div = document.createElement('div');
-  div.style.cssText = 'display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-bottom:8px;align-items:center';
+  div.style.cssText = 'margin-bottom:8px;padding:8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2)';
   div.id = 'np-wrap-' + n;
-  div.innerHTML = `<input type="text" class="form-input" id="np-addr-${n}" value="${addr.replace(/"/g,'&quot;')}" placeholder="Ej: Nueva Bilbao 8998">
+  div.innerHTML = `<div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center">
+    <input type="text" class="form-input" id="np-addr-${n}" value="${addr.replace(/"/g,'&quot;')}" placeholder="Ej: Nueva Bilbao 8998">
     <input type="date" class="date-input" id="np-date-${n}" value="${date}" style="height:42px;border-radius:var(--radius-sm);padding:0 10px;font-size:0.8rem;background:var(--surface2);border:1px solid var(--border);color:var(--text)">
-    <button class="btn-danger" onclick="this.parentElement.remove()" style="flex-shrink:0;padding:0.45rem 0.65rem"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+    <button class="btn-danger" onclick="this.closest('[id^=np-wrap-]').remove()" style="flex-shrink:0;padding:0.45rem 0.65rem"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <input type="text" class="form-input" id="np-desc-${n}" value="${desc.replace(/"/g,'&quot;')}" placeholder="Descripción / comentario (opcional)" style="margin-top:6px;font-size:0.8rem">`;
   document.getElementById('no-pasar-inputs').appendChild(div);
 }
 async function saveTerritory() {
   if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   const number = parseInt(document.getElementById('ter-num').value);
   if (!number) { showError('ter-error','El número de territorio es requerido'); return; }
-  // Collect no_pasar as array of {addr, date} objects
+  // Collect no_pasar as array of {addr, date, desc} objects
   const npWraps = document.querySelectorAll('#no-pasar-inputs [id^="np-wrap-"]');
   const no_pasar = Array.from(npWraps).map(wrap => {
     const n = wrap.id.replace('np-wrap-','');
     const addr = (document.getElementById('np-addr-'+n)?.value || '').trim();
     const date = (document.getElementById('np-date-'+n)?.value || '').trim();
-    return addr ? { addr, date } : null;
+    const desc = (document.getElementById('np-desc-'+n)?.value || '').trim();
+    return addr ? { addr, date, desc } : null;
   }).filter(Boolean);
   const btn = document.getElementById('save-ter-btn');
   btn.disabled = true; btn.textContent = 'Guardando...';
@@ -13086,9 +13106,12 @@ async function viewTerritory(id) {
   const noPasarList = document.getElementById('detail-no-pasar-list');
   if (noPasar.length) {
     noPasarList.innerHTML = noPasar.map(e => `
-      <div class="no-pasar-item" onclick="openNpActionSheet('${e.addr.replace(/'/g,"\\'")}','${t.number}',${e.date ? 'true' : 'false'})">
-        <span class="no-pasar-item-addr">${e.addr}</span>
-        ${e.date ? `<span class="no-pasar-item-date">${fmtNpDate(e.date)}</span>` : ''}
+      <div class="no-pasar-item" onclick="openNpActionSheet('${e.addr.replace(/'/g,"\\'")}','${t.number}',${e.date ? 'true' : 'false'},${e.desc ? 'true' : 'false'})">
+        <div class="no-pasar-item-top">
+          <span class="no-pasar-item-addr">${e.addr}</span>
+          ${e.date ? `<span class="no-pasar-item-date">${fmtNpDate(e.date)}</span>` : ''}
+        </div>
+        ${e.desc ? `<span class="no-pasar-item-desc">${e.desc}</span>` : ''}
       </div>`).join('');
     noPasarSec.style.display = '';
   } else {
@@ -15166,6 +15189,14 @@ const NOTIF_TEMPLATES_DEFAULT = [
     vars: ['territorio', 'remitente', 'direccion', 'valor'],
   },
   {
+    id: 'sugerir_descripcion_no_pasar',
+    label: 'Sugerir Descripción — No Pasar',
+    desc: 'Se envía al DEV cuando alguien sugiere una descripción/comentario para una dirección No Pasar que no tiene este campo.',
+    title: 'Sugerir Descripción – {territorio}',
+    body: '{remitente} sugiere la descripción "{valor}" para "{direccion}" en {territorio}.',
+    vars: ['territorio', 'remitente', 'direccion', 'valor'],
+  },
+  {
     id: 'responsabilidad_asignada',
     label: 'Responsabilidad Asignada',
     desc: 'Se envía a un hermano cuando se le asigna un cargo (Acomodador, Sonido, etc.) para un día Jueves/Sábado.',
@@ -15872,7 +15903,7 @@ async function deleteAllNotifications() {
 let _npCurrentAddr = '';
 let _npCurrentTerNum = '';
 
-function openNpActionSheet(addr, terNum, hasDate) {
+function openNpActionSheet(addr, terNum, hasDate, hasDesc) {
   _npCurrentAddr = addr;
   _npCurrentTerNum = terNum;
   document.getElementById('np-action-addr').textContent = addr;
@@ -15899,6 +15930,15 @@ function openNpActionSheet(addr, terNum, hasDate) {
   if (fform) fform.classList.remove('open');
   const fi = document.getElementById('np-fecha-val');
   if (fi) fi.value = '';
+  // Reset/mostrar sugerir descripción — solo si la dirección no tiene descripción aún
+  const descBtn = document.getElementById('np-action-btn-descripcion');
+  const descDivider = document.getElementById('np-descripcion-divider');
+  if (descBtn) descBtn.style.display = hasDesc ? 'none' : '';
+  if (descDivider) descDivider.style.display = hasDesc ? 'none' : '';
+  const dform = document.getElementById('np-descripcion-form');
+  if (dform) dform.classList.remove('open');
+  const di = document.getElementById('np-descripcion-val');
+  if (di) di.value = '';
   document.getElementById('np-action-overlay').classList.add('open');
 }
 
@@ -15913,6 +15953,8 @@ function closeNpActionSheet() {
   selectNpCorreccionReason(null);
   const fform = document.getElementById('np-fecha-form');
   if (fform) fform.classList.remove('open');
+  const dform = document.getElementById('np-descripcion-form');
+  if (dform) dform.classList.remove('open');
 }
 
 function handleNpOverlayClick(e) {
@@ -15923,9 +15965,10 @@ function toggleNpSugerirForm() {
   const form = document.getElementById('np-sugerir-form');
   const isOpen = form.classList.toggle('open');
   if (isOpen) {
-    // Close corrección/fecha forms if open
+    // Close corrección/fecha/descripción forms if open
     document.getElementById('np-correccion-form').classList.remove('open');
     document.getElementById('np-fecha-form')?.classList.remove('open');
+    document.getElementById('np-descripcion-form')?.classList.remove('open');
     setTimeout(() => document.getElementById('np-sugerir-motivo')?.focus(), 80);
   }
 }
@@ -15934,9 +15977,10 @@ function toggleNpCorreccionForm() {
   const form = document.getElementById('np-correccion-form');
   const isOpen = form.classList.toggle('open');
   if (isOpen) {
-    // Close quitado/fecha forms if open
+    // Close quitado/fecha/descripción forms if open
     document.getElementById('np-sugerir-form').classList.remove('open');
     document.getElementById('np-fecha-form')?.classList.remove('open');
+    document.getElementById('np-descripcion-form')?.classList.remove('open');
     // Reset reason selection
     selectNpCorreccionReason(null);
   }
@@ -15946,10 +15990,23 @@ function toggleNpFechaForm() {
   const form = document.getElementById('np-fecha-form');
   const isOpen = form.classList.toggle('open');
   if (isOpen) {
-    // Close quitado/corrección forms if open
+    // Close quitado/corrección/descripción forms if open
     document.getElementById('np-sugerir-form').classList.remove('open');
     document.getElementById('np-correccion-form').classList.remove('open');
+    document.getElementById('np-descripcion-form')?.classList.remove('open');
     setTimeout(() => document.getElementById('np-fecha-val')?.focus(), 80);
+  }
+}
+
+function toggleNpDescripcionForm() {
+  const form = document.getElementById('np-descripcion-form');
+  const isOpen = form.classList.toggle('open');
+  if (isOpen) {
+    // Close quitado/corrección/fecha forms if open
+    document.getElementById('np-sugerir-form').classList.remove('open');
+    document.getElementById('np-correccion-form').classList.remove('open');
+    document.getElementById('np-fecha-form')?.classList.remove('open');
+    setTimeout(() => document.getElementById('np-descripcion-val')?.focus(), 80);
   }
 }
 
@@ -16040,6 +16097,32 @@ async function submitSugerirFecha() {
   const body = tpl.body;
 
   const sendBtn = document.querySelector('.np-fecha-send');
+  if (sendBtn) { sendBtn.textContent = 'Enviando…'; sendBtn.disabled = true; }
+
+  const { error } = await sb.from('notifications').insert({ title, body, notif_category: 'casa', dev_only: true });
+
+  if (sendBtn) { sendBtn.textContent = 'Enviar sugerencia'; sendBtn.disabled = false; }
+
+  if (error) { showToast('Error al enviar', 'error'); return; }
+
+  showToast('Sugerencia enviada al DEV ✓', 'success');
+  closeNpActionSheet();
+}
+
+// ── Sugerir Descripción ────────────────────────────────────────────────────────
+async function submitSugerirDescripcion() {
+  const val = (document.getElementById('np-descripcion-val').value || '').trim();
+  if (!val) { showToast('Escribe una descripción', 'error'); return; }
+  const sender = currentUser?.name || 'Usuario';
+  const terStr = _npCurrentTerNum ? `Territorio ${_npCurrentTerNum}` : 'Territorio';
+
+  const tpl = renderTemplate('sugerir_descripcion_no_pasar', {
+    territorio: terStr, remitente: sender, direccion: _npCurrentAddr, valor: val,
+  });
+  const title = tpl.title;
+  const body = tpl.body;
+
+  const sendBtn = document.querySelector('.np-descripcion-send');
   if (sendBtn) { sendBtn.textContent = 'Enviando…'; sendBtn.disabled = true; }
 
   const { error } = await sb.from('notifications').insert({ title, body, notif_category: 'casa', dev_only: true });
@@ -17446,6 +17529,23 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
       <div class="np-sugerir-actions">
         <button class="np-fecha-send" onclick="submitSugerirFecha()">Enviar sugerencia</button>
         <button class="np-sugerir-cancel" onclick="toggleNpFechaForm()">Cancelar</button>
+      </div>
+    </div>
+    <div class="np-action-divider" id="np-descripcion-divider"></div>
+    <!-- Sugerir Descripción -->
+    <button class="np-action-btn np-action-btn-descripcion" id="np-action-btn-descripcion" onclick="toggleNpDescripcionForm()">
+      <span class="np-action-icon">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </span>
+      Sugerir Descripción
+    </button>
+    <!-- Inline form for Sugerir Descripción -->
+    <div class="np-sugerir-form" id="np-descripcion-form">
+      <div class="np-sugerir-label">¿Qué descripción o comentario debería tener esta dirección?</div>
+      <textarea class="np-sugerir-textarea" id="np-descripcion-val" placeholder="Ej: Pidió no visitas los domingos, prefiere después de las 18h, etc."></textarea>
+      <div class="np-sugerir-actions">
+        <button class="np-descripcion-send" onclick="submitSugerirDescripcion()">Enviar sugerencia</button>
+        <button class="np-sugerir-cancel" onclick="toggleNpDescripcionForm()">Cancelar</button>
       </div>
     </div>
     <button class="np-action-btn-cancel" onclick="closeNpActionSheet()">Cancelar</button>
