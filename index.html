@@ -6373,16 +6373,18 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         <div class="profile-row-content">
           <div class="profile-row-value">English</div>
         </div>
+        <span class="pref-alpha-badge" style="margin-right:4px">BETA</span>
         <svg class="pref-lang-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
-      <div class="pref-lang-row disabled">
-        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text3)">
+      <div class="pref-lang-row" data-lang="nl" onclick="setPrefLanguage('nl')">
+        <div class="profile-row-icon" style="background:var(--accent-light);color:var(--accent)">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-value" style="color:var(--text3)">Nederlands</div>
+          <div class="profile-row-value">Nederlands</div>
         </div>
-        <span class="pref-soon-badge" data-i18n="pref.proximamente">Próximamente</span>
+        <span class="pref-alpha-badge" style="margin-right:4px">BETA</span>
+        <svg class="pref-lang-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
     </div>
     <div class="profile-section">
@@ -6910,16 +6912,16 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.13.5-beta';
+const APP_VERSION = '1.13.5.2-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
-// El Holandés queda pendiente (ver panel de Preferencias).
+// Idiomas disponibles: Español, Inglés y Nederlands (Beta — en proceso de traducción).
 const I18N = {
   'nav.predicacion':        { es: 'Predicación',            en: 'Preaching' },
   'nav.reuniones':          { es: 'Reuniones',               en: 'Meetings' },
-  'subtab.casa':            { es: 'Casa en casa',            en: 'House to House' },
-  'subtab.territorios':     { es: 'Territorios',             en: 'Territories' },
+  'subtab.casa':            { es: 'Casa en casa',            en: 'House to House',      nl: 'Huis aan huis' },
+  'subtab.territorios':     { es: 'Territorios',             en: 'Territories',         nl: 'Gebieden' },
   'subtab.carritos':        { es: 'Carritos',                en: 'Carts' },
   'subtab.grupos':          { es: 'Grupos',                  en: 'Groups' },
   'subtab.vida-ministerio': { es: 'Vida y Ministerio',       en: 'Christian Life and Ministry' },
@@ -6958,54 +6960,54 @@ const I18N = {
   'live.estas-en':          { es: 'Estás en',                en: 'You are on' },
   'sin.direccion':          { es: 'Sin dirección',           en: 'No address' },
   'sin.conductor':          { es: 'Sin conductor',           en: 'No driver' },
-  'pref.title':             { es: 'Configuración',           en: 'Preferences' },
-  'pref.idioma':            { es: 'Idioma',                  en: 'Language' },
-  'pref.apariencia':        { es: 'Apariencia',              en: 'Appearance' },
-  'pref.proximamente':      { es: 'Próximamente',            en: 'Coming soon' },
-  'pref.theme.claro':       { es: 'Claro',                   en: 'Light' },
-  'pref.theme.oscuro':      { es: 'Oscuro',                  en: 'Dark' },
-  'pref.theme.auto':        { es: 'Automático',              en: 'Automatic' },
-  'pref.darkmaps':          { es: 'Mapas adaptados al tema oscuro', en: 'Maps adapted to dark theme' },
-  'pref.darkmaps.desc':     { es: 'Usa la versión oscura del mapa cuando está disponible', en: 'Use the dark version of the map when available' },
-  'pref.uisize':            { es: 'Tamaño de la interfaz',   en: 'Interface size' },
-  'pref.uisize.nivel':      { es: 'Nivel',                   en: 'Level' },
-  'pref.uisize.pequeno':    { es: 'Pequeño',                 en: 'Small' },
-  'pref.uisize.normal':     { es: 'Normal',                  en: 'Normal' },
-  'pref.uisize.grande':     { es: 'Grande',                  en: 'Large' },
-  'pref.uisize.help':       { es: 'Agranda el texto y los elementos del UI (botones, sliders, tarjetas) en toda la plataforma. Ideal si tienes dificultad para ver bien la pantalla.', en: 'Enlarges text and UI elements (buttons, sliders, cards) across the platform. Ideal if you have trouble seeing the screen clearly.' },
+  'pref.title':             { es: 'Configuración',           en: 'Preferences',   nl: 'Instellingen' },
+  'pref.idioma':            { es: 'Idioma',                  en: 'Language',      nl: 'Taal' },
+  'pref.apariencia':        { es: 'Apariencia',              en: 'Appearance',    nl: 'Weergave' },
+  'pref.proximamente':      { es: 'Próximamente',            en: 'Coming soon',   nl: 'Binnenkort' },
+  'pref.theme.claro':       { es: 'Claro',                   en: 'Light',         nl: 'Licht' },
+  'pref.theme.oscuro':      { es: 'Oscuro',                  en: 'Dark',          nl: 'Donker' },
+  'pref.theme.auto':        { es: 'Automático',              en: 'Automatic',     nl: 'Automatisch' },
+  'pref.darkmaps':          { es: 'Mapas adaptados al tema oscuro', en: 'Maps adapted to dark theme', nl: 'Kaarten aangepast aan donker thema' },
+  'pref.darkmaps.desc':     { es: 'Usa la versión oscura del mapa cuando está disponible', en: 'Use the dark version of the map when available', nl: 'Gebruik de donkere versie van de kaart indien beschikbaar' },
+  'pref.uisize':            { es: 'Tamaño de la interfaz',   en: 'Interface size', nl: 'Interfacegrootte' },
+  'pref.uisize.nivel':      { es: 'Nivel',                   en: 'Level',         nl: 'Niveau' },
+  'pref.uisize.pequeno':    { es: 'Pequeño',                 en: 'Small',         nl: 'Klein' },
+  'pref.uisize.normal':     { es: 'Normal',                  en: 'Normal',        nl: 'Normaal' },
+  'pref.uisize.grande':     { es: 'Grande',                  en: 'Large',         nl: 'Groot' },
+  'pref.uisize.help':       { es: 'Agranda el texto y los elementos del UI (botones, sliders, tarjetas) en toda la plataforma. Ideal si tienes dificultad para ver bien la pantalla.', en: 'Enlarges text and UI elements (buttons, sliders, cards) across the platform. Ideal if you have trouble seeing the screen clearly.', nl: 'Vergroot de tekst en UI-elementen (knoppen, schuifregelaars, kaarten) op het hele platform. Ideaal als je moeite hebt om het scherm goed te zien.' },
   // ── Configuración (menú principal) ──
-  'settings.title':             { es: 'Configuración',            en: 'Settings' },
-  'settings.preferencias':      { es: 'Preferencias',             en: 'Preferences' },
-  'settings.preferencias.desc': { es: 'Idioma, tema, mapas, transparencia y NavBar', en: 'Language, theme, maps, transparency and NavBar' },
-  'settings.funciones':         { es: 'Funciones especiales',     en: 'Special Features' },
-  'settings.funciones.desc':    { es: 'Live y vista de asignaciones', en: 'Live and assignment view' },
-  'settings.notificaciones':    { es: 'Notificaciones',           en: 'Notifications' },
-  'settings.notificaciones.desc': { es: 'Avisos de la plataforma', en: 'Platform alerts' },
-  'settings.experimentos':      { es: 'Experimentos',             en: 'Experiments' },
-  'settings.experimentos.desc': { es: 'Color de acento, animaciones y blur', en: 'Accent color, animations and blur' },
-  'settings.ayuda':             { es: 'Ayuda',                    en: 'Help' },
-  'settings.ayuda.desc':        { es: 'Tutoriales y reporte de problemas', en: 'Tutorials and issue reporting' },
-  'settings.tutoriales':        { es: 'Tutoriales',               en: 'Tutorials' },
-  'settings.soporte':           { es: 'Soporte',                  en: 'Support' },
-  'settings.tutorial':          { es: 'Ver tutorial',             en: 'View tutorial' },
-  'settings.tutorial.desc':     { es: 'Repasa cómo funcionan las secciones y funciones principales', en: 'Review how the main sections and features work' },
-  'settings.tutorial.h2h':      { es: 'Ver tutorial de Asignaciones', en: 'View Assignments tutorial' },
-  'settings.tutorial.h2h.desc': { es: 'Repasa la pantalla de detalle de una asignación de casa en casa', en: 'Review the detail screen of a door-to-door assignment' },
-  'settings.reportar':          { es: 'Reportar un problema',     en: 'Report a problem' },
-  'settings.reportar.desc':     { es: 'Esta plataforma está en fase Beta — cuéntanos si algo falla', en: 'This platform is in Beta — let us know if something breaks' },
-  'settings.acercade':          { es: 'Acerca de',                en: 'About' },
-  'settings.version':           { es: 'Versión de la plataforma', en: 'Platform version' },
-  'settings.actualizar':        { es: 'Actualizar',               en: 'Update' },
+  'settings.title':             { es: 'Configuración',            en: 'Settings',    nl: 'Instellingen' },
+  'settings.preferencias':      { es: 'Preferencias',             en: 'Preferences', nl: 'Voorkeuren' },
+  'settings.preferencias.desc': { es: 'Idioma, tema, mapas, transparencia y NavBar', en: 'Language, theme, maps, transparency and NavBar', nl: 'Taal, thema, kaarten, transparantie en NavBar' },
+  'settings.funciones':         { es: 'Funciones especiales',     en: 'Special Features', nl: 'Speciale functies' },
+  'settings.funciones.desc':    { es: 'Live y vista de asignaciones', en: 'Live and assignment view', nl: 'Live en weergave van toewijzingen' },
+  'settings.notificaciones':    { es: 'Notificaciones',           en: 'Notifications', nl: 'Meldingen' },
+  'settings.notificaciones.desc': { es: 'Avisos de la plataforma', en: 'Platform alerts', nl: 'Platformmeldingen' },
+  'settings.experimentos':      { es: 'Experimentos',             en: 'Experiments', nl: 'Experimenten' },
+  'settings.experimentos.desc': { es: 'Color de acento, animaciones y blur', en: 'Accent color, animations and blur', nl: 'Accentkleur, animaties en blur' },
+  'settings.ayuda':             { es: 'Ayuda',                    en: 'Help',   nl: 'Help' },
+  'settings.ayuda.desc':        { es: 'Tutoriales y reporte de problemas', en: 'Tutorials and issue reporting', nl: 'Tutorials en probleemmeldingen' },
+  'settings.tutoriales':        { es: 'Tutoriales',               en: 'Tutorials', nl: 'Tutorials' },
+  'settings.soporte':           { es: 'Soporte',                  en: 'Support',   nl: 'Ondersteuning' },
+  'settings.tutorial':          { es: 'Ver tutorial',             en: 'View tutorial', nl: 'Tutorial bekijken' },
+  'settings.tutorial.desc':     { es: 'Repasa cómo funcionan las secciones y funciones principales', en: 'Review how the main sections and features work', nl: 'Bekijk hoe de belangrijkste secties en functies werken' },
+  'settings.tutorial.h2h':      { es: 'Ver tutorial de Asignaciones', en: 'View Assignments tutorial', nl: 'Tutorial Toewijzingen bekijken' },
+  'settings.tutorial.h2h.desc': { es: 'Repasa la pantalla de detalle de una asignación de casa en casa', en: 'Review the detail screen of a door-to-door assignment', nl: 'Bekijk het detailscherm van een huis-aan-huis toewijzing' },
+  'settings.reportar':          { es: 'Reportar un problema',     en: 'Report a problem', nl: 'Een probleem melden' },
+  'settings.reportar.desc':     { es: 'Esta plataforma está en fase Beta — cuéntanos si algo falla', en: 'This platform is in Beta — let us know if something breaks', nl: 'Dit platform bevindt zich in de Beta-fase — laat ons weten als er iets misgaat' },
+  'settings.acercade':          { es: 'Acerca de',                en: 'About',   nl: 'Over' },
+  'settings.version':           { es: 'Versión de la plataforma', en: 'Platform version', nl: 'Platformversie' },
+  'settings.actualizar':        { es: 'Actualizar',               en: 'Update',  nl: 'Bijwerken' },
   // ── Funciones especiales ──
-  'func.vistacontenido':   { es: 'Vista de Contenido (Tablet / Escritorio)', en: 'Content View (Tablet / Desktop)' },
-  'func.lateral':          { es: 'Lateral',                 en: 'Sidebar' },
-  'func.lateral.help':     { es: 'En "Lateral", el detalle de la asignación se abre a la derecha, dejando la lista visible a la izquierda.', en: 'In "Sidebar", the assignment detail opens on the right, keeping the list visible on the left.' },
-  'func.escritorio':       { es: 'Escritorio',              en: 'Desktop' },
-  'func.auto.help':        { es: 'En "Automático" (por defecto), la barra se encoge apenas haces scroll y solo recupera su tamaño al volver hasta arriba del todo.', en: 'In "Automatic" (default), the bar shrinks as soon as you scroll and only returns to full size when you reach the very top.' },
-  'func.live':             { es: 'Función Live',            en: 'Live Feature' },
-  'func.live.desc':        { es: 'Activo automáticamente. Detección de calles y avisos de No Pasar en tiempo real', en: 'Active automatically. Real-time street detection and Do-Not-Pass alerts' },
-  'func.peak':             { es: 'Modo Peak',               en: 'Peak Mode' },
-  'func.peak.desc':        { es: 'Mantén presionado para ver previews rápidos (Notificaciones y Asignaciones)', en: 'Press and hold to see quick previews (Notifications and Assignments)' },
+  'func.vistacontenido':   { es: 'Vista de Contenido (Tablet / Escritorio)', en: 'Content View (Tablet / Desktop)', nl: 'Inhoudsweergave (Tablet / Desktop)' },
+  'func.lateral':          { es: 'Lateral',                 en: 'Sidebar',  nl: 'Zijbalk' },
+  'func.lateral.help':     { es: 'En "Lateral", el detalle de la asignación se abre a la derecha, dejando la lista visible a la izquierda.', en: 'In "Sidebar", the assignment detail opens on the right, keeping the list visible on the left.', nl: 'Bij "Zijbalk" opent het toewijzingsdetail rechts, terwijl de lijst links zichtbaar blijft.' },
+  'func.escritorio':       { es: 'Escritorio',              en: 'Desktop',  nl: 'Desktop' },
+  'func.auto.help':        { es: 'En "Automático" (por defecto), la barra se encoge apenas haces scroll y solo recupera su tamaño al volver hasta arriba del todo.', en: 'In "Automatic" (default), the bar shrinks as soon as you scroll and only returns to full size when you reach the very top.', nl: 'Bij "Automatisch" (standaard) krimpt de balk zodra je scrolt en herstelt deze pas als je helemaal naar boven gaat.' },
+  'func.live':             { es: 'Función Live',            en: 'Live Feature', nl: 'Live-functie' },
+  'func.live.desc':        { es: 'Activo automáticamente. Detección de calles y avisos de No Pasar en tiempo real', en: 'Active automatically. Real-time street detection and Do-Not-Pass alerts', nl: 'Wordt automatisch geactiveerd. Realtime straatdetectie en Niet-Bezoeken-meldingen' },
+  'func.peak':             { es: 'Modo Peak',               en: 'Peak Mode', nl: 'Peak-modus' },
+  'func.peak.desc':        { es: 'Mantén presionado para ver previews rápidos (Notificaciones y Asignaciones)', en: 'Press and hold to see quick previews (Notifications and Assignments)', nl: 'Houd ingedrukt voor snelle previews (Meldingen en Toewijzingen)' },
   // ── Mi Perfil ──
   'profile.title':          { es: 'Mi Perfil',               en: 'My Profile' },
   'profile.grupo':          { es: 'Grupo de Servicio',       en: 'Service Group' },
@@ -7029,21 +7031,21 @@ const I18N = {
   'notif.group.grupos':     { es: 'Grupos de Servicio',      en: 'Service Groups' },
   'notif.group.sistema':    { es: 'Sistema',                 en: 'System' },
   // ── Casa en Casa ──
-  'casa.cargando':          { es: 'Cargando Asignaciones',   en: 'Loading Assignments' },
-  'casa.sinasignaciones':   { es: 'Sin asignaciones',        en: 'No assignments' },
-  'casa.sinasignaciones.desc': { es: 'Sin asignaciones por ahora. Cuando tengas una asignación de predicación, un turno, un cargo o una parte en el programa, aparecerá aquí.', en: 'No assignments right now. Once you have a preaching assignment, a shift, a role, or a program part, it will appear here.' },
-  'casa.sinpredicaciones':  { es: 'No hay predicaciones programadas', en: 'No preaching scheduled' },
-  'casa.hoy':               { es: 'Hoy',                     en: 'Today' },
-  'casa.manana':            { es: 'Mañana',                  en: 'Tomorrow' },
+  'casa.cargando':          { es: 'Cargando Asignaciones',   en: 'Loading Assignments', nl: 'Toewijzingen laden' },
+  'casa.sinasignaciones':   { es: 'Sin asignaciones',        en: 'No assignments', nl: 'Geen toewijzingen' },
+  'casa.sinasignaciones.desc': { es: 'Sin asignaciones por ahora. Cuando tengas una asignación de predicación, un turno, un cargo o una parte en el programa, aparecerá aquí.', en: 'No assignments right now. Once you have a preaching assignment, a shift, a role, or a program part, it will appear here.', nl: 'Op dit moment geen toewijzingen. Zodra je een predikingstoewijzing, dienst, taak of programmaonderdeel hebt, verschijnt dit hier.' },
+  'casa.sinpredicaciones':  { es: 'No hay predicaciones programadas', en: 'No preaching scheduled', nl: 'Geen prediking gepland' },
+  'casa.hoy':               { es: 'Hoy',                     en: 'Today', nl: 'Vandaag' },
+  'casa.manana':            { es: 'Mañana',                  en: 'Tomorrow', nl: 'Morgen' },
   // ── Territorios ──
-  'territorios.title':      { es: 'Territorios',             en: 'Territories' },
-  'territorios.mapabanner': { es: 'Mapa de la congregación', en: 'Fleming Map' },
+  'territorios.title':      { es: 'Territorios',             en: 'Territories', nl: 'Gebieden' },
+  'territorios.mapabanner': { es: 'Mapa de la congregación', en: 'Fleming Map', nl: 'Fleming-kaart' },
 };
-// Idiomas disponibles: Español e Inglés (Holandés sigue "Próximamente").
+// Idiomas disponibles: Español, Inglés y Nederlands (Beta).
 let currentLang = 'es';
 try {
   const _savedLang = localStorage.getItem('fleming_lang');
-  if (_savedLang === 'es' || _savedLang === 'en') currentLang = _savedLang;
+  if (_savedLang === 'es' || _savedLang === 'en' || _savedLang === 'nl') currentLang = _savedLang;
 } catch {}
 function t(key) {
   const entry = I18N[key];
@@ -7088,14 +7090,18 @@ const DAY_ES_LONG = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes',
 const MON_ES_LONG = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const DAY_EN_LONG = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MON_EN_LONG = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAY_NL_LONG = ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'];
+const MON_NL_LONG = ['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
 function fmtCasaLongDate(d) {
   if (currentLang === 'en') return `${DAY_EN_LONG[d.getDay()]}, ${MON_EN_LONG[d.getMonth()]} ${_ordinalEn(d.getDate())}`;
+  if (currentLang === 'nl') return `${DAY_NL_LONG[d.getDay()]} ${d.getDate()} ${MON_NL_LONG[d.getMonth()]}`;
   return `${DAY_ES_LONG[d.getDay()]} ${d.getDate()} de ${MON_ES_LONG[d.getMonth()]}`;
 }
 
-// ── Nombre de un territorio — respeta el idioma ("Territorio N" / "Territory N") ──
+// ── Nombre de un territorio — respeta el idioma ("Territorio N" / "Territory N" / "Gebied N") ──
 function terLabel(number) {
-  return (currentLang === 'en' ? 'Territory ' : 'Territorio ') + number;
+  const prefix = currentLang === 'en' ? 'Territory ' : currentLang === 'nl' ? 'Gebied ' : 'Territorio ';
+  return prefix + number;
 }
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
@@ -13393,11 +13399,13 @@ function updateExperimentosNavVisibility() {
   if (!unlocked) document.getElementById('page-pref-experimentos')?.classList.remove('open');
 }
 function setPrefLanguage(lang) {
-  // Holandés sigue pendiente.
-  if (lang !== 'es' && lang !== 'en') return;
+  if (lang !== 'es' && lang !== 'en' && lang !== 'nl') return;
   if (lang === currentLang) return;
   applyLanguage(lang);
-  showToast(lang === 'en' ? 'Language switched to English' : 'Idioma cambiado a Español', 'success');
+  const msg = lang === 'en' ? 'Language switched to English'
+    : lang === 'nl' ? 'Taal gewijzigd naar Nederlands'
+    : 'Idioma cambiado a Español';
+  showToast(msg, 'success');
 }
 function updatePrefThemeActive() {
   const theme = document.documentElement.getAttribute('data-theme') || 'auto';
