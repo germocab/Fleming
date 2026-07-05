@@ -5350,15 +5350,15 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       <div id="sub-content-territorios" class="sub-page" style="display:none">
         <div id="admin-shortcut-territorios" style="display:none"></div>
         <div class="ter-view-header">
-          <span class="ter-view-title">Territorios</span>
+          <span class="ter-view-title" data-i18n="territorios.title">Territorios</span>
         </div>
-        <!-- Banner: Ver mapa completo (card, visible cuando hay mapa cargado) -->
-        <div class="ter-map-banner" id="ter-map-banner" onclick="openFullMap()" role="button" aria-label="Ver mapa completo de la congregación">
+        <!-- Banner: Mapa de la congregación (card, visible cuando hay mapa cargado) -->
+        <div class="ter-map-banner" id="ter-map-banner" onclick="openFullMap()" role="button" aria-label="Mapa de la congregación" data-i18n-aria="territorios.mapabanner">
           <div class="ter-map-banner-thumb">
             <img id="ter-map-banner-img" src="" alt="Vista previa del mapa">
           </div>
           <div class="ter-map-banner-body">
-            <div class="ter-map-banner-label">Ver el mapa completo de la congregación</div>
+            <div class="ter-map-banner-label" data-i18n="territorios.mapabanner">Mapa de la congregación</div>
           </div>
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-right:1rem"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
@@ -6910,7 +6910,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.13.0-beta';
+const APP_VERSION = '1.13.5-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -7035,6 +7035,9 @@ const I18N = {
   'casa.sinpredicaciones':  { es: 'No hay predicaciones programadas', en: 'No preaching scheduled' },
   'casa.hoy':               { es: 'Hoy',                     en: 'Today' },
   'casa.manana':            { es: 'Mañana',                  en: 'Tomorrow' },
+  // ── Territorios ──
+  'territorios.title':      { es: 'Territorios',             en: 'Territories' },
+  'territorios.mapabanner': { es: 'Mapa de la congregación', en: 'Fleming Map' },
 };
 // Idiomas disponibles: Español e Inglés (Holandés sigue "Próximamente").
 let currentLang = 'es';
@@ -7059,6 +7062,10 @@ function applyLanguage(lang) {
     const k = el.getAttribute('data-i18n-ph');
     el.placeholder = t(k);
   });
+  document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+    const k = el.getAttribute('data-i18n-aria');
+    el.setAttribute('aria-label', t(k));
+  });
   // Refrescar vistas dinámicas ya montadas para que también respeten el idioma.
   try { renderSubTabs(currentMainTab); } catch {}
   try { if (currentSubTab === 'territorios') renderTerritoryView(); } catch {}
@@ -7070,6 +7077,25 @@ function updateLangPrefUI() {
   document.querySelectorAll('.pref-lang-row[data-lang]').forEach(row => {
     row.classList.toggle('active', row.getAttribute('data-lang') === currentLang);
   });
+}
+
+// ── Fecha larga de "Casa en casa" (tarjetas y detalle) — respeta el idioma ──
+function _ordinalEn(n) {
+  const s = ['th','st','nd','rd'], v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+const DAY_ES_LONG = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const MON_ES_LONG = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const DAY_EN_LONG = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MON_EN_LONG = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+function fmtCasaLongDate(d) {
+  if (currentLang === 'en') return `${DAY_EN_LONG[d.getDay()]}, ${MON_EN_LONG[d.getMonth()]} ${_ordinalEn(d.getDate())}`;
+  return `${DAY_ES_LONG[d.getDay()]} ${d.getDate()} de ${MON_ES_LONG[d.getMonth()]}`;
+}
+
+// ── Nombre de un territorio — respeta el idioma ("Territorio N" / "Territory N") ──
+function terLabel(number) {
+  return (currentLang === 'en' ? 'Territory ' : 'Territorio ') + number;
 }
 
 const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
@@ -9363,7 +9389,7 @@ function renderSchedule() {
     const isTomorrow = !isToday && date === tomorrowStr;
     const isSabado = d.getDay() === 6;
     const dayName  = DAY[d.getDay()];
-    const dateLabel = `${dayName} ${d.getDate()} de ${MON[d.getMonth()]}`;
+    const dateLabel = fmtCasaLongDate(d);
 
     if (isToday) {
       html += `<div class="date-section">
@@ -9550,8 +9576,8 @@ async function viewAssignment(id) {
   const DAY = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
   const MON = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 
-  document.getElementById('detail-date-label').textContent = `${DAY[d.getDay()]} ${d.getDate()} de ${MON[d.getMonth()]}`;
-  document.getElementById('detail-mobile-date-label').textContent = `${DAY[d.getDay()]} ${d.getDate()} de ${MON[d.getMonth()]}`;
+  document.getElementById('detail-date-label').textContent = fmtCasaLongDate(d);
+  document.getElementById('detail-mobile-date-label').textContent = fmtCasaLongDate(d);
   document.getElementById('detail-time').textContent = (a.time ? a.time.substring(0,5) : '--:--') + 'hrs';
     const _casaTipo3 = a.casa_id ? (casas.find(c=>c.id===a.casa_id)?.tipo || 'casa') : 'casa';
   const _houseLabel3 = a.house ? (_casaTipo3 === 'departamento' ? 'Depto de ' : 'Casa de ') + a.house : '';
@@ -9633,8 +9659,8 @@ async function viewAssignment(id) {
     const badge2 = document.getElementById('detail-ter-tab-badge-2');
     badge1.textContent = ter.number;  badge1.style.background = getTerColor(ter.number);
     badge2.textContent = ter2.number; badge2.style.background = getTerColor(ter2.number);
-    document.getElementById('detail-ter-tab-label-1').textContent = `Territorio ${ter.number}`;
-    document.getElementById('detail-ter-tab-label-2').textContent = `Territorio ${ter2.number}`;
+    document.getElementById('detail-ter-tab-label-1').textContent = terLabel(ter.number);
+    document.getElementById('detail-ter-tab-label-2').textContent = terLabel(ter2.number);
     tabsBar.style.display = '';
     // Store both territories on panel for tab switching
     panel._ter1 = ter; panel._ter2 = ter2;
@@ -9686,7 +9712,7 @@ async function viewAssignment(id) {
       if (terMapSrc) {
         mapImg.src = terMapSrc;
         mapWrap.style.display = '';
-        mapWrap.onclick = () => openLightbox(terMapSrc, ter ? `Territorio ${ter.number}` : '');
+        mapWrap.onclick = () => openLightbox(terMapSrc, ter ? terLabel(ter.number) : '');
       } else {
         mapWrap.style.display = 'none';
         mapWrap.onclick = null;
@@ -9717,7 +9743,7 @@ function _renderDetailTerContent(ter) {
   if (terMapSrc) {
     mapImg.src = terMapSrc;
     mapWrap.style.display = '';
-    mapWrap.onclick = () => openLightbox(terMapSrc, ter ? `Territorio ${ter.number}` : '');
+    mapWrap.onclick = () => openLightbox(terMapSrc, ter ? terLabel(ter.number) : '');
   } else {
     mapWrap.style.display = 'none';
     mapWrap.onclick = null;
@@ -9743,7 +9769,7 @@ function _renderDetailNoPasar(ter) {
   } else { noPasarList.innerHTML = ''; }
   noPasarSec.style.display = ter ? '' : 'none';
   noPasarSec.dataset.territoryId   = ter ? ter.id     : '';
-  noPasarSec.dataset.territoryName = ter ? `Territorio ${ter.number}` : '';
+  noPasarSec.dataset.territoryName = ter ? terLabel(ter.number) : '';
   // Live Mode: mostrar/ocultar botón según si hay entradas
   setTimeout(_liveUpdateBtnVisibility, 0);
 }
@@ -13166,7 +13192,7 @@ async function renderTerritoryView() {
     return `<div class="ter-grid-card" onclick="viewTerritory('${t.id}')">
       <div class="ter-grid-map">${mapHtml}</div>
       <div class="ter-grid-footer">
-        <div class="ter-grid-num">Territorio ${t.number}</div>
+        <div class="ter-grid-num">${terLabel(t.number)}</div>
       </div>
     </div>`;
   }).join('') + `</div>`;
@@ -13182,7 +13208,7 @@ async function viewTerritory(id) {
   // Header: título estándar de la plataforma (back + "Territorio X" centrado),
   // igual que en Notificaciones y Configuración.
   document.getElementById('detail-panel').classList.add('territory-mode');
-  document.getElementById('detail-territory-title').textContent = `Territorio ${t.number}`;
+  document.getElementById('detail-territory-title').textContent = terLabel(t.number);
   document.getElementById('detail-date-label').textContent = '';
   document.getElementById('detail-mobile-date-label').textContent = '';
   document.getElementById('detail-time-chip').style.display = 'none';
@@ -13201,6 +13227,13 @@ async function viewTerritory(id) {
   document.getElementById('detail-actions').style.display = 'none';
   // Hide territory tabs — single territory view
   document.getElementById('detail-ter-tabs').style.display = 'none';
+  // Botón "Administrar": exclusivo de la pantalla de detalle de una asignación
+  // de casa en casa (viewAssignment). En la vista de un Territorio individual
+  // nunca se muestra, incluso si quedó visible de una asignación vista antes.
+  ['detail-admin-fab-ter', 'detail-admin-fab-mobile', 'detail-admin-fab-desktop'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) { btn.style.display = 'none'; btn.onclick = null; }
+  });
   // "Manzanas a Abarcar" es exclusivo de las asignaciones de Casa en Casa
   // (viewAssignment); en la vista de un Territorio individual nunca se muestra,
   // incluso si quedó visible de una asignación vista previamente.
@@ -13214,7 +13247,7 @@ async function viewTerritory(id) {
   if (terMapSrc) {
     mapImg.src = terMapSrc;
     mapWrap.style.display = '';
-    mapWrap.onclick = () => openLightbox(terMapSrc, `Territorio ${t.number}`);
+    mapWrap.onclick = () => openLightbox(terMapSrc, terLabel(t.number));
   } else {
     mapWrap.style.display = 'none';
     mapWrap.onclick = null;
@@ -13237,7 +13270,7 @@ async function viewTerritory(id) {
     noPasarSec.style.display = 'none';
   }
   noPasarSec.dataset.territoryId = t.id;
-  noPasarSec.dataset.territoryName = `Territorio ${t.number}`;
+  noPasarSec.dataset.territoryName = terLabel(t.number);
 
   // Live Mode: no disponible en la sub-sección Territorios, solo en asignaciones
   // de predicación de casa en casa. Se detiene si estaba activo y se oculta el botón.
@@ -14162,30 +14195,30 @@ const TUTORIAL_SEEN_KEY = 'fleming_tutorial_seen';
 const TUTORIAL_STEPS = [
   {
     selector: '#main-segment',
-    title: 'Secciones principales',
-    text: 'Con esta barra cambias entre las dos grandes áreas de la plataforma: Predicación y Reuniones.'
+    title: { es: 'Secciones principales', en: 'Main sections' },
+    text: { es: 'Con esta barra cambias entre las dos grandes áreas de la plataforma: Predicación y Reuniones.', en: 'Use this bar to switch between the platform\'s two main areas: Preaching and Meetings.' }
   },
   {
     selector: '#sub-tabs-wrap',
-    title: 'Sub-secciones',
-    text: 'Aquí encuentras las categorías dentro de cada sección — por ejemplo Casa en casa, Territorios, Carritos o Grupos en Predicación.',
+    title: { es: 'Sub-secciones', en: 'Sub-sections' },
+    text: { es: 'Aquí encuentras las categorías dentro de cada sección — por ejemplo Casa en casa, Territorios, Carritos o Grupos en Predicación.', en: 'Here you\'ll find the categories within each section — for example Door to door, Territories, Carts or Groups in Preaching.' },
     waitFor: true
   },
   {
     selector: '.assignment-card, .assignment-card-today',
-    title: 'Tarjetas de asignación',
-    text: 'Cada tarjeta es una asignación de casa en casa: dirección, horario, conductor y territorio.',
+    title: { es: 'Tarjetas de asignación', en: 'Assignment cards' },
+    text: { es: 'Cada tarjeta es una asignación de casa en casa: dirección, horario, conductor y territorio.', en: 'Each card is a door-to-door assignment: address, schedule, driver and territory.' },
     waitFor: true
   },
   {
     selector: '.options-wrap .nav-icon-btn[title="Notificaciones"]',
-    title: 'Panel de Notificaciones',
-    text: 'Desde la campanita revisas los avisos de nuevas asignaciones, cambios de última hora y recordatorios importantes.'
+    title: { es: 'Panel de Notificaciones', en: 'Notifications panel' },
+    text: { es: 'Desde la campanita revisas los avisos de nuevas asignaciones, cambios de última hora y recordatorios importantes.', en: 'From the bell icon you can check alerts for new assignments, last-minute changes and important reminders.' }
   },
   {
     selector: '.options-wrap .nav-icon-btn[title="Opciones"]',
-    title: 'Menú de Opciones',
-    text: 'Aquí accedes a tu perfil, la apariencia de la plataforma y la Configuración'
+    title: { es: 'Menú de Opciones', en: 'Options menu' },
+    text: { es: 'Aquí accedes a tu perfil, la apariencia de la plataforma y la Configuración', en: 'Here you can access your profile, the platform\'s appearance and Settings' }
   },
 ];
 
@@ -14198,22 +14231,22 @@ const TUTORIAL_STEPS = [
 const TUTORIAL_STEPS_H2H = [
   {
     selector: '#detail-address, #detail-house-label, #detail-conductor, #detail-time-chip, #detail-ter-badge',
-    title: 'Información de la asignación',
-    text: 'Arriba encuentras los datos principales: la dirección, el encargado, el horario y, si corresponde, el territorio asignado.'
+    title: { es: 'Información de la asignación', en: 'Assignment information' },
+    text: { es: 'Arriba encuentras los datos principales: la dirección, el encargado, el horario y, si corresponde, el territorio asignado.', en: 'At the top you\'ll find the main details: the address, the person in charge, the schedule and, if applicable, the assigned territory.' }
   },
   {
-    title: 'Live',
-    text: 'Live detecta automáticamente la calle por la que vas y te muestra al instante si hay Direcciones No Pasar cerca. Se activa solo mientras estás dentro de una asignación con territorio. Puedes desactivarlo desde Configuración, o pausarlo momentáneamente con el botón de pausa mientras estás en la sesión.'
+    title: { es: 'Live', en: 'Live' },
+    text: { es: 'Live detecta automáticamente la calle por la que vas y te muestra al instante si hay Direcciones No Pasar cerca. Se activa solo mientras estás dentro de una asignación con territorio. Puedes desactivarlo desde Configuración, o pausarlo momentáneamente con el botón de pausa mientras estás en la sesión.', en: 'Live automatically detects the street you\'re on and instantly shows you if there are any Do-Not-Pass addresses nearby. It only activates while you\'re inside an assignment with a territory. You can turn it off from Settings, or pause it momentarily with the pause button during your session.' }
   },
   {
     selector: '#detail-map-wrap',
-    title: 'Mapa de Territorio',
-    text: 'Aquí ves el mapa del territorio asignado. Puedes tocarlo para verlo en pantalla completa.'
+    title: { es: 'Mapa de Territorio', en: 'Territory Map' },
+    text: { es: 'Aquí ves el mapa del territorio asignado. Puedes tocarlo para verlo en pantalla completa.', en: 'Here you can see the map of the assigned territory. Tap it to view it in full screen.' }
   },
   {
     selector: '#detail-no-pasar-section',
-    title: 'Direcciones No Pasar',
-    text: 'Esta es la lista de direcciones "No Pasar" del territorio. Toca cualquiera para ver sus opciones: Sugerir Quitado, Sugerir Fecha, Sugerir Cambio (territorio o nombre equivocado) y Sugerir Descripción.'
+    title: { es: 'Direcciones No Pasar', en: 'Do-Not-Pass Addresses' },
+    text: { es: 'Esta es la lista de direcciones "No Pasar" del territorio. Toca cualquiera para ver sus opciones: Sugerir Quitado, Sugerir Fecha, Sugerir Cambio (territorio o nombre equivocado) y Sugerir Descripción.', en: 'This is the territory\'s list of "Do-Not-Pass" addresses. Tap any of them to see its options: Suggest Removal, Suggest Date, Suggest Change (wrong territory or name) and Suggest Description.' }
   },
 ];
 
@@ -14231,7 +14264,7 @@ function markTutorialSeen() {
 
 function startTutorial() {
   if (typeof isSimplifiedModeActive === 'function' && isSimplifiedModeActive()) {
-    showToast('El tutorial no está disponible en la Versión Simplificada.', 'error');
+    showToast(currentLang === 'en' ? 'The tutorial is not available in Simplified Mode.' : 'El tutorial no está disponible en la Versión Simplificada.', 'error');
     return;
   }
   const overlay = document.getElementById('tutorial-overlay');
@@ -14276,12 +14309,12 @@ function _findH2HTutorialAssignment() {
 
 async function startH2HTutorial() {
   if (typeof isSimplifiedModeActive === 'function' && isSimplifiedModeActive()) {
-    showToast('El tutorial no está disponible en la Versión Simplificada.', 'error');
+    showToast(currentLang === 'en' ? 'The tutorial is not available in Simplified Mode.' : 'El tutorial no está disponible en la Versión Simplificada.', 'error');
     return;
   }
   const target = _findH2HTutorialAssignment();
   if (!target) {
-    showToast('No hay asignaciones disponibles para mostrar el tutorial.', 'error');
+    showToast(currentLang === 'en' ? 'No assignments are available to show the tutorial.' : 'No hay asignaciones disponibles para mostrar el tutorial.', 'error');
     return;
   }
   closePreferencias();
@@ -14317,7 +14350,7 @@ function tutorialBackgroundClick(e) {
   // Solo reacciona si el clic fue directamente sobre el fondo del overlay
   // (no sobre la tarjeta del tutorial ni sus botones).
   if (e.target !== e.currentTarget) return;
-  if (confirm('¿Quieres saltar el tutorial? Podrás verlo más tarde en Configuración.')) {
+  if (confirm(currentLang === 'en' ? 'Do you want to skip the tutorial? You can view it later in Settings.' : '¿Quieres saltar el tutorial? Podrás verlo más tarde en Configuración.')) {
     skipTutorial();
   }
 }
@@ -14402,11 +14435,13 @@ async function renderTutorialStep(i, isReflow) {
     card.style.left = (window.innerWidth / 2 - cardWidth / 2) + 'px';
   }
 
-  document.getElementById('tutorial-card-title').textContent = step.title;
-  document.getElementById('tutorial-card-text').textContent = step.text;
+  document.getElementById('tutorial-card-title').textContent = step.title[currentLang] || step.title.es;
+  document.getElementById('tutorial-card-text').textContent = step.text[currentLang] || step.text.es;
   document.getElementById('tutorial-step-counter').textContent = `${i + 1} / ${_activeTutorialSteps.length}`;
   document.getElementById('tutorial-prev-btn').style.visibility = i === 0 ? 'hidden' : 'visible';
-  document.getElementById('tutorial-next-btn').textContent = i === _activeTutorialSteps.length - 1 ? 'Entendido' : 'Siguiente';
+  document.getElementById('tutorial-next-btn').textContent = i === _activeTutorialSteps.length - 1
+    ? (currentLang === 'en' ? 'Got it' : 'Entendido')
+    : (currentLang === 'en' ? 'Next' : 'Siguiente');
 
   const dotsWrap = document.getElementById('tutorial-dots');
   dotsWrap.innerHTML = _activeTutorialSteps.map((_, idx) =>
