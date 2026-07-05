@@ -1482,6 +1482,30 @@
   .live-street-label { font-size: 0.68rem; font-weight: 700; color: var(--green); letter-spacing: 0.06em; text-transform: uppercase; }
   .live-street-name  { font-size: 0.88rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .live-street-sub   { font-size: 0.7rem; color: var(--text3); margin-top: 1px; }
+  .live-pause-btn {
+    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    border: none; cursor: pointer; padding: 0;
+    background: rgba(52,199,89,0.18); color: var(--green);
+    transition: background 0.15s, color 0.15s, opacity 0.15s;
+  }
+  .live-pause-btn:hover { opacity: 0.85; }
+  .live-pause-btn:active { transform: scale(0.94); }
+  .live-pause-btn svg { width: 13px; height: 13px; fill: currentColor; stroke: none; }
+  /* ── Live: banner en estado pausado ──────────────────────────────────────── */
+  .live-street-banner.paused {
+    padding: 0.45rem 0.75rem;
+    background: var(--surface2);
+    border-color: var(--border);
+  }
+  .live-street-banner.paused .live-street-icon {
+    width: 24px; height: 24px;
+    background: var(--surface3); color: var(--text3);
+  }
+  .live-street-banner.paused .live-street-icon svg { width: 12px; height: 12px; }
+  .live-street-banner.paused .live-street-label { color: var(--text3); }
+  .live-street-banner.paused .live-street-sub { display: none; }
+  .live-street-banner.paused .live-pause-btn { background: var(--accent-light); color: var(--accent); }
 
   .no-pasar-item.live-match {
     background: rgba(255,59,48,0.08) !important;
@@ -5887,6 +5911,10 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         <div class="live-street-name" id="live-street-name">—</div>
         <div class="live-street-sub" id="live-street-sub">Mostrando No Pasar de esta calle</div>
       </div>
+      <button class="live-pause-btn" id="live-pause-btn" onclick="toggleLivePause()" title="Pausar Live">
+        <svg class="live-pause-icon" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+        <svg class="live-play-icon" viewBox="0 0 24 24" style="display:none"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+      </button>
     </div>
 
     <div class="no-pasar-section" id="detail-no-pasar-section" style="display:none">
@@ -6845,7 +6873,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.12.7-beta';
+const APP_VERSION = '1.12.8-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -9757,6 +9785,7 @@ function handleOverlayClick(e) {
 // ── Live Mode ──────────────────────────────────────────────────────────────────
 let _liveWatchId     = null;
 let _liveActive      = false;
+let _livePaused       = false;
 let _liveLastRoad    = null;
 let _liveGeoThrottle = null;
 
@@ -9828,7 +9857,7 @@ async function _liveReverseGeocode(lat, lng) {
   } catch { return null; }
 }
 async function _liveOnPosition(pos) {
-  if (!_liveActive) return;
+  if (!_liveActive || _livePaused) return;
   const { latitude, longitude } = pos.coords;
   const banner   = document.getElementById('live-street-banner');
   const locating = document.getElementById('live-locating-wrap');
@@ -9870,13 +9899,17 @@ function toggleLiveMode() {
 function startLiveMode() {
   if (!navigator.geolocation) { showToast('Este dispositivo no soporta geolocalizaci\u00f3n', 'error'); return; }
   _liveActive   = true;
+  _livePaused   = false;
   _liveLastRoad = null;
   const btn      = document.getElementById('live-btn');
   const label    = document.getElementById('live-btn-label');
   const locating = document.getElementById('live-locating-wrap');
+  const banner   = document.getElementById('live-street-banner');
   btn.classList.add('live-active');
   if (label) label.textContent = 'Live activo';
+  if (banner) banner.classList.remove('paused');
   locating.classList.add('visible');
+  _updateLivePauseBtnUI();
   _liveUpdateNavIndicator(true);
   _liveUpdateNotifPanelBanner();
   _liveRequestNotifPermission();
@@ -9884,6 +9917,7 @@ function startLiveMode() {
 }
 function stopLiveMode() {
   _liveActive = false;
+  _livePaused = false;
   if (_liveWatchId !== null) { navigator.geolocation.clearWatch(_liveWatchId); _liveWatchId = null; }
   if (_liveGeoThrottle) { clearTimeout(_liveGeoThrottle); _liveGeoThrottle = null; }
   _liveLastRoad = null;
@@ -9894,10 +9928,47 @@ function stopLiveMode() {
   btn.classList.remove('live-active');
   if (label) label.textContent = 'Live';
   banner.classList.remove('visible');
+  banner.classList.remove('paused');
   locating.classList.remove('visible');
+  _updateLivePauseBtnUI();
   _liveHighlight(null);
   _liveUpdateNavIndicator(false);
   _liveUpdateNotifPanelBanner();
+}
+
+// ── Live: pausar/reanudar momentáneamente (sin desactivar la función) ───────
+function toggleLivePause() {
+  if (!_liveActive) return;
+  if (_livePaused) resumeLiveMode(); else pauseLiveMode();
+}
+function pauseLiveMode() {
+  if (!_liveActive || _livePaused) return;
+  _livePaused = true;
+  if (_liveWatchId !== null) { navigator.geolocation.clearWatch(_liveWatchId); _liveWatchId = null; }
+  if (_liveGeoThrottle) { clearTimeout(_liveGeoThrottle); _liveGeoThrottle = null; }
+  document.getElementById('live-locating-wrap')?.classList.remove('visible');
+  document.getElementById('live-street-banner')?.classList.add('paused');
+  _updateLivePauseBtnUI();
+  // Los No Pasar vuelven a verse "normales" mientras Live está pausado
+  _liveHighlight(null);
+}
+function resumeLiveMode() {
+  if (!_liveActive || !_livePaused) return;
+  _livePaused = false;
+  _liveLastRoad = null; // fuerza a re-detectar la calle al reanudar
+  document.getElementById('live-street-banner')?.classList.remove('paused');
+  document.getElementById('live-locating-wrap')?.classList.add('visible');
+  _updateLivePauseBtnUI();
+  _liveWatchId = navigator.geolocation.watchPosition(_liveOnPosition, _liveOnError, { enableHighAccuracy: true, maximumAge: 5000, timeout: 12000 });
+}
+function _updateLivePauseBtnUI() {
+  const btn = document.getElementById('live-pause-btn');
+  if (!btn) return;
+  const pauseIcon = btn.querySelector('.live-pause-icon');
+  const playIcon  = btn.querySelector('.live-play-icon');
+  if (pauseIcon) pauseIcon.style.display = _livePaused ? 'none' : '';
+  if (playIcon)  playIcon.style.display  = _livePaused ? '' : 'none';
+  btn.title = _livePaused ? 'Reanudar Live' : 'Pausar Live';
 }
 // Live ahora es una función automática: no requiere presionar ningún botón.
 // Esta función se sigue llamando desde los mismos puntos que antes (al
