@@ -1249,6 +1249,12 @@
   }
   .np-action-addr { font-size: 1rem; font-weight: 700; color: var(--text); }
   .np-action-sub  { font-size: 0.78rem; color: var(--text3); margin-top: 2px; }
+  .np-action-desc-view {
+    margin: 0.7rem 1.25rem 0; padding: 0.65rem 0.8rem;
+    background: rgba(168,85,247,0.08); border: 1px solid rgba(168,85,247,0.22);
+    border-radius: 10px; font-size: 0.84rem; color: var(--text2); line-height: 1.4;
+    white-space: pre-wrap; word-break: break-word;
+  }
   .np-action-btn {
     display: flex; align-items: center; gap: 14px;
     width: 100%; padding: 1rem 1.25rem;
@@ -6839,7 +6845,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.12.5-beta';
+const APP_VERSION = '1.12.7-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -9656,7 +9662,7 @@ function _renderDetailNoPasar(ter) {
     const entries = parseNoPasar(ter.no_pasar);
     if (entries.length) {
       noPasarList.innerHTML = entries.map(e => `
-        <div class="no-pasar-item" onclick="openNpActionSheet('${e.addr.replace(/'/g,"\\'")}','${ter ? ter.number : ''}',${e.date ? 'true' : 'false'},${e.desc ? 'true' : 'false'})">
+        <div class="no-pasar-item" onclick="openNpActionSheet('${e.addr.replace(/'/g,"\\'")}','${ter ? ter.number : ''}',${e.date ? 'true' : 'false'},'${(e.desc||'').replace(/'/g,"\\'").replace(/\n/g,' ')}')">
           <div class="no-pasar-item-top">
             <span class="no-pasar-item-addr">${e.addr}</span>
             ${e.date ? `<span class="no-pasar-item-date">${fmtNpDate(e.date)}</span>` : ''}
@@ -13106,7 +13112,7 @@ async function viewTerritory(id) {
   const noPasarList = document.getElementById('detail-no-pasar-list');
   if (noPasar.length) {
     noPasarList.innerHTML = noPasar.map(e => `
-      <div class="no-pasar-item" onclick="openNpActionSheet('${e.addr.replace(/'/g,"\\'")}','${t.number}',${e.date ? 'true' : 'false'},${e.desc ? 'true' : 'false'})">
+      <div class="no-pasar-item" onclick="openNpActionSheet('${e.addr.replace(/'/g,"\\'")}','${t.number}',${e.date ? 'true' : 'false'},'${(e.desc||'').replace(/'/g,"\\'").replace(/\n/g,' ')}')">
         <div class="no-pasar-item-top">
           <span class="no-pasar-item-addr">${e.addr}</span>
           ${e.date ? `<span class="no-pasar-item-date">${fmtNpDate(e.date)}</span>` : ''}
@@ -15903,11 +15909,17 @@ async function deleteAllNotifications() {
 let _npCurrentAddr = '';
 let _npCurrentTerNum = '';
 
-function openNpActionSheet(addr, terNum, hasDate, hasDesc) {
+function openNpActionSheet(addr, terNum, hasDate, desc) {
   _npCurrentAddr = addr;
   _npCurrentTerNum = terNum;
   document.getElementById('np-action-addr').textContent = addr;
   document.getElementById('np-action-sub').textContent = terNum ? `Territorio ${terNum}` : 'Dirección No Pasar';
+  // Mostrar la descripción/motivo actual de No Pasar (visible para todos los usuarios)
+  const descView = document.getElementById('np-action-desc-view');
+  if (descView) {
+    if (desc) { descView.textContent = desc; descView.style.display = ''; }
+    else { descView.textContent = ''; descView.style.display = 'none'; }
+  }
   // Reset sugerir quitado form
   const form = document.getElementById('np-sugerir-form');
   if (form) form.classList.remove('open');
@@ -15931,6 +15943,7 @@ function openNpActionSheet(addr, terNum, hasDate, hasDesc) {
   const fi = document.getElementById('np-fecha-val');
   if (fi) fi.value = '';
   // Reset/mostrar sugerir descripción — solo si la dirección no tiene descripción aún
+  const hasDesc = !!desc;
   const descBtn = document.getElementById('np-action-btn-descripcion');
   const descDivider = document.getElementById('np-descripcion-divider');
   if (descBtn) descBtn.style.display = hasDesc ? 'none' : '';
@@ -17454,6 +17467,8 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
       <div class="np-action-addr" id="np-action-addr">—</div>
       <div class="np-action-sub" id="np-action-sub">Dirección No Pasar</div>
     </div>
+    <!-- Descripción / motivo actual, visible para todos los usuarios -->
+    <div class="np-action-desc-view" id="np-action-desc-view" style="display:none"></div>
     <!-- Sugerir Quitado -->
     <button class="np-action-btn np-action-btn-sugerir" onclick="toggleNpSugerirForm()">
       <span class="np-action-icon">
