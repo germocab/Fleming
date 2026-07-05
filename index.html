@@ -6302,26 +6302,15 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 
     <!-- Ayuda -->
     <div class="profile-section">
-      <div class="profile-section-title" data-i18n="settings.ayuda">Ayuda</div>
-      <div class="profile-row" id="pref-tutorial-row" style="cursor:pointer" onclick="closePreferencias();startTutorial()">
+      <div class="pref-nav-row" id="pref-nav-row-ayuda" onclick="openPrefScreen('ayuda')">
         <div class="profile-row-icon" style="background:var(--ter-2-bg);color:var(--ter-2)">
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="settings.tutorial">Ver tutorial</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.tutorial.desc">Repasa cómo funcionan las secciones y funciones principales</div>
+          <div class="profile-row-label" data-i18n="settings.ayuda">Ayuda</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.ayuda.desc">Tutoriales y reporte de problemas</div>
         </div>
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>
-      <div class="profile-row" style="cursor:pointer" onclick="openReportIssueModal()">
-        <div class="profile-row-icon" style="background:var(--ter-5-bg);color:var(--ter-5)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="settings.reportar">Reportar un problema</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.reportar.desc">Esta plataforma está en fase Beta — cuéntanos si algo falla</div>
-        </div>
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+        <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
     </div>
 
@@ -6667,6 +6656,54 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
   </div>
 </div>
 
+<!-- ── Sub-pantalla: Ayuda ── -->
+<div id="page-pref-ayuda" class="pref-subpage">
+  <nav class="subpage-topbar">
+    <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span class="pill-header-title" data-i18n="settings.ayuda">Ayuda</span>
+  </nav>
+  <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 0 2.5rem">
+    <div class="profile-section">
+      <div class="profile-section-title" data-i18n="settings.tutoriales">Tutoriales</div>
+      <div class="profile-row" id="pref-tutorial-row" style="cursor:pointer" onclick="closePreferencias();startTutorial()">
+        <div class="profile-row-icon" style="background:var(--ter-2-bg);color:var(--ter-2)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="settings.tutorial">Ver tutorial</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.tutorial.desc">Repasa cómo funcionan las secciones y funciones principales</div>
+        </div>
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="profile-row" id="pref-tutorial-h2h-row" style="cursor:pointer" onclick="startH2HTutorial()">
+        <div class="profile-row-icon" style="background:var(--ter-1-bg);color:var(--ter-1)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="settings.tutorial.h2h">Ver tutorial de Asignaciones</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.tutorial.h2h.desc">Repasa la pantalla de detalle de una asignación de casa en casa</div>
+        </div>
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+    <div class="profile-section">
+      <div class="profile-section-title" data-i18n="settings.soporte">Soporte</div>
+      <div class="profile-row" style="cursor:pointer" onclick="openReportIssueModal()">
+        <div class="profile-row-icon" style="background:var(--ter-5-bg);color:var(--ter-5)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="settings.reportar">Reportar un problema</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.reportar.desc">Esta plataforma está en fase Beta — cuéntanos si algo falla</div>
+        </div>
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Modal: Reportar un problema -->
 <div class="modal-overlay" id="report-issue-modal">
   <div class="modal">
@@ -6873,7 +6910,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.12.8-beta';
+const APP_VERSION = '1.13.0-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -6947,8 +6984,13 @@ const I18N = {
   'settings.experimentos':      { es: 'Experimentos',             en: 'Experiments' },
   'settings.experimentos.desc': { es: 'Color de acento, animaciones y blur', en: 'Accent color, animations and blur' },
   'settings.ayuda':             { es: 'Ayuda',                    en: 'Help' },
+  'settings.ayuda.desc':        { es: 'Tutoriales y reporte de problemas', en: 'Tutorials and issue reporting' },
+  'settings.tutoriales':        { es: 'Tutoriales',               en: 'Tutorials' },
+  'settings.soporte':           { es: 'Soporte',                  en: 'Support' },
   'settings.tutorial':          { es: 'Ver tutorial',             en: 'View tutorial' },
   'settings.tutorial.desc':     { es: 'Repasa cómo funcionan las secciones y funciones principales', en: 'Review how the main sections and features work' },
+  'settings.tutorial.h2h':      { es: 'Ver tutorial de Asignaciones', en: 'View Assignments tutorial' },
+  'settings.tutorial.h2h.desc': { es: 'Repasa la pantalla de detalle de una asignación de casa en casa', en: 'Review the detail screen of a door-to-door assignment' },
   'settings.reportar':          { es: 'Reportar un problema',     en: 'Report a problem' },
   'settings.reportar.desc':     { es: 'Esta plataforma está en fase Beta — cuéntanos si algo falla', en: 'This platform is in Beta — let us know if something breaks' },
   'settings.acercade':          { es: 'Acerca de',                en: 'About' },
@@ -13299,7 +13341,7 @@ function closePreferencias() {
   document.body.style.overflow = '';
 }
 // ── Navegación entre las sub-pantallas de Configuración ──────────────────────
-const PREF_SCREENS = ['preferencias', 'funciones', 'notificaciones', 'experimentos'];
+const PREF_SCREENS = ['preferencias', 'funciones', 'notificaciones', 'experimentos', 'ayuda'];
 function openPrefScreen(name) {
   if (!PREF_SCREENS.includes(name)) return;
   if (name === 'experimentos' && localStorage.getItem('fleming_egg_unlocked') !== '1') return;
@@ -14146,8 +14188,43 @@ const TUTORIAL_STEPS = [
     text: 'Aquí accedes a tu perfil, la apariencia de la plataforma y la Configuración'
   },
 ];
+
+// ── Tutorial de Asignaciones de casa en casa ──────────────────────────────
+// Se abre desde Configuración > Ayuda. A diferencia del tutorial de Inicio,
+// este explica la pantalla de detalle de una asignación: la información de
+// encabezado (encargado, territorio, hora), Live, el Mapa de Territorio y
+// las Direcciones No Pasar (con sus acciones de sugerencia). Al iniciarlo,
+// se redirige primero a la asignación más reciente disponible.
+const TUTORIAL_STEPS_H2H = [
+  {
+    selector: '#detail-address, #detail-house-label, #detail-conductor, #detail-time-chip, #detail-ter-badge',
+    title: 'Información de la asignación',
+    text: 'Arriba encuentras los datos principales: la dirección, el encargado, el horario y, si corresponde, el territorio asignado.'
+  },
+  {
+    title: 'Live',
+    text: 'Live detecta automáticamente la calle por la que vas y te muestra al instante si hay Direcciones No Pasar cerca. Se activa solo mientras estás dentro de una asignación con territorio. Puedes desactivarlo desde Configuración, o pausarlo momentáneamente con el botón de pausa mientras estás en la sesión.'
+  },
+  {
+    selector: '#detail-map-wrap',
+    title: 'Mapa de Territorio',
+    text: 'Aquí ves el mapa del territorio asignado. Tócalo para verlo en pantalla completa.'
+  },
+  {
+    selector: '#detail-no-pasar-section',
+    title: 'Direcciones No Pasar',
+    text: 'Esta es la lista de direcciones "No Pasar" del territorio. Toca cualquiera para ver sus opciones: Sugerir Quitado (ya no debería estar en la lista), Sugerir Fecha, Sugerir Cambio (territorio o nombre equivocado) y Sugerir Descripción.'
+  },
+  {
+    selector: '#suggest-np-btn',
+    title: 'Sugerir Nuevo No Pasar',
+    text: 'Si conoces una dirección que debería marcarse como No Pasar y no está en la lista, puedes sugerirla desde aquí.'
+  },
+];
+
 let _tutorialIndex = 0;
 let _tutorialResizeHandler = null;
+let _activeTutorialSteps = TUTORIAL_STEPS;
 
 function shouldAutoShowTutorial() {
   try { return !(typeof isSimplifiedModeActive === 'function' && isSimplifiedModeActive()) && !localStorage.getItem(TUTORIAL_SEEN_KEY); } catch { return false; }
@@ -14164,6 +14241,7 @@ function startTutorial() {
   }
   const overlay = document.getElementById('tutorial-overlay');
   if (!overlay) return;
+  _activeTutorialSteps = TUTORIAL_STEPS;
   _tutorialIndex = 0;
   // Nos aseguramos de partir desde Predicación → Casa en casa, para que la
   // tarjeta de ejemplo (paso 3) tenga algo real que resaltar.
@@ -14176,6 +14254,57 @@ function startTutorial() {
       switchSubTab('casa');
     }
   } catch {}
+  overlay.classList.add('active');
+  if (!_tutorialResizeHandler) {
+    _tutorialResizeHandler = () => renderTutorialStep(_tutorialIndex, true);
+    window.addEventListener('resize', _tutorialResizeHandler);
+    window.addEventListener('scroll', _tutorialResizeHandler, { passive: true });
+  }
+  requestAnimationFrame(() => renderTutorialStep(0));
+}
+
+// Busca la mejor asignación de casa en casa disponible para el tutorial:
+// preferimos la próxima futura (o de hoy) que tenga territorio asignado, ya
+// que así Live, el Mapa de Territorio y las Direcciones No Pasar tienen algo
+// real que mostrar. Si no hay ninguna futura, se usa la más reciente pasada.
+function _findH2HTutorialAssignment() {
+  const conTerritorio = (assignments || []).filter(a => a.type === 'presencial' && a.territory_id);
+  if (!conTerritorio.length) return null;
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  const futuras = conTerritorio
+    .filter(a => new Date(a.date + 'T00:00:00') >= hoy)
+    .sort((a, b) => a.date.localeCompare(b.date));
+  if (futuras.length) return futuras[0];
+  const pasadas = conTerritorio.slice().sort((a, b) => b.date.localeCompare(a.date));
+  return pasadas[0] || null;
+}
+
+async function startH2HTutorial() {
+  if (typeof isSimplifiedModeActive === 'function' && isSimplifiedModeActive()) {
+    showToast('El tutorial no está disponible en la Versión Simplificada.', 'error');
+    return;
+  }
+  const target = _findH2HTutorialAssignment();
+  if (!target) {
+    showToast('No hay asignaciones disponibles para mostrar el tutorial.', 'error');
+    return;
+  }
+  closePreferencias();
+  try {
+    const predBtn = document.querySelector('.main-seg-btn[data-tab="predicacion"]');
+    if (predBtn && typeof currentMainTab !== 'undefined' && currentMainTab !== 'predicacion') {
+      switchMainTab('predicacion', predBtn);
+    }
+    if (typeof currentSubTab !== 'undefined' && currentSubTab !== 'casa' && typeof switchSubTab === 'function') {
+      switchSubTab('casa');
+    }
+  } catch {}
+  await viewAssignment(target.id);
+
+  const overlay = document.getElementById('tutorial-overlay');
+  if (!overlay) return;
+  _activeTutorialSteps = TUTORIAL_STEPS_H2H;
+  _tutorialIndex = 0;
   overlay.classList.add('active');
   if (!_tutorialResizeHandler) {
     _tutorialResizeHandler = () => renderTutorialStep(_tutorialIndex, true);
@@ -14206,13 +14335,13 @@ function endTutorial() {
     window.removeEventListener('scroll', _tutorialResizeHandler);
     _tutorialResizeHandler = null;
   }
-  markTutorialSeen();
+  if (_activeTutorialSteps === TUTORIAL_STEPS) markTutorialSeen();
 }
 
 function tutorialGo(delta) {
   const next = _tutorialIndex + delta;
   if (next < 0) return;
-  if (next >= TUTORIAL_STEPS.length) { endTutorial(); return; }
+  if (next >= _activeTutorialSteps.length) { endTutorial(); return; }
   renderTutorialStep(next);
 }
 
@@ -14234,7 +14363,7 @@ function _waitForTutorialTarget(selector, attempts = 8) {
 async function renderTutorialStep(i, isReflow) {
   if (!document.getElementById('tutorial-overlay')?.classList.contains('active')) return;
   _tutorialIndex = i;
-  const step = TUTORIAL_STEPS[i];
+  const step = _activeTutorialSteps[i];
   const spot = document.getElementById('tutorial-spot');
   const card = document.getElementById('tutorial-card');
 
@@ -14280,12 +14409,12 @@ async function renderTutorialStep(i, isReflow) {
 
   document.getElementById('tutorial-card-title').textContent = step.title;
   document.getElementById('tutorial-card-text').textContent = step.text;
-  document.getElementById('tutorial-step-counter').textContent = `${i + 1} / ${TUTORIAL_STEPS.length}`;
+  document.getElementById('tutorial-step-counter').textContent = `${i + 1} / ${_activeTutorialSteps.length}`;
   document.getElementById('tutorial-prev-btn').style.visibility = i === 0 ? 'hidden' : 'visible';
-  document.getElementById('tutorial-next-btn').textContent = i === TUTORIAL_STEPS.length - 1 ? 'Entendido' : 'Siguiente';
+  document.getElementById('tutorial-next-btn').textContent = i === _activeTutorialSteps.length - 1 ? 'Entendido' : 'Siguiente';
 
   const dotsWrap = document.getElementById('tutorial-dots');
-  dotsWrap.innerHTML = TUTORIAL_STEPS.map((_, idx) =>
+  dotsWrap.innerHTML = _activeTutorialSteps.map((_, idx) =>
     `<div class="tutorial-dot${idx === i ? ' active' : ''}"></div>`).join('');
 }
 
@@ -15504,6 +15633,8 @@ function applySimplifiedModeUI() {
   if (funcRow) funcRow.style.display = active ? 'none' : '';
   const tutorialRow = document.getElementById('pref-tutorial-row');
   if (tutorialRow) tutorialRow.style.display = active ? 'none' : '';
+  const tutorialH2HRow = document.getElementById('pref-tutorial-h2h-row');
+  if (tutorialH2HRow) tutorialH2HRow.style.display = active ? 'none' : '';
 
   // Experimentos: ocultar blur / color de acento / animaciones
   const expBlock  = document.getElementById('exp-appearance-restricted');
