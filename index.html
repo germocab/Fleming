@@ -349,6 +349,36 @@
 
   #app { display: none; flex-direction: column; min-height: 100vh; }
 
+  /* ── Experimentos: NavBar abajo (solo Móvil) ──────────────────────────────
+     Cuando está activo (html.navbar-bottom-mobile) y estamos por debajo de
+     640px, el .app-header-shell (topnav + sub-tabs) se fija en la parte
+     inferior de la pantalla, como una barra de pestañas, en vez de
+     desplazarse junto con el contenido en su posición original arriba.
+     Se añade padding-bottom al contenido para que nada quede tapado detrás. ── */
+  @media (max-width: 639px) {
+    html.navbar-bottom-mobile .app-header-shell {
+      position: fixed;
+      left: 0; right: 0; bottom: 0; top: auto;
+      z-index: 150;
+      margin: 0;
+      border-radius: 0;
+      background: var(--nav-bg);
+      backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%);
+      -webkit-backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%);
+      border-top: 1px solid var(--border);
+      border-bottom: none;
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.10);
+      padding-bottom: env(safe-area-inset-bottom, 0);
+      display: flex; flex-direction: column-reverse;
+    }
+    html.navbar-bottom-mobile .app-header-shell .sub-tabs-wrap { border-top: 1px solid var(--border); }
+    html.navbar-bottom-mobile.no-transparency .app-header-shell {
+      background: var(--surface); backdrop-filter: none; -webkit-backdrop-filter: none;
+    }
+    /* Empuja el contenido para que la barra inferior no lo tape */
+    html.navbar-bottom-mobile #app > .main-content { padding-bottom: var(--navbar-bottom-h, 76px); }
+  }
+
   /* ── Header shell: envuelve topnav + sub-tabs. En Desktop queda "fixed"
      (sticky) arriba de la pantalla al hacer scroll, encogiéndose con
      transparencia/blur. En Móvil NO es fijo: se desplaza junto con el
@@ -6618,6 +6648,18 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <button class="accent-swatch" id="accent-sw-yellow" onclick="setAccentColor('yellow')" style="--sw:#f5a623" title="Desert"></button>
           <button class="accent-swatch" id="accent-sw-purple" onclick="setAccentColor('purple')" style="--sw:#a855f7" title="Lavender"></button>
         </div>
+        <div class="profile-row" style="cursor:pointer;border-top:1px solid var(--border)" onclick="toggleAccentBgPref()">
+          <div class="profile-row-icon" style="background:var(--ter-3-bg);color:var(--ter-3)">
+            <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2v20M2 12h20" opacity="0.4"/><circle cx="12" cy="12" r="9"/></svg>
+          </div>
+          <div class="profile-row-content">
+            <div class="profile-row-label">Ajustar el fondo al color de acento</div>
+            <div class="profile-row-value" style="font-size:0.8rem">El fondo de la plataforma toma un tono derivado del color de acento elegido</div>
+          </div>
+          <div id="accent-bg-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+            <div id="accent-bg-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+          </div>
+        </div>
       </div>
       <!-- Animaciones -->
       <div id="pref-animations-section" style="border-top:1px solid var(--border)">
@@ -6654,6 +6696,19 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         </div>
       </div>
       <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">Al activarla, se desactivan las Notificaciones, Live, Modo Peak, el Tutorial y el panel de administración. Para volver a la versión normal, entra a Configuración desde el título "Fleming".</div>
+      <!-- NavBar abajo (solo móvil) -->
+      <div class="profile-row" id="navbar-bottom-row" style="cursor:pointer;border-top:1px solid var(--border)" onclick="toggleNavbarBottomPref()">
+        <div class="profile-row-icon" style="background:var(--ter-6-bg);color:var(--ter-6)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="16" x2="21" y2="16"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">NavBar abajo</div>
+          <div class="profile-row-value" style="font-size:0.8rem" id="navbar-bottom-desc">Coloca la NavBar en la parte inferior de la pantalla. Solo disponible en móvil.</div>
+        </div>
+        <div id="navbar-bottom-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="navbar-bottom-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -6912,7 +6967,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.13.5.2.2-beta';
+const APP_VERSION = '1.14.0-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -8761,6 +8816,7 @@ async function enterApp() {
   renderSubTabs(currentMainTab);
 
   if (typeof applySimplifiedModeUI === 'function') applySimplifiedModeUI();
+  if (typeof applyNavbarBottomUI === 'function') applyNavbarBottomUI();
 
   // Restore sub-page visibility
   if (currentMainTab === 'predicacion') {
@@ -13387,7 +13443,7 @@ function openPrefScreen(name) {
   document.getElementById('page-pref-' + name)?.classList.add('open');
   if (name === 'funciones') { updateH2HViewModeUI(); updateNavbarShrinkToggleUI(); }
   if (name === 'notificaciones') renderPrefNotifList();
-  if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); }
+  if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBottomToggleUI(); }
 }
 function closePrefScreen() {
   PREF_SCREENS.forEach(name => document.getElementById('page-pref-' + name)?.classList.remove('open'));
@@ -13717,6 +13773,18 @@ const ACCENT_PALETTES = {
   yellow: { light: { accent: '#c9820a', light: 'rgba(201,130,10,0.12)'  }, dark: { accent: '#f5a623', light: 'rgba(245,166,35,0.15)'  } },
   purple: { light: { accent: '#9333ea', light: 'rgba(147,51,234,0.12)'  }, dark: { accent: '#a855f7', light: 'rgba(168,85,247,0.15)'  } },
 };
+
+// ── Experimentos: "Ajustar el fondo al color de acento" ─────────────────────
+// Tonos de fondo derivados de cada color de acento. Azul (por defecto) no
+// define tonos propios: al usarlo, el fondo se mantiene igual que siempre
+// (blanco en claro / negro en oscuro), sin necesidad de sobreescribir nada.
+const ACCENT_BG_TONES = {
+  blue:   null,
+  green:  { light: { bg: '#eefaf1', navBg: 'rgba(238,250,241,0.55)' }, dark: { bg: '#151f13', navBg: 'rgba(21,31,19,0.55)' } },
+  pink:   { light: { bg: '#fdeff5', navBg: 'rgba(253,239,245,0.55)' }, dark: { bg: '#22141c', navBg: 'rgba(34,20,28,0.55)' } },
+  yellow: { light: { bg: '#fdf6e6', navBg: 'rgba(253,246,230,0.55)' }, dark: { bg: '#241d0f', navBg: 'rgba(36,29,15,0.55)' } },
+  purple: { light: { bg: '#f4eefc', navBg: 'rgba(244,238,252,0.55)' }, dark: { bg: '#1c1730', navBg: 'rgba(28,23,48,0.55)' } },
+};
 let _versionHoldTimer = null;
 let _versionHoldRaf   = null;
 let _versionHoldStart = null;
@@ -13799,9 +13867,12 @@ function triggerEggUnlock() {
     // Toggle off — let them relive the surprise next time
     localStorage.removeItem('fleming_egg_unlocked');
     localStorage.removeItem('fleming_accent');
+    localStorage.removeItem('fleming_accent_bg');
     applyAccentColor('blue');
     localStorage.removeItem('fleming_animations');
     applyAnimationsMode('fluid');
+    localStorage.removeItem('fleming_navbar_bottom');
+    applyNavbarBottomUI();
     updateExperimentosNavVisibility();
     showToast('Experimentos desactivado. ¡Encuéntralo de nuevo!', '');
     return;
@@ -13922,9 +13993,18 @@ function applyAccentColor(name) {
     dynStyle.id = 'accent-dyn-style';
     document.head.appendChild(dynStyle);
   }
+  const tones = isAccentBgSelected() ? ACCENT_BG_TONES[name] : null;
+  let bgRules = '';
+  if (tones) {
+    bgRules = `
+    :root { --bg: ${tones.light.bg}; --nav-bg: ${tones.light.navBg}; --tab-bar-bg: ${tones.light.navBg}; }
+    :root[data-theme="dark"], :root[data-theme="auto"] { --bg: ${tones.dark.bg}; --nav-bg: ${tones.dark.navBg}; --tab-bar-bg: ${tones.dark.navBg}; }
+    @media (prefers-color-scheme: dark) { :root[data-theme="auto"] { --bg: ${tones.dark.bg}; --nav-bg: ${tones.dark.navBg}; --tab-bar-bg: ${tones.dark.navBg}; } }`;
+  }
   dynStyle.textContent = `
     :root[data-theme="dark"], :root[data-theme="auto"] { --accent: ${palette.dark.accent}; --accent-light: ${palette.dark.light}; }
     @media (prefers-color-scheme: dark) { :root[data-theme="auto"] { --accent: ${palette.dark.accent}; --accent-light: ${palette.dark.light}; } }
+    ${bgRules}
   `;
 }
 
@@ -13935,6 +14015,7 @@ function initAccentColor() {
     revealAccentSection();
     revealAnimationsSection();
   }
+  updateAccentBgToggleUI();
   updateExperimentosNavVisibility();
 }
 
@@ -13943,6 +14024,26 @@ function updateAccentSwatchesUI() {
   ['blue','green','pink','yellow','purple'].forEach(name => {
     document.getElementById('accent-sw-' + name)?.classList.toggle('active', name === active);
   });
+}
+
+// ── Toggle: "Ajustar el fondo al color de acento" ───────────────────────────
+function isAccentBgSelected() {
+  return localStorage.getItem('fleming_accent_bg') === 'true';
+}
+function toggleAccentBgPref() {
+  const next = !isAccentBgSelected();
+  localStorage.setItem('fleming_accent_bg', next ? 'true' : 'false');
+  updateAccentBgToggleUI();
+  applyAccentColor(localStorage.getItem('fleming_accent') || 'blue');
+  showToast(next ? 'Fondo ajustado al color de acento' : 'Fondo restaurado al valor por defecto', next ? 'success' : '');
+}
+function updateAccentBgToggleUI() {
+  const toggle = document.getElementById('accent-bg-toggle');
+  const thumb  = document.getElementById('accent-bg-thumb');
+  if (!toggle || !thumb) return;
+  const on = isAccentBgSelected();
+  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
+  thumb.style.left = on ? '21px' : '3px';
 }
 
 // ── Modo Experimentos: Animaciones (más fluidas / reducidas para personas sensibles) ──
@@ -15679,6 +15780,9 @@ function applySimplifiedModeUI() {
   const expNotice = document.getElementById('exp-appearance-restricted-notice');
   if (expBlock)  expBlock.style.display  = active ? 'none' : '';
   if (expNotice) expNotice.style.display = active ? '' : 'none';
+  // NavBar abajo: no aplica mientras la Versión Simplificada usa su propio header
+  const navBottomRow = document.getElementById('navbar-bottom-row');
+  if (navBottomRow) navBottomRow.style.display = active ? 'none' : '';
 
   // Notificaciones: cortar el polling y ocultar el badge
   if (active) {
@@ -15696,8 +15800,64 @@ function applySimplifiedModeUI() {
 
   if (typeof updateAdminShortcuts === 'function') updateAdminShortcuts();
   if (typeof simplifiedSyncHeaderTitle === 'function') simplifiedSyncHeaderTitle();
+  if (typeof applyNavbarBottomUI === 'function') applyNavbarBottomUI();
 }
 window.addEventListener('resize', () => { try { applySimplifiedModeUI(); } catch {} });
+
+// ══════════════════════ Experimentos: NavBar abajo (móvil) ══════════════════
+// Mueve la NavBar (.app-header-shell) a la parte inferior de la pantalla,
+// solo en dispositivos móviles. Exclusiva de Experimentos.
+function isNavbarBottomSelected() {
+  return localStorage.getItem('fleming_navbar_bottom') === 'true';
+}
+function isNavbarBottomActive() {
+  // No aplica si la Versión Simplificada está activa (usa su propio header)
+  return isNavbarBottomSelected() && isMobile() && !isSimplifiedModeActive();
+}
+function toggleNavbarBottomPref() {
+  const next = !isNavbarBottomSelected();
+  localStorage.setItem('fleming_navbar_bottom', next ? 'true' : 'false');
+  updateNavbarBottomToggleUI();
+  applyNavbarBottomUI();
+  if (next) {
+    showToast(isMobile() ? 'NavBar movida abajo' : 'NavBar abajo activada (se verá en móvil)', 'success');
+  } else {
+    showToast('NavBar abajo desactivada', '');
+  }
+}
+function updateNavbarBottomToggleUI() {
+  const toggle = document.getElementById('navbar-bottom-toggle');
+  const thumb  = document.getElementById('navbar-bottom-thumb');
+  const desc   = document.getElementById('navbar-bottom-desc');
+  if (!toggle || !thumb) return;
+  const on = isNavbarBottomSelected();
+  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
+  thumb.style.left = on ? '21px' : '3px';
+  if (desc) {
+    desc.textContent = isMobile()
+      ? 'Coloca la NavBar en la parte inferior de la pantalla, para un acceso más fácil.'
+      : 'Disponible solo en dispositivos móviles. Actívala y velá el efecto desde tu teléfono.';
+  }
+}
+let _navbarBottomResizeObs = null;
+function applyNavbarBottomUI() {
+  const active = isNavbarBottomActive();
+  document.documentElement.classList.toggle('navbar-bottom-mobile', active);
+  const shell = document.getElementById('app-header-shell');
+  if (active && shell) {
+    if (!_navbarBottomResizeObs && typeof ResizeObserver !== 'undefined') {
+      _navbarBottomResizeObs = new ResizeObserver(() => {
+        document.documentElement.style.setProperty('--navbar-bottom-h', shell.offsetHeight + 'px');
+      });
+      _navbarBottomResizeObs.observe(shell);
+    }
+    document.documentElement.style.setProperty('--navbar-bottom-h', shell.offsetHeight + 'px');
+  } else if (_navbarBottomResizeObs) {
+    _navbarBottomResizeObs.disconnect();
+    _navbarBottomResizeObs = null;
+  }
+}
+window.addEventListener('resize', () => { try { applyNavbarBottomUI(); } catch {} });
 
 // ── Interacción: título "Fleming" → Opciones (Apariencia / Configuración) ──
 let _simpOptionsOpen = false;
