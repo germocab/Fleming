@@ -4922,6 +4922,13 @@
 @media (max-width: 640px) {
   #scroll-top-fab { right: 14px; bottom: 18px; width: 42px; height: 42px; }
 }
+/* Cuando la NavBar está fijada abajo (Experimentos → NavBar abajo), el botón
+   "Volver arriba" debe flotar por encima de ella, no quedar tapado detrás. */
+@media (max-width: 639px) {
+  html.navbar-bottom-mobile #scroll-top-fab {
+    bottom: calc(var(--navbar-bottom-h, 76px) + 14px);
+  }
+}
 
 /* ── Tutorial de bienvenida (onboarding paso a paso) ─────────────────────
    Overlay + "spotlight" que resalta el elemento del que se está hablando
@@ -6980,7 +6987,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.14.2-beta';
+const APP_VERSION = '1.14.3-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
