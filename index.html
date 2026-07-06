@@ -52,6 +52,7 @@
     --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
     --font: -apple-system, 'SF Pro Display', 'Inter', sans-serif;
     --nav-bg: rgba(242,242,247,0.5);
+    --bottom-nav-bg: rgba(255,255,255,0.82);
     --modal-overlay-bg: rgba(0,0,0,0.35);
     --tab-active-bg: #ffffff;
     --tab-bar-bg: rgba(242,242,247,0.5);
@@ -132,6 +133,7 @@
   }
   html.no-transparency {
     --nav-bg: var(--surface) !important;
+    --bottom-nav-bg: var(--surface) !important;
     --modal-overlay-bg: rgba(0,0,0,0.6) !important;
     --tab-bar-bg: var(--surface) !important;
   }
@@ -233,6 +235,7 @@
       --shadow: 0 2px 12px rgba(0,0,0,0.5);
       --shadow-lg: 0 8px 40px rgba(0,0,0,0.6);
       --nav-bg: rgba(28,28,30,0.5);
+      --bottom-nav-bg: rgba(28,28,30,0.86);
       --modal-overlay-bg: rgba(0,0,0,0.6);
       --tab-active-bg: #3a3a3c;
       --tab-bar-bg: rgba(28,28,30,0.5);
@@ -258,6 +261,7 @@
     --shadow: 0 2px 12px rgba(0,0,0,0.5);
     --shadow-lg: 0 8px 40px rgba(0,0,0,0.6);
     --nav-bg: rgba(28,28,30,0.5);
+    --bottom-nav-bg: rgba(28,28,30,0.86);
     --modal-overlay-bg: rgba(0,0,0,0.6);
     --tab-active-bg: #3a3a3c;
     --tab-bar-bg: rgba(28,28,30,0.5);
@@ -360,9 +364,7 @@
       position: fixed;
       left: 0; right: 0; bottom: 0; top: auto;
       z-index: 150;
-      margin: 0;
-      border-radius: 0;
-      background: var(--nav-bg);
+      background: var(--bottom-nav-bg);
       backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%);
       -webkit-backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%);
       border-top: 1px solid var(--border);
@@ -6978,7 +6980,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.14.1-beta';
+const APP_VERSION = '1.14.2-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -14008,9 +14010,9 @@ function applyAccentColor(name) {
   let bgRules = '';
   if (tones) {
     bgRules = `
-    :root { --bg: ${tones.light.bg}; --nav-bg: ${tones.light.navBg}; --tab-bar-bg: ${tones.light.navBg}; }
-    :root[data-theme="dark"], :root[data-theme="auto"] { --bg: ${tones.dark.bg}; --nav-bg: ${tones.dark.navBg}; --tab-bar-bg: ${tones.dark.navBg}; }
-    @media (prefers-color-scheme: dark) { :root[data-theme="auto"] { --bg: ${tones.dark.bg}; --nav-bg: ${tones.dark.navBg}; --tab-bar-bg: ${tones.dark.navBg}; } }`;
+    :root { --bg: ${tones.light.bg}; --nav-bg: ${tones.light.navBg}; --tab-bar-bg: ${tones.light.navBg}; --bottom-nav-bg: ${tones.light.navBg}; }
+    :root[data-theme="dark"], :root[data-theme="auto"] { --bg: ${tones.dark.bg}; --nav-bg: ${tones.dark.navBg}; --tab-bar-bg: ${tones.dark.navBg}; --bottom-nav-bg: ${tones.dark.navBg}; }
+    @media (prefers-color-scheme: dark) { :root[data-theme="auto"] { --bg: ${tones.dark.bg}; --nav-bg: ${tones.dark.navBg}; --tab-bar-bg: ${tones.dark.navBg}; --bottom-nav-bg: ${tones.dark.navBg}; } }`;
   }
   dynStyle.textContent = `
     :root[data-theme="dark"], :root[data-theme="auto"] { --accent: ${palette.dark.accent}; --accent-light: ${palette.dark.light}; }
