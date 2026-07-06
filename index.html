@@ -529,6 +529,17 @@
   .options-dropdown.open { display: block; animation: fadeDown 0.15s ease; }
   @keyframes fadeDown { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
 
+  /* ── NavBar abajo (móvil): la NavBar vive al fondo de la pantalla, así que
+     sus menús desplegables (Opciones, Notificaciones) deben abrirse hacia
+     arriba en vez de hacia abajo, o quedarían fuera de la pantalla. ── */
+  @media (max-width: 639px) {
+    html.navbar-bottom-mobile .options-dropdown {
+      top: auto; bottom: calc(100% + 10px);
+    }
+    html.navbar-bottom-mobile .options-dropdown.open { animation: fadeUp 0.15s ease; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+  }
+
   .options-user-info {
     display: flex; align-items: center; gap: 10px;
     padding: 0.6rem 0.85rem 0.65rem;
@@ -6967,7 +6978,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.14.0-beta';
+const APP_VERSION = '1.14.1-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
