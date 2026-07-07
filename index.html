@@ -138,6 +138,35 @@
     --tab-bar-bg: var(--surface) !important;
   }
 
+  /* ── Modo invitado (enlace compartido de una asignación de Casa en casa) ──────
+     Se activa agregando la clase .guest-share-mode al <body> cuando la URL trae
+     ?share=<id>. Oculta todo lo que no debe ver un invitado sin sesión: no puede
+     cerrar el detalle (no hay nada más que mostrarle detrás), no puede administrar,
+     no puede reportar territorio, no puede volver a compartir, y no puede sugerir
+     ni corregir direcciones "No Pasar" (solo verlas). ── */
+  body.guest-share-mode .detail-close,
+  body.guest-share-mode .pill-back-btn,
+  body.guest-share-mode .detail-sidebar-fab,
+  body.guest-share-mode .detail-share-wrap,
+  body.guest-share-mode #suggest-np-btn,
+  body.guest-share-mode #suggest-np-form,
+  body.guest-share-mode #detail-report-actions,
+  body.guest-share-mode .detail-admin-fab {
+    display: none !important;
+  }
+  body.guest-share-mode .no-pasar-item { cursor: default; }
+  body.guest-share-mode .no-pasar-item:active { transform: none; }
+  .guest-share-banner {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 7px 10px; background: var(--accent-light); color: var(--accent);
+    font-size: 0.72rem; font-weight: 700; border-radius: 10px; margin: 0 0 0.85rem;
+  }
+  .guest-share-banner svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2.3; }
+  .guest-share-error-wrap {
+    display: flex; align-items: center; justify-content: center; height: 100vh;
+    padding: 2rem; text-align: center; font-family: var(--font); color: var(--text2);
+  }
+
   /* ── DEV Version Pill ─────────────────────────────────────────────────────── */
   #dev-version-pill {
     display: none; /* shown via JS only for DEV */
@@ -5974,6 +6003,10 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="detail-overlay" id="detail-overlay" onclick="handleOverlayClick(event)">
   <div class="detail-panel" id="detail-panel">
     <div class="detail-handle"></div>
+    <div class="guest-share-banner" id="guest-share-banner" style="display:none">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      Enlace compartido · Solo lectura
+    </div>
     <!-- Header estándar de la plataforma — solo visible en modo Territorio -->
     <nav class="subpage-topbar detail-territory-topbar" id="detail-territory-topbar">
       <button class="pill-back-btn" onclick="closeDetail()" title="Cerrar">
@@ -7185,7 +7218,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.14.11.6-beta';
+const APP_VERSION = '1.14.12-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -7642,6 +7675,11 @@ function clearSession() { localStorage.removeItem('fleming_user'); }
 
 async function init() {
   initTheme();
+  // ── Enlace compartido de una asignación de Casa en casa (?share=<id>) ──────
+  // No requiere sesión: se salta por completo la pantalla de acceso y muestra
+  // únicamente el detalle de esa asignación, en modo solo-lectura.
+  const _sharedAssignmentId = new URLSearchParams(location.search).get('share');
+  if (_sharedAssignmentId) { await initGuestShareMode(_sharedAssignmentId); return; }
   migrateSemiAdminsToAdmin(); // El cargo SemiAdmin fue eliminado: se promueve a Admin.
   const saved = loadSession();
   if (saved) {
@@ -9043,6 +9081,51 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
   
+// ── Modo invitado: enlace compartido de una asignación de Casa en casa ────────
+// Se activa vía ?share=<id> en la URL. No inicia sesión: solo carga los datos
+// mínimos necesarios para mostrar el detalle de ESA asignación (Live, mapa,
+// Direcciones, llamar al encargado, No Pasar en solo lectura) y bloquea todo
+// lo demás (Notificaciones, Perfil, otras Secciones/Sub-secciones, Compartir
+// y Sugerencias en No Pasar).
+async function initGuestShareMode(assignmentId) {
+  window._guestShareMode = true;
+  document.body.classList.add('guest-share-mode');
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('auth-pending-screen').style.display = 'none';
+  currentUser = null;
+  currentRole = 'guest';
+  applyLanguage(currentLang);
+
+  const app = document.getElementById('app');
+  app.style.display = 'flex'; app.style.flexDirection = 'column';
+
+  try {
+    await loadSchedule();
+  } catch (e) {
+    console.error('initGuestShareMode loadSchedule:', e);
+  }
+
+  const a = assignments.find(x => x.id === assignmentId);
+  if (!a) { showGuestShareError(); return; }
+
+  await viewAssignment(assignmentId);
+
+  // Fuerza pantalla completa (nunca modo lateral, que dejaría ver la app detrás)
+  // y muestra el aviso de "solo lectura".
+  const overlay = document.getElementById('detail-overlay');
+  overlay.classList.remove('sidebar-mode');
+  document.body.classList.remove('h2h-sidebar-open');
+  const banner = document.getElementById('guest-share-banner');
+  if (banner) banner.style.display = 'flex';
+}
+
+function showGuestShareError() {
+  document.body.innerHTML = `<div class="guest-share-error-wrap"><div>
+    <h2 style="margin-bottom:0.5rem">Enlace no disponible</h2>
+    <p>Esta asignación ya no existe o el enlace ha expirado.</p>
+  </div></div>`;
+}
+
 async function enterApp() {
   document.getElementById('auth-screen').style.display = 'none';
 
@@ -10237,6 +10320,9 @@ async function submitSuggestNp() {
 
 
 function closeDetail() {
+  // En modo invitado (enlace compartido) no hay nada detrás que mostrar,
+  // así que no se permite cerrar el detalle.
+  if (window._guestShareMode) return;
   // Reset any state that viewTerritory may have changed
   document.getElementById('detail-panel').classList.remove('territory-mode');
   document.getElementById('detail-time-chip').style.display = '';
@@ -10262,6 +10348,7 @@ function closeDetail() {
 }
 
 function handleOverlayClick(e) {
+  if (window._guestShareMode) return;
   if (e.target === document.getElementById('detail-overlay')) closeDetail();
 }
 
@@ -16685,6 +16772,9 @@ let _npCurrentAddr = '';
 let _npCurrentTerNum = '';
 
 function openNpActionSheet(addr, terNum, hasDate, desc) {
+  // En modo invitado (enlace compartido) las direcciones No Pasar son solo de
+  // lectura: no se permite sugerir, corregir ni agregar fecha/descripción.
+  if (window._guestShareMode) return;
   _npCurrentAddr = addr;
   _npCurrentTerNum = terNum;
   document.getElementById('np-action-addr').textContent = addr;
@@ -20536,38 +20626,37 @@ async function doShareOrDownloadPdf() {
   a.click();
 }
 
-// ── Compartir una asignación de Casa en casa (usa los datos ya renderizados
-//    en el panel de detalle) ──────────────────────────────────────────────────
+// ── Compartir una asignación de Casa en casa: genera un enlace que abre una
+//    versión limitada y de solo lectura de la plataforma (sin iniciar sesión),
+//    con el detalle de ESTA asignación. Quien reciba el link puede usar Live,
+//    ver el mapa, ver Direcciones No Pasar, llamar al encargado y ver la
+//    dirección de inicio en Google Maps — pero no puede acceder a Notificaciones,
+//    Perfil ni otras Secciones, ni volver a compartir, ni sugerir en No Pasar. ──
 function shareCasaEnCasaAssignment() {
-  const address   = document.getElementById('detail-address')?.textContent?.trim() || '';
-  const conductor = document.getElementById('detail-conductor')?.textContent?.trim() || '';
-  const time      = document.getElementById('detail-time')?.textContent?.trim() || '';
+  const panel = document.getElementById('detail-panel');
+  const id = panel && panel._openAssignmentId;
+  if (!id) { showToast('No se pudo generar el enlace', 'error'); return; }
+
+  const url = new URL(location.href);
+  url.search = ''; url.hash = '';
+  url.searchParams.set('share', id);
+  const shareUrl = url.toString();
+
+  const address = document.getElementById('detail-address')?.textContent?.trim() || 'Asignación';
   const dateLabel = document.getElementById('detail-date-label')?.textContent?.trim() || '';
-  const terBadge  = document.getElementById('detail-ter-badge')?.textContent?.trim() || '';
-  const mapImg    = document.getElementById('detail-map-img');
-  const mapaSrc   = (mapImg && mapImg.style && document.getElementById('detail-map-wrap')?.style.display !== 'none') ? mapImg.src : null;
 
-  // NOTA (fix v1.14.11.6-beta): las tarjetas reales de No Pasar (ver
-  // renderNoPasarList) NO tienen atributos data-addr/data-motivo — antes se
-  // buscaban con `[data-addr]`, que nunca coincidía con nada, por lo que la
-  // lista siempre salía vacía. Ahora se extrae del texto real de cada tarjeta.
-  const noPasarEls = [...document.querySelectorAll('#detail-no-pasar-list .no-pasar-item')];
-  const noPasar = noPasarEls.map(el => ({
-    addr: el.querySelector('.no-pasar-item-addr')?.textContent?.trim() || '',
-    motivo: el.querySelector('.no-pasar-item-desc')?.textContent?.trim() || '',
-  })).filter(e => e.addr);
-
-  generateAndShowSharePdf({
-    eyebrow: 'Casa en casa',
-    titulo: address || 'Asignación',
-    subtitulo: [dateLabel, time].filter(Boolean).join(' · '),
-    mapaSrc,
-    filas: [
-      { label: 'Encargado', value: conductor, icon: 'encargado' },
-      { label: 'Territorio', value: terBadge, icon: 'territorio' },
-    ],
-    noPasar,
-  });
+  if (navigator.share) {
+    navigator.share({ title: 'Predicación de casa en casa', text: [address, dateLabel].filter(Boolean).join(' · '), url: shareUrl })
+      .catch(() => { /* usuario canceló el share sheet */ });
+    return;
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(shareUrl)
+      .then(() => showToast('Enlace copiado al portapapeles', 'success'))
+      .catch(() => window.prompt('Copia este enlace para compartir:', shareUrl));
+    return;
+  }
+  window.prompt('Copia este enlace para compartir:', shareUrl);
 }
 
 // Inserta el botón "Compartir" al final absoluto del panel de detalle (después
