@@ -5335,7 +5335,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       <div class="ct-search-wrapper">
         <div class="ct-search-inner">
           <svg class="ct-search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="cartSearchInput" placeholder="Buscar por nombre…" aria-label="Buscar por nombre" oninput="cartHandleSearch()">
+          <input type="text" id="cartSearchInput" data-i18n-ph="search.buscar-nombre" placeholder="Buscar por nombre…" data-i18n-aria="search.buscar-nombre" aria-label="Buscar por nombre" oninput="cartHandleSearch()">
           <button onclick="cartToggleFilterMenu()" class="ct-search-filter-btn" aria-label="Abrir filtros" aria-expanded="false" aria-controls="cartFilterMenu">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="10" cy="6" r="2"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="14" cy="12" r="2"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="8" cy="18" r="2"/></svg>
           </button>
@@ -6956,15 +6956,15 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       <input type="hidden" id="miembro-grupo-id">
       <input type="hidden" id="miembro-id">
       <div class="form-group2">
-        <label class="form-label2">Nombre completo</label>
+        <label class="form-label2" data-i18n="grupos.nombre-completo">Nombre completo</label>
         <input type="text" class="form-input" id="miembro-nombre" placeholder="Nombre y apellido">
       </div>
       <div class="form-group2">
-        <label class="form-label2">Rol en el grupo</label>
+        <label class="form-label2" data-i18n="grupos.rol-en-grupo">Rol en el grupo</label>
         <select class="form-select" id="miembro-rol">
-          <option value="miembro">Miembro</option>
-          <option value="superintendente">Superintendente</option>
-          <option value="auxiliar">Auxiliar</option>
+          <option value="miembro" data-i18n="grupos.rol.miembro">Miembro</option>
+          <option value="superintendente" data-i18n="grupos.rol.superintendente">Superintendente</option>
+          <option value="auxiliar" data-i18n="grupos.rol.auxiliar">Auxiliar</option>
         </select>
       </div>
       <div class="form-group2" style="display:flex;align-items:center;gap:12px;padding:0.5rem 0">
@@ -6988,7 +6988,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.14.5-beta';
+const APP_VERSION = '1.14.6-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -7013,29 +7013,30 @@ const I18N = {
   'admin.tab.territories':  { es: 'Territorios',             en: 'Territories' },
   'admin.tab.conductores':  { es: 'Conductores',             en: 'Drivers' },
   'admin.tab.casas':        { es: 'Casas',                   en: 'Houses' },
-  'admin.tab.grupos':       { es: 'Grupos',                  en: 'Groups' },
+  'admin.tab.grupos':       { es: 'Grupos',                  en: 'Groups',            nl: 'Groepen' },
   'admin.tab.carritos':     { es: 'Carritos',                en: 'Carts' },
   'admin.tab.vmc':          { es: 'Vida y Ministerio',       en: 'Christian Life and Ministry' },
   'admin.tab.fin-semana':   { es: 'Fin de Semana',           en: 'Weekend' },
   'admin.tab.responsabilidades': { es: 'Responsabilidades', en: 'Responsibilities' },
   'admin.tab.aseo-salon':   { es: 'Aseo Salón',              en: 'Hall Cleaning' },
   'admin.tab.usuarios':     { es: 'Usuarios',                en: 'Users' },
-  'admin.tab.notificaciones': { es: 'Notificaciones',        en: 'Notifications' },
+  'admin.tab.notificaciones': { es: 'Notificaciones',        en: 'Notifications',     nl: 'Meldingen' },
   'admin.tab.reports':      { es: 'Reportes',                en: 'Reports' },
-  'btn.guardar':            { es: 'Guardar',                 en: 'Save' },
-  'btn.cancelar':           { es: 'Cancelar',                en: 'Cancel' },
-  'btn.editar':             { es: 'Editar',                  en: 'Edit' },
-  'btn.eliminar':           { es: 'Eliminar',                en: 'Delete' },
-  'btn.nuevo':              { es: '+ Nuevo',                 en: '+ New' },
-  'btn.buscar':             { es: 'Buscar persona…',         en: 'Search person…' },
-  'btn.cerrar-sesion':      { es: 'Cerrar sesión',           en: 'Log out' },
-  'btn.llamar':             { es: 'Llamar',                  en: 'Call' },
-  'btn.como-llegar':        { es: 'Cómo llegar',             en: 'Directions' },
-  'live.btn':               { es: 'Live',                    en: 'Live' },
-  'live.activo':            { es: 'Live activo',             en: 'Live active' },
-  'live.estas-en':          { es: 'Estás en',                en: 'You are on' },
-  'sin.direccion':          { es: 'Sin dirección',           en: 'No address' },
-  'sin.conductor':          { es: 'Sin conductor',           en: 'No driver' },
+  'btn.guardar':            { es: 'Guardar',                 en: 'Save',              nl: 'Opslaan' },
+  'btn.cancelar':           { es: 'Cancelar',                en: 'Cancel',            nl: 'Annuleren' },
+  'btn.editar':             { es: 'Editar',                  en: 'Edit',              nl: 'Bewerken' },
+  'btn.eliminar':           { es: 'Eliminar',                en: 'Delete',            nl: 'Verwijderen' },
+  'btn.nuevo':              { es: '+ Nuevo',                 en: '+ New',             nl: '+ Nieuw' },
+  'btn.buscar':             { es: 'Buscar persona…',         en: 'Search person…',    nl: 'Persoon zoeken…' },
+  'btn.cerrar-sesion':      { es: 'Cerrar sesión',           en: 'Log out',           nl: 'Uitloggen' },
+  'btn.llamar':             { es: 'Llamar',                  en: 'Call',              nl: 'Bellen' },
+  'btn.como-llegar':        { es: 'Cómo llegar',             en: 'Directions',        nl: 'Route' },
+  'btn.limpiar':            { es: 'Limpiar',                 en: 'Clear',             nl: 'Wissen' },
+  'live.btn':               { es: 'Live',                    en: 'Live',              nl: 'Live' },
+  'live.activo':            { es: 'Live activo',             en: 'Live active',       nl: 'Live actief' },
+  'live.estas-en':          { es: 'Estás en',                en: 'You are on',        nl: 'Je bent op' },
+  'sin.direccion':          { es: 'Sin dirección',           en: 'No address',        nl: 'Geen adres' },
+  'sin.conductor':          { es: 'Sin conductor',           en: 'No driver',         nl: 'Geen chauffeur' },
   'pref.title':             { es: 'Configuración',           en: 'Preferences',   nl: 'Instellingen' },
   'pref.idioma':            { es: 'Idioma',                  en: 'Language',      nl: 'Taal' },
   'pref.apariencia':        { es: 'Apariencia',              en: 'Appearance',    nl: 'Weergave' },
@@ -7086,10 +7087,10 @@ const I18N = {
   'func.peak.desc':        { es: 'Mantén presionado para ver previews rápidos (Notificaciones y Asignaciones)', en: 'Press and hold to see quick previews (Notifications and Assignments)', nl: 'Houd ingedrukt voor snelle previews (Meldingen en Toewijzingen)' },
   // ── Mi Perfil ──
   'profile.title':          { es: 'Mi Perfil',               en: 'My Profile' },
-  'profile.grupo':          { es: 'Grupo de Servicio',       en: 'Service Group' },
-  'profile.grupo.asignado': { es: 'Grupo asignado',          en: 'Assigned group' },
-  'profile.rolgrupo':       { es: 'Rol en el grupo',         en: 'Role in group' },
-  'profile.partes':         { es: 'Partes asignadas',        en: 'Assigned parts' },
+  'profile.grupo':          { es: 'Grupo de Servicio',       en: 'Service Group',     nl: 'Dienstgroep' },
+  'profile.grupo.asignado': { es: 'Grupo asignado',          en: 'Assigned group',    nl: 'Toegewezen groep' },
+  'profile.rolgrupo':       { es: 'Rol en el grupo',         en: 'Role in group',     nl: 'Rol in de groep' },
+  'profile.partes':         { es: 'Partes asignadas',        en: 'Assigned parts',    nl: 'Toegewezen onderdelen' },
   'profile.misasignaciones':{ es: 'Mis Asignaciones',        en: 'My Assignments' },
   'profile.cargando':       { es: 'Cargando asignaciones',   en: 'Loading assignments' },
   'profile.foto':           { es: 'Foto de perfil',          en: 'Profile photo' },
@@ -7097,15 +7098,35 @@ const I18N = {
   'profile.cambiarfoto':    { es: 'Cambiar foto',            en: 'Change photo' },
   'profile.eliminarfoto':   { es: 'Eliminar foto de perfil', en: 'Remove profile photo' },
   // ── Notificaciones ──
-  'notif.title':            { es: 'Notificaciones',          en: 'Notifications' },
-  'notif.buscar':           { es: 'Buscar notificaciones…',  en: 'Search notifications…' },
-  'notif.cargando':         { es: 'Cargando Notificaciones', en: 'Loading Notifications' },
-  'notif.vacio.titulo':     { es: 'Sin notificaciones',      en: 'No notifications' },
-  'notif.vacio.desc':       { es: 'No hay notificaciones por ahora', en: 'There are no notifications right now' },
-  'notif.vacio.filtro':     { es: 'No hay notificaciones que coincidan con la búsqueda o el filtro.', en: 'No notifications match the search or filter.' },
-  'notif.vacio.recientes':  { es: 'Sin notificaciones recientes', en: 'No recent notifications' },
-  'notif.group.grupos':     { es: 'Grupos de Servicio',      en: 'Service Groups' },
-  'notif.group.sistema':    { es: 'Sistema',                 en: 'System' },
+  'notif.title':            { es: 'Notificaciones',          en: 'Notifications',    nl: 'Meldingen' },
+  'notif.buscar':           { es: 'Buscar notificaciones…',  en: 'Search notifications…', nl: 'Meldingen zoeken…' },
+  'notif.cargando':         { es: 'Cargando Notificaciones', en: 'Loading Notifications', nl: 'Meldingen laden' },
+  'notif.vacio.titulo':     { es: 'Sin notificaciones',      en: 'No notifications', nl: 'Geen meldingen' },
+  'notif.vacio.desc':       { es: 'No hay notificaciones por ahora', en: 'There are no notifications right now', nl: 'Er zijn op dit moment geen meldingen' },
+  'notif.vacio.filtro':     { es: 'No hay notificaciones que coincidan con la búsqueda o el filtro.', en: 'No notifications match the search or filter.', nl: 'Er zijn geen meldingen die overeenkomen met de zoekopdracht of het filter.' },
+  'notif.vacio.recientes':  { es: 'Sin notificaciones recientes', en: 'No recent notifications', nl: 'Geen recente meldingen' },
+  'notif.group.grupos':     { es: 'Grupos de Servicio',      en: 'Service Groups',    nl: 'Dienstgroepen' },
+  'notif.group.sistema':    { es: 'Sistema',                 en: 'System',            nl: 'Systeem' },
+  // ── Barras de búsqueda (Grupos, Carritos, Territorios, Vida y Ministerio) ──
+  'search.buscar-nombre':      { es: 'Buscar por nombre…',   en: 'Search by name…',   nl: 'Zoeken op naam…' },
+  'search.buscar-territorio':  { es: 'Buscar territorio…',   en: 'Search territory…', nl: 'Gebied zoeken…' },
+  // ── Grupos de Servicio (sub-sección) ──
+  'grupos.singrupos':       { es: 'Sin grupos',              en: 'No groups',         nl: 'Geen groepen' },
+  'grupos.singrupos.desc':  { es: 'Aún no hay grupos de servicio configurados', en: 'No service groups have been configured yet', nl: 'Er zijn nog geen dienstgroepen ingesteld' },
+  'grupos.eyebrow':         { es: 'Grupo',                   en: 'Group',             nl: 'Groep' },
+  'grupos.grupo-num':       { es: 'Grupo',                   en: 'Group',             nl: 'Groep' },
+  'grupos.noresultados':    { es: 'No se encontró ninguna persona con',  en: 'No person found matching', nl: 'Geen persoon gevonden met' },
+  'grupos.rol.superintendente': { es: 'Superintendente',     en: 'Superintendent',    nl: 'Opziener' },
+  'grupos.rol.super-abrev': { es: 'Super.',                  en: 'Super.',            nl: 'Opz.' },
+  'grupos.rol.auxiliar':    { es: 'Auxiliar',                en: 'Assistant',         nl: 'Assistent' },
+  'grupos.rol.miembro':     { es: 'Miembro',                 en: 'Member',            nl: 'Lid' },
+  'grupos.precursor':       { es: 'Precursor',               en: 'Pioneer',           nl: 'Pionier' },
+  'grupos.sinmiembros':     { es: 'Sin miembros',            en: 'No members',        nl: 'Geen leden' },
+  'grupos.quickadd.placeholder': { es: 'Escribe nombre y apellido, presiona Enter…', en: 'Type first and last name, press Enter…', nl: 'Typ voor- en achternaam, druk op Enter…' },
+  'grupos.editar-grupo':    { es: 'Editar grupo',            en: 'Edit group',        nl: 'Groep bewerken' },
+  'grupos.eliminar-grupo':  { es: 'Eliminar grupo',          en: 'Delete group',      nl: 'Groep verwijderen' },
+  'grupos.nombre-completo': { es: 'Nombre completo',         en: 'Full name',         nl: 'Volledige naam' },
+  'grupos.rol-en-grupo':    { es: 'Rol en el grupo',         en: 'Role in group',     nl: 'Rol in de groep' },
   // ── Casa en Casa ──
   'casa.cargando':          { es: 'Cargando Asignaciones',   en: 'Loading Assignments', nl: 'Toewijzingen laden' },
   'casa.sinasignaciones':   { es: 'Sin asignaciones',        en: 'No assignments', nl: 'Geen toewijzingen' },
@@ -7143,6 +7164,10 @@ function applyLanguage(lang) {
   document.querySelectorAll('[data-i18n-aria]').forEach(el => {
     const k = el.getAttribute('data-i18n-aria');
     el.setAttribute('aria-label', t(k));
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const k = el.getAttribute('data-i18n-title');
+    el.setAttribute('title', t(k));
   });
   // Refrescar vistas dinámicas ya montadas para que también respeten el idioma.
   try { renderSubTabs(currentMainTab); } catch {}
@@ -7563,15 +7588,15 @@ function renderGruposView() {
   if (!grupos.length) {
     container.innerHTML = `<div class="empty-state" style="margin-top:2rem">
       <div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-      <h4>Sin grupos</h4><p>Aún no hay grupos de servicio configurados</p>
+      <h4 data-i18n="grupos.singrupos">Sin grupos</h4><p data-i18n="grupos.singrupos.desc">Aún no hay grupos de servicio configurados</p>
     </div>`;
     return;
   }
 
   const searchBar = `<div class="grupos-search-wrap">
     <svg class="grupos-search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <input class="grupos-search-input" id="grupos-search-input" type="text" placeholder="Buscar persona…" oninput="filterGruposSearch(this.value)" autocomplete="off">
-    <button class="grupos-search-clear" id="grupos-search-clear" onclick="clearGruposSearch()" title="Limpiar">
+    <input class="grupos-search-input" id="grupos-search-input" type="text" data-i18n-ph="btn.buscar" placeholder="${t('btn.buscar')}" oninput="filterGruposSearch(this.value)" autocomplete="off">
+    <button class="grupos-search-clear" id="grupos-search-clear" onclick="clearGruposSearch()" title="${t('btn.limpiar')}" data-i18n-title="btn.limpiar">
       <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </div>
@@ -7581,7 +7606,7 @@ function renderGruposView() {
     const color = grupoColorFor(g.numero);
     const cnt = g.miembros.length;
     return `<button class="grupo-btn" style="--grupo-color:${color}" onclick="openGrupoDetailPage('${g.id}')">
-      <div class="grupo-btn-eyebrow">Grupo</div>
+      <div class="grupo-btn-eyebrow">${t('grupos.eyebrow')}</div>
       <div class="grupo-btn-icon">${g.numero}</div>
     </button>`;
   }).join('') + '</div>';
@@ -7617,18 +7642,18 @@ function filterGruposSearch(query) {
   });
 
   if (!matches.length) {
-    resultsEl.innerHTML = `<div class="search-no-results">No se encontró ninguna persona con "<strong>${query}</strong>"</div>`;
+    resultsEl.innerHTML = `<div class="search-no-results">${t('grupos.noresultados')} "<strong>${query}</strong>"</div>`;
   } else {
     resultsEl.innerHTML = matches.map(({ miembro: m, grupo: g }) => {
-      const rolLabel = m.rol === 'superintendente' ? 'Superintendente' : m.rol === 'auxiliar' ? 'Auxiliar' : 'Miembro';
+      const rolLabel = m.rol === 'superintendente' ? t('grupos.rol.superintendente') : m.rol === 'auxiliar' ? t('grupos.rol.auxiliar') : t('grupos.rol.miembro');
       const rolClass = m.rol === 'superintendente' ? 's' : m.rol === 'auxiliar' ? 'a' : '';
-      const precBadge = m.precursor ? `<span class="search-result-role p">Precursor</span>` : '';
+      const precBadge = m.precursor ? `<span class="search-result-role p">${t('grupos.precursor')}</span>` : '';
       const rolBadge  = rolClass ? `<span class="search-result-role ${rolClass}">${rolLabel}</span>` : '';
       return `<div class="search-result-card">
         ${buildAvatarHtml(m.nombre, getAvatarForName(m.nombre), 36, '0.72rem')}
         <div class="search-result-info">
           <div class="search-result-name">${m.nombre}</div>
-          <div class="search-result-group">Grupo ${g.numero}</div>
+          <div class="search-result-group">${t('grupos.grupo-num')} ${g.numero}</div>
         </div>
         <div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end">
           ${rolBadge}${precBadge}
@@ -7742,10 +7767,10 @@ function _memberRowHtml(m) {
     ? `<div class="grupo-member-avatar-md" style="background:${col}"><img src="${avatar}" style="width:100%;height:100%;object-fit:cover"></div>`
     : `<div class="grupo-member-avatar-md" style="background:${col}">${inits}</div>`;
   const roleLabel = m.rol === 'superintendente'
-    ? `<span class="grupo-member-role-label role-super">Superintendente</span>`
+    ? `<span class="grupo-member-role-label role-super">${t('grupos.rol.superintendente')}</span>`
     : m.rol === 'auxiliar'
-      ? `<span class="grupo-member-role-label role-aux">Auxiliar</span>`
-      : m.precursor ? `<span class="grupo-member-role-label role-prec">Precursor</span>` : '';
+      ? `<span class="grupo-member-role-label role-aux">${t('grupos.rol.auxiliar')}</span>`
+      : m.precursor ? `<span class="grupo-member-role-label role-prec">${t('grupos.precursor')}</span>` : '';
   return `<div class="grupo-member-row-full">
     ${avatarHtml}
     <div class="grupo-member-info">
@@ -8121,9 +8146,9 @@ async function renderProfilePage() {
   const myMembership = findMembershipForName(currentUser.name);
   const groupSec = document.getElementById('profile-group-section');
   if (myMembership) {
-    document.getElementById('profile-group-value').textContent = `Grupo ${myMembership.grupo.numero}`;
-    const rolLabels = { superintendente:'Superintendente', auxiliar:'Auxiliar', miembro:'Miembro' };
-    document.getElementById('profile-group-role-value').textContent = rolLabels[myMembership.miembro.rol] || 'Miembro';
+    document.getElementById('profile-group-value').textContent = `${t('grupos.grupo-num')} ${myMembership.grupo.numero}`;
+    const rolLabels = { superintendente: t('grupos.rol.superintendente'), auxiliar: t('grupos.rol.auxiliar'), miembro: t('grupos.rol.miembro') };
+    document.getElementById('profile-group-role-value').textContent = rolLabels[myMembership.miembro.rol] || t('grupos.rol.miembro');
     document.getElementById('profile-group-role-row').style.display = '';
     groupSec.style.display = '';
   } else {
@@ -8606,30 +8631,30 @@ function renderAdminGrupos() {
         <div class="grupo-member-avatar" style="background:${memberColor(m.nombre)};width:26px;height:26px;font-size:0.58rem">${memberInitials(m.nombre)}</div>
         <span class="admin-miembro-name" onclick="openEditMiembro('${g.id}','${m.id}')" title="Editar rol y opciones">${m.nombre}</span>
         <div class="admin-miembro-badges">
-          ${m.rol === 'superintendente' ? '<span class="rol-badge rol-s">Super.</span>' : m.rol === 'auxiliar' ? '<span class="rol-badge rol-a">Auxiliar</span>' : ''}
-          ${m.precursor ? '<span class="precursor-badge">Precursor</span>' : ''}
+          ${m.rol === 'superintendente' ? `<span class="rol-badge rol-s">${t('grupos.rol.super-abrev')}</span>` : m.rol === 'auxiliar' ? `<span class="rol-badge rol-a">${t('grupos.rol.auxiliar')}</span>` : ''}
+          ${m.precursor ? `<span class="precursor-badge">${t('grupos.precursor')}</span>` : ''}
         </div>
-        <button class="btn-icon-sm danger" title="Eliminar" onclick="deleteMiembro('${m.id}','${g.id}')">
+        <button class="btn-icon-sm danger" title="${t('btn.eliminar')}" onclick="deleteMiembro('${m.id}','${g.id}')">
           <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
         </button>
-      </div>`).join('') : `<div style="color:var(--text3);font-size:0.82rem;padding:0.5rem 0">Sin miembros</div>`;
+      </div>`).join('') : `<div style="color:var(--text3);font-size:0.82rem;padding:0.5rem 0">${t('grupos.sinmiembros')}</div>`;
     return `<div class="admin-grupo-card">
       <div class="admin-grupo-header" onclick="toggleAdminGrupo('${g.id}')">
         <div class="admin-grupo-num">${g.numero}</div>
-        <div class="admin-grupo-name">Grupo ${g.numero}</div>
+        <div class="admin-grupo-name">${t('grupos.grupo-num')} ${g.numero}</div>
         <div class="admin-grupo-meta">${g.miembros.length} miembro${g.miembros.length !== 1 ? 's' : ''}</div>
         <div class="admin-grupo-actions" onclick="event.stopPropagation()">
-          <button class="btn-icon-sm" title="Editar grupo" onclick="openGrupoModal('${g.id}')">
+          <button class="btn-icon-sm" title="${t('grupos.editar-grupo')}" onclick="openGrupoModal('${g.id}')">
             <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
-          <button class="btn-icon-sm danger" title="Eliminar grupo" onclick="deleteGrupo('${g.id}')">
+          <button class="btn-icon-sm danger" title="${t('grupos.eliminar-grupo')}" onclick="deleteGrupo('${g.id}')">
             <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
           </button>
         </div>
       </div>
       <div class="admin-grupo-body" id="admin-grupo-body-${g.id}" style="display:none">
         <div class="admin-grupo-quickadd-wrap">
-          <input type="text" class="admin-grupo-quickadd" placeholder="Escribe nombre y apellido, presiona Enter…" autocomplete="off"
+          <input type="text" class="admin-grupo-quickadd" data-i18n-ph="grupos.quickadd.placeholder" placeholder="Escribe nombre y apellido, presiona Enter…" autocomplete="off"
             onkeydown="if(event.key==='Enter'){event.preventDefault();quickAddMiembro('${g.id}', this);}">
         </div>
         ${membersHtml}
@@ -18090,7 +18115,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
     </div>
     <div class="wb-ter-picker-search-wrap">
       <svg class="wb-ter-picker-search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input class="wb-ter-picker-search" id="wb-ter-picker-search" type="text" placeholder="Buscar territorio…" oninput="wbFilterTerPicker()" autocomplete="off">
+      <input class="wb-ter-picker-search" id="wb-ter-picker-search" type="text" data-i18n-ph="search.buscar-territorio" placeholder="Buscar territorio…" oninput="wbFilterTerPicker()" autocomplete="off">
     </div>
     <div class="wb-ter-picker-list" id="wb-ter-picker-list"></div>
     <div class="wb-ter-picker-footer">
@@ -18318,7 +18343,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
     </div>
     <div class="vmc-pp-search-wrap">
       <svg class="vmc-pp-search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input class="vmc-pp-search" id="vmc-pp-search" type="text" placeholder="Buscar por nombre…" oninput="vmcPpFilter()" autocomplete="off">
+      <input class="vmc-pp-search" id="vmc-pp-search" type="text" data-i18n-ph="search.buscar-nombre" placeholder="Buscar por nombre…" oninput="vmcPpFilter()" autocomplete="off">
     </div>
     <div class="vmc-pp-list" id="vmc-pp-list"></div>
     <!-- Create person button (shown when no match) -->
