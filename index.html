@@ -1033,14 +1033,14 @@
 
   .detail-actions { display: flex; gap: 0.75rem; padding: 0 1.25rem 1rem; }
   .detail-btn-primary {
-    flex: 1; padding: 0.75rem; border: none; border-radius: 12px;
+    flex: 1; padding: 0.75rem; border: none; border-radius: 999px;
     background: var(--accent); color: white;
     font-family: var(--font); font-size: 0.9rem; font-weight: 700;
     cursor: pointer; transition: opacity 0.2s;
   }
   .detail-btn-primary:hover { opacity: 0.85; }
   .detail-btn-secondary {
-    flex: 1; padding: 0.75rem; border: none; border-radius: 12px;
+    flex: 1; padding: 0.75rem; border: none; border-radius: 999px;
     background: var(--accent-light); color: var(--accent);
     font-family: var(--font); font-size: 0.9rem; font-weight: 700;
     cursor: pointer; transition: all 0.2s;
@@ -6631,7 +6631,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">Intensidad</span>
           <span id="pref-blur-level-label" style="font-size:0.78rem;font-weight:700;color:var(--accent)">Clásico</span>
         </div>
-        <input type="range" id="pref-blur-level-slider" min="1" max="5" step="1" value="4"
+        <input type="range" id="pref-blur-level-slider" min="1" max="6" step="1" value="4"
           oninput="setBlurLevel(parseInt(this.value,10))"
           style="width:100%;accent-color:var(--accent);cursor:pointer">
         <div style="display:flex;justify-content:space-between;margin-top:0.4rem">
@@ -6640,6 +6640,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <div class="pref-blur-dot" id="pref-blur-dot-3"></div>
           <div class="pref-blur-dot" id="pref-blur-dot-4"></div>
           <div class="pref-blur-dot" id="pref-blur-dot-5"></div>
+          <div class="pref-blur-dot" id="pref-blur-dot-6"></div>
         </div>
         <!-- Vista previa en vivo: usa los mismos elementos (pill-back-btn /
              pill-header-title) y variables (--ui-blur, --nav-bg) que el
@@ -6987,7 +6988,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.14.3-beta';
+const APP_VERSION = '1.14.5-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -9175,6 +9176,68 @@ function switchSubTab(tabId) {
     });
   }
 }
+
+// ── Gesto de swipe horizontal (móvil): moverse entre Sub-secciones ──────────
+// Desliza el dedo horizontalmente sobre el contenido para pasar a la
+// Sub-sección anterior/siguiente de la sección principal actual (Predicación,
+// Reuniones), sin tener que alcanzar la NavBar superior. Exclusivo de móvil.
+(function initSubTabSwipeGesture() {
+  const SWIPE_MIN_DIST     = 60;  // px mínimos en horizontal para contar como swipe
+  const SWIPE_MAX_OFF_AXIS = 55;  // px máximos en vertical (si no, es scroll vertical)
+  const SWIPE_MAX_TIME     = 600; // ms máximos entre el inicio y el final del gesto
+  // Elementos donde el swipe NO debe interpretarse como navegación entre
+  // sub-secciones (scrolls horizontales propios, inputs, modales, etc.)
+  const IGNORE_SELECTOR = '.sub-tabs-wrap, .sub-tabs, input, textarea, select, ' +
+    '.options-dropdown, .h2h-sidebar, .modal-overlay, .app-header-shell, [data-no-swipe]';
+
+  let startX = 0, startY = 0, startT = 0, tracking = false;
+
+  function getSwipeTabList() {
+    return (SUB_TABS[currentMainTab] || []).filter(t => t.id !== 'carritos' || carritosVisibleForCurrentUser());
+  }
+
+  function onTouchStart(e) {
+    tracking = false;
+    if (!isMobile()) return;
+    const target = e.target;
+    if (target.closest && target.closest(IGNORE_SELECTOR)) return;
+    if (getSwipeTabList().length < 2) return;
+    const touch = e.touches[0];
+    startX = touch.clientX; startY = touch.clientY; startT = Date.now();
+    tracking = true;
+  }
+
+  function onTouchEnd(e) {
+    if (!tracking) return;
+    tracking = false;
+    const touch = e.changedTouches[0];
+    const dx = touch.clientX - startX;
+    const dy = touch.clientY - startY;
+    const dt = Date.now() - startT;
+    if (dt > SWIPE_MAX_TIME) return;
+    if (Math.abs(dy) > SWIPE_MAX_OFF_AXIS) return;
+    if (Math.abs(dx) < SWIPE_MIN_DIST) return;
+
+    const tabs = getSwipeTabList();
+    const idx = tabs.findIndex(t => t.id === currentSubTab);
+    if (idx === -1) return;
+    // Deslizar de izquierda a derecha (dx > 0) → sub-sección anterior
+    // Deslizar de derecha a izquierda (dx < 0) → sub-sección siguiente
+    const nextIdx = dx > 0 ? idx - 1 : idx + 1;
+    if (nextIdx < 0 || nextIdx >= tabs.length) return; // ya está en un extremo
+
+    switchSubTab(tabs[nextIdx].id);
+    const btn = document.querySelector(`#sub-tabs-wrap .sub-tab[onclick*="'${tabs[nextIdx].id}'"]`);
+    if (btn && btn.scrollIntoView) btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const mainContentEl = document.querySelector('.main-content');
+    if (!mainContentEl) return;
+    mainContentEl.addEventListener('touchstart', onTouchStart, { passive: true });
+    mainContentEl.addEventListener('touchend', onTouchEnd, { passive: true });
+  });
+})();
 
 // ── Admin Shortcut Banners ────────────────────────────────────────────────────
 // Maps viewer sub-tab → admin tab key (used in switchAdminTab)
@@ -13584,16 +13647,17 @@ const BLUR_LEVELS = [
   { blur: 26, alpha: 0.58 },
   { blur: 34, alpha: 0.50 },
   { blur: 46, alpha: 0.34 },
+  { blur: 60, alpha: 0.20 },
 ];
 function isTransparencyEnabled() {
   return localStorage.getItem('fleming_transparency') !== 'false'; // default true
 }
 function getBlurLevel() {
   const v = parseInt(localStorage.getItem('fleming_blur_level') || '4', 10);
-  return Math.min(5, Math.max(1, isNaN(v) ? 4 : v));
+  return Math.min(6, Math.max(1, isNaN(v) ? 4 : v));
 }
 function setBlurLevel(level) {
-  localStorage.setItem('fleming_blur_level', String(Math.min(5, Math.max(1, level))));
+  localStorage.setItem('fleming_blur_level', String(Math.min(6, Math.max(1, level))));
   applyTransparencyPref();
   updateTransparencyToggleUI();
 }
@@ -13630,13 +13694,13 @@ function updateTransparencyToggleUI() {
   const level = getBlurLevel();
   if (sliderWrap) sliderWrap.style.display = enabled ? '' : 'none';
   if (slider) slider.value = String(level);
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 6; i++) {
     const dot = document.getElementById('pref-blur-dot-' + i);
     if (dot) dot.classList.toggle('active', i <= level);
   }
   const label = document.getElementById('pref-blur-level-label');
   if (label) {
-    const labels = ['Mínimo', 'Sutil', 'Medio', 'Clásico', 'Máximo'];
+    const labels = ['Mínimo', 'Sutil', 'Medio', 'Clásico', 'Máximo', 'Extremo'];
     label.textContent = labels[level - 1];
   }
 }
