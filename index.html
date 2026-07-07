@@ -6390,6 +6390,14 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       </div>
 
       <div class="form-group2">
+        <label class="form-label2">Usuario Amo de Casa</label>
+        <select class="form-select" id="casa-amo-user">
+          <option value="">Sin usuario vinculado</option>
+        </select>
+        <div style="font-size:0.72rem;color:var(--text3);margin-top:5px">Si vinculas un usuario registrado, recibirá una notificación de la plataforma cada vez que se asigne esta casa.</div>
+      </div>
+
+      <div class="form-group2">
         <label class="form-label2">Días disponibles</label>
         <div class="dias-picker" id="casa-dias-picker">
           <!-- Rendered by JS -->
@@ -7218,7 +7226,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.14.12-beta';
+const APP_VERSION = '1.14.13-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -10881,6 +10889,40 @@ function asDateChanged() {
     wrap.classList.remove('visible');
   }
 }
+// ── Notifica al Usuario Amo de Casa (vinculado en la ficha de la Casa) cuando
+//    su casa es asignada a una nueva predicación de casa en casa. Solo se
+//    dispara cuando la casa recién queda vinculada a este turno (creación de
+//    la asignación, o edición donde se cambió a esta casa) — no en cada edición
+//    menor que no toque la casa. ──────────────────────────────────────────────
+async function maybeNotifyCasaAmo(casa, payload, oldCasaId) {
+  if (!casa || !casa.amo_user) return;
+  if (oldCasaId !== undefined && oldCasaId === casa.id) return; // la casa no cambió: no repetir el aviso
+  const d = new Date(payload.date + 'T00:00:00');
+  const fecha = typeof fmtCasaLongDate === 'function' ? fmtCasaLongDate(d) : d.toLocaleDateString('es-CL', { weekday:'long', day:'numeric', month:'long' });
+  const tpl = renderTemplate('casa_asignada', {
+    direccion: casa.direccion || '',
+    fecha,
+    hora: payload.time ? payload.time.substring(0,5) : '',
+    encargado: payload.conductor || '',
+  });
+  const targetName = casa.amo_user.trim().toLowerCase();
+  try {
+    await sb.from('notifications').insert({
+      title: tpl.title,
+      body: tpl.body,
+      target_names: [targetName],
+      notif_category: 'casa',
+    });
+    await fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+      body: JSON.stringify({ title: tpl.title, body: tpl.body, target_names: [targetName] })
+    }).catch(() => {});
+  } catch (err) {
+    console.warn('No se pudo notificar al Amo de Casa:', err.message);
+  }
+}
+
 async function saveAssignment() {
   if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   const conductorId = document.getElementById('as-conductor-select').value || null;
@@ -10967,6 +11009,7 @@ async function saveAssignment() {
     const { error: updErr } = await robustSave(payload);
     btn.disabled = false; btn.textContent = 'Guardar';
     if (updErr) { showError('as-error', updErr.message); return; }
+    await maybeNotifyCasaAmo(casa, payload, oldAssign ? (oldAssign.casa_id || null) : null);
 
     // 3. Detectar cambios relevantes para notificar
     const hasChanged = !oldAssign || (
@@ -11015,6 +11058,7 @@ async function saveAssignment() {
     const { error: insErr } = await robustSave(payload);
     btn.disabled = false; btn.textContent = 'Guardar';
     if (insErr) { showError('as-error', insErr.message); return; }
+    await maybeNotifyCasaAmo(casa, payload);
   }
 
   showToast(editingAssignmentId ? 'Asignación actualizada' : 'Asignación creada', 'success');
@@ -12892,7 +12936,31 @@ function openCasaModal(h) {
   document.getElementById('casa-tipo').value = parseCasaTipo(h);
   renderDiasPicker(parseCasaDias(h));
   document.getElementById('casa-error').style.display = 'none';
+  populateCasaAmoUserSelect(h?.amo_user || '');
   document.getElementById('casa-modal').classList.add('open');
+}
+// Rellena el selector de "Usuario Amo de Casa" con los usuarios registrados de
+// la plataforma (rol viewer/admin/dev, excluyendo cuentas 'pending'), dejando
+// preseleccionado el usuario ya vinculado si corresponde.
+async function populateCasaAmoUserSelect(selectedName) {
+  const sel = document.getElementById('casa-amo-user');
+  if (!sel) return;
+  if (!activeUsers.length) { await loadUsers(); }
+  const opts = activeUsers
+    .filter(u => u.role !== 'pending')
+    .slice()
+    .sort((a,b) => (a.name||'').localeCompare(b.name||''));
+  sel.innerHTML = '<option value="">Sin usuario vinculado</option>' +
+    opts.map(u => `<option value="${u.name.replace(/"/g,'&quot;')}">${u.name}</option>`).join('');
+  sel.value = selectedName || '';
+  // Si el usuario vinculado ya no existe en la lista (ej. fue eliminado), lo
+  // agregamos igual como opción para no perder el dato guardado silenciosamente.
+  if (selectedName && sel.value !== selectedName) {
+    sel.insertAdjacentHTML('beforeend', `<option value="${selectedName.replace(/"/g,'&quot;')}">${selectedName} (no encontrado)</option>`);
+    sel.value = selectedName;
+  }
+  // Refresca la lista en segundo plano por si acaba de cambiar en otra pestaña.
+  loadUsers();
 }
 function closeCasaModal() { document.getElementById('casa-modal').classList.remove('open'); editingCasaId = null; }
 function editCasa(id) { openCasaModal(casas.find(h=>h.id===id)); }
@@ -12900,15 +12968,25 @@ async function saveCasa() {
   if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   const direccion = document.getElementById('casa-direccion').value.trim();
   const amo = document.getElementById('casa-amo').value.trim();
+  const amoUser = document.getElementById('casa-amo-user').value.trim();
   const tipo = document.getElementById('casa-tipo').value;
   const dias = JSON.stringify([..._selectedDias]);
   if (!direccion) { showError('casa-error','La dirección es requerida'); return; }
   const btn = document.getElementById('save-casa-btn');
   btn.disabled = true; btn.textContent = 'Guardando...';
-  const payload = { direccion, amo, tipo, dias };
+  const payload = { direccion, amo, tipo, dias, amo_user: amoUser || null };
   let error;
   if (editingCasaId) { ({error} = await sb.from('casas').update(payload).eq('id',editingCasaId)); }
   else { ({error} = await sb.from('casas').insert(payload)); }
+  // Si la columna amo_user todavía no existe en Supabase, reintenta sin ella
+  // para no bloquear el guardado del resto de los datos de la casa.
+  if (error && error.message && error.message.includes('amo_user')) {
+    const pl2 = { ...payload }; delete pl2.amo_user;
+    ({error} = editingCasaId
+      ? await sb.from('casas').update(pl2).eq('id',editingCasaId)
+      : await sb.from('casas').insert(pl2));
+    if (!error) console.warn('La columna "amo_user" no existe todavía en la tabla casas — el vínculo con el usuario no se guardó.');
+  }
   btn.disabled = false; btn.textContent = 'Guardar';
   if (error) { showError('casa-error', error.message); return; }
   showToast(editingCasaId?'Casa actualizada':'Casa creada','success');
@@ -16026,6 +16104,14 @@ const NOTIF_TEMPLATES_DEFAULT = [
     title: 'Nueva asignación en reunión',
     body: 'Se te ha asignado {roles} para la semana del {rango}. Revisa los detalles.',
     vars: ['roles', 'rango'],
+  },
+  {
+    id: 'casa_asignada',
+    label: 'Casa Asignada (Amo de Casa)',
+    desc: 'Se envía al Usuario Amo de Casa vinculado cuando su casa es asignada a una predicación de casa en casa.',
+    title: 'Tu casa fue asignada',
+    body: 'Tu casa ({direccion}) fue asignada para el {fecha} a las {hora}hrs, con {encargado} como encargado.',
+    vars: ['direccion', 'fecha', 'hora', 'encargado'],
   },
   {
     id: 'solicitud_cuenta',
