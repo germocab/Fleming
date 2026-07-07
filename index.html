@@ -4058,26 +4058,53 @@
   .detail-share-btn:hover { background: var(--surface3); }
   .detail-share-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
 
-  /* ── Tarjeta compartible (renderizada fuera de pantalla y capturada a PNG) ── */
+  /* ── Tarjeta compartible (renderizada fuera de pantalla y capturada a PNG) ──
+     v1.14.11.5-beta: se acerca al lenguaje visual de la propia plataforma
+     (mismas formas redondeadas, chips e iconografía que .no-pasar-item /
+     .detail-ter-badge), y ya no repite Dirección/Fecha-Hora abajo (quedan
+     arriba, en el header). Su alto crece libremente según la cantidad de
+     direcciones No Pasar, para que siempre quepan todas. ── */
   .share-card {
     width: 720px; font-family: var(--font); background: #ffffff; color: #111;
-    border-radius: 22px; overflow: hidden; border: 1px solid #e5e5ea;
+    border-radius: 24px; overflow: hidden; border: 1px solid #e5e5ea;
   }
   .share-card-header {
-    padding: 22px 26px; background: linear-gradient(135deg, #007AFF, #0051d5); color: #fff;
+    padding: 26px 28px 22px; background: linear-gradient(135deg, #007AFF, #0051d5); color: #fff;
   }
-  .share-card-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.85; }
-  .share-card-title { font-size: 24px; font-weight: 800; margin-top: 4px; }
-  .share-card-sub { font-size: 14px; font-weight: 500; opacity: 0.92; margin-top: 2px; }
+  .share-card-eyebrow {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    background: rgba(255,255,255,0.16); padding: 4px 11px; border-radius: 20px;
+  }
+  .share-card-title { font-size: 25px; font-weight: 800; margin-top: 12px; line-height: 1.25; }
+  .share-card-sub { font-size: 14.5px; font-weight: 600; opacity: 0.92; margin-top: 4px; }
   .share-card-map { width: 100%; display: block; background: #f2f2f7; }
-  .share-card-body { padding: 20px 26px 24px; }
-  .share-card-row { display: flex; gap: 14px; padding: 10px 0; border-bottom: 1px solid #f0f0f2; }
-  .share-card-row:last-child { border-bottom: none; }
-  .share-card-row-label { width: 130px; flex-shrink: 0; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: #8e8e93; }
-  .share-card-row-value { font-size: 15px; font-weight: 600; color: #111; flex: 1; }
-  .share-card-nopasar-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: #ff3b30; margin: 14px 0 6px; }
-  .share-card-nopasar-item { font-size: 13.5px; color: #333; padding: 3px 0; }
-  .share-card-footer { padding: 12px 26px; background: #f8f8fa; font-size: 11px; color: #a0a0a5; text-align: center; }
+  .share-card-body { padding: 22px 28px 26px; }
+  .share-card-row {
+    display: flex; align-items: center; gap: 14px;
+    background: #f8f8fa; border: 1px solid #ececef; border-radius: 14px;
+    padding: 12px 16px; margin-bottom: 10px;
+  }
+  .share-card-row-icon {
+    width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+    background: rgba(0,122,255,0.12); color: #007AFF;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .share-card-row-icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
+  .share-card-row-label { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: #8e8e93; }
+  .share-card-row-value { font-size: 16px; font-weight: 700; color: #111; margin-top: 1px; }
+  .share-card-nopasar-title {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 13px; font-weight: 700; color: #ff3b30; margin: 18px 0 8px;
+  }
+  .share-card-nopasar-title svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2.2; }
+  .share-card-nopasar-item {
+    background: #fff5f5; border: 1px solid #ffd9d6; border-radius: 12px;
+    padding: 9px 14px; margin-bottom: 7px; font-size: 14px; color: #333;
+  }
+  .share-card-nopasar-addr { font-weight: 700; color: #b91c1c; }
+  .share-card-nopasar-motivo { font-size: 12.5px; color: #8e8e93; margin-top: 1px; }
+  .share-card-footer { padding: 14px 28px; background: #f8f8fa; font-size: 11px; color: #a0a0a5; text-align: center; }
 
   /* ── Gestor de Notificaciones ─────────────────────────────────────────────── */
   .notif-gestor-card {
@@ -7158,7 +7185,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.14.10-beta';
+const APP_VERSION = '1.14.11.5-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -10454,21 +10481,42 @@ async function _liveRequestNotifPermission() {
   return perm === 'granted';
 }
 
-function _liveSendBrowserNotif(streetName, count, territoryNum) {
+// NOTA (v1.14.11-beta): antes se usaba `new Notification(...)` directamente.
+// Android (Chrome) NO soporta ese constructor cuando la página está bajo el
+// control de un Service Worker — simplemente no hace nada, sin lanzar error
+// visible. Por eso en iPhone sí llegaban (Safari lo tolera) y en Android no.
+// La forma correcta y compatible con ambas plataformas es pedirle al Service
+// Worker que muestre la notificación con showNotification().
+async function _liveSendBrowserNotif(streetName, count, territoryNum) {
+  if (!count || count <= 0) return; // nada que avisar: la calle no tiene No Pasar
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
   const title = count + ' No Pasar en esta calle';
   const body  = streetName + ' \u2014 Territorio ' + territoryNum + '. Toca para ver los detalles.';
-  const notif = new Notification(title, {
+  const options = {
     body: body,
     icon: 'icons/apple-touch-icon.png',
     badge: 'icons/favicon-32x32.png',
     tag: 'live-no-pasar',
     requireInteraction: false,
-  });
-  notif.onclick = function() { window.focus(); notif.close(); };
+  };
+  try {
+    if ('serviceWorker' in navigator) {
+      const registration = await navigator.serviceWorker.ready;
+      await registration.showNotification(title, options);
+      return;
+    }
+  } catch (e) {
+    console.warn('[Live] showNotification vía Service Worker falló, probando fallback:', e);
+  }
+  // Fallback solo para navegadores sin Service Worker activo (no aplica a Android).
+  try {
+    const notif = new Notification(title, options);
+    notif.onclick = function() { window.focus(); notif.close(); };
+  } catch (e) { console.warn('[Live] No se pudo mostrar la notificación:', e); }
 }
 
 async function _liveSendInternalNotif(streetName, count, territoryNum) {
+  if (!count || count <= 0) return; // nada que avisar: la calle no tiene No Pasar
   if (!currentUser) return;
   const userName = currentUser.name || 'Usuario';
   const title = 'Live \u2014 ' + count + ' No Pasar en ' + streetName;
@@ -20361,17 +20409,33 @@ function ensureHtml2Canvas() {
   return _html2canvasLoadPromise;
 }
 
-// config: { eyebrow, titulo, subtitulo, mapaSrc, filas:[{label,value}], noPasar:[{addr,motivo}] }
+// config: { eyebrow, titulo, subtitulo, mapaSrc, filas:[{label,value,icon}], noPasar:[{addr,motivo}] }
+const SHARE_CARD_ICONS = {
+  encargado: '<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  territorio: '<svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>',
+};
+
 function buildShareCardHTML(config) {
+  // Solo Encargado y Territorio abajo — Dirección y Fecha/Hora ya se muestran
+  // en el header, no hace falta repetirlas.
   const filasHTML = (config.filas || []).filter(f => f.value).map(f => `
     <div class="share-card-row">
-      <div class="share-card-row-label">${f.label}</div>
-      <div class="share-card-row-value">${f.value}</div>
+      <div class="share-card-row-icon">${SHARE_CARD_ICONS[f.icon] || SHARE_CARD_ICONS.encargado}</div>
+      <div>
+        <div class="share-card-row-label">${f.label}</div>
+        <div class="share-card-row-value">${f.value}</div>
+      </div>
     </div>`).join('');
 
   const noPasarHTML = (config.noPasar && config.noPasar.length) ? `
-    <div class="share-card-nopasar-title">Direcciones No Pasar</div>
-    ${config.noPasar.map(e => `<div class="share-card-nopasar-item">• ${e.addr}${e.motivo ? ' — ' + e.motivo : ''}</div>`).join('')}
+    <div class="share-card-nopasar-title">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.9" y1="4.9" x2="19.1" y2="19.1"/></svg>
+      Direcciones No Pasar (${config.noPasar.length})
+    </div>
+    ${config.noPasar.map(e => `<div class="share-card-nopasar-item">
+      <div class="share-card-nopasar-addr">${e.addr}</div>
+      ${e.motivo ? `<div class="share-card-nopasar-motivo">${e.motivo}</div>` : ''}
+    </div>`).join('')}
   ` : '';
 
   const mapaHTML = config.mapaSrc ? `<img class="share-card-map" src="${config.mapaSrc}">` : '';
@@ -20463,10 +20527,8 @@ function shareCasaEnCasaAssignment() {
     subtitulo: [dateLabel, time].filter(Boolean).join(' · '),
     mapaSrc,
     filas: [
-      { label: 'Dirección', value: address },
-      { label: 'Encargado', value: conductor },
-      { label: 'Territorio', value: terBadge },
-      { label: 'Fecha y Hora', value: [dateLabel, time].filter(Boolean).join(' — ') },
+      { label: 'Encargado', value: conductor, icon: 'encargado' },
+      { label: 'Territorio', value: terBadge, icon: 'territorio' },
     ],
     noPasar,
   });
