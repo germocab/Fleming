@@ -7160,24 +7160,24 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 </div>
 
 <!-- Contenedor oculto usado para renderizar la tarjeta que se convierte en PNG al compartir una asignación -->
-<div id="share-png-offscreen" style="position:fixed;left:-9999px;top:0;z-index:-1;pointer-events:none"></div>
+<div id="share-pdf-offscreen" style="position:fixed;left:-9999px;top:0;z-index:-1;pointer-events:none"></div>
 
-<!-- Modal: vista previa de la tarjeta PNG antes de compartir/descargar -->
-<div class="modal-overlay" id="share-png-modal">
+<!-- Modal: vista previa del PDF antes de compartir/descargar -->
+<div class="modal-overlay" id="share-pdf-modal">
   <div class="modal" style="max-width:460px">
     <div class="modal-header">
       <div class="modal-title">Compartir asignación</div>
-      <button class="modal-close" onclick="closeSharePngModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <button class="modal-close" onclick="closeSharePdfModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="modal-body" style="text-align:center">
-      <div id="share-png-preview-wrap" style="border-radius:14px;overflow:hidden;border:1px solid var(--border);margin-bottom:1rem">
-        <img id="share-png-preview-img" style="width:100%;display:block" alt="Vista previa">
+      <div id="share-pdf-preview-wrap" style="border-radius:14px;overflow:hidden;border:1px solid var(--border);margin-bottom:1rem;display:none">
+        <iframe id="share-pdf-preview-frame" style="width:100%;height:420px;border:none;display:block;background:#525659" title="Vista previa del PDF"></iframe>
       </div>
-      <div id="share-png-loading" class="loader-wrap"><div class="loader"></div><div class="loader-caption">Generando imagen…</div></div>
+      <div id="share-pdf-loading" class="loader-wrap"><div class="loader"></div><div class="loader-caption">Generando PDF en alta calidad…</div></div>
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" onclick="closeSharePngModal()">Cerrar</button>
-      <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" id="share-png-action-btn" onclick="doShareOrDownloadPng()">Compartir / Descargar</button>
+      <button class="btn-secondary" onclick="closeSharePdfModal()">Cerrar</button>
+      <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" id="share-pdf-action-btn" onclick="doShareOrDownloadPdf()">Compartir / Descargar</button>
     </div>
   </div>
 </div>
@@ -7185,7 +7185,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.14.11.5-beta';
+const APP_VERSION = '1.14.11.6-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -20387,12 +20387,13 @@ switchSubTab = function(tabId) {
 };
 
 /* ══════════════════════════════════════════════════════════════════════════
-   COMPARTIR ASIGNACIONES COMO IMAGEN PNG (v1.14.9-beta)
+   COMPARTIR ASIGNACIONES COMO PDF (v1.14.11.6-beta)
    ══════════════════════════════════════════════════════════════════════════
-   Genera una tarjeta con Mapa de territorio (si corresponde), Direcciones
-   No Pasar, Dirección, Encargado, Territorio, Fecha y Hora — y la convierte
-   en una imagen PNG lista para compartir a personas fuera de la plataforma
-   (usa Web Share API si está disponible; si no, descarga el archivo).
+   Genera un PDF con Mapa de territorio (si corresponde) en alta calidad,
+   Encargado, Territorio y TODAS las Direcciones No Pasar — sin límite de
+   espacio: si hay muchas, el documento simplemente ocupa varias páginas.
+   Usa jsPDF (con html2canvas por debajo) en vez de una sola imagen PNG,
+   para no perder calidad ni recortar contenido.
    ══════════════════════════════════════════════════════════════════════════ */
 
 let _html2canvasLoadPromise = null;
@@ -20407,6 +20408,20 @@ function ensureHtml2Canvas() {
     document.head.appendChild(s);
   });
   return _html2canvasLoadPromise;
+}
+
+let _jsPdfLoadPromise = null;
+function ensureJsPDF() {
+  if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve();
+  if (_jsPdfLoadPromise) return _jsPdfLoadPromise;
+  _jsPdfLoadPromise = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+  return _jsPdfLoadPromise;
 }
 
 // config: { eyebrow, titulo, subtitulo, mapaSrc, filas:[{label,value,icon}], noPasar:[{addr,motivo}] }
@@ -20455,17 +20470,17 @@ function buildShareCardHTML(config) {
   </div>`;
 }
 
-let _lastSharePngBlob = null;
-let _lastSharePngFilename = 'asignacion-fleming.png';
+let _lastSharePdfBlob = null;
+let _lastSharePdfFilename = 'asignacion-fleming.pdf';
 
-async function generateAndShowSharePng(config) {
-  document.getElementById('share-png-modal').classList.add('open');
-  document.getElementById('share-png-preview-img').style.display = 'none';
-  document.getElementById('share-png-loading').style.display = '';
+async function generateAndShowSharePdf(config) {
+  document.getElementById('share-pdf-modal').classList.add('open');
+  document.getElementById('share-pdf-preview-wrap').style.display = 'none';
+  document.getElementById('share-pdf-loading').style.display = '';
 
   try {
-    await ensureHtml2Canvas();
-    const offscreen = document.getElementById('share-png-offscreen');
+    await Promise.all([ensureHtml2Canvas(), ensureJsPDF()]);
+    const offscreen = document.getElementById('share-pdf-offscreen');
     offscreen.innerHTML = buildShareCardHTML(config);
     const cardEl = offscreen.firstElementChild;
 
@@ -20473,28 +20488,42 @@ async function generateAndShowSharePng(config) {
     const imgs = cardEl.querySelectorAll('img');
     await Promise.all([...imgs].map(img => img.complete ? Promise.resolve() : new Promise(res => { img.onload = res; img.onerror = res; })));
 
-    const canvas = await html2canvas(cardEl, { backgroundColor: '#ffffff', scale: 2, useCORS: true });
-    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
-    _lastSharePngBlob = blob;
-    _lastSharePngFilename = (config.titulo || 'asignacion').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-fleming.png';
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'px', format: [cardEl.offsetWidth, cardEl.offsetWidth * 1.6], hotfixes: ['px_scaling'] });
 
-    document.getElementById('share-png-preview-img').src = URL.createObjectURL(blob);
-    document.getElementById('share-png-preview-img').style.display = '';
+    await new Promise((resolve, reject) => {
+      doc.html(cardEl, {
+        html2canvas: { backgroundColor: '#ffffff', scale: 2.5, useCORS: true },
+        autoPaging: 'text', // reparte el contenido en varias páginas si no cabe en una — así nunca se corta ni se pierde nada
+        margin: 0,
+        width: cardEl.offsetWidth,
+        windowWidth: cardEl.offsetWidth,
+        callback: () => resolve(),
+      });
+      setTimeout(() => reject(new Error('Tiempo de espera agotado generando el PDF')), 25000);
+    });
+
+    const blob = doc.output('blob');
+    _lastSharePdfBlob = blob;
+    _lastSharePdfFilename = (config.titulo || 'asignacion').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-fleming.pdf';
+
+    document.getElementById('share-pdf-preview-frame').src = URL.createObjectURL(blob);
+    document.getElementById('share-pdf-preview-wrap').style.display = '';
   } catch (e) {
-    console.error('generateAndShowSharePng:', e);
-    showToast('No se pudo generar la imagen', 'error');
+    console.error('generateAndShowSharePdf:', e);
+    showToast('No se pudo generar el PDF', 'error');
   } finally {
-    document.getElementById('share-png-loading').style.display = 'none';
+    document.getElementById('share-pdf-loading').style.display = 'none';
   }
 }
 
-function closeSharePngModal() {
-  document.getElementById('share-png-modal').classList.remove('open');
+function closeSharePdfModal() {
+  document.getElementById('share-pdf-modal').classList.remove('open');
 }
 
-async function doShareOrDownloadPng() {
-  if (!_lastSharePngBlob) return;
-  const file = new File([_lastSharePngBlob], _lastSharePngFilename, { type: 'image/png' });
+async function doShareOrDownloadPdf() {
+  if (!_lastSharePdfBlob) return;
+  const file = new File([_lastSharePdfBlob], _lastSharePdfFilename, { type: 'application/pdf' });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
       await navigator.share({ files: [file], title: 'Asignación Fleming' });
@@ -20502,8 +20531,8 @@ async function doShareOrDownloadPng() {
     } catch (e) { /* el usuario canceló el share sheet, o falló: caemos a descarga */ }
   }
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(_lastSharePngBlob);
-  a.download = _lastSharePngFilename;
+  a.href = URL.createObjectURL(_lastSharePdfBlob);
+  a.download = _lastSharePdfFilename;
   a.click();
 }
 
@@ -20518,10 +20547,17 @@ function shareCasaEnCasaAssignment() {
   const mapImg    = document.getElementById('detail-map-img');
   const mapaSrc   = (mapImg && mapImg.style && document.getElementById('detail-map-wrap')?.style.display !== 'none') ? mapImg.src : null;
 
-  const noPasarEls = [...document.querySelectorAll('#detail-no-pasar-list [data-addr]')];
-  const noPasar = noPasarEls.map(el => ({ addr: el.dataset.addr, motivo: el.dataset.motivo || '' }));
+  // NOTA (fix v1.14.11.6-beta): las tarjetas reales de No Pasar (ver
+  // renderNoPasarList) NO tienen atributos data-addr/data-motivo — antes se
+  // buscaban con `[data-addr]`, que nunca coincidía con nada, por lo que la
+  // lista siempre salía vacía. Ahora se extrae del texto real de cada tarjeta.
+  const noPasarEls = [...document.querySelectorAll('#detail-no-pasar-list .no-pasar-item')];
+  const noPasar = noPasarEls.map(el => ({
+    addr: el.querySelector('.no-pasar-item-addr')?.textContent?.trim() || '',
+    motivo: el.querySelector('.no-pasar-item-desc')?.textContent?.trim() || '',
+  })).filter(e => e.addr);
 
-  generateAndShowSharePng({
+  generateAndShowSharePdf({
     eyebrow: 'Casa en casa',
     titulo: address || 'Asignación',
     subtitulo: [dateLabel, time].filter(Boolean).join(' · '),
