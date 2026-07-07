@@ -4046,10 +4046,12 @@
     flex-shrink: 0;
   }
 
-  /* ── Botón "Compartir" en el detalle de una asignación ────────────────────── */
+  /* ── Botón "Compartir" — al final del panel de detalle, respeta los mismos
+     márgenes horizontales que el resto de las secciones del panel ── */
+  .detail-share-wrap { padding: 0.4rem 1.25rem 1.5rem; }
   .detail-share-btn {
     display: flex; align-items: center; justify-content: center; gap: 7px;
-    width: 100%; border-radius: 12px; padding: 0.65rem; margin-top: 8px;
+    width: 100%; border-radius: 12px; padding: 0.65rem;
     background: var(--surface2); border: 1px solid var(--border); color: var(--text2);
     font-family: var(--font); font-size: 0.85rem; font-weight: 600; cursor: pointer;
   }
@@ -5615,7 +5617,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       <div class="admin-tabs-row" data-section="fleming">
         <button class="admin-tab" data-tab="usuarios" data-i18n="admin.tab.usuarios" onclick="switchAdminTab('usuarios')">Usuarios</button>
         <button class="admin-tab" id="admin-tab-notificaciones" data-tab="notificaciones" data-i18n="admin.tab.notificaciones" onclick="switchAdminTab('notificaciones')" style="display:none">Notificaciones</button>
-        <button class="admin-tab" data-tab="informaciones" data-i18n="Informaciones" onclick="switchAdminTab('informaciones')">Informaciones</button>
+        <button class="admin-tab" data-tab="informaciones" data-i18n="admin.tab.informaciones" onclick="switchAdminTab('informaciones')">Informaciones</button>
       </div>
       <div class="admin-section active" id="admin-assignments">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
@@ -7107,7 +7109,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       <div class="form-group2">
         <label class="form-label2">Encargado</label>
         <select class="form-select" id="info-edit-encargado-user" onchange="document.getElementById('info-edit-encargado-nombre').style.display = this.value ? 'none' : ''; document.getElementById('info-edit-encargado-nombre').value='';">
-          <option value="">—Seleccionar hermano—</option>
+          <option value="">— Escribir nombre manualmente —</option>
         </select>
         <input type="text" class="form-input" id="info-edit-encargado-nombre" placeholder="Nombre del encargado" style="margin-top:8px">
       </div>
@@ -7115,7 +7117,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       <div class="form-group2">
         <label class="form-label2">Auxiliar <span style="font-weight:400;color:var(--text3)">(opcional)</span></label>
         <select class="form-select" id="info-edit-auxiliar-user" onchange="document.getElementById('info-edit-auxiliar-nombre').style.display = this.value ? 'none' : ''; document.getElementById('info-edit-auxiliar-nombre').value='';">
-          <option value="">—Seleccionar hermano—</option>
+          <option value="">— Escribir nombre manualmente —</option>
         </select>
         <input type="text" class="form-input" id="info-edit-auxiliar-nombre" placeholder="Nombre del auxiliar (opcional)" style="margin-top:8px">
       </div>
@@ -7156,7 +7158,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.14.9-beta';
+const APP_VERSION = '1.14.10-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -7769,17 +7771,12 @@ async function debugPush() {
 // ── Grupos de Servicio ────────────────────────────────────────────────────────
 let grupos = [];
 
-// ── Paleta de colores de Grupos de Servicio (compartida entre la sub-sección
-//    "Grupos" y las mini-cards de "Otros grupos" del sábado en Casa en casa,
-//    para que el color de un grupo sea siempre el mismo en toda la plataforma). ──
-const GRUPO_COLORS = [
-  '#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6',
-  '#06b6d4','#ec4899','#f97316','#84cc16','#64748b',
-  '#6366f1','#14b8a6','#eab308','#dc2626','#a855f7',
-];
+// ── Color de los Grupos de Servicio: unificado (mismo azul de la marca) para
+//    que toda la plataforma se vea visualmente cohesiva — antes cada grupo
+//    tenía un color distinto de una paleta; ahora todos usan --accent. ──
+const GRUPO_COLOR_UNICO = '#3b82f6';
 function grupoColorFor(numero) {
-  const idx = grupos.findIndex(g => g.numero === numero);
-  return GRUPO_COLORS[(idx >= 0 ? idx : 0) % GRUPO_COLORS.length];
+  return GRUPO_COLOR_UNICO;
 }
 let editingGrupoId = null;
 let editingMiembroId = null;
@@ -20475,16 +20472,18 @@ function shareCasaEnCasaAssignment() {
   });
 }
 
-// Inserta el botón "Compartir" en el panel de detalle de asignaciones (junto
-// al botón "Reportar Territorio"), sin afectar el resto del panel.
+// Inserta el botón "Compartir" al final absoluto del panel de detalle (después
+// de No Pasar y cualquier otro contenido), respetando los mismos márgenes
+// horizontales que el resto de las secciones del panel.
 (function injectShareButtonInDetail() {
-  const actions = document.getElementById('detail-actions');
-  if (!actions || actions.querySelector('.detail-share-btn')) return;
-  const btn = document.createElement('button');
-  btn.className = 'detail-share-btn';
-  btn.innerHTML = `<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg> Compartir`;
-  btn.onclick = shareCasaEnCasaAssignment;
-  actions.parentNode.insertBefore(btn, actions.nextSibling);
+  const panel = document.getElementById('detail-panel');
+  if (!panel || panel.querySelector('.detail-share-wrap')) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'detail-share-wrap';
+  wrap.innerHTML = `<button class="detail-share-btn" onclick="shareCasaEnCasaAssignment()">
+    <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg> Compartir
+  </button>`;
+  panel.appendChild(wrap);
 })();
 </script>
 </body>
