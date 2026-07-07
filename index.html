@@ -6298,7 +6298,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <!-- ── Preferencias (fullscreen overlay) — pantalla principal ── -->
 <div id="page-preferencias" class="">
   <nav class="subpage-topbar">
-    <button class="pill-back-btn" onclick="closePreferencias()" title="Inicio">
+    <button class="pill-back-btn" onclick="closePreferencias()" title="Inicio" data-i18n-title="nav.inicio">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
     <span class="pill-header-title" data-i18n="settings.title">Configuración</span>
@@ -6399,7 +6399,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <!-- ── Sub-pantalla: Preferencias (Idioma + Apariencia unidos) ── -->
 <div id="page-pref-preferencias" class="pref-subpage">
   <nav class="subpage-topbar">
-    <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración">
+    <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración" data-i18n-title="settings.title">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
     <span class="pill-header-title" data-i18n="settings.preferencias">Preferencias</span>
@@ -6497,7 +6497,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <!-- ── Sub-pantalla: Funciones especiales ── -->
 <div id="page-pref-funciones" class="pref-subpage">
   <nav class="subpage-topbar">
-    <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración">
+    <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración" data-i18n-title="settings.title">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
     <span class="pill-header-title" data-i18n="settings.funciones">Funciones especiales</span>
@@ -6578,7 +6578,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <!-- ── Sub-pantalla: Notificaciones ── -->
 <div id="page-pref-notificaciones" class="pref-subpage">
   <nav class="subpage-topbar">
-    <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración">
+    <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración" data-i18n-title="settings.title">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
     <span class="pill-header-title" data-i18n="settings.notificaciones">Notificaciones</span>
@@ -6593,10 +6593,10 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <!-- ── Sub-pantalla: Experimentos (solo si se ha desbloqueado) ── -->
 <div id="page-pref-experimentos" class="pref-subpage">
   <nav class="subpage-topbar">
-    <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración">
+    <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración" data-i18n-title="settings.title">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
-    <span class="pill-header-title">Experimentos</span>
+    <span class="pill-header-title" data-i18n="settings.experimentos">Experimentos</span>
   </nav>
   <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 0 2.5rem">
     <!-- Aviso: en la Versión Simplificada, blur/color de acento/animaciones no están disponibles -->
@@ -6606,8 +6606,8 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label">Blur, color de acento y animaciones</div>
-          <div class="profile-row-value" style="font-size:0.8rem">No están disponibles mientras la Versión Simplificada está activa</div>
+          <div class="profile-row-label" data-i18n="exp.restricted.title">Blur, color de acento y animaciones</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.restricted.desc">No están disponibles mientras la Versión Simplificada está activa</div>
         </div>
       </div>
     </div>
@@ -6618,8 +6618,8 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" opacity="0.5"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label">Activa el efecto blur</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Muestra los paneles y encabezados con transparencia y desenfoque</div>
+          <div class="profile-row-label" data-i18n="exp.blur.title">Activa el efecto blur</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.blur.desc">Muestra los paneles y encabezados con transparencia y desenfoque</div>
         </div>
         <div id="pref-transparency-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
           <div id="pref-transparency-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
@@ -6628,7 +6628,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       <!-- Slider de 5 niveles: intensidad de transparencia y blur -->
       <div id="pref-blur-level-wrap" style="border-top:1px solid var(--border);padding:0.85rem 1rem 1rem">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem">
-          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">Intensidad</span>
+          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase" data-i18n="exp.intensidad">Intensidad</span>
           <span id="pref-blur-level-label" style="font-size:0.78rem;font-weight:700;color:var(--accent)">Clásico</span>
         </div>
         <input type="range" id="pref-blur-level-slider" min="1" max="6" step="1" value="4"
@@ -6651,16 +6651,16 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
             <button class="pill-back-btn" style="position:static" tabindex="-1">
               <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
             </button>
-            <span class="pill-header-title" style="position:static;transform:none;max-width:none">Vista previa</span>
+            <span class="pill-header-title" style="position:static;transform:none;max-width:none" data-i18n="exp.vistaprevia">Vista previa</span>
           </div>
         </div>
-        <div style="padding:0.55rem 0.1rem 0;font-size:0.75rem;color:var(--text3);line-height:1.4">Así se verán los encabezados y paneles flotantes de la plataforma con este nivel.</div>
+        <div style="padding:0.55rem 0.1rem 0;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.vistaprevia.desc">Así se verán los encabezados y paneles flotantes de la plataforma con este nivel.</div>
       </div>
       <!-- Accent color -->
       <div id="pref-accent-section" style="border-top:1px solid var(--border)">
         <div style="padding:0.75rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
           <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">Color de acento</span>
+          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase" data-i18n="exp.coloracento">Color de acento</span>
         </div>
         <div style="padding:0.4rem 1rem 1rem;display:flex;gap:14px;align-items:center">
           <button class="accent-swatch" id="accent-sw-blue"   onclick="setAccentColor('blue')"   style="--sw:#007AFF" title="Sky"></button>
@@ -6674,8 +6674,8 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
             <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2v20M2 12h20" opacity="0.4"/><circle cx="12" cy="12" r="9"/></svg>
           </div>
           <div class="profile-row-content">
-            <div class="profile-row-label">Ajustar el fondo al color de acento</div>
-            <div class="profile-row-value" style="font-size:0.8rem">El fondo de la plataforma toma un tono derivado del color de acento elegido</div>
+            <div class="profile-row-label" data-i18n="exp.fondoacento.title">Ajustar el fondo al color de acento</div>
+            <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.fondoacento.desc">El fondo de la plataforma toma un tono derivado del color de acento elegido</div>
           </div>
           <div id="accent-bg-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
             <div id="accent-bg-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
@@ -6686,45 +6686,45 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       <div id="pref-animations-section" style="border-top:1px solid var(--border)">
         <div style="padding:0.75rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
           <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase">Animaciones</span>
+          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase" data-i18n="exp.animaciones">Animaciones</span>
         </div>
         <div class="pref-theme-row" id="pref-animations-row">
           <button class="pref-theme-opt" id="pref-anim-fluid" onclick="setAnimationsMode('fluid')">
             <svg viewBox="0 0 24 24"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
-            Fluidas
+            <span data-i18n="exp.anim.fluidas">Fluidas</span>
           </button>
           <button class="pref-theme-opt" id="pref-anim-reduced" onclick="setAnimationsMode('reduced')">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
-            Reducidas
+            <span data-i18n="exp.anim.reducidas">Reducidas</span>
           </button>
         </div>
-        <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">Elige "Reducidas" si eres sensible al movimiento en pantalla.</div>
+        <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.anim.help">Elige "Reducidas" si eres sensible al movimiento en pantalla.</div>
       </div>
     </div>
     <!-- Versión Simplificada de la plataforma (solo móvil) -->
     <div class="profile-section">
-      <div class="profile-section-title">Layout</div>
+      <div class="profile-section-title" data-i18n="exp.layout">Layout</div>
       <div class="profile-row" style="cursor:pointer" onclick="toggleSimplifiedModePref()">
         <div class="profile-row-icon" style="background:var(--ter-2-bg);color:var(--ter-2)">
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label">Versión Simplificada</div>
-          <div class="profile-row-value" style="font-size:0.8rem" id="simplified-mode-desc">Reemplaza el NavBar por un menú simple. Solo disponible en móvil.</div>
+          <div class="profile-row-label" data-i18n="exp.simplificada.title">Versión Simplificada</div>
+          <div class="profile-row-value" style="font-size:0.8rem" id="simplified-mode-desc" data-i18n="exp.simplificada.desc">Reemplaza el NavBar por un menú simple. Solo disponible en móvil.</div>
         </div>
         <div id="simplified-mode-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
           <div id="simplified-mode-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
-      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">Al activarla, se desactivan las Notificaciones, Live, Modo Peak, el Tutorial y el panel de administración. Para volver a la versión normal, entra a Configuración desde el título "Fleming".</div>
+      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.simplificada.help">Al activarla, se desactivan las Notificaciones, Live, Modo Peak, el Tutorial y el panel de administración. Para volver a la versión normal, entra a Configuración desde el título "Fleming".</div>
       <!-- NavBar abajo (solo móvil) -->
       <div class="profile-row" id="navbar-bottom-row" style="cursor:pointer;border-top:1px solid var(--border)" onclick="toggleNavbarBottomPref()">
         <div class="profile-row-icon" style="background:var(--ter-6-bg);color:var(--ter-6)">
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="16" x2="21" y2="16"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label">NavBar abajo</div>
-          <div class="profile-row-value" style="font-size:0.8rem" id="navbar-bottom-desc">Coloca la NavBar en la parte inferior de la pantalla. Solo disponible en móvil.</div>
+          <div class="profile-row-label" data-i18n="exp.navbarabajo.title">NavBar abajo</div>
+          <div class="profile-row-value" style="font-size:0.8rem" id="navbar-bottom-desc" data-i18n="exp.navbarabajo.desc">Coloca la NavBar en la parte inferior de la pantalla. Solo disponible en móvil.</div>
         </div>
         <div id="navbar-bottom-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
           <div id="navbar-bottom-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
@@ -6737,7 +6737,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <!-- ── Sub-pantalla: Ayuda ── -->
 <div id="page-pref-ayuda" class="pref-subpage">
   <nav class="subpage-topbar">
-    <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración">
+    <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración" data-i18n-title="settings.title">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
     <span class="pill-header-title" data-i18n="settings.ayuda">Ayuda</span>
@@ -6786,19 +6786,19 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="modal-overlay" id="report-issue-modal">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">Reportar un problema</div>
+      <div class="modal-title" data-i18n="report.titulo">Reportar un problema</div>
       <button class="modal-close" onclick="closeReportIssueModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="modal-body">
       <div class="form-group2">
-        <label class="form-label2">¿Qué ocurrió?</label>
-        <textarea class="form-input" id="report-issue-text" rows="5" placeholder="Describe el problema con el mayor detalle posible (qué hacías, qué esperabas que pasara, qué pasó en realidad)..." style="resize:vertical;min-height:110px;font-family:var(--font)"></textarea>
+        <label class="form-label2" data-i18n="report.pregunta">¿Qué ocurrió?</label>
+        <textarea class="form-input" id="report-issue-text" rows="5" data-i18n-ph="report.placeholder" placeholder="Describe el problema con el mayor detalle posible (qué hacías, qué esperabas que pasara, qué pasó en realidad)..." style="resize:vertical;min-height:110px;font-family:var(--font)"></textarea>
       </div>
       <div id="report-issue-error" class="form-error" style="display:none"></div>
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" onclick="closeReportIssueModal()">Cancelar</button>
-      <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" id="report-issue-send-btn" onclick="submitIssueReport()">Enviar</button>
+      <button class="btn-secondary" onclick="closeReportIssueModal()" data-i18n="btn.cancelar">Cancelar</button>
+      <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" id="report-issue-send-btn" onclick="submitIssueReport()" data-i18n="report.enviar">Enviar</button>
     </div>
   </div>
 </div>
@@ -6988,7 +6988,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.14.6-beta';
+const APP_VERSION = '1.14.7-beta';
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -7072,6 +7072,10 @@ const I18N = {
   'settings.tutorial.h2h.desc': { es: 'Repasa la pantalla de detalle de una asignación de casa en casa', en: 'Review the detail screen of a door-to-door assignment', nl: 'Bekijk het detailscherm van een huis-aan-huis toewijzing' },
   'settings.reportar':          { es: 'Reportar un problema',     en: 'Report a problem', nl: 'Een probleem melden' },
   'settings.reportar.desc':     { es: 'Esta plataforma está en fase Beta — cuéntanos si algo falla', en: 'This platform is in Beta — let us know if something breaks', nl: 'Dit platform bevindt zich in de Beta-fase — laat ons weten als er iets misgaat' },
+  'report.titulo':          { es: 'Reportar un problema',     en: 'Report a problem', nl: 'Een probleem melden' },
+  'report.pregunta':        { es: '¿Qué ocurrió?',            en: 'What happened?',   nl: 'Wat is er gebeurd?' },
+  'report.placeholder':     { es: 'Describe el problema con el mayor detalle posible (qué hacías, qué esperabas que pasara, qué pasó en realidad)...', en: 'Describe the problem in as much detail as possible (what you were doing, what you expected to happen, what actually happened)...', nl: 'Beschrijf het probleem zo gedetailleerd mogelijk (wat je deed, wat je verwachtte dat er zou gebeuren, wat er werkelijk gebeurde)...' },
+  'report.enviar':          { es: 'Enviar',                   en: 'Send',              nl: 'Versturen' },
   'settings.acercade':          { es: 'Acerca de',                en: 'About',   nl: 'Over' },
   'settings.version':           { es: 'Versión de la plataforma', en: 'Platform version', nl: 'Platformversie' },
   'settings.actualizar':        { es: 'Actualizar',               en: 'Update',  nl: 'Bijwerken' },
@@ -7085,8 +7089,40 @@ const I18N = {
   'func.live.desc':        { es: 'Activo automáticamente. Detección de calles y avisos de No Pasar en tiempo real', en: 'Active automatically. Real-time street detection and Do-Not-Pass alerts', nl: 'Wordt automatisch geactiveerd. Realtime straatdetectie en Niet-Bezoeken-meldingen' },
   'func.peak':             { es: 'Modo Peak',               en: 'Peak Mode', nl: 'Peak-modus' },
   'func.peak.desc':        { es: 'Mantén presionado para ver previews rápidos (Notificaciones y Asignaciones)', en: 'Press and hold to see quick previews (Notifications and Assignments)', nl: 'Houd ingedrukt voor snelle previews (Meldingen en Toewijzingen)' },
+  // ── Experimentos ──
+  'exp.restricted.title':  { es: 'Blur, color de acento y animaciones', en: 'Blur, accent color and animations', nl: 'Blur, accentkleur en animaties' },
+  'exp.restricted.desc':   { es: 'No están disponibles mientras la Versión Simplificada está activa', en: 'Not available while Simplified Mode is active', nl: 'Niet beschikbaar terwijl de Vereenvoudigde Versie actief is' },
+  'exp.blur.title':        { es: 'Activa el efecto blur',   en: 'Enable blur effect', nl: 'Blur-effect inschakelen' },
+  'exp.blur.desc':         { es: 'Muestra los paneles y encabezados con transparencia y desenfoque', en: 'Shows panels and headers with transparency and blur', nl: 'Toont panelen en koppen met transparantie en blur' },
+  'exp.intensidad':        { es: 'Intensidad',              en: 'Intensity', nl: 'Intensiteit' },
+  'exp.blur.nivel.1':      { es: 'Mínimo',                  en: 'Minimum', nl: 'Minimaal' },
+  'exp.blur.nivel.2':      { es: 'Sutil',                   en: 'Subtle', nl: 'Subtiel' },
+  'exp.blur.nivel.3':      { es: 'Medio',                   en: 'Medium', nl: 'Gemiddeld' },
+  'exp.blur.nivel.4':      { es: 'Clásico',                 en: 'Classic', nl: 'Klassiek' },
+  'exp.blur.nivel.5':      { es: 'Máximo',                  en: 'Maximum', nl: 'Maximaal' },
+  'exp.blur.nivel.6':      { es: 'Extremo',                 en: 'Extreme', nl: 'Extreem' },
+  'exp.vistaprevia':       { es: 'Vista previa',            en: 'Preview', nl: 'Voorbeeld' },
+  'exp.vistaprevia.desc':  { es: 'Así se verán los encabezados y paneles flotantes de la plataforma con este nivel.', en: 'This is how the platform\u2019s headers and floating panels will look with this level.', nl: 'Zo zien de koppen en zwevende panelen van het platform eruit met dit niveau.' },
+  'exp.coloracento':       { es: 'Color de acento',         en: 'Accent color', nl: 'Accentkleur' },
+  'exp.fondoacento.title': { es: 'Ajustar el fondo al color de acento', en: 'Match background to accent color', nl: 'Achtergrond aanpassen aan accentkleur' },
+  'exp.fondoacento.desc':  { es: 'El fondo de la plataforma toma un tono derivado del color de acento elegido', en: 'The platform background takes on a tone derived from the chosen accent color', nl: 'De achtergrond van het platform krijgt een tint afgeleid van de gekozen accentkleur' },
+  'exp.animaciones':       { es: 'Animaciones',             en: 'Animations', nl: 'Animaties' },
+  'exp.anim.fluidas':      { es: 'Fluidas',                 en: 'Smooth', nl: 'Vloeiend' },
+  'exp.anim.reducidas':    { es: 'Reducidas',               en: 'Reduced', nl: 'Verminderd' },
+  'exp.anim.help':         { es: 'Elige "Reducidas" si eres sensible al movimiento en pantalla.', en: 'Choose "Reduced" if you are sensitive to on-screen motion.', nl: 'Kies "Verminderd" als je gevoelig bent voor beweging op het scherm.' },
+  'exp.layout':            { es: 'Layout',                  en: 'Layout', nl: 'Lay-out' },
+  'exp.simplificada.title':{ es: 'Versión Simplificada',    en: 'Simplified Mode', nl: 'Vereenvoudigde versie' },
+  'exp.simplificada.desc': { es: 'Reemplaza el NavBar por un menú simple. Solo disponible en móvil.', en: 'Replaces the NavBar with a simple menu. Only available on mobile.', nl: 'Vervangt de NavBar door een eenvoudig menu. Alleen beschikbaar op mobiel.' },
+  'exp.simplificada.desc.mobile': { es: 'Reemplaza el NavBar por un menú simple con título y hamburguesa.', en: 'Replaces the NavBar with a simple menu with a title and hamburger icon.', nl: 'Vervangt de NavBar door een eenvoudig menu met titel en hamburgerpictogram.' },
+  'exp.simplificada.desc.desktop': { es: 'Disponible solo en dispositivos móviles. Actívala y ábrela desde tu teléfono.', en: 'Only available on mobile devices. Enable it and open it from your phone.', nl: 'Alleen beschikbaar op mobiele apparaten. Schakel het in en open het vanaf je telefoon.' },
+  'exp.simplificada.help': { es: 'Al activarla, se desactivan las Notificaciones, Live, Modo Peak, el Tutorial y el panel de administración. Para volver a la versión normal, entra a Configuración desde el título "Fleming".', en: 'When enabled, Notifications, Live, Peak Mode, the Tutorial and the admin panel are disabled. To return to the normal version, open Settings from the "Fleming" title.', nl: 'Bij activering worden Meldingen, Live, Peak-modus, de Tutorial en het beheerpaneel uitgeschakeld. Ga naar Instellingen via de titel "Fleming" om terug te keren naar de normale versie.' },
+  'exp.navbarabajo.title': { es: 'NavBar abajo',            en: 'NavBar at the bottom', nl: 'NavBar onderaan' },
+  'exp.navbarabajo.desc':  { es: 'Coloca la NavBar en la parte inferior de la pantalla. Solo disponible en móvil.', en: 'Places the NavBar at the bottom of the screen. Only available on mobile.', nl: 'Plaatst de NavBar onderaan het scherm. Alleen beschikbaar op mobiel.' },
+  'exp.navbarabajo.desc.mobile': { es: 'Coloca la NavBar en la parte inferior de la pantalla, para un acceso más fácil.', en: 'Places the NavBar at the bottom of the screen, for easier access.', nl: 'Plaatst de NavBar onderaan het scherm voor eenvoudigere toegang.' },
+  'exp.navbarabajo.desc.desktop': { es: 'Disponible solo en dispositivos móviles. Actívala y velá el efecto desde tu teléfono.', en: 'Only available on mobile devices. Enable it and see the effect from your phone.', nl: 'Alleen beschikbaar op mobiele apparaten. Schakel het in en bekijk het effect vanaf je telefoon.' },
   // ── Mi Perfil ──
   'profile.title':          { es: 'Mi Perfil',               en: 'My Profile' },
+  'nav.inicio':             { es: 'Inicio',                  en: 'Home',              nl: 'Start' },
   'profile.grupo':          { es: 'Grupo de Servicio',       en: 'Service Group',     nl: 'Dienstgroep' },
   'profile.grupo.asignado': { es: 'Grupo asignado',          en: 'Assigned group',    nl: 'Toegewezen groep' },
   'profile.rolgrupo':       { es: 'Rol en el grupo',         en: 'Role in group',     nl: 'Rol in de groep' },
@@ -7107,6 +7143,18 @@ const I18N = {
   'notif.vacio.recientes':  { es: 'Sin notificaciones recientes', en: 'No recent notifications', nl: 'Geen recente meldingen' },
   'notif.group.grupos':     { es: 'Grupos de Servicio',      en: 'Service Groups',    nl: 'Dienstgroepen' },
   'notif.group.sistema':    { es: 'Sistema',                 en: 'System',            nl: 'Systeem' },
+  'notif.mandatory':        { es: 'Obligatoria, no se puede desactivar', en: 'Mandatory, cannot be turned off', nl: 'Verplicht, kan niet worden uitgeschakeld' },
+  'notifcat.casa':              { es: 'Predicación de Casa en Casa', en: 'House-to-House Preaching', nl: 'Huis-aan-huisprediking' },
+  'notifcat.grupo':              { es: 'Grupo de Servicio',           en: 'Service Group',            nl: 'Dienstgroep' },
+  'notifcat.live':                { es: 'Notificaciones Live',          en: 'Live Notifications',       nl: 'Live-meldingen' },
+  'notifcat.carritos':          { es: 'Carritos',                     en: 'Carts',                     nl: 'Karretjes' },
+  'notifcat.vida-ministerio':   { es: 'Vida y Ministerio',           en: 'Christian Life and Ministry', nl: 'Leven en Bediening' },
+  'notifcat.fin-semana':        { es: 'Fin de Semana',               en: 'Weekend',                   nl: 'Weekend' },
+  'notifcat.aseo':               { es: 'Aseo del Salón',               en: 'Hall Cleaning',             nl: 'Schoonmaak van de Zaal' },
+  'notifcat.hospitalidad':       { es: 'Hospitalidad',                 en: 'Hospitality',               nl: 'Gastvrijheid' },
+  'notifcat.responsabilidades': { es: 'Responsabilidades',           en: 'Responsibilities',          nl: 'Verantwoordelijkheden' },
+  'notifcat.sistema':           { es: 'Avisos de la Plataforma',     en: 'Platform Alerts',           nl: 'Platformmeldingen' },
+  'notifcat.solicitud-cuenta':  { es: 'Solicitudes de cuenta',        en: 'Account Requests',          nl: 'Accountverzoeken' },
   // ── Barras de búsqueda (Grupos, Carritos, Territorios, Vida y Ministerio) ──
   'search.buscar-nombre':      { es: 'Buscar por nombre…',   en: 'Search by name…',   nl: 'Zoeken op naam…' },
   'search.buscar-territorio':  { es: 'Buscar territorio…',   en: 'Search territory…', nl: 'Gebied zoeken…' },
@@ -7174,6 +7222,10 @@ function applyLanguage(lang) {
   try { if (currentSubTab === 'territorios') renderTerritoryView(); } catch {}
   try { if (currentSubTab === 'grupos' && typeof renderGruposView === 'function') renderGruposView(); } catch {}
   try { if (typeof refreshScheduleIfStale === 'function') refreshScheduleIfStale(true); } catch {}
+  try { if (typeof renderPrefNotifList === 'function' && document.getElementById('pref-notif-list')) renderPrefNotifList(); } catch {}
+  try { if (typeof updateTransparencyToggleUI === 'function') updateTransparencyToggleUI(); } catch {}
+  try { if (typeof updateSimplifiedModeToggleUI === 'function') updateSimplifiedModeToggleUI(); } catch {}
+  try { if (typeof updateNavbarBottomToggleUI === 'function') updateNavbarBottomToggleUI(); } catch {}
   updateLangPrefUI();
 }
 function updateLangPrefUI() {
@@ -13725,7 +13777,7 @@ function updateTransparencyToggleUI() {
   }
   const label = document.getElementById('pref-blur-level-label');
   if (label) {
-    const labels = ['Mínimo', 'Sutil', 'Medio', 'Clásico', 'Máximo', 'Extremo'];
+    const labels = [t('exp.blur.nivel.1'), t('exp.blur.nivel.2'), t('exp.blur.nivel.3'), t('exp.blur.nivel.4'), t('exp.blur.nivel.5'), t('exp.blur.nivel.6')];
     label.textContent = labels[level - 1];
   }
 }
@@ -14694,19 +14746,19 @@ document.addEventListener('DOMContentLoaded', initScrollTopFab);
 async function renderPrefNotifList() {
   const list = document.getElementById('pref-notif-list');
   if (!list) return;
-  list.innerHTML = '<div class="loader-wrap" style="padding:1rem"><div class="loader"></div><div class="loader-caption">Cargando Notificaciones</div></div>';
+  list.innerHTML = `<div class="loader-wrap" style="padding:1rem"><div class="loader"></div><div class="loader-caption">${t('notif.cargando')}</div></div>`;
   const prefs = await loadNotifPrefs();
 
   let html = '';
   const SECTION_ORDER = [
-    { key: 'predicacion', label: 'Predicación' },
-    { key: 'reuniones',   label: 'Reuniones' },
-    { key: 'sistema',     label: 'Sistema' },
+    { key: 'predicacion', label: 'nav.predicacion' },
+    { key: 'reuniones',   label: 'nav.reuniones' },
+    { key: 'sistema',     label: 'notif.group.sistema' },
   ];
   SECTION_ORDER.forEach(sec => {
     const cats = NOTIF_CATEGORIES.filter(c => c.section === sec.key && c.id !== 'solicitud-cuenta');
     if (!cats.length) return;
-    html += `<div class="pref-notif-group-header">${sec.label}</div>`;
+    html += `<div class="pref-notif-group-header">${t(sec.label)}</div>`;
     html += cats.map(cat => {
       const g = NOTIF_GROUPS[cat.group] || NOTIF_GROUPS.sistema;
       const checked = cat.mandatory ? true : (prefs[cat.id] !== false);
@@ -14717,7 +14769,7 @@ async function renderPrefNotifList() {
         <div class="pref-notif-icon" style="background:${g.bg};color:${g.color}">${g.icon}</div>
         <div class="pref-notif-content">
           <div class="pref-notif-title">${getCategoryLabel(cat.id)}</div>
-          ${cat.mandatory ? '<div class="pref-notif-sub">Obligatoria, no se puede desactivar</div>' : ''}
+          ${cat.mandatory ? `<div class="pref-notif-sub">${t('notif.mandatory')}</div>` : ''}
         </div>
         ${lockOrToggle}
       </div>`;
@@ -15334,17 +15386,17 @@ const NOTIF_GROUPS = {
 // dos sub-categorías visuales: "Predicación" y "Reuniones". No afecta el color
 // ni ícono de cada notificación en el feed (eso sigue usando `group`).
 const NOTIF_CATEGORIES = [
-  { id: 'casa',              label: 'Predicación de Casa en Casa', mandatory: false, group: 'casa',     section: 'predicacion' },
-  { id: 'grupo',             label: 'Grupo de Servicio',           mandatory: false, group: 'grupos',   section: 'predicacion' },
-  { id: 'live',              label: 'Notificaciones Live',          mandatory: false, group: 'live',     section: 'predicacion' },
-  { id: 'carritos',          label: 'Carritos',                     mandatory: false, group: 'carritos', section: 'predicacion' },
-  { id: 'vida-ministerio',   label: 'Vida y Ministerio',           mandatory: true,  group: 'reuniones', section: 'reuniones' },
-  { id: 'fin-semana',        label: 'Fin de Semana',               mandatory: true,  group: 'reuniones', section: 'reuniones' },
-  { id: 'aseo',              label: 'Aseo del Salón',               mandatory: false, group: 'reuniones', section: 'reuniones' },
-  { id: 'hospitalidad',      label: 'Hospitalidad',                 mandatory: false, group: 'reuniones', section: 'reuniones' },
-  { id: 'responsabilidades', label: 'Responsabilidades',           mandatory: true,  group: 'reuniones', section: 'reuniones' },
-  { id: 'sistema',           label: 'Avisos de la Plataforma',     mandatory: true,  group: 'sistema',  section: 'sistema' },
-  { id: 'solicitud-cuenta',  label: 'Solicitudes de cuenta',        mandatory: true,  group: 'sistema',  section: 'sistema' },
+  { id: 'casa',              label: 'notifcat.casa', mandatory: false, group: 'casa',     section: 'predicacion' },
+  { id: 'grupo',             label: 'notifcat.grupo', mandatory: false, group: 'grupos',   section: 'predicacion' },
+  { id: 'live',              label: 'notifcat.live', mandatory: false, group: 'live',     section: 'predicacion' },
+  { id: 'carritos',          label: 'notifcat.carritos', mandatory: false, group: 'carritos', section: 'predicacion' },
+  { id: 'vida-ministerio',   label: 'notifcat.vida-ministerio', mandatory: true,  group: 'reuniones', section: 'reuniones' },
+  { id: 'fin-semana',        label: 'notifcat.fin-semana', mandatory: true,  group: 'reuniones', section: 'reuniones' },
+  { id: 'aseo',              label: 'notifcat.aseo', mandatory: false, group: 'reuniones', section: 'reuniones' },
+  { id: 'hospitalidad',      label: 'notifcat.hospitalidad', mandatory: false, group: 'reuniones', section: 'reuniones' },
+  { id: 'responsabilidades', label: 'notifcat.responsabilidades', mandatory: true,  group: 'reuniones', section: 'reuniones' },
+  { id: 'sistema',           label: 'notifcat.sistema', mandatory: true,  group: 'sistema',  section: 'sistema' },
+  { id: 'solicitud-cuenta',  label: 'notifcat.solicitud-cuenta', mandatory: true,  group: 'sistema',  section: 'sistema' },
 ];
 
 // Devuelve la key de NOTIF_GROUPS correspondiente a una notificación.
@@ -15371,7 +15423,7 @@ function getCategoryLabel(catId) {
   if (!cat) return catId;
   const overrides = getNotifTemplatesCached();
   const ov = overrides[categoryTemplateId(catId)];
-  return (ov && ov.title) ? ov.title : cat.label;
+  return (ov && ov.title) ? ov.title : t(cat.label);
 }
 async function saveCategoryLabel(catId, label) {
   return saveNotifTemplate(categoryTemplateId(catId), label, '');
@@ -15501,7 +15553,7 @@ function renderNotifAdminCategories() {
   if (!container) return;
   container.innerHTML = NOTIF_CATEGORIES.map(cat => {
     const label = getCategoryLabel(cat.id);
-    const isCustom = label !== cat.label;
+    const isCustom = label !== t(cat.label);
     return `<div class="notif-cat-row">
       <input type="text" class="form-input" id="notif-cat-input-${cat.id}" value="${label.replace(/"/g, '&quot;')}">
       <button class="btn-icon-sm" title="Guardar" onclick="saveCategoryLabelFromUI('${cat.id}')">
@@ -15843,8 +15895,8 @@ function updateSimplifiedModeToggleUI() {
   thumb.style.left = on ? '21px' : '3px';
   if (desc) {
     desc.textContent = isMobile()
-      ? 'Reemplaza el NavBar por un menú simple con título y hamburguesa.'
-      : 'Disponible solo en dispositivos móviles. Actívala y ábrela desde tu teléfono.';
+      ? t('exp.simplificada.desc.mobile')
+      : t('exp.simplificada.desc.desktop');
   }
 }
 
@@ -15944,8 +15996,8 @@ function updateNavbarBottomToggleUI() {
   thumb.style.left = on ? '21px' : '3px';
   if (desc) {
     desc.textContent = isMobile()
-      ? 'Coloca la NavBar en la parte inferior de la pantalla, para un acceso más fácil.'
-      : 'Disponible solo en dispositivos móviles. Actívala y velá el efecto desde tu teléfono.';
+      ? t('exp.navbarabajo.desc.mobile')
+      : t('exp.navbarabajo.desc.desktop');
   }
 }
 let _navbarBottomResizeObs = null;
@@ -17783,7 +17835,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
 <!-- ── Profile fullscreen page ── -->
 <div id="page-profile" class="">
   <nav class="subpage-topbar">
-    <button class="pill-back-btn" onclick="closeProfilePage()" title="Inicio">
+    <button class="pill-back-btn" onclick="closeProfilePage()" title="Inicio" data-i18n-title="nav.inicio">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
     <span class="pill-header-title" data-i18n="profile.title">Mi Perfil</span>
@@ -17793,7 +17845,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
 
     <!-- Hero: avatar + nombre + rol + etiquetas -->
     <div class="profile-hero">
-      <div class="profile-avatar-wrap" onclick="openProfilePhotoSheet()" title="Cambiar foto">
+      <div class="profile-avatar-wrap" onclick="openProfilePhotoSheet()" title="Cambiar foto" data-i18n-title="profile.cambiarfoto">
         <div class="profile-avatar" id="profile-avatar-big">GC</div>
         <div class="profile-avatar-edit-badge">
           <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
