@@ -6883,7 +6883,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase" data-i18n="exp.intensidad">Intensidad</span>
           <span id="pref-blur-level-label" style="font-size:0.78rem;font-weight:700;color:var(--accent)">Clásico</span>
         </div>
-        <input type="range" id="pref-blur-level-slider" min="1" max="6" step="1" value="4"
+        <input type="range" id="pref-blur-level-slider" min="1" max="7" step="1" value="4"
           oninput="setBlurLevel(parseInt(this.value,10))"
           style="width:100%;accent-color:var(--accent);cursor:pointer">
         <div style="display:flex;justify-content:space-between;margin-top:0.4rem">
@@ -6893,6 +6893,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <div class="pref-blur-dot" id="pref-blur-dot-4"></div>
           <div class="pref-blur-dot" id="pref-blur-dot-5"></div>
           <div class="pref-blur-dot" id="pref-blur-dot-6"></div>
+          <div class="pref-blur-dot" id="pref-blur-dot-7"></div>
         </div>
         <!-- Vista previa en vivo: usa los mismos elementos (pill-back-btn /
              pill-header-title) y variables (--ui-blur, --nav-bg) que el
@@ -7316,7 +7317,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.15.10.2-beta';
+const APP_VERSION = '1.15.11-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -7384,8 +7385,8 @@ function _getOfflineTerritories() {
   try { return JSON.parse(localStorage.getItem(OFFLINE_TER_KEY) || '{}'); } catch (e) { return {}; }
 }
 function _saveOfflineTerritories(store) {
-  try { localStorage.setItem(OFFLINE_TER_KEY, JSON.stringify(store)); }
-  catch (e) { console.warn('[Offline] No se pudo guardar el territorio descargado:', e.message); }
+  try { localStorage.setItem(OFFLINE_TER_KEY, JSON.stringify(store)); return true; }
+  catch (e) { console.warn('[Offline] No se pudo guardar el territorio descargado:', e.message); return false; }
 }
 function _territoryFingerprint(terr) {
   return JSON.stringify({
@@ -7403,31 +7404,37 @@ async function downloadTerritoryOffline(terr) {
     map_data: terr.map_data || null, map_data_dark: terr.map_data_dark || null,
     fingerprint: _territoryFingerprint(terr), downloadedAt: Date.now(),
   };
-  _saveOfflineTerritories(store);
+  const ok = _saveOfflineTerritories(store);
   _updateDownloadBtnUI(terr.id);
+  return ok;
 }
 
 async function toggleTerritoryDownload() {
-  const btn = document.getElementById('detail-download-fab');
-  const id = btn && btn.dataset.territoryId;
-  if (!id) return;
-  const terr = territories.find(x => x.id === id);
-  if (!terr) return;
-  const entry = getDownloadedTerritory(id);
+  try {
+    const btn = document.getElementById('detail-download-fab');
+    const id = btn && btn.dataset.territoryId;
+    if (!id) return;
+    const terr = territories.find(x => x.id === id);
+    if (!terr) return;
+    const entry = getDownloadedTerritory(id);
 
-  if (!entry) {
-    if (blockIfOffline('offline.nodownload')) return;
-    await downloadTerritoryOffline(terr);
-    showToast(t('offline.descargado'), 'success');
-    return;
-  }
-  // Ya estaba descargado
-  if (!isAppOnline()) { showToast(t('offline.yadescargado'), 'info'); return; }
-  if (entry.fingerprint !== _territoryFingerprint(terr)) {
-    await downloadTerritoryOffline(terr);
-    showToast(t('offline.actualizado'), 'success');
-  } else {
-    showToast(t('offline.yadescargado'), 'info');
+    if (!entry) {
+      if (blockIfOffline('offline.nodownload')) return;
+      const ok = await downloadTerritoryOffline(terr);
+      showToast(t(ok ? 'offline.descargado' : 'offline.errorguardado'), ok ? 'success' : 'error');
+      return;
+    }
+    // Ya estaba descargado
+    if (!isAppOnline()) { showToast(t('offline.yadescargado'), 'info'); return; }
+    if (entry.fingerprint !== _territoryFingerprint(terr)) {
+      const ok = await downloadTerritoryOffline(terr);
+      showToast(t(ok ? 'offline.actualizado' : 'offline.errorguardado'), ok ? 'success' : 'error');
+    } else {
+      showToast(t('offline.yadescargado'), 'info');
+    }
+  } catch (e) {
+    console.error('[Offline] Error al descargar el territorio:', e);
+    showToast(t('offline.errorguardado'), 'error');
   }
 }
 
@@ -7506,13 +7513,16 @@ async function downloadAllTerritoriesOffline() {
   if (btn) btn.classList.add('loading');
   try {
     await ensureTerritoryMapsLoaded();
-    for (const terr of territories) {
-      if (label) label.textContent = `${t('offline.descargandotodo')} (${territories.indexOf(terr) + 1}/${territories.length})`;
-      await downloadTerritoryOffline(terr);
+    let anyFailed = false;
+    for (let i = 0; i < territories.length; i++) {
+      const terr = territories[i];
+      if (label) label.textContent = `${t('offline.descargandotodo')} (${i + 1}/${territories.length})`;
+      const ok = await downloadTerritoryOffline(terr);
+      if (!ok) anyFailed = true;
     }
-    showToast(t('offline.descargadotodo'), 'success');
+    showToast(t(anyFailed ? 'offline.errordescargatodo' : 'offline.descargadotodo'), anyFailed ? 'error' : 'success');
   } catch (e) {
-    console.warn('[Offline] No se pudieron descargar todos los territorios:', e.message);
+    console.error('[Offline] No se pudieron descargar todos los territorios:', e);
     showToast(t('offline.errordescargatodo'), 'error');
   } finally {
     _downloadingAllTerritories = false;
@@ -7649,6 +7659,7 @@ const I18N = {
   'offline.descargandotodo':  { es: 'Descargando territorios', en: 'Downloading territories', nl: 'Gebieden downloaden' },
   'offline.descargadotodo':   { es: 'Todos los territorios se descargaron para uso sin conexión', en: 'All territories were downloaded for offline use', nl: 'Alle gebieden zijn gedownload voor offline gebruik' },
   'offline.errordescargatodo':{ es: 'No se pudieron descargar todos los territorios', en: 'Could not download all territories', nl: 'Kon niet alle gebieden downloaden' },
+  'offline.errorguardado':    { es: 'No se pudo guardar el territorio en este dispositivo', en: 'Could not save the territory on this device', nl: 'Kon het gebied niet opslaan op dit apparaat' },
   'offline.mapaindisponible': { es: 'Mapa no disponible sin conexión', en: 'Map not available offline', nl: 'Kaart niet beschikbaar offline' },
   'offline.notif.actualizacion': { es: 'El mapa de {ter} fue actualizado. Toca para descargar la nueva versión.', en: 'The map for {ter} was updated. Tap to download the new version.', nl: 'De kaart van {ter} is bijgewerkt. Tik om de nieuwe versie te downloaden.' },
   // ── Funciones especiales ──
@@ -7671,6 +7682,7 @@ const I18N = {
   'exp.blur.nivel.4':      { es: 'Clásico',                 en: 'Classic', nl: 'Klassiek' },
   'exp.blur.nivel.5':      { es: 'Máximo',                  en: 'Maximum', nl: 'Maximaal' },
   'exp.blur.nivel.6':      { es: 'Extremo',                 en: 'Extreme', nl: 'Extreem' },
+  'exp.blur.nivel.7':      { es: 'Extra Plus',              en: 'Extra Plus', nl: 'Extra Plus' },
   'exp.vistaprevia':       { es: 'Vista previa',            en: 'Preview', nl: 'Voorbeeld' },
   'exp.vistaprevia.desc':  { es: 'Así se verán los encabezados y paneles flotantes de la plataforma con este nivel.', en: 'This is how the platform\u2019s headers and floating panels will look with this level.', nl: 'Zo zien de koppen en zwevende panelen van het platform eruit met dit niveau.' },
   'exp.coloracento':       { es: 'Color de acento',         en: 'Accent color', nl: 'Accentkleur' },
@@ -14558,16 +14570,17 @@ const BLUR_LEVELS = [
   { blur: 34, alpha: 0.50 },
   { blur: 46, alpha: 0.34 },
   { blur: 60, alpha: 0.20 },
+  { blur: 76, alpha: 0.10 },
 ];
 function isTransparencyEnabled() {
   return localStorage.getItem('fleming_transparency') !== 'false'; // default true
 }
 function getBlurLevel() {
   const v = parseInt(localStorage.getItem('fleming_blur_level') || '4', 10);
-  return Math.min(6, Math.max(1, isNaN(v) ? 4 : v));
+  return Math.min(7, Math.max(1, isNaN(v) ? 4 : v));
 }
 function setBlurLevel(level) {
-  localStorage.setItem('fleming_blur_level', String(Math.min(6, Math.max(1, level))));
+  localStorage.setItem('fleming_blur_level', String(Math.min(7, Math.max(1, level))));
   applyTransparencyPref();
   updateTransparencyToggleUI();
 }
@@ -14604,13 +14617,13 @@ function updateTransparencyToggleUI() {
   const level = getBlurLevel();
   if (sliderWrap) sliderWrap.style.display = enabled ? '' : 'none';
   if (slider) slider.value = String(level);
-  for (let i = 1; i <= 6; i++) {
+  for (let i = 1; i <= 7; i++) {
     const dot = document.getElementById('pref-blur-dot-' + i);
     if (dot) dot.classList.toggle('active', i <= level);
   }
   const label = document.getElementById('pref-blur-level-label');
   if (label) {
-    const labels = [t('exp.blur.nivel.1'), t('exp.blur.nivel.2'), t('exp.blur.nivel.3'), t('exp.blur.nivel.4'), t('exp.blur.nivel.5'), t('exp.blur.nivel.6')];
+    const labels = [t('exp.blur.nivel.1'), t('exp.blur.nivel.2'), t('exp.blur.nivel.3'), t('exp.blur.nivel.4'), t('exp.blur.nivel.5'), t('exp.blur.nivel.6'), t('exp.blur.nivel.7')];
     label.textContent = labels[level - 1];
   }
 }
