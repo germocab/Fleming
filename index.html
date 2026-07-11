@@ -1002,6 +1002,33 @@
   .detail-sidebar-fab { display: none; }
   @media (min-width: 640px) { .detail-sidebar-fab { display: flex; } }
 
+  /* ── Botón circular "Descargar territorio" (uso sin conexión) — misma
+     forma que .detail-admin-fab/.detail-sidebar-fab. Cambia a un check verde
+     una vez que el territorio queda descargado. ── */
+  .detail-download-fab {
+    display: flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+    background: var(--nav-bg);
+    backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%);
+    border: 1px solid var(--border); box-shadow: var(--shadow);
+    color: var(--accent); cursor: pointer; position: relative;
+    transition: opacity 0.2s, transform 0.15s, color 0.15s;
+  }
+  .detail-download-fab svg {
+    width: 17px; height: 17px; stroke: currentColor; fill: none;
+    stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .detail-download-fab:hover { opacity: 0.75; }
+  .detail-download-fab:active { transform: scale(0.92); }
+  .detail-download-fab.downloaded { color: var(--green, #30c97a); }
+  .detail-download-fab .dl-update-dot {
+    position: absolute; top: 1px; right: 1px; width: 9px; height: 9px; border-radius: 50%;
+    background: var(--orange, #ff9500); border: 2px solid var(--nav-bg); display: none;
+  }
+  .detail-download-fab.update-available .dl-update-dot { display: block; }
+
+
   .detail-handle { width: 36px; height: 4px; background: var(--surface3); border-radius: 2px; margin: 10px auto 0; }
   /* ── Detalle de Territorio: usa el mismo header estándar (back + título
      centrado) que el resto de las pantallas de la plataforma (Notificaciones,
@@ -1096,6 +1123,11 @@
     border: 1px solid var(--border); cursor: zoom-in;
   }
   .detail-map-wrap img { width: 100%; display: block; max-height: 260px; object-fit: contain; }
+  .detail-map-offline-placeholder {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    min-height: 160px; padding: 1.5rem 1rem; color: var(--text3);
+    font-family: var(--font); font-size: 0.85rem; font-weight: 600; text-align: center;
+  }
 
   .detail-manzanas-card {
     margin: 0 1.25rem 1.25rem; padding: 1rem 1.1rem;
@@ -6036,6 +6068,11 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       </button>
       <span class="pill-header-title" id="detail-territory-title">Territorio</span>
       <div class="subpage-topbar-right">
+        <button class="detail-download-fab" id="detail-download-fab" onclick="toggleTerritoryDownload()" title="Descargar territorio para uso sin conexión">
+          <svg class="dl-icon-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <svg class="dl-icon-check" viewBox="0 0 24 24" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
+          <span class="dl-update-dot"></span>
+        </button>
         <button class="detail-sidebar-fab" id="detail-sidebar-fab-ter" onclick="toggleH2HSidebarLive()" title="Cambiar a vista Lateral">
           <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="10" y1="4" x2="10" y2="20"/></svg>
         </button>
@@ -6109,6 +6146,10 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
     </div>
     <div class="detail-map-wrap" id="detail-map-wrap" style="display:none">
       <img id="detail-map-img" alt="Mapa del territorio">
+      <div class="detail-map-offline-placeholder" id="detail-map-offline-placeholder" style="display:none">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+        <span data-i18n="offline.mapaindisponible">Mapa no disponible sin conexión</span>
+      </div>
     </div>
     <!-- Live Mode: ya no se muestra un botón manual. Live se activa/desactiva
          automáticamente según la preferencia en Configuración (ver función
@@ -7256,7 +7297,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.15.8-beta';
+const APP_VERSION = '1.15.10-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -7305,7 +7346,149 @@ function blockIfOffline(i18nKey) {
 }
 
 window.addEventListener('online', () => { _isOnline = true; updateOnlineStatusUI(); });
-window.addEventListener('offline', () => { _isOnline = false; updateOnlineStatusUI(); });
+window.addEventListener('offline', () => {
+  _isOnline = false;
+  updateOnlineStatusUI();
+  if (typeof _liveActive !== 'undefined' && _liveActive && typeof stopLiveMode === 'function') stopLiveMode();
+  if (typeof _liveUpdateBtnVisibility === 'function') _liveUpdateBtnVisibility();
+  if (typeof updateLiveToggleUI === 'function') updateLiveToggleUI();
+});
+
+// ── Descarga de Territorios para uso sin conexión ───────────────────────────
+// Guarda una copia local (mapa + direcciones No Pasar) de un territorio para
+// que se pueda seguir viendo y usando sin necesidad de esperar a tener
+// conexión. Si el territorio se actualiza en el servidor (nuevo mapa, nuevas
+// direcciones No Pasar, etc.), se detecta comparando una "huella" simple de
+// sus datos y se avisa para poder actualizar la copia descargada.
+const OFFLINE_TER_KEY = 'fleming_offline_territories';
+function _getOfflineTerritories() {
+  try { return JSON.parse(localStorage.getItem(OFFLINE_TER_KEY) || '{}'); } catch (e) { return {}; }
+}
+function _saveOfflineTerritories(store) {
+  try { localStorage.setItem(OFFLINE_TER_KEY, JSON.stringify(store)); }
+  catch (e) { console.warn('[Offline] No se pudo guardar el territorio descargado:', e.message); }
+}
+function _territoryFingerprint(terr) {
+  return JSON.stringify({
+    color: terr.color, no_pasar: terr.no_pasar,
+    map_data: terr.map_data || null, map_data_dark: terr.map_data_dark || null,
+  });
+}
+function getDownloadedTerritory(id) { return _getOfflineTerritories()[id] || null; }
+function isTerritoryDownloaded(id) { return !!getDownloadedTerritory(id); }
+
+async function downloadTerritoryOffline(terr) {
+  const store = _getOfflineTerritories();
+  store[terr.id] = {
+    number: terr.number, color: terr.color, no_pasar: terr.no_pasar,
+    map_data: terr.map_data || null, map_data_dark: terr.map_data_dark || null,
+    fingerprint: _territoryFingerprint(terr), downloadedAt: Date.now(),
+  };
+  _saveOfflineTerritories(store);
+  _updateDownloadBtnUI(terr.id);
+}
+
+async function toggleTerritoryDownload() {
+  const btn = document.getElementById('detail-download-fab');
+  const id = btn && btn.dataset.territoryId;
+  if (!id) return;
+  const terr = territories.find(x => x.id === id);
+  if (!terr) return;
+  const entry = getDownloadedTerritory(id);
+
+  if (!entry) {
+    if (blockIfOffline('offline.nodownload')) return;
+    await downloadTerritoryOffline(terr);
+    showToast(t('offline.descargado'), 'success');
+    return;
+  }
+  // Ya estaba descargado
+  if (!isAppOnline()) { showToast(t('offline.yadescargado'), 'info'); return; }
+  if (entry.fingerprint !== _territoryFingerprint(terr)) {
+    await downloadTerritoryOffline(terr);
+    showToast(t('offline.actualizado'), 'success');
+  } else {
+    showToast(t('offline.yadescargado'), 'info');
+  }
+}
+
+function _updateDownloadBtnUI(id) {
+  const btn = document.getElementById('detail-download-fab');
+  if (!btn) return;
+  btn.dataset.territoryId = id;
+  const entry = getDownloadedTerritory(id);
+  const downloaded = !!entry;
+  btn.classList.toggle('downloaded', downloaded);
+  const dlIcon = btn.querySelector('.dl-icon-download');
+  const okIcon = btn.querySelector('.dl-icon-check');
+  if (dlIcon) dlIcon.style.display = downloaded ? 'none' : '';
+  if (okIcon) okIcon.style.display = downloaded ? '' : 'none';
+
+  let updateAvailable = false;
+  if (downloaded) {
+    const terr = territories.find(x => x.id === id);
+    if (terr && terr.map_data !== undefined && entry.fingerprint !== _territoryFingerprint(terr)) updateAvailable = true;
+  }
+  btn.classList.toggle('update-available', updateAvailable);
+  btn.title = !downloaded
+    ? 'Descargar territorio para uso sin conexión'
+    : (updateAvailable ? 'Hay una actualización disponible — toca para descargarla' : 'Territorio descargado para uso sin conexión');
+}
+
+// Resuelve y aplica el mapa de un territorio en un .detail-map-wrap dado,
+// recurriendo a la copia descargada localmente cuando no hay conexión.
+function _applyDetailMapSrc(ter, opts) {
+  opts = opts || {};
+  const mapWrap = document.getElementById('detail-map-wrap');
+  const mapImg  = document.getElementById('detail-map-img');
+  const placeholder = document.getElementById('detail-map-offline-placeholder');
+  if (!mapWrap || !mapImg) return;
+
+  let terMapSrc = ter ? getActiveTerMapSrc(ter) : null;
+  if (!terMapSrc && ter && !isAppOnline()) {
+    const dl = getDownloadedTerritory(ter.id);
+    if (dl) {
+      ter.map_data = dl.map_data; ter.map_data_dark = dl.map_data_dark;
+      terMapSrc = getActiveTerMapSrc(ter);
+    }
+  }
+
+  if (terMapSrc) {
+    mapImg.style.display = '';
+    if (placeholder) placeholder.style.display = 'none';
+    mapImg.src = terMapSrc;
+    mapWrap.style.display = '';
+    mapWrap.onclick = opts.noLightbox ? null : () => openLightbox(terMapSrc, ter ? terLabel(ter.number) : '');
+  } else if (ter && !isAppOnline()) {
+    // Sin conexión y sin copia descargada: mostrar aviso en vez de ocultar el bloque.
+    mapImg.style.display = 'none';
+    if (placeholder) placeholder.style.display = 'flex';
+    mapWrap.style.display = '';
+    mapWrap.onclick = null;
+  } else {
+    mapWrap.style.display = 'none';
+    mapWrap.onclick = null;
+  }
+}
+
+// Al volver a tener conexión y recargar los territorios, revisa si alguno de
+// los territorios descargados localmente cambió en el servidor, y si es así,
+// avisa para que se pueda actualizar la copia descargada.
+function _checkDownloadedTerritoriesForUpdates() {
+  if (!isAppOnline()) return;
+  const store = _getOfflineTerritories();
+  const ids = Object.keys(store);
+  if (!ids.length) return;
+  ids.forEach(id => {
+    const terr = territories.find(x => x.id === id);
+    if (!terr || terr.map_data === undefined) return; // mapas aún no cargados en memoria
+    const entry = store[id];
+    if (entry.fingerprint !== _territoryFingerprint(terr)) {
+      const msg = t('offline.notif.actualizacion').replace('{ter}', terLabel(terr.number));
+      showToast(msg, 'info');
+    }
+  });
+}
 document.addEventListener('DOMContentLoaded', updateOnlineStatusUI);
 // Recordatorios de reporte de territorio en el Perfil (Inicio): desactivados
 // momentáneamente. La función de Reportes sigue intacta; solo se oculta el aviso.
@@ -7401,10 +7584,16 @@ const I18N = {
   'settings.version':           { es: 'Versión de la plataforma', en: 'Platform version', nl: 'Platformversie' },
   'settings.actualizar':        { es: 'Actualizar',               en: 'Update',  nl: 'Bijwerken' },
   'settings.buscaractualizaciones': { es: 'Buscar actualizaciones', en: 'Check for updates', nl: 'Controleren op updates' },
-  'offline.banner':      { es: 'Sin conexión — mostrando información guardada', en: 'Offline — showing saved information', nl: 'Offline — opgeslagen informatie wordt getoond' },
+  'offline.banner':      { es: 'Sin conexión', en: 'Offline', nl: 'Offline' },
   'offline.noupdate':    { es: 'No disponible sin conexión', en: 'Not available offline', nl: 'Niet beschikbaar offline' },
   'offline.nolive':      { es: 'Live no está disponible sin conexión', en: 'Live is not available offline', nl: 'Live is niet beschikbaar offline' },
   'offline.cargando':    { es: 'Sin conexión. Mostrando las últimas asignaciones guardadas.', en: 'Offline. Showing the last saved assignments.', nl: 'Offline. De laatst opgeslagen toewijzingen worden getoond.' },
+  'offline.nodownload':  { es: 'No disponible sin conexión', en: 'Not available offline', nl: 'Niet beschikbaar offline' },
+  'offline.descargado':  { es: 'Territorio descargado para uso sin conexión', en: 'Territory downloaded for offline use', nl: 'Gebied gedownload voor offline gebruik' },
+  'offline.actualizado': { es: 'Mapa del territorio actualizado', en: 'Territory map updated', nl: 'Gebiedskaart bijgewerkt' },
+  'offline.yadescargado':{ es: 'Este territorio ya está descargado', en: 'This territory is already downloaded', nl: 'Dit gebied is al gedownload' },
+  'offline.mapaindisponible': { es: 'Mapa no disponible sin conexión', en: 'Map not available offline', nl: 'Kaart niet beschikbaar offline' },
+  'offline.notif.actualizacion': { es: 'El mapa de {ter} fue actualizado. Toca para descargar la nueva versión.', en: 'The map for {ter} was updated. Tap to download the new version.', nl: 'De kaart van {ter} is bijgewerkt. Tik om de nieuwe versie te downloaden.' },
   // ── Funciones especiales ──
   'func.vistacontenido':   { es: 'Vista de Contenido (Tablet / Escritorio)', en: 'Content View (Tablet / Desktop)', nl: 'Inhoudsweergave (Tablet / Desktop)' },
   'func.lateral':          { es: 'Lateral',                 en: 'Sidebar',  nl: 'Zijbalk' },
@@ -10406,21 +10595,16 @@ async function viewAssignment(id) {
 
   // ── Mapa del territorio (map_data/map_data_dark son blobs pesados) ──
   (async () => {
-    await ensureTerritoryMapsLoaded();
+    if (isAppOnline()) await ensureTerritoryMapsLoaded();
+    else if (ter) {
+      const dl = getDownloadedTerritory(ter.id);
+      if (dl) { ter.map_data = dl.map_data; ter.map_data_dark = dl.map_data_dark; }
+    }
     if (panel._openAssignmentId !== id) return; // el usuario ya cambió de tarjeta
     if (ter && ter2) {
       _renderDetailTerContent(ter);
     } else {
-      const mapImg = document.getElementById('detail-map-img');
-      const terMapSrc = ter ? getActiveTerMapSrc(ter) : null;
-      if (terMapSrc) {
-        mapImg.src = terMapSrc;
-        mapWrap.style.display = '';
-        mapWrap.onclick = () => openLightbox(terMapSrc, ter ? terLabel(ter.number) : '');
-      } else {
-        mapWrap.style.display = 'none';
-        mapWrap.onclick = null;
-      }
+      _applyDetailMapSrc(ter);
     }
   })();
 
@@ -10441,17 +10625,7 @@ async function viewAssignment(id) {
 
 // Render map + no-pasar content for a given territory object
 function _renderDetailTerContent(ter) {
-  const mapWrap = document.getElementById('detail-map-wrap');
-  const mapImg  = document.getElementById('detail-map-img');
-  const terMapSrc = ter ? getActiveTerMapSrc(ter) : null;
-  if (terMapSrc) {
-    mapImg.src = terMapSrc;
-    mapWrap.style.display = '';
-    mapWrap.onclick = () => openLightbox(terMapSrc, ter ? terLabel(ter.number) : '');
-  } else {
-    mapWrap.style.display = 'none';
-    mapWrap.onclick = null;
-  }
+  _applyDetailMapSrc(ter);
   _renderDetailNoPasar(ter);
 }
 
@@ -13983,9 +14157,16 @@ async function renderTerritoryView() {
     return;
   }
   container.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Territorio</div></div>';
-  await ensureTerritoryMapsLoaded();
+  if (isAppOnline()) {
+    await ensureTerritoryMapsLoaded();
+    _checkDownloadedTerritoriesForUpdates();
+  }
   container.innerHTML = `<div class="ter-grid" style="padding-top:0.25rem">` + territories.map(t => {
-    const mapSrc = getActiveTerMapSrc(t);
+    let mapSrc = getActiveTerMapSrc(t);
+    if (!mapSrc && !isAppOnline()) {
+      const dl = getDownloadedTerritory(t.id);
+      if (dl) { t.map_data = dl.map_data; t.map_data_dark = dl.map_data_dark; mapSrc = getActiveTerMapSrc(t); }
+    }
     const mapHtml = mapSrc
       ? `<img src="${mapSrc}" alt="Mapa T${t.number}" loading="lazy">`
       : `<div class="ter-grid-map-empty"><svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg><span>Sin mapa</span></div>`;
@@ -14001,7 +14182,11 @@ async function renderTerritoryView() {
 async function viewTerritory(id) {
   const t = territories.find(x => x.id === id);
   if (!t) return;
-  await ensureTerritoryMapsLoaded();
+  if (isAppOnline()) await ensureTerritoryMapsLoaded();
+  else {
+    const dl = getDownloadedTerritory(id);
+    if (dl) { t.map_data = dl.map_data; t.map_data_dark = dl.map_data_dark; }
+  }
   const noPasar = parseNoPasar(t.no_pasar);
   const color = getTerColor(t.number);
 
@@ -14041,17 +14226,10 @@ async function viewTerritory(id) {
   if (manzanasLine) manzanasLine.style.display = 'none';
 
   // Map
-  const mapWrap = document.getElementById('detail-map-wrap');
-  const mapImg  = document.getElementById('detail-map-img');
-  const terMapSrc = getActiveTerMapSrc(t);
-  if (terMapSrc) {
-    mapImg.src = terMapSrc;
-    mapWrap.style.display = '';
-    mapWrap.onclick = () => openLightbox(terMapSrc, terLabel(t.number));
-  } else {
-    mapWrap.style.display = 'none';
-    mapWrap.onclick = null;
-  }
+  _applyDetailMapSrc(t);
+
+  // Botón de descarga para uso sin conexión
+  _updateDownloadBtnUI(t.id);
 
   // No pasar with dates
   const noPasarSec  = document.getElementById('detail-no-pasar-section');
@@ -14488,6 +14666,7 @@ function applyAppUpdate() {
 // ── Función Live: activar/desactivar por completo ────────────────────────────
 function isLiveFeatureEnabled() {
   if (typeof isSimplifiedModeActive === 'function' && isSimplifiedModeActive()) return false;
+  if (!isAppOnline()) return false; // Live requiere conexión: geolocalización + datos en tiempo real
   return localStorage.getItem('fleming_live_enabled') !== 'false'; // default true
 }
 function updateLiveToggleUI() {
@@ -18890,7 +19069,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
 <!-- ══ Banner flotante "Sin conexión" (Modo Offline) ══ -->
 <div id="offline-banner">
   <span class="offline-banner-dot"></span>
-  <span data-i18n="offline.banner">Sin conexión — mostrando información guardada</span>
+  <span data-i18n="offline.banner">Sin conexión</span>
 </div>
 
 <!-- ══ Tutorial de bienvenida (onboarding paso a paso) ══ -->
