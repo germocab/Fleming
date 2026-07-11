@@ -20,7 +20,7 @@ self.addEventListener('push', event => {
   const options = {
     body: data.body,
     icon: '/icons/PNG.png',
-    badge: '/icons/favicon-32x32.png',
+    badge: '/icons/PNG.png',
     vibrate: [200, 100, 200],
     tag: 'fleming-push',          // reemplaza notificaciones previas del mismo tipo
     renotify: true,               // aun así vibra/suena si el tag ya existe
