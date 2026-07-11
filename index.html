@@ -5115,13 +5115,15 @@
    está activa. ────────────────────────────────────────────────────────── */
 .simplified-header-shell {
   position: sticky; top: 0; z-index: 60;
-  background: var(--nav-bg, var(--surface));
-  border-bottom: 1px solid var(--border);
+  background: var(--bg);
   flex-direction: column;
+  padding: 0.7rem 0.85rem 0.55rem;
 }
 .simp-topbar {
   display: flex; align-items: center; justify-content: space-between;
-  height: 56px; padding: 0 1rem;
+  height: 56px; padding: 0 0.9rem;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 18px; box-shadow: var(--shadow-lg);
 }
 .simp-title-btn {
   font-family: var(--font); font-size: 1.05rem; font-weight: 800; letter-spacing: -0.01em;
@@ -5130,14 +5132,14 @@
 .simp-title-btn:active { opacity: 0.6; }
 .simp-hamburger-btn {
   display: flex; align-items: center; justify-content: center;
-  width: 38px; height: 38px; border-radius: 10px; border: none;
+  width: 38px; height: 38px; border-radius: 12px; border: none;
   background: var(--surface3); color: var(--text); cursor: pointer;
   transition: background 0.15s, transform 0.15s;
 }
 .simp-hamburger-btn:active { transform: scale(0.92); background: var(--surface2); }
 /* "Opciones" (título Fleming): despliega hacia abajo con fade + leve escala ── */
 .simp-options-dropdown {
-  position: absolute; top: 52px; left: 0.85rem; z-index: 61;
+  position: absolute; top: 74px; left: 0.85rem; z-index: 61;
   display: flex; flex-direction: column; gap: 8px;
   background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
   padding: 10px; box-shadow: var(--shadow-lg); min-width: 180px;
@@ -5162,7 +5164,7 @@
    que "flotan" sobre el contenido). Anclado a la derecha, bajo el botón
    hamburguesa. ── */
 .simp-menu-row {
-  position: absolute; top: 52px; right: 0.85rem; z-index: 61;
+  position: absolute; top: 74px; right: 0.85rem; z-index: 61;
   display: flex; flex-direction: column; gap: 8px;
   background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
   padding: 10px; box-shadow: var(--shadow-lg); min-width: 200px; max-width: calc(100vw - 1.7rem);
@@ -6550,6 +6552,28 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
   </div>
 </div>
 
+<!-- ── Sub-pantalla: Versión ── -->
+<div id="page-pref-version" class="pref-subpage">
+  <nav class="subpage-topbar">
+    <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración" data-i18n-title="settings.title">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span class="pill-header-title" data-i18n="settings.version">Versión de la plataforma</span>
+  </nav>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.4rem;padding:1rem;text-align:center">
+    <div id="pref-version-app-icon" style="width:96px;height:96px;border-radius:24px;overflow:hidden;box-shadow:var(--shadow-lg);margin-bottom:0.85rem;cursor:pointer;user-select:none;-webkit-user-select:none;transition:transform 0.15s"
+      onmousedown="startVersionScreenHold(event)" onmouseup="endVersionScreenHold()" onmouseleave="cancelVersionScreenHold()"
+      ontouchstart="startVersionScreenHold(event)" ontouchend="endVersionScreenHold()" ontouchcancel="cancelVersionScreenHold()">
+      <img src="android-chrome-192x192.png" alt="FlemingApp" style="width:100%;height:100%;object-fit:cover">
+    </div>
+    <div style="font-size:1.2rem;font-weight:800;color:var(--text)">FlemingApp</div>
+    <div id="pref-version-screen-value" style="color:var(--text3);font-size:0.9rem;font-weight:600">Versión —</div>
+  </div>
+  <div style="padding:0 1rem 2rem">
+    <button class="btn-primary" style="width:100%;padding:0.85rem;border-radius:12px;font-weight:700" onclick="reloadToCheckForUpdate()" data-i18n="settings.buscaractualizaciones">Buscar actualizaciones</button>
+  </div>
+</div>
+
 <!-- ── Sub-pantalla: Preferencias (Idioma + Apariencia unidos) ── -->
 <div id="page-pref-preferencias" class="pref-subpage">
   <nav class="subpage-topbar">
@@ -7205,7 +7229,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.15.6-beta';
+const APP_VERSION = '1.15.7-beta';
 // Recordatorios de reporte de territorio en el Perfil (Inicio): desactivados
 // momentáneamente. La función de Reportes sigue intacta; solo se oculta el aviso.
 const RECORDATORIOS_TERRITORIO_ENABLED = false;
@@ -7299,6 +7323,7 @@ const I18N = {
   'settings.acercade':          { es: 'Acerca de',                en: 'About',   nl: 'Over' },
   'settings.version':           { es: 'Versión de la plataforma', en: 'Platform version', nl: 'Platformversie' },
   'settings.actualizar':        { es: 'Actualizar',               en: 'Update',  nl: 'Bijwerken' },
+  'settings.buscaractualizaciones': { es: 'Buscar actualizaciones', en: 'Check for updates', nl: 'Controleren op updates' },
   // ── Funciones especiales ──
   'func.vistacontenido':   { es: 'Vista de Contenido (Tablet / Escritorio)', en: 'Content View (Tablet / Desktop)', nl: 'Inhoudsweergave (Tablet / Desktop)' },
   'func.lateral':          { es: 'Lateral',                 en: 'Sidebar',  nl: 'Zijbalk' },
@@ -14032,7 +14057,7 @@ function closePreferencias() {
   document.body.style.overflow = '';
 }
 // ── Navegación entre las sub-pantallas de Configuración ──────────────────────
-const PREF_SCREENS = ['preferencias', 'funciones', 'notificaciones', 'experimentos', 'ayuda'];
+const PREF_SCREENS = ['preferencias', 'funciones', 'notificaciones', 'experimentos', 'ayuda', 'version'];
 function openPrefScreen(name) {
   if (!PREF_SCREENS.includes(name)) return;
   if (name === 'experimentos' && localStorage.getItem('fleming_egg_unlocked') !== '1') return;
@@ -14040,6 +14065,10 @@ function openPrefScreen(name) {
   if (name === 'funciones') { updateH2HViewModeUI(); updateNavbarShrinkToggleUI(); }
   if (name === 'notificaciones') renderPrefNotifList();
   if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBottomToggleUI(); }
+  if (name === 'version') {
+    const val = document.getElementById('pref-version-screen-value');
+    if (val) val.textContent = 'Versión ' + APP_VERSION;
+  }
 }
 function closePrefScreen() {
   PREF_SCREENS.forEach(name => document.getElementById('page-pref-' + name)?.classList.remove('open'));
@@ -14445,18 +14474,42 @@ function endVersionHold(isRelease) {
   if (isRelease && wasPressing && start != null) {
     const elapsed = Date.now() - start;
     if (elapsed < VERSION_TAP_MAX_MS) {
-      reloadToCheckForUpdate();
+      openPrefScreen('version');
     }
   }
 }
 
-// Un solo toque/click (no mantenido) sobre el número de versión recarga la
-// plataforma para buscar actualizaciones (por ejemplo, una nueva versión del
-// Service Worker o del propio archivo servido).
+// Un solo toque/click (no mantenido) sobre el número de versión abre la
+// pantalla "Versión". Desde ahí, el botón "Buscar actualizaciones" es el
+// que efectivamente recarga la plataforma para buscar una nueva versión
+// (por ejemplo, del Service Worker o del propio archivo servido).
 function reloadToCheckForUpdate() {
   try { showToast('Buscando actualizaciones…', 'info'); } catch (e) {}
   setTimeout(() => location.reload(true), 300);
 }
+
+// ── Pantalla "Versión": mantener presionado el ícono central también
+//    desbloquea/oculta el modo Experimentos (mismo gesto que en la fila
+//    "Versión de la plataforma" de Configuración). ──────────────────────────
+let _versionScreenHoldTimer = null;
+
+function startVersionScreenHold(e) {
+  if (e) e.preventDefault();
+  cancelVersionScreenHold();
+  const icon = document.getElementById('pref-version-app-icon');
+  if (icon) icon.style.transform = 'scale(0.94)';
+  _versionScreenHoldTimer = setTimeout(() => {
+    cancelVersionScreenHold();
+    triggerEggUnlock();
+  }, VERSION_HOLD_MS);
+}
+function cancelVersionScreenHold() {
+  clearTimeout(_versionScreenHoldTimer);
+  _versionScreenHoldTimer = null;
+  const icon = document.getElementById('pref-version-app-icon');
+  if (icon) icon.style.transform = '';
+}
+function endVersionScreenHold() { cancelVersionScreenHold(); }
 
 function triggerEggUnlock() {
   const alreadyUnlocked = localStorage.getItem('fleming_egg_unlocked') === '1';
