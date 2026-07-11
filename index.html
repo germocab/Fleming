@@ -1953,6 +1953,45 @@
   .modal-close svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
   .modal-body { padding: 1.25rem; }
 
+  /* ── Liquid Glass (Experimentos): estilo visual opt-in, OFF por defecto ──────
+     Se activa agregando la clase html.liquid-glass. No reemplaza el estilo
+     propio de la plataforma salvo que la persona lo active explícitamente. ── */
+  html.liquid-glass .modal,
+  html.liquid-glass .profile-section,
+  html.liquid-glass .grupo-btn,
+  html.liquid-glass .masinfo-btn,
+  html.liquid-glass .pia-group,
+  html.liquid-glass .btn-primary,
+  html.liquid-glass .btn-secondary,
+  html.liquid-glass .sub-tabs,
+  html.liquid-glass .app-header-shell,
+  html.liquid-glass .tab-bar,
+  html.liquid-glass .grupo-card-header-old {
+    background: linear-gradient(160deg, rgba(255,255,255,0.22), rgba(255,255,255,0.04) 55%, rgba(255,255,255,0.10));
+    background-color: color-mix(in srgb, var(--surface) 72%, transparent);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    backdrop-filter: blur(22px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.28);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -1px 0 rgba(0,0,0,0.05), 0 8px 26px rgba(0,0,0,0.14);
+    position: relative;
+    overflow: hidden;
+  }
+  html.liquid-glass .modal::before,
+  html.liquid-glass .profile-section::before,
+  html.liquid-glass .grupo-btn::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(120deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 30%);
+    mix-blend-mode: overlay;
+  }
+  html.liquid-glass .modal-header {
+    background: transparent; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  }
+  html.liquid-glass .grupo-btn:hover { box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 12px 30px rgba(0,0,0,0.18); }
+  html.liquid-glass .btn-primary {
+    color: var(--text);
+    background-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  }
+
   .btn-secondary {
     padding: 0.6rem 1.1rem; background: var(--surface2); border: 1px solid var(--border);
     border-radius: var(--radius-sm); color: var(--text); font-family: var(--font);
@@ -4341,44 +4380,6 @@
   }
   .toggle-switch.on { background: var(--accent); border-color: var(--accent); }
 
-  /* Modo Peak: evita que el long-press seleccione texto en las tarjetas de asignación */
-  html.peak-selection-guard .assignment-card,
-  html.peak-selection-guard .assignment-card-today,
-  html.peak-selection-guard .sabado-grupo-card {
-    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
-  }
-
-  /* ── Modo Peak: preview overlay para long-press (Notificaciones / Asignaciones) ── */
-  .peak-preview-overlay {
-    position: fixed; z-index: 9999; display: none; pointer-events: none;
-    max-width: 300px; min-width: 240px;
-  }
-  .peak-preview-overlay.open { display: block; animation: peakPreviewIn 0.16s cubic-bezier(.2,.9,.3,1.2); }
-  @keyframes peakPreviewIn { from { opacity:0; transform: scale(0.92) translateY(4px); } to { opacity:1; transform: scale(1) translateY(0); } }
-  .peak-preview-box {
-    background: var(--surface); border: 1px solid var(--border); border-radius: 22px;
-    box-shadow: 0 16px 40px rgba(0,0,0,0.28), 0 2px 8px rgba(0,0,0,0.08);
-    padding: 0; font-family: var(--font); overflow: hidden; backdrop-filter: blur(20px);
-  }
-  .peak-preview-head {
-    display: flex; align-items: center; gap: 10px; padding: 14px 16px 10px;
-  }
-  .peak-preview-icon {
-    flex-shrink: 0; width: 34px; height: 34px; border-radius: 11px; display: flex;
-    align-items: center; justify-content: center; background: var(--accent-light); color: var(--accent);
-  }
-  .peak-preview-icon svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .peak-preview-title { font-weight: 700; font-size: 0.92rem; color: var(--text); line-height: 1.25; }
-  .peak-preview-kicker { font-size: 0.68rem; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 1px; }
-  .peak-preview-body { font-size: 0.82rem; color: var(--text2); line-height: 1.4; padding: 0 16px 12px; }
-  .peak-preview-meta { font-size: 0.7rem; color: var(--text3); padding: 0 16px 14px; }
-  .peak-preview-rows { padding: 0 16px 4px; }
-  .peak-preview-row { display: flex; align-items: center; gap: 8px; font-size: 0.81rem; color: var(--text2); padding: 5px 0; border-top: 1px solid var(--border); }
-  .peak-preview-row:first-child { border-top: none; }
-  .peak-preview-row svg { flex-shrink: 0; width: 14px; height: 14px; stroke: var(--text3); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .peak-preview-row-value { font-weight: 600; color: var(--text); }
-  .peak-preview-empty { font-size: 0.82rem; color: var(--text3); padding: 0 16px 14px; }
-  .peak-preview-map { width: 100%; display: block; max-height: 150px; object-fit: cover; }
   .toggle-thumb {
     position: absolute; top: 3px; left: 3px;
     width: 18px; height: 18px; border-radius: 50%;
@@ -6722,7 +6723,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       </div>
       <div class="pref-desktop-only-row" style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="func.auto.help">En "Automático" (por defecto), la barra se encoge apenas haces scroll y solo recupera su tamaño al volver hasta arriba del todo.</div>
     </div>
-    <!-- Función Live + Modo Peak: comparten apartado -->
+    <!-- Función Live -->
     <div class="profile-section">
       <!-- Toggle: función Live -->
       <div class="profile-row" style="cursor:pointer" onclick="toggleLiveFeaturePref()">
@@ -6735,19 +6736,6 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         </div>
         <div id="pref-live-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
           <div id="pref-live-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
-      </div>
-      <!-- Toggle: Modo Peak -->
-      <div class="profile-row" id="peak-mode-row" style="cursor:pointer;border-top:1px solid var(--border)" onclick="togglePeakModeSetting()">
-        <div class="profile-row-icon" style="background:var(--ter-9-bg);color:var(--ter-9)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="func.peak">Modo Peak</div>
-          <div class="profile-row-value" style="font-size:0.8rem" id="peak-mode-desc" data-i18n="func.peak.desc">Mantén presionado para ver previews rápidos (Notificaciones y Asignaciones)</div>
-        </div>
-        <div id="peak-mode-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="peak-mode-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
     </div>
@@ -6880,6 +6868,23 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.anim.help">Elige "Reducidas" si eres sensible al movimiento en pantalla.</div>
       </div>
     </div>
+    <!-- Liquid Glass: estilo visual alternativo, opt-in, apagado por defecto -->
+    <div class="profile-section">
+      <div class="profile-section-title" data-i18n="exp.liquidglass.section">Apariencia</div>
+      <div class="profile-row" style="cursor:pointer" onclick="toggleLiquidGlassPref()">
+        <div class="profile-row-icon" style="background:var(--ter-4-bg);color:var(--ter-4)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2l7 4v6c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6z"/><path d="M9 11l2 2 4-4" opacity="0.5"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="exp.liquidglass.title">Liquid Glass</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.liquidglass.desc">Un nuevo estilo visual translúcido para paneles, tarjetas y botones. Experimental.</div>
+        </div>
+        <div id="liquid-glass-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="liquid-glass-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
+      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.liquidglass.help">Por defecto la plataforma mantiene su propio estilo. Actívalo para probar Liquid Glass; puedes desactivarlo en cualquier momento.</div>
+    </div>
     <!-- Versión Simplificada de la plataforma (solo móvil) -->
     <div class="profile-section">
       <div class="profile-section-title" data-i18n="exp.layout">Layout</div>
@@ -6895,7 +6900,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <div id="simplified-mode-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
-      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.simplificada.help">Al activarla, se desactivan las Notificaciones, Live, Modo Peak, el Tutorial y el panel de administración. Para volver a la versión normal, entra a Configuración desde el título "Fleming".</div>
+      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.simplificada.help">Al activarla, se desactivan las Notificaciones, Live, el Tutorial y el panel de administración. Para volver a la versión normal, entra a Configuración desde el título "Fleming".</div>
       <!-- NavBar abajo (solo móvil) -->
       <div class="profile-row" id="navbar-bottom-row" style="cursor:pointer;border-top:1px solid var(--border)" onclick="toggleNavbarBottomPref()">
         <div class="profile-row-icon" style="background:var(--ter-6-bg);color:var(--ter-6)">
@@ -6996,7 +7001,6 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
   </div>
 </div>
 
-<div class="peak-preview-overlay" id="peak-preview-overlay"><div class="peak-preview-box" id="peak-preview-box"></div></div>
 
 <div class="img-lightbox" id="img-lightbox" onclick="handleLightboxClick(event)">
   <button class="lightbox-close" onclick="closeLightbox()">
@@ -7244,7 +7248,10 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.5.0-beta';
+const APP_VERSION = '1.15.5-beta';
+// Recordatorios de reporte de territorio en el Perfil (Inicio): desactivados
+// momentáneamente. La función de Reportes sigue intacta; solo se oculta el aviso.
+const RECORDATORIOS_TERRITORIO_ENABLED = false;
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -7343,8 +7350,6 @@ const I18N = {
   'func.auto.help':        { es: 'En "Automático" (por defecto), la barra se encoge apenas haces scroll y solo recupera su tamaño al volver hasta arriba del todo.', en: 'In "Automatic" (default), the bar shrinks as soon as you scroll and only returns to full size when you reach the very top.', nl: 'Bij "Automatisch" (standaard) krimpt de balk zodra je scrolt en herstelt deze pas als je helemaal naar boven gaat.' },
   'func.live':             { es: 'Función Live',            en: 'Live Feature', nl: 'Live-functie' },
   'func.live.desc':        { es: 'Activo automáticamente. Detección de calles y avisos de No Pasar en tiempo real', en: 'Active automatically. Real-time street detection and Do-Not-Pass alerts', nl: 'Wordt automatisch geactiveerd. Realtime straatdetectie en Niet-Bezoeken-meldingen' },
-  'func.peak':             { es: 'Modo Peak',               en: 'Peak Mode', nl: 'Peak-modus' },
-  'func.peak.desc':        { es: 'Mantén presionado para ver previews rápidos (Notificaciones y Asignaciones)', en: 'Press and hold to see quick previews (Notifications and Assignments)', nl: 'Houd ingedrukt voor snelle previews (Meldingen en Toewijzingen)' },
   // ── Experimentos ──
   'exp.restricted.title':  { es: 'Blur, color de acento y animaciones', en: 'Blur, accent color and animations', nl: 'Blur, accentkleur en animaties' },
   'exp.restricted.desc':   { es: 'No están disponibles mientras la Versión Simplificada está activa', en: 'Not available while Simplified Mode is active', nl: 'Niet beschikbaar terwijl de Vereenvoudigde Versie actief is' },
@@ -7367,11 +7372,15 @@ const I18N = {
   'exp.anim.reducidas':    { es: 'Reducidas',               en: 'Reduced', nl: 'Verminderd' },
   'exp.anim.help':         { es: 'Elige "Reducidas" si eres sensible al movimiento en pantalla.', en: 'Choose "Reduced" if you are sensitive to on-screen motion.', nl: 'Kies "Verminderd" als je gevoelig bent voor beweging op het scherm.' },
   'exp.layout':            { es: 'Layout',                  en: 'Layout', nl: 'Lay-out' },
+  'exp.liquidglass.section': { es: 'Apariencia', en: 'Appearance', nl: 'Uiterlijk' },
+  'exp.liquidglass.title':   { es: 'Liquid Glass', en: 'Liquid Glass', nl: 'Liquid Glass' },
+  'exp.liquidglass.desc':    { es: 'Un nuevo estilo visual translúcido para paneles, tarjetas y botones. Experimental.', en: 'A new translucent visual style for panels, cards and buttons. Experimental.', nl: 'Een nieuwe doorschijnende visuele stijl voor panelen, kaarten en knoppen. Experimenteel.' },
+  'exp.liquidglass.help':    { es: 'Por defecto la plataforma mantiene su propio estilo. Actívalo para probar Liquid Glass; puedes desactivarlo en cualquier momento.', en: 'By default the platform keeps its own style. Turn it on to try Liquid Glass; you can turn it off again at any time.', nl: 'Standaard behoudt het platform zijn eigen stijl. Zet het aan om Liquid Glass te proberen; je kunt het op elk moment weer uitzetten.' },
   'exp.simplificada.title':{ es: 'Versión Simplificada',    en: 'Simplified Mode', nl: 'Vereenvoudigde versie' },
   'exp.simplificada.desc': { es: 'Reemplaza el NavBar por un menú simple. Solo disponible en móvil.', en: 'Replaces the NavBar with a simple menu. Only available on mobile.', nl: 'Vervangt de NavBar door een eenvoudig menu. Alleen beschikbaar op mobiel.' },
   'exp.simplificada.desc.mobile': { es: 'Reemplaza el NavBar por un menú simple con título y hamburguesa.', en: 'Replaces the NavBar with a simple menu with a title and hamburger icon.', nl: 'Vervangt de NavBar door een eenvoudig menu met titel en hamburgerpictogram.' },
   'exp.simplificada.desc.desktop': { es: 'Disponible solo en dispositivos móviles. Actívala y ábrela desde tu teléfono.', en: 'Only available on mobile devices. Enable it and open it from your phone.', nl: 'Alleen beschikbaar op mobiele apparaten. Schakel het in en open het vanaf je telefoon.' },
-  'exp.simplificada.help': { es: 'Al activarla, se desactivan las Notificaciones, Live, Modo Peak, el Tutorial y el panel de administración. Para volver a la versión normal, entra a Configuración desde el título "Fleming".', en: 'When enabled, Notifications, Live, Peak Mode, the Tutorial and the admin panel are disabled. To return to the normal version, open Settings from the "Fleming" title.', nl: 'Bij activering worden Meldingen, Live, Peak-modus, de Tutorial en het beheerpaneel uitgeschakeld. Ga naar Instellingen via de titel "Fleming" om terug te keren naar de normale versie.' },
+  'exp.simplificada.help': { es: 'Al activarla, se desactivan las Notificaciones, Live, el Tutorial y el panel de administración. Para volver a la versión normal, entra a Configuración desde el título "Fleming".', en: 'When enabled, Notifications, Live, the Tutorial and the admin panel are disabled. To return to the normal version, open Settings from the "Fleming" title.', nl: 'Bij activering worden Meldingen, Live, de Tutorial en het beheerpaneel uitgeschakeld. Ga naar Instellingen via de titel "Fleming" om terug te keren naar de normale versie.' },
   'exp.navbarabajo.title': { es: 'NavBar abajo',            en: 'NavBar at the bottom', nl: 'NavBar onderaan' },
   'exp.navbarabajo.desc':  { es: 'Coloca la NavBar en la parte inferior de la pantalla. Solo disponible en móvil.', en: 'Places the NavBar at the bottom of the screen. Only available on mobile.', nl: 'Plaatst de NavBar onderaan het scherm. Alleen beschikbaar op mobiel.' },
   'exp.navbarabajo.desc.mobile': { es: 'Coloca la NavBar en la parte inferior de la pantalla, para un acceso más fácil.', en: 'Places the NavBar at the bottom of the screen, for easier access.', nl: 'Plaatst de NavBar onderaan het scherm voor eenvoudigere toegang.' },
@@ -7689,8 +7698,8 @@ function initTheme() {
   initAccentColor();
   initAnimationsMode();
   applyTransparencyPref();
+  applyLiquidGlassPref();
   applyUiSizePref();
-  initPeakMode();
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
     if (document.documentElement.getAttribute('data-theme') === 'auto') {
       _updateThemeActive('auto');
@@ -7937,10 +7946,11 @@ async function debugPush() {
 // ── Grupos de Servicio ────────────────────────────────────────────────────────
 let grupos = [];
 
-// ── Color de los Grupos de Servicio: unificado (mismo azul de la marca) para
-//    que toda la plataforma se vea visualmente cohesiva — antes cada grupo
-//    tenía un color distinto de una paleta; ahora todos usan --accent. ──
-const GRUPO_COLOR_UNICO = '#3b82f6';
+// ── Color de los Grupos de Servicio: unificado, en gris oscuro (el mismo
+//    tono que usa la pestaña activa del slider de sub-secciones superior,
+//    #1c1c1e) en vez del azul de la marca — antes cada grupo tenía un color
+//    distinto de una paleta; luego se unificó en azul; ahora en gris oscuro. ──
+const GRUPO_COLOR_UNICO = '#1c1c1e';
 function grupoColorFor(numero) {
   return GRUPO_COLOR_UNICO;
 }
@@ -8838,7 +8848,10 @@ async function renderInicio() {
   } catch (e) { console.warn('Inicio (responsabilidades):', e); }
 
   // ── Recordatorios: predicación pasada como conductor sin reporte de territorio enviado ──
-  try {
+  // NOTA: desactivados momentáneamente (flag RECORDATORIOS_TERRITORIO_ENABLED más abajo).
+  // La función de Reportes en sí sigue funcionando con normalidad; solo se oculta este
+  // recordatorio en el Perfil del encargado de Predicación de casa en casa.
+  if (RECORDATORIOS_TERRITORIO_ENABLED) try {
     const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 45);
     const cutoffStr = cutoff.toISOString().slice(0, 10);
     const [{ data: pastAssignments }, { data: submissions }, { data: territories }] = await Promise.all([
@@ -14053,8 +14066,8 @@ async function openPreferencias() {
   updatePrefThemeActive();
   updateDarkMapToggleUI();
   updateLiveToggleUI();
-  updatePeakModeUI();
   updateTransparencyToggleUI();
+  updateLiquidGlassToggleUI();
   updateUiSizeToggleUI();
   updateNavbarShrinkToggleUI();
   updateH2HViewModeUI();
@@ -14075,7 +14088,7 @@ function openPrefScreen(name) {
   document.getElementById('page-pref-' + name)?.classList.add('open');
   if (name === 'funciones') { updateH2HViewModeUI(); updateNavbarShrinkToggleUI(); }
   if (name === 'notificaciones') renderPrefNotifList();
-  if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBottomToggleUI(); }
+  if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); updateLiquidGlassToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBottomToggleUI(); }
 }
 function closePrefScreen() {
   PREF_SCREENS.forEach(name => document.getElementById('page-pref-' + name)?.classList.remove('open'));
@@ -14258,6 +14271,29 @@ function toggleTransparencyPref() {
   localStorage.setItem('fleming_transparency', current ? 'false' : 'true');
   applyTransparencyPref();
   updateTransparencyToggleUI();
+}
+
+// ── Liquid Glass (Experimentos): estilo visual opt-in, OFF por defecto ──────
+function isLiquidGlassEnabled() {
+  return localStorage.getItem('fleming_liquid_glass') === 'true'; // default: desactivado
+}
+function applyLiquidGlassPref() {
+  document.documentElement.classList.toggle('liquid-glass', isLiquidGlassEnabled());
+}
+function updateLiquidGlassToggleUI() {
+  const enabled = isLiquidGlassEnabled();
+  const toggle = document.getElementById('liquid-glass-toggle');
+  const thumb  = document.getElementById('liquid-glass-thumb');
+  if (toggle && thumb) {
+    toggle.style.background = enabled ? 'var(--accent)' : 'var(--surface3)';
+    thumb.style.left = enabled ? '21px' : '3px';
+  }
+}
+function toggleLiquidGlassPref() {
+  const next = !isLiquidGlassEnabled();
+  localStorage.setItem('fleming_liquid_glass', next ? 'true' : 'false');
+  applyLiquidGlassPref();
+  updateLiquidGlassToggleUI();
 }
 
 // ── Tamaño de la Interfaz: 3 niveles (Pequeño, Normal, Grande) ──────────────
@@ -14708,192 +14744,6 @@ function revealAnimationsSection() {
   const sec = document.getElementById('pref-animations-section');
   if (sec) { sec.style.display = 'block'; }
   updateAnimationsModeUI();
-}
-
-// ── Modo Peak ────────────────────────────────────────────────────────────────
-// Mantener presionado (≥1.5s) el botón de Notificaciones o una asignación de
-// casa en casa muestra un preview rápido ("Notificaciones en Peak" /
-// "Asignaciones en Peak"). Exclusivo de pantallas táctiles; se puede
-// deshabilitar desde Configuración > Funciones Especiales.
-const PEAK_HOLD_MS = 1500;
-const PEAK_MOVE_TOLERANCE = 12;
-let _peakTimer = null;
-let _peakActive = false;
-let _peakStartXY = null;
-
-function isTouchDevice() {
-  return ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-}
-function isPeakModeEnabled() {
-  if (typeof isSimplifiedModeActive === 'function' && isSimplifiedModeActive()) return false;
-  return localStorage.getItem('fleming_peak_mode') === 'true'; // default: desactivado
-}
-function setPeakModeEnabled(on) {
-  localStorage.setItem('fleming_peak_mode', on ? 'true' : 'false');
-  _applyPeakSelectionGuard();
-}
-function updatePeakModeUI() {
-  const toggle = document.getElementById('peak-mode-toggle');
-  const thumb  = document.getElementById('peak-mode-thumb');
-  const desc   = document.getElementById('peak-mode-desc');
-  if (!toggle || !thumb) return;
-  const enabled = isPeakModeEnabled();
-  toggle.style.background = enabled ? 'var(--accent)' : 'var(--surface3)';
-  thumb.style.left = enabled ? '21px' : '3px';
-  if (desc) desc.textContent = isTouchDevice()
-    ? 'Mantén presionado para ver previews rápidos (Notificaciones y Asignaciones)'
-    : 'Disponible solo en dispositivos con pantalla táctil';
-}
-function togglePeakModeSetting() {
-  const next = !isPeakModeEnabled();
-  setPeakModeEnabled(next);
-  updatePeakModeUI();
-}
-// Mientras el Modo Peak está activo, el long-press sobre una tarjeta de
-// asignación no debe disparar la selección de texto nativa del dispositivo
-// (que compite con el gesto de mantener presionado para el preview).
-function _applyPeakSelectionGuard() {
-  const on = isPeakModeEnabled() && isTouchDevice();
-  document.documentElement.classList.toggle('peak-selection-guard', on);
-}
-
-function initPeakMode() {
-  updatePeakModeUI();
-  _applyPeakSelectionGuard();
-  if (!isTouchDevice()) return;
-  document.addEventListener('touchstart', _peakOnTouchStart, { passive: true });
-  document.addEventListener('touchmove', _peakOnTouchMove, { passive: true });
-  document.addEventListener('touchend', _peakOnTouchEnd, { passive: true });
-  document.addEventListener('touchcancel', _peakOnTouchEnd, { passive: true });
-}
-
-function _peakOnTouchStart(e) {
-  if (!isPeakModeEnabled() || e.touches.length !== 1) return;
-  const notifBtn   = e.target.closest('.nav-icon-btn[title="Notificaciones"]');
-  const assignCard = e.target.closest('.assignment-card, .assignment-card-today, .sabado-grupo-card');
-  if (!notifBtn && !assignCard) return;
-  const touch = e.touches[0];
-  _peakStartXY = { x: touch.clientX, y: touch.clientY };
-  clearTimeout(_peakTimer);
-  _peakActive = false;
-  _peakTimer = setTimeout(() => {
-    _peakActive = true;
-    if (navigator.vibrate) { try { navigator.vibrate(12); } catch(err) {} }
-    if (notifBtn) {
-      showNotifPeakPreview(touch.clientX, touch.clientY);
-    } else if (assignCard) {
-      const match = (assignCard.getAttribute('onclick') || '').match(/viewAssignment\('([^']+)'\)/);
-      if (match) showAssignmentPeakPreview(match[1], touch.clientX, touch.clientY);
-    }
-  }, PEAK_HOLD_MS);
-}
-function _peakOnTouchMove(e) {
-  if (!_peakStartXY || _peakActive || !e.touches.length) return;
-  const touch = e.touches[0];
-  const dx = Math.abs(touch.clientX - _peakStartXY.x), dy = Math.abs(touch.clientY - _peakStartXY.y);
-  if (dx > PEAK_MOVE_TOLERANCE || dy > PEAK_MOVE_TOLERANCE) { clearTimeout(_peakTimer); _peakStartXY = null; }
-}
-function _peakOnTouchEnd(e) {
-  clearTimeout(_peakTimer);
-  _peakStartXY = null;
-  if (_peakActive) {
-    // Evita que el "click" sintético posterior al touchend dispare la acción
-    // normal del elemento (abrir notificaciones / la asignación completa).
-    const target = e.target;
-    const suppress = (ev) => { ev.preventDefault(); ev.stopPropagation(); };
-    target.addEventListener('click', suppress, { capture: true, once: true });
-    hidePeakPreview();
-    _peakActive = false;
-  }
-}
-function _positionPeakOverlay(overlay, x, y) {
-  overlay.style.left = '0px'; overlay.style.top = '0px';
-  overlay.classList.add('open');
-  requestAnimationFrame(() => {
-    const rect = overlay.getBoundingClientRect();
-    let left = x - rect.width / 2;
-    let top  = y - rect.height - 18;
-    left = Math.max(10, Math.min(left, window.innerWidth - rect.width - 10));
-    if (top < 10) top = y + 18;
-    overlay.style.left = left + 'px';
-    overlay.style.top  = top + 'px';
-  });
-}
-function hidePeakPreview() {
-  document.getElementById('peak-preview-overlay')?.classList.remove('open');
-}
-async function showNotifPeakPreview(x, y) {
-  const overlay = document.getElementById('peak-preview-overlay');
-  const box = document.getElementById('peak-preview-box');
-  const bellIcon = '<svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>';
-  box.innerHTML = `
-    <div class="peak-preview-head">
-      <div class="peak-preview-icon">${bellIcon}</div>
-      <div><div class="peak-preview-kicker">Notificaciones</div><div class="peak-preview-title">Cargando…</div></div>
-    </div>`;
-  _positionPeakOverlay(overlay, x, y);
-  let n = null;
-  try {
-    const { data } = await sb.from('notifications').select('*').order('created_at', { ascending: false }).limit(20);
-    const myName = currentUser?.name?.trim().toLowerCase();
-    n = (data || []).find(item => isNotifForMe(item, myName)) || null;
-  } catch(e) { /* silencioso */ }
-  if (!overlay.classList.contains('open')) return; // el usuario ya soltó/cerró
-  const esc = s => (s || '').replace(/</g,'&lt;');
-  if (!n) {
-    box.innerHTML = `
-      <div class="peak-preview-head">
-        <div class="peak-preview-icon">${bellIcon}</div>
-        <div><div class="peak-preview-kicker">Notificaciones</div><div class="peak-preview-title">Nada por aquí</div></div>
-      </div>
-      <div class="peak-preview-empty">${t('notif.vacio.recientes')}</div>`;
-  } else {
-    let when = '';
-    if (n.created_at) {
-      const mins = Math.round((Date.now() - new Date(n.created_at)) / 60000);
-      when = mins < 2 ? 'Ahora mismo' : mins < 60 ? `Hace ${mins} min` : mins < 1440 ? `Hace ${Math.round(mins/60)}h` : new Date(n.created_at).toLocaleDateString('es-CL',{day:'numeric',month:'short'});
-    }
-    box.innerHTML = `
-      <div class="peak-preview-head">
-        <div class="peak-preview-icon">${bellIcon}</div>
-        <div><div class="peak-preview-kicker">Notificaciones</div><div class="peak-preview-title">${esc(n.title) || 'Notificación'}</div></div>
-      </div>
-      ${n.body ? `<div class="peak-preview-body">${esc(n.body)}</div>` : ''}
-      ${when ? `<div class="peak-preview-meta">${when}</div>` : ''}`;
-  }
-  _positionPeakOverlay(overlay, x, y);
-}
-function showAssignmentPeakPreview(id, x, y) {
-  const a = (typeof assignments !== 'undefined' ? assignments : []).find(z => z.id === id);
-  const overlay = document.getElementById('peak-preview-overlay');
-  const box = document.getElementById('peak-preview-box');
-  if (!a) return;
-  const ter = territories.find(t => t.id === a.territory_id) || null;
-  const timeStr = a.time ? a.time.substring(0,5) + ' hrs' : '--:--';
-  const esc = s => (s || '').replace(/</g,'&lt;');
-  const mapSrc = ter ? getActiveTerMapSrc(ter) : null;
-  const homeIcon = '<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>';
-  box.innerHTML = `
-    <div class="peak-preview-head">
-      <div class="peak-preview-icon">${homeIcon}</div>
-      <div><div class="peak-preview-kicker">Asignación</div><div class="peak-preview-title">${esc(a.address) || 'Sin dirección'}</div></div>
-    </div>
-    <div class="peak-preview-rows">
-      <div class="peak-preview-row"><svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg><span class="peak-preview-row-value">${ter ? 'Territorio ' + ter.number : 'Sin territorio'}</span></div>
-      <div class="peak-preview-row"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="peak-preview-row-value">${esc(a.conductor) || 'Sin conductor'}</span></div>
-      <div class="peak-preview-row"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span class="peak-preview-row-value">${timeStr}</span></div>
-    </div>
-    ${mapSrc ? `<img class="peak-preview-map" src="${mapSrc}">` : ''}`;
-  _positionPeakOverlay(overlay, x, y);
-  if (ter && !mapSrc) {
-    ensureTerritoryMapsLoaded().then(() => {
-      const src2 = getActiveTerMapSrc(ter);
-      if (src2 && overlay.classList.contains('open')) {
-        box.insertAdjacentHTML('beforeend', `<img class="peak-preview-map" src="${src2}">`);
-        _positionPeakOverlay(overlay, x, y);
-      }
-    });
-  }
 }
 
 // ── Botón flotante "Volver arriba" ────────────────────────────────────────
@@ -20498,7 +20348,13 @@ async function openMasInfoModal(seccionKey) {
   body.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando</div></div>';
   document.getElementById('masinfo-modal').classList.add('open');
 
-  await loadInfoResponsables();
+  // Nota: se fuerza siempre una recarga fresca (force=true) en vez de confiar en la
+  // caché de arranque. La caché inicial (loadInfoResponsables() sin forzar, disparada
+  // al cargar la página) puede quedar vacía si corre antes de que la sesión de
+  // Supabase esté lista, y sin este forzado la información solo aparecía después de
+  // visitar Panel de Administración → FlemingApp → Informaciones (lo que disparaba
+  // la primera recarga exitosa). Forzando aquí, la información sale de inmediato.
+  await loadInfoResponsables(true);
   const info = getInfoResponsable(seccionKey);
   renderMasInfoBody(info);
 }
