@@ -3323,6 +3323,25 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
 
+  /* ── Botón "Descargar todo" al final de la sub-sección Territorios ── */
+  .ter-download-all-btn {
+    width: 100%; margin-top: 1.1rem; padding: 0.9rem 1rem;
+    display: flex; align-items: center; gap: 0.8rem;
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius);
+    font-family: var(--font); cursor: pointer; transition: all 0.2s; text-align: left;
+  }
+  .ter-download-all-btn:hover { background: var(--surface3); border-color: var(--border-active); }
+  .ter-download-all-btn:active { transform: scale(0.985); }
+  .ter-download-all-icon {
+    width: 19px; height: 19px; flex-shrink: 0; color: var(--accent, #007AFF);
+  }
+  .ter-download-all-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .ter-download-all-label { font-size: 0.9rem; font-weight: 700; color: var(--text); }
+  .ter-download-all-sub { font-size: 0.75rem; color: var(--text3); }
+  .ter-download-all-btn.loading { pointer-events: none; opacity: 0.75; }
+  .ter-download-all-btn.loading .ter-download-all-icon { animation: ter-dl-spin 1s linear infinite; }
+  @keyframes ter-dl-spin { to { transform: rotate(360deg); } }
+
   /* ── Full congregation map button ── */
   .ter-view-header {
     display: flex; align-items: center; justify-content: space-between;
@@ -7297,7 +7316,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.15.10-beta';
+const APP_VERSION = '1.15.10.2-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -7471,11 +7490,44 @@ function _applyDetailMapSrc(ter, opts) {
   }
 }
 
+// Descarga TODOS los territorios de golpe para uso sin conexión (botón
+// "Descargar todo" al final de la sub-sección Territorios). Reutiliza
+// downloadTerritoryOffline() por cada territorio; requiere conexión, ya que
+// necesita traer los map_data de todos los territorios primero.
+let _downloadingAllTerritories = false;
+async function downloadAllTerritoriesOffline() {
+  if (_downloadingAllTerritories) return;
+  if (blockIfOffline('offline.nodownload')) return;
+  if (!territories.length) return;
+  _downloadingAllTerritories = true;
+  const btn = document.getElementById('ter-download-all-btn');
+  const label = btn ? btn.querySelector('.ter-download-all-label') : null;
+  const originalLabel = label ? label.textContent : '';
+  if (btn) btn.classList.add('loading');
+  try {
+    await ensureTerritoryMapsLoaded();
+    for (const terr of territories) {
+      if (label) label.textContent = `${t('offline.descargandotodo')} (${territories.indexOf(terr) + 1}/${territories.length})`;
+      await downloadTerritoryOffline(terr);
+    }
+    showToast(t('offline.descargadotodo'), 'success');
+  } catch (e) {
+    console.warn('[Offline] No se pudieron descargar todos los territorios:', e.message);
+    showToast(t('offline.errordescargatodo'), 'error');
+  } finally {
+    _downloadingAllTerritories = false;
+    if (btn) btn.classList.remove('loading');
+    if (label) label.textContent = originalLabel;
+  }
+}
+
 // Al volver a tener conexión y recargar los territorios, revisa si alguno de
 // los territorios descargados localmente cambió en el servidor, y si es así,
 // avisa para que se pueda actualizar la copia descargada.
 function _checkDownloadedTerritoriesForUpdates() {
   if (!isAppOnline()) return;
+  // Respeta el toggle "Actualización de Mapas" de Configuración > Notificaciones.
+  if (typeof getNotifPrefsCached === 'function' && getNotifPrefsCached()['mapas-actualizacion'] === false) return;
   const store = _getOfflineTerritories();
   const ids = Object.keys(store);
   if (!ids.length) return;
@@ -7592,6 +7644,11 @@ const I18N = {
   'offline.descargado':  { es: 'Territorio descargado para uso sin conexión', en: 'Territory downloaded for offline use', nl: 'Gebied gedownload voor offline gebruik' },
   'offline.actualizado': { es: 'Mapa del territorio actualizado', en: 'Territory map updated', nl: 'Gebiedskaart bijgewerkt' },
   'offline.yadescargado':{ es: 'Este territorio ya está descargado', en: 'This territory is already downloaded', nl: 'Dit gebied is al gedownload' },
+  'offline.descargartodo':    { es: 'Descargar todo', en: 'Download all', nl: 'Alles downloaden' },
+  'offline.descargartodo.desc': { es: 'Descarga todos los territorios para verlos y usarlos sin conexión', en: 'Download all territories to view and use them offline', nl: 'Download alle gebieden om ze offline te bekijken en gebruiken' },
+  'offline.descargandotodo':  { es: 'Descargando territorios', en: 'Downloading territories', nl: 'Gebieden downloaden' },
+  'offline.descargadotodo':   { es: 'Todos los territorios se descargaron para uso sin conexión', en: 'All territories were downloaded for offline use', nl: 'Alle gebieden zijn gedownload voor offline gebruik' },
+  'offline.errordescargatodo':{ es: 'No se pudieron descargar todos los territorios', en: 'Could not download all territories', nl: 'Kon niet alle gebieden downloaden' },
   'offline.mapaindisponible': { es: 'Mapa no disponible sin conexión', en: 'Map not available offline', nl: 'Kaart niet beschikbaar offline' },
   'offline.notif.actualizacion': { es: 'El mapa de {ter} fue actualizado. Toca para descargar la nueva versión.', en: 'The map for {ter} was updated. Tap to download the new version.', nl: 'De kaart van {ter} is bijgewerkt. Tik om de nieuwe versie te downloaden.' },
   // ── Funciones especiales ──
@@ -7661,6 +7718,7 @@ const I18N = {
   'notifcat.grupo':              { es: 'Grupo de Servicio',           en: 'Service Group',            nl: 'Dienstgroep' },
   'notifcat.live':                { es: 'Notificaciones Live',          en: 'Live Notifications',       nl: 'Live-meldingen' },
   'notifcat.carritos':          { es: 'Carritos',                     en: 'Carts',                     nl: 'Karretjes' },
+  'notifcat.mapas-actualizacion': { es: 'Actualización de Mapas',     en: 'Map Updates',               nl: 'Kaartupdates' },
   'notifcat.vida-ministerio':   { es: 'Vida y Ministerio',           en: 'Christian Life and Ministry', nl: 'Leven en Bediening' },
   'notifcat.fin-semana':        { es: 'Fin de Semana',               en: 'Weekend',                   nl: 'Weekend' },
   'notifcat.aseo':               { es: 'Aseo del Salón',               en: 'Hall Cleaning',             nl: 'Schoonmaak van de Zaal' },
@@ -10594,9 +10652,18 @@ async function viewAssignment(id) {
   if (typeof updateH2HSidebarFabIcon === 'function') updateH2HSidebarFabIcon();
 
   // ── Mapa del territorio (map_data/map_data_dark son blobs pesados) ──
+  // Si el territorio ya fue descargado previamente para uso sin conexión,
+  // se muestra de inmediato con esa copia local — sin esperar la red — para
+  // que aparezca de forma instantánea. Si hay conexión, igualmente se
+  // refresca en segundo plano por si el territorio cambió en el servidor.
+  const _dlTer = ter ? getDownloadedTerritory(ter.id) : null;
+  if (_dlTer) {
+    ter.map_data = _dlTer.map_data; ter.map_data_dark = _dlTer.map_data_dark;
+    if (ter && ter2) { _renderDetailTerContent(ter); } else { _applyDetailMapSrc(ter); }
+  }
   (async () => {
     if (isAppOnline()) await ensureTerritoryMapsLoaded();
-    else if (ter) {
+    else if (ter && !_dlTer) {
       const dl = getDownloadedTerritory(ter.id);
       if (dl) { ter.map_data = dl.map_data; ter.map_data_dark = dl.map_data_dark; }
     }
@@ -14176,7 +14243,14 @@ async function renderTerritoryView() {
         <div class="ter-grid-num">${terLabel(t.number)}</div>
       </div>
     </div>`;
-  }).join('') + `</div>`;
+  }).join('') + `</div>` + `
+    <button class="ter-download-all-btn" id="ter-download-all-btn" onclick="downloadAllTerritoriesOffline()">
+      <svg class="ter-download-all-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <div class="ter-download-all-text">
+        <span class="ter-download-all-label" data-i18n="offline.descargartodo">${t('offline.descargartodo')}</span>
+        <span class="ter-download-all-sub" data-i18n="offline.descargartodo.desc">${t('offline.descargartodo.desc')}</span>
+      </div>
+    </button>`;
 }
 
 async function viewTerritory(id) {
@@ -15983,6 +16057,12 @@ const NOTIF_GROUPS = {
     bg: 'rgba(243,97,0,0.12)',
     icon: '<svg viewBox="0 0 24 24"><circle cx="8" cy="19" r="1.8"/><circle cx="17" cy="19" r="1.8"/><path d="M2 3h2l2.4 12.2a2 2 0 0 0 2 1.8h7.2a2 2 0 0 0 2-1.6L20 8H6"/></svg>',
   },
+  mapas: {
+    label: 'notifcat.mapas-actualizacion',
+    color: '#5856d6',
+    bg: 'rgba(88,86,214,0.12)',
+    icon: '<svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>',
+  },
 };
 
 // ── Notification categories & preferences ───────────────────────────────────
@@ -15998,6 +16078,7 @@ const NOTIF_CATEGORIES = [
   { id: 'grupo',             label: 'notifcat.grupo', mandatory: false, group: 'grupos',   section: 'predicacion' },
   { id: 'live',              label: 'notifcat.live', mandatory: false, group: 'live',     section: 'predicacion' },
   { id: 'carritos',          label: 'notifcat.carritos', mandatory: false, group: 'carritos', section: 'predicacion' },
+  { id: 'mapas-actualizacion', label: 'notifcat.mapas-actualizacion', mandatory: false, group: 'mapas', section: 'predicacion' },
   { id: 'vida-ministerio',   label: 'notifcat.vida-ministerio', mandatory: true,  group: 'reuniones', section: 'reuniones' },
   { id: 'fin-semana',        label: 'notifcat.fin-semana', mandatory: true,  group: 'reuniones', section: 'reuniones' },
   { id: 'aseo',              label: 'notifcat.aseo', mandatory: false, group: 'reuniones', section: 'reuniones' },
