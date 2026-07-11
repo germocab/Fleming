@@ -5059,6 +5059,33 @@
   }
 }
 
+/* ── Modo Offline: banner flotante que indica que no hay conexión ──────────
+   Aparece automáticamente al perder la conexión (evento 'offline' / detección
+   de fallos de red) y desaparece al recuperarla. No bloquea la interacción
+   con el resto de la plataforma. ─────────────────────────────────────────── */
+#offline-banner {
+  position: fixed; left: 50%; bottom: 22px; z-index: 960;
+  transform: translateX(-50%) translateY(14px) scale(0.94); transform-origin: center;
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface); color: var(--text2);
+  border: 1px solid var(--border); box-shadow: var(--shadow-lg);
+  border-radius: 999px; padding: 0.55rem 1rem 0.55rem 0.75rem;
+  font-family: var(--font); font-size: 0.82rem; font-weight: 700;
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity 0.24s ease, transform 0.3s cubic-bezier(0.16,1,0.3,1), visibility 0.3s;
+}
+#offline-banner.visible { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0) scale(1); pointer-events: auto; }
+#offline-banner .offline-banner-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--orange, #ff9500); flex-shrink: 0;
+  box-shadow: 0 0 0 3px var(--orange-light, rgba(255,149,0,0.18));
+}
+@media (max-width: 640px) {
+  #offline-banner { bottom: 16px; font-size: 0.78rem; padding: 0.5rem 0.9rem 0.5rem 0.7rem; max-width: calc(100vw - 2rem); text-align: left; }
+}
+@media (max-width: 639px) {
+  html.navbar-bottom-mobile #offline-banner { bottom: calc(var(--navbar-bottom-h, 76px) + 14px); }
+}
+
 /* ── Tutorial de bienvenida (onboarding paso a paso) ─────────────────────
    Overlay + "spotlight" que resalta el elemento del que se está hablando
    (recorte transparente sobre fondo oscuro vía box-shadow gigante) y una
@@ -7229,7 +7256,57 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.15.7-beta';
+const APP_VERSION = '1.15.8-beta';
+// Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
+// de Configuración; la versión completa (con parche y sufijo) solo se
+// muestra en el detalle de la pantalla "Versión".
+function getAppVersionMajor() {
+  const m = APP_VERSION.match(/^(\d+\.\d+)/);
+  return m ? m[1] : APP_VERSION;
+}
+
+// ══════════════════════════ Modo Offline ══════════════════════════════════
+// FlemingApp puede usarse sin conexión: al perder Internet, la plataforma
+// sigue mostrando la información guardada (últimas asignaciones, territorios,
+// conductores, casas, etc. capturados la última vez que hubo conexión).
+// Lo que NO está disponible sin conexión: buscar actualizaciones de la
+// plataforma, la función Live, recibir notificaciones nuevas, o ver
+// novedades de asignaciones — todo lo que requiere datos frescos del
+// servidor en tiempo real.
+let _isOnline = navigator.onLine;
+
+function isAppOnline() { return _isOnline; }
+
+function _offlineCacheKey(key) { return 'fleming_offline_' + key; }
+function offlineCacheSet(key, data) {
+  try {
+    localStorage.setItem(_offlineCacheKey(key), JSON.stringify({ data, savedAt: Date.now() }));
+  } catch (e) { console.warn('[Offline] No se pudo guardar en caché:', key, e.message); }
+}
+function offlineCacheGet(key) {
+  try {
+    const raw = localStorage.getItem(_offlineCacheKey(key));
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) { return null; }
+}
+
+function updateOnlineStatusUI() {
+  const banner = document.getElementById('offline-banner');
+  if (banner) banner.classList.toggle('visible', !_isOnline);
+}
+
+// Bloquea acciones que requieren conexión (buscar actualizaciones, Live,
+// etc). Muestra un aviso y devuelve true si la acción debe cancelarse.
+function blockIfOffline(i18nKey) {
+  if (_isOnline) return false;
+  try { showToast(t(i18nKey || 'offline.noupdate'), 'error'); } catch (e) {}
+  return true;
+}
+
+window.addEventListener('online', () => { _isOnline = true; updateOnlineStatusUI(); });
+window.addEventListener('offline', () => { _isOnline = false; updateOnlineStatusUI(); });
+document.addEventListener('DOMContentLoaded', updateOnlineStatusUI);
 // Recordatorios de reporte de territorio en el Perfil (Inicio): desactivados
 // momentáneamente. La función de Reportes sigue intacta; solo se oculta el aviso.
 const RECORDATORIOS_TERRITORIO_ENABLED = false;
@@ -7324,6 +7401,10 @@ const I18N = {
   'settings.version':           { es: 'Versión de la plataforma', en: 'Platform version', nl: 'Platformversie' },
   'settings.actualizar':        { es: 'Actualizar',               en: 'Update',  nl: 'Bijwerken' },
   'settings.buscaractualizaciones': { es: 'Buscar actualizaciones', en: 'Check for updates', nl: 'Controleren op updates' },
+  'offline.banner':      { es: 'Sin conexión — mostrando información guardada', en: 'Offline — showing saved information', nl: 'Offline — opgeslagen informatie wordt getoond' },
+  'offline.noupdate':    { es: 'No disponible sin conexión', en: 'Not available offline', nl: 'Niet beschikbaar offline' },
+  'offline.nolive':      { es: 'Live no está disponible sin conexión', en: 'Live is not available offline', nl: 'Live is niet beschikbaar offline' },
+  'offline.cargando':    { es: 'Sin conexión. Mostrando las últimas asignaciones guardadas.', en: 'Offline. Showing the last saved assignments.', nl: 'Offline. De laatst opgeslagen toewijzingen worden getoond.' },
   // ── Funciones especiales ──
   'func.vistacontenido':   { es: 'Vista de Contenido (Tablet / Escritorio)', en: 'Content View (Tablet / Desktop)', nl: 'Inhoudsweergave (Tablet / Desktop)' },
   'func.lateral':          { es: 'Lateral',                 en: 'Sidebar',  nl: 'Zijbalk' },
@@ -9884,34 +9965,68 @@ async function loadSchedule() {
   _lastScheduleLoad = Date.now();
   document.getElementById('schedule-content').innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">' + t('casa.cargando') + '</div></div>';
 
-  // Fetch assignments without embedded territory join to avoid PostgREST
-  // ambiguous-relationship error (two FKs pointing to the same 'territories' table).
-  // Territory data is resolved client-side from the territories array fetched below.
-  const { data: aData, error: aErr } = await sb.from('assignments')
-    .select('*')
-    .order('date').order('time');
-  if (aErr) { console.error('loadSchedule assignments error:', aErr.message); }
-
-  assignments = aData || [];
-  const { data: tData } = await sb.from('territories').select('id, number, color, no_pasar').order('number');
-  territories = tData || [];
-  _territoryMapsLoaded = false; // territories array was replaced — map images need re-merging on next use
-  if (currentSubTab === 'territorios') renderTerritoryView();
-  // Refrescar conductores y casas siempre: la etiqueta "Casa de"/"Depto de" en
-  // las tarjetas y el detalle de asignaciones depende de `casas` para saber el
-  // tipo de cada dirección, y debe resolverse para todos los usuarios (no solo
-  // cuando el panel de Administración ya los había cargado antes).
-  {
-    const [{ data: cData }, { data: hData }] = await Promise.all([
-      sb.from('conductores').select('*').order('apellido').order('nombre'),
-      sb.from('casas').select('*').order('direccion'),
-    ]);
-    conductores = cData || [];
-    casas = hData || [];
+  if (!isAppOnline()) {
+    _loadScheduleFromOfflineCache();
+    return;
   }
-  // Ensure grupos are available for Saturday group rendering
-  if (!grupos.length) await loadGrupos();
+
+  try {
+    // Fetch assignments without embedded territory join to avoid PostgREST
+    // ambiguous-relationship error (two FKs pointing to the same 'territories' table).
+    // Territory data is resolved client-side from the territories array fetched below.
+    const { data: aData, error: aErr } = await sb.from('assignments')
+      .select('*')
+      .order('date').order('time');
+    if (aErr) { console.error('loadSchedule assignments error:', aErr.message); }
+
+    assignments = aData || [];
+    const { data: tData } = await sb.from('territories').select('id, number, color, no_pasar').order('number');
+    territories = tData || [];
+    _territoryMapsLoaded = false; // territories array was replaced — map images need re-merging on next use
+    if (currentSubTab === 'territorios') renderTerritoryView();
+    // Refrescar conductores y casas siempre: la etiqueta "Casa de"/"Depto de" en
+    // las tarjetas y el detalle de asignaciones depende de `casas` para saber el
+    // tipo de cada dirección, y debe resolverse para todos los usuarios (no solo
+    // cuando el panel de Administración ya los había cargado antes).
+    {
+      const [{ data: cData }, { data: hData }] = await Promise.all([
+        sb.from('conductores').select('*').order('apellido').order('nombre'),
+        sb.from('casas').select('*').order('direccion'),
+      ]);
+      conductores = cData || [];
+      casas = hData || [];
+    }
+    // Ensure grupos are available for Saturday group rendering
+    if (!grupos.length) await loadGrupos();
+    renderSchedule();
+
+    // Guarda una copia local: si más adelante se pierde la conexión, la
+    // plataforma seguirá mostrando estas mismas asignaciones y datos.
+    offlineCacheSet('schedule', { assignments, territories, conductores, casas, grupos });
+  } catch (e) {
+    console.warn('[Offline] Falla al cargar asignaciones desde el servidor, usando caché local:', e && e.message);
+    _loadScheduleFromOfflineCache();
+  }
+}
+
+// Restaura la última copia guardada de asignaciones/territorios/conductores/
+// casas cuando no hay conexión (o el pedido al servidor falló), para que la
+// plataforma pueda seguir usándose en modo Offline.
+function _loadScheduleFromOfflineCache() {
+  const cached = offlineCacheGet('schedule');
+  if (!cached || !cached.data) {
+    document.getElementById('schedule-content').innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><h4>${t('casa.sinasignaciones')}</h4><p>${t('offline.cargando')}</p></div>`;
+    return;
+  }
+  assignments  = cached.data.assignments || [];
+  territories  = cached.data.territories || [];
+  conductores  = cached.data.conductores || [];
+  casas        = cached.data.casas || [];
+  if (cached.data.grupos && !grupos.length) grupos = cached.data.grupos;
+  _territoryMapsLoaded = false;
+  if (currentSubTab === 'territorios') renderTerritoryView();
   renderSchedule();
+  try { showToast(t('offline.cargando'), 'info'); } catch (e) {}
 }
 
 function renderSchedule() {
@@ -10555,6 +10670,7 @@ function _liveOnError(err) {
 }
 function toggleLiveMode() {
   if (!isLiveFeatureEnabled()) { showToast('La función Live está desactivada en Configuración.', 'error'); return; }
+  if (!_liveActive && blockIfOffline('offline.nolive')) return;
   if (_liveActive) { stopLiveMode(); } else { startLiveMode(); }
 }
 function startLiveMode() {
@@ -14039,7 +14155,7 @@ function closeProfileMenu() { closeOptionsMenu(); }
 async function openPreferencias() {
   document.getElementById('page-preferencias').classList.add('open');
   document.body.style.overflow = 'hidden';
-  document.getElementById('pref-version-value').textContent = 'Versión ' + APP_VERSION;
+  document.getElementById('pref-version-value').textContent = getAppVersionMajor();
   updatePrefThemeActive();
   updateDarkMapToggleUI();
   updateLiveToggleUI();
@@ -14484,6 +14600,7 @@ function endVersionHold(isRelease) {
 // que efectivamente recarga la plataforma para buscar una nueva versión
 // (por ejemplo, del Service Worker o del propio archivo servido).
 function reloadToCheckForUpdate() {
+  if (blockIfOffline('offline.noupdate')) return;
   try { showToast('Buscando actualizaciones…', 'info'); } catch (e) {}
   setTimeout(() => location.reload(true), 300);
 }
@@ -18770,6 +18887,12 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="6 11 12 5 18 11"/></svg>
 </button>
 
+<!-- ══ Banner flotante "Sin conexión" (Modo Offline) ══ -->
+<div id="offline-banner">
+  <span class="offline-banner-dot"></span>
+  <span data-i18n="offline.banner">Sin conexión — mostrando información guardada</span>
+</div>
+
 <!-- ══ Tutorial de bienvenida (onboarding paso a paso) ══ -->
 <div id="tutorial-overlay" onclick="tutorialBackgroundClick(event)">
   <div id="tutorial-spot"></div>
@@ -20328,7 +20451,6 @@ async function openMasInfoModal(seccionKey, evt) {
   const body = document.getElementById('masinfo-modal-body');
   body.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando</div></div>';
   document.getElementById('masinfo-modal').classList.add('open');
-  _morphPanelFromTrigger(document.getElementById('masinfo-modal-panel'), evt && evt.currentTarget);
 
   // Nota: se fuerza siempre una recarga fresca (force=true) en vez de confiar en la
   // caché de arranque. La caché inicial (loadInfoResponsables() sin forzar, disparada
