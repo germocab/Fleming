@@ -19,7 +19,7 @@ self.addEventListener('push', event => {
 
   const options = {
     body: data.body,
-    icon: '/android-chrome-192x192.png',
+    icon: '/icons/PNG.png',
     badge: '/icons/favicon-32x32.png',
     vibrate: [200, 100, 200],
     tag: 'fleming-push',          // reemplaza notificaciones previas del mismo tipo
