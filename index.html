@@ -7317,7 +7317,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.15.15-beta';
+const APP_VERSION = '1.15.20-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -8436,10 +8436,25 @@ function closeGrupoDetailPage() {
   _currentGrupoId = null;
 }
 
+function getApellido(nombreCompleto) {
+  const parts = (nombreCompleto || '').trim().split(/\s+/);
+  return parts.length > 1 ? parts.slice(1).join(' ') : (parts[0] || '');
+}
+
+function sortMiembrosJerarquico(miembros) {
+  const rank = m => m.rol === 'superintendente' ? 0 : m.rol === 'auxiliar' ? 1 : m.precursor ? 2 : 3;
+  return [...miembros].sort((a, b) => {
+    const ra = rank(a), rb = rank(b);
+    if (ra !== rb) return ra - rb;
+    return getApellido(a.nombre).localeCompare(getApellido(b.nombre), 'es', { sensitivity: 'base' });
+  });
+}
+
 function _renderGrupoDetailMembers(g) {
-  const leaders   = g.miembros.filter(m => m.rol === 'superintendente' || m.rol === 'auxiliar');
-  const precursors = g.miembros.filter(m => m.rol !== 'superintendente' && m.rol !== 'auxiliar' && m.precursor);
-  const regular   = g.miembros.filter(m => m.rol !== 'superintendente' && m.rol !== 'auxiliar' && !m.precursor);
+  const sortedMiembros = sortMiembrosJerarquico(g.miembros);
+  const leaders   = sortedMiembros.filter(m => m.rol === 'superintendente' || m.rol === 'auxiliar');
+  const precursors = sortedMiembros.filter(m => m.rol !== 'superintendente' && m.rol !== 'auxiliar' && m.precursor);
+  const regular   = sortedMiembros.filter(m => m.rol !== 'superintendente' && m.rol !== 'auxiliar' && !m.precursor);
 
   // Leaders
   const leadersEl = document.getElementById('grupo-detail-leaders-list');
@@ -9339,7 +9354,8 @@ function renderAdminGrupos() {
     return;
   }
   container.innerHTML = grupos.map(g => {
-    const membersHtml = g.miembros.length ? g.miembros.map(m => `
+    const miembrosOrdenados = sortMiembrosJerarquico(g.miembros);
+    const membersHtml = miembrosOrdenados.length ? miembrosOrdenados.map(m => `
       <div class="admin-miembro-row">
         <div class="grupo-member-avatar" style="background:${memberColor(m.nombre)};width:26px;height:26px;font-size:0.58rem">${memberInitials(m.nombre)}</div>
         <span class="admin-miembro-name" onclick="openEditMiembro('${g.id}','${m.id}')" title="Editar rol y opciones">${m.nombre}</span>
@@ -9355,7 +9371,7 @@ function renderAdminGrupos() {
       <div class="admin-grupo-header" onclick="toggleAdminGrupo('${g.id}')">
         <div class="admin-grupo-num">${g.numero}</div>
         <div class="admin-grupo-name">${t('grupos.grupo-num')} ${g.numero}</div>
-        <div class="admin-grupo-meta">${g.miembros.length} miembro${g.miembros.length !== 1 ? 's' : ''}</div>
+        <div class="admin-grupo-meta">${miembrosOrdenados.length} miembro${miembrosOrdenados.length !== 1 ? 's' : ''}</div>
         <div class="admin-grupo-actions" onclick="event.stopPropagation()">
           <button class="btn-icon-sm" title="${t('grupos.editar-grupo')}" onclick="openGrupoModal('${g.id}')">
             <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
