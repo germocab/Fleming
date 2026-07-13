@@ -1287,7 +1287,7 @@
 
   /* ── Campo Grupo en el modal de asignación (visible solo sábados) ── */
   #as-grupo-wrap { display: none; }
-  #as-grupo-wrap.visible { display: block; }
+  #as-grupo-wrap.visible { display: flex; }
   .detail-ter-tabs {
     display: flex; gap: 0; margin: 0 1.25rem 0.75rem;
     background: var(--surface2); border-radius: 10px; padding: 3px;
@@ -1998,9 +1998,9 @@
   .modal-body { padding: 1.25rem; }
 
   .btn-secondary {
-    padding: 0.6rem 1.1rem; background: var(--surface2); border: 1px solid var(--border);
+    padding: 0.65rem 1.1rem; background: var(--surface2); border: 1px solid var(--border);
     border-radius: var(--radius-sm); color: var(--text); font-family: var(--font);
-    font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
   }
   .btn-secondary:hover { background: var(--surface3); }
   .btn-danger {
@@ -5717,12 +5717,6 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         </div>
       </div>
       <div class="admin-body">
-      <div class="page-header">
-        <div>
-          <div class="page-header-title" data-i18n="admin.title">Administración</div>
-          <div class="page-header-sub" data-i18n="admin.subtitle">Gestiona asignaciones, territorios, conductores y casas</div>
-        </div>
-      </div>
       <div class="admin-section-tabs">
         <button class="admin-section-tab active" data-section="predicacion" data-i18n="admin.section.predicacion" onclick="switchAdminSection('predicacion')">Predicación</button>
         <button class="admin-section-tab" data-section="reuniones" data-i18n="admin.section.reuniones" onclick="switchAdminSection('reuniones')">Reuniones</button>
@@ -7317,7 +7311,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.15.30-beta';
+const APP_VERSION = '1.16.0-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -13704,7 +13698,7 @@ function openUserProfilePage(uid) {
       Esta cuenta fue eliminada anteriormente y ${u.name.split(' ')[0]} intentó iniciar sesión de nuevo con el mismo nombre. Acepta para permitirle volver a entrar como Visitante, o deniega para mantener la cuenta bloqueada.
     </p>
     <div class="uprofile-actions">
-      <button class="btn-primary" style="width:auto;padding:0.6rem 1.5rem;background:var(--green)" onclick="acceptPendingFromProfile('${u.id}','${u.name.replace(/'/g,"\\'")}')">Aceptar</button>
+      <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem;background:var(--green)" onclick="acceptPendingFromProfile('${u.id}','${u.name.replace(/'/g,"\\'")}')">Aceptar</button>
       <button class="btn-secondary" onclick="denyPendingFromProfile('${u.id}','${u.name.replace(/'/g,"\\'")}')">Denegar</button>
     </div>`;
 
@@ -13765,7 +13759,7 @@ function openUserProfilePage(uid) {
         </div>` : ''}
 
         <div class="uprofile-actions" style="margin-top:1rem">
-          <button class="btn-primary" style="width:auto;padding:0.6rem 1.5rem" onclick="saveProfileChanges('${u.id}')">Guardar cambios</button>
+          <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="saveProfileChanges('${u.id}')">Guardar cambios</button>
           ${!isCurrentUser ? `<button class="btn-secondary" onclick="revokeUser('${u.id}')">Revocar acceso</button>` : ''}
         </div>`;
 
