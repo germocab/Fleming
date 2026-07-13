@@ -1624,21 +1624,19 @@
   .live-street-banner.paused .live-pause-btn { background: var(--accent-light); color: var(--accent); }
 
   .no-pasar-item.live-match {
-    background: rgba(255,59,48,0.08) !important;
-    border-color: rgba(255,59,48,0.4) !important;
+    background: rgba(52,199,89,0.1) !important;
+    border-color: rgba(52,199,89,0.35) !important;
     animation: liveMatchAppear 0.3s ease;
   }
   @keyframes liveMatchAppear { from { transform: scale(0.97); opacity: 0.6; } to { transform: scale(1); opacity: 1; } }
-  .no-pasar-item.live-match .no-pasar-item-addr { color: var(--red); }
+  .no-pasar-item.live-match .no-pasar-item-addr { color: var(--green); }
   .no-pasar-item.live-no-match { opacity: 0.38; }
   .live-match-badge {
-    display: inline-flex; align-items: center; gap: 4px;
-    background: var(--red); color: #fff;
-    font-size: 0.62rem; font-weight: 800; letter-spacing: 0.05em;
-    padding: 2px 6px; border-radius: 5px; flex-shrink: 0;
-    text-transform: uppercase;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+    background: var(--green); color: #fff;
   }
-  .live-match-badge svg { width: 9px; height: 9px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; flex-shrink: 0; }
+  .live-match-badge svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; flex-shrink: 0; }
 
   .live-locating-wrap {
     display: none; align-items: center; gap: 8px;
@@ -7316,7 +7314,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.16.0.1-beta';
+const APP_VERSION = '1.16.5-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -10959,8 +10957,9 @@ function _liveHighlight(detectedRoad) {
       if (!el.querySelector('.live-match-badge')) {
         const badge = document.createElement('span');
         badge.className = 'live-match-badge';
-        badge.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>Aqu\u00ed';
-        el.appendChild(badge);
+        badge.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>';
+        const topRow = el.querySelector('.no-pasar-item-top') || el;
+        topRow.appendChild(badge);
         el.parentElement.prepend(el);
       }
     } else {
