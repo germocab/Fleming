@@ -7317,7 +7317,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.15.20-beta';
+const APP_VERSION = '1.15.21-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -8263,11 +8263,11 @@ async function debugPush() {
 // ── Grupos de Servicio ────────────────────────────────────────────────────────
 let grupos = [];
 
-// ── Color de los Grupos de Servicio: unificado, en gris oscuro (el mismo
-//    tono que usa la pestaña activa del slider de sub-secciones superior,
-//    #1c1c1e) en vez del azul de la marca — antes cada grupo tenía un color
-//    distinto de una paleta; luego se unificó en azul; ahora en gris oscuro. ──
-const GRUPO_COLOR_UNICO = '#1c1c1e';
+// ── Color de los Grupos de Servicio: unificado, siguiendo el color de texto
+//    principal (var(--text)) para que se adapte automáticamente al tema
+//    claro/oscuro — antes era un gris oscuro fijo (#1c1c1e) que quedaba
+//    invisible en modo oscuro. ──
+const GRUPO_COLOR_UNICO = 'var(--text)';
 function grupoColorFor(numero) {
   return GRUPO_COLOR_UNICO;
 }
