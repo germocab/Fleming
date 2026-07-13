@@ -1996,6 +1996,11 @@
   }
   .modal-close svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
   .modal-body { padding: 1.25rem; }
+  .modal-footer {
+    display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+    padding: 1rem 1.25rem; border-top: 1px solid var(--border);
+    position: sticky; bottom: 0; background: var(--surface);
+  }
 
   .btn-secondary {
     padding: 0.65rem 1.1rem; background: var(--surface2); border: 1px solid var(--border);
@@ -7311,7 +7316,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.16.0-beta';
+const APP_VERSION = '1.16.0.1-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
