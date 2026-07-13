@@ -7317,7 +7317,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.15.21-beta';
+const APP_VERSION = '1.15.30-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -7380,13 +7380,90 @@ window.addEventListener('offline', () => {
 // conexión. Si el territorio se actualiza en el servidor (nuevo mapa, nuevas
 // direcciones No Pasar, etc.), se detecta comparando una "huella" simple de
 // sus datos y se avisa para poder actualizar la copia descargada.
-const OFFLINE_TER_KEY = 'fleming_offline_territories';
-function _getOfflineTerritories() {
-  try { return JSON.parse(localStorage.getItem(OFFLINE_TER_KEY) || '{}'); } catch (e) { return {}; }
+//
+// NOTA (fix v1.15.30-beta): antes esto se guardaba en localStorage, que tiene
+// una cuota muy chica (5-10MB) compartida con el resto de la app. Los mapas
+// de los territorios (imágenes en base64) la llenan rápido, sobre todo con
+// "Descargar todo", así que el guardado fallaba silenciosamente con
+// "No se pudo guardar el territorio en este dispositivo" apenas se acumulaban
+// unos pocos territorios con mapa. Ahora se usa IndexedDB (cuota mucho mayor,
+// pensada para este tipo de datos) y se mantiene un cache en memoria para que
+// las lecturas sigan siendo síncronas en el resto del código.
+const OFFLINE_TER_KEY = 'fleming_offline_territories'; // clave legacy (localStorage), solo para migrar datos viejos
+const OFFLINE_TER_DB_NAME = 'fleming_offline_db';
+const OFFLINE_TER_STORE = 'territories';
+let _offlineTerritoriesCache = {};
+let _offlineDBPromise = null;
+
+function _openOfflineTerDB() {
+  if (_offlineDBPromise) return _offlineDBPromise;
+  _offlineDBPromise = new Promise((resolve, reject) => {
+    try {
+      const req = indexedDB.open(OFFLINE_TER_DB_NAME, 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(OFFLINE_TER_STORE)) db.createObjectStore(OFFLINE_TER_STORE, { keyPath: 'id' });
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    } catch (e) { reject(e); }
+  });
+  return _offlineDBPromise;
 }
+
+async function _loadAllOfflineTerritoriesFromDB() {
+  try {
+    const db = await _openOfflineTerDB();
+    const fromDB = await new Promise((resolve, reject) => {
+      const tx = db.transaction(OFFLINE_TER_STORE, 'readonly');
+      const req = tx.objectStore(OFFLINE_TER_STORE).getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+    const map = {};
+    fromDB.forEach(entry => { map[entry.id] = entry; });
+    // Migración única desde localStorage (versiones anteriores a 1.15.30-beta)
+    if (!fromDB.length) {
+      try {
+        const legacy = JSON.parse(localStorage.getItem(OFFLINE_TER_KEY) || '{}');
+        const legacyIds = Object.keys(legacy);
+        if (legacyIds.length) {
+          for (const id of legacyIds) {
+            const entry = { id, ...legacy[id] };
+            map[id] = entry;
+            await _putOfflineTerritoryInDB(entry);
+          }
+          localStorage.removeItem(OFFLINE_TER_KEY);
+        }
+      } catch (e) { /* sin datos legacy o corruptos, se ignora */ }
+    }
+    return map;
+  } catch (e) {
+    console.warn('[Offline] No se pudo abrir IndexedDB, usando localStorage como respaldo:', e.message);
+    try { return JSON.parse(localStorage.getItem(OFFLINE_TER_KEY) || '{}'); } catch (e2) { return {}; }
+  }
+}
+
+function _putOfflineTerritoryInDB(entryWithId) {
+  return _openOfflineTerDB().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(OFFLINE_TER_STORE, 'readwrite');
+    tx.objectStore(OFFLINE_TER_STORE).put(entryWithId);
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => reject(tx.error);
+  }));
+}
+
+let _offlineTerCacheReady = (async () => {
+  _offlineTerritoriesCache = await _loadAllOfflineTerritoriesFromDB();
+})();
+
+function _getOfflineTerritories() { return _offlineTerritoriesCache; }
 function _saveOfflineTerritories(store) {
-  try { localStorage.setItem(OFFLINE_TER_KEY, JSON.stringify(store)); return true; }
-  catch (e) { console.warn('[Offline] No se pudo guardar el territorio descargado:', e.message); return false; }
+  // Se mantiene por compatibilidad de firma; ya no escribe todo el store de
+  // golpe (eso era parte del problema), sino que cada territorio se guarda
+  // individualmente vía _putOfflineTerritoryInDB en downloadTerritoryOffline().
+  _offlineTerritoriesCache = store;
+  return true;
 }
 function _territoryFingerprint(terr) {
   return JSON.stringify({
@@ -7398,19 +7475,27 @@ function getDownloadedTerritory(id) { return _getOfflineTerritories()[id] || nul
 function isTerritoryDownloaded(id) { return !!getDownloadedTerritory(id); }
 
 async function downloadTerritoryOffline(terr) {
-  const store = _getOfflineTerritories();
-  store[terr.id] = {
+  const entry = {
+    id: terr.id,
     number: terr.number, color: terr.color, no_pasar: terr.no_pasar,
     map_data: terr.map_data || null, map_data_dark: terr.map_data_dark || null,
     fingerprint: _territoryFingerprint(terr), downloadedAt: Date.now(),
   };
-  const ok = _saveOfflineTerritories(store);
+  _offlineTerritoriesCache[terr.id] = entry;
+  let ok = true;
+  try {
+    await _putOfflineTerritoryInDB(entry);
+  } catch (e) {
+    console.warn('[Offline] No se pudo guardar el territorio descargado:', e.message);
+    ok = false;
+  }
   _updateDownloadBtnUI(terr.id);
   return ok;
 }
 
 async function toggleTerritoryDownload() {
   try {
+    await _offlineTerCacheReady;
     const btn = document.getElementById('detail-download-fab');
     const id = btn && btn.dataset.territoryId;
     if (!id) return;
@@ -7506,6 +7591,7 @@ async function downloadAllTerritoriesOffline() {
   if (_downloadingAllTerritories) return;
   if (blockIfOffline('offline.nodownload')) return;
   if (!territories.length) return;
+  await _offlineTerCacheReady;
   _downloadingAllTerritories = true;
   const btn = document.getElementById('ter-download-all-btn');
   const label = btn ? btn.querySelector('.ter-download-all-label') : null;
