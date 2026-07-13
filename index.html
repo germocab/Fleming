@@ -7317,7 +7317,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.15.11-beta';
+const APP_VERSION = '1.15.15-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -8802,7 +8802,7 @@ async function renderProfilePage() {
 
   // Fetch fresh data for this user (only the avatar field is used below)
   const { data: me } = await sb.from('platform_users')
-    .select('avatar').ilike('name', currentUser.name).single();
+    .select('avatar, labels').ilike('name', currentUser.name).single();
 
   // Avatar big
   const bigAvatar = document.getElementById('profile-avatar-big');
