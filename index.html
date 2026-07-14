@@ -1165,10 +1165,11 @@
 
   .detail-map-wrap {
     margin: 0 1.25rem 1.25rem;
-    background: var(--surface2); border-radius: var(--radius);
+    background: var(--surface2); border-radius: 26px;
     overflow: hidden; min-height: 160px;
     display: flex; align-items: center; justify-content: center;
     border: 1px solid var(--border); cursor: zoom-in;
+    transition: background-color 0.25s ease;
   }
   .detail-map-wrap img { width: 100%; display: block; max-height: 260px; object-fit: contain; }
   .detail-map-offline-placeholder {
@@ -7409,7 +7410,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.17.1.1-beta';
+const APP_VERSION = '1.17.2-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -7640,12 +7641,30 @@ function _updateDownloadBtnUI(id) {
 
 // Resuelve y aplica el mapa de un territorio en un .detail-map-wrap dado,
 // recurriendo a la copia descargada localmente cuando no hay conexión.
+// Convierte un color hex (#rrggbb) a rgba(...) con la opacidad indicada.
+// Se usa para que el contenedor del mapa de territorio adopte un tono
+// derivado del color del territorio, evitando el "corte" visual entre el
+// mapa (que suele tener fondo oscuro/transparente) y el recuadro que lo
+// contiene.
+function hexToRgba(hex, alpha) {
+  if (!hex) return null;
+  const m = hex.replace('#','').match(/^([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+  if (!m) return null;
+  const r = parseInt(m[1],16), g = parseInt(m[2],16), b = parseInt(m[3],16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
 function _applyDetailMapSrc(ter, opts) {
   opts = opts || {};
   const mapWrap = document.getElementById('detail-map-wrap');
   const mapImg  = document.getElementById('detail-map-img');
   const placeholder = document.getElementById('detail-map-offline-placeholder');
   if (!mapWrap || !mapImg) return;
+
+  // El recuadro del mapa adopta un tono derivado del color del territorio,
+  // para que no se note un "corte" entre el mapa y su contenedor.
+  const terColor = ter ? getTerColorFromObj(ter) : null;
+  mapWrap.style.background = terColor ? hexToRgba(terColor, 0.16) : 'var(--surface2)';
 
   let terMapSrc = ter ? getActiveTerMapSrc(ter) : null;
   if (!terMapSrc && ter && !isAppOnline()) {
