@@ -7410,7 +7410,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.17.2-beta';
+const APP_VERSION = '1.17.2.5-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -7641,6 +7641,14 @@ function _updateDownloadBtnUI(id) {
 
 // Resuelve y aplica el mapa de un territorio en un .detail-map-wrap dado,
 // recurriendo a la copia descargada localmente cuando no hay conexión.
+// Determina si el modo oscuro está activo en este momento (respeta el modo
+// "auto", que sigue la preferencia del sistema). Se usa para que ciertos
+// elementos (como el fondo del contenedor del mapa) elijan el tono correcto.
+function _isDarkThemeActive() {
+  const theme = document.documentElement.getAttribute('data-theme') || 'auto';
+  return theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+}
+
 // Convierte un color hex (#rrggbb) a rgba(...) con la opacidad indicada.
 // Se usa para que el contenedor del mapa de territorio adopte un tono
 // derivado del color del territorio, evitando el "corte" visual entre el
@@ -7661,10 +7669,11 @@ function _applyDetailMapSrc(ter, opts) {
   const placeholder = document.getElementById('detail-map-offline-placeholder');
   if (!mapWrap || !mapImg) return;
 
-  // El recuadro del mapa adopta un tono derivado del color del territorio,
-  // para que no se note un "corte" entre el mapa y su contenedor.
-  const terColor = ter ? getTerColorFromObj(ter) : null;
-  mapWrap.style.background = terColor ? hexToRgba(terColor, 0.16) : 'var(--surface2)';
+  // El recuadro del mapa adopta el mismo color de fondo con el que se
+  // exportó el propio mapa (blanco en modo claro, oscuro en modo oscuro),
+  // para que no se note un "corte" entre el mapa y su contenedor. No usa el
+  // color del territorio (ese solo identifica manzanas/badges).
+  mapWrap.style.background = _isDarkThemeActive() ? '#000000' : '#ffffff';
 
   let terMapSrc = ter ? getActiveTerMapSrc(ter) : null;
   if (!terMapSrc && ter && !isAppOnline()) {
