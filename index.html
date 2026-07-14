@@ -864,8 +864,23 @@
   }
   .detail-especial-photo-wrap img { width: 100%; height: 100%; max-height: 220px; object-fit: cover; display: block; }
   .detail-especial-block {
-    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
-    padding: 0.8rem 1rem; margin-bottom: 0.6rem;
+    margin: 0 1.25rem 0.85rem; padding: 1rem 1.1rem;
+    background: var(--surface2); border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+  .detail-especial-block-head {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+  }
+  .detail-especial-block-head svg {
+    width: 16px; height: 16px; stroke: var(--accent); fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0;
+  }
+  .detail-especial-block-title {
+    font-size: 0.8rem; font-weight: 700; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .detail-especial-block-value {
+    font-size: 0.95rem; font-weight: 500; color: var(--text); line-height: 1.45;
   }
 
   .card-main { flex: 1; min-width: 0; }
@@ -6183,12 +6198,18 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       </button>
     </div>
     <div class="detail-especial-block" id="detail-especial-lugar-block" style="display:none">
-      <div class="detail-manzanas-title">Lugar</div>
-      <div id="detail-especial-lugar-value" style="font-size:0.9rem;color:var(--text2);margin-top:2px"></div>
+      <div class="detail-especial-block-head">
+        <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span class="detail-especial-block-title">Lugar</span>
+      </div>
+      <div class="detail-especial-block-value" id="detail-especial-lugar-value"></div>
     </div>
     <div class="detail-especial-block" id="detail-especial-desc-block" style="display:none">
-      <div class="detail-manzanas-title">Descripción</div>
-      <div id="detail-especial-desc-value" style="font-size:0.9rem;color:var(--text2);margin-top:2px;white-space:pre-wrap"></div>
+      <div class="detail-especial-block-head">
+        <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span class="detail-especial-block-title">Descripción</span>
+      </div>
+      <div class="detail-especial-block-value" id="detail-especial-desc-value" style="white-space:pre-wrap"></div>
     </div>
     <!-- Territory tabs (shown only when 2 territories assigned) -->
     <div class="detail-ter-tabs" id="detail-ter-tabs" style="display:none">
@@ -7388,7 +7409,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.17.1-beta';
+const APP_VERSION = '1.17.1.1-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
