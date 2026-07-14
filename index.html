@@ -7410,7 +7410,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.17.2.5-beta';
+const APP_VERSION = '1.17.2.5.5-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -7673,7 +7673,7 @@ function _applyDetailMapSrc(ter, opts) {
   // exportó el propio mapa (blanco en modo claro, oscuro en modo oscuro),
   // para que no se note un "corte" entre el mapa y su contenedor. No usa el
   // color del territorio (ese solo identifica manzanas/badges).
-  mapWrap.style.background = _isDarkThemeActive() ? '#000000' : '#ffffff';
+  mapWrap.style.background = _isDarkThemeActive() ? '#191919' : '#ffffff';
 
   let terMapSrc = ter ? getActiveTerMapSrc(ter) : null;
   if (!terMapSrc && ter && !isAppOnline()) {
