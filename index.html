@@ -7410,7 +7410,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.17.2.5.5-beta';
+const APP_VERSION = '1.17.5-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -7944,6 +7944,7 @@ const I18N = {
   'notifcat.responsabilidades': { es: 'Responsabilidades',           en: 'Responsibilities',          nl: 'Verantwoordelijkheden' },
   'notifcat.sistema':           { es: 'Avisos de la Plataforma',     en: 'Platform Alerts',           nl: 'Platformmeldingen' },
   'notifcat.solicitud-cuenta':  { es: 'Solicitudes de cuenta',        en: 'Account Requests',          nl: 'Accountverzoeken' },
+  'notifcat.reporte-territorio': { es: 'Reportes de Territorio',      en: 'Territory Reports',         nl: 'Gebiedsrapporten' },
   // ── Barras de búsqueda (Grupos, Carritos, Territorios, Vida y Ministerio) ──
   'search.buscar-nombre':      { es: 'Buscar por nombre…',   en: 'Search by name…',   nl: 'Zoeken op naam…' },
   'search.buscar-territorio':  { es: 'Buscar territorio…',   en: 'Search territory…', nl: 'Gebied zoeken…' },
@@ -16482,6 +16483,7 @@ const NOTIF_CATEGORIES = [
   { id: 'responsabilidades', label: 'notifcat.responsabilidades', mandatory: true,  group: 'reuniones', section: 'reuniones' },
   { id: 'sistema',           label: 'notifcat.sistema', mandatory: true,  group: 'sistema',  section: 'sistema' },
   { id: 'solicitud-cuenta',  label: 'notifcat.solicitud-cuenta', mandatory: true,  group: 'sistema',  section: 'sistema' },
+  { id: 'reporte-territorio', label: 'notifcat.reporte-territorio', mandatory: true, group: 'sistema', section: 'sistema' },
 ];
 
 // Devuelve la key de NOTIF_GROUPS correspondiente a una notificación.
@@ -21012,6 +21014,49 @@ async function trepPubSubmit() {
   if (error) { alert('Error al enviar el reporte. Intenta de nuevo.'); console.error(error); return; }
   trepPubReported.add(trepPubCurrentTer);
   trepPubStep(0);
+  notifyReportRecipients(t, payload).catch(err => console.warn('No se pudo notificar el reporte de territorio:', err.message));
+}
+
+// Avisa al Usuario DEV y a los Usuarios Admin con el módulo "Reportes de
+// Territorio" habilitado cuando un encargado envía un reporte. No bloquea
+// el flujo de envío del publicador: se dispara "en segundo plano".
+async function notifyReportRecipients(territoryObj, submission) {
+  const terLabelStr = `Territorio ${territoryObj?.number ?? '?'}`;
+  const title = `Nuevo reporte de ${terLabelStr}`;
+  const bodyBits = [`${submission.host_name || 'Un publicador'} envió el reporte de ${terLabelStr}.`];
+  if (submission.not_covered) bodyBits.push('Indicó que no se pudo cubrir.');
+  else if (submission.all_territory) bodyBits.push('Cubrió todo el territorio.');
+  else if (submission.manzanas_done?.length) bodyBits.push(`Manzanas cubiertas: ${submission.manzanas_done.join(', ')}.`);
+  const body = bodyBits.join(' ');
+
+  // Admins con el módulo "Reportes de Territorio" habilitado (permissions.territory_reports === true)
+  let adminNames = [];
+  try {
+    const { data: admins } = await sb.from('platform_users').select('name, permissions').eq('role', 'admin');
+    adminNames = (admins || [])
+      .filter(u => parsePermissions(u.permissions).territory_reports === true)
+      .map(u => (u.name || '').trim().toLowerCase())
+      .filter(Boolean);
+  } catch (e) { console.warn('No se pudo resolver admins de Reportes:', e.message); }
+
+  const rows = [];
+  // DEV: siempre se notifica (dev_only, igual que otras notificaciones internas)
+  rows.push({ title, body, notif_category: 'reporte-territorio', dev_only: true });
+  // Admins encargados del módulo Reportes (si hay alguno configurado)
+  if (adminNames.length) {
+    rows.push({ title, body, notif_category: 'reporte-territorio', target_names: adminNames });
+  }
+  if (!rows.length) return;
+  await sb.from('notifications').insert(rows);
+  // Push (best-effort, no bloquea si falla)
+  const pushTargets = adminNames.length ? adminNames : [];
+  if (pushTargets.length) {
+    fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+      body: JSON.stringify({ title, body, target_names: pushTargets })
+    }).catch(() => {});
+  }
 }
 
 // ── Router: activa la pantalla pública si la URL trae ?rtoken= ──
