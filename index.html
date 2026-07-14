@@ -6174,6 +6174,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
     <div class="detail-actions" id="detail-actions">
       <button class="detail-btn-primary" id="detail-call-btn">Llamar</button>
       <button class="detail-btn-secondary" id="detail-map-btn">Cómo llegar</button>
+      <button class="detail-btn-secondary" id="detail-programa-btn" style="display:none">Ver Programa</button>
     </div>
     <div class="detail-actions" id="detail-report-actions" style="display:none">
       <button class="admin-shortcut-btn" id="detail-report-btn" style="width:100%;justify-content:center;border-radius:12px;padding:0.65rem">
@@ -6309,6 +6310,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         </div>
         <div class="form-group2"><label class="form-label2">Descripción <span style="font-weight:400;color:var(--text3)">— opcional</span></label><textarea class="form-textarea" id="as-especial-descripcion" placeholder="Detalles del evento..."></textarea></div>
         <div class="form-group2"><label class="form-label2">Lugar <span style="font-weight:400;color:var(--text3)">— opcional</span></label><input type="text" class="form-input" id="as-especial-lugar" placeholder="Ej: Salón de Asambleas, Av. Siempre Viva 123"></div>
+        <div class="form-group2"><label class="form-label2">Enlace del Programa <span style="font-weight:400;color:var(--text3)">— opcional, habilita el botón "Ver Programa"</span></label><input type="url" class="form-input" id="as-especial-programa-url" placeholder="Ej: https://..."></div>
         <div class="form-group2" style="margin-bottom:1.1rem">
           <label class="form-label2">Foto <span style="font-weight:400;color:var(--text3)">— se verá en la tarjeta y en el detalle</span></label>
           <div class="img-upload-area" id="as-especial-img-area" onclick="document.getElementById('as-especial-img-file').click()">
@@ -7386,7 +7388,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.17.0-beta';
+const APP_VERSION = '1.17.1-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -10782,9 +10784,11 @@ async function viewAssignment(id) {
   const actions = document.getElementById('detail-actions');
   const callBtn = document.getElementById('detail-call-btn');
   const mapBtn  = document.getElementById('detail-map-btn');
+  const programaBtn = document.getElementById('detail-programa-btn');
   if (isEspecial) {
     // No hay Territorio, encargado ni Casa: sin botón "Llamar". El botón
-    // "Cómo llegar" solo se muestra si se registró un Lugar para el evento.
+    // "Cómo llegar" solo se muestra si se registró un Lugar, y "Ver Programa"
+    // solo si se registró un enlace — ambos pueden convivir uno al lado del otro.
     callBtn.style.display = 'none';
     if (a.especial_lugar) {
       mapBtn.style.display = '';
@@ -10794,10 +10798,18 @@ async function viewAssignment(id) {
     } else {
       mapBtn.style.display = 'none';
     }
-    actions.style.display = (a.especial_lugar) ? '' : 'none';
+    if (a.especial_programa_url) {
+      programaBtn.style.display = '';
+      programaBtn.onclick = () => window.open(a.especial_programa_url, '_blank');
+      programaBtn.style.opacity = '1';
+    } else {
+      programaBtn.style.display = 'none';
+    }
+    actions.style.display = (a.especial_lugar || a.especial_programa_url) ? '' : 'none';
   } else {
     callBtn.style.display = '';
     mapBtn.style.display = '';
+    programaBtn.style.display = 'none';
     actions.style.display = '';
     if (a.type === 'zoom') { callBtn.textContent = 'Abrir Zoom'; callBtn.onclick = null; }
     else if (a.type === 'cartas') { callBtn.textContent = 'Ver detalles'; callBtn.onclick = null; }
@@ -11532,6 +11544,7 @@ function openAssignmentModal(a) {
   document.getElementById('as-especial-subtitulo').value = a?.especial_subtitulo || '';
   document.getElementById('as-especial-descripcion').value = a?.especial_descripcion || '';
   document.getElementById('as-especial-lugar').value = a?.especial_lugar || '';
+  document.getElementById('as-especial-programa-url').value = a?.especial_programa_url || '';
   pendingEspecialBase64 = null;
   const espPreview = document.getElementById('as-especial-img-preview');
   const espPlaceholder = document.getElementById('as-especial-img-placeholder');
@@ -11702,6 +11715,7 @@ async function saveAssignment() {
     especial_subtitulo: isEspecial ? document.getElementById('as-especial-subtitulo').value.trim() : null,
     especial_descripcion: isEspecial ? document.getElementById('as-especial-descripcion').value.trim() : null,
     especial_lugar: isEspecial ? document.getElementById('as-especial-lugar').value.trim() : null,
+    especial_programa_url: isEspecial ? document.getElementById('as-especial-programa-url').value.trim() : null,
     especial_foto: isEspecial ? (pendingEspecialBase64 || (editingAssignmentId ? undefined : null)) : null,
   };
   if (payload.especial_foto === undefined) delete payload.especial_foto; // conserva la foto existente si no se cambió
@@ -11759,7 +11773,7 @@ async function saveAssignment() {
     }
     // Compatibilidad: si las columnas de la tarjeta "Especial" aún no existen
     // en Supabase, se quitan del payload y se reintenta (ver SQL de migración).
-    const especialCols = ['especial_titulo','especial_subtitulo','especial_descripcion','especial_lugar','especial_foto'];
+    const especialCols = ['especial_titulo','especial_subtitulo','especial_descripcion','especial_lugar','especial_foto','especial_programa_url'];
     for (const col of especialCols) {
       if (res.error && res.error.message && res.error.message.includes(col)) {
         const pl2 = { ...pl }; delete pl2[col];
