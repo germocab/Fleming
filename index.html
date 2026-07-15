@@ -6045,15 +6045,13 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 
       <div class="admin-section" id="admin-usuarios">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
-          <span style="flex:1;font-size:0.95rem;font-weight:700">Usuarios</span>
+          <span style="flex:1;font-size:0.95rem;font-weight:700">Usuarios <span class="users-count-badge" id="users-count-badge">0</span></span>
+          <button class="admintags-icon-btn" id="open-admintags-btn" style="display:none" title="Gestionar AdminTags" onclick="openAdminTagsModal()">
+            <svg viewBox="0 0 24 24"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          </button>
         </div>
-        <div class="empty-state">
-          <div class="empty-state-icon">
-            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          </div>
-          <h3>Gestión de usuarios</h3>
-          <p>Administra roles, permisos y accesos de los usuarios.</p>
-          <button class="btn-primary" style="margin-top:0.75rem" onclick="openUsersPanel()">Abrir panel de usuarios</button>
+        <div class="users-panel-body" id="users-panel-body" style="padding:0.25rem 0 0">
+          <div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Usuarios</div></div>
         </div>
       </div>
       <div class="admin-section" id="admin-notificaciones">
@@ -6613,27 +6611,6 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
   </div>
 </div>
 
-
-<div class="users-panel-overlay" id="users-panel-overlay">
-  <div class="users-panel" id="users-panel">
-    <div class="users-panel-header">
-      <button class="users-panel-back" onclick="closeUsersPanel()">
-        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-        Volver
-      </button>
-      <div class="users-panel-title-wrap">
-        <div class="users-panel-title">Usuarios <span class="users-count-badge" id="users-count-badge">0</span></div>
-        <span class="users-panel-subtitle">Gestiona roles y permisos</span>
-      </div>
-      <button class="admintags-icon-btn" id="open-admintags-btn" style="display:none;margin-left:auto" title="Gestionar AdminTags" onclick="openAdminTagsModal()">
-        <svg viewBox="0 0 24 24"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-      </button>
-    </div>
-    <div class="users-panel-body" id="users-panel-body">
-      <div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Usuarios</div></div>
-    </div>
-  </div>
-</div>
 
 <!-- ── AdminTags: modal de gestión (Crear / Editar / Eliminar) ── -->
 <div class="modal-overlay" id="admintags-modal">
@@ -7473,7 +7450,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.19.0-beta';
+const APP_VERSION = '1.19.5-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -7856,6 +7833,7 @@ const I18N = {
   'admin.tab.aseo-salon':   { es: 'Aseo Salón',              en: 'Hall Cleaning' },
   'admin.tab.usuarios':     { es: 'Usuarios',                en: 'Users' },
   'admin.tab.notificaciones': { es: 'Notificaciones',        en: 'Notifications',     nl: 'Meldingen' },
+  'admin.tab.informaciones': { es: 'Informaciones',          en: 'Information',       nl: 'Informatie' },
   'admin.tab.reports':      { es: 'Reportes',                en: 'Reports' },
   'btn.guardar':            { es: 'Guardar',                 en: 'Save',              nl: 'Opslaan' },
   'btn.cancelar':           { es: 'Cancelar',                en: 'Cancel',            nl: 'Annuleren' },
@@ -9917,7 +9895,7 @@ async function enterApp() {
   const flemingTab = document.getElementById('admin-section-tab-fleming');
   if (flemingTab) flemingTab.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
   const notifAdminTab = document.getElementById('admin-tab-notificaciones');
-  if (notifAdminTab) notifAdminTab.style.display = currentRole === 'dev' ? '' : 'none';
+  if (notifAdminTab) notifAdminTab.style.display = (currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, 'notificaciones'))) ? '' : 'none';
 
   // Restore navigation position from before reload (if any)
   const _nav = _loadNavState();
@@ -10457,7 +10435,7 @@ async function switchAdminTab(tab) {
     showToast('No tienes permisos para acceder a este módulo.', 'error');
     return;
   }
-  if (tab === 'notificaciones' && currentRole !== 'dev') {
+  if (tab === 'notificaciones' && !['dev','admin'].includes(currentRole)) {
     showToast('No tienes permisos para acceder a este módulo.', 'error');
     return;
   }
@@ -10473,7 +10451,16 @@ async function switchAdminTab(tab) {
   if (section) switchAdminSection(section, true);
   if (tab === 'responsabilidades') loadResponsabilidadesAdmin();
   if (tab === 'aseo-salon') loadAseoSalonAdmin();
-  if (tab === 'usuarios') { loadUsers().then(() => renderUsersPanel()); }
+  if (tab === 'usuarios') {
+    document.getElementById('users-panel-body').innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Usuarios</div></div>';
+    Promise.all([loadUsers(), loadAdminTags()]).then(() => {
+      // El botón de gestión de AdminTags solo aparece para DEV, o para un
+      // Admin con el módulo "AdminTags" activado por el DEV.
+      const admBtn = document.getElementById('open-admintags-btn');
+      if (admBtn) admBtn.style.display = canManageAdminTagsCatalog() ? '' : 'none';
+      renderUsersPanel();
+    });
+  }
   if (tab === 'vmc') { loadVmcWeeks().then(() => renderAdminVmc()); }
   if (tab === 'fin-semana') { loadFsWeeks().then(() => renderAdminFs()); }
   if (tab === 'notificaciones') { renderNotifAdminTemplates(); renderNotifAdminCategories(); }
@@ -10482,14 +10469,14 @@ async function switchAdminTab(tab) {
   if (tab === 'informaciones') { loadInfoResponsables().then(() => renderAdminInformaciones()); }
 }
 
-// Mapa de tab de admin -> clave de permiso (PERM_MODULES). Solo se restringen
-// los tabs que tienen una clave de permiso asociada; 'notificaciones' se
-// controla aparte (solo DEV).
+// Mapa de tab de admin -> clave de permiso (PERM_MODULES). Se restringen
+// todos los tabs que tienen una clave de permiso asociada, incluyendo
+// 'notificaciones' (el DEV decide qué Admins pueden gestionar Notificaciones).
 const ADMIN_TAB_PERM_KEY = {
   assignments: 'assignments', territories: 'territories', conductores: 'conductores',
   casas: 'casas', grupos: 'grupos', carritos: 'carritos', reports: 'territory_reports',
   vmc: 'vida_ministerio', 'fin-semana': 'fin_semana', responsabilidades: 'responsabilidades',
-  'aseo-salon': 'aseo_salon', usuarios: 'usuarios',
+  'aseo-salon': 'aseo_salon', usuarios: 'usuarios', notificaciones: 'notificaciones',
 };
 
 async function applyAdminTabPermissions() {
@@ -10504,7 +10491,6 @@ async function applyAdminTabPermissions() {
   const perms = _currentUserPermsCache;
   document.querySelectorAll('.admin-tab').forEach(tabBtn => {
     const tab = tabBtn.dataset.tab;
-    if (tab === 'notificaciones') return; // controlado aparte, exclusivo DEV
     const permKey = ADMIN_TAB_PERM_KEY[tab];
     if (!permKey) return;
     const allowed = canAccessModule(perms, permKey);
@@ -10515,7 +10501,7 @@ async function applyAdminTabPermissions() {
   // Si el tab actualmente activo quedó bloqueado, cambia al primero disponible.
   const activeTab = document.querySelector('.admin-tab.active');
   if (activeTab && activeTab.style.display === 'none') {
-    const firstAllowed = [...document.querySelectorAll('.admin-tab')].find(b => b.style.display !== 'none' && b.dataset.tab !== 'notificaciones');
+    const firstAllowed = [...document.querySelectorAll('.admin-tab')].find(b => b.style.display !== 'none');
     if (firstAllowed) switchAdminTab(firstAllowed.dataset.tab);
   }
 }
@@ -13962,10 +13948,11 @@ const PERM_MODULES = [
   // ── Sistema ────────────────────────────────────────────────────────────────
   { key: 'usuarios',          label: 'Usuarios',            group: 'sistema',   icon: '<svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg>' },
   { key: 'admin_tags',        label: 'AdminTags',           group: 'sistema',   icon: '<svg viewBox="0 0 24 24"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>' },
+  { key: 'notificaciones',    label: 'Notificaciones',      group: 'sistema',   icon: '<svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>' },
 ];
 
 function parsePermissions(raw) {
-  const defaults = { territories: true, assignments: true, conductores: true, casas: true, grupos: true, carritos: true, territory_reports: false, vida_ministerio: true, fin_semana: true, hospitalidad: true, responsabilidades: true, aseo_salon: true, usuarios: false, admin_tags: false };
+  const defaults = { territories: true, assignments: true, conductores: true, casas: true, grupos: true, carritos: true, territory_reports: false, vida_ministerio: true, fin_semana: true, hospitalidad: true, responsabilidades: true, aseo_salon: true, usuarios: false, admin_tags: false, notificaciones: false };
   if (!raw) return { ...defaults };
   try {
     const p = typeof raw === 'string' ? JSON.parse(raw) : raw;
@@ -13984,6 +13971,7 @@ function parsePermissions(raw) {
       aseo_salon:        p.aseo_salon        !== false,
       usuarios:          p.usuarios          === true,
       admin_tags:        p.admin_tags        === true,
+      notificaciones:    p.notificaciones    === true,
     };
   } catch { return { ...defaults }; }
 }
@@ -14006,21 +13994,14 @@ async function loadUsers() {
   activeUsers = data || [];
 }
 
+// Atajo usado desde el menú rápido DEV y otros accesos directos: navega al
+// Panel de Administración y abre directamente la Sub-sección Usuarios, donde
+// el panel ahora vive embebido (ya no es un overlay independiente).
 async function openUsersPanel() {
   if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
-  document.getElementById('users-panel-overlay').classList.add('open');
-  document.getElementById('users-panel-body').innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Usuarios</div></div>';
-  await Promise.all([loadUsers(), loadAdminTags()]);
-  // El botón de gestión de AdminTags solo aparece para DEV, o para un Admin
-  // con el módulo "AdminTags" activado por el DEV (ver PERM_MODULES/parsePermissions).
-  const canManageAdminTags = currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, 'admin_tags'));
-  const admBtn = document.getElementById('open-admintags-btn');
-  if (admBtn) admBtn.style.display = canManageAdminTags ? '' : 'none';
-  renderUsersPanel();
-}
-function closeUsersPanel() {
-  document.getElementById('users-panel-overlay').classList.remove('open');
-  expandedUserId = null;
+  showPage('admin');
+  await new Promise(r => setTimeout(r, 60));
+  switchAdminTab('usuarios');
 }
 
 // ── AdminTags: catálogo, gestión (Crear/Editar/Eliminar) y asignación ────────
@@ -14694,7 +14675,7 @@ async function getUserPermissions() {
 let _permsCacheTime = 0;
 const PERMS_CACHE_TTL_MS = 60000; // evita re-consultar Supabase cada vez que se abre un detalle (p.ej. tarjetas de Asignaciones)
 async function refreshCurrentUserPermsCache(force) {
-  if (currentRole === 'dev') { _currentUserPermsCache = { usuarios: true, admin_tags: true }; return; }
+  if (currentRole === 'dev') { _currentUserPermsCache = { usuarios: true, admin_tags: true, notificaciones: true }; return; }
   if (currentRole !== 'admin') { _currentUserPermsCache = null; return; }
   if (!force && _currentUserPermsCache && (Date.now() - _permsCacheTime) < PERMS_CACHE_TTL_MS) return; // caché reciente, sin round-trip
   try {
@@ -14900,7 +14881,7 @@ async function syncRoleFromServer() {
       const flemingTab = document.getElementById('admin-section-tab-fleming');
       if (flemingTab) flemingTab.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
       const notifAdminTab = document.getElementById('admin-tab-notificaciones');
-      if (notifAdminTab) notifAdminTab.style.display = currentRole === 'dev' ? '' : 'none';
+      if (notifAdminTab) notifAdminTab.style.display = (currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, 'notificaciones'))) ? '' : 'none';
       // If user was viewing the Fleming App / Usuarios section and lost access, send them back to predicación
       const usuariosSection = document.getElementById('admin-usuarios');
       if (usuariosSection && usuariosSection.classList.contains('active') && !['dev','admin'].includes(currentRole)) {
@@ -16318,10 +16299,6 @@ function _closeTopLayer() {
     else document.getElementById('profile-photo-overlay').classList.remove('open');
     return;
   }
-  // Users panel (dentro del admin)
-  if (document.getElementById('users-panel-overlay')?.classList.contains('open')) {
-    if (typeof closeUsersPanel === 'function') closeUsersPanel(); return;
-  }
   // User profile page
   if (document.getElementById('page-user-profile')?.classList.contains('open')) {
     if (typeof closeUserProfilePage === 'function') closeUserProfilePage(); return;
@@ -16373,7 +16350,6 @@ window.addEventListener('popstate', (e) => {
       'openProfilePage',
       'openPreferencias',
       'openUserProfilePage',
-      'openUsersPanel',
     ].forEach(name => wrap(name, window[name]));
 
     // VMC modales (pueden definirse después de DOMContentLoaded)
@@ -16400,7 +16376,7 @@ function syncAdminDropdown() {
   const flemingTab = document.getElementById('admin-section-tab-fleming');
   if (flemingTab) flemingTab.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
   const notifAdminTab = document.getElementById('admin-tab-notificaciones');
-  if (notifAdminTab) notifAdminTab.style.display = currentRole === 'dev' ? '' : 'none';
+  if (notifAdminTab) notifAdminTab.style.display = (currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, 'notificaciones'))) ? '' : 'none';
   const themeLabel = document.getElementById('theme-btn-label-admin');
   if (themeLabel) _updateThemeActive(document.documentElement.getAttribute('data-theme') || 'auto');
 }
