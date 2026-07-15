@@ -7410,7 +7410,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.17.5-beta';
+const APP_VERSION = '1.18.0-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -8307,6 +8307,20 @@ function saveSession(u) { localStorage.setItem('fleming_user', JSON.stringify(u)
 function loadSession() { try { return JSON.parse(localStorage.getItem('fleming_user')); } catch { return null; } }
 function clearSession() { localStorage.removeItem('fleming_user'); }
 
+// ── Vinculación de cuentas (v1.18.0-beta) ───────────────────────────────────
+// El DEV puede enlazar una cuenta (ej. "Alison Gutiérrez") con el nombre bajo
+// el cual esa misma persona aparece registrada en Grupos de Servicio,
+// Asignaciones, Responsabilidades, etc. (ej. "Sandra de Abarca"), sin
+// necesidad de fusionar realmente ambas filas de platform_users. El nombre
+// de inicio de sesión y el de la pestaña de perfil NO cambian: solo cambia
+// el nombre que se usa para "reconocerse" dentro de la plataforma.
+// currentUser.linkedName guarda ese nombre "de reconocimiento" (o null si no
+// hay vínculo, en cuyo caso se usa el propio nombre de la cuenta).
+function getIdentityName() {
+  if (!currentUser) return '';
+  return (currentUser.linkedName && currentUser.linkedName.trim()) || currentUser.name;
+}
+
 async function init() {
   initTheme();
   // ── Enlace compartido de una asignación de Casa en casa (?share=<id>) ──────
@@ -8408,13 +8422,13 @@ async function subscribeToPush() {
     if (currentUser) {
       const subJson = JSON.stringify(sub.toJSON ? sub.toJSON() : sub);
       const { error } = await sb.from('push_subscriptions').upsert(
-        { user_name: currentUser.name, subscription: subJson },
+        { user_name: getIdentityName(), subscription: subJson },
         { onConflict: 'user_name' }
       );
       if (error) {
         console.error('[Push] Error guardando suscripción:', error.message);
       } else {
-        console.log('[Push] Suscripción guardada en Supabase ✓ para:', currentUser.name);
+        console.log('[Push] Suscripción guardada en Supabase ✓ para:', getIdentityName());
       }
     }
   } catch (error) {
@@ -8451,7 +8465,7 @@ async function debugPush() {
     const subObj = await reg.pushManager.getSubscription();
     const subJson = subObj ? JSON.stringify(subObj.toJSON ? subObj.toJSON() : subObj) : null;
     const { error: insertError } = await sb.from('push_subscriptions').upsert(
-      { user_name: currentUser?.name ?? 'test', subscription: subJson },
+      { user_name: currentUser ? getIdentityName() : 'test', subscription: subJson },
       { onConflict: 'user_name' }
     );
     if (insertError) {
@@ -8595,7 +8609,7 @@ function _canEditGrupoContent(g) {
   if (!g || !currentUser) return false;
   // Superintendent or Auxiliary of this group can also upload
   const me = g.miembros.find(m =>
-    m.nombre.toLowerCase() === currentUser.name.toLowerCase() &&
+    m.nombre.toLowerCase() === getIdentityName().toLowerCase() &&
     (m.rol === 'superintendente' || m.rol === 'auxiliar')
   );
   return !!me;
@@ -9075,7 +9089,7 @@ async function renderProfilePage() {
 
   // Grupo
   await loadGruposIfNeeded();
-  const myMembership = findMembershipForName(currentUser.name);
+  const myMembership = findMembershipForName(getIdentityName());
   const groupSec = document.getElementById('profile-group-section');
   if (myMembership) {
     document.getElementById('profile-group-value').textContent = `${t('grupos.grupo-num')} ${myMembership.grupo.numero}`;
@@ -9096,7 +9110,7 @@ async function renderProfilePage() {
 }
 
 async function renderProfilePartes() {
-  const userName = currentUser.name.trim().toLowerCase();
+  const userName = getIdentityName().trim().toLowerCase();
   const today = todayStr();
   const partesSection = document.getElementById('profile-partes-section');
   const partesList = document.getElementById('profile-partes-list');
@@ -9197,6 +9211,19 @@ function findMembershipForName(name) {
   return null;
 }
 
+// Junta los nombres "candidatos" a los que el DEV puede vincular una cuenta:
+// integrantes de Grupos de Servicio, Conductores y otras cuentas registradas.
+// Se usa solo para sugerir (datalist); el DEV también puede escribir
+// cualquier nombre a mano.
+async function collectLinkableNames(excludeUid) {
+  try { await loadGruposIfNeeded(); } catch {}
+  const names = new Set();
+  grupos.forEach(g => (g.miembros || []).forEach(m => { if (m.nombre) names.add(m.nombre.trim()); }));
+  conductores.forEach(c => { if (c.nombre) names.add(`${c.nombre} ${c.apellido||''}`.trim()); });
+  activeUsers.forEach(u => { if (u.id !== excludeUid && u.name) names.add(u.name.trim()); });
+  return Array.from(names).filter(Boolean).sort((a,b) => a.localeCompare(b,'es',{sensitivity:'base'}));
+}
+
 // ══════════════════════════════════════════════════════════════════════════
 // ── Pantalla de Inicio (experimental) ───────────────────────────────────────
 // Reúne, en una sola vista, todas las asignaciones/cargos vigentes del
@@ -9240,19 +9267,19 @@ async function renderInicio() {
   if (!wrap || !currentUser) return;
   wrap.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Inicio</div></div>';
 
-  const myName = currentUser.name.trim().toLowerCase();
+  const myName = getIdentityName().trim().toLowerCase();
   const today = todayStr();
   const sections = [];
 
   await loadGruposIfNeeded();
-  const myMembership = findMembershipForName(currentUser.name);
+  const myMembership = findMembershipForName(getIdentityName());
 
   // ── Casa en casa: próximas asignaciones donde soy el conductor/encargado ──
   try {
     const { data } = await sb.from('assignments')
       .select('id,date,time,conductor,territory_id')
       .gte('date', today).order('date').order('time');
-    const mine = (data || []).filter(a => _namesMatch(a.conductor, currentUser.name));
+    const mine = (data || []).filter(a => _namesMatch(a.conductor, getIdentityName()));
     if (mine.length) {
       sections.push({
         key: 'casa', title: 'Casa en Casa', color: 'var(--ter-2)', bg: 'var(--ter-2-bg)',
@@ -9296,7 +9323,7 @@ async function renderInicio() {
     const { data } = await sb.from('aseo_salon').select('*').gte('fecha', today).order('fecha');
     const myGroupNum = myMembership ? myMembership.grupo.numero : null;
     const mine = (data || []).filter(r =>
-      _namesMatch(r.encargado_nombre, currentUser.name) ||
+      _namesMatch(r.encargado_nombre, getIdentityName()) ||
       (myGroupNum != null && (r.grupo1_numero === myGroupNum || r.grupo2_numero === myGroupNum))
     );
     if (mine.length) {
@@ -9304,7 +9331,7 @@ async function renderInicio() {
         key: 'aseo', title: 'Aseo del Salón', color: 'var(--ter-6)', bg: 'var(--ter-6-bg)',
         icon: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
         items: mine.slice(0, 5).map(r => ({
-          label: _namesMatch(r.encargado_nombre, currentUser.name) ? 'Encargado del aseo' : 'Tu grupo de servicio limpia el salón',
+          label: _namesMatch(r.encargado_nombre, getIdentityName()) ? 'Encargado del aseo' : 'Tu grupo de servicio limpia el salón',
           sub: fmtInicioDate(r.fecha),
           onClick: () => inicioGoTo('reuniones', 'aseo-salon'),
         })),
@@ -9372,7 +9399,7 @@ async function renderInicio() {
   // ── Responsabilidades: próximos cargos (Audio/Video, Micrófonos, Plataforma, Acomodadores, etc.) ──
   try {
     const { data } = await sb.from('responsabilidades')
-      .select('*').ilike('hermano', currentUser.name).gte('fecha', today).order('fecha');
+      .select('*').ilike('hermano', getIdentityName()).gte('fecha', today).order('fecha');
     if ((data || []).length) {
       sections.push({
         key: 'resp', title: 'Responsabilidades', color: 'var(--ter-4)', bg: 'var(--ter-4-bg)',
@@ -9398,7 +9425,7 @@ async function renderInicio() {
       sb.from('territory_report_submissions').select('territory_id,submitted_at'),
       sb.from('territories').select('id,number'),
     ]);
-    const mine = (pastAssignments || []).filter(a => a.territory_id && _namesMatch(a.conductor, currentUser.name));
+    const mine = (pastAssignments || []).filter(a => a.territory_id && _namesMatch(a.conductor, getIdentityName()));
     const pending = mine.filter(a => {
       const reported = (submissions || []).some(s => s.territory_id === a.territory_id && s.submitted_at && s.submitted_at.slice(0, 10) >= a.date);
       return !reported;
@@ -10624,7 +10651,7 @@ function renderSchedule() {
       // mini-cards) incluso cuando el Sábado es "Hoy". Antes, al ser hoy, se
       // caía en la rama de "días regulares" y se mostraban todas las
       // asignaciones (de todos los grupos) con la tarjeta grande normal.
-      const myName = (currentUser?.name || '').trim().toLowerCase();
+      const myName = (currentUser ? getIdentityName() : '').trim().toLowerCase();
 
       // Identify user's group
       let myGrupo = null;
@@ -10901,7 +10928,7 @@ async function viewAssignment(id) {
   // ── Botón "Reportar Territorio" — visible solo para el encargado de ESTA asignación ──
   const reportActionsWrap = document.getElementById('detail-report-actions');
   const reportBtn = document.getElementById('detail-report-btn');
-  const esEncargadoDeEstaAsignacion = !isEspecial && _namesMatch(currentUser?.name, a.conductor);
+  const esEncargadoDeEstaAsignacion = !isEspecial && _namesMatch(currentUser ? getIdentityName() : '', a.conductor);
   if (!isEspecial && ter && esEncargadoDeEstaAsignacion) {
     reportActionsWrap.style.display = '';
     reportBtn.onclick = () => reportarTerritorioDesdeAsignacion(a.id);
@@ -11440,7 +11467,7 @@ async function renderLiveAdminPanel() {
   if (!historyEl) return;
   historyEl.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Historial de Live</div></div>';
   try {
-    var myName = currentUser && currentUser.name ? currentUser.name.trim().toLowerCase() : '';
+    var myName = currentUser ? getIdentityName().trim().toLowerCase() : '';
     var result = await sb.from('notifications')
       .select('id, title, body, created_at, target_names')
       .eq('notif_category', 'live')
@@ -13012,7 +13039,7 @@ async function renderRespUserView() {
     el.innerHTML = `<div class="coming-soon-panel"><div class="coming-soon-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><h3>Responsabilidades</h3><p>Aún no hay responsabilidades asignadas para los próximos Jueves o Sábados.</p></div>`;
     return;
   }
-  const myName = currentUser?.name?.trim().toLowerCase();
+  const myName = currentUser ? getIdentityName().trim().toLowerCase() : undefined;
   el.innerHTML = dates.map(dateStr => {
     const cargosDia = rows.filter(r => r.fecha === dateStr);
     return `
@@ -13315,7 +13342,7 @@ async function renderAseoUserView() {
     el.innerHTML = `<div class="coming-soon-panel"><div class="coming-soon-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><h3>Aseo del Salón</h3><p>Aún no hay aseos asignados para los próximos Jueves o Sábados.</p></div>`;
     return;
   }
-  const myName = currentUser?.name?.trim().toLowerCase();
+  const myName = currentUser ? getIdentityName().trim().toLowerCase() : undefined;
   el.innerHTML = rows.map((row, idx) => {
     const isMe = myName && row.encargado_nombre && row.encargado_nombre.trim().toLowerCase() === myName;
     return `
@@ -13922,7 +13949,7 @@ function closeUsersPanel() {
 // ── User Profile Page ─────────────────────────────────────────────────────────
 let _currentProfileUserId = null;
 
-function openUserProfilePage(uid) {
+async function openUserProfilePage(uid) {
   _currentProfileUserId = uid;
   const u = activeUsers.find(x => x.id === uid);
   if (!u) return;
@@ -13996,6 +14023,16 @@ function openUserProfilePage(uid) {
           <label class="form-label2">Nombre completo</label>
           <div style="display:flex;gap:8px">
             <input type="text" class="form-input" id="uprof-name-input" value="${u.name}" placeholder="Nombre y apellido" style="padding:0.6rem 0.85rem;font-size:0.88rem">
+          </div>
+        </div>
+        <div class="form-group2" style="margin-bottom:0.75rem">
+          <label class="form-label2">Vincular con (Grupos de Servicio, Conductores, etc.)</label>
+          <div style="display:flex;gap:8px">
+            <input type="text" class="form-input" id="uprof-linked-input" value="${(u.linked_name||'').replace(/"/g,'&quot;')}" placeholder="Ej: Sandra de Abarca" list="uprof-linked-datalist" style="padding:0.6rem 0.85rem;font-size:0.88rem">
+            <datalist id="uprof-linked-datalist"></datalist>
+          </div>
+          <div style="font-size:0.76rem;color:var(--text3);margin-top:5px;line-height:1.4">
+            Si esta persona está registrada en Grupos de Servicio, Asignaciones o Responsabilidades con otro nombre (ej. su apellido de casada), escríbelo aquí para que la plataforma reconozca a esta cuenta como esa persona, sin tener que cambiar el nombre de inicio de sesión.
           </div>
         </div>` : ''}
         ${!isCurrentUser ? `
@@ -14077,6 +14114,7 @@ function openUserProfilePage(uid) {
     <div class="uprofile-section">
       <div class="uprofile-section-title">Información</div>
       <div class="uprofile-row"><span class="uprofile-row-label">Nombre</span><span class="uprofile-row-val">${u.name}</span></div>
+      ${u.linked_name ? `<div class="uprofile-row"><span class="uprofile-row-label">Vinculado con</span><span class="uprofile-row-val" style="color:var(--accent);font-weight:600">🔗 ${u.linked_name}</span></div>` : ''}
       <div class="uprofile-row"><span class="uprofile-row-label">Rol</span><span class="uprofile-row-val">${roleLabel}</span></div>
       <div class="uprofile-row"><span class="uprofile-row-label">Registrado</span><span class="uprofile-row-val">${joinedStr}</span></div>
       <div class="uprofile-row"><span class="uprofile-row-label">Última actividad</span><span class="uprofile-row-val">${since}</span></div>
@@ -14088,6 +14126,18 @@ function openUserProfilePage(uid) {
   `;
 
   document.getElementById('page-user-profile').classList.add('open');
+
+  // Poblar el datalist de nombres sugeridos para vincular (solo DEV). Se hace
+  // después de insertar el HTML porque requiere consultar Grupos de Servicio
+  // y Conductores, que pueden no estar cargados aún.
+  if (isDev) {
+    const dl = document.getElementById('uprof-linked-datalist');
+    if (dl) {
+      collectLinkableNames(u.id).then(names => {
+        dl.innerHTML = names.map(n => `<option value="${n.replace(/"/g,'&quot;')}">`).join('');
+      }).catch(() => {});
+    }
+  }
 }
 
 function closeUserProfilePage() {
@@ -14099,6 +14149,7 @@ async function saveProfileChanges(uid) {
   const roleSel   = document.getElementById('uprof-role-sel');
   const taskEl    = document.getElementById('uprof-task');
   const nameInput = document.getElementById('uprof-name-input');
+  const linkedInput = document.getElementById('uprof-linked-input');
   const u = activeUsers.find(x=>x.id===uid);
   if (!u) return;
   if (roleSel) u.role = roleSel.value;
@@ -14111,26 +14162,42 @@ async function saveProfileChanges(uid) {
     if (!newName) { showToast('El nombre no puede estar vacío.', 'error'); return; }
   }
 
+  // DEV puede vincular esta cuenta al nombre bajo el cual la persona aparece
+  // registrada en Grupos de Servicio, Asignaciones, etc. (ver getIdentityName()).
+  let newLinkedName = u.linked_name || '';
+  if (currentRole === 'dev' && linkedInput) {
+    newLinkedName = linkedInput.value.trim();
+    if (newLinkedName && newLinkedName.toLowerCase() === newName.toLowerCase()) newLinkedName = ''; // vincularse a sí mismo = sin vínculo
+  }
+
   const perms = parsePermissions(u.permissions);
   const updatePayload = { role: u.role, task: u.task, permissions: perms, labels: parseLabels(u.labels) };
   if (currentRole === 'dev' && newName !== u.name) updatePayload.name = newName;
+  if (currentRole === 'dev' && newLinkedName !== (u.linked_name || '')) updatePayload.linked_name = newLinkedName || null;
 
   let { error } = await sb.from('platform_users')
     .update(updatePayload)
     .eq('id', u.id);
   if (error) {
+    // Reintento sin linked_name por si la columna aún no existe en Supabase
+    // (ver bloque SQL "VINCULACIÓN DE CUENTAS" para agregarla).
     const fallback = { role: u.role, task: u.task, labels: parseLabels(u.labels) };
     if (currentRole === 'dev' && newName !== u.name) fallback.name = newName;
     const retry = await sb.from('platform_users').update(fallback).eq('id', u.id);
     if (retry.error) { showToast('Error: ' + retry.error.message, 'error'); return; }
+    if (currentRole === 'dev' && newLinkedName !== (u.linked_name || '')) {
+      showToast('Cambios guardados, pero falta crear la columna "linked_name" en Supabase para poder vincular cuentas.', 'error');
+    }
   }
 
   const wasCurrentUser = currentUser && u.name === currentUser.name;
   if (currentRole === 'dev' && newName !== u.name) u.name = newName;
+  if (currentRole === 'dev') u.linked_name = newLinkedName || null;
   if (wasCurrentUser) {
     currentRole = u.role;
     currentUser.role = u.role;
     if (currentRole === 'dev' && newName) currentUser.name = u.name;
+    if (currentRole === 'dev') currentUser.linkedName = u.linked_name || null;
     saveSession(currentUser);
     // Update displayed name in the nav dropdown
     const nameEl = document.querySelector('.options-user-name');
@@ -14260,7 +14327,7 @@ function renderUsersPanel() {
           ${isOnline ? '<span class="user-online-ring"></span>' : ''}
         </div>
         <div class="user-card-info">
-          <div class="user-card-name">${u.name}${isCurrentUser ? ' <span style="font-size:0.68rem;color:var(--text3);font-weight:500">(tú)</span>' : ''}</div>
+          <div class="user-card-name">${u.name}${isCurrentUser ? ' <span style="font-size:0.68rem;color:var(--text3);font-weight:500">(tú)</span>' : ''}${u.linked_name ? ` <span title="Vinculado con ${u.linked_name}" style="font-size:0.68rem;color:var(--accent);font-weight:600">🔗</span>` : ''}</div>
           <div class="user-card-meta">
             <span>${since}</span>
             ${labelChips}
@@ -14422,7 +14489,7 @@ function carritosVisibleForCurrentUser() {
   if (currentRole === 'dev') return true;
   if (currentRole === 'admin') return !!(_currentUserPermsCache && _currentUserPermsCache.carritos !== false);
   if (!currentUser || !Array.isArray(_carritosAllowedUsers)) return false;
-  const myName = (currentUser.name || '').trim().toLowerCase();
+  const myName = (getIdentityName() || '').trim().toLowerCase();
   return _carritosAllowedUsers.some(n => (n || '').trim().toLowerCase() === myName);
 }
 async function saveCarritosVisibleUsers(names) {
@@ -14458,17 +14525,23 @@ async function registerUserSession(name, role) {
   } catch(e) { /* ignore — proceed normally */ }
 
   const { data: existing } = await sb.from('platform_users')
-    .select('id, role').ilike('name', name).single();
+    .select('id, role, linked_name').ilike('name', name).single();
 
   if (existing) {
     await sb.from('platform_users').update({ last_seen: now }).eq('id', existing.id);
     // Always adopt the role Supabase has — this is the source of truth
     // (incluye 'pending': si ya hay una solicitud en curso, no se reinserta).
+    let sessionChanged = false;
     if (existing.role !== currentRole) {
       currentRole = existing.role;
       currentUser.role = existing.role;
-      saveSession(currentUser);
+      sessionChanged = true;
     }
+    if ((existing.linked_name || null) !== (currentUser.linkedName || null)) {
+      currentUser.linkedName = existing.linked_name || null;
+      sessionChanged = true;
+    }
+    if (sessionChanged) saveSession(currentUser);
   } else {
     await sb.from('platform_users')
       .insert({ name, role, task: '', joined_at: now, last_seen: now });
@@ -16911,7 +16984,7 @@ async function checkForNewNotifications() {
       .select('id, target_names, notif_category, dev_only, notif_audience')
       .gt('created_at', since)
       .limit(50);
-    const myName = currentUser?.name?.trim().toLowerCase();
+    const myName = currentUser ? getIdentityName().trim().toLowerCase() : undefined;
     // Las notificaciones "live" nunca deben contar para el badge de no leídas
     // del Panel de Notificaciones (son efímeras y no se listan ahí).
     const relevant = (data || []).filter(n => n.notif_category !== 'live' && isNotifForMe(n, myName));
@@ -17333,7 +17406,7 @@ async function loadNotifications(target) {
     .order('created_at', { ascending: false })
     .limit(50);
 
-  const myNameLower = currentUser?.name?.trim().toLowerCase();
+  const myNameLower = currentUser ? getIdentityName().trim().toLowerCase() : undefined;
   // Las notificaciones "live" son efímeras (cambian constantemente mientras
   // dura el recorrido) y no deben acumularse en el Panel de Notificaciones.
   // Se siguen registrando en la BD (para el Historial de Live del admin) pero
@@ -18471,7 +18544,7 @@ function vmcShortRange(w) {
 
 function vmcRenderWeekProgram(week) {
   const parts = Array.isArray(week.parts) ? week.parts : [];
-  const myName = currentUser?.name || '';
+  const myName = currentUser ? getIdentityName() : '';
 
   // My assignments
   const myParts = parts.filter(p => p.assigned === myName || p.assigned2 === myName);
@@ -18856,7 +18929,7 @@ function fsSelectWeek(id) {
 }
 
 function fsRenderWeekProgram(week) {
-  const myName = currentUser?.name || '';
+  const myName = currentUser ? getIdentityName() : '';
 
   const myMeta = [];
   if (week.presidente === myName)        myMeta.push('Presidente');
@@ -19629,7 +19702,7 @@ function cartIsAdmin() {
 }
 
 function cartUserName() {
-  return (currentUser && currentUser.name) || '';
+  return (currentUser && getIdentityName()) || '';
 }
 
 // ---------- CARGA DE DATOS ----------
@@ -21067,6 +21140,23 @@ async function notifyReportRecipients(territoryObj, submission) {
     window.addEventListener('DOMContentLoaded', () => trepInitPublicScreen(rtoken));
   }
 })();
+
+/* ══════════════════════════════════════════════════════════════════════════
+   VINCULACIÓN DE CUENTAS (v1.18.0-beta)
+   ══════════════════════════════════════════════════════════════════════════
+   Columna en Supabase (agregar una vez):
+
+   alter table platform_users add column if not exists linked_name text;
+
+   Guarda el nombre "de reconocimiento" bajo el cual esta cuenta debe
+   identificarse dentro de Grupos de Servicio, Asignaciones (Casa en Casa),
+   Responsabilidades, Aseo del Salón, Vida y Ministerio, Fin de Semana,
+   Carritos y Notificaciones/Push — sin necesidad de fusionar la fila de
+   platform_users ni de iniciar sesión con ese otro nombre. Si es null/vacío,
+   la cuenta se reconoce por su propio nombre (comportamiento normal).
+   Solo el DEV puede establecer o quitar este vínculo (ver openUserProfilePage
+   / saveProfileChanges y getIdentityName()).
+   ══════════════════════════════════════════════════════════════════════════ */
 
 /* ══════════════════════════════════════════════════════════════════════════
    "MÁS INFORMACIÓN" — Encargados/Auxiliares por Sub-sección (v1.14.9-beta)
