@@ -4532,6 +4532,30 @@
   .profile-tag.precursor  { background: rgba(168,85,247,0.12); color: #a855f7; border-color: rgba(168,85,247,0.25); }
   .profile-tag.anciano    { background: rgba(245,158,11,0.12);  color: #f59e0b; border-color: rgba(245,158,11,0.25); }
   .profile-tag.siervo     { background: rgba(6,182,212,0.12);   color: #06b6d4; border-color: rgba(6,182,212,0.25); }
+  /* AdminTag: color dinámico definido por el propio tag (--atag-color) */
+  .profile-tag.admintag   { background: color-mix(in srgb, var(--atag-color, #0A84FF) 12%, transparent); color: var(--atag-color, #0A84FF); border-color: color-mix(in srgb, var(--atag-color, #0A84FF) 30%, transparent); }
+  .profile-tag.admintag svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2.4; }
+
+  /* ── AdminTags: gestión (Panel de Usuarios) ─────────────────────────────── */
+  .admintags-list-item {
+    display: flex; align-items: center; gap: 10px; padding: 0.6rem 0.7rem;
+    border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; background: var(--surface2);
+  }
+  .admintags-list-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .admintags-list-name { flex: 1; font-size: 0.86rem; font-weight: 600; color: var(--text1); }
+  .admintags-list-actions { display: flex; gap: 6px; }
+  .admintags-icon-btn {
+    width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center; justify-content: center;
+    background: var(--surface3); border: 1px solid var(--border); color: var(--text2); cursor: pointer; transition: all 0.15s;
+  }
+  .admintags-icon-btn:hover { background: var(--accent-light); color: var(--accent); }
+  .admintags-icon-btn.danger:hover { background: rgba(255,59,48,0.12); color: var(--red); }
+  .admintags-icon-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+  .admintags-color-swatches { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+  .admintags-color-swatch {
+    width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.12s;
+  }
+  .admintags-color-swatch.selected { border-color: var(--text1); transform: scale(1.12); }
 
   .profile-section {
     margin: 0 1.25rem 1.25rem;
@@ -6601,9 +6625,48 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         <div class="users-panel-title">Usuarios <span class="users-count-badge" id="users-count-badge">0</span></div>
         <span class="users-panel-subtitle">Gestiona roles y permisos</span>
       </div>
+      <button class="admintags-icon-btn" id="open-admintags-btn" style="display:none;margin-left:auto" title="Gestionar AdminTags" onclick="openAdminTagsModal()">
+        <svg viewBox="0 0 24 24"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+      </button>
     </div>
     <div class="users-panel-body" id="users-panel-body">
       <div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Usuarios</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── AdminTags: modal de gestión (Crear / Editar / Eliminar) ── -->
+<div class="modal-overlay" id="admintags-modal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <div class="modal-title" id="admintags-modal-title">AdminTags</div>
+      <button class="modal-close" onclick="closeAdminTagsModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <!-- Vista de lista -->
+      <div id="admintags-list-view">
+        <div style="font-size:0.78rem;color:var(--text3);margin-bottom:0.9rem;line-height:1.4">
+          Crea etiquetas para dar contexto sobre qué gestiona cada Administrador. Solo el Usuario DEV puede asignarlas a un perfil.
+        </div>
+        <div id="admintags-list-body"></div>
+        <button class="btn-secondary" style="width:100%;margin-top:6px" onclick="openAdminTagEditor()">+ Nueva AdminTag</button>
+      </div>
+      <!-- Vista de edición/creación -->
+      <div id="admintags-editor-view" style="display:none">
+        <div class="form-group2">
+          <label class="form-label2">Nombre</label>
+          <input type="text" class="form-input" id="admintag-name-input" placeholder="Ej: Encargado de Territorios" maxlength="40">
+        </div>
+        <div class="form-group2">
+          <label class="form-label2">Color</label>
+          <div class="admintags-color-swatches" id="admintag-color-swatches"></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:1.25rem;justify-content:flex-end">
+          <button class="btn-secondary" onclick="closeAdminTagEditor()">Cancelar</button>
+          <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="saveAdminTag()" id="save-admintag-btn">Guardar</button>
+        </div>
+        <div class="auth-error" id="admintag-error"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -7410,7 +7473,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.18.0-beta';
+const APP_VERSION = '1.19.0-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -9038,7 +9101,8 @@ async function renderProfilePage() {
 
   // Fetch fresh data for this user (only the avatar field is used below)
   const { data: me } = await sb.from('platform_users')
-    .select('avatar, labels').ilike('name', currentUser.name).single();
+    .select('avatar, labels, admin_tag_id').ilike('name', currentUser.name).single();
+  if (currentRole === 'admin' && me?.admin_tag_id) await loadAdminTags();
 
   // Avatar big
   const bigAvatar = document.getElementById('profile-avatar-big');
@@ -9083,8 +9147,14 @@ async function renderProfilePage() {
     { key:'siervo',    label:'Siervo Ministerial', cls:'siervo'    },
   ];
   const activeTags = tagDefs.filter(t => labels[t.key]);
-  tagsEl.innerHTML = activeTags.length
-    ? activeTags.map(t => `<span class="profile-tag ${t.cls}">${t.label}</span>`).join('')
+  // AdminTag propia: se muestra debajo de las etiquetas generales, solo si
+  // este usuario es Admin y tiene una AdminTag asignada por el DEV.
+  const myAdminTag = (currentRole === 'admin' && me?.admin_tag_id)
+    ? adminTagsCatalog.find(t => t.id === me.admin_tag_id) : null;
+  const myAdminTagHTML = myAdminTag
+    ? `<span class="profile-tag admintag" style="--atag-color:${myAdminTag.color}"><svg viewBox="0 0 24 24"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>${myAdminTag.nombre}</span>` : '';
+  tagsEl.innerHTML = (activeTags.length || myAdminTagHTML)
+    ? activeTags.map(t => `<span class="profile-tag ${t.cls}">${t.label}</span>`).join('') + myAdminTagHTML
     : `<span class="profile-tag" style="opacity:0.5">Sin etiquetas asignadas</span>`;
 
   // Grupo
@@ -13891,10 +13961,11 @@ const PERM_MODULES = [
   { key: 'responsabilidades', label: 'Responsabilidades',  group: 'reuniones', icon: '<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
   // ── Sistema ────────────────────────────────────────────────────────────────
   { key: 'usuarios',          label: 'Usuarios',            group: 'sistema',   icon: '<svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg>' },
+  { key: 'admin_tags',        label: 'AdminTags',           group: 'sistema',   icon: '<svg viewBox="0 0 24 24"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>' },
 ];
 
 function parsePermissions(raw) {
-  const defaults = { territories: true, assignments: true, conductores: true, casas: true, grupos: true, carritos: true, territory_reports: false, vida_ministerio: true, fin_semana: true, hospitalidad: true, responsabilidades: true, aseo_salon: true, usuarios: false };
+  const defaults = { territories: true, assignments: true, conductores: true, casas: true, grupos: true, carritos: true, territory_reports: false, vida_ministerio: true, fin_semana: true, hospitalidad: true, responsabilidades: true, aseo_salon: true, usuarios: false, admin_tags: false };
   if (!raw) return { ...defaults };
   try {
     const p = typeof raw === 'string' ? JSON.parse(raw) : raw;
@@ -13912,6 +13983,7 @@ function parsePermissions(raw) {
       responsabilidades: p.responsabilidades !== false,
       aseo_salon:        p.aseo_salon        !== false,
       usuarios:          p.usuarios          === true,
+      admin_tags:        p.admin_tags        === true,
     };
   } catch { return { ...defaults }; }
 }
@@ -13938,12 +14010,147 @@ async function openUsersPanel() {
   if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   document.getElementById('users-panel-overlay').classList.add('open');
   document.getElementById('users-panel-body').innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Usuarios</div></div>';
-  await loadUsers();
+  await Promise.all([loadUsers(), loadAdminTags()]);
+  // El botón de gestión de AdminTags solo aparece para DEV, o para un Admin
+  // con el módulo "AdminTags" activado por el DEV (ver PERM_MODULES/parsePermissions).
+  const canManageAdminTags = currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, 'admin_tags'));
+  const admBtn = document.getElementById('open-admintags-btn');
+  if (admBtn) admBtn.style.display = canManageAdminTags ? '' : 'none';
   renderUsersPanel();
 }
 function closeUsersPanel() {
   document.getElementById('users-panel-overlay').classList.remove('open');
   expandedUserId = null;
+}
+
+// ── AdminTags: catálogo, gestión (Crear/Editar/Eliminar) y asignación ────────
+// Las AdminTags dan contexto sobre qué gestiona cada Administrador. Se
+// muestran debajo de las etiquetas generales del Perfil (Precursor Regular,
+// Siervo Ministerial, Anciano), pero SOLO son visibles para el propio usuario
+// y para los Admins/DEV con acceso al Panel de Usuarios. Cualquier Admin con
+// el módulo "AdminTags" activo puede crear/editar/eliminar el catálogo, pero
+// SOLO el Usuario DEV puede asignar o quitar una AdminTag de un perfil.
+let adminTagsCatalog = []; // [{ id, nombre, color, orden }]
+let _adminTagsLoaded = false;
+let editingAdminTagId = null; // null = creando nueva
+let _selectedAdminTagColor = '#0A84FF';
+
+const ADMINTAG_COLORS = ['#0A84FF','#34C759','#FF9500','#FF3B30','#AF52DE','#06b6d4','#EC4899','#a3a3a3'];
+
+async function loadAdminTags(force) {
+  if (_adminTagsLoaded && !force) return;
+  try {
+    const { data, error } = await sb.from('admin_tags').select('*').order('orden', { ascending: true });
+    if (error) throw error;
+    adminTagsCatalog = data || [];
+    _adminTagsLoaded = true;
+  } catch (e) {
+    console.warn('loadAdminTags: la tabla "admin_tags" podría no existir aún en Supabase.', e.message);
+    adminTagsCatalog = [];
+  }
+}
+
+function canManageAdminTagsCatalog() {
+  return currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, 'admin_tags'));
+}
+
+async function openAdminTagsModal() {
+  if (!canManageAdminTagsCatalog()) { showToast('Sin permisos.','error'); return; }
+  await loadAdminTags(true);
+  document.getElementById('admintags-list-view').style.display = '';
+  document.getElementById('admintags-editor-view').style.display = 'none';
+  document.getElementById('admintags-modal-title').textContent = 'AdminTags';
+  renderAdminTagsList();
+  document.getElementById('admintags-modal').classList.add('open');
+}
+function closeAdminTagsModal() {
+  document.getElementById('admintags-modal').classList.remove('open');
+}
+
+function renderAdminTagsList() {
+  const body = document.getElementById('admintags-list-body');
+  if (!adminTagsCatalog.length) {
+    body.innerHTML = `<div style="text-align:center;padding:1.25rem 0.5rem;color:var(--text3);font-size:0.85rem">Aún no hay AdminTags creadas.</div>`;
+    return;
+  }
+  body.innerHTML = adminTagsCatalog.map(tag => `
+    <div class="admintags-list-item">
+      <div class="admintags-list-dot" style="background:${tag.color}"></div>
+      <div class="admintags-list-name">${tag.nombre}</div>
+      <div class="admintags-list-actions">
+        <div class="admintags-icon-btn" onclick="openAdminTagEditor('${tag.id}')" title="Editar">
+          <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+        </div>
+        <div class="admintags-icon-btn danger" onclick="deleteAdminTag('${tag.id}')" title="Eliminar">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function openAdminTagEditor(id) {
+  editingAdminTagId = id || null;
+  const tag = id ? adminTagsCatalog.find(t => t.id === id) : null;
+  _selectedAdminTagColor = tag ? tag.color : ADMINTAG_COLORS[0];
+  document.getElementById('admintags-list-view').style.display = 'none';
+  document.getElementById('admintags-editor-view').style.display = '';
+  document.getElementById('admintags-modal-title').textContent = tag ? 'Editar AdminTag' : 'Nueva AdminTag';
+  document.getElementById('admintag-name-input').value = tag ? tag.nombre : '';
+  document.getElementById('admintag-error').textContent = '';
+  const swatches = document.getElementById('admintag-color-swatches');
+  swatches.innerHTML = ADMINTAG_COLORS.map(c => `
+    <div class="admintags-color-swatch${c === _selectedAdminTagColor ? ' selected' : ''}" style="background:${c}" data-color="${c}" onclick="selectAdminTagColor('${c}')"></div>`).join('');
+}
+function closeAdminTagEditor() {
+  editingAdminTagId = null;
+  document.getElementById('admintags-list-view').style.display = '';
+  document.getElementById('admintags-editor-view').style.display = 'none';
+  document.getElementById('admintags-modal-title').textContent = 'AdminTags';
+}
+function selectAdminTagColor(c) {
+  _selectedAdminTagColor = c;
+  document.querySelectorAll('#admintag-color-swatches .admintags-color-swatch').forEach(el => {
+    el.classList.toggle('selected', el.dataset.color === c);
+  });
+}
+
+async function saveAdminTag() {
+  const nameInput = document.getElementById('admintag-name-input');
+  const nombre = nameInput.value.trim();
+  const errEl = document.getElementById('admintag-error');
+  errEl.textContent = '';
+  if (!nombre) { errEl.textContent = 'El nombre no puede estar vacío.'; return; }
+
+  const btn = document.getElementById('save-admintag-btn');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+
+  let error;
+  if (editingAdminTagId) {
+    ({ error } = await sb.from('admin_tags').update({ nombre, color: _selectedAdminTagColor }).eq('id', editingAdminTagId));
+  } else {
+    ({ error } = await sb.from('admin_tags').insert({ nombre, color: _selectedAdminTagColor, orden: adminTagsCatalog.length }));
+  }
+
+  btn.disabled = false; btn.textContent = 'Guardar';
+  if (error) {
+    errEl.textContent = 'Error: ' + error.message + ' (¿Creaste la tabla "admin_tags" en Supabase?)';
+    return;
+  }
+  await loadAdminTags(true);
+  showToast(editingAdminTagId ? 'AdminTag actualizada ✓' : 'AdminTag creada ✓', 'success');
+  closeAdminTagEditor();
+  renderAdminTagsList();
+}
+
+async function deleteAdminTag(id) {
+  const tag = adminTagsCatalog.find(t => t.id === id);
+  if (!tag) return;
+  if (!confirm(`¿Eliminar la AdminTag "${tag.nombre}"? Se quitará de cualquier perfil que la tenga asignada.`)) return;
+  const { error } = await sb.from('admin_tags').delete().eq('id', id);
+  if (error) { showToast('Error al eliminar: ' + error.message, 'error'); return; }
+  await loadAdminTags(true);
+  showToast('AdminTag eliminada', 'success');
+  renderAdminTagsList();
 }
 
 // ── User Profile Page ─────────────────────────────────────────────────────────
@@ -13953,6 +14160,7 @@ async function openUserProfilePage(uid) {
   _currentProfileUserId = uid;
   const u = activeUsers.find(x => x.id === uid);
   if (!u) return;
+  await loadAdminTags(); // catálogo de AdminTags (solo se consulta una vez por sesión)
 
   const col = userColor(u.name);
   const inits = userInitials(u.name);
@@ -13994,6 +14202,13 @@ async function openUserProfilePage(uid) {
     uLabels.siervo    ? `<span style="font-size:0.75rem;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(16,185,129,0.12);color:#059669;border:1px solid rgba(16,185,129,0.3)">Siervo Ministerial</span>` : '',
     uLabels.precursor ? `<span style="font-size:0.75rem;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(139,92,246,0.12);color:#7c3aed;border:1px solid rgba(139,92,246,0.3)">Precursor</span>` : '',
   ].filter(Boolean).join('');
+
+  // AdminTag: solo tiene sentido para perfiles con rol Administrador. Visible
+  // aquí porque quien abre este perfil ya tiene acceso al Panel de Usuarios.
+  const uAdminTag = (u.role === 'admin' && u.admin_tag_id) ? adminTagsCatalog.find(t => t.id === u.admin_tag_id) : null;
+  const adminTagChipHTML = uAdminTag
+    ? `<span class="profile-tag admintag" style="--atag-color:${uAdminTag.color}"><svg viewBox="0 0 24 24"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>${uAdminTag.nombre}</span>`
+    : '';
 
   // Permissions text
   const permNames = { assignments:'Asignaciones', territories:'Territorios', conductores:'Conductores', casas:'Casas', grupos:'Grupos', responsabilidades:'Responsabilidades' };
@@ -14068,6 +14283,17 @@ async function openUserProfilePage(uid) {
           </div>
         </div>` : ''}
 
+        ${(isDev && u.role === 'admin') ? `
+        <div style="margin-top:0.9rem">
+          <div class="form-label2" style="margin-bottom:6px">AdminTag</div>
+          <div class="uprofile-row-label" style="font-size:0.76rem;color:var(--text3);margin-bottom:8px">Asigna una etiqueta de contexto a este Administrador. Solo tú (DEV) puedes hacerlo.</div>
+          <select class="form-select" id="uprof-admintag-sel">
+            <option value="">Sin AdminTag</option>
+            ${adminTagsCatalog.map(t => `<option value="${t.id}" ${u.admin_tag_id === t.id ? 'selected' : ''}>${t.nombre}</option>`).join('')}
+          </select>
+          ${!adminTagsCatalog.length ? `<div style="font-size:0.72rem;color:var(--text3);margin-top:5px">Aún no hay AdminTags creadas. Actívale el módulo "AdminTags" a un Admin (o créalas tú) desde el botón del Panel de Usuarios.</div>` : ''}
+        </div>` : ''}
+
         <div style="margin-top:0.9rem">
           <div class="form-label2" style="margin-bottom:6px">Etiquetas</div>
           <div class="labels-grid">
@@ -14120,7 +14346,7 @@ async function openUserProfilePage(uid) {
       <div class="uprofile-row"><span class="uprofile-row-label">Última actividad</span><span class="uprofile-row-val">${since}</span></div>
       ${u.task ? `<div class="uprofile-row"><span class="uprofile-row-label">Responsabilidad</span><span class="uprofile-row-val">${u.task}</span></div>` : ''}
     </div>
-    ${labelChipsFull ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.1rem">${labelChipsFull}</div>` : ''}
+    ${(labelChipsFull || adminTagChipHTML) ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.1rem">${labelChipsFull}${adminTagChipHTML}</div>` : ''}
     ${editSection}
     ${dangerSection}
   `;
@@ -14175,24 +14401,39 @@ async function saveProfileChanges(uid) {
   if (currentRole === 'dev' && newName !== u.name) updatePayload.name = newName;
   if (currentRole === 'dev' && newLinkedName !== (u.linked_name || '')) updatePayload.linked_name = newLinkedName || null;
 
+  // AdminTag: solo el DEV puede asignarla/quitarla, y solo aplica a Admins.
+  const admintagSel = document.getElementById('uprof-admintag-sel');
+  let newAdminTagId = u.admin_tag_id || null;
+  if (currentRole === 'dev' && admintagSel && u.role === 'admin') {
+    newAdminTagId = admintagSel.value || null;
+    updatePayload.admin_tag_id = newAdminTagId;
+  } else if (currentRole === 'dev' && u.role !== 'admin') {
+    // Si dejó de ser Admin, no conserva AdminTag
+    newAdminTagId = null;
+    updatePayload.admin_tag_id = null;
+  }
+
   let { error } = await sb.from('platform_users')
     .update(updatePayload)
     .eq('id', u.id);
   if (error) {
-    // Reintento sin linked_name por si la columna aún no existe en Supabase
-    // (ver bloque SQL "VINCULACIÓN DE CUENTAS" para agregarla).
+    // Reintento sin linked_name/admin_tag_id por si las columnas aún no
+    // existen en Supabase (ver bloques SQL correspondientes para agregarlas).
     const fallback = { role: u.role, task: u.task, labels: parseLabels(u.labels) };
     if (currentRole === 'dev' && newName !== u.name) fallback.name = newName;
     const retry = await sb.from('platform_users').update(fallback).eq('id', u.id);
     if (retry.error) { showToast('Error: ' + retry.error.message, 'error'); return; }
     if (currentRole === 'dev' && newLinkedName !== (u.linked_name || '')) {
       showToast('Cambios guardados, pero falta crear la columna "linked_name" en Supabase para poder vincular cuentas.', 'error');
+    } else if (currentRole === 'dev' && admintagSel) {
+      showToast('Cambios guardados, pero falta crear la columna "admin_tag_id" en Supabase para poder asignar AdminTags.', 'error');
     }
   }
 
   const wasCurrentUser = currentUser && u.name === currentUser.name;
   if (currentRole === 'dev' && newName !== u.name) u.name = newName;
   if (currentRole === 'dev') u.linked_name = newLinkedName || null;
+  if (currentRole === 'dev') u.admin_tag_id = newAdminTagId;
   if (wasCurrentUser) {
     currentRole = u.role;
     currentUser.role = u.role;
@@ -14317,6 +14558,9 @@ function renderUsersPanel() {
       uLabels.precursor ? `<span style="font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(139,92,246,0.12);color:#7c3aed;border:1px solid rgba(139,92,246,0.3)">Precursor</span>` : '',
     ].filter(Boolean).join('');
     const isCurrentUser = currentUser && u.name === currentUser.name;
+    const cardAdminTag = (u.role === 'admin' && u.admin_tag_id) ? adminTagsCatalog.find(t => t.id === u.admin_tag_id) : null;
+    const cardAdminTagChip = cardAdminTag
+      ? `<span style="font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:20px;background:${cardAdminTag.color}1f;color:${cardAdminTag.color};border:1px solid ${cardAdminTag.color}4d">${cardAdminTag.nombre}</span>` : '';
     const avatarHtml = u.avatar
       ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:15px">`
       : inits;
@@ -14330,7 +14574,7 @@ function renderUsersPanel() {
           <div class="user-card-name">${u.name}${isCurrentUser ? ' <span style="font-size:0.68rem;color:var(--text3);font-weight:500">(tú)</span>' : ''}${u.linked_name ? ` <span title="Vinculado con ${u.linked_name}" style="font-size:0.68rem;color:var(--accent);font-weight:600">🔗</span>` : ''}</div>
           <div class="user-card-meta">
             <span>${since}</span>
-            ${labelChips}
+            ${labelChips}${cardAdminTagChip}
           </div>
         </div>
         <div class="user-card-actions">
@@ -14450,7 +14694,7 @@ async function getUserPermissions() {
 let _permsCacheTime = 0;
 const PERMS_CACHE_TTL_MS = 60000; // evita re-consultar Supabase cada vez que se abre un detalle (p.ej. tarjetas de Asignaciones)
 async function refreshCurrentUserPermsCache(force) {
-  if (currentRole === 'dev') { _currentUserPermsCache = { usuarios: true }; return; }
+  if (currentRole === 'dev') { _currentUserPermsCache = { usuarios: true, admin_tags: true }; return; }
   if (currentRole !== 'admin') { _currentUserPermsCache = null; return; }
   if (!force && _currentUserPermsCache && (Date.now() - _permsCacheTime) < PERMS_CACHE_TTL_MS) return; // caché reciente, sin round-trip
   try {
@@ -21156,6 +21400,42 @@ async function notifyReportRecipients(territoryObj, submission) {
    la cuenta se reconoce por su propio nombre (comportamiento normal).
    Solo el DEV puede establecer o quitar este vínculo (ver openUserProfilePage
    / saveProfileChanges y getIdentityName()).
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ADMINTAGS (v1.19.0-beta)
+   ══════════════════════════════════════════════════════════════════════════
+   Tabla y columna en Supabase (crear/agregar una vez):
+
+   create table if not exists admin_tags (
+     id uuid primary key default gen_random_uuid(),
+     nombre text not null,
+     color text not null default '#0A84FF',
+     orden integer default 0,
+     created_at timestamptz default now()
+   );
+
+   alter table platform_users add column if not exists admin_tag_id uuid
+     references admin_tags(id) on delete set null;
+
+   Las AdminTags dan contexto sobre qué gestiona cada Administrador (ej.
+   "Encargado de Territorios"). Se muestran en la pantalla de Perfil, debajo
+   de las etiquetas generales (Precursor Regular, Siervo Ministerial, Anciano),
+   y también en el Panel de Usuarios / Perfil de Usuario.
+
+   Reglas:
+   - Un Admin no está obligado a tener una AdminTag; si no la tiene, no se
+     muestra nada.
+   - El catálogo de AdminTags (crear/editar/eliminar) puede ser gestionado
+     por el DEV o por un Admin al que el DEV le haya activado el módulo
+     "AdminTags" en Módulos permitidos (ver PERM_MODULES / parsePermissions,
+     clave 'admin_tags').
+   - Solo el Usuario DEV puede asignar o quitar una AdminTag de un perfil
+     (ver el selector "AdminTag" dentro de openUserProfilePage /
+     saveProfileChanges).
+   - Las AdminTags NO son visibles para usuarios comunes (Visitantes): solo
+     el propio usuario ve su AdminTag en su Perfil, y los Admins/DEV con
+     acceso al Panel de Usuarios la ven en el perfil de ese Admin.
    ══════════════════════════════════════════════════════════════════════════ */
 
 /* ══════════════════════════════════════════════════════════════════════════
