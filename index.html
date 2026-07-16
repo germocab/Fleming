@@ -6056,6 +6056,20 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
               <label class="form-label2">Nombres (uno por línea, o separados por coma)</label>
               <textarea class="form-textarea" id="anuncio-target-names" placeholder="Juan Pérez&#10;María González" rows="3"></textarea>
             </div>
+            <div class="form-group2">
+              <label class="form-label2">Imagen (opcional)</label>
+              <input type="file" id="anuncio-img-file" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="handleAnuncioImage(event)">
+              <div id="anuncio-img-placeholder" style="display:flex;align-items:center;gap:8px;padding:0.65rem 0.9rem;border:1.5px dashed var(--border);border-radius:10px;cursor:pointer;color:var(--text3);font-size:0.85rem" onclick="document.getElementById('anuncio-img-file').click()">
+                <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                Adjuntar imagen
+              </div>
+              <div id="anuncio-img-preview-wrap" style="display:none;position:relative;margin-top:0.5rem">
+                <img id="anuncio-img-preview" style="max-width:100%;max-height:160px;border-radius:10px;display:block">
+                <button type="button" onclick="clearAnuncioImage()" style="position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.55);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center">
+                  <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+            </div>
             <div id="anuncio-error" class="form-error" style="display:none"></div>
             <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" id="send-anuncio-btn" onclick="sendAnuncioSistema()">Enviar anuncio</button>
           </div>
@@ -7445,7 +7459,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.20.6-beta';
+const APP_VERSION = '1.21.0-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -7634,14 +7648,14 @@ async function toggleTerritoryDownload() {
     if (!entry) {
       if (blockIfOffline('offline.nodownload')) return;
       const ok = await downloadTerritoryOffline(terr);
-      showToast(t(ok ? 'offline.descargado' : 'offline.errorguardado'), ok ? 'success' : 'error');
+      if (!ok) showToast(t('offline.errorguardado'), 'error');
       return;
     }
     // Ya estaba descargado
     if (!isAppOnline()) { showToast(t('offline.yadescargado'), 'info'); return; }
     if (entry.fingerprint !== _territoryFingerprint(terr)) {
       const ok = await downloadTerritoryOffline(terr);
-      showToast(t(ok ? 'offline.actualizado' : 'offline.errorguardado'), ok ? 'success' : 'error');
+      if (!ok) showToast(t('offline.errorguardado'), 'error');
     } else {
       showToast(t('offline.yadescargado'), 'info');
     }
@@ -7813,21 +7827,13 @@ async function downloadAllTerritoriesOffline() {
 // los territorios descargados localmente cambió en el servidor, y si es así,
 // avisa para que se pueda actualizar la copia descargada.
 function _checkDownloadedTerritoriesForUpdates() {
-  if (!isAppOnline()) return;
-  // Respeta el toggle "Actualización de Mapas" de Configuración > Notificaciones.
-  if (typeof getNotifPrefsCached === 'function' && getNotifPrefsCached()['mapas-actualizacion'] === false) return;
-  const store = _getOfflineTerritories();
-  const ids = Object.keys(store);
-  if (!ids.length) return;
-  ids.forEach(id => {
-    const terr = territories.find(x => x.id === id);
-    if (!terr || terr.map_data === undefined) return; // mapas aún no cargados en memoria
-    const entry = store[id];
-    if (entry.fingerprint !== _territoryFingerprint(terr)) {
-      const msg = t('offline.notif.actualizacion').replace('{ter}', terLabel(terr.number));
-      showToast(msg, 'info');
-    }
-  });
+  // v1.21.0-beta: las actualizaciones de Mapas de Territorio ya no se
+  // informan por Toast/PopUp. La única forma de detectarlas es entrando a
+  // Configuración > Almacenamiento, donde cada territorio descargado muestra
+  // su propio indicador de actualización (ver _updateDownloadBtnUI y el
+  // renderizado de #storage-territories-list, que comparan el fingerprint
+  // por su cuenta). Esta función queda intencionalmente inactiva.
+  return;
 }
 document.addEventListener('DOMContentLoaded', updateOnlineStatusUI);
 // Recordatorios de reporte de territorio en el Perfil (Inicio): desactivados
@@ -11243,6 +11249,17 @@ async function viewAssignment(id) {
   if (_dlTer) {
     ter.map_data = _dlTer.map_data; ter.map_data_dark = _dlTer.map_data_dark;
     if (ter && ter2) { _renderDetailTerContent(ter); } else { _applyDetailMapSrc(ter); }
+  } else if (ter && !isEspecial) {
+    // El territorio no está descargado localmente: mientras se resuelve el
+    // mapa (requiere red), mostramos un indicador de carga con el mensaje
+    // "Cargando Territorio". Descargar el territorio en Almacenamiento hace
+    // que la próxima vez cargue instantáneamente (ver rama _dlTer arriba).
+    if (mapWrap) {
+      mapWrap.style.display = 'flex';
+      mapWrap.style.alignItems = 'center';
+      mapWrap.style.justifyContent = 'center';
+      mapWrap.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Territorio</div></div>';
+    }
   }
   (async () => {
     if (isAppOnline()) await ensureTerritoryMapsLoaded();
@@ -11251,6 +11268,14 @@ async function viewAssignment(id) {
       if (dl) { ter.map_data = dl.map_data; ter.map_data_dark = dl.map_data_dark; }
     }
     if (panel._openAssignmentId !== id) return; // el usuario ya cambió de tarjeta
+    if (mapWrap && !_dlTer) {
+      // Restaura el markup original del contenedor (el loader lo sobrescribió)
+      mapWrap.removeAttribute('style');
+      mapWrap.innerHTML = '<img id="detail-map-img" alt="Mapa del territorio">' +
+        '<div class="detail-map-offline-placeholder" id="detail-map-offline-placeholder" style="display:none">' +
+        '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>' +
+        '<span>Mapa no disponible sin conexión</span></div>';
+    }
     if (ter && ter2) {
       _renderDetailTerContent(ter);
     } else {
@@ -13222,6 +13247,9 @@ function renderAdminRespUpcoming() {
         </div>
         <div class="list-item-actions">
           ${isPast ? '' : `<button class="btn-sm" onclick="editRespDate('${dateStr}')">Editar</button>`}
+          <button class="btn-sm" title="Compartir como imagen" onclick="shareRespDayAsPng('${dateStr}')">
+            <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          </button>
           <button class="btn-danger" onclick="deleteRespDate('${dateStr}', ${isPast})"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
       </div>
@@ -13232,6 +13260,62 @@ function renderAdminRespUpcoming() {
   container.innerHTML =
     upcomingDates.map(d => renderItem(d, false)).join('') +
     pastDates.map(d => renderItem(d, true)).join('');
+}
+
+// Genera una imagen PNG con las Responsabilidades de un día (Jueves/Sábado) y
+// abre el share sheet nativo (o descarga el archivo si no hay share sheet
+// disponible) — así el encargado puede enviarla por WhatsApp/Telegram/etc.
+// sin necesidad de tomar una captura de pantalla manual (v1.21.0-beta).
+async function shareRespDayAsPng(dateStr) {
+  const allRows = [...responsabilidades, ...respHistorial];
+  const rows = allRows.filter(r => r.fecha === dateStr);
+  if (!rows.length) { showToast('No hay datos para compartir', 'error'); return; }
+
+  showToast('Generando imagen…', '');
+  try {
+    await ensureHtml2Canvas();
+    const offscreen = document.getElementById('share-pdf-offscreen');
+
+    const filasHTML = RESP_CARGOS.map(cargo => {
+      const row = rows.find(r => r.cargo === cargo);
+      const hermano = row?.hermano || 'Sin asignar';
+      return `<div class="share-card-row">
+        <div style="flex:1">
+          <div class="share-card-row-label">${cargo}</div>
+          <div class="share-card-row-value">${hermano}</div>
+        </div>
+      </div>`;
+    }).join('');
+
+    offscreen.innerHTML = `<div class="share-card" style="width:520px">
+      <div class="share-card-header" style="background:linear-gradient(135deg,#007AFF,#5856d6)">
+        <div class="share-card-eyebrow">Responsabilidades</div>
+        <div class="share-card-title">${capitalizar(respDiaLabelLong(dateStr))}</div>
+      </div>
+      <div class="share-card-body">${filasHTML}</div>
+      <div class="share-card-footer">Generado desde la app Fleming · ${APP_VERSION}</div>
+    </div>`;
+    const cardEl = offscreen.firstElementChild;
+
+    const canvas = await window.html2canvas(cardEl, { backgroundColor: '#ffffff', scale: 2.5, useCORS: true });
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    const filename = 'responsabilidades-' + dateStr + '.png';
+    const file = new File([blob], filename, { type: 'image/png' });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: 'Responsabilidades' });
+        return;
+      } catch (e) { /* el usuario canceló el share sheet, o falló: caemos a descarga */ }
+    }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+  } catch (e) {
+    console.error('shareRespDayAsPng:', e);
+    showToast('No se pudo generar la imagen', 'error');
+  }
 }
 
 function editRespDate(dateStr) {
@@ -17306,6 +17390,33 @@ document.addEventListener('change', (e) => {
   }
 });
 
+let pendingAnuncioImageBase64 = null;
+function handleAnuncioImage(event) {
+  const file = event.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img; const maxW = 1000;
+      if (width > maxW) { height = Math.round(height * maxW / width); width = maxW; }
+      const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      pendingAnuncioImageBase64 = canvas.toDataURL('image/jpeg', 0.82);
+      document.getElementById('anuncio-img-preview').src = pendingAnuncioImageBase64;
+      document.getElementById('anuncio-img-preview-wrap').style.display = 'block';
+      document.getElementById('anuncio-img-placeholder').style.display = 'none';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function clearAnuncioImage() {
+  pendingAnuncioImageBase64 = null;
+  document.getElementById('anuncio-img-file').value = '';
+  document.getElementById('anuncio-img-preview-wrap').style.display = 'none';
+  document.getElementById('anuncio-img-placeholder').style.display = 'flex';
+}
+
 async function sendAnuncioSistema() {
   const title = document.getElementById('anuncio-title').value.trim();
   const body  = document.getElementById('anuncio-body').value.trim();
@@ -17327,6 +17438,7 @@ async function sendAnuncioSistema() {
 
   const payload = { title, body, notif_category: 'sistema' };
   if (target_names) payload.target_names = target_names;
+  if (pendingAnuncioImageBase64) payload.image_url = pendingAnuncioImageBase64;
 
   const { error } = await sb.from('notifications').insert(payload);
 
@@ -17341,6 +17453,7 @@ async function sendAnuncioSistema() {
   document.getElementById('anuncio-target').value = '';
   document.getElementById('anuncio-target-names').value = '';
   document.getElementById('anuncio-target-names-wrap').style.display = 'none';
+  clearAnuncioImage();
 }
 
 let _notifTplOpenId = null;
@@ -17456,7 +17569,8 @@ async function resetCategoryLabelFromUI(catId) {
 
 function defaultNotifPrefs() {
   const prefs = {};
-  NOTIF_CATEGORIES.forEach(c => { prefs[c.id] = true; });
+  // v1.21.0-beta: "Actualización de Mapas" viene desactivada por defecto.
+  NOTIF_CATEGORIES.forEach(c => { prefs[c.id] = c.id !== 'mapas-actualizacion'; });
   return prefs;
 }
 // Las prefs viven en platform_users.notif_prefs (jsonb) y se cachean en
@@ -18294,7 +18408,7 @@ function _renderNotifTarget(t) {
       const _mGrpKey = getNotifGroupKey(n);
       const _mGrp = NOTIF_GROUPS[_mGrpKey];
       const _mGrpIconInner = _mGrp.icon.replace(/<svg[^>]*>/, '').replace('</svg>', '');
-      return `<div class="notif-card${isNew?' is-new':''}" id="notif-m-${n.id}">
+      return `<div class="notif-card${isNew?' is-new':''}" id="notif-m-${n.id}" onclick="openNotifDetail('${n.id}', event)" style="cursor:pointer">
         <div class="notif-card-header">
           <div class="notif-card-icon-badge" style="width:36px;height:36px;border-radius:10px;background:${_mGrp.bg};color:${_mGrp.color};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:2px">
             <svg viewBox="0 0 24 24" style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round">${_mGrpIconInner}</svg>
@@ -18303,10 +18417,11 @@ function _renderNotifTarget(t) {
             ${isNew?'<div class="notif-card-dot"></div>':''}
             <span class="notif-card-title">${n.title}</span>
           </div>
-          <button class="notif-delete-btn" title="Eliminar" onclick="deleteNotification('${n.id}')">
+          <button class="notif-delete-btn" title="Eliminar" onclick="event.stopPropagation();deleteNotification('${n.id}')">
             <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
+        ${n.image_url ? `<img src="${n.image_url}" style="width:100%;max-height:150px;object-fit:cover;border-radius:10px;margin:6px 0">` : ''}
         <div class="notif-card-body">${n.body}</div>
         <div id="notif-m-actions-${n.id}">${_accountRequestActionsHTML(n, 'mobile')}</div>
         <div class="notif-card-footer">
@@ -18316,6 +18431,43 @@ function _renderNotifTarget(t) {
       </div>`;
     }).join('');
   }
+}
+
+// ── Detalle de Notificación (v1.21.0-beta) ──────────────────────────────────
+let _notifDetailCurrentId = null;
+function openNotifDetail(id, ev) {
+  if (ev && ev.target && ev.target.closest('.notif-delete-btn')) return;
+  const n = _notifAllData.find(x => x.id === id);
+  if (!n) return;
+  _notifDetailCurrentId = id;
+
+  const imgEl = document.getElementById('notif-detail-image');
+  if (n.image_url) { imgEl.src = n.image_url; imgEl.style.display = 'block'; }
+  else { imgEl.style.display = 'none'; imgEl.src = ''; }
+
+  const grpKey = getNotifGroupKey(n);
+  const grp = NOTIF_GROUPS[grpKey];
+  const grpIconInner = grp.icon.replace(/<svg[^>]*>/, '').replace('</svg>', '');
+  document.getElementById('notif-detail-icon-badge').style.background = grp.bg;
+  document.getElementById('notif-detail-icon-badge').style.color = grp.color;
+  document.getElementById('notif-detail-icon-badge').innerHTML = `<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round">${grpIconInner}</svg>`;
+  document.getElementById('notif-detail-group-pill').innerHTML = notifGroupPillHTML(n);
+  document.getElementById('notif-detail-title').textContent = n.title || '';
+  document.getElementById('notif-detail-content').textContent = n.body || '';
+  document.getElementById('notif-detail-date').textContent = new Date(n.created_at).toLocaleDateString('es-CL', {weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
+  document.getElementById('notif-detail-actions').innerHTML = _accountRequestActionsHTML(n, 'mobile');
+
+  document.getElementById('page-notif-detail').style.display = 'flex';
+}
+function closeNotifDetail() {
+  document.getElementById('page-notif-detail').style.display = 'none';
+  _notifDetailCurrentId = null;
+}
+async function deleteNotificationFromDetail() {
+  if (!_notifDetailCurrentId) return;
+  const id = _notifDetailCurrentId;
+  closeNotifDetail();
+  await deleteNotification(id);
 }
 
 async function deleteNotification(id) {
@@ -20037,6 +20189,34 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
   </div>
   <div style="flex:1;overflow-y:auto;padding:0 1rem 1rem;max-width:640px;width:100%;margin:0 auto" id="notifications-list-mobile">
     <div class="loader-wrap"><div class="loader"></div><div class="loader-caption" data-i18n="notif.cargando">Cargando Notificaciones</div></div>
+  </div>
+</div>
+
+<!-- ── Detalle de Notificación (v1.21.0-beta) ── -->
+<div id="page-notif-detail" style="display:none;position:fixed;inset:0;z-index:260;background:var(--bg);flex-direction:column;animation: fadeIn 0.26s var(--ease-fluid-soft)">
+  <nav class="subpage-topbar">
+    <button class="pill-back-btn" onclick="closeNotifDetail()" title="Volver">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span class="pill-header-title">Notificación</span>
+    <div class="subpage-topbar-right">
+      <button id="notif-detail-delete-btn" class="notif-clear-icon-btn" onclick="deleteNotificationFromDetail()" title="Borrar" aria-label="Borrar">
+        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+      </button>
+    </div>
+  </nav>
+  <div style="flex:1;overflow-y:auto;padding:0 0 2rem" id="notif-detail-body">
+    <img id="notif-detail-image" style="display:none;width:100%;max-height:280px;object-fit:cover">
+    <div style="padding:1.1rem 1.25rem;max-width:640px;width:100%;margin:0 auto">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.9rem">
+        <div id="notif-detail-icon-badge" style="width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0"></div>
+        <div id="notif-detail-group-pill"></div>
+      </div>
+      <h2 id="notif-detail-title" style="font-size:1.25rem;font-weight:800;color:var(--text);margin:0 0 0.5rem;line-height:1.3"></h2>
+      <div id="notif-detail-date" style="font-size:0.78rem;color:var(--text3);font-weight:600;margin-bottom:1.1rem"></div>
+      <div id="notif-detail-content" style="font-size:0.95rem;color:var(--text2);line-height:1.65;white-space:pre-wrap"></div>
+      <div id="notif-detail-actions" style="margin-top:1.1rem"></div>
+    </div>
   </div>
 </div>
 
