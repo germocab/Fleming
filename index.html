@@ -3919,6 +3919,39 @@
   }
   #page-grupo.open { display: flex; }
 
+  /* ── Pantalla "Otros Grupos" (v1.23.0-beta): lista independiente de las
+     asignaciones de los demás Grupos de Servicio del Sábado, agrupadas por
+     Grupo. Solo existe cuando la preferencia "Habilitar pantalla de
+     asignaciones por grupo" está activada; si no, esas asignaciones se
+     siguen mostrando como mini-cards en la pantalla principal. ── */
+  #page-otros-grupos {
+    display: none; position: fixed; inset: 0; z-index: 260;
+    background: var(--bg); flex-direction: column;
+    overflow-y: auto; animation: fadeIn 0.28s var(--ease-fluid-soft);
+  }
+  #page-otros-grupos.open { display: flex; }
+  .otros-grupos-btn {
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    width: 100%; margin-top: 0.7rem; padding: 0.75rem 1rem;
+    border-radius: 14px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text);
+    font-family: var(--font); font-size: 0.85rem; font-weight: 700;
+    cursor: pointer; transition: background 0.15s, transform 0.12s;
+  }
+  .otros-grupos-btn:hover { background: var(--surface2); }
+  .otros-grupos-btn:active { transform: scale(0.98); }
+  .otros-grupos-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; }
+  .og-group-section { margin: 0 1.25rem 1.5rem; }
+  .og-group-section:first-child { margin-top: 1rem; }
+  .og-group-title {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.78rem; font-weight: 700; letter-spacing: 0.02em;
+    color: var(--text2); margin-bottom: 0.6rem;
+  }
+  .og-group-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .og-group-cards { display: flex; flex-direction: column; gap: 0.6rem; }
+  .og-empty { text-align: center; padding: 3rem 1.25rem; color: var(--text3); font-size: 0.85rem; }
+
   /* El título "Grupo X" en pill (con blur/transparencia) del header estándar
      permanece oculto mientras se ve el hero grande (círculo + título + nº de
      miembros); aparece con una transición suave recién cuando el usuario
@@ -7107,6 +7140,19 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <div id="pref-dark-maps-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
+      <!-- Toggle: pantalla de asignaciones por grupo (v1.23.0-beta) -->
+      <div class="profile-row" style="cursor:pointer;border-top:1px solid var(--border)" onclick="toggleGroupScreenPref()">
+        <div class="profile-row-icon" style="background:var(--ter-2-bg);color:var(--ter-2)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Habilitar pantalla de asignaciones por grupo</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Muestra las asignaciones de otros Grupos de Servicio en una pantalla aparte, en vez de mini-cards en Casa en Casa</div>
+        </div>
+        <div id="pref-group-screen-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="pref-group-screen-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
     </div>
     <!-- Tamaño de la interfaz: al final de Preferencias, en su propia sección -->
     <div class="profile-section">
@@ -7765,7 +7811,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.22.12-beta';
+const APP_VERSION = '1.23.0-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -11143,6 +11189,7 @@ function _loadScheduleFromOfflineCache() {
 
 function renderSchedule() {
   const container = document.getElementById('schedule-content');
+  Object.keys(_otrosGruposByDate).forEach(k => delete _otrosGruposByDate[k]);
   if (!assignments.length) {
     container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><h4>${t("casa.sinasignaciones")}</h4><p>${t("casa.sinpredicaciones")}</p></div>`;
     return;
@@ -11313,8 +11360,19 @@ function renderSchedule() {
           </div>`;
       }
 
-      // ── Other groups grid ──
+      // ── Other groups: mini-cards inline (comportamiento clásico) o botón
+      //    hacia la pantalla independiente "Otros Grupos", según la
+      //    preferencia de Configuración → Apariencia (v1.23.0-beta) ──
       if (otherAssignments.length) {
+        if (isGroupScreenPrefEnabled()) {
+          // Guarda los datos de este Sábado para que la pantalla "Otros
+          // Grupos" los pueda leer al abrirse.
+          _otrosGruposByDate[date] = otherAssignments;
+          html += `<button class="otros-grupos-btn" style="margin-top:${myAssignment ? '0.7rem' : '0'}" onclick="openOtrosGruposScreen('${date}')">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            Otros Grupos
+          </button>`;
+        } else {
         html += `<div class="sabado-section-label" style="margin-top:${myAssignment ? '0.85rem' : '0'}">Otros grupos</div>`;
         html += `<div class="sabado-grupos-grid">`;
         otherAssignments.forEach(a => {
@@ -11349,6 +11407,7 @@ function renderSchedule() {
           </div>`;
         });
         html += `</div>`;
+        }
       }
 
     } else {
@@ -11403,6 +11462,104 @@ function _namesMatch(a, b) {
   if (!a || !b) return false;
   const norm = s => s.toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
   return norm(a) === norm(b);
+}
+
+// ── Pantalla "Otros Grupos" (v1.23.0-beta) ──────────────────────────────────
+// Guarda, por fecha de Sábado, las asignaciones de los demás Grupos de
+// Servicio que renderSchedule() calculó, para que esta pantalla independiente
+// las pueda mostrar sin tener que recalcularlas.
+const _otrosGruposByDate = {};
+
+function _findGrupoForAssignmentGlobal(a) {
+  if (!grupos.length) return null;
+  if (a.grupo_id) return grupos.find(g => g.id === a.grupo_id) || null;
+  const condLower = (a.conductor || '').trim().toLowerCase();
+  if (!condLower) return null;
+  for (const g of grupos) {
+    const sup = g.miembros.find(m => m.rol === 'superintendente' && m.nombre.trim().toLowerCase() === condLower);
+    if (sup) return g;
+  }
+  for (const g of grupos) {
+    const mem = g.miembros.find(m => m.nombre.trim().toLowerCase() === condLower);
+    if (mem) return g;
+  }
+  return null;
+}
+
+function openOtrosGruposScreen(date) {
+  const items = _otrosGruposByDate[date] || [];
+  const d = new Date(date+'T00:00:00');
+  const dateLabel = fmtCasaLongDate(d);
+  const titleEl = document.getElementById('otros-grupos-nav-title');
+  if (titleEl) titleEl.textContent = 'Otros Grupos · ' + dateLabel;
+
+  // Agrupa por Grupo de Servicio, ordenado por número de grupo.
+  const byGroup = new Map();
+  items.forEach(a => {
+    const g = _findGrupoForAssignmentGlobal(a);
+    const key = g ? g.id : '__sin_grupo__';
+    if (!byGroup.has(key)) byGroup.set(key, { grupo: g, items: [] });
+    byGroup.get(key).items.push(a);
+  });
+  const groupsSorted = [...byGroup.values()].sort((x, y) => {
+    const nx = x.grupo ? x.grupo.numero : Infinity;
+    const ny = y.grupo ? y.grupo.numero : Infinity;
+    return nx - ny;
+  });
+
+  const container = document.getElementById('otros-grupos-content');
+  if (container) {
+    if (!groupsSorted.length) {
+      container.innerHTML = `<div class="og-empty">No hay asignaciones de otros grupos para este Sábado.</div>`;
+    } else {
+      let html = '';
+      groupsSorted.forEach(({ grupo, items }) => {
+        const numero = grupo ? grupo.numero : null;
+        const color = numero != null ? grupoColorFor(numero) : '#64748b';
+        html += `<div class="og-group-section">
+          <div class="og-group-title"><span class="og-group-dot" style="background:${color}"></span>${numero != null ? 'Grupo ' + numero : 'Grupo'}</div>
+          <div class="og-group-cards">`;
+        items.forEach(a => {
+          const timeStr = a.time ? a.time.substring(0,5) : '--:--';
+          const _c = casas.find(c => c.id === a.casa_id);
+          const houseLabel = a.house ? ((_c && _c.tipo === 'departamento' ? 'Depto' : 'Casa') + ' de ') + a.house : '';
+          const ter  = territories.find(t => t.id === a.territory_id)  || null;
+          const ter2 = a.territory_id_2 ? (territories.find(t => t.id === a.territory_id_2) || null) : null;
+          let rightBadge = '';
+          if (a.type === 'zoom') rightBadge = `<div class="ter-badge-icon zoom-badge"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="15" height="10" rx="2"/><polygon points="17 9 22 6 22 18 17 15"/></svg></div>`;
+          else if (a.type === 'telefono') rightBadge = `<div class="ter-badge-icon phone-badge"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.35 2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>`;
+          else if (a.type === 'cartas') rightBadge = `<div class="ter-badge-icon cartas-badge"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>`;
+          else if (ter && ter2) rightBadge = `<div class="ter-badge-duo"><div class="ter-badge-sm" style="background:${getTerColor(ter.number)}">${ter.number}</div><div class="ter-badge-sm" style="background:${getTerColor(ter2.number)}">${ter2.number}</div></div>`;
+          else if (ter) rightBadge = `<div class="ter-badge" style="background:${getTerColor(ter.number)}">${ter.number}</div>`;
+          const typeChip = a.type === 'zoom' ? `<span class="type-chip chip-zoom">Zoom</span>`
+            : a.type === 'telefono' ? `<span class="type-chip chip-phone">Teléfono</span>`
+            : a.type === 'cartas' ? `<span class="type-chip chip-cartas">Cartas</span>` : '';
+          html += `<div class="assignment-card" onclick="viewAssignment('${a.id}')">
+            <div class="card-main">
+              <div class="card-address">${a.address||'Sin dirección'}${houseLabel?`<br><span class="card-house">${houseLabel}</span>`:''}</div>
+              <div class="card-meta">
+                <span class="card-time-chip">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  ${timeStr}hrs
+                </span>
+                <span class="card-conductor">${a.conductor||'Sin conductor'}</span>
+                ${typeChip}
+              </div>
+            </div>
+            ${rightBadge}
+          </div>`;
+        });
+        html += `</div></div>`;
+      });
+      container.innerHTML = html;
+    }
+  }
+  document.getElementById('page-otros-grupos')?.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeOtrosGruposScreen() {
+  document.getElementById('page-otros-grupos')?.classList.remove('open');
+  document.body.style.overflow = '';
 }
 
 async function viewAssignment(id) {
@@ -15966,6 +16123,7 @@ async function openPreferencias() {
   document.getElementById('pref-version-value').textContent = getAppVersionMajor();
   updatePrefThemeActive();
   updateDarkMapToggleUI();
+  updateGroupScreenToggleUI();
   updateLiveToggleUI();
   updateTransparencyToggleUI();
   updateUiSizeToggleUI();
@@ -16034,6 +16192,31 @@ function toggleDarkMapsPref() {
   localStorage.setItem('fleming_dark_maps', current ? 'false' : 'true');
   updateDarkMapToggleUI();
   if (currentSubTab === 'territorios') renderTerritoryView();
+}
+
+// ── Toggle: pantalla de asignaciones por grupo (v1.23.0-beta) ───────────────
+// Desactivado (por defecto): las asignaciones de Grupos de Servicio ajenos
+// siguen mostrándose como mini-cards en la pantalla principal de Casa en
+// Casa, igual que antes. Activado: esas asignaciones dejan de aparecer ahí y
+// se mueven a la pantalla independiente "Otros Grupos", accesible mediante
+// un botón bajo la tarjeta del grupo del usuario.
+function isGroupScreenPrefEnabled() {
+  return localStorage.getItem('fleming_group_screen_mode') === 'true';
+}
+function updateGroupScreenToggleUI() {
+  const enabled = isGroupScreenPrefEnabled();
+  const toggle = document.getElementById('pref-group-screen-toggle');
+  const thumb  = document.getElementById('pref-group-screen-thumb');
+  if (!toggle || !thumb) return;
+  toggle.style.background = enabled ? 'var(--accent)' : 'var(--surface3)';
+  thumb.style.left = enabled ? '21px' : '3px';
+}
+function toggleGroupScreenPref() {
+  const current = isGroupScreenPrefEnabled();
+  localStorage.setItem('fleming_group_screen_mode', current ? 'false' : 'true');
+  updateGroupScreenToggleUI();
+  // Si Casa en Casa ya está renderizado, refleja el cambio de inmediato.
+  if (typeof renderSchedule === 'function' && assignments && assignments.length) renderSchedule();
 }
 
 // ── Navbar compacta al hacer scroll (solo Desktop, ≥640px) ──────────────────
@@ -20955,8 +21138,22 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
   </div>
 </div>
 
+<!-- ── Otros Grupos fullscreen page (v1.23.0-beta) ── -->
+<div id="page-otros-grupos" class="">
+  <nav class="subpage-topbar">
+    <button class="pill-back-btn" onclick="closeOtrosGruposScreen()" title="Casa en Casa">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span id="otros-grupos-nav-title" class="pill-header-title">Otros Grupos</span>
+  </nav>
+  <div style="max-width:600px;width:100%;margin:0 auto;padding-bottom:2.5rem">
+    <div id="otros-grupos-content"></div>
+  </div>
+</div>
+
 <!-- ── Grupo Detail fullscreen page ── -->
 <div id="page-grupo" class="">
+
   <nav class="subpage-topbar">
     <button class="pill-back-btn" onclick="closeGrupoDetailPage()" title="Grupos">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
