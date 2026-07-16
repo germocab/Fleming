@@ -1749,6 +1749,18 @@
   }
   .live-match-badge svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; flex-shrink: 0; }
 
+  /* ── Live Siempre Activo (Experimentos): borde que brilla en la tarjeta
+       de la asignación que tiene una sesión Live activa en segundo plano ── */
+  .live-card-glow {
+    position: relative;
+    border-color: var(--green) !important;
+    box-shadow: 0 0 0 1px rgba(52,199,89,0.35), 0 0 14px rgba(52,199,89,0.35);
+    animation: liveCardGlowPulse 2.2s ease-in-out infinite;
+  }
+  @keyframes liveCardGlowPulse {
+    0%, 100% { box-shadow: 0 0 0 1px rgba(52,199,89,0.30), 0 0 10px rgba(52,199,89,0.28); }
+    50%      { box-shadow: 0 0 0 1.5px rgba(52,199,89,0.55), 0 0 18px rgba(52,199,89,0.5); }
+  }
   .live-locating-wrap {
     display: none; align-items: center; gap: 8px;
     margin: 0 1.25rem 0.75rem;
@@ -7417,6 +7429,23 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       </div>
       <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.clima.help">El pronóstico solo está disponible para fechas cercanas y depende de que el territorio o la dirección puedan ubicarse en el mapa.</div>
     </div>
+    <!-- Live Siempre Activo (v1.24.0-beta) -->
+    <div class="profile-section">
+      <div class="profile-section-title" data-i18n="exp.liveaa.section">Live</div>
+      <div class="profile-row" style="cursor:pointer" onclick="toggleLiveAlwaysOnPref()">
+        <div class="profile-row-icon" style="background:var(--ter-8-bg,rgba(52,199,89,0.12));color:var(--green)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="exp.liveaa.title">Live Siempre Activo</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.liveaa.desc">Live sigue activo en segundo plano al salir de la asignación. La tarjeta con Live activo brilla en verde en Inicio</div>
+        </div>
+        <div id="live-always-on-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="live-always-on-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
+      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.liveaa.help">Para detener la sesión: entra a la asignación y presiona Pausa en la tarjeta Live, o detenla desde el panel de Notificaciones.</div>
+    </div>
     <!-- Versión Simplificada de la plataforma (solo móvil) -->
     <div class="profile-section">
       <div class="profile-section-title" data-i18n="exp.layout">Layout</div>
@@ -7811,7 +7840,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.23.0-beta';
+const APP_VERSION = '1.24.0-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -8343,6 +8372,10 @@ const I18N = {
   'exp.clima.title':   { es: 'Clima en asignaciones', en: 'Weather in assignments', nl: 'Weer bij toewijzingen' },
   'exp.clima.desc':    { es: 'Muestra el pronóstico del día y hora de cada asignación de casa en casa, junto a la hora', en: 'Shows the forecast for the day and time of each door-to-door assignment, next to the time', nl: 'Toont de weersverwachting voor de dag en het tijdstip van elke huis-aan-huis toewijzing, naast de tijd' },
   'exp.clima.help':    { es: 'El pronóstico solo está disponible para fechas cercanas y depende de que el territorio o la dirección puedan ubicarse en el mapa.', en: 'The forecast is only available for nearby dates and depends on the territory or address being locatable on the map.', nl: 'De verwachting is alleen beschikbaar voor nabije data en is afhankelijk van of het gebied of adres op de kaart gevonden kan worden.' },
+  'exp.liveaa.section': { es: 'Live', en: 'Live', nl: 'Live' },
+  'exp.liveaa.title':   { es: 'Live Siempre Activo', en: 'Live Always On', nl: 'Live Altijd Actief' },
+  'exp.liveaa.desc':    { es: 'Live sigue activo en segundo plano al salir de la asignación. La tarjeta con Live activo brilla en verde en Inicio', en: 'Live keeps running in the background when you leave the assignment. The card with active Live glows green on Home', nl: 'Live blijft actief op de achtergrond wanneer je de toewijzing verlaat. De kaart met actieve Live licht groen op bij Start' },
+  'exp.liveaa.help':    { es: 'Para detener la sesión: entra a la asignación y presiona Pausa en la tarjeta Live, o detenla desde el panel de Notificaciones.', en: 'To stop the session: open the assignment and press Pause on the Live card, or stop it from the Notifications panel.', nl: 'Om de sessie te stoppen: open de toewijzing en druk op Pauze op de Live-kaart, of stop deze via het Meldingenpaneel.' },
   'exp.navbarabajo.desc':  { es: 'Coloca la NavBar en la parte inferior de la pantalla. Solo disponible en móvil.', en: 'Places the NavBar at the bottom of the screen. Only available on mobile.', nl: 'Plaatst de NavBar onderaan het scherm. Alleen beschikbaar op mobiel.' },
   'exp.navbarabajo.desc.mobile': { es: 'Coloca la NavBar en la parte inferior de la pantalla, para un acceso más fácil.', en: 'Places the NavBar at the bottom of the screen, for easier access.', nl: 'Plaatst de NavBar onderaan het scherm voor eenvoudigere toegang.' },
   'exp.navbarabajo.desc.desktop': { es: 'Disponible solo en dispositivos móviles. Actívala y velá el efecto desde tu teléfono.', en: 'Only available on mobile devices. Enable it and see the effect from your phone.', nl: 'Alleen beschikbaar op mobiele apparaten. Schakel het in en bekijk het effect vanaf je telefoon.' },
@@ -11344,7 +11377,7 @@ function renderSchedule() {
         const mainWrapClose = isToday ? '' : '</div>';
         html += `
           <div class="sabado-section-label mine">Mi grupo · Grupo ${myGrupo.numero}</div>
-          <div class="${cardClass}" onclick="viewAssignment('${myAssignment.id}')">
+          <div class="${cardClass}" data-assignment-id="${myAssignment.id}" onclick="viewAssignment('${myAssignment.id}')">
             ${infoWrapOpen}${mainWrapOpen}
               <div class="${addressClass}">${myAssignment.address||'Sin dirección'}${houseLabel?`<br><span class="${houseClass}">${houseLabel}</span>`:''}</div>
               <div class="${metaClass}">
@@ -11388,7 +11421,7 @@ function renderSchedule() {
             `<div class="sabado-grupo-ter-circle" style="background:${getTerColor(t.number)}">${t.number}</div>`
           ).join('');
 
-          html += `<div class="sabado-grupo-card" onclick="viewAssignment('${a.id}')">
+          html += `<div class="sabado-grupo-card" data-assignment-id="${a.id}" onclick="viewAssignment('${a.id}')">
             ${terCircles ? `<div class="sabado-grupo-ter-badges">${terCircles}</div>` : ''}
             <div class="sabado-grupo-tag" style="color:${tagColor};background:${tagColor}26">${grupoNum != null ? 'Grupo ' + grupoNum : 'Grupo'}</div>
             <div class="sabado-grupo-body">
@@ -11420,7 +11453,7 @@ function renderSchedule() {
         const houseLabel = a.house ? ((_c && _c.tipo === 'departamento' ? 'Depto' : 'Casa') + ' de ') + a.house : '';
 
         if (isToday) {
-          html += `<div class="assignment-card-today" onclick="viewAssignment('${a.id}')">
+          html += `<div class="assignment-card-today" data-assignment-id="${a.id}" onclick="viewAssignment('${a.id}')">
             <div class="today-card-info">
               <div class="today-card-address">${a.address||'Sin dirección'}${houseLabel?`<br><span class="today-card-house">${houseLabel}</span>`:''}</div>
               <div class="today-card-meta">
@@ -11435,7 +11468,7 @@ function renderSchedule() {
             ${rightBadge}
           </div>`;
         } else {
-          html += `<div class="assignment-card" onclick="viewAssignment('${a.id}')">
+          html += `<div class="assignment-card" data-assignment-id="${a.id}" onclick="viewAssignment('${a.id}')">
             <div class="card-main">
               <div class="card-address">${a.address||'Sin dirección'}${houseLabel?`<br><span class="card-house">${houseLabel}</span>`:''}</div>
               <div class="card-meta">
@@ -11456,6 +11489,7 @@ function renderSchedule() {
     html += `</div>`;
   });
   container.innerHTML = html;
+  if (typeof _liveApplyCardGlow === 'function') _liveApplyCardGlow();
 }
 
 function _namesMatch(a, b) {
@@ -11534,7 +11568,7 @@ function openOtrosGruposScreen(date) {
           const typeChip = a.type === 'zoom' ? `<span class="type-chip chip-zoom">Zoom</span>`
             : a.type === 'telefono' ? `<span class="type-chip chip-phone">Teléfono</span>`
             : a.type === 'cartas' ? `<span class="type-chip chip-cartas">Cartas</span>` : '';
-          html += `<div class="assignment-card" onclick="viewAssignment('${a.id}')">
+          html += `<div class="assignment-card" data-assignment-id="${a.id}" onclick="viewAssignment('${a.id}')">
             <div class="card-main">
               <div class="card-address">${a.address||'Sin dirección'}${houseLabel?`<br><span class="card-house">${houseLabel}</span>`:''}</div>
               <div class="card-meta">
@@ -11554,6 +11588,7 @@ function openOtrosGruposScreen(date) {
       container.innerHTML = html;
     }
   }
+  if (typeof _liveApplyCardGlow === 'function') _liveApplyCardGlow();
   document.getElementById('page-otros-grupos')?.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -11916,8 +11951,18 @@ function closeDetail() {
   const form = document.getElementById('suggest-np-form');
   if (form) { form.classList.remove('open'); }
   ['snp-calle','snp-numero','snp-motivo'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-  // Live Mode: detener al cerrar el detalle
-  if (_liveActive) stopLiveMode();
+  // Live Mode: al cerrar el detalle, se detiene normalmente. Pero si la
+  // función experimental "Live Siempre Activo" está encendida, Live se deja
+  // corriendo en segundo plano (no se llama a stopLiveMode) y la tarjeta de
+  // esa asignación mostrará un borde que brilla en verde en la pantalla de
+  // inicio, hasta que se pause/detenga manualmente.
+  if (_liveActive) {
+    if (typeof isLiveAlwaysOnEnabled === 'function' && isLiveAlwaysOnEnabled()) {
+      if (typeof _liveApplyCardGlow === 'function') _liveApplyCardGlow();
+    } else {
+      stopLiveMode();
+    }
+  }
 }
 
 function handleOverlayClick(e) {
@@ -11931,6 +11976,10 @@ let _liveActive      = false;
 let _livePaused       = false;
 let _liveLastRoad    = null;
 let _liveGeoThrottle = null;
+// v1.24.0-beta — id de la asignación de casa en casa dueña de la sesión Live
+// activa (para poder marcar su tarjeta cuando "Live Siempre Activo" la deja
+// corriendo en segundo plano al volver a la pantalla de inicio).
+let _liveAssignmentId = null;
 
 function _liveNormStr(s) {
   return (s || '').toLowerCase()
@@ -12046,6 +12095,11 @@ function startLiveMode() {
   _liveActive   = true;
   _livePaused   = false;
   _liveLastRoad = null;
+  // Recuerda a qué asignación de casa en casa pertenece esta sesión Live,
+  // para poder marcar su tarjeta con el borde verde en la pantalla de
+  // inicio cuando "Live Siempre Activo" está encendido (v1.24.0-beta).
+  const _panelForLive = document.getElementById('detail-panel');
+  _liveAssignmentId = _panelForLive ? (_panelForLive._openAssignmentId || null) : null;
   const btn      = document.getElementById('live-btn');
   const label    = document.getElementById('live-btn-label');
   const locating = document.getElementById('live-locating-wrap');
@@ -12058,6 +12112,7 @@ function startLiveMode() {
   _liveUpdateNavIndicator(true);
   _liveUpdateNotifPanelBanner();
   _liveRequestNotifPermission();
+  _liveApplyCardGlow();
   _liveWatchId = navigator.geolocation.watchPosition(_liveOnPosition, _liveOnError, { enableHighAccuracy: true, maximumAge: 5000, timeout: 12000 });
 }
 function stopLiveMode() {
@@ -12066,6 +12121,7 @@ function stopLiveMode() {
   if (_liveWatchId !== null) { navigator.geolocation.clearWatch(_liveWatchId); _liveWatchId = null; }
   if (_liveGeoThrottle) { clearTimeout(_liveGeoThrottle); _liveGeoThrottle = null; }
   _liveLastRoad = null;
+  _liveAssignmentId = null;
   const btn      = document.getElementById('live-btn');
   const label    = document.getElementById('live-btn-label');
   const banner   = document.getElementById('live-street-banner');
@@ -12077,6 +12133,7 @@ function stopLiveMode() {
   locating.classList.remove('visible');
   _updateLivePauseBtnUI();
   _liveHighlight(null);
+  _liveApplyCardGlow();
   _liveUpdateNavIndicator(false);
   _liveUpdateNotifPanelBanner();
 }
@@ -12096,6 +12153,8 @@ function pauseLiveMode() {
   _updateLivePauseBtnUI();
   // Los No Pasar vuelven a verse "normales" mientras Live está pausado
   _liveHighlight(null);
+  // Mientras está pausado, la tarjeta deja de brillar (no se envían avisos)
+  _liveApplyCardGlow();
 }
 function resumeLiveMode() {
   if (!_liveActive || !_livePaused) return;
@@ -12104,6 +12163,7 @@ function resumeLiveMode() {
   document.getElementById('live-street-banner')?.classList.remove('paused');
   document.getElementById('live-locating-wrap')?.classList.add('visible');
   _updateLivePauseBtnUI();
+  _liveApplyCardGlow();
   _liveWatchId = navigator.geolocation.watchPosition(_liveOnPosition, _liveOnError, { enableHighAccuracy: true, maximumAge: 5000, timeout: 12000 });
 }
 function _updateLivePauseBtnUI() {
@@ -12285,6 +12345,50 @@ async function renderLiveAdminPanel() {
   } catch(e) {
     historyEl.innerHTML = '<div style="font-size:0.83rem;color:var(--red);text-align:center;padding:1rem 0">Error al cargar el historial</div>';
   }
+}
+
+// ── Live Siempre Activo (Experimentos, v1.24.0-beta) ─────────────────────────
+// Al encenderse, Live ya no se detiene automáticamente al cerrar el detalle
+// de una asignación de casa en casa (ver closeDetail): sigue corriendo en
+// segundo plano mientras se navega por la plataforma. La tarjeta de esa
+// asignación en la pantalla de inicio muestra un borde que brilla en verde
+// mientras la sesión siga activa y sin pausar.
+function isLiveAlwaysOnEnabled() {
+  return localStorage.getItem('fleming_live_always_on') === 'true';
+}
+function toggleLiveAlwaysOnPref() {
+  const next = !isLiveAlwaysOnEnabled();
+  localStorage.setItem('fleming_live_always_on', next ? 'true' : 'false');
+  updateLiveAlwaysOnToggleUI();
+  if (next) {
+    showToast('Live Siempre Activo activado', 'success');
+  } else {
+    showToast('Live Siempre Activo desactivado', '');
+    // Si se apaga estando el detalle cerrado con Live corriendo en segundo
+    // plano, se detiene la sesión de inmediato para respetar la preferencia.
+    if (_liveActive && !document.getElementById('detail-overlay')?.classList.contains('open')) {
+      stopLiveMode();
+    }
+  }
+}
+function updateLiveAlwaysOnToggleUI() {
+  const toggle = document.getElementById('live-always-on-toggle');
+  const thumb  = document.getElementById('live-always-on-thumb');
+  if (!toggle || !thumb) return;
+  const on = isLiveAlwaysOnEnabled();
+  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
+  thumb.style.left = on ? '21px' : '3px';
+}
+
+// Marca (o desmarca) con el borde verde la tarjeta de la asignación dueña de
+// la sesión Live activa, en cualquier lista de tarjetas ya renderizada
+// (pantalla de inicio, y la pantalla "Otros Grupos").
+function _liveApplyCardGlow() {
+  document.querySelectorAll('.live-card-glow').forEach(el => el.classList.remove('live-card-glow'));
+  if (!_liveActive || _livePaused || !_liveAssignmentId) return;
+  document.querySelectorAll('[data-assignment-id="' + _liveAssignmentId + '"]').forEach(el => {
+    el.classList.add('live-card-glow');
+  });
 }
 
 // ── Fin Live Mode ──────────────────────────────────────────────────────────────
@@ -16149,7 +16253,7 @@ function openPrefScreen(name) {
   if (name === 'notificaciones') renderPrefNotifList();
   if (name === 'almacenamiento') renderStorageList();
   if (name === 'ayuda') renderAyudaTipsList();
-  if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBottomToggleUI(); updateWeatherToggleUI(); updateNavbarAvatarToggleUI(); }
+  if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBottomToggleUI(); updateWeatherToggleUI(); updateNavbarAvatarToggleUI(); if (typeof updateLiveAlwaysOnToggleUI === 'function') updateLiveAlwaysOnToggleUI(); }
   if (name === 'version') {
     const val = document.getElementById('pref-version-screen-value');
     if (val) val.textContent = 'Versión ' + APP_VERSION;
