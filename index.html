@@ -3079,6 +3079,16 @@
     width: 14px; height: 14px; border-radius: 50%;
     border: 2px solid var(--surface); background: var(--green);
   }
+  /* ── Marcos de color para Admin / Admin+AdminTag (v1.20.0-beta) ──────────
+     Admin sin AdminTag: marco azul fijo (--accent). Admin con AdminTag
+     asignada: marco con el color propio de esa AdminTag (--atag-frame-color).
+     Se aplica como box-shadow en anillo para no alterar el tamaño del avatar. */
+  .avatar-frame-admin {
+    box-shadow: 0 0 0 2.5px var(--surface), 0 0 0 4.5px var(--accent);
+  }
+  .avatar-frame-admintag {
+    box-shadow: 0 0 0 2.5px var(--surface), 0 0 0 4.5px var(--atag-frame-color, var(--accent));
+  }
   .user-card-info { flex: 1; min-width: 0; }
   .user-card-name { font-size: 1rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.02em; }
   .user-card-meta { font-size: 0.74rem; color: var(--text3); margin-top: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -6046,6 +6056,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       <div class="admin-section" id="admin-usuarios">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
           <span style="flex:1;font-size:0.95rem;font-weight:700">Usuarios <span class="users-count-badge" id="users-count-badge">0</span></span>
+          <button class="btn-secondary" id="open-new-user-btn" style="display:none;width:auto;padding:0.5rem 0.9rem;font-size:0.82rem" title="Agregar usuario" onclick="openNewUserModal()">+ Nuevo Usuario</button>
           <button class="admintags-icon-btn" id="open-admintags-btn" style="display:none" title="Gestionar AdminTags" onclick="openAdminTagsModal()">
             <svg viewBox="0 0 24 24"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
           </button>
@@ -6061,6 +6072,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         <div class="sub-tabs" style="margin-bottom:1.1rem">
           <button class="sub-tab active" id="notif-admin-tab-anuncios" onclick="switchNotifAdminTab('anuncios')">Anuncios</button>
           <button class="sub-tab" id="notif-admin-tab-plantillas" onclick="switchNotifAdminTab('plantillas')">Plantillas</button>
+          <button class="sub-tab" id="notif-admin-tab-niveles" onclick="switchNotifAdminTab('niveles')">Niveles</button>
           <button class="sub-tab" id="notif-admin-tab-live" onclick="switchNotifAdminTab('live')">Live</button>
         </div>
 
@@ -6093,6 +6105,15 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
             El anuncio se enviará a todos como una notificación de categoría <strong>Sistema</strong>.
           </div>
+        </div>
+
+        <!-- Niveles -->
+        <div id="notif-admin-niveles" style="display:none">
+          <div class="notif-gestor-hint" style="margin-bottom:1rem">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <strong>Silencio</strong>: no llega al teléfono, solo al Panel. <strong>Normal</strong>: llega al teléfono de forma inadvertida + Panel. <strong>Top</strong>: urgente, llega como Notificación Push + Panel.
+          </div>
+          <div id="notif-levels-list"></div>
         </div>
 
         <!-- Live -->
@@ -6648,6 +6669,53 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
   </div>
 </div>
 
+<!-- ── Nuevo Usuario: modal de creación anticipada (v1.20.0-beta) ── -->
+<div class="modal-overlay" id="new-user-modal">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header">
+      <div class="modal-title">Nuevo Usuario</div>
+      <button class="modal-close" onclick="closeNewUserModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:0.78rem;color:var(--text3);margin-bottom:0.9rem;line-height:1.4">
+        Crea el perfil de una persona antes de que inicie sesión por primera vez, para que ya tenga los permisos e información correctos apenas entre. Debe iniciar sesión con exactamente este mismo nombre.
+      </div>
+      <div class="form-group2">
+        <label class="form-label2">Nombre completo</label>
+        <input type="text" class="form-input" id="newuser-name-input" placeholder="Nombre y apellido" maxlength="80">
+      </div>
+      <div class="form-group2">
+        <label class="form-label2">Rol</label>
+        <select class="form-select" id="newuser-role-sel" onchange="onNewUserRoleChange()">
+          <option value="viewer">Visitante</option>
+          <option value="admin">Administrador</option>
+        </select>
+      </div>
+      <div id="newuser-admin-extra" style="display:none">
+        <div style="margin-top:0.9rem">
+          <div class="form-label2" style="margin-bottom:6px">Módulos permitidos</div>
+          <div class="perm-modules-grid" id="newuser-perm-grid"></div>
+        </div>
+        <div class="form-group2" style="margin-top:0.9rem">
+          <label class="form-label2">AdminTag</label>
+          <select class="form-select" id="newuser-admintag-sel">
+            <option value="">Sin AdminTag</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group2" style="margin-top:0.9rem">
+        <label class="form-label2">Nota / Responsabilidad (opcional)</label>
+        <textarea class="task-textarea" id="newuser-task-input" placeholder="Ej: Encargado de territorios…"></textarea>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:1.25rem;justify-content:flex-end">
+        <button class="btn-secondary" onclick="closeNewUserModal()">Cancelar</button>
+        <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="saveNewUser()" id="save-newuser-btn">Crear usuario</button>
+      </div>
+      <div class="auth-error" id="newuser-error"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ── User Profile fullscreen page ── -->
 <div id="page-user-profile" class="">
   <nav class="subpage-topbar">
@@ -6711,6 +6779,16 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         <div class="profile-row-content">
           <div class="profile-row-label" data-i18n="settings.notificaciones">Notificaciones</div>
           <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.notificaciones.desc">Avisos de la plataforma</div>
+        </div>
+        <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="pref-nav-row" id="pref-nav-row-almacenamiento" onclick="openPrefScreen('almacenamiento')">
+        <div class="profile-row-icon" style="background:var(--ter-6-bg);color:var(--ter-6)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Almacenamiento</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Mapas de Territorio descargados</div>
         </div>
         <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
@@ -6972,6 +7050,30 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
     <div class="profile-section">
       <div id="pref-notif-list"></div>
     </div>
+  </div>
+</div>
+
+<!-- ── Sub-pantalla: Almacenamiento (v1.20.0-beta) ── -->
+<div id="page-pref-almacenamiento" class="pref-subpage">
+  <nav class="subpage-topbar">
+    <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración" data-i18n-title="settings.title">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span class="pill-header-title">Almacenamiento</span>
+  </nav>
+  <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 1rem 2.5rem">
+    <div class="notif-gestor-hint" style="margin-bottom:1rem">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      Aquí puedes ver los mapas de Territorio descargados para uso sin conexión, revisar si hay actualizaciones disponibles, y borrarlos para liberar espacio.
+    </div>
+    <div class="profile-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0.85rem 1rem;border-bottom:1px solid var(--border)">
+        <span style="font-size:0.85rem;font-weight:600;color:var(--text2)">Espacio usado</span>
+        <span style="font-size:0.9rem;font-weight:700" id="storage-total-value">—</span>
+      </div>
+      <div id="storage-territories-list" style="padding:0.5rem 0.75rem"></div>
+    </div>
+    <button class="btn-secondary" style="width:100%;margin-top:1rem" onclick="clearAllOfflineTerritoriesFromUI()">Borrar todas las descargas</button>
   </div>
 </div>
 
@@ -7450,7 +7552,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.19.5-beta';
+const APP_VERSION = '1.20.0-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -7654,6 +7756,43 @@ async function toggleTerritoryDownload() {
     console.error('[Offline] Error al descargar el territorio:', e);
     showToast(t('offline.errorguardado'), 'error');
   }
+}
+
+// ── Gestión de Almacenamiento (v1.20.0-beta) ─────────────────────────────────
+// Permite ver y borrar los mapas de Territorio descargados para uso sin
+// conexión desde Configuración > Almacenamiento, sin tener que entrar a cada
+// Territorio individualmente.
+function _deleteOfflineTerritoryFromDB(id) {
+  return _openOfflineTerDB().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(OFFLINE_TER_STORE, 'readwrite');
+    tx.objectStore(OFFLINE_TER_STORE).delete(id);
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => reject(tx.error);
+  }));
+}
+async function removeOfflineTerritory(id) {
+  delete _offlineTerritoriesCache[id];
+  try {
+    await _deleteOfflineTerritoryFromDB(id);
+  } catch (e) {
+    console.warn('[Almacenamiento] No se pudo borrar el territorio descargado:', e.message);
+  }
+  _updateDownloadBtnUI(id);
+}
+async function clearAllOfflineTerritories() {
+  const ids = Object.keys(_offlineTerritoriesCache);
+  for (const id of ids) await removeOfflineTerritory(id);
+}
+// Estimación aproximada en bytes del tamaño de un territorio descargado
+// (a partir del largo del base64 de sus mapas guardados).
+function _offlineEntrySizeBytes(entry) {
+  const b64 = (entry.map_data || '') + (entry.map_data_dark || '');
+  return Math.round(b64.length * 0.75);
+}
+function _formatBytes(bytes) {
+  if (!bytes) return '0 KB';
+  if (bytes < 1024 * 1024) return Math.max(1, Math.round(bytes / 1024)) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 }
 
 function _updateDownloadBtnUI(id) {
@@ -9087,6 +9226,11 @@ async function renderProfilePage() {
   const col = userColor(currentUser.name);
   const inits = userInitials(currentUser.name);
   bigAvatar.style.background = col;
+  // Marco de color (Admin / Admin+AdminTag) — v1.20.0-beta
+  bigAvatar.classList.remove('avatar-frame-admin', 'avatar-frame-admintag');
+  const frame = avatarFrameFor(currentRole, me?.admin_tag_id);
+  if (frame.cls) bigAvatar.classList.add(frame.cls);
+  if (frame.style) bigAvatar.style.cssText += frame.style; else bigAvatar.style.removeProperty('--atag-frame-color');
   if (me?.avatar) {
     bigAvatar.innerHTML = `<img src="${me.avatar}" style="width:100%;height:100%;object-fit:cover">`;
     const removeBtn = document.getElementById('profile-photo-remove-btn');
@@ -9881,6 +10025,7 @@ async function enterApp() {
   // Cargar preferencias de notificaciones (en segundo plano, no bloquea el resto del arranque)
   loadNotifPrefs();
   loadNotifTemplates();
+  loadNotifLevels();
   refreshCurrentUserPermsCache();
   loadCarritosVisibility();
 
@@ -10458,12 +10603,18 @@ async function switchAdminTab(tab) {
       // Admin con el módulo "AdminTags" activado por el DEV.
       const admBtn = document.getElementById('open-admintags-btn');
       if (admBtn) admBtn.style.display = canManageAdminTagsCatalog() ? '' : 'none';
+      // El botón "+ Nuevo Usuario" es visible siempre que se pueda llegar a
+      // este tab: ya está filtrado por el permiso de módulo "usuarios" más
+      // arriba en switchAdminTab (DEV siempre puede; Admin solo si tiene el
+      // módulo "Usuarios" encendido).
+      const newUserBtn = document.getElementById('open-new-user-btn');
+      if (newUserBtn) newUserBtn.style.display = '';
       renderUsersPanel();
     });
   }
   if (tab === 'vmc') { loadVmcWeeks().then(() => renderAdminVmc()); }
   if (tab === 'fin-semana') { loadFsWeeks().then(() => renderAdminFs()); }
-  if (tab === 'notificaciones') { renderNotifAdminTemplates(); renderNotifAdminCategories(); }
+  if (tab === 'notificaciones') { renderNotifAdminTemplates(); renderNotifAdminCategories(); loadNotifLevels().then(renderNotifAdminLevels); }
   if (tab === 'carritos') { cartOpenAdminSection(); }
   if (tab === 'reports') { trepOpenAdminSection(); }
   if (tab === 'informaciones') { loadInfoResponsables().then(() => renderAdminInformaciones()); }
@@ -11809,11 +11960,7 @@ async function maybeNotifyCasaAmo(casa, payload, oldCasaId) {
       target_names: [targetName],
       notif_category: 'casa',
     });
-    await fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
-      body: JSON.stringify({ title: tpl.title, body: tpl.body, target_names: [targetName] })
-    }).catch(() => {});
+    await notifyUsersPush('casa', { title: tpl.title, body: tpl.body, target_names: [targetName] }).catch(() => {});
   } catch (err) {
     console.warn('No se pudo notificar al Amo de Casa:', err.message);
   }
@@ -11961,12 +12108,7 @@ async function saveAssignment() {
           notif_category: 'casa'
         });
         try {
-          const resp = await fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
-            body: JSON.stringify({ title: tpl.title, body: userMessage })
-          });
-          if (!resp.ok) console.warn('Edge Function error:', resp.status, await resp.text());
+          await notifyUsersPush('casa', { title: tpl.title, body: userMessage });
         } catch (err) {
           console.warn('No se pudo enviar push:', err.message);
         }
@@ -13000,16 +13142,11 @@ async function saveResponsabilidadesAsignacion() {
       for (const n of newlyAssigned) {
         try {
           const pushTpl = renderTemplate('responsabilidad_asignada', { categoria_cargo: respCargoCategoria(n.cargo), cargo: n.cargo, fecha: diaLargo });
-          const resp = await fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
-            body: JSON.stringify({
-              title: pushTpl.title,
-              body: pushTpl.body,
-              target_names: [n.hermano.trim().toLowerCase()],
-            })
+          await notifyUsersPush('responsabilidades', {
+            title: pushTpl.title,
+            body: pushTpl.body,
+            target_names: [n.hermano.trim().toLowerCase()],
           });
-          if (!resp.ok) console.warn('Edge Function respondió con error:', resp.status, await resp.text());
         } catch (err) {
           console.warn('No se pudo enviar push (Edge Function no disponible):', err.message);
         }
@@ -13306,12 +13443,7 @@ async function saveAseoSalonAsignacion() {
     try {
       await sb.from('notifications').insert([{ title, body, target_names: targetNames, notif_category: 'aseo' }]);
       try {
-        const resp = await fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
-          body: JSON.stringify({ title, body, target_names: targetNames })
-        });
-        if (!resp.ok) console.warn('Edge Function respondió con error:', resp.status, await resp.text());
+        await notifyUsersPush('aseo', { title, body, target_names: targetNames });
       } catch (err) {
         console.warn('No se pudo enviar push (Edge Function no disponible):', err.message);
       }
@@ -14004,6 +14136,93 @@ async function openUsersPanel() {
   switchAdminTab('usuarios');
 }
 
+// ── Nuevo Usuario: creación anticipada desde el Panel de Usuarios (v1.20.0-beta) ──
+// Permite a DEV/Admin (con el módulo "usuarios" encendido) crear el registro
+// de una persona en platform_users ANTES de que inicie sesión, para que ya
+// tenga el rol, permisos, AdminTag y nota correctos apenas entre. Cuando esa
+// persona inicie sesión por primera vez con exactamente el mismo nombre, la
+// lógica de login existente (ver trackLogin) encuentra esta fila por nombre
+// y simplemente actualiza last_seen, respetando el rol y demás datos ya
+// configurados aquí en vez de crear una fila nueva desde cero.
+async function openNewUserModal() {
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  await loadAdminTags();
+  document.getElementById('newuser-name-input').value = '';
+  document.getElementById('newuser-role-sel').value = 'viewer';
+  document.getElementById('newuser-task-input').value = '';
+  document.getElementById('newuser-error').style.display = 'none';
+  // Solo DEV puede crear directamente un Administrador; un Admin con el
+  // módulo "usuarios" encendido solo puede pre-crear Visitantes.
+  const roleSel = document.getElementById('newuser-role-sel');
+  roleSel.querySelector('option[value="admin"]').style.display = (currentRole === 'dev') ? '' : 'none';
+  renderNewUserPermGrid();
+  const admTagSel = document.getElementById('newuser-admintag-sel');
+  admTagSel.innerHTML = '<option value="">Sin AdminTag</option>' +
+    adminTagsCatalog.map(t => `<option value="${t.id}">${t.nombre}</option>`).join('');
+  onNewUserRoleChange();
+  document.getElementById('new-user-modal').classList.add('open');
+}
+function closeNewUserModal() {
+  document.getElementById('new-user-modal').classList.remove('open');
+}
+function onNewUserRoleChange() {
+  const isAdmin = document.getElementById('newuser-role-sel').value === 'admin';
+  document.getElementById('newuser-admin-extra').style.display = (isAdmin && currentRole === 'dev') ? '' : 'none';
+}
+let _newUserPerms = {};
+function renderNewUserPermGrid() {
+  _newUserPerms = {};
+  const grid = document.getElementById('newuser-perm-grid');
+  grid.innerHTML = ['predicacion','reuniones','sistema'].map(grp => {
+    const modsInGroup = PERM_MODULES.filter(m => m.group === grp);
+    if (!modsInGroup.length) return '';
+    const grpLabel = grp === 'predicacion' ? 'Predicación' : (grp === 'reuniones' ? 'Reuniones' : 'Sistema');
+    return `
+      <div class="perm-modules-group-header">${grpLabel}</div>
+      ${modsInGroup.map(m => `
+        <div class="profile-row" style="padding:0.55rem 0.7rem;cursor:pointer" onclick="toggleNewUserPermModule('${m.key}')">
+          <div class="profile-row-icon" style="width:30px;height:30px;background:var(--surface3);color:var(--text2)">${m.icon}</div>
+          <div class="profile-row-content"><div class="profile-row-label" style="font-size:0.85rem">${m.label}</div></div>
+          <div class="toggle-switch" id="newuser-permtoggle-${m.key}" onclick="event.stopPropagation();toggleNewUserPermModule('${m.key}')"><div class="toggle-thumb"></div></div>
+        </div>`).join('')}`;
+  }).join('');
+}
+function toggleNewUserPermModule(key) {
+  _newUserPerms[key] = !_newUserPerms[key];
+  document.getElementById('newuser-permtoggle-' + key)?.classList.toggle('on', !!_newUserPerms[key]);
+}
+async function saveNewUser() {
+  const nameInput = document.getElementById('newuser-name-input');
+  const name = nameInput.value.trim();
+  const errEl = document.getElementById('newuser-error');
+  errEl.style.display = 'none';
+  if (!name) { showError('newuser-error', 'El nombre es requerido'); return; }
+
+  const role = document.getElementById('newuser-role-sel').value;
+  const task = document.getElementById('newuser-task-input').value.trim();
+
+  const { data: existing } = await sb.from('platform_users').select('id').ilike('name', name).single();
+  if (existing) { showError('newuser-error', 'Ya existe un usuario con ese nombre'); return; }
+
+  const payload = { name, role, task: task || '' };
+  if (role === 'admin' && currentRole === 'dev') {
+    payload.permissions = parsePermissions(_newUserPerms);
+    const admTagSel = document.getElementById('newuser-admintag-sel');
+    if (admTagSel && admTagSel.value) payload.admin_tag_id = admTagSel.value;
+  }
+
+  const btn = document.getElementById('save-newuser-btn');
+  btn.disabled = true; btn.textContent = 'Creando…';
+  const { error } = await sb.from('platform_users').insert(payload);
+  btn.disabled = false; btn.textContent = 'Crear usuario';
+
+  if (error) { showError('newuser-error', error.message); return; }
+  showToast('Usuario creado ✓', 'success');
+  closeNewUserModal();
+  await loadUsers();
+  renderUsersPanel();
+}
+
 // ── AdminTags: catálogo, gestión (Crear/Editar/Eliminar) y asignación ────────
 // Las AdminTags dan contexto sobre qué gestiona cada Administrador. Se
 // muestran debajo de las etiquetas generales del Perfil (Precursor Regular,
@@ -14029,6 +14248,18 @@ async function loadAdminTags(force) {
     console.warn('loadAdminTags: la tabla "admin_tags" podría no existir aún en Supabase.', e.message);
     adminTagsCatalog = [];
   }
+}
+
+// Marco de color en la foto de perfil (v1.20.0-beta):
+// - Admin sin AdminTag → marco azul (--accent).
+// - Admin con AdminTag asignada → marco con el color propio de la AdminTag.
+// Devuelve { cls, style } listos para insertar en un elemento con clase
+// "user-card-avatar" o "profile-avatar".
+function avatarFrameFor(role, adminTagId) {
+  if (role !== 'admin') return { cls: '', style: '' };
+  const tag = adminTagId ? adminTagsCatalog.find(t => t.id === adminTagId) : null;
+  if (tag) return { cls: 'avatar-frame-admintag', style: `--atag-frame-color:${tag.color};` };
+  return { cls: 'avatar-frame-admin', style: '' };
 }
 
 function canManageAdminTagsCatalog() {
@@ -14545,9 +14776,10 @@ function renderUsersPanel() {
     const avatarHtml = u.avatar
       ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:15px">`
       : inits;
+    const frame = avatarFrameFor(u.role, u.admin_tag_id);
     return `<div class="user-card" id="user-card-${u.id}" onclick="openUserProfilePage('${u.id}')">
       <div class="user-card-main">
-        <div class="user-card-avatar" style="background:${col};overflow:hidden;position:relative">
+        <div class="user-card-avatar ${frame.cls}" style="background:${col};overflow:hidden;position:relative;${frame.style}">
           ${avatarHtml}
           ${isOnline ? '<span class="user-online-ring"></span>' : ''}
         </div>
@@ -15119,13 +15351,14 @@ function closePreferencias() {
   document.body.style.overflow = '';
 }
 // ── Navegación entre las sub-pantallas de Configuración ──────────────────────
-const PREF_SCREENS = ['preferencias', 'funciones', 'notificaciones', 'experimentos', 'ayuda', 'version'];
+const PREF_SCREENS = ['preferencias', 'funciones', 'notificaciones', 'almacenamiento', 'experimentos', 'ayuda', 'version'];
 function openPrefScreen(name) {
   if (!PREF_SCREENS.includes(name)) return;
   if (name === 'experimentos' && localStorage.getItem('fleming_egg_unlocked') !== '1') return;
   document.getElementById('page-pref-' + name)?.classList.add('open');
   if (name === 'funciones') { updateH2HViewModeUI(); updateNavbarShrinkToggleUI(); }
   if (name === 'notificaciones') renderPrefNotifList();
+  if (name === 'almacenamiento') renderStorageList();
   if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBottomToggleUI(); }
   if (name === 'version') {
     const val = document.getElementById('pref-version-screen-value');
@@ -16118,6 +16351,51 @@ function scrollActiveListToTop() {
 }
 document.addEventListener('DOMContentLoaded', initScrollTopFab);
 
+async function renderStorageList() {
+  const container = document.getElementById('storage-territories-list');
+  const totalEl = document.getElementById('storage-total-value');
+  if (!container) return;
+  await _offlineTerCacheReady;
+  const entries = Object.values(_offlineTerritoriesCache);
+  if (!entries.length) {
+    container.innerHTML = `<div style="text-align:center;padding:2.5rem 1rem;color:var(--text3)">
+      <svg viewBox="0 0 24 24" style="width:40px;height:40px;stroke:var(--text3);fill:none;stroke-width:1.5;stroke-linecap:round;margin-bottom:0.85rem;opacity:0.4"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg>
+      <p style="font-size:0.85rem">Aún no has descargado ningún mapa de Territorio.</p>
+    </div>`;
+    if (totalEl) totalEl.textContent = '0 KB';
+    return;
+  }
+  let totalBytes = 0;
+  const rows = entries.map(entry => {
+    const size = _offlineEntrySizeBytes(entry);
+    totalBytes += size;
+    const terr = territories.find(x => x.id === entry.id);
+    const updateAvailable = terr && terr.map_data !== undefined && entry.fingerprint !== _territoryFingerprint(terr);
+    return `<div class="notif-cat-row" style="align-items:center">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:0.88rem;font-weight:700">Territorio ${entry.number ?? '—'}</div>
+        <div style="font-size:0.72rem;color:var(--text3)">${_formatBytes(size)}${updateAvailable ? ' · <span style="color:var(--orange);font-weight:600">Actualización disponible</span>' : ''}</div>
+      </div>
+      <button class="notif-delete-btn" title="Borrar descarga" onclick="removeOfflineTerritoryFromUI('${entry.id}')">
+        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+      </button>
+    </div>`;
+  }).join('');
+  container.innerHTML = rows;
+  if (totalEl) totalEl.textContent = _formatBytes(totalBytes);
+}
+async function removeOfflineTerritoryFromUI(id) {
+  await removeOfflineTerritory(id);
+  showToast('Descarga eliminada ✓', 'success');
+  renderStorageList();
+}
+async function clearAllOfflineTerritoriesFromUI() {
+  if (!confirm('¿Borrar todos los mapas de Territorio descargados de este dispositivo?')) return;
+  await clearAllOfflineTerritories();
+  showToast('Almacenamiento liberado ✓', 'success');
+  renderStorageList();
+}
+
 async function renderPrefNotifList() {
   const list = document.getElementById('pref-notif-list');
   if (!list) return;
@@ -16755,6 +17033,100 @@ const NOTIF_GROUPS = {
   },
 };
 
+// ── Niveles de Notificación (v1.20.0-beta) ───────────────────────────────────
+// Cada categoría de notificación tiene un Nivel que determina cómo llega al
+// usuario:
+//   silencio → NO llega al teléfono, solo aparece en el Panel de Notificaciones.
+//   normal   → llega al teléfono de forma inadvertida (push silencioso) + Panel.
+//   top      → urgente: llega como Notificación Push visible + Panel.
+// DEV y Admin con el módulo "Notificaciones" encendido pueden configurar el
+// nivel de cada categoría desde Configuración > Gestor de Notificaciones >
+// Niveles. Los overrides se guardan en la tabla notif_category_levels
+// (columnas: id text PK = id de categoría, level text) y se cachean en
+// localStorage para que el envío de notificaciones nunca quede bloqueado
+// por la red.
+const NOTIF_LEVEL_INFO = {
+  silencio: { label: 'Silencio', desc: 'No llega al teléfono. Solo se muestra en el Panel de Notificaciones.', color: 'var(--text3)' },
+  normal:   { label: 'Normal',   desc: 'Llega al teléfono de forma inadvertida y se muestra en el Panel.', color: 'var(--accent)' },
+  top:      { label: 'Top',      desc: 'Urgente: llega como Notificación Push y se muestra en el Panel.', color: 'var(--red)' },
+};
+// Nivel por defecto de cada categoría antes de cualquier personalización.
+const NOTIF_LEVEL_DEFAULTS = {
+  'casa': 'normal', 'grupo': 'normal', 'live': 'top', 'carritos': 'normal',
+  'mapas-actualizacion': 'silencio', 'vida-ministerio': 'top', 'fin-semana': 'top',
+  'aseo': 'normal', 'hospitalidad': 'normal', 'responsabilidades': 'top',
+  'sistema': 'top', 'solicitud-cuenta': 'top', 'reporte-territorio': 'normal',
+};
+
+let _notifLevelsCache = null;
+function getNotifLevelsCached() {
+  if (_notifLevelsCache) return _notifLevelsCache;
+  try {
+    const raw = localStorage.getItem('fleming_notif_levels');
+    _notifLevelsCache = raw ? JSON.parse(raw) : {};
+  } catch { _notifLevelsCache = {}; }
+  return _notifLevelsCache;
+}
+async function loadNotifLevels() {
+  try {
+    const { data, error } = await sb.from('notif_category_levels').select('*');
+    if (error) throw error;
+    const overrides = {};
+    (data || []).forEach(row => { overrides[row.id] = row.level; });
+    _notifLevelsCache = overrides;
+    localStorage.setItem('fleming_notif_levels', JSON.stringify(overrides));
+    return overrides;
+  } catch (e) {
+    // Tabla inexistente u otro error de red: usar lo cacheado localmente.
+    console.warn('No se pudieron cargar los niveles de notificación:', e.message);
+    return getNotifLevelsCached();
+  }
+}
+function getCategoryLevel(catId) {
+  const overrides = getNotifLevelsCached();
+  return overrides[catId] || NOTIF_LEVEL_DEFAULTS[catId] || 'normal';
+}
+async function saveCategoryLevel(catId, level) {
+  const overrides = getNotifLevelsCached();
+  overrides[catId] = level;
+  _notifLevelsCache = overrides;
+  localStorage.setItem('fleming_notif_levels', JSON.stringify(overrides));
+  const { error } = await sb.from('notif_category_levels').upsert({ id: catId, level });
+  if (error) console.warn('No se pudo guardar el nivel de notificación en Supabase:', error.message);
+  return !error;
+}
+async function resetCategoryLevel(catId) {
+  const overrides = getNotifLevelsCached();
+  delete overrides[catId];
+  _notifLevelsCache = overrides;
+  localStorage.setItem('fleming_notif_levels', JSON.stringify(overrides));
+  const { error } = await sb.from('notif_category_levels').delete().eq('id', catId);
+  if (error) console.warn('No se pudo restaurar el nivel de notificación en Supabase:', error.message);
+  return !error;
+}
+function canManageNotifLevels() {
+  return currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, 'notificaciones'));
+}
+// Envía el push (Edge Function notify-users) respetando el Nivel de la
+// categoría: Silencio nunca llama a la Edge Function (no debe llegar al
+// teléfono). Normal y Top sí la llaman, incluyendo el nivel en el payload
+// para que la Edge Function pueda diferenciar un push silencioso (Normal)
+// de uno urgente/alertivo (Top).
+async function notifyUsersPush(catId, body) {
+  const level = getCategoryLevel(catId);
+  if (level === 'silencio') return; // no debe llegar al teléfono
+  try {
+    const resp = await fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+      body: JSON.stringify({ ...body, notif_level: level })
+    });
+    if (!resp.ok) console.warn('Edge Function respondió con error:', resp.status, await resp.text());
+  } catch (err) {
+    console.warn('No se pudo enviar push (Edge Function no disponible):', err.message);
+  }
+}
+
 // ── Notification categories & preferences ───────────────────────────────────
 // Cada notificación lleva (opcionalmente) un campo notif_category. Las
 // categorías marcadas como mandatory NO pueden desactivarse desde Preferencias.
@@ -16814,12 +17186,13 @@ async function resetCategoryLabel(catId) {
 
 // ── Gestor de Notificaciones — UI (solo DEV) ─────────────────────────────────
 function switchNotifAdminTab(tab) {
-  ['anuncios','plantillas','live'].forEach(function(t) {
+  ['anuncios','plantillas','niveles','live'].forEach(function(t) {
     var btn = document.getElementById('notif-admin-tab-' + t);
     var sec = document.getElementById('notif-admin-' + t);
     if (btn) btn.classList.toggle('active', t === tab);
     if (sec) sec.style.display = t === tab ? '' : 'none';
   });
+  if (tab === 'niveles') renderNotifAdminLevels();
   if (tab === 'live') renderLiveAdminPanel();
 }
 
@@ -16853,16 +17226,7 @@ async function sendAnuncioSistema() {
 
   const { error } = await sb.from('notifications').insert(payload);
 
-  try {
-    const resp = await fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
-      body: JSON.stringify(target_names ? { title, body, target_names } : { title, body })
-    });
-    if (!resp.ok) console.warn('Edge Function respondió con error:', resp.status, await resp.text());
-  } catch (err) {
-    console.warn('No se pudo enviar push (Edge Function no disponible):', err.message);
-  }
+  await notifyUsersPush('sistema', target_names ? { title, body, target_names } : { title, body });
 
   btn.disabled = false; btn.textContent = 'Enviar anuncio';
   if (error) { showError('anuncio-error', error.message); return; }
@@ -16926,6 +17290,34 @@ async function resetTemplateFromUI(id) {
   await resetNotifTemplate(id);
   showToast('Plantilla restaurada ✓', 'success');
   renderNotifAdminTemplates();
+}
+
+function renderNotifAdminLevels() {
+  const container = document.getElementById('notif-levels-list');
+  if (!container) return;
+  const canEdit = canManageNotifLevels();
+  container.innerHTML = NOTIF_CATEGORIES.map(cat => {
+    const level = getCategoryLevel(cat.id);
+    const label = getCategoryLabel(cat.id);
+    return `<div class="notif-cat-row" style="align-items:center">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:0.85rem;font-weight:600">${label}</div>
+        <div style="font-size:0.72rem;color:var(--text3)">${NOTIF_LEVEL_INFO[level].desc}</div>
+      </div>
+      <select class="form-select" style="width:auto;min-width:120px" id="notif-level-sel-${cat.id}" ${canEdit ? '' : 'disabled'} onchange="saveCategoryLevelFromUI('${cat.id}')">
+        <option value="silencio" ${level==='silencio'?'selected':''}>Silencio</option>
+        <option value="normal" ${level==='normal'?'selected':''}>Normal</option>
+        <option value="top" ${level==='top'?'selected':''}>Top</option>
+      </select>
+    </div>`;
+  }).join('');
+}
+async function saveCategoryLevelFromUI(catId) {
+  const sel = document.getElementById('notif-level-sel-' + catId);
+  if (!sel) return;
+  const ok = await saveCategoryLevel(catId, sel.value);
+  showToast(ok ? 'Nivel actualizado ✓' : 'Guardado localmente (sin conexión a la tabla)', ok ? 'success' : '');
+  renderNotifAdminLevels();
 }
 
 function renderNotifAdminCategories() {
@@ -18680,11 +19072,7 @@ async function vmcNotifyNewAssignments(newWeek, prevWeek, range) {
     }
 
     try {
-      await fetch(EDGE_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
-        body: JSON.stringify({ title, body, target_names: target })
-      });
+      await notifyUsersPush('vida-ministerio', { title, body, target_names: target });
     } catch (err) {
       console.warn('Push no disponible para', name, err.message);
     }
@@ -19081,11 +19469,7 @@ async function fsNotifyNewAssignments(newWeek, prevWeek, range) {
     }
 
     try {
-      await fetch(EDGE_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
-        body: JSON.stringify({ title, body, target_names: target })
-      });
+      await notifyUsersPush('fin-semana', { title, body, target_names: target });
     } catch (err) {
       console.warn('Push no disponible para', name, err.message);
     }
@@ -19906,12 +20290,7 @@ const CART_DIAS = ['Lunes','Martes','Miercoles','Jueves','Viernes','Sabado','Dom
 // guardada igual). target_names vacío/omitido = para todos.
 async function cartNotifyPush(title, body, targetNames) {
   try {
-    const EDGE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users';
-    await fetch(EDGE_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
-      body: JSON.stringify({ title, body, target_names: targetNames || [] })
-    });
+    await notifyUsersPush('carritos', { title, body, target_names: targetNames || [] });
   } catch (err) {
     console.warn('No se pudo enviar el push de Carritos:', err.message);
   }
@@ -21344,11 +21723,7 @@ async function notifyReportRecipients(territoryObj, submission) {
   // Push (best-effort, no bloquea si falla)
   const pushTargets = adminNames.length ? adminNames : [];
   if (pushTargets.length) {
-    fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
-      body: JSON.stringify({ title, body, target_names: pushTargets })
-    }).catch(() => {});
+    notifyUsersPush('reporte-territorio', { title, body, target_names: pushTargets }).catch(() => {});
   }
 }
 
