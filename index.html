@@ -17,6 +17,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- pdf.js (v1.22.7-beta): renderiza el Mapa de la congregación, ahora en PDF, sobre un <canvas> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js"></script>
+<script>
+  if (window.pdfjsLib) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js';
+  }
+</script>
 <style>
   :root {
     /* ── Animaciones: curvas "fluidas" al estilo Apple (springy, sin cortes) ── */
@@ -3536,7 +3543,7 @@
     position: relative; touch-action: none; cursor: grab;
   }
   .full-map-lb-img-wrap.fm-dragging { cursor: grabbing; }
-  .full-map-lb-img-wrap img {
+  .full-map-lb-img-wrap img, .full-map-lb-img-wrap canvas {
     max-width: 100%; display: block; border-radius: var(--radius);
     will-change: transform; user-select: none; -webkit-user-drag: none;
     transform-origin: center center;
@@ -3577,8 +3584,17 @@
     position: relative;
   }
   .full-map-preview-wrap.visible { display: block; }
-  .full-map-preview-wrap img { width: 100%; display: block; max-height: 220px; object-fit: contain; }
+  .full-map-preview-wrap img, .full-map-preview-wrap canvas { width: 100%; display: block; max-height: 220px; object-fit: contain; margin: 0 auto; }
   .full-map-admin-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .fm-page-nav { display: flex; align-items: center; gap: 8px; }
+  .fm-page-nav button {
+    width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.18); color: #fff; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .fm-page-nav button:disabled { opacity: 0.35; cursor: default; }
+  .fm-page-nav button svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; }
+  .fm-page-nav span { color: #fff; font-size: 0.78rem; font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
 
   /* ── Admin fullscreen mode ─────────────────────────────────── */
   #page-admin {
@@ -5665,10 +5681,14 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         <!-- Banner: Mapa de la congregación (card, visible cuando hay mapa cargado) -->
         <div class="ter-map-banner" id="ter-map-banner" onclick="openFullMap()" role="button" aria-label="Mapa de la congregación" data-i18n-aria="territorios.mapabanner">
           <div class="ter-map-banner-thumb">
-            <img id="ter-map-banner-img" src="" alt="Vista previa del mapa">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+              <svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:var(--red);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span style="font-size:0.62rem;font-weight:800;color:var(--red);letter-spacing:0.03em">PDF</span>
+            </div>
           </div>
           <div class="ter-map-banner-body">
             <div class="ter-map-banner-label" data-i18n="territorios.mapabanner">Mapa de la congregación</div>
+            <div style="font-size:0.72rem;color:var(--text3);margin-top:2px" id="ter-map-banner-sub">PDF · Toca para ver</div>
           </div>
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-right:1rem"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
@@ -5818,18 +5838,18 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
             </div>
             <div>
               <div class="full-map-admin-title">Mapa completo de la congregación</div>
-              <div class="full-map-admin-sub" id="full-map-admin-sub">Sube un PNG con el mapa general de todos los territorios</div>
+              <div class="full-map-admin-sub" id="full-map-admin-sub">Sube un PDF con el mapa general de todos los territorios</div>
             </div>
           </div>
           <div class="full-map-preview-wrap" id="full-map-preview-wrap">
-            <img id="full-map-admin-preview" src="" alt="Mapa completo">
+            <canvas id="full-map-admin-preview-canvas"></canvas>
           </div>
           <div class="full-map-admin-actions">
             <button class="btn-secondary" onclick="document.getElementById('full-map-file-input').click()">
-              <span id="full-map-upload-label">Subir mapa PNG</span>
+              <span id="full-map-upload-label">Subir mapa en PDF</span>
             </button>
             <button class="btn-danger" id="full-map-delete-btn" onclick="deleteFullMap()" style="display:none">Eliminar mapa</button>
-            <input type="file" id="full-map-file-input" accept="image/png" style="display:none" onchange="handleFullMapUpload(event)">
+            <input type="file" id="full-map-file-input" accept="application/pdf" style="display:none" onchange="handleFullMapUpload(event)">
           </div>
         </div>
 
@@ -7517,9 +7537,14 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
   <div class="full-map-lb-header">
     <span class="full-map-lb-title">Mapa completo de la congregación</span>
     <div class="full-map-lb-actions">
+      <div class="fm-page-nav" id="fm-page-nav" style="display:none">
+        <button onclick="event.stopPropagation();changeFullMapPage(-1)" id="fm-page-prev"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <span id="fm-page-indicator">1/1</span>
+        <button onclick="event.stopPropagation();changeFullMapPage(1)" id="fm-page-next"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>
       <button class="full-map-lb-btn download" onclick="downloadFullMap()">
         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        <span class="fm-label">Descargar PNG</span>
+        <span class="fm-label">Descargar PDF</span>
       </button>
       <button class="full-map-lb-btn close-btn" onclick="closeFullMap()">
         <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -7528,7 +7553,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
     </div>
   </div>
   <div class="full-map-lb-img-wrap" id="full-map-lb-wrap">
-    <img id="full-map-lb-img" src="" alt="Mapa completo de la congregación">
+    <canvas id="full-map-lb-canvas"></canvas>
     <div class="map-zoom-hint" id="full-map-lb-hint">Pellizca o usa la rueda para hacer zoom</div>
   </div>
 </div>
@@ -7620,7 +7645,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.22.5.1-beta';
+const APP_VERSION = '1.22.7-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -17258,6 +17283,10 @@ function _closeTopLayer() {
   if (document.getElementById('page-user-profile')?.classList.contains('open')) {
     if (typeof closeUserProfilePage === 'function') closeUserProfilePage(); return;
   }
+  // Detalle de Tip en pantalla completa (v1.22.6-beta)
+  if (document.getElementById('page-tip-detail')?.style.display === 'flex') {
+    closeTipDetailModal(); return;
+  }
   // Preferencias
   if (document.getElementById('page-preferencias')?.classList.contains('open')) {
     if (typeof closePreferencias === 'function') closePreferencias(); return;
@@ -17358,89 +17387,108 @@ function togglePassVisibility() {
 // Escape key handled in full map section below
 
 // ── Full congregation map ─────────────────────────────────────────────────────
+// ── Mapa completo de la congregación — ahora en PDF (v1.22.7-beta) ───────────
+// `platform_config.full_congregation_map` guarda un Data URI
+// "data:application/pdf;base64,..." en vez de una imagen PNG. Se renderiza
+// con pdf.js sobre un <canvas>, tanto en la miniatura de administración como
+// en la vista de pantalla completa (con zoom/pan) para Móvil y Desktop.
+let _fullMapPdfDoc = null;      // documento PDF cargado (pdf.js)
+let _fullMapPdfDataUri = null;  // Data URI original, usado para descargar
+let fullMapCurrentPage = 1;
+
 async function loadFullMap() {
   try {
     const { data, error } = await sb.from('platform_config')
       .select('value').eq('key', 'full_congregation_map');
     if (error) { console.warn('platform_config no disponible:', error.message); return; }
     const src = (data && data.length > 0) ? data[0].value : null;
-    updateFullMapUI(src);
+    await updateFullMapUI(src);
   } catch(e) {
     console.warn('loadFullMap error:', e);
   }
 }
 
-function updateFullMapUI(src) {
+// Convierte un Data URI en el ArrayBuffer que pdf.js necesita.
+function _dataUriToUint8Array(dataUri) {
+  const base64 = dataUri.split(',')[1] || '';
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+async function updateFullMapUI(src) {
   const adminCard   = document.getElementById('full-map-admin-card');
   const previewWrap = document.getElementById('full-map-preview-wrap');
-  const previewImg  = document.getElementById('full-map-admin-preview');
   const deleteBtn   = document.getElementById('full-map-delete-btn');
   const uploadLabel = document.getElementById('full-map-upload-label');
   const adminSub    = document.getElementById('full-map-admin-sub');
   // Banner card (visible para todos los usuarios)
   const banner      = document.getElementById('ter-map-banner');
-  const bannerImg   = document.getElementById('ter-map-banner-img');
+
+  _fullMapPdfDataUri = src || null;
+  _fullMapPdfDoc = null;
 
   if (src) {
-    const lbImg = document.getElementById('full-map-lb-img');
-    if (lbImg) lbImg.src = src;
-    if (previewWrap) { previewWrap.classList.add('visible'); previewImg.src = src; }
+    try {
+      _fullMapPdfDoc = await pdfjsLib.getDocument({ data: _dataUriToUint8Array(src) }).promise;
+    } catch (e) {
+      console.warn('No se pudo leer el PDF del mapa:', e.message);
+      _fullMapPdfDoc = null;
+    }
+    if (previewWrap) {
+      previewWrap.classList.add('visible');
+      if (_fullMapPdfDoc) await renderPdfPageToCanvas(_fullMapPdfDoc, 1, 'full-map-admin-preview-canvas', 500);
+    }
     if (deleteBtn)   deleteBtn.style.display = '';
     if (uploadLabel) uploadLabel.textContent = 'Cambiar mapa';
-    if (adminSub)    adminSub.textContent = 'Mapa subido · Visible para todos los usuarios';
+    if (adminSub)    adminSub.textContent = `Mapa subido (PDF${_fullMapPdfDoc && _fullMapPdfDoc.numPages > 1 ? ', ' + _fullMapPdfDoc.numPages + ' páginas' : ''}) · Visible para todos los usuarios`;
     if (adminCard)   adminCard.classList.add('has-map');
-    // Mostrar banner con preview
-    if (banner)    { banner.classList.add('visible'); }
-    if (bannerImg) { bannerImg.src = src; }
+    if (banner)      banner.classList.add('visible');
   } else {
     if (previewWrap) previewWrap.classList.remove('visible');
     if (deleteBtn)   deleteBtn.style.display = 'none';
-    if (uploadLabel) uploadLabel.textContent = 'Subir mapa PNG';
-    if (adminSub)    adminSub.textContent = 'Sube un PNG con el mapa general de todos los territorios';
+    if (uploadLabel) uploadLabel.textContent = 'Subir mapa en PDF';
+    if (adminSub)    adminSub.textContent = 'Sube un PDF con el mapa general de todos los territorios';
     if (adminCard)   adminCard.classList.remove('has-map');
-    // Ocultar banner
-    if (banner)    { banner.classList.remove('visible'); }
-    if (bannerImg) { bannerImg.src = ''; }
+    if (banner)      banner.classList.remove('visible');
   }
 }
 
-function compressFullMapImage(file, callback) {
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const MAX = 1800;
-      let w = img.width, h = img.height;
-      if (w > MAX || h > MAX) {
-        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
-        else       { w = Math.round(w * MAX / h); h = MAX; }
-      }
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      // Try quality 0.85 first, then reduce if still too large
-      let quality = 0.85;
-      let result = canvas.toDataURL('image/jpeg', quality);
-      if (result.length > 3 * 1024 * 1024) result = canvas.toDataURL('image/jpeg', 0.65);
-      if (result.length > 3 * 1024 * 1024) result = canvas.toDataURL('image/jpeg', 0.45);
-      callback(result);
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
+// Renderiza una página del PDF sobre el <canvas> indicado, escalando para que
+// quepa dentro de maxWidth (nítido en pantallas de alta densidad gracias a
+// devicePixelRatio).
+async function renderPdfPageToCanvas(pdfDoc, pageNum, canvasId, maxWidth) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas || !pdfDoc) return;
+  const page = await pdfDoc.getPage(pageNum);
+  const dpr = window.devicePixelRatio || 1;
+  const unscaledViewport = page.getViewport({ scale: 1 });
+  const scale = (maxWidth / unscaledViewport.width) * dpr;
+  const viewport = page.getViewport({ scale });
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+  canvas.style.width = (viewport.width / dpr) + 'px';
+  canvas.style.height = (viewport.height / dpr) + 'px';
+  const ctx = canvas.getContext('2d');
+  await page.render({ canvasContext: ctx, viewport }).promise;
 }
 
 async function handleFullMapUpload(event) {
   const file = event.target.files[0];
   event.target.value = '';
   if (!file) return;
-  if (!file.type.startsWith('image/')) { showToast('Solo se aceptan imágenes','error'); return; }
+  if (file.type !== 'application/pdf') { showToast('Solo se aceptan archivos PDF', 'error'); return; }
+  if (file.size > 15 * 1024 * 1024) { showToast('El PDF pesa demasiado (máx. 15 MB)', 'error'); return; }
 
   const uploadLabel = document.getElementById('full-map-upload-label');
   if (uploadLabel) uploadLabel.textContent = 'Procesando...';
-  showToast('Procesando imagen…', '');
+  showToast('Procesando PDF…', '');
 
-  compressFullMapImage(file, async (base64) => {
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const dataUri = e.target.result;
+
     // Check if row already exists
     const { data: existing } = await sb.from('platform_config')
       .select('key').eq('key', 'full_congregation_map');
@@ -17448,30 +17496,43 @@ async function handleFullMapUpload(event) {
     let saveError;
     if (existing && existing.length > 0) {
       const { error } = await sb.from('platform_config')
-        .update({ value: base64 }).eq('key', 'full_congregation_map');
+        .update({ value: dataUri }).eq('key', 'full_congregation_map');
       saveError = error;
     } else {
       const { error } = await sb.from('platform_config')
-        .insert({ key: 'full_congregation_map', value: base64 });
+        .insert({ key: 'full_congregation_map', value: dataUri });
       saveError = error;
     }
 
     if (saveError) {
       console.error('Error guardando mapa:', saveError);
       showToast('Error: ' + saveError.message, 'error');
-      if (uploadLabel) uploadLabel.textContent = 'Subir mapa PNG';
+      if (uploadLabel) uploadLabel.textContent = 'Subir mapa en PDF';
       return;
     }
-    updateFullMapUI(base64);
+    await updateFullMapUI(dataUri);
     showToast('Mapa completo guardado ✓', 'success');
-  });
+
+    // Notifica a quienes tengan activo el Toggle "Actualización de Mapas".
+    await sb.from('notifications').insert({
+      title: 'Mapa de la congregación actualizado',
+      body: 'Se subió una nueva versión del mapa completo de la congregación (PDF).',
+      notif_category: 'mapas-actualizacion',
+    });
+    await notifyUsersPush('mapas-actualizacion', { title: 'Mapa de la congregación actualizado', body: 'Hay una nueva versión disponible para descargar.' });
+  };
+  reader.onerror = () => {
+    showToast('No se pudo leer el archivo', 'error');
+    if (uploadLabel) uploadLabel.textContent = 'Subir mapa en PDF';
+  };
+  reader.readAsDataURL(file);
 }
 
 async function deleteFullMap() {
   if (!confirm('¿Eliminar el mapa completo de la congregación?')) return;
   const { error } = await sb.from('platform_config').delete().eq('key', 'full_congregation_map');
   if (error) { console.error('deleteFullMap:', error); showToast('Error al eliminar','error'); return; }
-  updateFullMapUI(null);
+  await updateFullMapUI(null);
   showToast('Mapa eliminado','success');
 }
 
@@ -17615,17 +17676,42 @@ function createMapZoomController(imgId, refElId, hintId) {
   return { init, reset, showHintThenHide };
 }
 
-const fullMapZoomCtrl  = createMapZoomController('full-map-lb-img', 'full-map-lb-wrap', 'full-map-lb-hint');
+const fullMapZoomCtrl  = createMapZoomController('full-map-lb-canvas', 'full-map-lb-wrap', 'full-map-lb-hint');
 const lightboxZoomCtrl = createMapZoomController('lightbox-img',    'img-lightbox',     'lightbox-zoom-hint');
 
-function openFullMap() {
-  const src = document.getElementById('full-map-lb-img').src;
-  if (!src || src === window.location.href) return;
+async function openFullMap() {
+  if (!_fullMapPdfDoc) return;
+  fullMapCurrentPage = 1;
   fullMapZoomCtrl.reset();
   document.getElementById('full-map-lightbox').classList.add('open');
   document.body.style.overflow = 'hidden';
+  await renderFullMapLightboxPage();
   fullMapZoomCtrl.init();
   fullMapZoomCtrl.showHintThenHide();
+}
+
+async function renderFullMapLightboxPage() {
+  if (!_fullMapPdfDoc) return;
+  const maxWidth = Math.min(900, window.innerWidth - 32);
+  await renderPdfPageToCanvas(_fullMapPdfDoc, fullMapCurrentPage, 'full-map-lb-canvas', maxWidth);
+  const nav = document.getElementById('fm-page-nav');
+  const numPages = _fullMapPdfDoc.numPages;
+  if (nav) nav.style.display = numPages > 1 ? 'flex' : 'none';
+  const indicator = document.getElementById('fm-page-indicator');
+  if (indicator) indicator.textContent = `${fullMapCurrentPage}/${numPages}`;
+  const prevBtn = document.getElementById('fm-page-prev');
+  const nextBtn = document.getElementById('fm-page-next');
+  if (prevBtn) prevBtn.disabled = fullMapCurrentPage <= 1;
+  if (nextBtn) nextBtn.disabled = fullMapCurrentPage >= numPages;
+}
+
+function changeFullMapPage(dir) {
+  if (!_fullMapPdfDoc) return;
+  const next = fullMapCurrentPage + dir;
+  if (next < 1 || next > _fullMapPdfDoc.numPages) return;
+  fullMapCurrentPage = next;
+  fullMapZoomCtrl.reset();
+  renderFullMapLightboxPage();
 }
 
 function closeFullMap() {
@@ -17639,11 +17725,10 @@ function handleFullMapClick(e) {
 }
 
 function downloadFullMap() {
-  const img = document.getElementById('full-map-lb-img');
-  if (!img.src) return;
+  if (!_fullMapPdfDataUri) return;
   const a = document.createElement('a');
-  a.href = img.src;
-  a.download = 'mapa-congregacion-fleming.png';
+  a.href = _fullMapPdfDataUri;
+  a.download = 'mapa-congregacion-fleming.pdf';
   a.click();
 }
 
