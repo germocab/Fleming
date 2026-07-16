@@ -2015,6 +2015,9 @@
     outline: none; transition: border-color 0.2s; resize: vertical; min-height: 80px;
   }
   .form-textarea:focus { border-color: var(--accent); }
+  .form-textarea[contenteditable] { color: var(--text) !important; -webkit-text-fill-color: var(--text); caret-color: var(--text); }
+  .form-textarea[contenteditable] * { color: inherit !important; -webkit-text-fill-color: inherit; }
+  #anuncio-preview { color: var(--text) !important; -webkit-text-fill-color: var(--text); }
   .form-textarea[contenteditable]:empty:before { content: attr(data-placeholder); color: var(--text3); pointer-events: none; }
   .form-textarea[contenteditable] h3 { font-size: 1.05rem; font-weight: 800; margin: 0.3rem 0; }
   .form-textarea[contenteditable] p { margin: 0.3rem 0; }
@@ -20284,7 +20287,9 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
       <div id="notif-detail-date" style="font-size:0.78rem;color:var(--text3);font-weight:600;margin-bottom:1.1rem"></div>
       <div id="notif-detail-content" class="notif-detail-rich" style="font-size:0.95rem;color:var(--text2);line-height:1.65"></div>
       <style>
-        .notif-detail-rich h3 { font-size: 1.1rem; font-weight: 800; color: var(--text); margin: 0.9rem 0 0.4rem; }
+        .notif-detail-rich, .notif-detail-rich * { color: var(--text2) !important; -webkit-text-fill-color: var(--text2); }
+        .notif-detail-rich h3, .notif-detail-rich h3 * { color: var(--text) !important; -webkit-text-fill-color: var(--text); }
+        .notif-detail-rich h3 { font-size: 1.1rem; font-weight: 800; margin: 0.9rem 0 0.4rem; }
         .notif-detail-rich h3:first-child { margin-top: 0; }
         .notif-detail-rich p { margin: 0.4rem 0; }
       </style>
