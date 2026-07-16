@@ -606,6 +606,36 @@
   .options-user-name { font-size: 0.88rem; font-weight: 700; color: var(--text); line-height: 1.2; }
   .options-user-role { font-size: 0.72rem; color: var(--text3); }
 
+  /* ── Experimentos: Foto de perfil en la NavBar (reemplaza Notificaciones +
+     Opciones por el avatar del usuario) — v1.22.12-beta ── */
+  .nav-avatar-btn {
+    display: none; width: 42px; height: 42px; border-radius: 50%;
+    border: none; cursor: pointer; padding: 0; flex-shrink: 0;
+    align-items: center; justify-content: center; overflow: hidden;
+    transition: transform 0.15s, filter 0.15s; position: relative;
+  }
+  .nav-avatar-btn:hover { filter: brightness(0.93); }
+  .nav-avatar-btn:active { transform: scale(0.94); }
+  .nav-avatar-btn-img {
+    width: 100%; height: 100%; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #007AFF, #5ac8fa);
+    font-size: 0.78rem; font-weight: 700; color: #fff; overflow: hidden;
+  }
+  .nav-avatar-btn-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .nav-avatar-btn-dot {
+    display: none; position: absolute; top: 1px; right: 1px;
+    width: 10px; height: 10px; background: var(--red); border-radius: 50%;
+    border: 2px solid var(--surface); pointer-events: none;
+  }
+  .nav-avatar-btn-dot.visible { display: block; }
+  html.navbar-avatar-mode #nav-bell-wrap,
+  html.navbar-avatar-mode #nav-options-dots-btn { display: none !important; }
+  html.navbar-avatar-mode .nav-avatar-btn { display: flex; }
+  /* Ítem "Notificaciones" dentro del Menú Opciones: solo visible en este modo */
+  #options-dropdown-notif-item { display: none; }
+  html.navbar-avatar-mode #options-dropdown-notif-item { display: flex; }
+
   .dropdown-item {
     display: flex; align-items: center; gap: 10px;
     padding: 0.6rem 0.85rem; border-radius: 10px;
@@ -5541,7 +5571,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
     </div>
 
     <div class="nav-icons">
-<div class="options-wrap">
+<div class="options-wrap" id="nav-bell-wrap">
   <button class="nav-icon-btn" title="Notificaciones" onclick="toggleNotificationsMenu()" style="position:relative">
     <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
     <div id="notif-badge" style="display:none;position:absolute;top:6px;right:6px;width:9px;height:9px;background:var(--red);border-radius:50%;border:2px solid var(--surface);pointer-events:none"></div>
@@ -5569,8 +5599,12 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 </div>
       
       <div class="options-wrap">
-        <button class="nav-icon-btn" title="Opciones" onclick="toggleOptionsMenu()">
+        <button class="nav-icon-btn" id="nav-options-dots-btn" title="Opciones" onclick="toggleOptionsMenu()">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.2" fill="currentColor" stroke="none"/></svg>
+        </button>
+        <button class="nav-avatar-btn" id="nav-avatar-btn" title="Opciones" onclick="toggleOptionsMenu()">
+          <div class="nav-avatar-btn-img" id="user-avatar-navbtn">?</div>
+          <div class="nav-avatar-btn-dot" id="notif-badge-navbtn"></div>
         </button>
         <div class="options-dropdown" id="options-dropdown">
           <div class="options-user-info" onclick="openProfilePage();closeOptionsMenu()" style="cursor:pointer;transition:background 0.15s;border-radius:10px 10px 0 0" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
@@ -5581,6 +5615,11 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
             </div>
             <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
           </div>
+          <button class="dropdown-item" id="options-dropdown-notif-item" style="position:relative" onclick="openNotificationsPage();closeOptionsMenu()">
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span data-i18n="notif.title">Notificaciones</span>
+            <span id="notif-badge-menu" style="display:none;width:8px;height:8px;border-radius:50%;background:var(--red);margin-left:auto;flex-shrink:0"></span>
+          </button>
           <button class="dropdown-item appearance-trigger" id="appearance-trigger-main" onclick="toggleAppearanceSubmenu('main')">
             <svg class="sub-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
             Apariencia
@@ -7361,6 +7400,19 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <div id="navbar-bottom-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
+      <!-- Foto de perfil en la NavBar (reemplaza Notificaciones + Opciones) -->
+      <div class="profile-row" id="navbar-avatar-row" style="cursor:pointer;border-top:1px solid var(--border)" onclick="toggleNavbarAvatarPref()">
+        <div class="profile-row-icon" style="background:var(--ter-3-bg);color:var(--ter-3)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="exp.navbaravatar.title">Foto de perfil en NavBar</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.navbaravatar.desc">Reemplaza los botones de Notificaciones y Opciones por tu foto de perfil, dejando más espacio libre en la NavBar</div>
+        </div>
+        <div id="navbar-avatar-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="navbar-avatar-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -7713,7 +7765,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.22.11-beta';
+const APP_VERSION = '1.22.12-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -8239,6 +8291,8 @@ const I18N = {
   'exp.simplificada.desc.desktop': { es: 'Disponible solo en dispositivos móviles. Actívala y ábrela desde tu teléfono.', en: 'Only available on mobile devices. Enable it and open it from your phone.', nl: 'Alleen beschikbaar op mobiele apparaten. Schakel het in en open het vanaf je telefoon.' },
   'exp.simplificada.help': { es: 'Al activarla, se desactivan las Notificaciones, Live, el Tutorial y el panel de administración. Para volver a la versión normal, entra a Configuración desde el título "Fleming".', en: 'When enabled, Notifications, Live, the Tutorial and the admin panel are disabled. To return to the normal version, open Settings from the "Fleming" title.', nl: 'Bij activering worden Meldingen, Live, de Tutorial en het beheerpaneel uitgeschakeld. Ga naar Instellingen via de titel "Fleming" om terug te keren naar de normale versie.' },
   'exp.navbarabajo.title': { es: 'NavBar abajo',            en: 'NavBar at the bottom', nl: 'NavBar onderaan' },
+  'exp.navbaravatar.title': { es: 'Foto de perfil en NavBar', en: 'Profile photo in NavBar', nl: 'Profielfoto in NavBar' },
+  'exp.navbaravatar.desc':  { es: 'Reemplaza los botones de Notificaciones y Opciones por tu foto de perfil, dejando más espacio libre en la NavBar', en: 'Replaces the Notifications and Options buttons with your profile photo, leaving more free space in the NavBar', nl: 'Vervangt de knoppen Meldingen en Opties door je profielfoto, wat meer ruimte vrijmaakt in de NavBar' },
   'exp.clima.section': { es: 'Clima', en: 'Weather', nl: 'Weer' },
   'exp.clima.title':   { es: 'Clima en asignaciones', en: 'Weather in assignments', nl: 'Weer bij toewijzingen' },
   'exp.clima.desc':    { es: 'Muestra el pronóstico del día y hora de cada asignación de casa en casa, junto a la hora', en: 'Shows the forecast for the day and time of each door-to-door assignment, next to the time', nl: 'Toont de weersverwachting voor de dag en het tijdstip van elke huis-aan-huis toewijzing, naast de tijd' },
@@ -10176,7 +10230,7 @@ function applyOwnAvatarToDropdowns() {
   if (!currentUser) return;
   const col   = userColor(currentUser.name);
   const inits = userInitials(currentUser.name);
-  ['user-avatar', 'user-avatar-admin'].forEach(id => {
+  ['user-avatar', 'user-avatar-admin', 'user-avatar-navbtn'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.style.background = col;
@@ -10255,6 +10309,7 @@ async function enterApp() {
 
   if (typeof applySimplifiedModeUI === 'function') applySimplifiedModeUI();
   if (typeof applyNavbarBottomUI === 'function') applyNavbarBottomUI();
+  if (typeof applyNavbarAvatarUI === 'function') applyNavbarAvatarUI();
 
   // Restore sub-page visibility
   if (currentMainTab === 'predicacion') {
@@ -15936,7 +15991,7 @@ function openPrefScreen(name) {
   if (name === 'notificaciones') renderPrefNotifList();
   if (name === 'almacenamiento') renderStorageList();
   if (name === 'ayuda') renderAyudaTipsList();
-  if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBottomToggleUI(); updateWeatherToggleUI(); }
+  if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBottomToggleUI(); updateWeatherToggleUI(); updateNavbarAvatarToggleUI(); }
   if (name === 'version') {
     const val = document.getElementById('pref-version-screen-value');
     if (val) val.textContent = 'Versión ' + APP_VERSION;
@@ -16435,6 +16490,8 @@ function triggerEggUnlock() {
     applyNavbarBottomUI();
     localStorage.removeItem('fleming_weather_enabled');
     resetAssignmentWeatherChip();
+    localStorage.removeItem('fleming_navbar_avatar');
+    applyNavbarAvatarUI();
     updateExperimentosNavVisibility();
     showToast('Experimentos desactivados', '');
     return;
@@ -18591,8 +18648,7 @@ async function checkForNewNotifications() {
     // Las notificaciones "live" nunca deben contar para el badge de no leídas
     // del Panel de Notificaciones (son efímeras y no se listan ahí).
     const relevant = (data || []).filter(n => n.notif_category !== 'live' && isNotifForMe(n, myName));
-    const badge = document.getElementById('notif-badge');
-    if (badge) badge.style.display = relevant.length > 0 ? 'block' : 'none';
+    setNotifBadgeVisible(relevant.length > 0);
   } catch(e) { /* silently ignore */ }
 }
 
@@ -18721,8 +18777,7 @@ function applySimplifiedModeUI() {
   // Notificaciones: cortar el polling y ocultar el badge
   if (active) {
     if (typeof _notifPollInterval !== 'undefined' && _notifPollInterval) { clearInterval(_notifPollInterval); _notifPollInterval = null; }
-    const badge = document.getElementById('notif-badge');
-    if (badge) badge.style.display = 'none';
+    setNotifBadgeVisible(false);
   } else if (currentUser && typeof startNotifPolling === 'function') {
     startNotifPolling();
   }
@@ -18748,6 +18803,52 @@ function isNavbarBottomActive() {
   // No aplica si la Versión Simplificada está activa (usa su propio header)
   return isNavbarBottomSelected() && isMobile() && !isSimplifiedModeActive();
 }
+// ══════════════ Experimentos: Foto de perfil en NavBar (v1.22.12-beta) ══════
+// Reemplaza los botones de Notificaciones y Opciones de la NavBar por un solo
+// botón con la foto de perfil del usuario. Al presionarlo se abre el mismo
+// Menú de Opciones de siempre, que ahora incluye un ítem de "Notificaciones"
+// para compensar la ausencia del botón de campana en la NavBar.
+function isNavbarAvatarSelected() {
+  return localStorage.getItem('fleming_navbar_avatar') === 'true';
+}
+function toggleNavbarAvatarPref() {
+  const next = !isNavbarAvatarSelected();
+  localStorage.setItem('fleming_navbar_avatar', next ? 'true' : 'false');
+  updateNavbarAvatarToggleUI();
+  applyNavbarAvatarUI();
+  if (next) {
+    showToast('Foto de perfil en NavBar activada', 'success');
+  } else {
+    showToast('Foto de perfil en NavBar desactivada', '');
+  }
+}
+function updateNavbarAvatarToggleUI() {
+  const toggle = document.getElementById('navbar-avatar-toggle');
+  const thumb  = document.getElementById('navbar-avatar-thumb');
+  if (!toggle || !thumb) return;
+  const on = isNavbarAvatarSelected();
+  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
+  thumb.style.left = on ? '21px' : '3px';
+}
+function applyNavbarAvatarUI() {
+  const active = isNavbarAvatarSelected();
+  document.documentElement.classList.toggle('navbar-avatar-mode', active);
+  if (active) applyOwnAvatarToDropdowns();
+}
+// Sincroniza el indicador de "hay notificaciones nuevas" en los tres lugares
+// donde puede vivir: la campanita de la NavBar (modo normal), el punto sobre
+// el botón de avatar y el punto junto al ítem "Notificaciones" del Menú
+// Opciones (ambos exclusivos del modo "Foto de perfil en NavBar").
+function setNotifBadgeVisible(show) {
+  const badge = document.getElementById('notif-badge');
+  if (badge) badge.style.display = show ? 'block' : 'none';
+  const navDot = document.getElementById('notif-badge-navbtn');
+  if (navDot) navDot.classList.toggle('visible', !!show);
+  const menuDot = document.getElementById('notif-badge-menu');
+  if (menuDot) menuDot.style.display = show ? 'block' : 'none';
+}
+
+
 // ── Experimentos: Clima en asignaciones (v1.22.10-beta) ──────────────────────
 // Muestra un pill junto a la hora en el detalle de la asignación con el
 // pronóstico (sol/lluvia/nubes + grados) para el día y hora exactos de esa
@@ -19010,8 +19111,7 @@ function toggleNotificationsMenu() {
     menu.classList.toggle('open');
     if (menu.classList.contains('open')) {
       setLastSeenNotifTime(new Date().toISOString());
-      const badge = document.getElementById('notif-badge');
-      if (badge) badge.style.display = 'none';
+      setNotifBadgeVisible(false);
       _syncNotifSearchInput('desktop');
       loadNotifications('desktop');
     }
@@ -19030,8 +19130,7 @@ function openNotificationsPage() {
   const page = document.getElementById('page-notifications');
   page.style.display = 'flex';
   setLastSeenNotifTime(new Date().toISOString());
-  const badge = document.getElementById('notif-badge');
-  if (badge) badge.style.display = 'none';
+  setNotifBadgeVisible(false);
   _syncNotifSearchInput('mobile');
   loadNotifications('mobile');
 }
