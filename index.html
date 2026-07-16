@@ -6231,7 +6231,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
     <div class="detail-especial-block" id="detail-especial-desc-block" style="display:none">
       <div class="detail-especial-block-head">
         <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-        <span class="detail-especial-block-title">Título de la Asamblea</span>
+        <span class="detail-especial-block-title">Descripción</span>
       </div>
       <div class="detail-especial-block-value" id="detail-especial-desc-value" style="white-space:pre-wrap"></div>
     </div>
@@ -7478,7 +7478,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.21.1-beta';
+const APP_VERSION = '1.21.4-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -15416,6 +15416,17 @@ async function viewTerritory(id) {
   badge.style.background = color;
   badge.style.display = 'flex';
 
+  // Limpia restos de la vista de un evento "Especial" (foto, descripción,
+  // lugar) si el usuario venía de ver uno antes de entrar a un Territorio —
+  // estos bloques comparten el mismo panel (#detail-panel) y de lo contrario
+  // quedaban visibles por encima del contenido del Territorio.
+  const espPhotoWrap = document.getElementById('detail-especial-photo-wrap');
+  if (espPhotoWrap) espPhotoWrap.style.display = 'none';
+  const espDescBlock = document.getElementById('detail-especial-desc-block');
+  if (espDescBlock) espDescBlock.style.display = 'none';
+  const espLugarBlock = document.getElementById('detail-especial-lugar-block');
+  if (espLugarBlock) espLugarBlock.style.display = 'none';
+
   // Hide call/directions buttons — not relevant for a territory
   document.getElementById('detail-actions').style.display = 'none';
   // Hide territory tabs — single territory view
@@ -19493,7 +19504,7 @@ function vmcRenderWeekProgram(week) {
     <div class="vmc-my-assignments">
       <div class="vmc-my-assignments-title">
         <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;vertical-align:middle;margin-right:4px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        Tu asignación en esta reunión
+        Tus partes esta semana
       </div>
       ${allMine.map(p => `<div class="vmc-my-item"><span class="vmc-my-item-dot"></span>${p.name}${p.mins ? ` <span style="color:var(--text3);font-size:0.75rem">(${p.mins} min)</span>` : ''}</div>`).join('')}
     </div>` : '';
@@ -20061,7 +20072,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
 
     <!-- Líderes (Super + Aux) -->
     <div class="grupo-section" id="grupo-detail-leaders-section">
-      <div class="grupo-section-title">Encargados</div>
+      <div class="grupo-section-title">Liderazgo</div>
       <div id="grupo-detail-leaders-list"></div>
     </div>
 
