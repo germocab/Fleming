@@ -4636,19 +4636,31 @@
     to   { opacity:1; transform: translateY(0) scale(1); }
   }
 
-  /* ── Pantalla Versión: glow verde/azul al mantener presionado el ícono ── */
+  /* ── Pantalla Versión: glow verde/azul (pantalla completa) al mantener
+     presionado el ícono ── */
   .version-hold-glow {
-    position: absolute; left: 50%; top: 50%; z-index: 0;
-    width: 96px; height: 96px; border-radius: 50%;
-    transform: translate(-50%, -50%) scale(0.5);
-    opacity: 0; pointer-events: none;
-    filter: blur(18px);
-    transition: opacity 0.35s ease, transform 0.35s ease, filter 0.35s ease;
-    will-change: transform, opacity;
+    position: fixed; z-index: 260; pointer-events: none;
+    left: 50%; top: 50%;
+    width: 46vmax; height: 46vmax;
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0.35);
+    opacity: 0;
+    filter: blur(60px);
+    transition: opacity 0.45s ease;
+    will-change: transform, opacity, filter;
   }
-  .version-hold-glow-blue  { background: radial-gradient(circle, rgba(0,122,255,0.55) 0%, rgba(0,122,255,0.0) 70%); }
-  .version-hold-glow-green { background: radial-gradient(circle, rgba(48,209,88,0.5) 0%, rgba(48,209,88,0.0) 70%); }
-  .version-hold-glow.active { opacity: 1; }
+  .version-hold-glow-blue  {
+    background: radial-gradient(circle, rgba(10,132,255,0.60) 0%, rgba(10,132,255,0.28) 45%, rgba(10,132,255,0) 72%);
+  }
+  .version-hold-glow-green {
+    background: radial-gradient(circle, rgba(52,199,89,0.55) 0%, rgba(52,199,89,0.26) 45%, rgba(52,199,89,0) 72%);
+  }
+  .version-hold-glow.active { opacity: 1; animation: versionGlowDrift 3.6s ease-in-out infinite; }
+  .version-hold-glow-green.active { animation-delay: -1.8s; }
+  @keyframes versionGlowDrift {
+    0%, 100% { margin-left: -6vmax; margin-top: -4vmax; }
+    50%      { margin-left: 6vmax;  margin-top: 4vmax; }
+  }
 
   /* ── Modo Experimentos: unlock overlay ── */
   #egg-unlock-overlay {
@@ -7669,7 +7681,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.22.9-beta';
+const APP_VERSION = '1.22.9.1-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -16300,15 +16312,15 @@ function startVersionScreenHold(e) {
   function tick() {
     const elapsed = Date.now() - _versionScreenHoldStart;
     const frac = Math.min(elapsed / VERSION_HOLD_MS, 1);
-    // El glow se expande y se difumina más mientras se sostiene la presión
-    const scale = 0.5 + frac * 1.35;
-    const blurPx = 18 + frac * 22;
+    // El glow se expande y cubre más pantalla mientras se sostiene la presión
+    const scale = 0.4 + frac * 1.05;
+    const blurPx = 55 + frac * 30;
     if (glowBlue) {
-      glowBlue.style.transform = `translate(-50%, -50%) scale(${scale}) translate(-4px, -3px)`;
+      glowBlue.style.transform = `translate(-50%, -50%) scale(${scale})`;
       glowBlue.style.filter = `blur(${blurPx}px)`;
     }
     if (glowGreen) {
-      glowGreen.style.transform = `translate(-50%, -50%) scale(${scale}) translate(4px, 3px)`;
+      glowGreen.style.transform = `translate(-50%, -50%) scale(${scale})`;
       glowGreen.style.filter = `blur(${blurPx}px)`;
     }
     if (frac < 1) {
@@ -16350,7 +16362,7 @@ function triggerEggUnlock() {
     localStorage.removeItem('fleming_navbar_bottom');
     applyNavbarBottomUI();
     updateExperimentosNavVisibility();
-    showToast('Experimentos desactivado. ¡Encuéntralo de nuevo!', '');
+    showToast('Experimentos desactivados', '');
     return;
   }
   // First unlock!
