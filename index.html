@@ -684,7 +684,7 @@
   .sub-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
 
   @media (min-width: 640px) {
-    /* Desktop: mismo lenguaje visual que el segmento Predicación/Reuniones — pill con fondo, sin barra propia */
+    /* Desktop: mismo lenguaje visual que el segmento Predicación/Reuniones — pill con fondo, sin barra propia. */
     .sub-tabs-wrap { padding: 0 1.1rem 1.1rem; display: flex; justify-content: center; }
     .sub-tabs {
       display: inline-flex; background: rgba(120,120,128,0.14);
@@ -699,6 +699,18 @@
       background: #ffffff; color: #1c1c1e;
       border-bottom-color: transparent;
       box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    }
+    /* v1.22.8-beta: la barra de Sub-secciones (Casa en casa/Territorios/Carritos/Grupos, etc.)
+       es a propósito ligeramente más pequeña que el segmento principal (Predicación/Reuniones),
+       para reforzar la jerarquía visual entre ambas barras. Exclusivo de Desktop/Tablet — acotado
+       a #sub-tabs-wrap para no afectar los ".sub-tabs" reutilizados dentro del Panel de Administración.
+       En móvil (regla base, fuera de este media query) el tamaño no cambia. */
+    #sub-tabs-wrap .sub-tabs {
+      border-radius: 19px; padding: 3px;
+    }
+    #sub-tabs-wrap .sub-tab {
+      padding: 7px 16px; border-radius: 15px;
+      font-size: 0.82rem;
     }
   }
 
@@ -7639,7 +7651,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.22.7.2-beta';
+const APP_VERSION = '1.22.8-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
