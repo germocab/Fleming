@@ -3054,6 +3054,12 @@
     font-size: 0.78rem; font-weight: 600; color: var(--text2);
   }
   .users-stat-chip-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  /* ── Usuarios: barra de búsqueda + filtros (reemplaza los indicadores) ─── */
+  .users-filter-check {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.83rem; color: var(--text2); padding: 0.35rem 0; cursor: pointer;
+  }
+  .users-filter-check input { width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer; }
 
   /* User card — list view */
   .user-card {
@@ -14733,23 +14739,99 @@ function renderUsersPanel() {
   const roleOrder = { dev: 0, admin: 1, pending: 2, viewer: 3 };
   // El usuario DEV nunca aparece en la lista de usuarios
   const sorted = [...activeUsers].filter(u => u.role !== 'dev').sort((a,b) => (roleOrder[a.role]??5) - (roleOrder[b.role]??5));
+  _usersSortedCache = sorted;
 
-  // Stats strip
-  const onlineCount = sorted.filter(u => {
-    const m = u.last_seen ? Math.round((new Date() - new Date(u.last_seen)) / 60000) : 9999;
-    return m < 10;
-  }).length;
-  const byRole = { dev:0, admin:0, viewer:0, pending:0 };
-  sorted.forEach(u => { if (byRole[u.role] !== undefined) byRole[u.role]++; else byRole.viewer++; });
+  const q = (_usersFilter.q || '').replace(/"/g, '&quot;');
+  const toolbar = `<div style="display:flex;gap:8px;margin-bottom:0.9rem">
+    <div class="notif-search-wrap" style="flex:1;margin-bottom:0">
+      <svg class="notif-search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" class="notif-search-input" id="users-search-input" placeholder="Buscar usuario…" autocomplete="off" oninput="onUsersSearchInput(this.value)" value="${q}">
+    </div>
+    <div class="options-wrap">
+      <button class="admintags-icon-btn" id="users-filter-btn" title="Filtros" onclick="toggleUsersFilterMenu(event)" style="position:relative">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+        <span id="users-filter-dot" style="display:none;position:absolute;top:2px;right:2px;width:7px;height:7px;background:var(--accent);border-radius:50%;border:2px solid var(--surface)"></span>
+      </button>
+      <div class="options-dropdown" id="users-filter-dropdown" style="width:230px;padding:0.85rem" onclick="event.stopPropagation()">
+        <div style="font-size:0.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:0.35rem">Cargos</div>
+        <label class="users-filter-check"><input type="checkbox" id="uf-cargo-anciano" ${_usersFilter.cargos.anciano?'checked':''} onchange="onUsersFilterCargoChange('anciano',this.checked)">Anciano</label>
+        <label class="users-filter-check"><input type="checkbox" id="uf-cargo-siervo" ${_usersFilter.cargos.siervo?'checked':''} onchange="onUsersFilterCargoChange('siervo',this.checked)">Siervo Ministerial</label>
+        <label class="users-filter-check"><input type="checkbox" id="uf-cargo-precursor" ${_usersFilter.cargos.precursor?'checked':''} onchange="onUsersFilterCargoChange('precursor',this.checked)">Precursor</label>
+        <div style="font-size:0.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;margin:0.75rem 0 0.35rem">AdminTags</div>
+        <div class="profile-row" style="padding:0.35rem 0;cursor:pointer" onclick="toggleUsersFilterAdminTag()">
+          <div class="profile-row-content"><div class="profile-row-label" style="font-size:0.83rem">Solo con AdminTag</div></div>
+          <div class="toggle-switch${_usersFilter.onlyAdminTag ? ' on' : ''}" id="uf-admintag-toggle" onclick="event.stopPropagation();toggleUsersFilterAdminTag()"><div class="toggle-thumb"></div></div>
+        </div>
+        <button class="btn-secondary" style="width:100%;margin-top:0.85rem;padding:0.45rem;font-size:0.8rem" onclick="clearUsersFilters()">Limpiar filtros</button>
+      </div>
+    </div>
+  </div>
+  <div id="users-cards-container"></div>`;
 
-  const stats = `<div class="users-stats-strip">
-    <div class="users-stat-chip"><span class="users-stat-chip-dot" style="background:var(--green)"></span>${onlineCount} en línea</div>
-    ${byRole.pending ? `<div class="users-stat-chip"><span class="users-stat-chip-dot" style="background:var(--orange)"></span>${byRole.pending} pendiente${byRole.pending!==1?'s':''}</div>` : ''}
-    ${byRole.admin ? `<div class="users-stat-chip"><span class="users-stat-chip-dot" style="background:var(--accent)"></span>${byRole.admin} admin</div>` : ''}
-    <div class="users-stat-chip"><span class="users-stat-chip-dot" style="background:var(--surface3)"></span>${byRole.viewer} visitante${byRole.viewer!==1?'s':''}</div>
-  </div>`;
+  body.innerHTML = toolbar;
+  updateUsersFilterDot();
+  renderUsersCards();
+}
 
-  const cards = sorted.map(u => {
+// ── Búsqueda + Filtros del Panel de Usuarios (v1.20.0-beta) ──────────────────
+// Reemplaza los indicadores fijos ("en línea / admin / visitantes") por una
+// barra de búsqueda (por nombre) y un botón de filtros por Cargo (Anciano,
+// Siervo Ministerial, Precursor) y por AdminTags (solo con AdminTag asignada).
+let _usersSortedCache = [];
+let _usersFilter = { q: '', cargos: { anciano: false, siervo: false, precursor: false }, onlyAdminTag: false };
+
+function onUsersSearchInput(value) {
+  _usersFilter.q = value;
+  renderUsersCards();
+}
+function toggleUsersFilterMenu(e) {
+  if (e) e.stopPropagation();
+  const dd = document.getElementById('users-filter-dropdown');
+  if (!dd) return;
+  const willOpen = !dd.classList.contains('open');
+  dd.classList.toggle('open', willOpen);
+  if (willOpen) {
+    setTimeout(() => document.addEventListener('click', _closeUsersFilterMenuOnce, { once: true }), 0);
+  }
+}
+function _closeUsersFilterMenuOnce() {
+  document.getElementById('users-filter-dropdown')?.classList.remove('open');
+}
+function onUsersFilterCargoChange(key, checked) {
+  _usersFilter.cargos[key] = checked;
+  updateUsersFilterDot();
+  renderUsersCards();
+}
+function toggleUsersFilterAdminTag() {
+  _usersFilter.onlyAdminTag = !_usersFilter.onlyAdminTag;
+  document.getElementById('uf-admintag-toggle')?.classList.toggle('on', _usersFilter.onlyAdminTag);
+  updateUsersFilterDot();
+  renderUsersCards();
+}
+function clearUsersFilters() {
+  _usersFilter.cargos = { anciano: false, siervo: false, precursor: false };
+  _usersFilter.onlyAdminTag = false;
+  ['anciano','siervo','precursor'].forEach(k => { const el = document.getElementById('uf-cargo-' + k); if (el) el.checked = false; });
+  document.getElementById('uf-admintag-toggle')?.classList.remove('on');
+  updateUsersFilterDot();
+  renderUsersCards();
+}
+function updateUsersFilterDot() {
+  const dot = document.getElementById('users-filter-dot');
+  if (!dot) return;
+  const hasFilters = _usersFilter.onlyAdminTag || Object.values(_usersFilter.cargos).some(Boolean);
+  dot.style.display = hasFilters ? '' : 'none';
+}
+function _userMatchesFilter(u) {
+  if (_usersFilter.q && !u.name.toLowerCase().includes(_usersFilter.q.trim().toLowerCase())) return false;
+  const uLabels = parseLabels(u.labels);
+  const activeCargoKeys = Object.keys(_usersFilter.cargos).filter(k => _usersFilter.cargos[k]);
+  if (activeCargoKeys.length && !activeCargoKeys.some(k => uLabels[k])) return false;
+  if (_usersFilter.onlyAdminTag && !(u.role === 'admin' && u.admin_tag_id)) return false;
+  return true;
+}
+
+function _userCardHTML(u) {
     const col = userColor(u.name);
     const inits = userInitials(u.name);
     const roleBadgeCls = u.role === 'dev' ? 'role-badge-dev' : u.role === 'admin' ? 'role-badge-admin' : u.role === 'pending' ? 'role-badge-viewer' : 'role-badge-viewer';
@@ -14796,9 +14878,17 @@ function renderUsersPanel() {
         </div>
       </div>
     </div>`;
-  }).join('');
+}
 
-  body.innerHTML = stats + cards;
+function renderUsersCards() {
+  const container = document.getElementById('users-cards-container');
+  if (!container) return;
+  const filtered = (_usersSortedCache || []).filter(_userMatchesFilter);
+  if (!filtered.length) {
+    container.innerHTML = `<div style="text-align:center;padding:2.5rem 1rem;color:var(--text3);font-size:0.85rem">Ningún usuario coincide con la búsqueda o los filtros.</div>`;
+    return;
+  }
+  container.innerHTML = filtered.map(_userCardHTML).join('');
 }
 
 function changeUserRole(uid, newRole) {
@@ -21751,6 +21841,26 @@ async function notifyReportRecipients(territoryObj, submission) {
    la cuenta se reconoce por su propio nombre (comportamiento normal).
    Solo el DEV puede establecer o quitar este vínculo (ver openUserProfilePage
    / saveProfileChanges y getIdentityName()).
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════════════════
+   NIVELES DE NOTIFICACIÓN (v1.20.0-beta)
+   ══════════════════════════════════════════════════════════════════════════
+   Tabla en Supabase (crear una vez):
+
+   create table if not exists notif_category_levels (
+     id text primary key,           -- id de la categoría (ver NOTIF_CATEGORIES)
+     level text not null default 'normal'
+       check (level in ('silencio', 'normal', 'top')),
+     updated_at timestamptz default now()
+   );
+
+   Cada categoría de notificación (NOTIF_CATEGORIES) tiene un Nivel que
+   determina cómo llega al usuario: silencio (solo Panel), normal (push
+   inadvertido + Panel) o top (push urgente + Panel). Se gestiona desde
+   Configuración > Gestor de Notificaciones > Niveles (ver
+   renderNotifAdminLevels / saveCategoryLevel), y se consulta antes de cada
+   llamada a la Edge Function notify-users (ver notifyUsersPush).
    ══════════════════════════════════════════════════════════════════════════ */
 
 /* ══════════════════════════════════════════════════════════════════════════
