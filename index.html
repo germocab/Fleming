@@ -5791,6 +5791,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       <div class="admin-tabs-row" data-section="fleming">
         <button class="admin-tab" data-tab="usuarios" data-i18n="admin.tab.usuarios" onclick="switchAdminTab('usuarios')">Usuarios</button>
         <button class="admin-tab" id="admin-tab-notificaciones" data-tab="notificaciones" data-i18n="admin.tab.notificaciones" onclick="switchAdminTab('notificaciones')" style="display:none">Notificaciones</button>
+        <button class="admin-tab" id="admin-tab-tips" data-tab="tips" onclick="switchAdminTab('tips')" style="display:none">Tips</button>
       </div>
       <div class="admin-section active" id="admin-assignments">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
@@ -6135,6 +6136,61 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <div style="font-size:0.8rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;margin:1.4rem 0 0.6rem">Nombres de categorías</div>
           <div id="notif-categories-list"></div>
         </div>
+      </div>
+
+      <!-- ── Tips (v1.22.0-beta): artículos breves de Ayuda, solo DEV ── -->
+      <div class="admin-section" id="admin-tips">
+        <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
+          <span style="flex:1;font-size:0.95rem;font-weight:700">Tips de Ayuda</span>
+        </div>
+        <div class="notif-gestor-card" style="margin-bottom:1.1rem">
+          <div class="form-group2">
+            <label class="form-label2">Título</label>
+            <input type="text" class="form-input" id="tip-title" placeholder="Ej: Nuevo modo de búsqueda avanzada" maxlength="120">
+          </div>
+          <div class="form-group2">
+            <label class="form-label2">Imagen</label>
+            <input type="file" id="tip-img-file" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="handleTipImage(event)">
+            <div id="tip-img-placeholder" style="display:flex;align-items:center;gap:8px;padding:0.65rem 0.9rem;border:1.5px dashed var(--border);border-radius:10px;cursor:pointer;color:var(--text3);font-size:0.85rem" onclick="document.getElementById('tip-img-file').click()">
+              <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+              Adjuntar imagen
+            </div>
+            <div id="tip-img-preview-wrap" style="display:none;position:relative;margin-top:0.5rem">
+              <img id="tip-img-preview" style="max-width:100%;max-height:160px;border-radius:10px;display:block">
+              <button type="button" onclick="clearTipImage()" style="position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.55);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center">
+                <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="form-group2">
+            <label class="form-label2">Cuerpo</label>
+            <div class="rte-toolbar" style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap">
+              <button type="button" class="rte-btn" title="Título" onclick="rteExec('tip-body','formatBlock','H3')" style="padding:0.35rem 0.6rem;border-radius:7px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:0.78rem;font-weight:700">Título</button>
+              <button type="button" class="rte-btn" title="Cuerpo" onclick="rteExec('tip-body','formatBlock','P')" style="padding:0.35rem 0.6rem;border-radius:7px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:0.78rem">Cuerpo</button>
+              <button type="button" class="rte-btn" title="Negrita" onclick="rteExec('tip-body','bold')" style="padding:0.35rem 0.65rem;border-radius:7px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:0.78rem;font-weight:800">N</button>
+              <button type="button" class="rte-btn" title="Itálica" onclick="rteExec('tip-body','italic')" style="padding:0.35rem 0.65rem;border-radius:7px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:0.78rem;font-style:italic">I</button>
+              <button type="button" class="rte-btn" title="Subrayado" onclick="rteExec('tip-body','underline')" style="padding:0.35rem 0.65rem;border-radius:7px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:0.78rem;text-decoration:underline">S</button>
+            </div>
+            <div class="form-textarea" id="tip-body" contenteditable="true" data-placeholder="Escribe el contenido del Tip…" style="min-height:120px;max-height:340px;overflow-y:auto;line-height:1.5" oninput="_rteEnforceLimit('tip-body','tip-body-count',2000)"></div>
+            <div style="font-size:0.7rem;color:var(--text3);margin-top:3px" id="tip-body-count">0/2000</div>
+          </div>
+          <div class="profile-row" style="cursor:pointer;padding:0.6rem 0" onclick="toggleTipNotify()">
+            <div class="profile-row-content">
+              <div class="profile-row-label" style="font-size:0.85rem">Enviar notificación</div>
+              <div class="profile-row-value" style="font-size:0.78rem">Avisa a quienes tengan activo el Toggle "Tips" en Notificaciones</div>
+            </div>
+            <div id="tip-notify-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+              <div id="tip-notify-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+            </div>
+          </div>
+          <div id="tip-error" class="form-error" style="display:none"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" id="save-tip-btn" onclick="saveTip()">Publicar Tip</button>
+            <button class="btn-secondary" style="width:auto;padding:0.65rem 1.4rem;display:none" id="cancel-tip-edit-btn" onclick="resetTipForm()">Cancelar edición</button>
+          </div>
+        </div>
+        <div style="font-size:0.8rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;margin:0.5rem 0 0.6rem">Tips publicados</div>
+        <div id="admin-tips-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Tips</div></div></div>
       </div>
 
       </div><!-- /.admin-body -->
@@ -7252,6 +7308,12 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
     </div>
+    <div class="profile-section" id="pref-tips-section">
+      <div class="profile-section-title" data-i18n="settings.tips">Tips</div>
+      <div id="pref-tips-list">
+        <div class="loader-wrap" style="padding:1rem"><div class="loader"></div></div>
+      </div>
+    </div>
     <div class="profile-section">
       <div class="profile-section-title" data-i18n="settings.soporte">Soporte</div>
       <div class="profile-row" style="cursor:pointer" onclick="openReportIssueModal()">
@@ -7264,6 +7326,20 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         </div>
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Detalle de Tip -->
+<div class="modal-overlay" id="tip-detail-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="tip-detail-title">Tip</div>
+      <button class="modal-close" onclick="closeTipDetailModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <img id="tip-detail-image" style="display:none;width:100%;max-height:220px;object-fit:cover;border-radius:12px;margin-bottom:0.9rem">
+      <div id="tip-detail-body" style="font-size:0.9rem;line-height:1.55;color:var(--text2)"></div>
     </div>
   </div>
 </div>
@@ -7496,7 +7572,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.21.6-beta';
+const APP_VERSION = '1.22.0-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -7953,6 +8029,8 @@ const I18N = {
   'settings.ayuda.desc':        { es: 'Tutoriales y reporte de problemas', en: 'Tutorials and issue reporting', nl: 'Tutorials en probleemmeldingen' },
   'settings.tutoriales':        { es: 'Tutoriales',               en: 'Tutorials', nl: 'Tutorials' },
   'settings.soporte':           { es: 'Soporte',                  en: 'Support',   nl: 'Ondersteuning' },
+  'settings.tips':               { es: 'Tips',                     en: 'Tips',      nl: 'Tips' },
+  'settings.tips.vacio':         { es: 'Todavía no hay Tips publicados', en: 'No Tips published yet', nl: 'Er zijn nog geen Tips gepubliceerd' },
   'settings.tutorial':          { es: 'Ver tutorial',             en: 'View tutorial', nl: 'Tutorial bekijken' },
   'settings.tutorial.desc':     { es: 'Repasa cómo funcionan las secciones y funciones principales', en: 'Review how the main sections and features work', nl: 'Bekijk hoe de belangrijkste secties en functies werken' },
   'settings.tutorial.h2h':      { es: 'Ver tutorial de Asignaciones', en: 'View Assignments tutorial', nl: 'Tutorial Toewijzingen bekijken' },
@@ -8060,6 +8138,8 @@ const I18N = {
   'notifcat.sistema':           { es: 'Avisos de la Plataforma',     en: 'Platform Alerts',           nl: 'Platformmeldingen' },
   'notifcat.solicitud-cuenta':  { es: 'Solicitudes de cuenta',        en: 'Account Requests',          nl: 'Accountverzoeken' },
   'notifcat.reporte-territorio': { es: 'Reportes de Territorio',      en: 'Territory Reports',         nl: 'Gebiedsrapporten' },
+  'notifcat.tips':               { es: 'Nuevos Tips',                 en: 'New Tips',                  nl: 'Nieuwe Tips' },
+  'notif.group.tips':            { es: 'Tips',                        en: 'Tips',                       nl: 'Tips' },
   // ── Barras de búsqueda (Grupos, Carritos, Territorios, Vida y Ministerio) ──
   'search.buscar-nombre':      { es: 'Buscar por nombre…',   en: 'Search by name…',   nl: 'Zoeken op naam…' },
   'search.buscar-territorio':  { es: 'Buscar territorio…',   en: 'Search territory…', nl: 'Gebied zoeken…' },
@@ -9975,6 +10055,8 @@ async function enterApp() {
   updateAdminSectionTabsVisibility();
   const notifAdminTab = document.getElementById('admin-tab-notificaciones');
   if (notifAdminTab) notifAdminTab.style.display = (currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, 'notificaciones'))) ? '' : 'none';
+  const tipsAdminTab = document.getElementById('admin-tab-tips');
+  if (tipsAdminTab) tipsAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
 
   // Restore navigation position from before reload (if any)
   const _nav = _loadNavState();
@@ -10580,7 +10662,7 @@ const ADMIN_TAB_SECTION = {
   assignments: 'predicacion', territories: 'predicacion', conductores: 'predicacion',
   casas: 'predicacion', grupos: 'predicacion', carritos: 'predicacion', reports: 'predicacion',
   vmc: 'reuniones', 'fin-semana': 'reuniones', responsabilidades: 'reuniones', 'aseo-salon': 'reuniones',
-  usuarios: 'fleming', notificaciones: 'fleming',
+  usuarios: 'fleming', notificaciones: 'fleming', tips: 'fleming',
 };
 
 // Cambia la sección visible (Predicación/Reuniones) y activa la primera sub-pestaña disponible dentro de ella.
@@ -10600,6 +10682,11 @@ async function switchAdminTab(tab) {
     return;
   }
   if (tab === 'notificaciones' && !['dev','admin'].includes(currentRole)) {
+    showToast('No tienes permisos para acceder a este módulo.', 'error');
+    return;
+  }
+  // Tips (v1.22.0-beta): gestión exclusiva del Usuario DEV, no delegable a Admins.
+  if (tab === 'tips' && currentRole !== 'dev') {
     showToast('No tienes permisos para acceder a este módulo.', 'error');
     return;
   }
@@ -10634,6 +10721,7 @@ async function switchAdminTab(tab) {
   if (tab === 'vmc') { loadVmcWeeks().then(() => renderAdminVmc()); }
   if (tab === 'fin-semana') { loadFsWeeks().then(() => renderAdminFs()); }
   if (tab === 'notificaciones') { renderNotifAdminTemplates(); renderNotifAdminCategories(); loadNotifLevels().then(renderNotifAdminLevels); }
+  if (tab === 'tips') { renderAdminTipsList(); }
   if (tab === 'carritos') { cartOpenAdminSection(); }
   if (tab === 'reports') { trepOpenAdminSection(); }
 }
@@ -15340,6 +15428,8 @@ async function syncRoleFromServer() {
       _applyAdminSectionTabsVisibility();
       const notifAdminTab = document.getElementById('admin-tab-notificaciones');
       if (notifAdminTab) notifAdminTab.style.display = (currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, 'notificaciones'))) ? '' : 'none';
+      const tipsAdminTab = document.getElementById('admin-tab-tips');
+      if (tipsAdminTab) tipsAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
       // If user was viewing the Fleming App / Usuarios section and lost access, send them back to predicación
       const usuariosSection = document.getElementById('admin-usuarios');
       if (usuariosSection && usuariosSection.classList.contains('active') && !['dev','admin'].includes(currentRole)) {
@@ -15499,6 +15589,10 @@ async function viewTerritory(id) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 function showError(id, msg) { const el=document.getElementById(id); el.style.display='block'; el.textContent=msg; }
+// Escapa HTML para insertar texto de usuario de forma segura en innerHTML (usado por Tips).
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
+}
 function showToast(msg, type='') {
   const wrap = document.getElementById('toast-wrap');
   const t = document.createElement('div');
@@ -15660,6 +15754,7 @@ function openPrefScreen(name) {
   if (name === 'funciones') { updateH2HViewModeUI(); updateNavbarShrinkToggleUI(); }
   if (name === 'notificaciones') renderPrefNotifList();
   if (name === 'almacenamiento') renderStorageList();
+  if (name === 'ayuda') renderAyudaTipsList();
   if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBottomToggleUI(); }
   if (name === 'version') {
     const val = document.getElementById('pref-version-screen-value');
@@ -16739,6 +16834,211 @@ async function togglePrefNotif(categoryId, el) {
   await setNotifPref(categoryId, turningOn);
 }
 
+// ── Tips (v1.22.0-beta) ───────────────────────────────────────────────────────
+// El Usuario DEV publica "artículos breves" (Tips) desde el Panel de
+// Administración > FlemingApp > Tips. A diferencia de las notificaciones
+// convencionales, los Tips siempre están disponibles en Configuración > Ayuda,
+// tanto para usuarios nuevos como antiguos. El DEV decide si, al publicarse,
+// además se envía una notificación (categoría 'tips', desactivable desde
+// Configuración > Notificaciones).
+// Tabla Supabase esperada: tips (
+//   id uuid PK default gen_random_uuid(), title text, body text, image_url text,
+//   notify boolean default false, active boolean default true,
+//   created_at timestamptz default now()
+// )
+let _tipsCache = null;
+async function loadTips(force) {
+  if (_tipsCache && !force) return _tipsCache;
+  try {
+    const { data, error } = await sb.from('tips').select('*').eq('active', true).order('created_at', { ascending: false });
+    if (error) throw error;
+    _tipsCache = data || [];
+  } catch (e) {
+    console.warn('No se pudieron cargar los Tips:', e.message);
+    _tipsCache = [];
+  }
+  return _tipsCache;
+}
+async function renderAyudaTipsList() {
+  const list = document.getElementById('pref-tips-list');
+  if (!list) return;
+  list.innerHTML = `<div class="loader-wrap" style="padding:1rem"><div class="loader"></div></div>`;
+  const tips = await loadTips(true);
+  if (!tips.length) {
+    list.innerHTML = `<div class="profile-row" style="cursor:default">
+      <div class="profile-row-content">
+        <div class="profile-row-value" style="font-size:0.82rem" data-i18n="settings.tips.vacio">Todavía no hay Tips publicados</div>
+      </div>
+    </div>`;
+    return;
+  }
+  list.innerHTML = tips.map(tip => `
+    <div class="profile-row" style="cursor:pointer" onclick='openTipDetailModal(${JSON.stringify(tip.id)})'>
+      ${tip.image_url ? `<div class="profile-row-icon" style="padding:0;overflow:hidden;background:var(--surface3)"><img src="${tip.image_url}" style="width:100%;height:100%;object-fit:cover"></div>` : `
+      <div class="profile-row-icon" style="background:rgba(255,204,0,0.14);color:#ffcc00">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.45 1 1.2 1 2.05V17h6v-.25c0-.85.4-1.6 1-2.05A7 7 0 0 0 12 2z"/></svg>
+      </div>`}
+      <div class="profile-row-content">
+        <div class="profile-row-label">${escapeHtml(tip.title || '')}</div>
+      </div>
+      <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>`).join('');
+}
+function openTipDetailModal(tipId) {
+  const tip = (_tipsCache || []).find(t => t.id === tipId);
+  if (!tip) return;
+  document.getElementById('tip-detail-title').textContent = tip.title || '';
+  const img = document.getElementById('tip-detail-image');
+  if (tip.image_url) { img.src = tip.image_url; img.style.display = 'block'; } else { img.style.display = 'none'; }
+  document.getElementById('tip-detail-body').innerHTML = tip.body || '';
+  document.getElementById('tip-detail-modal').classList.add('open');
+}
+function closeTipDetailModal() {
+  document.getElementById('tip-detail-modal').classList.remove('open');
+}
+
+// ── Tips — Panel de Administración (solo DEV) ────────────────────────────────
+let pendingTipImageBase64 = null;
+let editingTipId = null;
+let tipNotifyOn = false;
+function handleTipImage(event) {
+  const file = event.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img; const maxW = 1000;
+      if (width > maxW) { height = Math.round(height * maxW / width); width = maxW; }
+      const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      pendingTipImageBase64 = canvas.toDataURL('image/jpeg', 0.82);
+      document.getElementById('tip-img-preview').src = pendingTipImageBase64;
+      document.getElementById('tip-img-preview-wrap').style.display = 'block';
+      document.getElementById('tip-img-placeholder').style.display = 'none';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function clearTipImage() {
+  pendingTipImageBase64 = null;
+  document.getElementById('tip-img-file').value = '';
+  document.getElementById('tip-img-preview-wrap').style.display = 'none';
+  document.getElementById('tip-img-placeholder').style.display = 'flex';
+}
+function toggleTipNotify() {
+  tipNotifyOn = !tipNotifyOn;
+  document.getElementById('tip-notify-toggle').classList.toggle('on', tipNotifyOn);
+  document.getElementById('tip-notify-toggle').style.background = tipNotifyOn ? 'var(--accent)' : 'var(--surface3)';
+  document.getElementById('tip-notify-thumb').style.left = tipNotifyOn ? '21px' : '3px';
+}
+function resetTipForm() {
+  editingTipId = null;
+  document.getElementById('tip-title').value = '';
+  _rteClear('tip-body');
+  document.getElementById('tip-body-count').textContent = '0/2000';
+  clearTipImage();
+  tipNotifyOn = false;
+  document.getElementById('tip-notify-toggle').classList.remove('on');
+  document.getElementById('tip-notify-toggle').style.background = 'var(--surface3)';
+  document.getElementById('tip-notify-thumb').style.left = '3px';
+  document.getElementById('tip-error').style.display = 'none';
+  document.getElementById('save-tip-btn').textContent = 'Publicar Tip';
+  document.getElementById('cancel-tip-edit-btn').style.display = 'none';
+}
+async function saveTip() {
+  const title = document.getElementById('tip-title').value.trim();
+  const bodyEl = document.getElementById('tip-body');
+  const body = (bodyEl.innerHTML || '').trim();
+  document.getElementById('tip-error').style.display = 'none';
+
+  if (!title) { showError('tip-error', 'El título es requerido'); return; }
+  if (!body || !(bodyEl.textContent || '').trim()) { showError('tip-error', 'El cuerpo es requerido'); return; }
+  if ((bodyEl.textContent || '').length > 2000) { showError('tip-error', 'El cuerpo supera los 2000 caracteres'); return; }
+
+  const btn = document.getElementById('save-tip-btn');
+  btn.disabled = true; btn.textContent = editingTipId ? 'Guardando…' : 'Publicando…';
+
+  const payload = { title, body };
+  if (pendingTipImageBase64) payload.image_url = pendingTipImageBase64;
+
+  let error;
+  if (editingTipId) {
+    ({ error } = await sb.from('tips').update(payload).eq('id', editingTipId));
+  } else {
+    payload.notify = tipNotifyOn;
+    ({ error } = await sb.from('tips').insert(payload));
+  }
+
+  btn.disabled = false; btn.textContent = editingTipId ? 'Guardar cambios' : 'Publicar Tip';
+  if (error) { showError('tip-error', error.message); return; }
+
+  // Notificación opcional (solo al publicar por primera vez, categoría 'tips').
+  if (!editingTipId && tipNotifyOn) {
+    await sb.from('notifications').insert({ title, body: title, notif_category: 'tips', image_url: pendingTipImageBase64 || null });
+    await notifyUsersPush('tips', { title, body: title });
+  }
+
+  showToast(editingTipId ? 'Tip actualizado ✓' : 'Tip publicado ✓', 'success');
+  resetTipForm();
+  await renderAdminTipsList();
+}
+function editTip(tipId) {
+  const tip = (_tipsCache || []).find(t => t.id === tipId);
+  if (!tip) return;
+  editingTipId = tipId;
+  document.getElementById('tip-title').value = tip.title || '';
+  document.getElementById('tip-body').innerHTML = tip.body || '';
+  document.getElementById('tip-body-count').textContent = (tip.body || '').replace(/<[^>]*>/g, '').length + '/2000';
+  if (tip.image_url) {
+    document.getElementById('tip-img-preview').src = tip.image_url;
+    document.getElementById('tip-img-preview-wrap').style.display = 'block';
+    document.getElementById('tip-img-placeholder').style.display = 'none';
+  } else {
+    clearTipImage();
+  }
+  pendingTipImageBase64 = null; // solo se sobreescribe la imagen si se adjunta una nueva
+  document.getElementById('save-tip-btn').textContent = 'Guardar cambios';
+  document.getElementById('cancel-tip-edit-btn').style.display = '';
+  document.getElementById('admin-tips').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+async function deleteTipAdmin(tipId) {
+  if (!confirm('¿Eliminar este Tip? Dejará de estar disponible en Ayuda para todos los usuarios.')) return;
+  const { error } = await sb.from('tips').delete().eq('id', tipId);
+  if (error) { showToast('No se pudo eliminar el Tip', 'error'); return; }
+  showToast('Tip eliminado ✓', 'success');
+  await renderAdminTipsList();
+}
+async function renderAdminTipsList() {
+  const list = document.getElementById('admin-tips-list');
+  if (!list) return;
+  list.innerHTML = `<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Tips</div></div>`;
+  const tips = await loadTips(true);
+  if (!tips.length) {
+    list.innerHTML = `<div class="notif-gestor-hint">Todavía no se ha publicado ningún Tip.</div>`;
+    return;
+  }
+  list.innerHTML = tips.map(tip => `
+    <div class="notif-gestor-card" style="display:flex;gap:12px;align-items:flex-start;margin-bottom:10px">
+      ${tip.image_url ? `<img src="${tip.image_url}" style="width:56px;height:56px;border-radius:10px;object-fit:cover;flex-shrink:0">` : `
+      <div style="width:56px;height:56px;border-radius:10px;background:rgba(255,204,0,0.14);color:#ffcc00;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.45 1 1.2 1 2.05V17h6v-.25c0-.85.4-1.6 1-2.05A7 7 0 0 0 12 2z"/></svg>
+      </div>`}
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:0.9rem;color:var(--text)">${escapeHtml(tip.title || '')}</div>
+        <div style="font-size:0.75rem;color:var(--text3);margin-top:2px">${new Date(tip.created_at).toLocaleDateString('es-CL', { day:'numeric', month:'long', year:'numeric' })}${tip.notify ? ' · Con notificación' : ''}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button onclick='editTip(${JSON.stringify(tip.id)})' title="Editar" style="width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2)">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>
+        </button>
+        <button onclick='deleteTipAdmin(${JSON.stringify(tip.id)})' title="Eliminar" style="width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--red)">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </button>
+      </div>
+    </div>`).join('');
+}
+
 // ── Reportar un problema (DEV recibe notificación) ───────────────────────────
 function openReportIssueModal() {
   document.getElementById('report-issue-text').value = '';
@@ -16955,6 +17255,8 @@ function syncAdminDropdown() {
   _applyAdminSectionTabsVisibility();
   const notifAdminTab = document.getElementById('admin-tab-notificaciones');
   if (notifAdminTab) notifAdminTab.style.display = (currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, 'notificaciones'))) ? '' : 'none';
+  const tipsAdminTab = document.getElementById('admin-tab-tips');
+  if (tipsAdminTab) tipsAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
   const themeLabel = document.getElementById('theme-btn-label-admin');
   if (themeLabel) _updateThemeActive(document.documentElement.getAttribute('data-theme') || 'auto');
 }
@@ -17331,6 +17633,12 @@ const NOTIF_GROUPS = {
     bg: 'rgba(88,86,214,0.12)',
     icon: '<svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>',
   },
+  tips: {
+    label: 'notif.group.tips',
+    color: '#ffcc00',
+    bg: 'rgba(255,204,0,0.14)',
+    icon: '<svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.45 1 1.2 1 2.05V17h6v-.25c0-.85.4-1.6 1-2.05A7 7 0 0 0 12 2z"/></svg>',
+  },
 };
 
 // ── Niveles de Notificación (v1.20.0-beta) ───────────────────────────────────
@@ -17356,6 +17664,7 @@ const NOTIF_LEVEL_DEFAULTS = {
   'mapas-actualizacion': 'silencio', 'vida-ministerio': 'top', 'fin-semana': 'top',
   'aseo': 'normal', 'hospitalidad': 'normal', 'responsabilidades': 'top',
   'sistema': 'top', 'solicitud-cuenta': 'top', 'reporte-territorio': 'normal',
+  'tips': 'normal',
 };
 
 let _notifLevelsCache = null;
@@ -17449,6 +17758,7 @@ const NOTIF_CATEGORIES = [
   { id: 'sistema',           label: 'notifcat.sistema', mandatory: true,  group: 'sistema',  section: 'sistema' },
   { id: 'solicitud-cuenta',  label: 'notifcat.solicitud-cuenta', mandatory: true,  group: 'sistema',  section: 'sistema' },
   { id: 'reporte-territorio', label: 'notifcat.reporte-territorio', mandatory: true, group: 'sistema', section: 'sistema' },
+  { id: 'tips',              label: 'notifcat.tips', mandatory: false, group: 'tips', section: 'sistema' },
 ];
 
 // Devuelve la key de NOTIF_GROUPS correspondiente a una notificación.
