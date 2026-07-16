@@ -2015,6 +2015,9 @@
     outline: none; transition: border-color 0.2s; resize: vertical; min-height: 80px;
   }
   .form-textarea:focus { border-color: var(--accent); }
+  .form-textarea[contenteditable]:empty:before { content: attr(data-placeholder); color: var(--text3); pointer-events: none; }
+  .form-textarea[contenteditable] h3 { font-size: 1.05rem; font-weight: 800; margin: 0.3rem 0; }
+  .form-textarea[contenteditable] p { margin: 0.3rem 0; }
 
   .modal-overlay {
     display: none; position: fixed; inset: 0;
@@ -6042,8 +6045,21 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
               <input type="text" class="form-input" id="anuncio-title" placeholder="Ej: Cambio de horario esta semana" maxlength="120">
             </div>
             <div class="form-group2">
+              <label class="form-label2">Preview</label>
+              <input type="text" class="form-input" id="anuncio-preview" placeholder="Texto breve que se ve bajo el título en el Push y el Panel" maxlength="150" oninput="document.getElementById('anuncio-preview-count').textContent=this.value.length+'/150'">
+              <div style="font-size:0.7rem;color:var(--text3);margin-top:3px" id="anuncio-preview-count">0/150</div>
+            </div>
+            <div class="form-group2">
               <label class="form-label2">Mensaje</label>
-              <textarea class="form-textarea" id="anuncio-body" placeholder="Escribe el contenido del anuncio…" rows="4" maxlength="600"></textarea>
+              <div class="rte-toolbar" style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap">
+                <button type="button" class="rte-btn" title="Título" onclick="rteExec('anuncio-body','formatBlock','H3')" style="padding:0.35rem 0.6rem;border-radius:7px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:0.78rem;font-weight:700">Título</button>
+                <button type="button" class="rte-btn" title="Cuerpo" onclick="rteExec('anuncio-body','formatBlock','P')" style="padding:0.35rem 0.6rem;border-radius:7px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:0.78rem">Cuerpo</button>
+                <button type="button" class="rte-btn" title="Negrita" onclick="rteExec('anuncio-body','bold')" style="padding:0.35rem 0.65rem;border-radius:7px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:0.78rem;font-weight:800">N</button>
+                <button type="button" class="rte-btn" title="Itálica" onclick="rteExec('anuncio-body','italic')" style="padding:0.35rem 0.65rem;border-radius:7px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:0.78rem;font-style:italic">I</button>
+                <button type="button" class="rte-btn" title="Subrayado" onclick="rteExec('anuncio-body','underline')" style="padding:0.35rem 0.65rem;border-radius:7px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:0.78rem;text-decoration:underline">S</button>
+              </div>
+              <div class="form-textarea" id="anuncio-body" contenteditable="true" data-placeholder="Escribe el contenido del anuncio…" style="min-height:120px;max-height:340px;overflow-y:auto;line-height:1.5" oninput="_rteEnforceLimit('anuncio-body','anuncio-body-count',2000)"></div>
+              <div style="font-size:0.7rem;color:var(--text3);margin-top:3px" id="anuncio-body-count">0/2000</div>
             </div>
             <div class="form-group2">
               <label class="form-label2">Destinatarios</label>
@@ -7459,7 +7475,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.21.0-beta';
+const APP_VERSION = '1.21.1-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -17390,6 +17406,43 @@ document.addEventListener('change', (e) => {
   }
 });
 
+// ── Editor de texto enriquecido para el campo "Mensaje" (v1.21.1-beta) ──────
+// Usa un div contenteditable + document.execCommand para dar formato básico
+// (Título, Cuerpo, Negrita, Itálica, Subrayado). El HTML resultante se guarda
+// tal cual en `body`; solo se muestra completo en la pantalla de detalle de
+// la Notificación. El "Preview" (texto plano, corto) es lo que se ve en el
+// Panel y en la notificación Push del teléfono.
+function rteExec(editorId, command, value) {
+  const el = document.getElementById(editorId);
+  if (!el) return;
+  el.focus();
+  document.execCommand(command, false, value || null);
+}
+function _rteTextLength(editorId) {
+  const el = document.getElementById(editorId);
+  return el ? (el.textContent || '').length : 0;
+}
+function _rteEnforceLimit(editorId, counterId, limit) {
+  const el = document.getElementById(editorId);
+  const counterEl = document.getElementById(counterId);
+  let len = (el.textContent || '').length;
+  if (len > limit) {
+    // Trunca el texto (mantiene el HTML simple ya escrito hasta el límite).
+    let text = el.innerText || el.textContent || '';
+    el.innerText = text.slice(0, limit);
+    len = limit;
+    // Coloca el cursor al final
+    const range = document.createRange(); const sel = window.getSelection();
+    range.selectNodeContents(el); range.collapse(false);
+    sel.removeAllRanges(); sel.addRange(range);
+  }
+  if (counterEl) counterEl.textContent = `${len}/${limit}`;
+}
+function _rteClear(editorId) {
+  const el = document.getElementById(editorId);
+  if (el) el.innerHTML = '';
+}
+
 let pendingAnuncioImageBase64 = null;
 function handleAnuncioImage(event) {
   const file = event.target.files[0]; if (!file) return;
@@ -17419,12 +17472,16 @@ function clearAnuncioImage() {
 
 async function sendAnuncioSistema() {
   const title = document.getElementById('anuncio-title').value.trim();
-  const body  = document.getElementById('anuncio-body').value.trim();
+  const bodyEl = document.getElementById('anuncio-body');
+  const body = (bodyEl.innerHTML || '').trim();
+  const preview = document.getElementById('anuncio-preview').value.trim();
   const targetMode = document.getElementById('anuncio-target').value;
   document.getElementById('anuncio-error').style.display = 'none';
 
   if (!title) { showError('anuncio-error', 'El título es requerido'); return; }
-  if (!body)  { showError('anuncio-error', 'El mensaje es requerido'); return; }
+  if (!preview) { showError('anuncio-error', 'El Preview es requerido'); return; }
+  if (!body || !(bodyEl.textContent || '').trim()) { showError('anuncio-error', 'El mensaje es requerido'); return; }
+  if ((bodyEl.textContent || '').length > 2000) { showError('anuncio-error', 'El mensaje supera los 2000 caracteres'); return; }
 
   let target_names = null;
   if (targetMode === 'nombres') {
@@ -17436,20 +17493,26 @@ async function sendAnuncioSistema() {
   const btn = document.getElementById('send-anuncio-btn');
   btn.disabled = true; btn.textContent = 'Enviando…';
 
-  const payload = { title, body, notif_category: 'sistema' };
+  // `body` guarda el Mensaje con formato (HTML) — se muestra completo solo en
+  // la pantalla de detalle. `preview` es el texto plano y corto que se
+  // muestra bajo el título en el Panel y en la notificación Push.
+  const payload = { title, body, preview, notif_category: 'sistema' };
   if (target_names) payload.target_names = target_names;
   if (pendingAnuncioImageBase64) payload.image_url = pendingAnuncioImageBase64;
 
   const { error } = await sb.from('notifications').insert(payload);
 
-  await notifyUsersPush('sistema', target_names ? { title, body, target_names } : { title, body });
+  await notifyUsersPush('sistema', target_names ? { title, body: preview, target_names } : { title, body: preview });
 
   btn.disabled = false; btn.textContent = 'Enviar anuncio';
   if (error) { showError('anuncio-error', error.message); return; }
 
   showToast('Anuncio enviado ✓', 'success');
   document.getElementById('anuncio-title').value = '';
-  document.getElementById('anuncio-body').value = '';
+  _rteClear('anuncio-body');
+  document.getElementById('anuncio-body-count').textContent = '0/2000';
+  document.getElementById('anuncio-preview').value = '';
+  document.getElementById('anuncio-preview-count').textContent = '0/150';
   document.getElementById('anuncio-target').value = '';
   document.getElementById('anuncio-target-names').value = '';
   document.getElementById('anuncio-target-names-wrap').style.display = 'none';
@@ -18389,7 +18452,7 @@ function _renderNotifTarget(t) {
           <span style="font-size:0.85rem;font-weight:700;color:var(--text)">${n.title}</span>
           ${isNew?'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0"></span>':''}
         </div>
-        <span style="font-size:0.8rem;color:var(--text2);line-height:1.4">${n.body}</span>
+        <span style="font-size:0.8rem;color:var(--text2);line-height:1.4">${n.preview != null ? n.preview : n.body}</span>
         <div id="notif-d-actions-${n.id}">${_accountRequestActionsHTML(n, 'desktop')}</div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;gap:6px">
           ${notifGroupPillHTML(n)}
@@ -18422,7 +18485,7 @@ function _renderNotifTarget(t) {
           </button>
         </div>
         ${n.image_url ? `<img src="${n.image_url}" style="width:100%;max-height:150px;object-fit:cover;border-radius:10px;margin:6px 0">` : ''}
-        <div class="notif-card-body">${n.body}</div>
+        <div class="notif-card-body">${n.preview != null ? n.preview : n.body}</div>
         <div id="notif-m-actions-${n.id}">${_accountRequestActionsHTML(n, 'mobile')}</div>
         <div class="notif-card-footer">
           ${notifGroupPillHTML(n)}
@@ -18453,8 +18516,13 @@ function openNotifDetail(id, ev) {
   document.getElementById('notif-detail-icon-badge').innerHTML = `<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round">${grpIconInner}</svg>`;
   document.getElementById('notif-detail-group-pill').innerHTML = notifGroupPillHTML(n);
   document.getElementById('notif-detail-title').textContent = n.title || '';
-  document.getElementById('notif-detail-content').textContent = n.body || '';
   document.getElementById('notif-detail-date').textContent = new Date(n.created_at).toLocaleDateString('es-CL', {weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
+  const contentEl = document.getElementById('notif-detail-content');
+  // El Mensaje (n.body) puede traer formato HTML simple (título, negrita,
+  // itálica, subrayado) generado por el editor del Gestor de Notificaciones.
+  // Las notificaciones antiguas (sin formato) siguen siendo texto plano
+  // seguro de insertar tal cual.
+  contentEl.innerHTML = n.body || '';
   document.getElementById('notif-detail-actions').innerHTML = _accountRequestActionsHTML(n, 'mobile');
 
   document.getElementById('page-notif-detail').style.display = 'flex';
@@ -20214,7 +20282,12 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
       </div>
       <h2 id="notif-detail-title" style="font-size:1.25rem;font-weight:800;color:var(--text);margin:0 0 0.5rem;line-height:1.3"></h2>
       <div id="notif-detail-date" style="font-size:0.78rem;color:var(--text3);font-weight:600;margin-bottom:1.1rem"></div>
-      <div id="notif-detail-content" style="font-size:0.95rem;color:var(--text2);line-height:1.65;white-space:pre-wrap"></div>
+      <div id="notif-detail-content" class="notif-detail-rich" style="font-size:0.95rem;color:var(--text2);line-height:1.65"></div>
+      <style>
+        .notif-detail-rich h3 { font-size: 1.1rem; font-weight: 800; color: var(--text); margin: 0.9rem 0 0.4rem; }
+        .notif-detail-rich h3:first-child { margin-top: 0; }
+        .notif-detail-rich p { margin: 0.4rem 0; }
+      </style>
       <div id="notif-detail-actions" style="margin-top:1.1rem"></div>
     </div>
   </div>
