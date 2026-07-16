@@ -7496,7 +7496,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.21.5-beta';
+const APP_VERSION = '1.21.6-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -18430,8 +18430,8 @@ function _accountRequestActionsHTML(n, variant) {
       return `<div style="${wrapStyle}"><span style="font-size:0.78rem;font-weight:600;color:var(--red)">✕ Solicitud denegada</span></div>`;
     }
     return `<div style="${wrapStyle}">
-      <button style="${btnBase};background:var(--green);color:#fff" onclick="resolveAccountRequest('${n.id}','${name.replace(/'/g,"\\'")}',true)">Aceptar</button>
-      <button style="${btnBase};background:var(--surface3);color:var(--text)" onclick="resolveAccountRequest('${n.id}','${name.replace(/'/g,"\\'")}',false)">Denegar</button>
+      <button style="${btnBase};background:var(--green);color:#fff" onclick="event.stopPropagation();resolveAccountRequest('${n.id}','${name.replace(/'/g,"\\'")}',true)">Aceptar</button>
+      <button style="${btnBase};background:var(--surface3);color:var(--text)" onclick="event.stopPropagation();resolveAccountRequest('${n.id}','${name.replace(/'/g,"\\'")}',false)">Denegar</button>
     </div>`;
   }
 
@@ -18447,8 +18447,8 @@ function _accountRequestActionsHTML(n, variant) {
     }
     const nameEsc = p.name.replace(/'/g, "\\'");
     return `<div style="${wrapStyle}">
-      <button style="${btnBase};background:var(--green);color:#fff" onclick="resolveCartShiftRequest('${n.id}','${p.turnoId}','${nameEsc}',true)">Aceptar</button>
-      <button style="${btnBase};background:var(--surface3);color:var(--text)" onclick="resolveCartShiftRequest('${n.id}','${p.turnoId}','${nameEsc}',false)">Rechazar</button>
+      <button style="${btnBase};background:var(--green);color:#fff" onclick="event.stopPropagation();resolveCartShiftRequest('${n.id}','${p.turnoId}','${nameEsc}',true)">Aceptar</button>
+      <button style="${btnBase};background:var(--surface3);color:var(--text)" onclick="event.stopPropagation();resolveCartShiftRequest('${n.id}','${p.turnoId}','${nameEsc}',false)">Rechazar</button>
     </div>`;
   }
 
@@ -18542,19 +18542,20 @@ function _renderNotifTarget(t) {
     listEl.innerHTML = data.map(n => {
       const isNew = n.created_at > lastSeen;
       const dateStr = new Date(n.created_at).toLocaleDateString('es-CL', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-      return `<div id="notif-d-${n.id}" style="padding:0.75rem 1rem;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:5px;${isNew?'background:var(--accent-light);':''}position:relative">
+      return `<div id="notif-d-${n.id}" onclick="openNotifDetail('${n.id}', event)" style="padding:0.75rem 1rem;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:5px;${isNew?'background:var(--accent-light);':''}position:relative;cursor:pointer">
         <div style="display:flex;align-items:center;gap:8px;padding-right:24px">
           ${(() => { const _dGrp = NOTIF_GROUPS[getNotifGroupKey(n)]; const _dInner = _dGrp.icon.replace(/<svg[^>]*>/, '').replace('</svg>', ''); return `<div style="width:28px;height:28px;border-radius:8px;background:${_dGrp.bg};color:${_dGrp.color};display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round">${_dInner}</svg></div>`; })()}
           <span style="font-size:0.85rem;font-weight:700;color:var(--text)">${n.title}</span>
           ${isNew?'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0"></span>':''}
         </div>
+        ${n.image_url ? `<img src="${n.image_url}" style="width:100%;max-height:110px;object-fit:cover;border-radius:8px">` : ''}
         <span style="font-size:0.8rem;color:var(--text2);line-height:1.4">${n.preview != null ? n.preview : n.body}</span>
         <div id="notif-d-actions-${n.id}">${_accountRequestActionsHTML(n, 'desktop')}</div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;gap:6px">
           ${notifGroupPillHTML(n)}
           <span style="font-size:0.65rem;color:var(--text3);flex-shrink:0">${dateStr}</span>
         </div>
-        <button onclick="deleteNotification('${n.id}')" title="Eliminar" style="position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text3);padding:0" onmouseover="this.style.background='rgba(255,59,48,0.1)';this.style.color='var(--red)'" onmouseout="this.style.background='none';this.style.color='var(--text3)'">
+        <button onclick="event.stopPropagation();deleteNotification('${n.id}')" title="Eliminar" style="position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text3);padding:0" onmouseover="this.style.background='rgba(255,59,48,0.1)';this.style.color='var(--red)'" onmouseout="this.style.background='none';this.style.color='var(--text3)'">
           <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>`;
