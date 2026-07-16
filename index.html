@@ -1159,6 +1159,17 @@
     margin-top: 8px;
   }
   .detail-time-chip svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.2; }
+  .detail-weather-chip {
+    display: none; align-items: center; gap: 5px;
+    font-size: 0.8rem; font-weight: 600; color: var(--text2);
+    background: var(--surface3); padding: 3px 10px; border-radius: 20px;
+    margin-top: 8px; margin-left: 6px;
+  }
+  .detail-weather-chip.visible { display: inline-flex; }
+  .detail-weather-chip svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .detail-weather-chip.weather-sun    { color: #b8860b; background: rgba(245,166,35,0.14); }
+  .detail-weather-chip.weather-cloud  { color: var(--text2); background: var(--surface3); }
+  .detail-weather-chip.weather-rain   { color: #0a6cd1; background: rgba(10,108,209,0.12); }
   .detail-address { font-size: 1.1rem; font-weight: 700; line-height: 1.3; }
   /* "Casa de X" / "Depto de X" — dato independiente de la dirección, en gris
      para distinguirlo visualmente, tal como el resto de los datos del bloque. */
@@ -6316,6 +6327,10 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           <span id="detail-time">—</span>
         </div>
+        <div class="detail-weather-chip" id="detail-weather-chip">
+          <svg id="detail-weather-icon" viewBox="0 0 24 24"></svg>
+          <span id="detail-weather-temp">—°</span>
+        </div>
       </div>
       <div class="detail-ter-badge" id="detail-ter-badge" style="display:none"></div>
     </div>
@@ -7300,6 +7315,23 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.anim.help">Elige "Reducidas" si eres sensible al movimiento en pantalla.</div>
       </div>
     </div>
+    <!-- Clima en asignaciones (v1.22.10-beta) -->
+    <div class="profile-section">
+      <div class="profile-section-title" data-i18n="exp.clima.section">Clima</div>
+      <div class="profile-row" style="cursor:pointer" onclick="toggleWeatherPref()">
+        <div class="profile-row-icon" style="background:var(--ter-4-bg);color:var(--ter-4)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M17.5 19H9a5 5 0 1 1 1.5-9.77A6 6 0 0 1 22 11.5a4.5 4.5 0 0 1-4.5 7.5z"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="exp.clima.title">Clima en asignaciones</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.clima.desc">Muestra el pronóstico del día y hora de cada asignación de casa en casa, junto a la hora</div>
+        </div>
+        <div id="weather-pref-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="weather-pref-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
+      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.clima.help">El pronóstico solo está disponible para fechas cercanas y depende de que el territorio o la dirección puedan ubicarse en el mapa.</div>
+    </div>
     <!-- Versión Simplificada de la plataforma (solo móvil) -->
     <div class="profile-section">
       <div class="profile-section-title" data-i18n="exp.layout">Layout</div>
@@ -7681,7 +7713,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.22.9.1-beta';
+const APP_VERSION = '1.22.10-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -8207,6 +8239,10 @@ const I18N = {
   'exp.simplificada.desc.desktop': { es: 'Disponible solo en dispositivos móviles. Actívala y ábrela desde tu teléfono.', en: 'Only available on mobile devices. Enable it and open it from your phone.', nl: 'Alleen beschikbaar op mobiele apparaten. Schakel het in en open het vanaf je telefoon.' },
   'exp.simplificada.help': { es: 'Al activarla, se desactivan las Notificaciones, Live, el Tutorial y el panel de administración. Para volver a la versión normal, entra a Configuración desde el título "Fleming".', en: 'When enabled, Notifications, Live, the Tutorial and the admin panel are disabled. To return to the normal version, open Settings from the "Fleming" title.', nl: 'Bij activering worden Meldingen, Live, de Tutorial en het beheerpaneel uitgeschakeld. Ga naar Instellingen via de titel "Fleming" om terug te keren naar de normale versie.' },
   'exp.navbarabajo.title': { es: 'NavBar abajo',            en: 'NavBar at the bottom', nl: 'NavBar onderaan' },
+  'exp.clima.section': { es: 'Clima', en: 'Weather', nl: 'Weer' },
+  'exp.clima.title':   { es: 'Clima en asignaciones', en: 'Weather in assignments', nl: 'Weer bij toewijzingen' },
+  'exp.clima.desc':    { es: 'Muestra el pronóstico del día y hora de cada asignación de casa en casa, junto a la hora', en: 'Shows the forecast for the day and time of each door-to-door assignment, next to the time', nl: 'Toont de weersverwachting voor de dag en het tijdstip van elke huis-aan-huis toewijzing, naast de tijd' },
+  'exp.clima.help':    { es: 'El pronóstico solo está disponible para fechas cercanas y depende de que el territorio o la dirección puedan ubicarse en el mapa.', en: 'The forecast is only available for nearby dates and depends on the territory or address being locatable on the map.', nl: 'De verwachting is alleen beschikbaar voor nabije data en is afhankelijk van of het gebied of adres op de kaart gevonden kan worden.' },
   'exp.navbarabajo.desc':  { es: 'Coloca la NavBar en la parte inferior de la pantalla. Solo disponible en móvil.', en: 'Places the NavBar at the bottom of the screen. Only available on mobile.', nl: 'Plaatst de NavBar onderaan het scherm. Alleen beschikbaar op mobiel.' },
   'exp.navbarabajo.desc.mobile': { es: 'Coloca la NavBar en la parte inferior de la pantalla, para un acceso más fácil.', en: 'Places the NavBar at the bottom of the screen, for easier access.', nl: 'Plaatst de NavBar onderaan het scherm voor eenvoudigere toegang.' },
   'exp.navbarabajo.desc.desktop': { es: 'Disponible solo en dispositivos móviles. Actívala y velá el efecto desde tu teléfono.', en: 'Only available on mobile devices. Enable it and see the effect from your phone.', nl: 'Alleen beschikbaar op mobiele apparaten. Schakel het in en bekijk het effect vanaf je telefoon.' },
@@ -8320,6 +8356,7 @@ function applyLanguage(lang) {
   try { if (typeof updateTransparencyToggleUI === 'function') updateTransparencyToggleUI(); } catch {}
   try { if (typeof updateSimplifiedModeToggleUI === 'function') updateSimplifiedModeToggleUI(); } catch {}
   try { if (typeof updateNavbarBottomToggleUI === 'function') updateNavbarBottomToggleUI(); } catch {}
+  try { if (typeof updateWeatherToggleUI === 'function') updateWeatherToggleUI(); } catch {}
   updateLangPrefUI();
 }
 function updateLangPrefUI() {
@@ -11306,6 +11343,12 @@ async function viewAssignment(id) {
   document.getElementById('detail-address').textContent = isEspecial ? (a.especial_titulo || 'Evento especial') : (a.address || '—');
   document.getElementById('detail-house-label').textContent = isEspecial ? (a.especial_subtitulo || '') : _houseLabel3;
   document.getElementById('detail-conductor').textContent = isEspecial ? '' : (a.conductor || '');
+
+  // ── Clima de la asignación (Experimentos) ──
+  resetAssignmentWeatherChip();
+  if (!isEspecial && a.address) {
+    loadAssignmentWeather(a);
+  }
 
   // ── Foto de la tarjeta "Especial" ──
   const espPhotoWrap = document.getElementById('detail-especial-photo-wrap');
@@ -15864,7 +15907,7 @@ function openPrefScreen(name) {
   if (name === 'notificaciones') renderPrefNotifList();
   if (name === 'almacenamiento') renderStorageList();
   if (name === 'ayuda') renderAyudaTipsList();
-  if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBottomToggleUI(); }
+  if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBottomToggleUI(); updateWeatherToggleUI(); }
   if (name === 'version') {
     const val = document.getElementById('pref-version-screen-value');
     if (val) val.textContent = 'Versión ' + APP_VERSION;
@@ -16361,6 +16404,8 @@ function triggerEggUnlock() {
     applyAnimationsMode('fluid');
     localStorage.removeItem('fleming_navbar_bottom');
     applyNavbarBottomUI();
+    localStorage.removeItem('fleming_weather_enabled');
+    resetAssignmentWeatherChip();
     updateExperimentosNavVisibility();
     showToast('Experimentos desactivados', '');
     return;
@@ -18673,6 +18718,113 @@ function isNavbarBottomActive() {
   // No aplica si la Versión Simplificada está activa (usa su propio header)
   return isNavbarBottomSelected() && isMobile() && !isSimplifiedModeActive();
 }
+// ── Experimentos: Clima en asignaciones (v1.22.10-beta) ──────────────────────
+// Muestra un pill junto a la hora en el detalle de la asignación con el
+// pronóstico (sol/lluvia/nubes + grados) para el día y hora exactos de esa
+// asignación. Usa geocodificación (Nominatim) para ubicar la dirección y
+// Open-Meteo para el pronóstico horario — ambos servicios gratuitos y sin
+// necesidad de API key. Si algo falla o la fecha está fuera del rango de
+// pronóstico disponible, el pill simplemente no se muestra.
+function isWeatherPrefEnabled() {
+  return localStorage.getItem('fleming_weather_enabled') === 'true';
+}
+function toggleWeatherPref() {
+  const next = !isWeatherPrefEnabled();
+  localStorage.setItem('fleming_weather_enabled', next ? 'true' : 'false');
+  updateWeatherToggleUI();
+  if (next) {
+    showToast('Clima en asignaciones activado', 'success');
+  } else {
+    showToast('Clima en asignaciones desactivado', '');
+    resetAssignmentWeatherChip();
+  }
+}
+function updateWeatherToggleUI() {
+  const toggle = document.getElementById('weather-pref-toggle');
+  const thumb  = document.getElementById('weather-pref-thumb');
+  if (!toggle || !thumb) return;
+  const on = isWeatherPrefEnabled();
+  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
+  thumb.style.left = on ? '21px' : '3px';
+}
+
+function resetAssignmentWeatherChip() {
+  const chip = document.getElementById('detail-weather-chip');
+  if (!chip) return;
+  chip.classList.remove('visible', 'weather-sun', 'weather-cloud', 'weather-rain');
+  chip.dataset.reqId = '';
+}
+
+const WEATHER_ICONS = {
+  sun: '<circle cx="12" cy="12" r="4.5"/><line x1="12" y1="2.5" x2="12" y2="4.5"/><line x1="12" y1="19.5" x2="12" y2="21.5"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="2.5" y1="12" x2="4.5" y2="12"/><line x1="19.5" y1="12" x2="21.5" y2="12"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/>',
+  cloud: '<path d="M17.5 19H8a5 5 0 1 1 1.35-9.8A6 6 0 0 1 21 11.5 4.5 4.5 0 0 1 17.5 19z"/>',
+  rain: '<path d="M16.5 15H8a4.5 4.5 0 1 1 1.2-8.84A5.5 5.5 0 0 1 19.5 8 4 4 0 0 1 16.5 15z"/><line x1="8" y1="18" x2="7" y2="20.5"/><line x1="12.5" y1="18" x2="11.5" y2="20.5"/><line x1="17" y1="18" x2="16" y2="20.5"/>',
+};
+
+// Mapea los weathercode de Open-Meteo (estándar WMO) a un tipo simple de ícono.
+function _weatherCodeToType(code) {
+  if (code === 0 || code === 1) return 'sun';
+  if (code === 2 || code === 3) return 'cloud';
+  return 'rain'; // niebla, llovizna, lluvia, chubascos, tormenta, nieve, etc.
+}
+
+const _weatherGeocodeCache = {};
+async function _geocodeAddressForWeather(address) {
+  const key = address.trim().toLowerCase();
+  if (_weatherGeocodeCache[key] !== undefined) return _weatherGeocodeCache[key];
+  try {
+    const url = 'https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(address) + '&format=json&limit=1';
+    const res = await fetch(url, { headers: { 'Accept-Language': 'es' } });
+    if (!res.ok) { _weatherGeocodeCache[key] = null; return null; }
+    const data = await res.json();
+    const first = Array.isArray(data) ? data[0] : null;
+    const coords = first ? { lat: parseFloat(first.lat), lon: parseFloat(first.lon) } : null;
+    _weatherGeocodeCache[key] = coords;
+    return coords;
+  } catch { _weatherGeocodeCache[key] = null; return null; }
+}
+
+// `a` es la asignación (a.address, a.date 'YYYY-MM-DD', a.time 'HH:MM:SS').
+async function loadAssignmentWeather(a) {
+  if (!isWeatherPrefEnabled()) return;
+  if (!a.date || !a.time) return;
+  const chip = document.getElementById('detail-weather-chip');
+  if (!chip) return;
+  // Evita que una respuesta lenta de una asignación anterior pise el resultado
+  // de la asignación actual, si el usuario navega rápido entre tarjetas.
+  const reqId = a.id + ':' + Date.now();
+  chip.dataset.reqId = reqId;
+
+  const coords = await _geocodeAddressForWeather(a.address);
+  if (!coords || chip.dataset.reqId !== reqId) return;
+
+  try {
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + coords.lat + '&longitude=' + coords.lon
+      + '&hourly=temperature_2m,weathercode&timezone=auto&start_date=' + a.date + '&end_date=' + a.date;
+    const res = await fetch(url);
+    if (!res.ok || chip.dataset.reqId !== reqId) return;
+    const data = await res.json();
+    const times = data?.hourly?.time || [];
+    const temps = data?.hourly?.temperature_2m || [];
+    const codes = data?.hourly?.weathercode || [];
+    if (!times.length) return; // fecha fuera del rango de pronóstico disponible
+
+    const targetHour = parseInt(a.time.substring(0, 2), 10);
+    const targetIso = a.date + 'T' + String(targetHour).padStart(2, '0') + ':00';
+    let idx = times.indexOf(targetIso);
+    if (idx === -1) idx = 0;
+    const temp = temps[idx];
+    const code = codes[idx];
+    if (temp === undefined || code === undefined || chip.dataset.reqId !== reqId) return;
+
+    const type = _weatherCodeToType(code);
+    document.getElementById('detail-weather-icon').innerHTML = WEATHER_ICONS[type];
+    document.getElementById('detail-weather-temp').textContent = Math.round(temp) + '°';
+    chip.classList.remove('weather-sun', 'weather-cloud', 'weather-rain');
+    chip.classList.add('weather-' + type, 'visible');
+  } catch { /* si algo falla, el pill simplemente no se muestra */ }
+}
+
 function toggleNavbarBottomPref() {
   const next = !isNavbarBottomSelected();
   localStorage.setItem('fleming_navbar_bottom', next ? 'true' : 'false');
