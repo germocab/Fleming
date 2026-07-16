@@ -7713,7 +7713,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.22.10-beta';
+const APP_VERSION = '1.22.11-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -9392,6 +9392,7 @@ async function renderProfilePage() {
   const frame = avatarFrameFor(currentRole, me?.admin_tag_id);
   if (frame.cls) bigAvatar.classList.add(frame.cls);
   if (frame.style) bigAvatar.style.cssText += frame.style; else bigAvatar.style.removeProperty('--atag-frame-color');
+  _ownAvatarUrl = me?.avatar || null; // mantiene sincronizado el avatar del Menú Opciones
   if (me?.avatar) {
     bigAvatar.innerHTML = `<img src="${me.avatar}" style="width:100%;height:100%;object-fit:cover">`;
     const removeBtn = document.getElementById('profile-photo-remove-btn');
@@ -10160,6 +10161,33 @@ function showGuestShareError() {
   </div></div>`;
 }
 
+// ── Foto de perfil en el Menú Opciones: se carga desde el arranque, sin
+// esperar a que el usuario entre a "Mi Perfil" (v1.22.11-beta) ──────────────
+let _ownAvatarUrl; // undefined = aún no consultado, null = sin foto, string = URL/base64
+async function loadOwnAvatarForDropdown() {
+  if (!currentUser) return;
+  try {
+    const { data } = await sb.from('platform_users').select('avatar').ilike('name', currentUser.name).single();
+    _ownAvatarUrl = data?.avatar || null;
+  } catch (e) { _ownAvatarUrl = _ownAvatarUrl || null; }
+  applyOwnAvatarToDropdowns();
+}
+function applyOwnAvatarToDropdowns() {
+  if (!currentUser) return;
+  const col   = userColor(currentUser.name);
+  const inits = userInitials(currentUser.name);
+  ['user-avatar', 'user-avatar-admin'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.background = col;
+    if (_ownAvatarUrl) {
+      el.innerHTML = `<img src="${_ownAvatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+    } else {
+      el.textContent = inits;
+    }
+  });
+}
+
 async function enterApp() {
   document.getElementById('auth-screen').style.display = 'none';
 
@@ -10182,6 +10210,7 @@ async function enterApp() {
   const initials = currentUser.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
   document.getElementById('user-avatar').textContent = initials;
   document.getElementById('dropdown-name').textContent = currentUser.name;
+  loadOwnAvatarForDropdown(); // en segundo plano, no bloquea el resto del arranque
 
   // Cargar preferencias de notificaciones (en segundo plano, no bloquea el resto del arranque)
   loadNotifPrefs();
@@ -17467,6 +17496,7 @@ function syncAdminDropdown() {
   const adminRole    = document.getElementById('dropdown-role-admin');
   if (adminAvatar) adminAvatar.textContent = initials;
   if (adminName)   adminName.textContent = currentUser ? currentUser.name : '—';
+  if (_ownAvatarUrl !== undefined) applyOwnAvatarToDropdowns();
   if (adminRole) {
     const roleLabelsMap = { dev:'DEV', admin:'Administrador', viewer:'Visitante' };
     adminRole.textContent = roleLabelsMap[currentRole] || 'Visitante';
