@@ -3504,23 +3504,16 @@
     .ter-map-banner-label { font-size: 0.88rem; }
   }
 
-  /* ── Full map lightbox (extends existing lightbox) ── */
+  /* ── Mapa de la congregación: visor de pantalla completa (v1.22.7.2-beta) ──
+     Ya no es un lightbox centrado con ancho máximo: ocupa toda la pantalla,
+     igual que el resto de las pantallas completas de la plataforma (Tips,
+     Notificación, etc.), para aprovechar más espacio y ver más detalle. ── */
   .full-map-lightbox {
-    position: fixed; inset: 0; z-index: 500;
-    background: var(--modal-overlay-bg); backdrop-filter: blur(10px);
+    position: fixed; inset: 0; z-index: 260;
+    background: var(--bg);
     display: none; flex-direction: column;
-    align-items: center; justify-content: center; padding: 1rem;
   }
   .full-map-lightbox.open { display: flex; animation: fadeIn 0.26s var(--ease-fluid-soft); }
-  .full-map-lb-header {
-    display: flex; align-items: center; justify-content: space-between;
-    width: 100%; max-width: 900px; margin-bottom: 0.75rem;
-    flex-wrap: wrap; gap: 8px;
-  }
-  .full-map-lb-title {
-    font-size: 1rem; font-weight: 700; color: #fff;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
-  }
   .full-map-lb-actions { display: flex; gap: 8px; align-items: center; }
   .full-map-lb-btn {
     display: inline-flex; align-items: center; gap: 6px;
@@ -3529,7 +3522,6 @@
     cursor: pointer; transition: opacity 0.15s; border: none;
   }
   .full-map-lb-btn.download { background: var(--green); color: #fff; }
-  .full-map-lb-btn.close-btn { background: rgba(255,255,255,0.18); color: #fff; border: 1px solid rgba(255,255,255,0.3); }
   .full-map-lb-btn:hover { opacity: 0.85; }
   .full-map-lb-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
   @media (max-width: 480px) {
@@ -3537,21 +3529,19 @@
     .full-map-lb-btn.download { padding: 0.45rem 0.65rem; }
   }
   .full-map-lb-img-wrap {
-    width: 100%; max-width: 900px; max-height: calc(100vh - 120px);
-    overflow: hidden; border-radius: var(--radius);
-    box-shadow: var(--shadow-lg);
+    flex: 1; width: 100%; overflow: hidden;
     background: var(--surface2);
     display: flex; align-items: center; justify-content: center;
     position: relative; touch-action: none; cursor: grab;
   }
   .full-map-lb-img-wrap.fm-dragging { cursor: grabbing; }
   .full-map-lb-img-wrap img, .full-map-lb-img-wrap canvas {
-    max-width: 100%; display: block; border-radius: var(--radius);
+    max-width: 100%; max-height: 100%; display: block;
     will-change: transform; user-select: none; -webkit-user-drag: none;
     transform-origin: center center;
   }
   .map-zoom-hint {
-    position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+    position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
     background: rgba(0,0,0,0.55); color: #fff; font-size: 0.7rem; font-weight: 600;
     padding: 4px 12px; border-radius: 20px; pointer-events: none; opacity: 1;
     transition: opacity 0.4s ease; z-index: 2;
@@ -3590,13 +3580,16 @@
   .full-map-admin-actions { display: flex; gap: 8px; flex-wrap: wrap; }
   .fm-page-nav { display: flex; align-items: center; gap: 8px; }
   .fm-page-nav button {
-    width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3);
-    background: rgba(255,255,255,0.18); color: #fff; cursor: pointer;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--nav-bg);
+    backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%);
+    border: 1px solid var(--border); box-shadow: var(--shadow); color: var(--text); cursor: pointer;
     display: flex; align-items: center; justify-content: center;
   }
   .fm-page-nav button:disabled { opacity: 0.35; cursor: default; }
-  .fm-page-nav button svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; }
-  .fm-page-nav span { color: #fff; font-size: 0.78rem; font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+  .fm-page-nav button svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; }
+  .fm-page-nav span { color: var(--text2); font-size: 0.78rem; font-weight: 600; }
 
   /* ── Admin fullscreen mode ─────────────────────────────────── */
   #page-admin {
@@ -7534,26 +7527,25 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 </div>
 
 
-<!-- Full congregation map lightbox -->
-<div class="full-map-lightbox" id="full-map-lightbox" onclick="handleFullMapClick(event)">
-  <div class="full-map-lb-header">
-    <span class="full-map-lb-title">Mapa completo de la congregación</span>
-    <div class="full-map-lb-actions">
+<!-- Mapa de la congregación: visor de pantalla completa (v1.22.7.2-beta) -->
+<div class="full-map-lightbox" id="full-map-lightbox">
+  <nav class="subpage-topbar">
+    <button class="pill-back-btn" onclick="closeFullMap()" title="Territorios">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span class="pill-header-title">Mapa</span>
+    <div class="subpage-topbar-right full-map-lb-actions">
       <div class="fm-page-nav" id="fm-page-nav" style="display:none">
-        <button onclick="event.stopPropagation();changeFullMapPage(-1)" id="fm-page-prev"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <button onclick="changeFullMapPage(-1)" id="fm-page-prev"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
         <span id="fm-page-indicator">1/1</span>
-        <button onclick="event.stopPropagation();changeFullMapPage(1)" id="fm-page-next"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+        <button onclick="changeFullMapPage(1)" id="fm-page-next"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
       <button class="full-map-lb-btn download" onclick="downloadFullMap()">
         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         <span class="fm-label">Descargar PDF</span>
       </button>
-      <button class="full-map-lb-btn close-btn" onclick="closeFullMap()">
-        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        Cerrar
-      </button>
     </div>
-  </div>
+  </nav>
   <div class="full-map-lb-img-wrap" id="full-map-lb-wrap">
     <canvas id="full-map-lb-canvas"></canvas>
     <div class="map-zoom-hint" id="full-map-lb-hint">Pellizca o usa la rueda para hacer zoom</div>
@@ -7647,7 +7639,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.22.7.1-beta';
+const APP_VERSION = '1.22.7.2-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -17259,7 +17251,7 @@ function _closeTopLayer() {
     document.querySelector('.img-lightbox.open').classList.remove('open'); return;
   }
   if (document.querySelector('.full-map-lightbox.open')) {
-    document.querySelector('.full-map-lightbox.open').classList.remove('open'); return;
+    closeFullMap(); return;
   }
   // Detail overlay (asignaciones)
   if (document.getElementById('detail-overlay')?.classList.contains('open')) {
@@ -17696,7 +17688,8 @@ async function openFullMap() {
 
 async function renderFullMapLightboxPage() {
   if (!_fullMapPdfDoc) return;
-  const maxWidth = Math.min(900, window.innerWidth - 32);
+  const wrap = document.getElementById('full-map-lb-wrap');
+  const maxWidth = (wrap ? wrap.clientWidth : window.innerWidth) - 8;
   await renderPdfPageToCanvas(_fullMapPdfDoc, fullMapCurrentPage, 'full-map-lb-canvas', maxWidth);
   const nav = document.getElementById('fm-page-nav');
   const numPages = _fullMapPdfDoc.numPages;
@@ -17722,10 +17715,6 @@ function closeFullMap() {
   document.getElementById('full-map-lightbox').classList.remove('open');
   document.body.style.overflow = '';
   fullMapZoomCtrl.reset();
-}
-
-function handleFullMapClick(e) {
-  if (e.target === document.getElementById('full-map-lightbox')) closeFullMap();
 }
 
 function downloadFullMap() {
