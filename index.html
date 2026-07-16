@@ -7558,7 +7558,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.20.0-beta';
+const APP_VERSION = '1.20.2-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -14836,15 +14836,6 @@ function _userCardHTML(u) {
     const inits = userInitials(u.name);
     const roleBadgeCls = u.role === 'dev' ? 'role-badge-dev' : u.role === 'admin' ? 'role-badge-admin' : u.role === 'pending' ? 'role-badge-viewer' : 'role-badge-viewer';
     const roleLabel = ROLE_LABELS[u.role] || u.role;
-    const lastActive = u.last_seen || u.joined_at;
-    const minutesAgo = lastActive ? Math.round((new Date() - new Date(lastActive)) / 60000) : 9999;
-    const isOnline = minutesAgo < 10;
-    const since = lastActive ? (() => {
-      if (minutesAgo < 2) return 'Ahora mismo';
-      if (minutesAgo < 60) return 'Hace ' + minutesAgo + ' min';
-      if (minutesAgo < 1440) return 'Hace ' + Math.round(minutesAgo/60) + 'h';
-      return new Date(lastActive).toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'});
-    })() : '—';
     const uLabels = parseLabels(u.labels);
     const labelChips = [
       uLabels.anciano   ? `<span style="font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(234,179,8,0.12);color:#ca8a04;border:1px solid rgba(234,179,8,0.3)">Anciano</span>` : '',
@@ -14863,14 +14854,12 @@ function _userCardHTML(u) {
       <div class="user-card-main">
         <div class="user-card-avatar ${frame.cls}" style="background:${col};overflow:hidden;position:relative;${frame.style}">
           ${avatarHtml}
-          ${isOnline ? '<span class="user-online-ring"></span>' : ''}
         </div>
         <div class="user-card-info">
           <div class="user-card-name">${u.name}${isCurrentUser ? ' <span style="font-size:0.68rem;color:var(--text3);font-weight:500">(tú)</span>' : ''}${u.linked_name ? ` <span title="Vinculado con ${u.linked_name}" style="font-size:0.68rem;color:var(--accent);font-weight:600">🔗</span>` : ''}</div>
-          <div class="user-card-meta">
-            <span>${since}</span>
+          ${(labelChips || cardAdminTagChip) ? `<div class="user-card-meta">
             ${labelChips}${cardAdminTagChip}
-          </div>
+          </div>` : ''}
         </div>
         <div class="user-card-actions">
           <span class="role-badge-pill ${roleBadgeCls}">${roleLabel}</span>
