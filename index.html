@@ -4636,6 +4636,20 @@
     to   { opacity:1; transform: translateY(0) scale(1); }
   }
 
+  /* ── Pantalla Versión: glow verde/azul al mantener presionado el ícono ── */
+  .version-hold-glow {
+    position: absolute; left: 50%; top: 50%; z-index: 0;
+    width: 96px; height: 96px; border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0; pointer-events: none;
+    filter: blur(18px);
+    transition: opacity 0.35s ease, transform 0.35s ease, filter 0.35s ease;
+    will-change: transform, opacity;
+  }
+  .version-hold-glow-blue  { background: radial-gradient(circle, rgba(0,122,255,0.55) 0%, rgba(0,122,255,0.0) 70%); }
+  .version-hold-glow-green { background: radial-gradient(circle, rgba(48,209,88,0.5) 0%, rgba(48,209,88,0.0) 70%); }
+  .version-hold-glow.active { opacity: 1; }
+
   /* ── Modo Experimentos: unlock overlay ── */
   #egg-unlock-overlay {
     position: fixed; inset: 0; z-index: 9999;
@@ -6940,10 +6954,14 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
     <span class="pill-header-title" data-i18n="settings.version">Versión de la plataforma</span>
   </nav>
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.4rem;padding:1rem;text-align:center">
-    <div id="pref-version-app-icon" style="width:96px;height:96px;border-radius:24px;overflow:hidden;box-shadow:var(--shadow-lg);margin-bottom:0.85rem;cursor:pointer;user-select:none;-webkit-user-select:none;transition:transform 0.15s"
-      onmousedown="startVersionScreenHold(event)" onmouseup="endVersionScreenHold()" onmouseleave="cancelVersionScreenHold()"
-      ontouchstart="startVersionScreenHold(event)" ontouchend="endVersionScreenHold()" ontouchcancel="cancelVersionScreenHold()">
-      <img src="android-chrome-192x192.png" alt="FlemingApp" style="width:100%;height:100%;object-fit:cover">
+    <div id="pref-version-icon-wrap" style="position:relative;width:96px;height:96px;margin-bottom:0.85rem">
+      <div id="version-hold-glow-blue" class="version-hold-glow version-hold-glow-blue"></div>
+      <div id="version-hold-glow-green" class="version-hold-glow version-hold-glow-green"></div>
+      <div id="pref-version-app-icon" style="position:relative;width:96px;height:96px;border-radius:24px;overflow:hidden;box-shadow:var(--shadow-lg);cursor:pointer;user-select:none;-webkit-user-select:none;transition:transform 0.15s"
+        onmousedown="startVersionScreenHold(event)" onmouseup="endVersionScreenHold()" onmouseleave="cancelVersionScreenHold()"
+        ontouchstart="startVersionScreenHold(event)" ontouchend="endVersionScreenHold()" ontouchcancel="cancelVersionScreenHold()">
+        <img src="android-chrome-192x192.png" alt="FlemingApp" style="width:100%;height:100%;object-fit:cover">
+      </div>
     </div>
     <div style="font-size:1.2rem;font-weight:800;color:var(--text)">FlemingApp</div>
     <div id="pref-version-screen-value" style="color:var(--text3);font-size:0.9rem;font-weight:600">Versión —</div>
@@ -7651,7 +7669,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.22.8-beta';
+const APP_VERSION = '1.22.9-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -16265,12 +16283,40 @@ function reloadToCheckForUpdate() {
 //    desbloquea/oculta el modo Experimentos (mismo gesto que en la fila
 //    "Versión de la plataforma" de Configuración). ──────────────────────────
 let _versionScreenHoldTimer = null;
+let _versionScreenHoldRaf   = null;
+let _versionScreenHoldStart = null;
 
 function startVersionScreenHold(e) {
   if (e) e.preventDefault();
   cancelVersionScreenHold();
   const icon = document.getElementById('pref-version-app-icon');
   if (icon) icon.style.transform = 'scale(0.94)';
+  const glowBlue  = document.getElementById('version-hold-glow-blue');
+  const glowGreen = document.getElementById('version-hold-glow-green');
+  if (glowBlue)  glowBlue.classList.add('active');
+  if (glowGreen) glowGreen.classList.add('active');
+  _versionScreenHoldStart = Date.now();
+
+  function tick() {
+    const elapsed = Date.now() - _versionScreenHoldStart;
+    const frac = Math.min(elapsed / VERSION_HOLD_MS, 1);
+    // El glow se expande y se difumina más mientras se sostiene la presión
+    const scale = 0.5 + frac * 1.35;
+    const blurPx = 18 + frac * 22;
+    if (glowBlue) {
+      glowBlue.style.transform = `translate(-50%, -50%) scale(${scale}) translate(-4px, -3px)`;
+      glowBlue.style.filter = `blur(${blurPx}px)`;
+    }
+    if (glowGreen) {
+      glowGreen.style.transform = `translate(-50%, -50%) scale(${scale}) translate(4px, 3px)`;
+      glowGreen.style.filter = `blur(${blurPx}px)`;
+    }
+    if (frac < 1) {
+      _versionScreenHoldRaf = requestAnimationFrame(tick);
+    }
+  }
+  _versionScreenHoldRaf = requestAnimationFrame(tick);
+
   _versionScreenHoldTimer = setTimeout(() => {
     cancelVersionScreenHold();
     triggerEggUnlock();
@@ -16278,9 +16324,16 @@ function startVersionScreenHold(e) {
 }
 function cancelVersionScreenHold() {
   clearTimeout(_versionScreenHoldTimer);
+  if (_versionScreenHoldRaf) cancelAnimationFrame(_versionScreenHoldRaf);
   _versionScreenHoldTimer = null;
+  _versionScreenHoldRaf = null;
+  _versionScreenHoldStart = null;
   const icon = document.getElementById('pref-version-app-icon');
   if (icon) icon.style.transform = '';
+  const glowBlue  = document.getElementById('version-hold-glow-blue');
+  const glowGreen = document.getElementById('version-hold-glow-green');
+  if (glowBlue)  { glowBlue.classList.remove('active'); glowBlue.style.transform = ''; glowBlue.style.filter = ''; }
+  if (glowGreen) { glowGreen.classList.remove('active'); glowGreen.style.transform = ''; glowGreen.style.filter = ''; }
 }
 function endVersionScreenHold() { cancelVersionScreenHold(); }
 
@@ -16307,13 +16360,11 @@ function triggerEggUnlock() {
   updateExperimentosNavVisibility();
   const overlay = document.getElementById('egg-unlock-overlay');
   overlay.classList.add('active');
-  launchConfetti();
 }
 
 function closeEggUnlock() {
   const overlay = document.getElementById('egg-unlock-overlay');
   overlay.classList.remove('active');
-  stopConfetti();
 }
 
 function revealAccentSection() {
@@ -21143,9 +21194,9 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
         <circle cx="36" cy="36" r="34" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.35"/>
       </svg>
     </div>
-    <div id="egg-unlock-title">¡Experimentos activado!</div>
-    <div id="egg-unlock-sub">Has descubierto una función oculta. Ahora puedes personalizar el color de acento de toda la plataforma y ajustar la fluidez de las animaciones.</div>
-    <button id="egg-unlock-btn" onclick="closeEggUnlock()">¡Genial!</button>
+    <div id="egg-unlock-title">Experimentos de FlemingApp</div>
+    <div id="egg-unlock-sub">Los experimentos son funciones adicionales que ajustan la interfaz y los controles de formas distintas. No están pensadas para el uso masivo, ya que pueden contener errores o bugs.</div>
+    <button id="egg-unlock-btn" onclick="closeEggUnlock()">Continuar</button>
   </div>
 </div>
 
