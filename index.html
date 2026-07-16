@@ -4178,53 +4178,6 @@
   .rol-s { background: var(--accent-light); color: var(--accent); border: 1px solid rgba(0,122,255,0.2); }
   .rol-a { background: var(--green-light); color: var(--green); border: 1px solid rgba(52,199,89,0.25); }
 
-  /* ── Botón "Más información" al final de cada Sub-sección ────────────────── */
-  .masinfo-btn-wrap { display: flex; justify-content: center; padding: 1.1rem 1rem 1.6rem; }
-  .masinfo-btn {
-    display: flex; align-items: center; gap: 7px;
-    background: var(--surface2); border: 1px solid var(--border); color: var(--text2);
-    font-family: var(--font); font-size: 0.82rem; font-weight: 600;
-    padding: 0.55rem 1.1rem; border-radius: 20px; cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
-  }
-  .masinfo-btn:hover { background: var(--surface3); border-color: var(--border-active); }
-  .masinfo-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; flex-shrink: 0; }
-
-  /* ── Popup "Más información": tarjetas de Encargado/Auxiliar ─────────────── */
-  .masinfo-person-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 0.7rem 0.2rem; border-bottom: 1px solid var(--border);
-  }
-  .masinfo-person-row:last-child { border-bottom: none; }
-  .masinfo-avatar {
-    width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    color: #fff; font-weight: 700; font-size: 0.85rem; overflow: hidden;
-  }
-  .masinfo-person-info { flex: 1; min-width: 0; }
-  .masinfo-person-name { font-size: 0.92rem; font-weight: 700; color: var(--text); }
-  .masinfo-person-role {
-    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
-    color: var(--text3); margin-top: 1px;
-  }
-  .masinfo-empty { text-align: center; padding: 1.6rem 1rem; color: var(--text3); font-size: 0.88rem; }
-
-  /* ── Fila de Encargados en el panel de Administración → Informaciones ───── */
-  .info-admin-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 0.85rem 0.9rem; background: var(--surface2); border: 1px solid var(--border);
-    border-radius: var(--radius-sm); margin-bottom: 8px; cursor: pointer;
-  }
-  .info-admin-row:hover { border-color: var(--border-active); }
-  .info-admin-row-title { flex: 1; min-width: 0; }
-  .info-admin-row-name { font-size: 0.88rem; font-weight: 700; color: var(--text); }
-  .info-admin-row-sub { font-size: 0.76rem; color: var(--text3); margin-top: 2px; }
-  .info-admin-row-chip {
-    font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
-    padding: 2px 8px; border-radius: 20px; background: var(--accent-light); color: var(--accent);
-    flex-shrink: 0;
-  }
-
   /* ── Botón "Compartir" — al final del panel de detalle, respeta los mismos
      márgenes horizontales que el resto de las secciones del panel ── */
   .detail-share-wrap { padding: 0.4rem 1.25rem 1.5rem; }
@@ -5832,7 +5785,6 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       <div class="admin-tabs-row" data-section="fleming">
         <button class="admin-tab" data-tab="usuarios" data-i18n="admin.tab.usuarios" onclick="switchAdminTab('usuarios')">Usuarios</button>
         <button class="admin-tab" id="admin-tab-notificaciones" data-tab="notificaciones" data-i18n="admin.tab.notificaciones" onclick="switchAdminTab('notificaciones')" style="display:none">Notificaciones</button>
-        <button class="admin-tab" data-tab="informaciones" data-i18n="admin.tab.informaciones" onclick="switchAdminTab('informaciones')">Informaciones</button>
       </div>
       <div class="admin-section active" id="admin-assignments">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
@@ -6152,17 +6104,6 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         </div>
       </div>
 
-      <div class="admin-section" id="admin-informaciones">
-        <div style="display:flex;gap:10px;margin-bottom:0.4rem;align-items:center">
-          <span style="flex:1;font-size:0.95rem;font-weight:700">Informaciones</span>
-          <button class="btn-secondary" onclick="openInfoEditModal(null)">+ Agregar personalizado</button>
-        </div>
-        <div class="notif-gestor-hint" style="margin-bottom:1.1rem">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-          Aquí defines quién aparece como Encargado y Auxiliar en el botón "Más información" de cada Sub-sección. También puedes agregar personas o cargos que no correspondan a ninguna Sub-sección de la plataforma.
-        </div>
-        <div id="admin-informaciones-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Informaciones</div></div></div>
-      </div>
       </div><!-- /.admin-body -->
     </div><!-- /#page-admin -->
   </div>
@@ -7478,60 +7419,6 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
   </div>
 </div>
 
-<!-- Modal: "Más información" (vista usuario final, solo lectura) -->
-<div class="modal-overlay" id="masinfo-modal">
-  <div class="modal" id="masinfo-modal-panel" style="max-width:420px;animation:none">
-    <div class="modal-header">
-      <div class="modal-title" id="masinfo-modal-title">Más información</div>
-      <button class="modal-close" onclick="closeMasInfoModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-    <div class="modal-body" id="masinfo-modal-body">
-      <div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando</div></div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: Editar Encargado/Auxiliar de una Sub-sección (panel de Administración → FlemingApp → Informaciones) -->
-<div class="modal-overlay" id="info-edit-modal">
-  <div class="modal" style="max-width:480px">
-    <div class="modal-header">
-      <div class="modal-title" id="info-edit-modal-title">Editar Información</div>
-      <button class="modal-close" onclick="closeInfoEditModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="info-edit-id">
-      <input type="hidden" id="info-edit-seccion-key">
-      <div class="form-group2" id="info-edit-titulo-group">
-        <label class="form-label2">Título / Cargo</label>
-        <input type="text" class="form-input" id="info-edit-titulo" placeholder="Ej: Encargado de sonido">
-      </div>
-
-      <div class="form-group2">
-        <label class="form-label2">Encargado</label>
-        <select class="form-select" id="info-edit-encargado-user" onchange="document.getElementById('info-edit-encargado-nombre').style.display = this.value ? 'none' : ''; document.getElementById('info-edit-encargado-nombre').value='';">
-          <option value="">— Escribir nombre manualmente —</option>
-        </select>
-        <input type="text" class="form-input" id="info-edit-encargado-nombre" placeholder="Nombre del encargado" style="margin-top:8px">
-      </div>
-
-      <div class="form-group2">
-        <label class="form-label2">Auxiliar <span style="font-weight:400;color:var(--text3)">(opcional)</span></label>
-        <select class="form-select" id="info-edit-auxiliar-user" onchange="document.getElementById('info-edit-auxiliar-nombre').style.display = this.value ? 'none' : ''; document.getElementById('info-edit-auxiliar-nombre').value='';">
-          <option value="">— Escribir nombre manualmente —</option>
-        </select>
-        <input type="text" class="form-input" id="info-edit-auxiliar-nombre" placeholder="Nombre del auxiliar (opcional)" style="margin-top:8px">
-      </div>
-      <div id="info-edit-error" class="form-error" style="display:none"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-secondary" id="info-edit-delete-btn" style="display:none;color:var(--red)" onclick="deleteInfoResponsable()">Eliminar</button>
-      <div style="flex:1"></div>
-      <button class="btn-secondary" onclick="closeInfoEditModal()">Cancelar</button>
-      <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" id="save-info-edit-btn" onclick="saveInfoResponsable()">Guardar</button>
-    </div>
-  </div>
-</div>
-
 <!-- Contenedor oculto usado para renderizar la tarjeta que se convierte en PNG al compartir una asignación -->
 <div id="share-pdf-offscreen" style="position:fixed;left:-9999px;top:0;z-index:-1;pointer-events:none"></div>
 
@@ -7558,7 +7445,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.20.2-beta';
+const APP_VERSION = '1.20.5-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -7978,7 +7865,6 @@ const I18N = {
   'admin.tab.aseo-salon':   { es: 'Aseo Salón',              en: 'Hall Cleaning' },
   'admin.tab.usuarios':     { es: 'Usuarios',                en: 'Users' },
   'admin.tab.notificaciones': { es: 'Notificaciones',        en: 'Notifications',     nl: 'Meldingen' },
-  'admin.tab.informaciones': { es: 'Informaciones',          en: 'Information',       nl: 'Informatie' },
   'admin.tab.reports':      { es: 'Reportes',                en: 'Reports' },
   'btn.guardar':            { es: 'Guardar',                 en: 'Save',              nl: 'Opslaan' },
   'btn.cancelar':           { es: 'Cancelar',                en: 'Cancel',            nl: 'Annuleren' },
@@ -10517,12 +10403,27 @@ async function updateAdminShortcuts() {
     return;
   }
 
+  // El DEV siempre ve todos los atajos. Para un Admin, cada atajo solo debe
+  // aparecer si el DEV le habilitó el módulo correspondiente — de lo
+  // contrario ni siquiera se pinta el botón "Administrar" (ver fix de
+  // seguridad v1.20.5-beta: antes se mostraba para cualquier Admin sin
+  // verificar el módulo específico, permitiendo entrar por un instante a
+  // secciones no autorizadas).
+  let perms = null;
+  if (currentRole === 'admin') {
+    await refreshCurrentUserPermsCache();
+    perms = _currentUserPermsCache;
+  }
+
   Object.keys(VIEWER_TO_ADMIN_TAB).forEach(sub => {
     const el = document.getElementById('admin-shortcut-' + sub);
     if (!el) return;
 
     const adminTab = VIEWER_TO_ADMIN_TAB[sub];
-    const label = VIEWER_SECTION_LABELS[sub];
+    const permKey = VIEWER_PERM_KEY[sub];
+    const allowed = currentRole === 'dev' || !permKey || canAccessModule(perms, permKey);
+    if (!allowed) { el.style.display = 'none'; el.innerHTML = ''; return; }
+
     el.style.display = '';
     el.innerHTML = `
       <div class="admin-shortcut-wrap">
@@ -10535,31 +10436,101 @@ async function updateAdminShortcuts() {
 }
 
 async function goAdminShortcut(adminTab) {
-  showPage('admin');
-  await new Promise(r => setTimeout(r, 60)); // let admin page open
-  switchAdminTab(adminTab);
+  // showPage('admin', adminTab) resuelve y verifica el permiso del módulo
+  // ANTES de abrir el panel — si no está permitido, el panel nunca llega a
+  // mostrarse (ver fix de seguridad v1.20.5-beta).
+  await showPage('admin', adminTab);
 }
 
-function showPage(name) {
+// ── Apertura del Panel de Administración (v1.20.5-beta) ──────────────────────
+// CRÍTICO DE SEGURIDAD: el Panel de Administración NUNCA debe hacerse visible
+// (ni por un instante) antes de confirmar que el usuario actual tiene permiso
+// para el módulo/tab con el que se va a abrir. Antes, showPage('admin') hacía
+// visible el overlay de inmediato (con el tab "Asignaciones" activo por
+// defecto) y solo DESPUÉS, de forma asíncrona, se verificaba si el tab
+// solicitado estaba permitido — dejando una ventana real en la que un Admin
+// sin acceso a un módulo podía verlo y editarlo antes de ser expulsado.
+// Ahora toda la resolución de permisos ocurre ANTES de agregar la clase
+// "active" al overlay, así que un módulo no autorizado jamás llega a pintarse.
+//
+// `requestedTab` es opcional: si se omite (p.ej. botón genérico "Panel de
+// Administración" del menú), se abre en el tab activo actual si el usuario
+// tiene acceso, o si no, en el primer módulo permitido. Devuelve una Promise
+// que resuelve a `true` si el panel se abrió, o `false` si fue bloqueado.
+async function showPage(name, requestedTab) {
   if (name === 'admin') {
     if (typeof isSimplifiedModeActive === 'function' && isSimplifiedModeActive()) {
       showToast('El panel de administración no está disponible en la Versión Simplificada.', 'error');
-      return;
+      return false;
     }
     if (!['dev','admin'].includes(currentRole)) {
       showToast('No tienes permisos para acceder a esta sección.', 'error');
-      return;
+      return false;
     }
-    // Open admin as a fullscreen overlay — independent of main nav
-    document.getElementById('page-admin').classList.add('active');
-    document.body.style.overflow = 'hidden';
-    syncAdminDropdown();
-    loadAdminData();
-    return;
+    return openAdminPage(requestedTab);
   }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const p = document.getElementById('page-' + name);
   if (p) p.classList.add('active');
+  return true;
+}
+
+async function openAdminPage(requestedTab) {
+  if (currentRole === 'dev') {
+    // El DEV siempre tiene acceso completo a todos los módulos.
+    _openAdminPageOverlay(requestedTab);
+    return true;
+  }
+
+  // currentRole === 'admin': resolvemos los permisos ANTES de mostrar nada.
+  await refreshCurrentUserPermsCache();
+  const perms = _currentUserPermsCache;
+  const isTabAllowed = (tab) => !ADMIN_TAB_PERM_KEY[tab] || canAccessModule(perms, ADMIN_TAB_PERM_KEY[tab]);
+
+  let targetTab = requestedTab;
+  if (targetTab) {
+    // Se pidió un módulo específico (atajo desde una Sub-sección, fab de
+    // Asignaciones, etc.) — si no está permitido, se bloquea por completo:
+    // el panel nunca se abre.
+    if (!isTabAllowed(targetTab)) {
+      showToast('No tienes permisos para acceder a este módulo.', 'error');
+      return false;
+    }
+  } else {
+    // Entrada genérica (p.ej. botón "Panel de Administración" del menú):
+    // se abre en el tab actualmente activo si está permitido, o si no, en
+    // el primer módulo que el DEV le haya habilitado a este Admin.
+    const activeBtn = document.querySelector('.admin-tab.active');
+    const currentActiveTab = activeBtn ? activeBtn.dataset.tab : null;
+    if (currentActiveTab && isTabAllowed(currentActiveTab)) {
+      targetTab = currentActiveTab;
+    } else {
+      targetTab = [...document.querySelectorAll('.admin-tab')]
+        .map(b => b.dataset.tab)
+        .find(isTabAllowed);
+    }
+    if (!targetTab) {
+      showToast('No tienes ningún módulo asignado en el Panel de Administración.', 'error');
+      return false;
+    }
+  }
+
+  _openAdminPageOverlay(targetTab);
+  return true;
+}
+
+// Hace visible el overlay del Panel de Administración. Si se indica un tab,
+// las clases "active" correspondientes se aplican de forma SÍNCRONA (a través
+// de switchAdminTab, cuya parte de manipulación de clases corre antes de
+// cualquier `await`) antes de que el navegador pinte el frame — de modo que
+// el contenido que se ve al abrir el panel siempre es el del tab correcto,
+// nunca el tab "Asignaciones" que queda activo por defecto en el HTML.
+function _openAdminPageOverlay(targetTab) {
+  if (targetTab) switchAdminTab(targetTab);
+  document.getElementById('page-admin').classList.add('active');
+  document.body.style.overflow = 'hidden';
+  syncAdminDropdown();
+  loadAdminData();
 }
 
 // Mapa centralizado: a qué sección (Predicación/Reuniones) pertenece cada tab de admin.
@@ -10567,7 +10538,7 @@ const ADMIN_TAB_SECTION = {
   assignments: 'predicacion', territories: 'predicacion', conductores: 'predicacion',
   casas: 'predicacion', grupos: 'predicacion', carritos: 'predicacion', reports: 'predicacion',
   vmc: 'reuniones', 'fin-semana': 'reuniones', responsabilidades: 'reuniones', 'aseo-salon': 'reuniones',
-  usuarios: 'fleming', notificaciones: 'fleming', informaciones: 'fleming',
+  usuarios: 'fleming', notificaciones: 'fleming',
 };
 
 // Cambia la sección visible (Predicación/Reuniones) y activa la primera sub-pestaña disponible dentro de ella.
@@ -10623,7 +10594,6 @@ async function switchAdminTab(tab) {
   if (tab === 'notificaciones') { renderNotifAdminTemplates(); renderNotifAdminCategories(); loadNotifLevels().then(renderNotifAdminLevels); }
   if (tab === 'carritos') { cartOpenAdminSection(); }
   if (tab === 'reports') { trepOpenAdminSection(); }
-  if (tab === 'informaciones') { loadInfoResponsables().then(() => renderAdminInformaciones()); }
 }
 
 // Mapa de tab de admin -> clave de permiso (PERM_MODULES). Se restringen
@@ -11925,9 +11895,9 @@ function handleEspecialImage(event) {
 // administración, con esa asignación específica lista para editar.
 async function goToAdminAssignment(id) {
   closeDetail();
-  showPage('admin');
+  const opened = await showPage('admin', 'assignments');
+  if (!opened) return;
   await new Promise(r => setTimeout(r, 60)); // let admin page open
-  switchAdminTab('assignments');
   editAssignment(id);
 }
 
@@ -14137,9 +14107,7 @@ async function loadUsers() {
 // el panel ahora vive embebido (ya no es un overlay independiente).
 async function openUsersPanel() {
   if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
-  showPage('admin');
-  await new Promise(r => setTimeout(r, 60));
-  switchAdminTab('usuarios');
+  await showPage('admin', 'usuarios');
 }
 
 // ── Nuevo Usuario: creación anticipada desde el Panel de Usuarios (v1.20.0-beta) ──
@@ -21887,307 +21855,6 @@ async function notifyReportRecipients(territoryObj, submission) {
      el propio usuario ve su AdminTag en su Perfil, y los Admins/DEV con
      acceso al Panel de Usuarios la ven en el perfil de ese Admin.
    ══════════════════════════════════════════════════════════════════════════ */
-
-/* ══════════════════════════════════════════════════════════════════════════
-   "MÁS INFORMACIÓN" — Encargados/Auxiliares por Sub-sección (v1.14.9-beta)
-   ══════════════════════════════════════════════════════════════════════════
-   Tabla en Supabase (crear una vez):
-
-   create table if not exists info_responsables (
-     id uuid primary key default gen_random_uuid(),
-     seccion_key text unique,              -- null para entradas personalizadas
-     titulo text not null,
-     encargado_user_id uuid references platform_users(id) on delete set null,
-     encargado_nombre text,
-     auxiliar_user_id uuid references platform_users(id) on delete set null,
-     auxiliar_nombre text,
-     orden integer default 0,
-     created_at timestamptz default now()
-   );
-
-   Cada Sub-sección/instancia con contenido de la plataforma tiene una
-   "seccion_key" fija (ver INFO_SECCIONES). Las entradas personalizadas
-   (cargos que no pertenecen a ninguna Sub-sección) se guardan con
-   seccion_key = null y se identifican por su id.
-   ══════════════════════════════════════════════════════════════════════════ */
-
-// Catálogo de todas las Sub-secciones/instancias de la plataforma que tienen
-// contenido y por lo tanto pueden mostrar el botón "Más información".
-// key: debe calzar con el id usado en #sub-content-<key> cuando aplica;
-// para instancias que no son sub-tabs de nivel superior (ej. Reportes de
-// Territorio) se usa una key propia y el botón se inserta manualmente.
-const INFO_SECCIONES = [
-  { key: 'casa',               label: 'Casa en casa' },
-  { key: 'territorios',        label: 'Territorios' },
-  { key: 'carritos',           label: 'Carritos' },
-  { key: 'grupos',             label: 'Grupos' },
-  { key: 'vida-ministerio',    label: 'Vida y Ministerio' },
-  { key: 'fin-semana',         label: 'Fin de Semana' },
-  { key: 'aseo-salon',         label: 'Aseo del Salón' },
-  { key: 'hospitalidad',       label: 'Hospitalidad' },
-  { key: 'responsabilidades',  label: 'Responsabilidades' },
-  { key: 'territory_reports',  label: 'Reportes de Territorio' },
-];
-
-let infoResponsablesCache = []; // filas crudas desde Supabase
-let _infoResponsablesLoaded = false;
-
-async function loadInfoResponsables(force) {
-  if (_infoResponsablesLoaded && !force) return infoResponsablesCache;
-  try {
-    const { data, error } = await sb.from('info_responsables').select('*').order('orden', { ascending: true });
-    if (error) throw error;
-    infoResponsablesCache = data || [];
-    _infoResponsablesLoaded = true;
-  } catch (e) {
-    console.warn('info_responsables:', e);
-    infoResponsablesCache = [];
-  }
-  return infoResponsablesCache;
-}
-
-function getInfoResponsable(seccionKey) {
-  return infoResponsablesCache.find(r => r.seccion_key === seccionKey) || null;
-}
-
-// ── Inserta el botón "Más información" al final de cada Sub-sección conocida ──
-function injectMasInfoButtons() {
-  INFO_SECCIONES.forEach(sec => {
-    const container = document.getElementById('sub-content-' + sec.key);
-    if (!container) return; // esta instancia no vive dentro de un sub-content estándar
-    if (container.querySelector('.masinfo-btn-wrap')) return; // ya insertado
-    const wrap = document.createElement('div');
-    wrap.className = 'masinfo-btn-wrap';
-    wrap.innerHTML = `<button class="masinfo-btn" onclick="openMasInfoModal('${sec.key}', event)">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-      Más información
-    </button>`;
-    container.appendChild(wrap);
-  });
-}
-
-async function openMasInfoModal(seccionKey, evt) {
-  const secDef = INFO_SECCIONES.find(s => s.key === seccionKey);
-  document.getElementById('masinfo-modal-title').textContent = secDef ? secDef.label : 'Más información';
-  const body = document.getElementById('masinfo-modal-body');
-  body.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando</div></div>';
-  document.getElementById('masinfo-modal').classList.add('open');
-
-  // Nota: se fuerza siempre una recarga fresca (force=true) en vez de confiar en la
-  // caché de arranque. La caché inicial (loadInfoResponsables() sin forzar, disparada
-  // al cargar la página) puede quedar vacía si corre antes de que la sesión de
-  // Supabase esté lista, y sin este forzado la información solo aparecía después de
-  // visitar Panel de Administración → FlemingApp → Informaciones (lo que disparaba
-  // la primera recarga exitosa). Forzando aquí, la información sale de inmediato.
-  await loadInfoResponsables(true);
-  const info = getInfoResponsable(seccionKey);
-  renderMasInfoBody(info);
-}
-
-// ── Morph "botón → panel": el panel crece de forma continua desde el botón
-//    que lo abrió (misma idea visual que Apple usa en Liquid Glass), en vez
-//    de simplemente aparecer o deslizarse con un corte brusco. Técnica FLIP:
-//    se calcula la diferencia entre el rect del botón y el rect final del
-//    panel, se aplica esa diferencia como estado inicial (sin transición) y
-//    luego se anima de vuelta al estado natural con una curva fluida. ──
-function _morphPanelFromTrigger(panelEl, triggerEl) {
-  if (!panelEl) return;
-  panelEl.classList.remove('morph-ready');
-  panelEl.style.transition = 'none';
-  panelEl.style.transform = '';
-  panelEl.style.borderRadius = '';
-  panelEl.style.opacity = '';
-  if (!triggerEl || !triggerEl.getBoundingClientRect) return;
-  const btnRect = triggerEl.getBoundingClientRect();
-  requestAnimationFrame(() => {
-    const panelRect = panelEl.getBoundingClientRect();
-    if (!panelRect.width || !panelRect.height) return;
-    const scaleX = Math.max(btnRect.width / panelRect.width, 0.05);
-    const scaleY = Math.max(btnRect.height / panelRect.height, 0.05);
-    const originX = ((btnRect.left + btnRect.width / 2) - panelRect.left) / panelRect.width * 100;
-    const originY = ((btnRect.top + btnRect.height / 2) - panelRect.top) / panelRect.height * 100;
-    panelEl.style.transformOrigin = `${originX}% ${originY}%`;
-    panelEl.style.transform = `scale(${scaleX}, ${scaleY})`;
-    panelEl.style.borderRadius = '999px';
-    panelEl.style.opacity = '0';
-    void panelEl.offsetWidth; // fuerza reflow para que el estado inicial se pinte
-    panelEl.style.transition = 'transform 0.5s var(--ease-fluid), border-radius 0.5s var(--ease-fluid), opacity 0.32s ease';
-    requestAnimationFrame(() => {
-      panelEl.style.transform = 'scale(1,1)';
-      panelEl.style.borderRadius = '';
-      panelEl.style.opacity = '1';
-    });
-  });
-}
-
-function _masinfoPersonHTML(role, userId, nombreLibre) {
-  const u = userId ? activeUsers.find(x => x.id === userId) : null;
-  const displayName = u ? u.name : (nombreLibre || '').trim();
-  if (!displayName) return '';
-  const col = userColor(displayName);
-  const inits = userInitials(displayName);
-  const avatarHTML = (u && u.avatar)
-    ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover">`
-    : inits;
-  return `<div class="masinfo-person-row">
-    <div class="masinfo-avatar" style="background:${col}">${avatarHTML}</div>
-    <div class="masinfo-person-info">
-      <div class="masinfo-person-name">${displayName}</div>
-      <div class="masinfo-person-role">${role}</div>
-    </div>
-  </div>`;
-}
-
-function renderMasInfoBody(info) {
-  const body = document.getElementById('masinfo-modal-body');
-  if (!info) {
-    body.innerHTML = '<div class="masinfo-empty">Todavía no se ha registrado un Encargado para esta Sub-sección.</div>';
-    return;
-  }
-  const rows = [
-    _masinfoPersonHTML('Encargado', info.encargado_user_id, info.encargado_nombre),
-    _masinfoPersonHTML('Auxiliar', info.auxiliar_user_id, info.auxiliar_nombre),
-  ].filter(Boolean).join('');
-  body.innerHTML = rows || '<div class="masinfo-empty">Todavía no se ha registrado un Encargado para esta Sub-sección.</div>';
-}
-
-function closeMasInfoModal() {
-  document.getElementById('masinfo-modal').classList.remove('open');
-}
-
-// ── Panel de Administración → FlemingApp → Informaciones ────────────────────
-function renderAdminInformaciones() {
-  const list = document.getElementById('admin-informaciones-list');
-  const known = INFO_SECCIONES.map(sec => ({ sec, row: getInfoResponsable(sec.key) }));
-  const custom = infoResponsablesCache.filter(r => !r.seccion_key);
-
-  const rowHTML = (titulo, row, seccionKey) => {
-    const encName = row ? (row.encargado_user_id ? (activeUsers.find(u => u.id === row.encargado_user_id)?.name) : row.encargado_nombre) : null;
-    const auxName = row ? (row.auxiliar_user_id ? (activeUsers.find(u => u.id === row.auxiliar_user_id)?.name) : row.auxiliar_nombre) : null;
-    const sub = encName
-      ? `Encargado: ${encName}${auxName ? ' · Auxiliar: ' + auxName : ''}`
-      : 'Sin encargado asignado';
-    return `<div class="info-admin-row" onclick="openInfoEditModal(${row ? `'${row.id}'` : 'null'}, ${seccionKey ? `'${seccionKey}'` : 'null'}, ${JSON.stringify(titulo).replace(/"/g,'&quot;')})">
-      <div class="info-admin-row-title">
-        <div class="info-admin-row-name">${titulo}</div>
-        <div class="info-admin-row-sub">${sub}</div>
-      </div>
-      ${seccionKey ? '' : '<span class="info-admin-row-chip">Personalizado</span>'}
-    </div>`;
-  };
-
-  let html = '<div style="font-size:0.8rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;margin:0 0 0.6rem">Sub-secciones de la plataforma</div>';
-  html += known.map(k => rowHTML(k.sec.label, k.row, k.sec.key)).join('');
-  html += '<div style="font-size:0.8rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;margin:1.4rem 0 0.6rem">Personas y cargos adicionales</div>';
-  html += custom.length ? custom.map(r => rowHTML(r.titulo, r, null)).join('') : '<div class="masinfo-empty" style="padding:1rem 0">Ningún registro personalizado todavía.</div>';
-
-  list.innerHTML = html;
-}
-
-function _populateInfoUserSelect(selectId, selectedUserId) {
-  const sel = document.getElementById(selectId);
-  sel.innerHTML = '<option value="">— Escribir nombre manualmente —</option>' +
-    activeUsers.map(u => `<option value="${u.id}"${u.id===selectedUserId?' selected':''}>${u.name}</option>`).join('');
-}
-
-async function openInfoEditModal(rowId, seccionKey, titulo) {
-  await loadUsers().catch(()=>{}); // refresca la lista de usuarios disponibles
-  const row = rowId ? infoResponsablesCache.find(r => r.id === rowId) : null;
-
-  document.getElementById('info-edit-id').value = row ? row.id : '';
-  document.getElementById('info-edit-seccion-key').value = seccionKey || '';
-  document.getElementById('info-edit-modal-title').textContent = titulo || (seccionKey ? 'Editar Información' : 'Agregar personalizado');
-  document.getElementById('info-edit-error').style.display = 'none';
-
-  const tituloGroup = document.getElementById('info-edit-titulo-group');
-  const tituloInput = document.getElementById('info-edit-titulo');
-  if (seccionKey) {
-    tituloGroup.style.display = 'none';
-    tituloInput.value = titulo || '';
-  } else {
-    tituloGroup.style.display = '';
-    tituloInput.value = row ? row.titulo : '';
-  }
-
-  _populateInfoUserSelect('info-edit-encargado-user', row?.encargado_user_id || '');
-  _populateInfoUserSelect('info-edit-auxiliar-user', row?.auxiliar_user_id || '');
-  document.getElementById('info-edit-encargado-nombre').value = row?.encargado_nombre || '';
-  document.getElementById('info-edit-auxiliar-nombre').value = row?.auxiliar_nombre || '';
-  document.getElementById('info-edit-encargado-nombre').style.display = row?.encargado_user_id ? 'none' : '';
-  document.getElementById('info-edit-auxiliar-nombre').style.display = row?.auxiliar_user_id ? 'none' : '';
-
-  document.getElementById('info-edit-delete-btn').style.display = (row && !seccionKey) ? '' : 'none';
-  document.getElementById('info-edit-modal').classList.add('open');
-}
-
-function closeInfoEditModal() {
-  document.getElementById('info-edit-modal').classList.remove('open');
-}
-
-async function saveInfoResponsable() {
-  const id = document.getElementById('info-edit-id').value || null;
-  const seccionKey = document.getElementById('info-edit-seccion-key').value || null;
-  const titulo = document.getElementById('info-edit-titulo').value.trim();
-  const encUserId = document.getElementById('info-edit-encargado-user').value || null;
-  const encNombre = document.getElementById('info-edit-encargado-nombre').value.trim() || null;
-  const auxUserId = document.getElementById('info-edit-auxiliar-user').value || null;
-  const auxNombre = document.getElementById('info-edit-auxiliar-nombre').value.trim() || null;
-  const errEl = document.getElementById('info-edit-error');
-
-  if (!seccionKey && !titulo) {
-    errEl.textContent = 'El título/cargo es requerido.'; errEl.style.display = ''; return;
-  }
-  if (!encUserId && !encNombre) {
-    errEl.textContent = 'Indica un Encargado (selecciona un usuario o escribe un nombre).'; errEl.style.display = ''; return;
-  }
-  errEl.style.display = 'none';
-
-  const secDef = seccionKey ? INFO_SECCIONES.find(s => s.key === seccionKey) : null;
-  const payload = {
-    seccion_key: seccionKey,
-    titulo: seccionKey ? (secDef ? secDef.label : seccionKey) : titulo,
-    encargado_user_id: encUserId, encargado_nombre: encUserId ? null : encNombre,
-    auxiliar_user_id: auxUserId, auxiliar_nombre: auxUserId ? null : auxNombre,
-  };
-
-  const btn = document.getElementById('save-info-edit-btn');
-  btn.disabled = true; btn.textContent = 'Guardando...';
-  let error;
-  if (id) {
-    ({ error } = await sb.from('info_responsables').update(payload).eq('id', id));
-  } else {
-    ({ error } = await sb.from('info_responsables').insert(payload));
-  }
-  btn.disabled = false; btn.textContent = 'Guardar';
-
-  if (error) { errEl.textContent = 'Error al guardar. Intenta de nuevo.'; errEl.style.display = ''; console.error(error); return; }
-  showToast('Información guardada', 'success');
-  closeInfoEditModal();
-  await loadInfoResponsables(true);
-  renderAdminInformaciones();
-}
-
-async function deleteInfoResponsable() {
-  const id = document.getElementById('info-edit-id').value;
-  if (!id) return;
-  if (!confirm('¿Eliminar este registro personalizado?')) return;
-  const { error } = await sb.from('info_responsables').delete().eq('id', id);
-  if (error) { showToast('Error al eliminar', 'error'); console.error(error); return; }
-  showToast('Registro eliminado', 'success');
-  closeInfoEditModal();
-  await loadInfoResponsables(true);
-  renderAdminInformaciones();
-}
-
-// Inserta los botones "Más información" en cuanto la app está lista, y cada
-// vez que se cambia de Sub-sección (por si el contenido se re-renderiza).
-loadInfoResponsables().then(injectMasInfoButtons);
-window.addEventListener('DOMContentLoaded', () => setTimeout(injectMasInfoButtons, 800));
-const _origSwitchSubTabForInfo = switchSubTab;
-switchSubTab = function(tabId) {
-  _origSwitchSubTabForInfo(tabId);
-  injectMasInfoButtons();
-};
 
 /* ══════════════════════════════════════════════════════════════════════════
    COMPARTIR ASIGNACIONES COMO PDF (v1.14.11.6-beta)
