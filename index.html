@@ -7445,7 +7445,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.20.5-beta';
+const APP_VERSION = '1.20.6-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -9929,8 +9929,7 @@ async function enterApp() {
 
   const adminBtn = document.getElementById('admin-dropdown-btn');
   adminBtn.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
-  const flemingTab = document.getElementById('admin-section-tab-fleming');
-  if (flemingTab) flemingTab.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
+  updateAdminSectionTabsVisibility();
   const notifAdminTab = document.getElementById('admin-tab-notificaciones');
   if (notifAdminTab) notifAdminTab.style.display = (currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, 'notificaciones'))) ? '' : 'none';
 
@@ -10606,12 +10605,69 @@ const ADMIN_TAB_PERM_KEY = {
   'aseo-salon': 'aseo_salon', usuarios: 'usuarios', notificaciones: 'notificaciones',
 };
 
+// ── Visibilidad de las Secciones (Predicación / Reuniones / Fleming App) ─────
+// No basta con ocultar los tabs individuales (Asignaciones, Territorios,
+// etc.): si un Admin solo tiene el módulo "Responsabilidades" habilitado, la
+// Sección "Predicación" completa (y su fila de sub-tabs) tampoco debería
+// aparecer como opción — mostraría un panel vacío/sin sentido y expondría la
+// existencia y organización de módulos a los que no tiene ningún acceso.
+// (v1.20.6-beta)
+function _sectionHasAnyAllowedTab(section, perms) {
+  return Object.keys(ADMIN_TAB_SECTION).some(tab => {
+    if (ADMIN_TAB_SECTION[tab] !== section) return false;
+    const permKey = ADMIN_TAB_PERM_KEY[tab];
+    return !permKey || canAccessModule(perms, permKey);
+  });
+}
+
+// Núcleo síncrono: aplica visibilidad a los 3 botones de Sección usando el
+// caché de permisos YA disponible (no hace red). Se usa tanto dentro del
+// Panel de Administración (donde el caché ya fue refrescado) como desde
+// puntos de entrada externos que llaman a la versión con red, más abajo.
+function _applyAdminSectionTabsVisibility() {
+  const tabs = {
+    predicacion: document.querySelector('.admin-section-tab[data-section="predicacion"]'),
+    reuniones:   document.querySelector('.admin-section-tab[data-section="reuniones"]'),
+    fleming:     document.getElementById('admin-section-tab-fleming'),
+  };
+
+  if (currentRole === 'dev') {
+    Object.values(tabs).forEach(el => { if (el) el.style.display = ''; });
+  } else if (currentRole === 'admin') {
+    const perms = _currentUserPermsCache;
+    Object.keys(tabs).forEach(section => {
+      const el = tabs[section];
+      if (el) el.style.display = _sectionHasAnyAllowedTab(section, perms) ? '' : 'none';
+    });
+  } else {
+    Object.values(tabs).forEach(el => { if (el) el.style.display = 'none'; });
+  }
+
+  // Si la Sección actualmente activa quedó oculta (p.ej. el DEV le quitó al
+  // Admin todos los módulos de Predicación), saltamos a la primera visible.
+  const activeSecBtn = document.querySelector('.admin-section-tab.active');
+  if (activeSecBtn && activeSecBtn.style.display === 'none') {
+    const firstVisible = Object.values(tabs).find(el => el && el.style.display !== 'none');
+    if (firstVisible) switchAdminSection(firstVisible.dataset.section);
+  }
+}
+
+// Versión con red: refresca el caché de permisos si hace falta antes de
+// aplicar. Usar en puntos de entrada FUERA del Panel de Administración
+// (carga inicial de la app, sincronización periódica de rol, dropdown),
+// donde no podemos asumir que el caché ya esté al día.
+async function updateAdminSectionTabsVisibility() {
+  if (currentRole === 'admin') await refreshCurrentUserPermsCache();
+  _applyAdminSectionTabsVisibility();
+}
+
 async function applyAdminTabPermissions() {
   // Solo el Usuario DEV decide qué módulos puede administrar cada Admin.
   // El DEV siempre tiene acceso completo; a los Admins se les restringe según
   // los permisos que el DEV les haya otorgado (tabla platform_users.permissions).
   if (currentRole === 'dev') {
     document.querySelectorAll('.admin-tab').forEach(t => { t.style.display = ''; t.style.pointerEvents = ''; t.style.opacity = ''; });
+    _applyAdminSectionTabsVisibility();
     return;
   }
   await refreshCurrentUserPermsCache();
@@ -10625,6 +10681,9 @@ async function applyAdminTabPermissions() {
     tabBtn.style.pointerEvents = allowed ? '' : 'none';
     tabBtn.style.opacity = allowed ? '' : '0.4';
   });
+  // Oculta Secciones completas (Predicación/Reuniones/Fleming App) sin ningún
+  // módulo permitido, y salta a una Sección visible si la activa se ocultó.
+  _applyAdminSectionTabsVisibility();
   // Si el tab actualmente activo quedó bloqueado, cambia al primero disponible.
   const activeTab = document.querySelector('.admin-tab.active');
   if (activeTab && activeTab.style.display === 'none') {
@@ -15157,8 +15216,7 @@ async function syncRoleFromServer() {
       // Show/hide admin buttons
       const adminBtn = document.getElementById('admin-dropdown-btn');
       if (adminBtn) adminBtn.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
-      const flemingTab = document.getElementById('admin-section-tab-fleming');
-      if (flemingTab) flemingTab.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
+      _applyAdminSectionTabsVisibility();
       const notifAdminTab = document.getElementById('admin-tab-notificaciones');
       if (notifAdminTab) notifAdminTab.style.display = (currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, 'notificaciones'))) ? '' : 'none';
       // If user was viewing the Fleming App / Usuarios section and lost access, send them back to predicación
@@ -16698,8 +16756,7 @@ function syncAdminDropdown() {
     const roleLabelsMap = { dev:'DEV', admin:'Administrador', viewer:'Visitante' };
     adminRole.textContent = roleLabelsMap[currentRole] || 'Visitante';
   }
-  const flemingTab = document.getElementById('admin-section-tab-fleming');
-  if (flemingTab) flemingTab.style.display = ['dev','admin'].includes(currentRole) ? '' : 'none';
+  _applyAdminSectionTabsVisibility();
   const notifAdminTab = document.getElementById('admin-tab-notificaciones');
   if (notifAdminTab) notifAdminTab.style.display = (currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, 'notificaciones'))) ? '' : 'none';
   const themeLabel = document.getElementById('theme-btn-label-admin');
