@@ -17,11 +17,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<!-- pdf.js (v1.22.7-beta): renderiza el Mapa de la congregación, ahora en PDF, sobre un <canvas> -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js"></script>
+<!-- pdf.js (v1.22.7-beta): renderiza el Mapa de la congregación, ahora en PDF, sobre un <canvas>.
+     Se usa la 3.11.174 (última versión con build clásico "pdf.min.js"; desde la 4.x pdf.js
+     solo se distribuye como módulo ES ".mjs", que no funciona con <script src="..."> normal). -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   if (window.pdfjsLib) {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js';
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   }
 </script>
 <style>
@@ -7645,7 +7647,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.22.7-beta';
+const APP_VERSION = '1.22.7.1-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -17431,10 +17433,12 @@ async function updateFullMapUI(src) {
 
   if (src) {
     try {
+      if (!window.pdfjsLib) throw new Error('pdf.js no se cargó (revisa la conexión a internet)');
       _fullMapPdfDoc = await pdfjsLib.getDocument({ data: _dataUriToUint8Array(src) }).promise;
     } catch (e) {
       console.warn('No se pudo leer el PDF del mapa:', e.message);
       _fullMapPdfDoc = null;
+      showToast('No se pudo mostrar el mapa: ' + e.message, 'error');
     }
     if (previewWrap) {
       previewWrap.classList.add('visible');
@@ -17680,7 +17684,7 @@ const fullMapZoomCtrl  = createMapZoomController('full-map-lb-canvas', 'full-map
 const lightboxZoomCtrl = createMapZoomController('lightbox-img',    'img-lightbox',     'lightbox-zoom-hint');
 
 async function openFullMap() {
-  if (!_fullMapPdfDoc) return;
+  if (!_fullMapPdfDoc) { showToast('El mapa aún no se pudo cargar. Intenta de nuevo en unos segundos.', 'error'); return; }
   fullMapCurrentPage = 1;
   fullMapZoomCtrl.reset();
   document.getElementById('full-map-lightbox').classList.add('open');
