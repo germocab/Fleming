@@ -2638,9 +2638,9 @@
     font-size: 0.67rem; font-weight: 700; padding: 2px 8px;
     border-radius: 20px; letter-spacing: 0.02em; text-transform: uppercase;
   }
-  .vmc-chip-tesoros  { background: rgba(245,158,11,0.12); color: #d97706; }
-  .vmc-chip-maestros { background: rgba(59,130,246,0.12); color: #2563eb; }
-  .vmc-chip-vida     { background: rgba(168,85,247,0.12); color: #9333ea; }
+  .vmc-chip-tesoros  { background: rgba(59,130,246,0.12); color: #2563eb; }
+  .vmc-chip-maestros { background: rgba(245,158,11,0.12); color: #d97706; }
+  .vmc-chip-vida     { background: rgba(239,68,68,0.12); color: #dc2626; }
   .vmc-week-actions {
     display: flex; gap: 8px; margin-top: 0.75rem; padding-top: 0.75rem;
     border-top: 1px solid var(--border);
@@ -2687,9 +2687,9 @@
     padding: 0.7rem 0.9rem; font-size: 0.8rem; font-weight: 800;
     letter-spacing: 0.06em; text-transform: uppercase;
   }
-  .vmc-section-header-tesoros  { background: rgba(245,158,11,0.08); color: #b45309; border-bottom: 1px solid rgba(245,158,11,0.2); }
-  .vmc-section-header-maestros { background: rgba(59,130,246,0.08); color: #1d4ed8; border-bottom: 1px solid rgba(59,130,246,0.2); }
-  .vmc-section-header-vida     { background: rgba(168,85,247,0.08); color: #7e22ce; border-bottom: 1px solid rgba(168,85,247,0.2); }
+  .vmc-section-header-tesoros  { background: rgba(59,130,246,0.08); color: #1d4ed8; border-bottom: 1px solid rgba(59,130,246,0.2); }
+  .vmc-section-header-maestros { background: rgba(245,158,11,0.08); color: #b45309; border-bottom: 1px solid rgba(245,158,11,0.2); }
+  .vmc-section-header-vida     { background: rgba(239,68,68,0.08); color: #b91c1c; border-bottom: 1px solid rgba(239,68,68,0.2); }
 
   /* ── Part row inside section ── */
   .vmc-part-row {
@@ -2996,15 +2996,6 @@
   .vmc-program-reading {
     font-size: 0.82rem; color: var(--accent); font-weight: 600; margin-top: 3px;
   }
-  .vmc-program-meta-strip {
-    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 0.65rem;
-  }
-  .vmc-meta-chip {
-    display: flex; align-items: center; gap: 5px;
-    padding: 5px 10px; background: var(--surface); border: 1px solid var(--border);
-    border-radius: 12px; font-size: 0.75rem; font-weight: 600; color: var(--text2);
-  }
-  .vmc-meta-chip svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; flex-shrink: 0; }
 
   .vmc-user-section { margin-bottom: 1.25rem; }
   .vmc-user-section-header {
@@ -3012,9 +3003,9 @@
     padding: 0.55rem 0.85rem; border-radius: var(--radius-sm) var(--radius-sm) 0 0;
     font-size: 0.72rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
   }
-  .vmc-user-section-header-tesoros  { background: rgba(245,158,11,0.1); color: #b45309; }
-  .vmc-user-section-header-maestros { background: rgba(59,130,246,0.1); color: #1d4ed8; }
-  .vmc-user-section-header-vida     { background: rgba(168,85,247,0.1); color: #7e22ce; }
+  .vmc-user-section-header-tesoros  { background: rgba(59,130,246,0.1); color: #1d4ed8; }
+  .vmc-user-section-header-maestros { background: rgba(245,158,11,0.1); color: #b45309; }
+  .vmc-user-section-header-vida     { background: rgba(239,68,68,0.1); color: #b91c1c; }
 
   .vmc-user-part-card {
     background: var(--surface); border: 1px solid var(--border);
@@ -5839,11 +5830,11 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         </div>
       </div>
 
-      <!-- Fin de Semana -->
+      <!-- Pública -->
       <div id="sub-content-fin-semana" class="sub-page" style="display:none">
         <div id="admin-shortcut-fin-semana" style="display:none"></div>
         <div id="fs-user-view">
-          <div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Fin de Semana</div></div>
+          <div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Pública</div></div>
         </div>
       </div>
 
@@ -5932,7 +5923,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       </div>
       <div class="admin-tabs-row" data-section="reuniones">
         <button class="admin-tab" data-tab="vmc" data-i18n="admin.tab.vmc" onclick="switchAdminTab('vmc')">Vida y Ministerio</button>
-        <button class="admin-tab" data-tab="fin-semana" data-i18n="admin.tab.fin-semana" onclick="switchAdminTab('fin-semana')">Fin de Semana</button>
+        <button class="admin-tab" data-tab="fin-semana" data-i18n="admin.tab.fin-semana" onclick="switchAdminTab('fin-semana')">Pública</button>
         <button class="admin-tab" data-tab="responsabilidades" data-i18n="admin.tab.responsabilidades" onclick="switchAdminTab('responsabilidades')">Responsabilidades</button>
         <button class="admin-tab" data-tab="aseo-salon" data-i18n="admin.tab.aseo-salon" onclick="switchAdminTab('aseo-salon')">Aseo Salón</button>
       </div>
@@ -6157,10 +6148,10 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         <div id="admin-vmc-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando VMC</div></div></div>
       </div>
 
-      <!-- ── Fin de Semana Admin Section ── -->
+      <!-- ── Pública Admin Section ── -->
       <div class="admin-section" id="admin-fin-semana">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
-          <span style="flex:1;font-size:0.95rem;font-weight:700">Fin de Semana</span>
+          <span style="flex:1;font-size:0.95rem;font-weight:700">Pública</span>
           <button class="btn-secondary" onclick="openFsWeekModal(null)">+ Nueva semana</button>
         </div>
         <div id="admin-fs-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Servicio de Campo</div></div></div>
@@ -7840,7 +7831,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.24.0-beta';
+const APP_VERSION = '1.24.5-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -8232,7 +8223,7 @@ const I18N = {
   'subtab.carritos':        { es: 'Carritos',                en: 'Carts',              nl: 'Karretjes' },
   'subtab.grupos':          { es: 'Grupos',                  en: 'Groups',             nl: 'Groepen' },
   'subtab.vida-ministerio': { es: 'Vida y Ministerio',       en: 'Christian Life and Ministry' },
-  'subtab.fin-semana':      { es: 'Fin de Semana',           en: 'Weekend' },
+  'subtab.fin-semana':      { es: 'Pública',                 en: 'Public Meeting' },
   'subtab.aseo-salon':      { es: 'Aseo del Salón',          en: 'Hall Cleaning' },
   'subtab.hospitalidad':    { es: 'Hospitalidad',            en: 'Hospitality' },
   'subtab.responsabilidades': { es: 'Responsabilidades',     en: 'Responsibilities' },
@@ -8247,7 +8238,7 @@ const I18N = {
   'admin.tab.grupos':       { es: 'Grupos',                  en: 'Groups',            nl: 'Groepen' },
   'admin.tab.carritos':     { es: 'Carritos',                en: 'Carts' },
   'admin.tab.vmc':          { es: 'Vida y Ministerio',       en: 'Christian Life and Ministry' },
-  'admin.tab.fin-semana':   { es: 'Fin de Semana',           en: 'Weekend' },
+  'admin.tab.fin-semana':   { es: 'Pública',                 en: 'Public Meeting' },
   'admin.tab.responsabilidades': { es: 'Responsabilidades', en: 'Responsibilities' },
   'admin.tab.aseo-salon':   { es: 'Aseo Salón',              en: 'Hall Cleaning' },
   'admin.tab.usuarios':     { es: 'Usuarios',                en: 'Users' },
@@ -8409,7 +8400,7 @@ const I18N = {
   'notifcat.carritos':          { es: 'Carritos',                     en: 'Carts',                     nl: 'Karretjes' },
   'notifcat.mapas-actualizacion': { es: 'Actualización de Mapas',     en: 'Map Updates',               nl: 'Kaartupdates' },
   'notifcat.vida-ministerio':   { es: 'Vida y Ministerio',           en: 'Christian Life and Ministry', nl: 'Leven en Bediening' },
-  'notifcat.fin-semana':        { es: 'Fin de Semana',               en: 'Weekend',                   nl: 'Weekend' },
+  'notifcat.fin-semana':        { es: 'Pública',                     en: 'Public Meeting',            nl: 'Openbare vergadering' },
   'notifcat.aseo':               { es: 'Aseo del Salón',               en: 'Hall Cleaning',             nl: 'Schoonmaak van de Zaal' },
   'notifcat.hospitalidad':       { es: 'Hospitalidad',                 en: 'Hospitality',               nl: 'Gastvrijheid' },
   'notifcat.responsabilidades': { es: 'Responsabilidades',           en: 'Responsibilities',          nl: 'Verantwoordelijkheden' },
@@ -9590,7 +9581,7 @@ async function renderProfilePage() {
     groupSec.style.display = '';
   }
 
-  // Partes asignadas: Vida y Ministerio + Fin de Semana
+  // Partes asignadas: Vida y Ministerio + Pública
   await renderProfilePartes();
   await renderInicio();
 
@@ -9652,7 +9643,7 @@ async function renderProfilePartes() {
       .order('date_start');
     if (fsData) {
       const fsRoles = [
-        { field: 'presidente',        label: 'Presidente — Fin de Semana' },
+        { field: 'presidente',        label: 'Presidente — Pública' },
         { field: 'watchtower_reader', label: 'Lector de La Atalaya' },
       ];
       for (const w of fsData) {
@@ -9715,7 +9706,7 @@ async function collectLinkableNames(excludeUid) {
 // ── Pantalla de Inicio (experimental) ───────────────────────────────────────
 // Reúne, en una sola vista, todas las asignaciones/cargos vigentes del
 // usuario conectado: Casa en casa, Carritos, Aseo del Salón, Vida y
-// Ministerio, Fin de Semana, Responsabilidades y recordatorios de reporte
+// Ministerio, Pública, Responsabilidades y recordatorios de reporte
 // de territorio. Reutiliza los mismos criterios de "coincidencia" que ya
 // usa cada módulo por separado (conductor de la asignación, integrante de
 // grupo, nombre en cart_turnos.nombres, etc.) para no duplicar reglas.
@@ -9858,7 +9849,7 @@ async function renderInicio() {
     }
   } catch (e) { console.warn('Inicio (VMC):', e); }
 
-  // ── Fin de Semana: roles de cabecera en semanas vigentes ──
+  // ── Pública: roles de cabecera en semanas vigentes ──
   try {
     const { data } = await sb.from('fs_weeks')
       .select('id,date_start,date_end,presidente,watchtower_reader')
@@ -9876,7 +9867,7 @@ async function renderInicio() {
     }
     if (items.length) {
       sections.push({
-        key: 'fs', title: 'Fin de Semana', color: '#34c759', bg: 'rgba(52,199,89,0.12)',
+        key: 'fs', title: 'Pública', color: '#34c759', bg: 'rgba(52,199,89,0.12)',
         icon: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
         items: items.slice(0, 5),
       });
@@ -10809,7 +10800,7 @@ const VIEWER_SECTION_LABELS = {
   'grupos':            'Grupos',
   'carritos':          'Carritos',
   'vida-ministerio':   'Vida y Ministerio',
-  'fin-semana':        'Fin de Semana',
+  'fin-semana':        'Pública',
   'aseo-salon':        'Aseo del Salón',
   'responsabilidades': 'Responsabilidades',
 };
@@ -14814,7 +14805,7 @@ const PERM_MODULES = [
   { key: 'territory_reports', label: 'Reportes de Territorio', group: 'predicacion', icon: '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="11" x2="15" y2="11"/></svg>' },
   // ── Reuniones ──────────────────────────────────────────────────────────────
   { key: 'vida_ministerio',   label: 'Vida y Ministerio',  group: 'reuniones', icon: '<svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>' },
-  { key: 'fin_semana',        label: 'Fin de Semana',      group: 'reuniones', icon: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/></svg>' },
+  { key: 'fin_semana',        label: 'Pública',            group: 'reuniones', icon: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/></svg>' },
   { key: 'hospitalidad',      label: 'Hospitalidad',       group: 'reuniones', icon: '<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' },
   { key: 'aseo_salon',        label: 'Aseo del Salón',     group: 'reuniones', icon: '<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>' },
   { key: 'responsabilidades', label: 'Responsabilidades',  group: 'reuniones', icon: '<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
@@ -18828,7 +18819,7 @@ const NOTIF_TEMPLATES_DEFAULT = [
   {
     id: 'nueva_asignacion_reunion',
     label: 'Nueva Asignación en Reunión',
-    desc: 'Se envía cuando a alguien se le asigna una parte o rol en Vida y Ministerio o Fin de Semana.',
+    desc: 'Se envía cuando a alguien se le asigna una parte o rol en Vida y Ministerio o Pública.',
     title: 'Nueva asignación en reunión',
     body: 'Se te ha asignado {roles} para la semana del {rango}. Revisa los detalles.',
     vars: ['roles', 'rango'],
@@ -20755,10 +20746,6 @@ function vmcRenderWeekProgram(week) {
     <div class="vmc-program-header">
       <div class="vmc-program-title">${vmcFormatRange(week)}</div>
       ${week.reading ? `<div class="vmc-program-reading"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;margin-right:4px"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>${week.reading}</div>` : ''}
-      <div class="vmc-program-meta-strip">
-        ${week.presidente ? `<div class="vmc-meta-chip"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Pres. ${week.presidente}</div>` : ''}
-        ${parts.length ? `<div class="vmc-meta-chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${parts.reduce((a,p)=>a+(p.mins||0),0)} min</div>` : ''}
-      </div>
     </div>
     ${myBlock}
     ${openRow}
@@ -20770,7 +20757,7 @@ function vmcRenderWeekProgram(week) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// Fin de Semana — Admin + Vista de usuario
+// Pública — Admin + Vista de usuario
 // Tabla Supabase: fs_weeks
 // Esquema: { id uuid pk, date_start date, date_end date,
 //            talk_title text, presidente text, speaker_name text,
@@ -20813,7 +20800,7 @@ function fsShortRange(w) {
 
 async function loadFsWeeks() {
   const { data, error } = await sb.from('fs_weeks').select('*').order('date_start', { ascending: false });
-  if (error) { showToast('Error cargando semanas de Fin de Semana', 'error'); return; }
+  if (error) { showToast('Error cargando semanas de Pública', 'error'); return; }
   fsWeeks = data || [];
 }
 
@@ -20868,7 +20855,7 @@ async function openFsWeekModal(id) {
   overlay.classList.add('open');
 
   const week = id ? fsWeeks.find(w => w.id === id) : null;
-  document.getElementById('fs-modal-title').textContent = week ? 'Editar semana — Fin de Semana' : 'Nueva semana — Fin de Semana';
+  document.getElementById('fs-modal-title').textContent = week ? 'Editar semana — Pública' : 'Nueva semana — Pública';
 
   document.getElementById('fs-date-start').value          = week?.date_start          || '';
   document.getElementById('fs-date-end').value            = week?.date_end            || '';
@@ -20937,14 +20924,14 @@ async function saveFsWeek() {
     const range = fsFormatRange(payload);
     await fsNotifyNewAssignments(payload, prevWeek, range);
   } catch (err) {
-    console.warn('No se pudieron enviar notificaciones de Fin de Semana:', err.message);
+    console.warn('No se pudieron enviar notificaciones de Pública:', err.message);
   }
 }
 
 // ── Delete week ───────────────────────────────────────────────────────────────
 
 async function deleteFsWeek(id) {
-  if (!confirm('¿Eliminar esta semana de Fin de Semana?')) return;
+  if (!confirm('¿Eliminar esta semana de Pública?')) return;
   const { error } = await sb.from('fs_weeks').delete().eq('id', id);
   if (error) { showToast('Error al eliminar', 'error'); return; }
   showToast('Semana eliminada', 'success');
@@ -20953,7 +20940,7 @@ async function deleteFsWeek(id) {
   renderFsUserView();
 }
 
-// ── Notificaciones personales automáticas — Fin de Semana ───────────────────
+// ── Notificaciones personales automáticas — Pública ───────────────────
 
 function fsBuildAssignmentMap(week) {
   const map = {};
@@ -21121,7 +21108,7 @@ function fsRenderWeekProgram(week) {
   ].filter(Boolean);
 
   const programBody = cards.length ? `<div class="vmc-user-section">
-      <div class="vmc-user-section-header" style="background:rgba(0,122,255,0.1);color:var(--accent)">Fin de Semana</div>
+      <div class="vmc-user-section-header" style="background:rgba(0,122,255,0.1);color:var(--accent)">Pública</div>
       ${cards.join('')}
     </div>` : `<div class="vmc-empty">
       <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -21192,7 +21179,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
       </div>
     </div>
 
-    <!-- Partes asignadas (VMC y Fin de Semana) -->
+    <!-- Partes asignadas (VMC y Pública) -->
     <div class="profile-section" id="profile-partes-section" style="display:none">
       <div class="profile-section-title" data-i18n="profile.partes">Partes asignadas</div>
       <div id="profile-partes-list"></div>
@@ -21661,7 +21648,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
 </div>
 
 <!-- ══════════════════════════════════════════════════════════════════
-     Fin de Semana — Week Editor Modal
+     Pública — Week Editor Modal
      (reutiliza las clases .vmc-* y el picker de personas vmc_people)
 ══════════════════════════════════════════════════════════════════ -->
 <div class="vmc-modal-overlay" id="fs-modal-overlay">
@@ -21671,7 +21658,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
         <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         Volver
       </button>
-      <div class="vmc-modal-title" id="fs-modal-title">Nueva semana — Fin de Semana</div>
+      <div class="vmc-modal-title" id="fs-modal-title">Nueva semana — Pública</div>
     </div>
     <div class="vmc-modal-body" id="fs-modal-body">
 
@@ -21687,11 +21674,11 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
         </div>
       </div>
 
-      <!-- Campos de la reunión de Fin de Semana -->
+      <!-- Campos de la reunión de Pública -->
       <div class="vmc-section-block">
         <div class="vmc-section-header" style="background:rgba(0,122,255,0.08);color:var(--accent);border-bottom:1px solid rgba(0,122,255,0.2)">
           <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          Reunión de Fin de Semana
+          Reunión Pública
         </div>
         <div class="vmc-meta-row">
           <span class="vmc-meta-label">Nombre de la conferencia</span>
@@ -23322,7 +23309,7 @@ async function notifyReportRecipients(territoryObj, submission) {
 
    Guarda el nombre "de reconocimiento" bajo el cual esta cuenta debe
    identificarse dentro de Grupos de Servicio, Asignaciones (Casa en Casa),
-   Responsabilidades, Aseo del Salón, Vida y Ministerio, Fin de Semana,
+   Responsabilidades, Aseo del Salón, Vida y Ministerio, Pública,
    Carritos y Notificaciones/Push — sin necesidad de fusionar la fila de
    platform_users ni de iniciar sesión con ese otro nombre. Si es null/vacío,
    la cuenta se reconoce por su propio nombre (comportamiento normal).
