@@ -6711,23 +6711,23 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
     <div class="modal-body">
 
       <div class="form-group2">
-        <label class="form-label2">Dirección</label>
+        <label class="form-label2">Dirección <span id="casa-direccion-optional" style="display:none;font-weight:400;color:var(--text3)">(opcional para Reunión Zoom)</span></label>
         <input type="text" class="form-input" id="casa-direccion" placeholder="Ej: Tres Marías 1633">
       </div>
 
       <div class="form-group2">
         <label class="form-label2">Habitante</label>
         <div class="tipo-amo-row">
-          <select class="form-input tipo-select" id="casa-tipo">
+          <select class="form-input tipo-select" id="casa-tipo" onchange="updateCasaTipoUI()">
             <option value="casa">Casa</option>
             <option value="departamento">Departamento</option>
-            <option value="otro">Otro</option>
+            <option value="zoom">Reunión Zoom</option>
           </select>
           <input type="text" class="form-input" id="casa-amo" placeholder="Ej: Familia González">
         </div>
       </div>
 
-      <div class="form-group2">
+      <div class="form-group2" id="casa-amo-user-group">
         <label class="form-label2">Usuario Amo de Casa</label>
         <select class="form-select" id="casa-amo-user">
           <option value="">Sin usuario vinculado</option>
@@ -6735,7 +6735,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         <div style="font-size:0.72rem;color:var(--text3);margin-top:5px">Si vinculas un usuario registrado, recibirá una notificación de la plataforma cada vez que se asigne esta casa.</div>
       </div>
 
-      <div class="form-group2">
+      <div class="form-group2" id="casa-dias-group">
         <label class="form-label2">Días disponibles</label>
         <div class="dias-picker" id="casa-dias-picker">
           <!-- Rendered by JS -->
@@ -7773,7 +7773,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.25.5-beta';
+const APP_VERSION = '1.25.6-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -11620,7 +11620,7 @@ async function viewAssignment(id) {
     programaBtn.style.display = 'none';
     actions.style.display = '';
     if (a.type === 'zoom') { callBtn.textContent = 'Abrir Zoom'; callBtn.onclick = null; }
-    else if (a.type === 'cartas') { callBtn.textContent = 'Ver detalles'; callBtn.onclick = null; }
+    else if (a.type === 'cartas') { callBtn.style.display = 'none'; }
     else {
       callBtn.textContent = 'Llamar';
       if (a.phone) {
@@ -14562,8 +14562,8 @@ function renderAdminCasas() {
     const tipo = parseCasaTipo(h);
     const tipoIcon = tipo === 'departamento'
       ? `<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M9 3v18"/><path d="M2 9h7"/><path d="M2 15h7"/><path d="M15 9h5"/><path d="M15 15h5"/></svg>`
-      : tipo === 'otro'
-      ? `<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
+      : tipo === 'zoom'
+      ? `<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="1" y="5" width="15" height="14" rx="2"/><polygon points="23 7 16 12 23 17 23 7"/></svg>`
       : `<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`;
     const dias = parseCasaDias(h);
     return `
@@ -14572,9 +14572,9 @@ function renderAdminCasas() {
         ${tipoIcon}
       </div>
       <div class="list-item-main">
-        <div class="list-item-title">${h.direccion}</div>
-        <div class="list-item-sub">${h.amo ? `${tipo==='departamento'?'Dpto':'Casa'} · ${h.amo}` : 'Sin habitante registrado'}</div>
-        ${dias.length ? diasChipsHtml(dias) : ''}
+        <div class="list-item-title">${h.direccion || (tipo === 'zoom' ? 'Reunión Zoom' : 'Sin dirección')}</div>
+        <div class="list-item-sub">${tipo === 'zoom' ? 'Reunión Zoom · todos los días' : (h.amo ? `${tipo==='departamento'?'Dpto':'Casa'} · ${h.amo}` : 'Sin habitante registrado')}</div>
+        ${(tipo !== 'zoom' && dias.length) ? diasChipsHtml(dias) : ''}
       </div>
       <div class="list-item-actions">
         <button class="btn-sm" onclick="editCasa('${h.id}')">Editar</button>
@@ -14632,6 +14632,22 @@ function parseCasaTipo(h) {
   return h?.tipo || 'casa';
 }
 
+// Muestra/oculta campos del modal de Casa según el tipo de Habitante elegido.
+// "Reunión Zoom" no requiere Habitante, Usuario Amo de Casa ni Dirección, y
+// todos los días quedan disponibles (sin restricción de días).
+function updateCasaTipoUI() {
+  const tipo = document.getElementById('casa-tipo').value;
+  const isZoom = tipo === 'zoom';
+  const amoInput = document.getElementById('casa-amo');
+  const amoUserGroup = document.getElementById('casa-amo-user-group');
+  const diasGroup = document.getElementById('casa-dias-group');
+  const direccionOptional = document.getElementById('casa-direccion-optional');
+  if (amoInput) { amoInput.style.display = isZoom ? 'none' : ''; if (isZoom) amoInput.value = ''; }
+  if (amoUserGroup) { amoUserGroup.style.display = isZoom ? 'none' : ''; if (isZoom) document.getElementById('casa-amo-user').value = ''; }
+  if (diasGroup) { diasGroup.style.display = isZoom ? 'none' : ''; }
+  if (direccionOptional) { direccionOptional.style.display = isZoom ? '' : 'none'; }
+}
+
 function diasChipsHtml(dias) {
   if (!dias || !dias.length) return '';
   return '<div class="dias-chips">' +
@@ -14657,6 +14673,7 @@ function openCasaModal(h) {
   document.getElementById('casa-amo').value = h?.amo || '';
   document.getElementById('casa-tipo').value = parseCasaTipo(h);
   renderDiasPicker(parseCasaDias(h));
+  updateCasaTipoUI();
   document.getElementById('casa-error').style.display = 'none';
   populateCasaAmoUserSelect(h?.amo_user || '');
   document.getElementById('casa-modal').classList.add('open');
@@ -14689,11 +14706,12 @@ function editCasa(id) { openCasaModal(casas.find(h=>h.id===id)); }
 async function saveCasa() {
   if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   const direccion = document.getElementById('casa-direccion').value.trim();
-  const amo = document.getElementById('casa-amo').value.trim();
-  const amoUser = document.getElementById('casa-amo-user').value.trim();
   const tipo = document.getElementById('casa-tipo').value;
-  const dias = JSON.stringify([..._selectedDias]);
-  if (!direccion) { showError('casa-error','La dirección es requerida'); return; }
+  const isZoom = tipo === 'zoom';
+  const amo = isZoom ? '' : document.getElementById('casa-amo').value.trim();
+  const amoUser = isZoom ? '' : document.getElementById('casa-amo-user').value.trim();
+  const dias = isZoom ? JSON.stringify([]) : JSON.stringify([..._selectedDias]);
+  if (!isZoom && !direccion) { showError('casa-error','La dirección es requerida'); return; }
   const btn = document.getElementById('save-casa-btn');
   btn.disabled = true; btn.textContent = 'Guardando...';
   const payload = { direccion, amo, tipo, dias, amo_user: amoUser || null };
