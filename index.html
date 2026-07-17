@@ -5629,6 +5629,10 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
             Configuración
             <span id="config-update-dot" style="display:none;width:8px;height:8px;border-radius:50%;background:var(--green,#30c97a);margin-left:auto;flex-shrink:0;box-shadow:0 0 0 2px var(--surface)"></span>
           </button>
+          <button class="dropdown-item danger" onclick="openReportIssueModal();closeOptionsMenu()">
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Reportar un problema
+          </button>
         </div>
       </div>
     </div>
@@ -7773,7 +7777,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.25.6-beta';
+const APP_VERSION = '1.25.7-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -11619,7 +11623,7 @@ async function viewAssignment(id) {
     mapBtn.style.display = '';
     programaBtn.style.display = 'none';
     actions.style.display = '';
-    if (a.type === 'zoom') { callBtn.textContent = 'Abrir Zoom'; callBtn.onclick = null; }
+    if (a.type === 'zoom') { callBtn.style.display = 'none'; mapBtn.style.display = 'none'; actions.style.display = 'none'; }
     else if (a.type === 'cartas') { callBtn.style.display = 'none'; }
     else {
       callBtn.textContent = 'Llamar';
@@ -11633,12 +11637,14 @@ async function viewAssignment(id) {
       }
     }
     mapBtn.textContent = 'Cómo llegar';
-    if (a.address) {
-      mapBtn.onclick = () => window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(a.address), '_blank');
-      mapBtn.style.opacity = '1';
-    } else {
-      mapBtn.onclick = null;
-      mapBtn.style.opacity = '0.45';
+    if (a.type !== 'zoom') {
+      if (a.address) {
+        mapBtn.onclick = () => window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(a.address), '_blank');
+        mapBtn.style.opacity = '1';
+      } else {
+        mapBtn.onclick = null;
+        mapBtn.style.opacity = '0.45';
+      }
     }
   }
 
@@ -22348,18 +22354,23 @@ async function cartSaveTurno(id) {
 
   if (res.error) { showToast('Error: ' + res.error.message, 'error'); return; }
 
-  // Avisar a todos los que siguen Carritos sobre turnos nuevos o cambios de horario.
+  // Nuevos turnos o cambios de horario ya no se notifican por defecto: se le
+  // pregunta al usuario DEV/Admin encargado si desea enviar la notificación.
   try {
     if (!id) {
       const title = 'Nuevo turno en Carritos';
       const body = `Se añadió un nuevo turno en ${puntoNombre} (${dia}, ${hora}).`;
-      await sb.from('notifications').insert({ title, body, notif_category: 'carritos' });
-      cartNotifyPush(title, body);
+      if (confirm('¿Enviar notificación a quienes siguen Carritos sobre este nuevo turno?')) {
+        await sb.from('notifications').insert({ title, body, notif_category: 'carritos' });
+        cartNotifyPush(title, body);
+      }
     } else if (horaCambio) {
       const title = 'Cambio de horario en Carritos';
       const body = `El turno de ${puntoNombre} (${dia}) cambió su horario a ${hora}.`;
-      await sb.from('notifications').insert({ title, body, notif_category: 'carritos' });
-      cartNotifyPush(title, body);
+      if (confirm('¿Enviar notificación a quienes siguen Carritos sobre este cambio de horario?')) {
+        await sb.from('notifications').insert({ title, body, notif_category: 'carritos' });
+        cartNotifyPush(title, body);
+      }
     }
   } catch (err) {
     console.warn('No se pudo notificar el cambio de turno:', err.message);
