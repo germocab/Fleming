@@ -397,34 +397,6 @@
 
   #app { display: none; flex-direction: column; min-height: 100vh; }
 
-  /* ── Experimentos: NavBar abajo (solo Móvil) ──────────────────────────────
-     Cuando está activo (html.navbar-bottom-mobile) y estamos por debajo de
-     640px, el .app-header-shell (topnav + sub-tabs) se fija en la parte
-     inferior de la pantalla, como una barra de pestañas, en vez de
-     desplazarse junto con el contenido en su posición original arriba.
-     Se añade padding-bottom al contenido para que nada quede tapado detrás. ── */
-  @media (max-width: 639px) {
-    html.navbar-bottom-mobile .app-header-shell {
-      position: fixed;
-      left: 0; right: 0; bottom: 0; top: auto;
-      z-index: 150;
-      background: var(--bottom-nav-bg);
-      backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%);
-      -webkit-backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%);
-      border-top: 1px solid var(--border);
-      border-bottom: none;
-      box-shadow: 0 -4px 24px rgba(0,0,0,0.10);
-      padding-bottom: env(safe-area-inset-bottom, 0);
-      display: flex; flex-direction: column-reverse;
-    }
-    html.navbar-bottom-mobile .app-header-shell .sub-tabs-wrap { border-top: 1px solid var(--border); }
-    html.navbar-bottom-mobile.no-transparency .app-header-shell {
-      background: var(--surface); backdrop-filter: none; -webkit-backdrop-filter: none;
-    }
-    /* Empuja el contenido para que la barra inferior no lo tape */
-    html.navbar-bottom-mobile #app > .main-content { padding-bottom: var(--navbar-bottom-h, 76px); }
-  }
-
   /* ── Header shell: envuelve topnav + sub-tabs. En Desktop queda "fixed"
      (sticky) arriba de la pantalla al hacer scroll, encogiéndose con
      transparencia/blur. En Móvil NO es fijo: se desplaza junto con el
@@ -580,18 +552,6 @@
   @keyframes menuMorphIn { from { opacity:0; transform: scale(0.85) translateY(-8px); } to { opacity:1; transform: scale(1) translateY(0); } }
   @keyframes menuMorphInUp { from { opacity:0; transform: scale(0.85) translateY(8px); } to { opacity:1; transform: scale(1) translateY(0); } }
 
-  /* ── NavBar abajo (móvil): la NavBar vive al fondo de la pantalla, así que
-     sus menús desplegables (Opciones, Notificaciones) deben abrirse hacia
-     arriba en vez de hacia abajo, o quedarían fuera de la pantalla. ── */
-  @media (max-width: 639px) {
-    html.navbar-bottom-mobile .options-dropdown {
-      top: auto; bottom: calc(100% + 10px);
-      transform-origin: bottom right;
-    }
-    html.navbar-bottom-mobile .options-dropdown.open { animation: menuMorphInUp 0.32s var(--ease-fluid-snappy); }
-    @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
-  }
-
   .options-user-info {
     display: flex; align-items: center; gap: 10px;
     padding: 0.6rem 0.85rem 0.65rem;
@@ -606,8 +566,8 @@
   .options-user-name { font-size: 0.88rem; font-weight: 700; color: var(--text); line-height: 1.2; }
   .options-user-role { font-size: 0.72rem; color: var(--text3); }
 
-  /* ── Experimentos: Foto de perfil en la NavBar (reemplaza Notificaciones +
-     Opciones por el avatar del usuario) — v1.22.12-beta ── */
+  /* ── Experimentos: Foto de perfil en Más opciones (reemplaza solo el botón
+     Más opciones/Opciones por el avatar del usuario) — v1.25.0-beta ── */
   .nav-avatar-btn {
     display: none; width: 42px; height: 42px; border-radius: 50%;
     border: none; cursor: pointer; padding: 0; flex-shrink: 0;
@@ -623,18 +583,9 @@
     font-size: 0.78rem; font-weight: 700; color: #fff; overflow: hidden;
   }
   .nav-avatar-btn-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .nav-avatar-btn-dot {
-    display: none; position: absolute; top: 1px; right: 1px;
-    width: 10px; height: 10px; background: var(--red); border-radius: 50%;
-    border: 2px solid var(--surface); pointer-events: none;
-  }
-  .nav-avatar-btn-dot.visible { display: block; }
-  html.navbar-avatar-mode #nav-bell-wrap,
   html.navbar-avatar-mode #nav-options-dots-btn { display: none !important; }
   html.navbar-avatar-mode .nav-avatar-btn { display: flex; }
-  /* Ítem "Notificaciones" dentro del Menú Opciones: solo visible en este modo */
   #options-dropdown-notif-item { display: none; }
-  html.navbar-avatar-mode #options-dropdown-notif-item { display: flex; }
 
   .dropdown-item {
     display: flex; align-items: center; gap: 10px;
@@ -5279,14 +5230,6 @@
 @media (max-width: 640px) {
   #scroll-top-fab { right: 14px; bottom: 18px; width: 42px; height: 42px; }
 }
-/* Cuando la NavBar está fijada abajo (Experimentos → NavBar abajo), el botón
-   "Volver arriba" debe flotar por encima de ella, no quedar tapado detrás. */
-@media (max-width: 639px) {
-  html.navbar-bottom-mobile #scroll-top-fab {
-    bottom: calc(var(--navbar-bottom-h, 76px) + 14px);
-  }
-}
-
 /* ── Modo Offline: banner flotante que indica que no hay conexión ──────────
    Aparece automáticamente al perder la conexión (evento 'offline' / detección
    de fallos de red) y desaparece al recuperarla. No bloquea la interacción
@@ -5310,10 +5253,6 @@
 @media (max-width: 640px) {
   #offline-banner { bottom: 16px; font-size: 0.78rem; padding: 0.5rem 0.9rem 0.5rem 0.7rem; max-width: calc(100vw - 2rem); text-align: left; }
 }
-@media (max-width: 639px) {
-  html.navbar-bottom-mobile #offline-banner { bottom: calc(var(--navbar-bottom-h, 76px) + 14px); }
-}
-
 /* ── Tutorial de bienvenida (onboarding paso a paso) ─────────────────────
    Overlay + "spotlight" que resalta el elemento del que se está hablando
    (recorte transparente sobre fondo oscuro vía box-shadow gigante) y una
@@ -5640,7 +5579,6 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         </button>
         <button class="nav-avatar-btn" id="nav-avatar-btn" title="Opciones" onclick="toggleOptionsMenu()">
           <div class="nav-avatar-btn-img" id="user-avatar-navbtn">?</div>
-          <div class="nav-avatar-btn-dot" id="notif-badge-navbtn"></div>
         </button>
         <div class="options-dropdown" id="options-dropdown">
           <div class="options-user-info" onclick="openProfilePage();closeOptionsMenu()" style="cursor:pointer;transition:background 0.15s;border-radius:10px 10px 0 0" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
@@ -6955,7 +6893,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         </div>
         <div class="profile-row-content">
           <div class="profile-row-label" data-i18n="settings.preferencias">Preferencias</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.preferencias.desc">Idioma, tema, mapas, transparencia y NavBar</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.preferencias.desc">Idioma, tema, mapas, transparencia, NavBar y almacenamiento</div>
         </div>
         <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
@@ -6965,7 +6903,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         </div>
         <div class="profile-row-content">
           <div class="profile-row-label" data-i18n="settings.funciones">Funciones especiales</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.funciones.desc">Live y vista de asignaciones</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.funciones.desc">Función Live</div>
         </div>
         <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
@@ -6976,16 +6914,6 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         <div class="profile-row-content">
           <div class="profile-row-label" data-i18n="settings.notificaciones">Notificaciones</div>
           <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.notificaciones.desc">Avisos de la plataforma</div>
-        </div>
-        <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>
-      <div class="pref-nav-row" id="pref-nav-row-almacenamiento" onclick="openPrefScreen('almacenamiento')">
-        <div class="profile-row-icon" style="background:var(--ter-6-bg);color:var(--ter-6)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label">Almacenamiento</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Mapas de Territorio descargados</div>
         </div>
         <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
@@ -7157,42 +7085,6 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         </div>
       </div>
     </div>
-    <!-- Tamaño de la interfaz: al final de Preferencias, en su propia sección -->
-    <div class="profile-section">
-      <div class="profile-section-title" data-i18n="pref.uisize">Tamaño de la interfaz</div>
-      <div style="padding:0.2rem 1rem 1rem">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem">
-          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase" data-i18n="pref.uisize.nivel">Nivel</span>
-          <span id="pref-ui-size-label" style="font-size:0.78rem;font-weight:700;color:var(--accent)" data-i18n="pref.uisize.normal">Normal</span>
-        </div>
-        <input type="range" id="pref-ui-size-slider" min="1" max="3" step="1" value="2"
-          oninput="setUiSizeLevel(parseInt(this.value,10))"
-          style="width:100%;accent-color:var(--accent);cursor:pointer">
-        <div style="display:flex;justify-content:space-between;margin-top:0.4rem">
-          <div class="pref-blur-dot" id="pref-ui-size-dot-1"></div>
-          <div class="pref-blur-dot" id="pref-ui-size-dot-2"></div>
-          <div class="pref-blur-dot" id="pref-ui-size-dot-3"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-top:0.3rem">
-          <span style="font-size:0.68rem;color:var(--text3)" data-i18n="pref.uisize.pequeno">Pequeño</span>
-          <span style="font-size:0.68rem;color:var(--text3)" data-i18n="pref.uisize.normal">Normal</span>
-          <span style="font-size:0.68rem;color:var(--text3)" data-i18n="pref.uisize.grande">Grande</span>
-        </div>
-        <div style="padding:0.55rem 0.1rem 0;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="pref.uisize.help">Agranda el texto y los elementos del UI (botones, sliders, tarjetas) en toda la plataforma. Ideal si tienes dificultad para ver bien la pantalla.</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ── Sub-pantalla: Funciones especiales ── -->
-<div id="page-pref-funciones" class="pref-subpage">
-  <nav class="subpage-topbar">
-    <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración" data-i18n-title="settings.title">
-      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-    </button>
-    <span class="pill-header-title" data-i18n="settings.funciones">Funciones especiales</span>
-  </nav>
-  <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 0 2.5rem">
     <!-- Vista de Contenido + NavBar Grow&Shrink: comparten zona (ambos son
          ajustes de presentación en Tablet/Escritorio) -->
     <div class="profile-section">
@@ -7233,6 +7125,55 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       </div>
       <div class="pref-desktop-only-row" style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="func.auto.help">En "Automático" (por defecto), la barra se encoge apenas haces scroll y solo recupera su tamaño al volver hasta arriba del todo.</div>
     </div>
+    <!-- Almacenamiento (v1.20.0-beta) -->
+    <div class="profile-section">
+      <div class="pref-nav-row" id="pref-nav-row-almacenamiento" onclick="openPrefScreen('almacenamiento')">
+        <div class="profile-row-icon" style="background:var(--ter-6-bg);color:var(--ter-6)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Almacenamiento</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Mapas de Territorio descargados</div>
+        </div>
+        <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+    <!-- Tamaño de la interfaz: al final de Preferencias, en su propia sección -->
+    <div class="profile-section">
+      <div class="profile-section-title" data-i18n="pref.uisize">Tamaño de la interfaz</div>
+      <div style="padding:0.2rem 1rem 1rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem">
+          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase" data-i18n="pref.uisize.nivel">Nivel</span>
+          <span id="pref-ui-size-label" style="font-size:0.78rem;font-weight:700;color:var(--accent)" data-i18n="pref.uisize.normal">Normal</span>
+        </div>
+        <input type="range" id="pref-ui-size-slider" min="1" max="3" step="1" value="2"
+          oninput="setUiSizeLevel(parseInt(this.value,10))"
+          style="width:100%;accent-color:var(--accent);cursor:pointer">
+        <div style="display:flex;justify-content:space-between;margin-top:0.4rem">
+          <div class="pref-blur-dot" id="pref-ui-size-dot-1"></div>
+          <div class="pref-blur-dot" id="pref-ui-size-dot-2"></div>
+          <div class="pref-blur-dot" id="pref-ui-size-dot-3"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:0.3rem">
+          <span style="font-size:0.68rem;color:var(--text3)" data-i18n="pref.uisize.pequeno">Pequeño</span>
+          <span style="font-size:0.68rem;color:var(--text3)" data-i18n="pref.uisize.normal">Normal</span>
+          <span style="font-size:0.68rem;color:var(--text3)" data-i18n="pref.uisize.grande">Grande</span>
+        </div>
+        <div style="padding:0.55rem 0.1rem 0;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="pref.uisize.help">Agranda el texto y los elementos del UI (botones, sliders, tarjetas) en toda la plataforma. Ideal si tienes dificultad para ver bien la pantalla.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Sub-pantalla: Funciones especiales ── -->
+<div id="page-pref-funciones" class="pref-subpage">
+  <nav class="subpage-topbar">
+    <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración" data-i18n-title="settings.title">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span class="pill-header-title" data-i18n="settings.funciones">Funciones especiales</span>
+  </nav>
+  <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 0 2.5rem">
     <!-- Función Live -->
     <div class="profile-section">
       <!-- Toggle: función Live -->
@@ -7453,27 +7394,14 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         </div>
       </div>
       <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.simplificada.help">Al activarla, se desactivan las Notificaciones, Live, el Tutorial y el panel de administración. Para volver a la versión normal, entra a Configuración desde el título "Fleming".</div>
-      <!-- NavBar abajo (solo móvil) -->
-      <div class="profile-row" id="navbar-bottom-row" style="cursor:pointer;border-top:1px solid var(--border)" onclick="toggleNavbarBottomPref()">
-        <div class="profile-row-icon" style="background:var(--ter-6-bg);color:var(--ter-6)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="16" x2="21" y2="16"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="exp.navbarabajo.title">NavBar abajo</div>
-          <div class="profile-row-value" style="font-size:0.8rem" id="navbar-bottom-desc" data-i18n="exp.navbarabajo.desc">Coloca la NavBar en la parte inferior de la pantalla. Solo disponible en móvil.</div>
-        </div>
-        <div id="navbar-bottom-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="navbar-bottom-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
-      </div>
-      <!-- Foto de perfil en la NavBar (reemplaza Notificaciones + Opciones) -->
+      <!-- Foto de perfil en Más opciones (reemplaza solo el botón Opciones) -->
       <div class="profile-row" id="navbar-avatar-row" style="cursor:pointer;border-top:1px solid var(--border)" onclick="toggleNavbarAvatarPref()">
         <div class="profile-row-icon" style="background:var(--ter-3-bg);color:var(--ter-3)">
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="exp.navbaravatar.title">Foto de perfil en NavBar</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.navbaravatar.desc">Reemplaza los botones de Notificaciones y Opciones por tu foto de perfil, dejando más espacio libre en la NavBar</div>
+          <div class="profile-row-label" data-i18n="exp.navbaravatar.title">Foto de perfil en Más opciones</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.navbaravatar.desc">Reemplaza el botón Más opciones de la NavBar por tu foto de perfil, manteniendo el resto igual</div>
         </div>
         <div id="navbar-avatar-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
           <div id="navbar-avatar-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
@@ -7831,7 +7759,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.24.5-beta';
+const APP_VERSION = '1.25.0-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -8277,9 +8205,9 @@ const I18N = {
   // ── Configuración (menú principal) ──
   'settings.title':             { es: 'Configuración',            en: 'Settings',    nl: 'Instellingen' },
   'settings.preferencias':      { es: 'Preferencias',             en: 'Preferences', nl: 'Voorkeuren' },
-  'settings.preferencias.desc': { es: 'Idioma, tema, mapas, transparencia y NavBar', en: 'Language, theme, maps, transparency and NavBar', nl: 'Taal, thema, kaarten, transparantie en NavBar' },
+  'settings.preferencias.desc': { es: 'Idioma, tema, mapas, transparencia, NavBar y almacenamiento', en: 'Language, theme, maps, transparency, NavBar and storage', nl: 'Taal, thema, kaarten, transparantie, NavBar en opslag' },
   'settings.funciones':         { es: 'Funciones especiales',     en: 'Special Features', nl: 'Speciale functies' },
-  'settings.funciones.desc':    { es: 'Live y vista de asignaciones', en: 'Live and assignment view', nl: 'Live en weergave van toewijzingen' },
+  'settings.funciones.desc':    { es: 'Función Live', en: 'Live function', nl: 'Live-functie' },
   'settings.notificaciones':    { es: 'Notificaciones',           en: 'Notifications', nl: 'Meldingen' },
   'settings.notificaciones.desc': { es: 'Avisos de la plataforma', en: 'Platform alerts', nl: 'Platformmeldingen' },
   'settings.experimentos':      { es: 'Experimentos',             en: 'Experiments', nl: 'Experimenten' },
@@ -8339,8 +8267,8 @@ const I18N = {
   'exp.blur.nivel.3':      { es: 'Medio',                   en: 'Medium', nl: 'Gemiddeld' },
   'exp.blur.nivel.4':      { es: 'Clásico',                 en: 'Classic', nl: 'Klassiek' },
   'exp.blur.nivel.5':      { es: 'Máximo',                  en: 'Maximum', nl: 'Maximaal' },
-  'exp.blur.nivel.6':      { es: 'Extremo',                 en: 'Extreme', nl: 'Extreem' },
-  'exp.blur.nivel.7':      { es: 'Extra Plus',              en: 'Extra Plus', nl: 'Extra Plus' },
+  'exp.blur.nivel.6':      { es: 'Alto',                    en: 'High', nl: 'Hoog' },
+  'exp.blur.nivel.7':      { es: 'Extremo',                 en: 'Extreme', nl: 'Extreem' },
   'exp.vistaprevia':       { es: 'Vista previa',            en: 'Preview', nl: 'Voorbeeld' },
   'exp.vistaprevia.desc':  { es: 'Así se verán los encabezados y paneles flotantes de la plataforma con este nivel.', en: 'This is how the platform\u2019s headers and floating panels will look with this level.', nl: 'Zo zien de koppen en zwevende panelen van het platform eruit met dit niveau.' },
   'exp.coloracento':       { es: 'Color de acento',         en: 'Accent color', nl: 'Accentkleur' },
@@ -8356,9 +8284,8 @@ const I18N = {
   'exp.simplificada.desc.mobile': { es: 'Reemplaza el NavBar por un menú simple con título y hamburguesa.', en: 'Replaces the NavBar with a simple menu with a title and hamburger icon.', nl: 'Vervangt de NavBar door een eenvoudig menu met titel en hamburgerpictogram.' },
   'exp.simplificada.desc.desktop': { es: 'Disponible solo en dispositivos móviles. Actívala y ábrela desde tu teléfono.', en: 'Only available on mobile devices. Enable it and open it from your phone.', nl: 'Alleen beschikbaar op mobiele apparaten. Schakel het in en open het vanaf je telefoon.' },
   'exp.simplificada.help': { es: 'Al activarla, se desactivan las Notificaciones, Live, el Tutorial y el panel de administración. Para volver a la versión normal, entra a Configuración desde el título "Fleming".', en: 'When enabled, Notifications, Live, the Tutorial and the admin panel are disabled. To return to the normal version, open Settings from the "Fleming" title.', nl: 'Bij activering worden Meldingen, Live, de Tutorial en het beheerpaneel uitgeschakeld. Ga naar Instellingen via de titel "Fleming" om terug te keren naar de normale versie.' },
-  'exp.navbarabajo.title': { es: 'NavBar abajo',            en: 'NavBar at the bottom', nl: 'NavBar onderaan' },
-  'exp.navbaravatar.title': { es: 'Foto de perfil en NavBar', en: 'Profile photo in NavBar', nl: 'Profielfoto in NavBar' },
-  'exp.navbaravatar.desc':  { es: 'Reemplaza los botones de Notificaciones y Opciones por tu foto de perfil, dejando más espacio libre en la NavBar', en: 'Replaces the Notifications and Options buttons with your profile photo, leaving more free space in the NavBar', nl: 'Vervangt de knoppen Meldingen en Opties door je profielfoto, wat meer ruimte vrijmaakt in de NavBar' },
+  'exp.navbaravatar.title': { es: 'Foto de perfil en Más opciones', en: 'Profile photo in More options', nl: 'Profielfoto in Meer opties' },
+  'exp.navbaravatar.desc':  { es: 'Reemplaza el botón Más opciones de la NavBar por tu foto de perfil, manteniendo el resto igual', en: 'Replaces the More options button in the NavBar with your profile photo, keeping everything else the same', nl: 'Vervangt de knop Meer opties in de NavBar door je profielfoto, de rest blijft hetzelfde' },
   'exp.clima.section': { es: 'Clima', en: 'Weather', nl: 'Weer' },
   'exp.clima.title':   { es: 'Clima en asignaciones', en: 'Weather in assignments', nl: 'Weer bij toewijzingen' },
   'exp.clima.desc':    { es: 'Muestra el pronóstico del día y hora de cada asignación de casa en casa, junto a la hora', en: 'Shows the forecast for the day and time of each door-to-door assignment, next to the time', nl: 'Toont de weersverwachting voor de dag en het tijdstip van elke huis-aan-huis toewijzing, naast de tijd' },
@@ -8367,9 +8294,6 @@ const I18N = {
   'exp.liveaa.title':   { es: 'Live Siempre Activo', en: 'Live Always On', nl: 'Live Altijd Actief' },
   'exp.liveaa.desc':    { es: 'Live sigue activo en segundo plano al salir de la asignación. La tarjeta con Live activo brilla en verde en Inicio', en: 'Live keeps running in the background when you leave the assignment. The card with active Live glows green on Home', nl: 'Live blijft actief op de achtergrond wanneer je de toewijzing verlaat. De kaart met actieve Live licht groen op bij Start' },
   'exp.liveaa.help':    { es: 'Para detener la sesión: entra a la asignación y presiona Pausa en la tarjeta Live, o detenla desde el panel de Notificaciones.', en: 'To stop the session: open the assignment and press Pause on the Live card, or stop it from the Notifications panel.', nl: 'Om de sessie te stoppen: open de toewijzing en druk op Pauze op de Live-kaart, of stop deze via het Meldingenpaneel.' },
-  'exp.navbarabajo.desc':  { es: 'Coloca la NavBar en la parte inferior de la pantalla. Solo disponible en móvil.', en: 'Places the NavBar at the bottom of the screen. Only available on mobile.', nl: 'Plaatst de NavBar onderaan het scherm. Alleen beschikbaar op mobiel.' },
-  'exp.navbarabajo.desc.mobile': { es: 'Coloca la NavBar en la parte inferior de la pantalla, para un acceso más fácil.', en: 'Places the NavBar at the bottom of the screen, for easier access.', nl: 'Plaatst de NavBar onderaan het scherm voor eenvoudigere toegang.' },
-  'exp.navbarabajo.desc.desktop': { es: 'Disponible solo en dispositivos móviles. Actívala y velá el efecto desde tu teléfono.', en: 'Only available on mobile devices. Enable it and see the effect from your phone.', nl: 'Alleen beschikbaar op mobiele apparaten. Schakel het in en bekijk het effect vanaf je telefoon.' },
   // ── Mi Perfil ──
   'profile.title':          { es: 'Mi Perfil',               en: 'My Profile' },
   'nav.inicio':             { es: 'Inicio',                  en: 'Home',              nl: 'Start' },
@@ -8479,7 +8403,6 @@ function applyLanguage(lang) {
   try { if (typeof renderPrefNotifList === 'function' && document.getElementById('pref-notif-list')) renderPrefNotifList(); } catch {}
   try { if (typeof updateTransparencyToggleUI === 'function') updateTransparencyToggleUI(); } catch {}
   try { if (typeof updateSimplifiedModeToggleUI === 'function') updateSimplifiedModeToggleUI(); } catch {}
-  try { if (typeof updateNavbarBottomToggleUI === 'function') updateNavbarBottomToggleUI(); } catch {}
   try { if (typeof updateWeatherToggleUI === 'function') updateWeatherToggleUI(); } catch {}
   updateLangPrefUI();
 }
@@ -10378,7 +10301,6 @@ async function enterApp() {
   renderSubTabs(currentMainTab);
 
   if (typeof applySimplifiedModeUI === 'function') applySimplifiedModeUI();
-  if (typeof applyNavbarBottomUI === 'function') applyNavbarBottomUI();
   if (typeof applyNavbarAvatarUI === 'function') applyNavbarAvatarUI();
 
   // Restore sub-page visibility
@@ -16244,7 +16166,7 @@ function openPrefScreen(name) {
   if (name === 'notificaciones') renderPrefNotifList();
   if (name === 'almacenamiento') renderStorageList();
   if (name === 'ayuda') renderAyudaTipsList();
-  if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBottomToggleUI(); updateWeatherToggleUI(); updateNavbarAvatarToggleUI(); if (typeof updateLiveAlwaysOnToggleUI === 'function') updateLiveAlwaysOnToggleUI(); }
+  if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateWeatherToggleUI(); updateNavbarAvatarToggleUI(); if (typeof updateLiveAlwaysOnToggleUI === 'function') updateLiveAlwaysOnToggleUI(); }
   if (name === 'version') {
     const val = document.getElementById('pref-version-screen-value');
     if (val) val.textContent = 'Versión ' + APP_VERSION;
@@ -16764,11 +16686,9 @@ function triggerEggUnlock() {
     applyAccentColor('blue');
     localStorage.removeItem('fleming_animations');
     applyAnimationsMode('fluid');
-    localStorage.removeItem('fleming_navbar_bottom');
-    applyNavbarBottomUI();
     localStorage.removeItem('fleming_weather_enabled');
     resetAssignmentWeatherChip();
-    localStorage.removeItem('fleming_navbar_avatar');
+    localStorage.removeItem('fleming_navbar_options_avatar');
     applyNavbarAvatarUI();
     updateExperimentosNavVisibility();
     showToast('Experimentos desactivados', '');
@@ -19048,9 +18968,6 @@ function applySimplifiedModeUI() {
   const expNotice = document.getElementById('exp-appearance-restricted-notice');
   if (expBlock)  expBlock.style.display  = active ? 'none' : '';
   if (expNotice) expNotice.style.display = active ? '' : 'none';
-  // NavBar abajo: no aplica mientras la Versión Simplificada usa su propio header
-  const navBottomRow = document.getElementById('navbar-bottom-row');
-  if (navBottomRow) navBottomRow.style.display = active ? 'none' : '';
 
   // Notificaciones: cortar el polling y ocultar el badge
   if (active) {
@@ -19067,37 +18984,25 @@ function applySimplifiedModeUI() {
 
   if (typeof updateAdminShortcuts === 'function') updateAdminShortcuts();
   if (typeof simplifiedSyncHeaderTitle === 'function') simplifiedSyncHeaderTitle();
-  if (typeof applyNavbarBottomUI === 'function') applyNavbarBottomUI();
 }
 window.addEventListener('resize', () => { try { applySimplifiedModeUI(); } catch {} });
 
-// ══════════════════════ Experimentos: NavBar abajo (móvil) ══════════════════
-// Mueve la NavBar (.app-header-shell) a la parte inferior de la pantalla,
-// solo en dispositivos móviles. Exclusiva de Experimentos.
-function isNavbarBottomSelected() {
-  return localStorage.getItem('fleming_navbar_bottom') === 'true';
-}
-function isNavbarBottomActive() {
-  // No aplica si la Versión Simplificada está activa (usa su propio header)
-  return isNavbarBottomSelected() && isMobile() && !isSimplifiedModeActive();
-}
-// ══════════════ Experimentos: Foto de perfil en NavBar (v1.22.12-beta) ══════
-// Reemplaza los botones de Notificaciones y Opciones de la NavBar por un solo
-// botón con la foto de perfil del usuario. Al presionarlo se abre el mismo
-// Menú de Opciones de siempre, que ahora incluye un ítem de "Notificaciones"
-// para compensar la ausencia del botón de campana en la NavBar.
+// ══════════════ Experimentos: Foto de perfil en Más opciones (v1.25.0-beta) ══
+// Reemplaza el botón "Más opciones" de la NavBar por un botón con la foto de
+// perfil del usuario, que abre el mismo Menú de Opciones de siempre. El resto
+// de la NavBar (incluyendo Notificaciones) no cambia.
 function isNavbarAvatarSelected() {
-  return localStorage.getItem('fleming_navbar_avatar') === 'true';
+  return localStorage.getItem('fleming_navbar_options_avatar') === 'true';
 }
 function toggleNavbarAvatarPref() {
   const next = !isNavbarAvatarSelected();
-  localStorage.setItem('fleming_navbar_avatar', next ? 'true' : 'false');
+  localStorage.setItem('fleming_navbar_options_avatar', next ? 'true' : 'false');
   updateNavbarAvatarToggleUI();
   applyNavbarAvatarUI();
   if (next) {
-    showToast('Foto de perfil en NavBar activada', 'success');
+    showToast('Foto de perfil en Más opciones activada', 'success');
   } else {
-    showToast('Foto de perfil en NavBar desactivada', '');
+    showToast('Foto de perfil en Más opciones desactivada', '');
   }
 }
 function updateNavbarAvatarToggleUI() {
@@ -19113,15 +19018,9 @@ function applyNavbarAvatarUI() {
   document.documentElement.classList.toggle('navbar-avatar-mode', active);
   if (active) applyOwnAvatarToDropdowns();
 }
-// Sincroniza el indicador de "hay notificaciones nuevas" en los tres lugares
-// donde puede vivir: la campanita de la NavBar (modo normal), el punto sobre
-// el botón de avatar y el punto junto al ítem "Notificaciones" del Menú
-// Opciones (ambos exclusivos del modo "Foto de perfil en NavBar").
 function setNotifBadgeVisible(show) {
   const badge = document.getElementById('notif-badge');
   if (badge) badge.style.display = show ? 'block' : 'none';
-  const navDot = document.getElementById('notif-badge-navbtn');
-  if (navDot) navDot.classList.toggle('visible', !!show);
   const menuDot = document.getElementById('notif-badge-menu');
   if (menuDot) menuDot.style.display = show ? 'block' : 'none';
 }
@@ -19233,51 +19132,6 @@ async function loadAssignmentWeather(a) {
     chip.classList.add('weather-' + type, 'visible');
   } catch { /* si algo falla, el pill simplemente no se muestra */ }
 }
-
-function toggleNavbarBottomPref() {
-  const next = !isNavbarBottomSelected();
-  localStorage.setItem('fleming_navbar_bottom', next ? 'true' : 'false');
-  updateNavbarBottomToggleUI();
-  applyNavbarBottomUI();
-  if (next) {
-    showToast(isMobile() ? 'NavBar movida abajo' : 'NavBar abajo activada (se verá en móvil)', 'success');
-  } else {
-    showToast('NavBar abajo desactivada', '');
-  }
-}
-function updateNavbarBottomToggleUI() {
-  const toggle = document.getElementById('navbar-bottom-toggle');
-  const thumb  = document.getElementById('navbar-bottom-thumb');
-  const desc   = document.getElementById('navbar-bottom-desc');
-  if (!toggle || !thumb) return;
-  const on = isNavbarBottomSelected();
-  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
-  thumb.style.left = on ? '21px' : '3px';
-  if (desc) {
-    desc.textContent = isMobile()
-      ? t('exp.navbarabajo.desc.mobile')
-      : t('exp.navbarabajo.desc.desktop');
-  }
-}
-let _navbarBottomResizeObs = null;
-function applyNavbarBottomUI() {
-  const active = isNavbarBottomActive();
-  document.documentElement.classList.toggle('navbar-bottom-mobile', active);
-  const shell = document.getElementById('app-header-shell');
-  if (active && shell) {
-    if (!_navbarBottomResizeObs && typeof ResizeObserver !== 'undefined') {
-      _navbarBottomResizeObs = new ResizeObserver(() => {
-        document.documentElement.style.setProperty('--navbar-bottom-h', shell.offsetHeight + 'px');
-      });
-      _navbarBottomResizeObs.observe(shell);
-    }
-    document.documentElement.style.setProperty('--navbar-bottom-h', shell.offsetHeight + 'px');
-  } else if (_navbarBottomResizeObs) {
-    _navbarBottomResizeObs.disconnect();
-    _navbarBottomResizeObs = null;
-  }
-}
-window.addEventListener('resize', () => { try { applyNavbarBottomUI(); } catch {} });
 
 // ── Interacción: título "Fleming" → Opciones (Apariencia / Configuración) ──
 let _simpOptionsOpen = false;
