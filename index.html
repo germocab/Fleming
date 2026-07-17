@@ -3142,6 +3142,29 @@
   }
   #page-user-profile.open { display: flex; }
 
+  /* ── Perfil (miembro de Grupo de Servicio) — solo lectura: foto, nombre,
+     cargos, etiquetas y AdminTags. No muestra asignaciones ni responsabilidades. ── */
+  #page-member-perfil {
+    display: none; position: fixed; inset: 0; z-index: 500;
+    background: var(--bg); flex-direction: column; overflow-y: auto;
+    animation: fadeIn 0.26s var(--ease-fluid-soft);
+  }
+  #page-member-perfil.open { display: flex; }
+  .mperfil-hero {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 1.6rem 1.5rem 1.4rem; text-align: center;
+  }
+  .mperfil-avatar {
+    width: 92px; height: 92px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.9rem; font-weight: 700; color: #fff; overflow: hidden;
+    box-shadow: var(--shadow-md); margin-bottom: 0.9rem;
+  }
+  .mperfil-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .mperfil-name { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.01em; color: var(--text); }
+  .mperfil-cargos { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 0.6rem; }
+  .mperfil-tags { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 0.5rem; }
+
   .uprofile-hero {
     position: relative;
     background: linear-gradient(160deg, var(--user-accent, var(--accent)) 0%, color-mix(in srgb, var(--user-accent, var(--accent)) 60%, #000) 100%);
@@ -6863,6 +6886,26 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
   <div class="uprofile-body" id="uprofile-body"></div>
 </div>
 
+<!-- ── Perfil (miembro de Grupo de Servicio) — pantalla de solo lectura, se
+     abre al presionar a un usuario en la lista de un Grupo de Servicio.
+     Muestra foto, nombre, cargos, etiquetas y AdminTags. No muestra
+     asignaciones ni responsabilidades específicas. (v1.25.9-beta) ── -->
+<div id="page-member-perfil">
+  <nav class="subpage-topbar">
+    <button class="pill-back-btn" onclick="closeMemberPerfil()" title="Grupo de Servicio">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span class="pill-header-title">Perfil</span>
+  </nav>
+
+  <div class="mperfil-hero">
+    <div class="mperfil-avatar" id="mperfil-avatar">—</div>
+    <div class="mperfil-name" id="mperfil-name">—</div>
+    <div class="mperfil-cargos" id="mperfil-cargos"></div>
+    <div class="mperfil-tags" id="mperfil-tags"></div>
+  </div>
+</div>
+
 <!-- ── Preferencias (fullscreen overlay) — pantalla principal ── -->
 <div id="page-preferencias" class="">
   <nav class="subpage-topbar">
@@ -7116,21 +7159,20 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         <div style="padding:0.55rem 0.1rem 0;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="pref.uisize.help">Agranda el texto y los elementos del UI (botones, sliders, tarjetas) en toda la plataforma. Ideal si tienes dificultad para ver bien la pantalla.</div>
       </div>
     </div>
-    <!-- Animaciones: debajo de Apariencia, oficial (antes en Experimentos), desactivada por defecto -->
+    <!-- Animaciones: debajo de Apariencia, oficial (antes en Experimentos). Fluidas por defecto (no es un toggle: dos botones separados) -->
     <div class="profile-section">
       <div class="profile-section-title" data-i18n="pref.animaciones">Animaciones</div>
-      <div class="profile-row" style="cursor:pointer" onclick="toggleAnimationsEnabledPref()">
-        <div class="profile-row-icon" style="background:var(--ter-3-bg);color:var(--ter-3)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="pref.animaciones.title">Animaciones fluidas</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="pref.animaciones.desc">Usa transiciones fluidas en toda la plataforma.</div>
-        </div>
-        <div id="pref-animations-enabled-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="pref-animations-enabled-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
+      <div class="pref-theme-row" id="pref-animations-row">
+        <button class="pref-theme-opt" id="pref-animations-fluid" onclick="setAnimationsMode('fluid')">
+          <svg viewBox="0 0 24 24" style="width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+          <span data-i18n="pref.animaciones.fluidas">Fluidas</span>
+        </button>
+        <button class="pref-theme-opt" id="pref-animations-reduced" onclick="setAnimationsMode('reduced')">
+          <svg viewBox="0 0 24 24" style="width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span data-i18n="pref.animaciones.reducidas">Reducidas</span>
+        </button>
       </div>
+      <div style="padding:0.55rem 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="pref.animaciones.desc">Usa transiciones fluidas en toda la plataforma. Si prefieres, elige "Reducidas" (ideal si eres sensible al movimiento).</div>
     </div>
     <!-- Clima en asignaciones: oficial (antes en Experimentos), desactivada por defecto -->
     <div class="profile-section">
@@ -7251,7 +7293,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <!-- ── Sub-pantalla: Almacenamiento (v1.20.0-beta) ── -->
 <div id="page-pref-almacenamiento" class="pref-subpage">
   <nav class="subpage-topbar">
-    <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración" data-i18n-title="settings.title">
+    <button class="pill-back-btn" onclick="closePrefScreenToConfig()" title="Configuración" data-i18n-title="settings.title">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
     <span class="pill-header-title">Almacenamiento</span>
@@ -7777,7 +7819,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.25.7-beta';
+const APP_VERSION = '1.25.9-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -8221,8 +8263,9 @@ const I18N = {
   'pref.uisize.grande':     { es: 'Grande',                  en: 'Large',         nl: 'Groot' },
   'pref.uisize.help':       { es: 'Agranda el texto y los elementos del UI (botones, sliders, tarjetas) en toda la plataforma. Ideal si tienes dificultad para ver bien la pantalla.', en: 'Enlarges text and UI elements (buttons, sliders, cards) across the platform. Ideal if you have trouble seeing the screen clearly.', nl: 'Vergroot de tekst en UI-elementen (knoppen, schuifregelaars, kaarten) op het hele platform. Ideaal als je moeite hebt om het scherm goed te zien.' },
   'pref.animaciones':       { es: 'Animaciones',             en: 'Animations',    nl: 'Animaties' },
-  'pref.animaciones.title': { es: 'Animaciones fluidas',     en: 'Smooth animations', nl: 'Vloeiende animaties' },
-  'pref.animaciones.desc':  { es: 'Usa transiciones fluidas en toda la plataforma', en: 'Uses Apple-style smooth transitions across the platform. If disabled, animations are reduced (ideal if you are sensitive to motion)', nl: 'Gebruikt vloeiende overgangen in Apple-stijl op het hele platform. Indien uitgeschakeld, worden animaties verminderd (ideaal als je gevoelig bent voor beweging)' },
+  'pref.animaciones.fluidas':  { es: 'Fluidas',  en: 'Smooth',  nl: 'Vloeiend' },
+  'pref.animaciones.reducidas': { es: 'Reducidas', en: 'Reduced', nl: 'Verminderd' },
+  'pref.animaciones.desc':  { es: 'Usa transiciones fluidas en toda la plataforma. Si prefieres, elige "Reducidas" (ideal si eres sensible al movimiento).', en: 'Uses Apple-style smooth transitions across the platform. Choose "Reduced" if you prefer (ideal if you are sensitive to motion).', nl: 'Gebruikt vloeiende overgangen in Apple-stijl op het hele platform. Kies "Verminderd" indien gewenst (ideaal als je gevoelig bent voor beweging).' },
   // ── Configuración (menú principal) ──
   'settings.title':             { es: 'Configuración',            en: 'Settings',    nl: 'Instellingen' },
   'settings.preferencias':      { es: 'Preferencias',             en: 'Preferences', nl: 'Voorkeuren' },
@@ -9125,7 +9168,7 @@ function _memberRowHtml(m) {
     : m.rol === 'auxiliar'
       ? `<span class="grupo-member-role-label role-aux">${t('grupos.rol.auxiliar')}</span>`
       : m.precursor ? `<span class="grupo-member-role-label role-prec">${t('grupos.precursor')}</span>` : '';
-  return `<div class="grupo-member-row-full">
+  return `<div class="grupo-member-row-full" style="cursor:pointer" onclick="openMemberPerfil('${(m.nombre || '').replace(/'/g, "\\'")}', ${!!m.precursor}, '${m.rol || ''}')">
     ${avatarHtml}
     <div class="grupo-member-info">
       <div class="grupo-member-name-full">${m.nombre}</div>
@@ -9438,6 +9481,74 @@ async function openProfilePage() {
 
 function closeProfilePage() {
   document.getElementById('page-profile').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── Perfil (miembro de Grupo de Servicio) — solo lectura ─────────────────────
+// Se abre al presionar a un usuario en la lista de un Grupo de Servicio.
+// Muestra foto, nombre, cargos (rol dentro del grupo + etiquetas generales del
+// perfil) y AdminTags. A propósito NO muestra asignaciones ni responsabilidades
+// específicas de esa persona.
+async function openMemberPerfil(nombre, esPrecursorGrupo, rolGrupo) {
+  if (!nombre) return;
+  document.getElementById('page-member-perfil')?.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  const avatarEl = document.getElementById('mperfil-avatar');
+  const nameEl   = document.getElementById('mperfil-name');
+  const cargosEl = document.getElementById('mperfil-cargos');
+  const tagsEl   = document.getElementById('mperfil-tags');
+
+  nameEl.textContent = nombre;
+  const col = memberColor(nombre);
+  const inits = memberInitials(nombre);
+  avatarEl.style.background = col;
+  avatarEl.textContent = inits;
+  avatarEl.classList.remove('avatar-frame-admin', 'avatar-frame-admintag');
+  avatarEl.style.removeProperty('--atag-frame-color');
+  cargosEl.innerHTML = '';
+  tagsEl.innerHTML = '<span class="profile-tag" style="opacity:0.5">Cargando…</span>';
+
+  // Cargos dentro del Grupo de Servicio (Superintendente/Auxiliar/Precursor)
+  const cargoBadges = [];
+  if (rolGrupo === 'superintendente') cargoBadges.push(`<span class="grupo-member-role-label role-super">${t('grupos.rol.superintendente')}</span>`);
+  else if (rolGrupo === 'auxiliar')   cargoBadges.push(`<span class="grupo-member-role-label role-aux">${t('grupos.rol.auxiliar')}</span>`);
+  else if (esPrecursorGrupo)          cargoBadges.push(`<span class="grupo-member-role-label role-prec">${t('grupos.precursor')}</span>`);
+  cargosEl.innerHTML = cargoBadges.join('');
+
+  // Etiquetas generales + AdminTag, si esta persona tiene cuenta registrada
+  try {
+    const { data: me } = await sb.from('platform_users')
+      .select('avatar, labels, admin_tag_id, role').ilike('name', nombre).single();
+
+    if (me?.avatar) avatarEl.innerHTML = `<img src="${me.avatar}" style="width:100%;height:100%;object-fit:cover">`;
+
+    if (me?.role === 'admin' && me?.admin_tag_id) await loadAdminTags();
+    const frame = avatarFrameFor(me?.role, me?.admin_tag_id);
+    if (frame.cls) avatarEl.classList.add(frame.cls);
+    if (frame.style) avatarEl.style.cssText += frame.style;
+
+    const labels = parseLabels(me?.labels);
+    const tagDefs = [
+      { key:'precursor', label:'Precursor Regular', cls:'precursor' },
+      { key:'precursor_especial', label:'Precursor Especial', cls:'precursor-especial' },
+      { key:'anciano',   label:'Anciano',            cls:'anciano'   },
+      { key:'siervo',    label:'Siervo Ministerial', cls:'siervo'    },
+    ];
+    const activeTags = tagDefs.filter(tg => labels[tg.key]);
+    const myAdminTag = (me?.role === 'admin' && me?.admin_tag_id)
+      ? adminTagsCatalog.find(tg => tg.id === me.admin_tag_id) : null;
+    const myAdminTagHTML = myAdminTag
+      ? `<span class="profile-tag admintag" style="--atag-color:${myAdminTag.color}"><svg viewBox="0 0 24 24"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>${myAdminTag.nombre}</span>` : '';
+    tagsEl.innerHTML = (activeTags.length || myAdminTagHTML)
+      ? activeTags.map(tg => `<span class="profile-tag ${tg.cls}">${tg.label}</span>`).join('') + myAdminTagHTML
+      : `<span class="profile-tag" style="opacity:0.5">Sin etiquetas asignadas</span>`;
+  } catch (e) {
+    tagsEl.innerHTML = `<span class="profile-tag" style="opacity:0.5">Sin etiquetas asignadas</span>`;
+  }
+}
+function closeMemberPerfil() {
+  document.getElementById('page-member-perfil')?.classList.remove('open');
   document.body.style.overflow = '';
 }
 
@@ -16223,6 +16334,13 @@ function openPrefScreen(name) {
 function closePrefScreen() {
   PREF_SCREENS.forEach(name => document.getElementById('page-pref-' + name)?.classList.remove('open'));
 }
+// Variante robusta usada por pantallas que deben volver siempre a Configuración
+// (p. ej. Almacenamiento), sin importar desde qué sub-pantalla intermedia se
+// haya llegado (evita quedar en "Preferencias" en lugar de "Configuración").
+function closePrefScreenToConfig() {
+  closePrefScreen();
+  document.getElementById('page-preferencias')?.classList.add('open');
+}
 function updateExperimentosNavVisibility() {
   const unlocked = localStorage.getItem('fleming_egg_unlocked') === '1';
   const row = document.getElementById('pref-experimentos-nav-row');
@@ -16910,29 +17028,25 @@ function updateAccentBgToggleUI() {
   thumb.style.left = on ? '21px' : '3px';
 }
 
-// ── Animaciones (función oficial, antes en Experimentos): desactivadas por defecto ──
+// ── Animaciones (función oficial, antes en Experimentos): fluidas por defecto ──
 function initAnimationsMode() {
-  const saved = localStorage.getItem('fleming_animations') || 'reduced';
+  const saved = localStorage.getItem('fleming_animations') || 'fluid';
   applyAnimationsMode(saved);
 }
 function applyAnimationsMode(mode) {
-  document.documentElement.setAttribute('data-animations', mode === 'fluid' ? 'fluid' : 'reduced');
+  document.documentElement.setAttribute('data-animations', mode === 'reduced' ? 'reduced' : 'fluid');
   updateAnimationsEnabledToggleUI();
 }
-function toggleAnimationsEnabledPref() {
-  const current = localStorage.getItem('fleming_animations') || 'reduced';
-  const next = current === 'fluid' ? 'reduced' : 'fluid';
+function setAnimationsMode(mode) {
+  const next = mode === 'reduced' ? 'reduced' : 'fluid';
   localStorage.setItem('fleming_animations', next);
   applyAnimationsMode(next);
   showToast(next === 'fluid' ? 'Animaciones activadas' : 'Animaciones desactivadas', next === 'fluid' ? 'success' : '');
 }
 function updateAnimationsEnabledToggleUI() {
-  const toggle = document.getElementById('pref-animations-enabled-toggle');
-  const thumb  = document.getElementById('pref-animations-enabled-thumb');
-  if (!toggle || !thumb) return;
-  const on = (localStorage.getItem('fleming_animations') || 'reduced') === 'fluid';
-  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
-  thumb.style.left = on ? '21px' : '3px';
+  const on = (localStorage.getItem('fleming_animations') || 'fluid') === 'fluid';
+  document.getElementById('pref-animations-fluid')?.classList.toggle('active', on);
+  document.getElementById('pref-animations-reduced')?.classList.toggle('active', !on);
 }
 
 // ── Botón flotante "Volver arriba" ────────────────────────────────────────
@@ -17740,6 +17854,10 @@ function _closeTopLayer() {
   // User profile page
   if (document.getElementById('page-user-profile')?.classList.contains('open')) {
     if (typeof closeUserProfilePage === 'function') closeUserProfilePage(); return;
+  }
+  // Perfil de miembro de Grupo de Servicio (solo lectura)
+  if (document.getElementById('page-member-perfil')?.classList.contains('open')) {
+    if (typeof closeMemberPerfil === 'function') closeMemberPerfil(); return;
   }
   // Detalle de Tip en pantalla completa (v1.22.6-beta)
   if (document.getElementById('page-tip-detail')?.style.display === 'flex') {
