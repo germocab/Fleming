@@ -4556,6 +4556,7 @@
     border: 1px solid var(--border);
   }
   .profile-tag.precursor  { background: rgba(168,85,247,0.12); color: #a855f7; border-color: rgba(168,85,247,0.25); }
+  .profile-tag.precursor-especial  { background: rgba(147,51,234,0.12); color: #9333ea; border-color: rgba(147,51,234,0.3); }
   .profile-tag.anciano    { background: rgba(245,158,11,0.12);  color: #f59e0b; border-color: rgba(245,158,11,0.25); }
   .profile-tag.siervo     { background: rgba(6,182,212,0.12);   color: #06b6d4; border-color: rgba(6,182,212,0.25); }
   /* AdminTag: color dinámico definido por el propio tag (--atag-color) */
@@ -4777,10 +4778,12 @@
   }
   .label-toggle:hover { border-color: var(--border-active); }
   .label-toggle.active-precursor  { background: rgba(168,85,247,0.12); color: #a855f7; border-color: rgba(168,85,247,0.4); }
+  .label-toggle.active-precursor_especial { background: rgba(147,51,234,0.12); color: #9333ea; border-color: rgba(147,51,234,0.4); }
   .label-toggle.active-anciano    { background: rgba(245,158,11,0.12);  color: #f59e0b; border-color: rgba(245,158,11,0.4); }
   .label-toggle.active-siervo     { background: rgba(6,182,212,0.12);   color: #06b6d4; border-color: rgba(6,182,212,0.4); }
   .label-toggle svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; opacity: 0; transition: opacity 0.15s; }
   .label-toggle.active-precursor svg,
+  .label-toggle.active-precursor_especial svg,
   .label-toggle.active-anciano svg,
   .label-toggle.active-siervo svg { opacity: 1; }
 
@@ -7085,6 +7088,63 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         </div>
       </div>
     </div>
+    <!-- Tamaño de la interfaz: debajo de Apariencia -->
+    <div class="profile-section">
+      <div class="profile-section-title" data-i18n="pref.uisize">Tamaño de la interfaz</div>
+      <div style="padding:0.2rem 1rem 1rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem">
+          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase" data-i18n="pref.uisize.nivel">Nivel</span>
+          <span id="pref-ui-size-label" style="font-size:0.78rem;font-weight:700;color:var(--accent)" data-i18n="pref.uisize.normal">Normal</span>
+        </div>
+        <input type="range" id="pref-ui-size-slider" min="1" max="3" step="1" value="2"
+          oninput="setUiSizeLevel(parseInt(this.value,10))"
+          style="width:100%;accent-color:var(--accent);cursor:pointer">
+        <div style="display:flex;justify-content:space-between;margin-top:0.4rem">
+          <div class="pref-blur-dot" id="pref-ui-size-dot-1"></div>
+          <div class="pref-blur-dot" id="pref-ui-size-dot-2"></div>
+          <div class="pref-blur-dot" id="pref-ui-size-dot-3"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:0.3rem">
+          <span style="font-size:0.68rem;color:var(--text3)" data-i18n="pref.uisize.pequeno">Pequeño</span>
+          <span style="font-size:0.68rem;color:var(--text3)" data-i18n="pref.uisize.normal">Normal</span>
+          <span style="font-size:0.68rem;color:var(--text3)" data-i18n="pref.uisize.grande">Grande</span>
+        </div>
+        <div style="padding:0.55rem 0.1rem 0;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="pref.uisize.help">Agranda el texto y los elementos del UI (botones, sliders, tarjetas) en toda la plataforma. Ideal si tienes dificultad para ver bien la pantalla.</div>
+      </div>
+    </div>
+    <!-- Animaciones: debajo de Apariencia, oficial (antes en Experimentos), desactivada por defecto -->
+    <div class="profile-section">
+      <div class="profile-section-title" data-i18n="pref.animaciones">Animaciones</div>
+      <div class="profile-row" style="cursor:pointer" onclick="toggleAnimationsEnabledPref()">
+        <div class="profile-row-icon" style="background:var(--ter-3-bg);color:var(--ter-3)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="pref.animaciones.title">Animaciones fluidas</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="pref.animaciones.desc">Usa transiciones fluidas al estilo Apple en toda la plataforma. Si está desactivado, se reducen las animaciones (ideal si eres sensible al movimiento)</div>
+        </div>
+        <div id="pref-animations-enabled-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="pref-animations-enabled-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
+    </div>
+    <!-- Clima en asignaciones: oficial (antes en Experimentos), desactivada por defecto -->
+    <div class="profile-section">
+      <div class="profile-section-title" data-i18n="exp.clima.section">Clima</div>
+      <div class="profile-row" style="cursor:pointer" onclick="toggleWeatherPref()">
+        <div class="profile-row-icon" style="background:var(--ter-4-bg);color:var(--ter-4)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M17.5 19H9a5 5 0 1 1 1.5-9.77A6 6 0 0 1 22 11.5a4.5 4.5 0 0 1-4.5 7.5z"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="exp.clima.title">Clima en asignaciones</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.clima.desc">Muestra el pronóstico del día y hora de cada asignación de casa en casa, junto a la hora</div>
+        </div>
+        <div id="weather-pref-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="weather-pref-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
+      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.clima.help">El pronóstico solo está disponible para fechas cercanas y depende de que el territorio o la dirección puedan ubicarse en el mapa.</div>
+    </div>
     <!-- Vista de Contenido + NavBar Grow&Shrink: comparten zona (ambos son
          ajustes de presentación en Tablet/Escritorio) -->
     <div class="profile-section">
@@ -7136,30 +7196,6 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <div class="profile-row-value" style="font-size:0.8rem">Mapas de Territorio descargados</div>
         </div>
         <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>
-    </div>
-    <!-- Tamaño de la interfaz: al final de Preferencias, en su propia sección -->
-    <div class="profile-section">
-      <div class="profile-section-title" data-i18n="pref.uisize">Tamaño de la interfaz</div>
-      <div style="padding:0.2rem 1rem 1rem">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem">
-          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase" data-i18n="pref.uisize.nivel">Nivel</span>
-          <span id="pref-ui-size-label" style="font-size:0.78rem;font-weight:700;color:var(--accent)" data-i18n="pref.uisize.normal">Normal</span>
-        </div>
-        <input type="range" id="pref-ui-size-slider" min="1" max="3" step="1" value="2"
-          oninput="setUiSizeLevel(parseInt(this.value,10))"
-          style="width:100%;accent-color:var(--accent);cursor:pointer">
-        <div style="display:flex;justify-content:space-between;margin-top:0.4rem">
-          <div class="pref-blur-dot" id="pref-ui-size-dot-1"></div>
-          <div class="pref-blur-dot" id="pref-ui-size-dot-2"></div>
-          <div class="pref-blur-dot" id="pref-ui-size-dot-3"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-top:0.3rem">
-          <span style="font-size:0.68rem;color:var(--text3)" data-i18n="pref.uisize.pequeno">Pequeño</span>
-          <span style="font-size:0.68rem;color:var(--text3)" data-i18n="pref.uisize.normal">Normal</span>
-          <span style="font-size:0.68rem;color:var(--text3)" data-i18n="pref.uisize.grande">Grande</span>
-        </div>
-        <div style="padding:0.55rem 0.1rem 0;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="pref.uisize.help">Agranda el texto y los elementos del UI (botones, sliders, tarjetas) en toda la plataforma. Ideal si tienes dificultad para ver bien la pantalla.</div>
       </div>
     </div>
   </div>
@@ -7248,7 +7284,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="exp.restricted.title">Blur, color de acento y animaciones</div>
+          <div class="profile-row-label" data-i18n="exp.restricted.title">Blur y color de acento</div>
           <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.restricted.desc">No están disponibles mientras la Versión Simplificada está activa</div>
         </div>
       </div>
@@ -7325,41 +7361,6 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           </div>
         </div>
       </div>
-      <!-- Animaciones -->
-      <div id="pref-animations-section" style="border-top:1px solid var(--border)">
-        <div style="padding:0.75rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
-          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase" data-i18n="exp.animaciones">Animaciones</span>
-        </div>
-        <div class="pref-theme-row" id="pref-animations-row">
-          <button class="pref-theme-opt" id="pref-anim-fluid" onclick="setAnimationsMode('fluid')">
-            <svg viewBox="0 0 24 24"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
-            <span data-i18n="exp.anim.fluidas">Fluidas</span>
-          </button>
-          <button class="pref-theme-opt" id="pref-anim-reduced" onclick="setAnimationsMode('reduced')">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
-            <span data-i18n="exp.anim.reducidas">Reducidas</span>
-          </button>
-        </div>
-        <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.anim.help">Elige "Reducidas" si eres sensible al movimiento en pantalla.</div>
-      </div>
-    </div>
-    <!-- Clima en asignaciones (v1.22.10-beta) -->
-    <div class="profile-section">
-      <div class="profile-section-title" data-i18n="exp.clima.section">Clima</div>
-      <div class="profile-row" style="cursor:pointer" onclick="toggleWeatherPref()">
-        <div class="profile-row-icon" style="background:var(--ter-4-bg);color:var(--ter-4)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M17.5 19H9a5 5 0 1 1 1.5-9.77A6 6 0 0 1 22 11.5a4.5 4.5 0 0 1-4.5 7.5z"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="exp.clima.title">Clima en asignaciones</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.clima.desc">Muestra el pronóstico del día y hora de cada asignación de casa en casa, junto a la hora</div>
-        </div>
-        <div id="weather-pref-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="weather-pref-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
-      </div>
-      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.clima.help">El pronóstico solo está disponible para fechas cercanas y depende de que el territorio o la dirección puedan ubicarse en el mapa.</div>
     </div>
     <!-- Live Siempre Activo (v1.24.0-beta) -->
     <div class="profile-section">
@@ -7458,6 +7459,19 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         <div class="profile-row-content">
           <div class="profile-row-label" data-i18n="settings.reportar">Reportar un problema</div>
           <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.reportar.desc">Esta plataforma está en fase Beta — cuéntanos si algo falla</div>
+        </div>
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+    <div class="profile-section">
+      <div class="profile-section-title" data-i18n="settings.mantenimiento">Mantenimiento</div>
+      <div class="profile-row" style="cursor:pointer" onclick="confirmResetPlatform()">
+        <div class="profile-row-icon" style="background:rgba(255,59,48,0.12);color:#ff3b30">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="settings.restablecer">Restablecer plataforma</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.restablecer.desc">Restaura todas las preferencias y configuraciones a sus valores predeterminados. No cierra tu sesión ni modifica tu perfil</div>
         </div>
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
@@ -7759,7 +7773,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.25.0-beta';
+const APP_VERSION = '1.25.5-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -8202,6 +8216,9 @@ const I18N = {
   'pref.uisize.normal':     { es: 'Normal',                  en: 'Normal',        nl: 'Normaal' },
   'pref.uisize.grande':     { es: 'Grande',                  en: 'Large',         nl: 'Groot' },
   'pref.uisize.help':       { es: 'Agranda el texto y los elementos del UI (botones, sliders, tarjetas) en toda la plataforma. Ideal si tienes dificultad para ver bien la pantalla.', en: 'Enlarges text and UI elements (buttons, sliders, cards) across the platform. Ideal if you have trouble seeing the screen clearly.', nl: 'Vergroot de tekst en UI-elementen (knoppen, schuifregelaars, kaarten) op het hele platform. Ideaal als je moeite hebt om het scherm goed te zien.' },
+  'pref.animaciones':       { es: 'Animaciones',             en: 'Animations',    nl: 'Animaties' },
+  'pref.animaciones.title': { es: 'Animaciones fluidas',     en: 'Smooth animations', nl: 'Vloeiende animaties' },
+  'pref.animaciones.desc':  { es: 'Usa transiciones fluidas al estilo Apple en toda la plataforma. Si está desactivado, se reducen las animaciones (ideal si eres sensible al movimiento)', en: 'Uses Apple-style smooth transitions across the platform. If disabled, animations are reduced (ideal if you are sensitive to motion)', nl: 'Gebruikt vloeiende overgangen in Apple-stijl op het hele platform. Indien uitgeschakeld, worden animaties verminderd (ideaal als je gevoelig bent voor beweging)' },
   // ── Configuración (menú principal) ──
   'settings.title':             { es: 'Configuración',            en: 'Settings',    nl: 'Instellingen' },
   'settings.preferencias':      { es: 'Preferencias',             en: 'Preferences', nl: 'Voorkeuren' },
@@ -8224,6 +8241,9 @@ const I18N = {
   'settings.tutorial.h2h.desc': { es: 'Repasa la pantalla de detalle de una asignación de casa en casa', en: 'Review the detail screen of a door-to-door assignment', nl: 'Bekijk het detailscherm van een huis-aan-huis toewijzing' },
   'settings.reportar':          { es: 'Reportar un problema',     en: 'Report a problem', nl: 'Een probleem melden' },
   'settings.reportar.desc':     { es: 'Esta plataforma está en fase Beta — cuéntanos si algo falla', en: 'This platform is in Beta — let us know if something breaks', nl: 'Dit platform bevindt zich in de Beta-fase — laat ons weten als er iets misgaat' },
+  'settings.mantenimiento':     { es: 'Mantenimiento',            en: 'Maintenance', nl: 'Onderhoud' },
+  'settings.restablecer':       { es: 'Restablecer plataforma',   en: 'Reset platform', nl: 'Platform herstellen' },
+  'settings.restablecer.desc':  { es: 'Restaura todas las preferencias y configuraciones a sus valores predeterminados. No cierra tu sesión ni modifica tu perfil', en: 'Restores all preferences and settings to their default values. Does not sign you out or modify your profile', nl: 'Herstelt alle voorkeuren en instellingen naar hun standaardwaarden. Meldt je niet af en wijzigt je profiel niet' },
   'report.titulo':          { es: 'Reportar un problema',     en: 'Report a problem', nl: 'Een probleem melden' },
   'report.pregunta':        { es: '¿Qué ocurrió?',            en: 'What happened?',   nl: 'Wat is er gebeurd?' },
   'report.placeholder':     { es: 'Describe el problema con el mayor detalle posible (qué hacías, qué esperabas que pasara, qué pasó en realidad)...', en: 'Describe the problem in as much detail as possible (what you were doing, what you expected to happen, what actually happened)...', nl: 'Beschrijf het probleem zo gedetailleerd mogelijk (wat je deed, wat je verwachtte dat er zou gebeuren, wat er werkelijk gebeurde)...' },
@@ -8274,10 +8294,6 @@ const I18N = {
   'exp.coloracento':       { es: 'Color de acento',         en: 'Accent color', nl: 'Accentkleur' },
   'exp.fondoacento.title': { es: 'Ajustar el fondo al color de acento', en: 'Match background to accent color', nl: 'Achtergrond aanpassen aan accentkleur' },
   'exp.fondoacento.desc':  { es: 'El fondo de la plataforma toma un tono derivado del color de acento elegido', en: 'The platform background takes on a tone derived from the chosen accent color', nl: 'De achtergrond van het platform krijgt een tint afgeleid van de gekozen accentkleur' },
-  'exp.animaciones':       { es: 'Animaciones',             en: 'Animations', nl: 'Animaties' },
-  'exp.anim.fluidas':      { es: 'Fluidas',                 en: 'Smooth', nl: 'Vloeiend' },
-  'exp.anim.reducidas':    { es: 'Reducidas',               en: 'Reduced', nl: 'Verminderd' },
-  'exp.anim.help':         { es: 'Elige "Reducidas" si eres sensible al movimiento en pantalla.', en: 'Choose "Reduced" if you are sensitive to on-screen motion.', nl: 'Kies "Verminderd" als je gevoelig bent voor beweging op het scherm.' },
   'exp.layout':            { es: 'Layout',                  en: 'Layout', nl: 'Lay-out' },
   'exp.simplificada.title':{ es: 'Versión Simplificada',    en: 'Simplified Mode', nl: 'Vereenvoudigde versie' },
   'exp.simplificada.desc': { es: 'Reemplaza el NavBar por un menú simple. Solo disponible en móvil.', en: 'Replaces the NavBar with a simple menu. Only available on mobile.', nl: 'Vervangt de NavBar door een eenvoudig menu. Alleen beschikbaar op mobiel.' },
@@ -9474,6 +9490,7 @@ async function renderProfilePage() {
   const labels = parseLabels(me?.labels);
   const tagDefs = [
     { key:'precursor', label:'Precursor Regular', cls:'precursor' },
+    { key:'precursor_especial', label:'Precursor Especial', cls:'precursor-especial' },
     { key:'anciano',   label:'Anciano',            cls:'anciano'   },
     { key:'siervo',    label:'Siervo Ministerial', cls:'siervo'    },
   ];
@@ -15064,7 +15081,8 @@ async function openUserProfilePage(uid) {
   const labelChipsFull = [
     uLabels.anciano   ? `<span style="font-size:0.75rem;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(234,179,8,0.12);color:#ca8a04;border:1px solid rgba(234,179,8,0.3)">Anciano</span>` : '',
     uLabels.siervo    ? `<span style="font-size:0.75rem;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(16,185,129,0.12);color:#059669;border:1px solid rgba(16,185,129,0.3)">Siervo Ministerial</span>` : '',
-    uLabels.precursor ? `<span style="font-size:0.75rem;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(139,92,246,0.12);color:#7c3aed;border:1px solid rgba(139,92,246,0.3)">Precursor</span>` : '',
+    uLabels.precursor ? `<span style="font-size:0.75rem;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(139,92,246,0.12);color:#7c3aed;border:1px solid rgba(139,92,246,0.3)">Precursor Regular</span>` : '',
+    uLabels.precursor_especial ? `<span style="font-size:0.75rem;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(168,85,247,0.12);color:#9333ea;border:1px solid rgba(168,85,247,0.3)">Precursor Especial</span>` : '',
   ].filter(Boolean).join('');
 
   // AdminTag: solo tiene sentido para perfiles con rol Administrador. Visible
@@ -15162,7 +15180,10 @@ async function openUserProfilePage(uid) {
           <div class="form-label2" style="margin-bottom:6px">Etiquetas</div>
           <div class="labels-grid">
             <div class="label-toggle${uLabels.precursor?' active-precursor':''}" onclick="toggleLabel('${u.id}','precursor')" id="lbl-${u.id}-precursor">
-              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Precursor
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Precursor Regular
+            </div>
+            <div class="label-toggle${uLabels.precursor_especial?' active-precursor_especial':''}" onclick="toggleLabel('${u.id}','precursor_especial')" id="lbl-${u.id}-precursor_especial">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Precursor Especial
             </div>
             <div class="label-toggle${uLabels.anciano?' active-anciano':''}" onclick="toggleLabel('${u.id}','anciano')" id="lbl-${u.id}-anciano">
               <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Anciano
@@ -15402,7 +15423,8 @@ function renderUsersPanel() {
         <div style="font-size:0.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:0.35rem">Cargos</div>
         <label class="users-filter-check"><input type="checkbox" id="uf-cargo-anciano" ${_usersFilter.cargos.anciano?'checked':''} onchange="onUsersFilterCargoChange('anciano',this.checked)">Anciano</label>
         <label class="users-filter-check"><input type="checkbox" id="uf-cargo-siervo" ${_usersFilter.cargos.siervo?'checked':''} onchange="onUsersFilterCargoChange('siervo',this.checked)">Siervo Ministerial</label>
-        <label class="users-filter-check"><input type="checkbox" id="uf-cargo-precursor" ${_usersFilter.cargos.precursor?'checked':''} onchange="onUsersFilterCargoChange('precursor',this.checked)">Precursor</label>
+        <label class="users-filter-check"><input type="checkbox" id="uf-cargo-precursor" ${_usersFilter.cargos.precursor?'checked':''} onchange="onUsersFilterCargoChange('precursor',this.checked)">Precursor Regular</label>
+        <label class="users-filter-check"><input type="checkbox" id="uf-cargo-precursor_especial" ${_usersFilter.cargos.precursor_especial?'checked':''} onchange="onUsersFilterCargoChange('precursor_especial',this.checked)">Precursor Especial</label>
         <div style="font-size:0.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;margin:0.75rem 0 0.35rem">AdminTags</div>
         <div class="profile-row" style="padding:0.35rem 0;cursor:pointer" onclick="toggleUsersFilterAdminTag()">
           <div class="profile-row-content"><div class="profile-row-label" style="font-size:0.83rem">Solo con AdminTag</div></div>
@@ -15424,7 +15446,7 @@ function renderUsersPanel() {
 // barra de búsqueda (por nombre) y un botón de filtros por Cargo (Anciano,
 // Siervo Ministerial, Precursor) y por AdminTags (solo con AdminTag asignada).
 let _usersSortedCache = [];
-let _usersFilter = { q: '', cargos: { anciano: false, siervo: false, precursor: false }, onlyAdminTag: false };
+let _usersFilter = { q: '', cargos: { anciano: false, siervo: false, precursor: false, precursor_especial: false }, onlyAdminTag: false };
 
 function onUsersSearchInput(value) {
   _usersFilter.q = value;
@@ -15455,9 +15477,9 @@ function toggleUsersFilterAdminTag() {
   renderUsersCards();
 }
 function clearUsersFilters() {
-  _usersFilter.cargos = { anciano: false, siervo: false, precursor: false };
+  _usersFilter.cargos = { anciano: false, siervo: false, precursor: false, precursor_especial: false };
   _usersFilter.onlyAdminTag = false;
-  ['anciano','siervo','precursor'].forEach(k => { const el = document.getElementById('uf-cargo-' + k); if (el) el.checked = false; });
+  ['anciano','siervo','precursor','precursor_especial'].forEach(k => { const el = document.getElementById('uf-cargo-' + k); if (el) el.checked = false; });
   document.getElementById('uf-admintag-toggle')?.classList.remove('on');
   updateUsersFilterDot();
   renderUsersCards();
@@ -15486,7 +15508,8 @@ function _userCardHTML(u) {
     const labelChips = [
       uLabels.anciano   ? `<span style="font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(234,179,8,0.12);color:#ca8a04;border:1px solid rgba(234,179,8,0.3)">Anciano</span>` : '',
       uLabels.siervo    ? `<span style="font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(16,185,129,0.12);color:#059669;border:1px solid rgba(16,185,129,0.3)">Siervo</span>` : '',
-      uLabels.precursor ? `<span style="font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(139,92,246,0.12);color:#7c3aed;border:1px solid rgba(139,92,246,0.3)">Precursor</span>` : '',
+      uLabels.precursor ? `<span style="font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(139,92,246,0.12);color:#7c3aed;border:1px solid rgba(139,92,246,0.3)">Precursor Regular</span>` : '',
+      uLabels.precursor_especial ? `<span style="font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(168,85,247,0.12);color:#9333ea;border:1px solid rgba(168,85,247,0.3)">Precursor Especial</span>` : '',
     ].filter(Boolean).join('');
     const isCurrentUser = currentUser && u.name === currentUser.name;
     const cardAdminTag = (u.role === 'admin' && u.admin_tag_id) ? adminTagsCatalog.find(t => t.id === u.admin_tag_id) : null;
@@ -16166,7 +16189,8 @@ function openPrefScreen(name) {
   if (name === 'notificaciones') renderPrefNotifList();
   if (name === 'almacenamiento') renderStorageList();
   if (name === 'ayuda') renderAyudaTipsList();
-  if (name === 'experimentos') { updateAccentSwatchesUI(); updateAnimationsModeUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateWeatherToggleUI(); updateNavbarAvatarToggleUI(); if (typeof updateLiveAlwaysOnToggleUI === 'function') updateLiveAlwaysOnToggleUI(); }
+  if (name === 'preferencias') { updateAnimationsEnabledToggleUI(); updateWeatherToggleUI(); }
+  if (name === 'experimentos') { updateAccentSwatchesUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarAvatarToggleUI(); if (typeof updateLiveAlwaysOnToggleUI === 'function') updateLiveAlwaysOnToggleUI(); }
   if (name === 'version') {
     const val = document.getElementById('pref-version-screen-value');
     if (val) val.textContent = 'Versión ' + APP_VERSION;
@@ -16684,10 +16708,6 @@ function triggerEggUnlock() {
     localStorage.removeItem('fleming_accent');
     localStorage.removeItem('fleming_accent_bg');
     applyAccentColor('blue');
-    localStorage.removeItem('fleming_animations');
-    applyAnimationsMode('fluid');
-    localStorage.removeItem('fleming_weather_enabled');
-    resetAssignmentWeatherChip();
     localStorage.removeItem('fleming_navbar_options_avatar');
     applyNavbarAvatarUI();
     updateExperimentosNavVisibility();
@@ -16697,7 +16717,6 @@ function triggerEggUnlock() {
   // First unlock!
   localStorage.setItem('fleming_egg_unlocked', '1');
   revealAccentSection();
-  revealAnimationsSection();
   updateExperimentosNavVisibility();
   const overlay = document.getElementById('egg-unlock-overlay');
   overlay.classList.add('active');
@@ -16835,7 +16854,6 @@ function initAccentColor() {
   applyAccentColor(saved);
   if (localStorage.getItem('fleming_egg_unlocked') === '1') {
     revealAccentSection();
-    revealAnimationsSection();
   }
   updateAccentBgToggleUI();
   updateExperimentosNavVisibility();
@@ -16868,28 +16886,29 @@ function updateAccentBgToggleUI() {
   thumb.style.left = on ? '21px' : '3px';
 }
 
-// ── Modo Experimentos: Animaciones (más fluidas / reducidas para personas sensibles) ──
+// ── Animaciones (función oficial, antes en Experimentos): desactivadas por defecto ──
 function initAnimationsMode() {
-  const saved = localStorage.getItem('fleming_animations') || 'fluid';
+  const saved = localStorage.getItem('fleming_animations') || 'reduced';
   applyAnimationsMode(saved);
 }
 function applyAnimationsMode(mode) {
-  document.documentElement.setAttribute('data-animations', mode === 'reduced' ? 'reduced' : 'fluid');
-  updateAnimationsModeUI();
+  document.documentElement.setAttribute('data-animations', mode === 'fluid' ? 'fluid' : 'reduced');
+  updateAnimationsEnabledToggleUI();
 }
-function setAnimationsMode(mode) {
-  localStorage.setItem('fleming_animations', mode === 'reduced' ? 'reduced' : 'fluid');
-  applyAnimationsMode(mode);
+function toggleAnimationsEnabledPref() {
+  const current = localStorage.getItem('fleming_animations') || 'reduced';
+  const next = current === 'fluid' ? 'reduced' : 'fluid';
+  localStorage.setItem('fleming_animations', next);
+  applyAnimationsMode(next);
+  showToast(next === 'fluid' ? 'Animaciones activadas' : 'Animaciones desactivadas', next === 'fluid' ? 'success' : '');
 }
-function updateAnimationsModeUI() {
-  const active = localStorage.getItem('fleming_animations') || 'fluid';
-  document.getElementById('pref-anim-fluid')?.classList.toggle('active', active === 'fluid');
-  document.getElementById('pref-anim-reduced')?.classList.toggle('active', active === 'reduced');
-}
-function revealAnimationsSection() {
-  const sec = document.getElementById('pref-animations-section');
-  if (sec) { sec.style.display = 'block'; }
-  updateAnimationsModeUI();
+function updateAnimationsEnabledToggleUI() {
+  const toggle = document.getElementById('pref-animations-enabled-toggle');
+  const thumb  = document.getElementById('pref-animations-enabled-thumb');
+  if (!toggle || !thumb) return;
+  const on = (localStorage.getItem('fleming_animations') || 'reduced') === 'fluid';
+  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
+  thumb.style.left = on ? '21px' : '3px';
 }
 
 // ── Botón flotante "Volver arriba" ────────────────────────────────────────
@@ -17539,6 +17558,23 @@ async function renderAdminTipsList() {
 }
 
 // ── Reportar un problema (DEV recibe notificación) ───────────────────────────
+// ── Restablecer plataforma (Ayuda): restaura preferencias/configuraciones a
+// sus valores predeterminados sin cerrar sesión ni tocar el perfil del usuario ──
+const PLATFORM_RESET_KEYS = [
+  'fleming_accent', 'fleming_accent_bg', 'fleming_animations', 'fleming_blur_level',
+  'fleming_dark_maps', 'fleming_egg_unlocked', 'fleming_group_screen_mode', 'fleming_h2h_view',
+  'fleming_lang', 'fleming_live_always_on', 'fleming_live_enabled', 'fleming_navbar_mode',
+  'fleming_navbar_options_avatar', 'fleming_notif_levels', 'fleming_notif_prefs',
+  'fleming_notif_templates', 'fleming_simplified_mode', 'fleming_theme', 'fleming_tip_font_scale',
+  'fleming_transparency', 'fleming_ui_size', 'fleming_weather_enabled'
+];
+function confirmResetPlatform() {
+  if (!confirm('¿Restablecer la plataforma? Se restaurarán todas las preferencias y configuraciones a sus valores predeterminados. Tu sesión y tu perfil no se verán afectados.')) return;
+  PLATFORM_RESET_KEYS.forEach(k => localStorage.removeItem(k));
+  showToast('Restableciendo plataforma…', '');
+  setTimeout(() => location.reload(), 400);
+}
+
 function openReportIssueModal() {
   document.getElementById('report-issue-text').value = '';
   document.getElementById('report-issue-error').style.display = 'none';
