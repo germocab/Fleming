@@ -2100,6 +2100,31 @@
   .btn-danger-block:hover { background: rgba(255,59,48,0.08); }
   .btn-danger-block:active { transform: scale(0.98); }
 
+  /* v1.28.1-beta: modo selección múltiple (móvil) en Admin → Asignaciones */
+  .admin-select-bar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 0.7rem 0.85rem; margin-bottom: 1rem;
+  }
+  .admin-select-count { font-size: 0.85rem; font-weight: 700; color: var(--text); flex: 1; }
+  .admin-select-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .admin-select-mode [data-assignment-id] { position: relative; cursor: pointer; }
+  .admin-select-mode [data-assignment-id]::before {
+    content: ''; position: absolute; inset: 0; border-radius: inherit;
+    box-shadow: 0 0 0 2px transparent inset; pointer-events: none; transition: box-shadow 0.15s;
+  }
+  .admin-select-mode [data-assignment-id].admin-selected::before {
+    box-shadow: 0 0 0 2.5px var(--accent) inset;
+  }
+  .admin-select-checkbox {
+    position: absolute; top: 8px; right: 8px; width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(0,0,0,0.35); border: 2px solid #fff; z-index: 2;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .admin-select-checkbox svg { width: 12px; height: 12px; stroke: #fff; fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; display: none; }
+  [data-assignment-id].admin-selected .admin-select-checkbox { background: var(--accent); border-color: var(--accent); }
+  [data-assignment-id].admin-selected .admin-select-checkbox svg { display: block; }
+
   .btn-secondary {
     padding: 0.65rem 1.1rem; background: var(--surface2); border: 1px solid var(--border);
     border-radius: var(--radius-sm); color: var(--text); font-family: var(--font);
@@ -6022,6 +6047,15 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           </button>
           <button class="btn-secondary" onclick="openAssignmentModal()">+ Nueva</button>
         </div>
+        <!-- v1.28.1-beta: barra del modo selección (móvil) — se activa con mantener presionada una tarjeta -->
+        <div class="admin-select-bar" id="admin-assign-select-bar" style="display:none">
+          <span class="admin-select-count" id="admin-assign-select-count">0 seleccionadas</span>
+          <div class="admin-select-actions">
+            <button class="btn-secondary" onclick="adminAssignSelectAll()">Seleccionar todo</button>
+            <button class="btn-danger-block" style="width:auto;margin:0;padding:0.55rem 1rem" onclick="adminAssignDeleteSelected()">Borrar selección</button>
+            <button class="btn-secondary" onclick="adminAssignExitSelectMode()">Cancelar</button>
+          </div>
+        </div>
         <div id="admin-assignments-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Asignaciones</div></div></div>
       </div>
       <div class="admin-section" id="admin-territories">
@@ -7988,7 +8022,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.28.0-beta';
+const APP_VERSION = '1.28.1-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -12667,8 +12701,73 @@ async function loadAdminData() {
 // tarjeta se entra directo al Edit Mode (ver editAssignment), sin pasar por
 // una pantalla de solo lectura. La opción "Eliminar asignación" se movió al
 // fondo de esa pantalla de edición (ver #assignment-modal).
+// ── v1.28.1-beta: modo selección múltiple (móvil) en Admin → Asignaciones ──
+// Mantener presionada una tarjeta activa el modo selección; desde ahí se
+// puede tocar otras tarjetas para sumarlas, usar "Seleccionar todo" o
+// "Borrar selección" para eliminarlas todas en una sola acción.
+let adminAssignSelectMode = false;
+let adminAssignSelected = new Set();
+let _adminAssignPressTimer = null;
+let _adminAssignPressMoved = false;
+const ADMIN_ASSIGN_PRESS_MS = 480;
+
+function adminAssignPressStart(id) {
+  _adminAssignPressMoved = false;
+  clearTimeout(_adminAssignPressTimer);
+  _adminAssignPressTimer = setTimeout(() => {
+    if (!_adminAssignPressMoved) adminAssignEnterSelectMode(id);
+  }, ADMIN_ASSIGN_PRESS_MS);
+}
+function adminAssignPressCancel() { _adminAssignPressMoved = true; clearTimeout(_adminAssignPressTimer); }
+function adminAssignPressEnd() { clearTimeout(_adminAssignPressTimer); }
+
+function adminAssignEnterSelectMode(id) {
+  adminAssignSelectMode = true;
+  adminAssignSelected = new Set([id]);
+  if (navigator.vibrate) navigator.vibrate(15);
+  renderAdminAssignments();
+}
+function adminAssignExitSelectMode() {
+  adminAssignSelectMode = false;
+  adminAssignSelected.clear();
+  renderAdminAssignments();
+}
+function adminAssignCardClick(id) {
+  if (adminAssignSelectMode) { adminAssignToggleSelect(id); return; }
+  editAssignment(id);
+}
+function adminAssignToggleSelect(id) {
+  if (adminAssignSelected.has(id)) adminAssignSelected.delete(id); else adminAssignSelected.add(id);
+  if (!adminAssignSelected.size) { adminAssignExitSelectMode(); return; }
+  renderAdminAssignments();
+}
+function adminAssignSelectAll() {
+  assignments.forEach(a => adminAssignSelected.add(a.id));
+  renderAdminAssignments();
+}
+async function adminAssignDeleteSelected() {
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!adminAssignSelected.size) return;
+  const n = adminAssignSelected.size;
+  if (!confirm(`¿Eliminar ${n} asignación${n===1?'':'es'} seleccionada${n===1?'':'s'}?`)) return;
+  const ids = [...adminAssignSelected];
+  const { error } = await sb.from('assignments').delete().in('id', ids);
+  if (error) { showToast('Error al eliminar','error'); return; }
+  showToast('Asignaciones eliminadas','success');
+  adminAssignSelectMode = false; adminAssignSelected.clear();
+  await loadSchedule();
+  renderAdminAssignments();
+}
+
 function renderAdminAssignments() {
   const container = document.getElementById('admin-assignments-list');
+  const selectBar = document.getElementById('admin-assign-select-bar');
+  container.classList.toggle('admin-select-mode', adminAssignSelectMode);
+  if (selectBar) {
+    selectBar.style.display = adminAssignSelectMode ? 'flex' : 'none';
+    const n = adminAssignSelected.size;
+    document.getElementById('admin-assign-select-count').textContent = `${n} seleccionada${n===1?'':'s'}`;
+  }
   if (!assignments.length) {
     container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><h4>Sin asignaciones</h4><p>Crea la primera asignación</p></div>`;
     return;
@@ -12677,6 +12776,17 @@ function renderAdminAssignments() {
   const DAY = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
   const MON = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
   const todayStr = new Date().toISOString().slice(0,10);
+
+  // v1.28.1-beta: atributos comunes de mantener-presionado + toggle de tap,
+  // usados en ambos tipos de tarjeta (regular y especial).
+  function cardAttrs(id) {
+    const selected = adminAssignSelected.has(id) ? ' admin-selected' : '';
+    return {
+      selectedClass: selected,
+      attrs: `data-assignment-id="${id}" onclick="adminAssignCardClick('${id}')" ontouchstart="adminAssignPressStart('${id}')" ontouchend="adminAssignPressEnd()" ontouchmove="adminAssignPressCancel()" ontouchcancel="adminAssignPressCancel()" onmousedown="adminAssignPressStart('${id}')" onmouseup="adminAssignPressEnd()" onmouseleave="adminAssignPressCancel()"`,
+      checkbox: `<div class="admin-select-checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>`,
+    };
+  }
 
   function buildRightBadge(a) {
     const ter  = territories.find(t => t.id === a.territory_id)  || null;
@@ -12697,7 +12807,9 @@ function renderAdminAssignments() {
   function buildEspecialCard(a) {
     const timeStr = a.time ? a.time.substring(0,5) : '--:--';
     const bg = a.especial_foto ? `style="background-image:url('${a.especial_foto}')"` : '';
-    return `<div class="assignment-card-especial" ${bg} data-assignment-id="${a.id}" onclick="editAssignment('${a.id}')">
+    const c = cardAttrs(a.id);
+    return `<div class="assignment-card-especial${c.selectedClass}" ${bg} ${c.attrs}>
+      ${c.checkbox}
       <div class="especial-card-body">
         <div class="especial-card-title">${a.especial_titulo || 'Evento especial'}</div>
         ${a.especial_subtitulo ? `<div class="especial-card-subtitle">${a.especial_subtitulo}</div>` : ''}
@@ -12714,8 +12826,10 @@ function renderAdminAssignments() {
     const typeChip = buildTypeChip(a);
     const _c = casas.find(c => c.id === a.casa_id);
     const houseLabel = a.house ? ((_c && _c.tipo === 'departamento' ? 'Depto' : 'Casa') + ' de ') + a.house : '';
+    const c = cardAttrs(a.id);
     if (isToday) {
-      return `<div class="assignment-card-today" data-assignment-id="${a.id}" onclick="editAssignment('${a.id}')">
+      return `<div class="assignment-card-today${c.selectedClass}" ${c.attrs}>
+        ${c.checkbox}
         <div class="today-card-info">
           <div class="today-card-address">${a.address||'Sin dirección'}${houseLabel?`<br><span class="today-card-house">${houseLabel}</span>`:''}</div>
           <div class="today-card-meta">
@@ -12730,7 +12844,8 @@ function renderAdminAssignments() {
         ${rightBadge}
       </div>`;
     }
-    return `<div class="assignment-card" data-assignment-id="${a.id}" onclick="editAssignment('${a.id}')">
+    return `<div class="assignment-card${c.selectedClass}" ${c.attrs}>
+      ${c.checkbox}
       <div class="card-main">
         <div class="card-address">${a.address||'Sin dirección'}${houseLabel?`<br><span class="card-house">${houseLabel}</span>`:''}</div>
         <div class="card-meta">
