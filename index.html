@@ -470,7 +470,26 @@
     position: relative;
   }
   .main-seg-thumb {
-    display: none; /* activado solo en desktop vía media query */
+    display: none; /* v1.29.5-beta: se activa vía [data-animations="fluid"], en cualquier ancho */
+    position: absolute; top: 4px; left: 4px;
+    height: calc(100% - 8px);
+    background: var(--accent);
+    border-radius: 22px;
+    box-shadow: 0 2px 12px rgba(0,122,255,0.4);
+    transition: transform 0.32s cubic-bezier(0.65, 0, 0.35, 1), width 0.32s cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform, width;
+    z-index: 0;
+    pointer-events: none;
+  }
+  /* Con Animaciones = "Fluidas": el thumb se desliza detrás del botón activo,
+     tanto en Desktop como en Móvil (antes era exclusivo de Desktop). El botón
+     activo deja de pintar su propio fondo para que no "compita" con el thumb.
+     Con Animaciones = "Reducidas" no se muestra: el botón activo vuelve a
+     pintar su propio fondo (ver regla .main-seg-btn.active más abajo). */
+  [data-animations="fluid"] .main-seg-thumb { display: block; }
+  [data-animations="fluid"] .main-seg-btn.active {
+    background: transparent;
+    box-shadow: none;
   }
   .main-seg-btn {
     padding: 9px 24px;
@@ -490,24 +509,7 @@
   }
 
   @media (min-width: 640px) {
-    /* Desktop: el thumb se desliza detrás del botón activo con una animación fluida;
-       el botón activo deja de pintar su propio fondo para que no "compita" con el thumb. */
-    .main-seg-thumb {
-      display: block;
-      position: absolute; top: 4px; left: 4px;
-      height: calc(100% - 8px);
-      background: var(--accent);
-      border-radius: 22px;
-      box-shadow: 0 2px 12px rgba(0,122,255,0.4);
-      transition: transform 0.32s cubic-bezier(0.65, 0, 0.35, 1), width 0.32s cubic-bezier(0.65, 0, 0.35, 1);
-      will-change: transform, width;
-      z-index: 0;
-      pointer-events: none;
-    }
-    .main-seg-btn.active {
-      background: transparent;
-      box-shadow: none;
-    }
+    /* (el thumb en sí ya se define arriba, activo en cualquier ancho vía [data-animations="fluid"]) */
   }
 
   @media (max-width: 639px) {
@@ -8032,7 +8034,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.29.0-beta';
+const APP_VERSION = '1.29.5-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -10934,10 +10936,13 @@ function switchMainTab(tab, btn) {
   _saveNavState();
 }
 
-// Desliza el thumb de la píldora Predicación/Reuniones detrás del botón activo (solo desktop, ≥640px).
+// Desliza el thumb de la píldora Predicación/Reuniones detrás del botón activo.
+// v1.29.5-beta: ya no es exclusivo de Desktop — corre en cualquier ancho,
+// siempre que Preferencias → Animaciones esté en "Fluidas" (en "Reducidas"
+// el thumb queda oculto por CSS y no hace falta posicionarlo).
 // instant=true posiciona sin animación (usado en la carga inicial / restauración de estado).
 function updateMainSegThumb(instant) {
-  if (window.innerWidth < 640) return; // móvil: sin thumb animado
+  if (!isFluidAnimEnabled()) return;
   const seg = document.getElementById('main-segment');
   const thumb = document.getElementById('main-seg-thumb');
   const activeBtn = seg?.querySelector('.main-seg-btn.active');
@@ -15684,6 +15689,15 @@ async function openUserProfilePage(uid) {
           <div style="font-size:0.76rem;color:var(--text3);margin-top:5px;line-height:1.4">
             Si esta persona está registrada en Grupos de Servicio, Asignaciones o Responsabilidades con otro nombre (ej. su apellido de casada), escríbelo aquí para que la plataforma reconozca a esta cuenta como esa persona, sin tener que cambiar el nombre de inicio de sesión.
           </div>
+        </div>
+        <!-- v1.29.5-beta: Género — exclusivo DEV. Se usa, entre otras cosas, para
+             validar quién puede invitar a quién en Carritos (mismo género). -->
+        <div class="form-group2" style="margin-bottom:0.75rem">
+          <label class="form-label2">Género</label>
+          <div class="pref-theme-row" id="uprof-genero-row">
+            <button type="button" class="pref-theme-opt" id="uprof-genero-m" onclick="setUprofGenero('M')">Hombre</button>
+            <button type="button" class="pref-theme-opt" id="uprof-genero-f" onclick="setUprofGenero('F')">Mujer</button>
+          </div>
         </div>` : ''}
         ${!isCurrentUser ? `
         <div class="form-group2">
@@ -15791,6 +15805,10 @@ async function openUserProfilePage(uid) {
 
   document.getElementById('page-user-profile').classList.add('open');
 
+  // v1.29.5-beta: estado del selector de Género (exclusivo DEV)
+  _uprofGeneroValue = u.genero || null;
+  updateUprofGeneroUI();
+
   // Poblar el datalist de nombres sugeridos para vincular (solo DEV). Se hace
   // después de insertar el HTML porque requiere consultar Grupos de Servicio
   // y Conductores, que pueden no estar cargados aún.
@@ -15802,6 +15820,16 @@ async function openUserProfilePage(uid) {
       }).catch(() => {});
     }
   }
+}
+
+let _uprofGeneroValue = null;
+function setUprofGenero(val) {
+  _uprofGeneroValue = _uprofGeneroValue === val ? null : val; // tocar de nuevo lo deja "sin definir"
+  updateUprofGeneroUI();
+}
+function updateUprofGeneroUI() {
+  document.getElementById('uprof-genero-m')?.classList.toggle('active', _uprofGeneroValue === 'M');
+  document.getElementById('uprof-genero-f')?.classList.toggle('active', _uprofGeneroValue === 'F');
 }
 
 function closeUserProfilePage() {
@@ -15839,6 +15867,10 @@ async function saveProfileChanges(uid) {
   if (currentRole === 'dev' && newName !== u.name) updatePayload.name = newName;
   if (currentRole === 'dev' && newLinkedName !== (u.linked_name || '')) updatePayload.linked_name = newLinkedName || null;
 
+  // v1.29.5-beta: Género — exclusivo DEV.
+  const newGenero = currentRole === 'dev' ? (_uprofGeneroValue || null) : (u.genero || null);
+  if (currentRole === 'dev' && newGenero !== (u.genero || null)) updatePayload.genero = newGenero;
+
   // AdminTag: solo el DEV puede asignarla/quitarla, y solo aplica a Admins.
   const admintagSel = document.getElementById('uprof-admintag-sel');
   let newAdminTagId = u.admin_tag_id || null;
@@ -15855,7 +15887,7 @@ async function saveProfileChanges(uid) {
     .update(updatePayload)
     .eq('id', u.id);
   if (error) {
-    // Reintento sin linked_name/admin_tag_id por si las columnas aún no
+    // Reintento sin linked_name/admin_tag_id/genero por si las columnas aún no
     // existen en Supabase (ver bloques SQL correspondientes para agregarlas).
     const fallback = { role: u.role, task: u.task, labels: parseLabels(u.labels) };
     if (currentRole === 'dev' && newName !== u.name) fallback.name = newName;
@@ -15865,6 +15897,8 @@ async function saveProfileChanges(uid) {
       showToast('Cambios guardados, pero falta crear la columna "linked_name" en Supabase para poder vincular cuentas.', 'error');
     } else if (currentRole === 'dev' && admintagSel) {
       showToast('Cambios guardados, pero falta crear la columna "admin_tag_id" en Supabase para poder asignar AdminTags.', 'error');
+    } else if (currentRole === 'dev' && newGenero !== (u.genero || null)) {
+      showToast('Cambios guardados, pero falta crear la columna "genero" en Supabase para poder guardar el Género.', 'error');
     }
   }
 
@@ -15872,6 +15906,7 @@ async function saveProfileChanges(uid) {
   if (currentRole === 'dev' && newName !== u.name) u.name = newName;
   if (currentRole === 'dev') u.linked_name = newLinkedName || null;
   if (currentRole === 'dev') u.admin_tag_id = newAdminTagId;
+  if (currentRole === 'dev') u.genero = newGenero;
   if (wasCurrentUser) {
     currentRole = u.role;
     currentUser.role = u.role;
@@ -17476,6 +17511,9 @@ function updateAccentBgToggleUI() {
 }
 
 // ── Animaciones (función oficial, antes en Experimentos): fluidas por defecto ──
+function isFluidAnimEnabled() {
+  return document.documentElement.getAttribute('data-animations') !== 'reduced';
+}
 function initAnimationsMode() {
   const saved = localStorage.getItem('fleming_animations') || 'fluid';
   applyAnimationsMode(saved);
@@ -17489,6 +17527,10 @@ function setAnimationsMode(mode) {
   localStorage.setItem('fleming_animations', next);
   applyAnimationsMode(next);
   showToast(next === 'fluid' ? 'Animaciones activadas' : 'Animaciones desactivadas', next === 'fluid' ? 'success' : '');
+  // v1.29.5-beta: al activar "Fluidas" hay que posicionar el thumb del pill
+  // Predicación/Reuniones de inmediato (sin esto quedaría en 0,0 hasta el
+  // próximo cambio de sección), tanto en Desktop como en Móvil.
+  if (typeof updateMainSegThumb === 'function') updateMainSegThumb(true);
 }
 function updateAnimationsEnabledToggleUI() {
   const on = (localStorage.getItem('fleming_animations') || 'fluid') === 'fluid';
