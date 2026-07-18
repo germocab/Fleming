@@ -2937,6 +2937,76 @@
   }
   .vmc-week-pill.active { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
 
+  /* ── Selector de semana + botón de calendario (v1.26.0-beta) ──────────────
+     Envuelve el pill-row de semanas junto al botón circular que abre el
+     mini-calendario para elegir la fecha directamente. */
+  .vmc-week-selector-row {
+    position: relative;
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 1rem 0.75rem; margin-bottom: 0.25rem;
+  }
+  .vmc-week-selector-row .vmc-user-week-selector { padding: 0; margin-bottom: 0; flex: 1; min-width: 0; }
+
+  .vmc-cal-btn {
+    flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--surface2); border: 1.5px solid var(--border);
+    color: var(--text2); cursor: pointer; padding: 0;
+    transition: border-color 0.2s, background 0.2s, color 0.2s, transform 0.15s;
+  }
+  .vmc-cal-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
+  .vmc-cal-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .vmc-cal-btn:active { transform: scale(0.92); }
+  .vmc-cal-btn.active { border-color: var(--accent); background: var(--accent); color: #fff; }
+
+  .vmc-cal-popover {
+    display: none;
+    position: absolute; top: calc(100% + 6px); right: 1rem;
+    width: min(310px, calc(100vw - 2rem));
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow-lg);
+    padding: 0.85rem 0.9rem 1rem; z-index: 40;
+    transform-origin: top right;
+  }
+  .vmc-cal-popover.open { display: block; animation: menuMorphIn 0.28s var(--ease-fluid-snappy); }
+  @media (max-width: 480px) { .vmc-cal-popover { right: -0.25rem; left: -0.25rem; width: auto; } }
+
+  .vmc-cal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 0.65rem;
+  }
+  .vmc-cal-month-label {
+    font-size: 0.86rem; font-weight: 800; color: var(--text);
+    text-transform: capitalize; letter-spacing: -0.01em;
+  }
+  .vmc-cal-nav {
+    width: 26px; height: 26px; border-radius: 50%; border: none;
+    background: var(--surface2); color: var(--text2);
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .vmc-cal-nav:hover { background: var(--accent-light); color: var(--accent); }
+  .vmc-cal-nav svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
+  .vmc-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .vmc-cal-daynames { margin-bottom: 2px; }
+  .vmc-cal-dayname {
+    text-align: center; font-size: 0.65rem; font-weight: 700;
+    color: var(--text3); text-transform: uppercase; letter-spacing: 0.02em;
+    padding: 4px 0;
+  }
+  .vmc-cal-cell {
+    aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+    font-size: 0.78rem; font-weight: 600; color: var(--text3);
+    border-radius: 50%; position: relative;
+  }
+  .vmc-cal-cell.empty { visibility: hidden; }
+  .vmc-cal-cell.has-week { color: var(--text); cursor: pointer; transition: background 0.15s, color 0.15s; }
+  .vmc-cal-cell.has-week:hover { background: var(--accent-light); color: var(--accent); }
+  .vmc-cal-cell.today:not(.selected) { box-shadow: inset 0 0 0 1.5px var(--accent); color: var(--accent); }
+  .vmc-cal-cell.selected { background: var(--accent); color: #fff; box-shadow: none; }
+  .vmc-cal-empty-msg { text-align: center; font-size: 0.78rem; color: var(--text3); padding: 0.5rem 0 0.15rem; }
+
   .vmc-program-container { padding: 0 1rem 5rem; }
   .vmc-program-header {
     margin-bottom: 1.1rem;
@@ -7819,7 +7889,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.25.9.5-beta';
+const APP_VERSION = '1.26.0-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -20678,7 +20748,13 @@ function renderVmcUserView() {
   const programHtml = week ? vmcRenderWeekProgram(week) : '';
 
   container.innerHTML = `
-    <div class="vmc-user-week-selector">${pills}</div>
+    <div class="vmc-week-selector-row">
+      <div class="vmc-user-week-selector">${pills}</div>
+      <button class="vmc-cal-btn" id="vmc-cal-btn" onclick="calToggle('vmc')" title="Elegir fecha" aria-label="Elegir fecha">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </button>
+      <div class="vmc-cal-popover" id="vmc-cal-popover"></div>
+    </div>
     <div class="vmc-program-container" id="vmc-program-container">${programHtml}</div>`;
 }
 
@@ -20691,6 +20767,7 @@ function vmcSelectWeek(id) {
   // Update program
   const c = document.getElementById('vmc-program-container');
   if (c && week) c.innerHTML = vmcRenderWeekProgram(week);
+  calClose('vmc');
 }
 
 function vmcShortRange(w) {
@@ -21066,7 +21143,13 @@ function renderFsUserView() {
   const programHtml = week ? fsRenderWeekProgram(week) : '';
 
   container.innerHTML = `
-    <div class="vmc-user-week-selector">${pills}</div>
+    <div class="vmc-week-selector-row">
+      <div class="vmc-user-week-selector">${pills}</div>
+      <button class="vmc-cal-btn" id="fs-cal-btn" onclick="calToggle('fs')" title="Elegir fecha" aria-label="Elegir fecha">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </button>
+      <div class="vmc-cal-popover" id="fs-cal-popover"></div>
+    </div>
     <div class="vmc-program-container" id="fs-program-container">${programHtml}</div>`;
 }
 
@@ -21077,6 +21160,133 @@ function fsSelectWeek(id) {
   event.target.classList.add('active');
   const c = document.getElementById('fs-program-container');
   if (c && week) c.innerHTML = fsRenderWeekProgram(week);
+  calClose('fs');
+}
+
+// ── Mini-calendario para elegir fecha directamente (v1.26.0-beta) ────────────
+// Compartido entre "Vida y Ministerio" (prefix 'vmc') y "Pública" (prefix 'fs').
+// Se adapta automáticamente al color de acento activo vía var(--accent).
+
+const calState = {
+  vmc: { open: false, monthDate: null },
+  fs:  { open: false, monthDate: null },
+};
+
+function calWeeksFor(prefix) { return prefix === 'vmc' ? vmcWeeks : fsWeeks; }
+function calSelectedIdFor(prefix) { return prefix === 'vmc' ? vmcSelectedWeekId : fsSelectedWeekId; }
+
+function calToggle(prefix) {
+  const st = calState[prefix];
+  if (st.open) { calClose(prefix); return; }
+  // Cierra el otro calendario si estuviera abierto
+  const other = prefix === 'vmc' ? 'fs' : 'vmc';
+  if (calState[other].open) calClose(other);
+
+  if (!st.monthDate) {
+    const weeks = calWeeksFor(prefix);
+    const week = weeks.find(w => w.id === calSelectedIdFor(prefix));
+    st.monthDate = week ? new Date(week.date_start + 'T00:00:00') : new Date();
+  }
+  st.open = true;
+  const pop = document.getElementById(prefix + '-cal-popover');
+  const btn = document.getElementById(prefix + '-cal-btn');
+  if (pop) { pop.innerHTML = calRenderMonth(prefix); pop.classList.add('open'); }
+  if (btn) btn.classList.add('active');
+  document.addEventListener('click', calOutsideHandler, true);
+}
+
+function calClose(prefix) {
+  const st = calState[prefix];
+  if (!st.open) return;
+  st.open = false;
+  const pop = document.getElementById(prefix + '-cal-popover');
+  const btn = document.getElementById(prefix + '-cal-btn');
+  if (pop) pop.classList.remove('open');
+  if (btn) btn.classList.remove('active');
+  if (!calState.vmc.open && !calState.fs.open) {
+    document.removeEventListener('click', calOutsideHandler, true);
+  }
+}
+
+function calOutsideHandler(e) {
+  ['vmc', 'fs'].forEach(prefix => {
+    const st = calState[prefix];
+    if (!st.open) return;
+    const pop = document.getElementById(prefix + '-cal-popover');
+    const btn = document.getElementById(prefix + '-cal-btn');
+    const insidePop = pop && pop.contains(e.target);
+    const insideBtn = btn && btn.contains(e.target);
+    if (!insidePop && !insideBtn) calClose(prefix);
+  });
+}
+
+function calChangeMonth(prefix, delta) {
+  const st = calState[prefix];
+  st.monthDate = new Date(st.monthDate.getFullYear(), st.monthDate.getMonth() + delta, 1);
+  const pop = document.getElementById(prefix + '-cal-popover');
+  if (pop) pop.innerHTML = calRenderMonth(prefix);
+}
+
+function calRenderMonth(prefix) {
+  const st = calState[prefix];
+  const weeks = calWeeksFor(prefix);
+  const selId = calSelectedIdFor(prefix);
+  const md = st.monthDate;
+  const year = md.getFullYear(), month = md.getMonth();
+
+  const first = new Date(year, month, 1);
+  const startOffset = (first.getDay() + 6) % 7; // Lunes primero
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const todayStr = new Date().toISOString().slice(0, 10);
+
+  const monthLabel = md.toLocaleDateString('es-CL', { month: 'long', year: 'numeric' });
+  const dayNames = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+
+  let cells = '';
+  for (let i = 0; i < startOffset; i++) cells += `<div class="vmc-cal-cell empty"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const week = weeks.find(w => dateStr >= w.date_start && dateStr <= w.date_end);
+    const isSelected = !!week && week.id === selId;
+    const isToday = dateStr === todayStr;
+    const classes = ['vmc-cal-cell'];
+    if (week) classes.push('has-week');
+    if (isSelected) classes.push('selected');
+    if (isToday) classes.push('today');
+    cells += `<div class="${classes.join(' ')}"${week ? ` onclick="calPickDate('${prefix}','${week.id}')"` : ''}>${d}</div>`;
+  }
+
+  const emptyMsg = weeks.length ? '' : `<div class="vmc-cal-empty-msg">Aún no hay programa cargado.</div>`;
+
+  return `
+    <div class="vmc-cal-header">
+      <button class="vmc-cal-nav" onclick="calChangeMonth('${prefix}',-1)" aria-label="Mes anterior">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="vmc-cal-month-label">${monthLabel}</div>
+      <button class="vmc-cal-nav" onclick="calChangeMonth('${prefix}',1)" aria-label="Mes siguiente">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+    <div class="vmc-cal-grid vmc-cal-daynames">${dayNames.map(n => `<div class="vmc-cal-dayname">${n}</div>`).join('')}</div>
+    <div class="vmc-cal-grid">${cells}</div>
+    ${emptyMsg}`;
+}
+
+function calPickDate(prefix, weekId) {
+  // El render reconstruye el botón/popover desde cero, así que solo hace
+  // falta resetear el estado (el DOM anterior ya no existe).
+  calState[prefix].open = false;
+  if (!calState.vmc.open && !calState.fs.open) {
+    document.removeEventListener('click', calOutsideHandler, true);
+  }
+  if (prefix === 'vmc') {
+    vmcSelectedWeekId = weekId;
+    renderVmcUserView();
+  } else {
+    fsSelectedWeekId = weekId;
+    renderFsUserView();
+  }
 }
 
 function fsRenderWeekProgram(week) {
