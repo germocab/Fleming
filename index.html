@@ -1391,6 +1391,14 @@
     display: inline-flex; align-items: center; justify-content: center;
     font-size: 0.72rem; font-weight: 800; color: white; flex-shrink: 0;
   }
+  /* v1.30.8-beta: con 3 territorios asignados, se ocultan las etiquetas de
+     texto ("Territorio X") y solo se muestra el indicador circular, para
+     evitar que el menú se vea apretado o pierda formato en pantallas
+     angostas. Con 1 o 2 territorios el comportamiento no cambia. */
+  .detail-ter-tabs.compact .detail-ter-tab-label { display: none; }
+  .detail-ter-tabs.compact .tab-badge {
+    width: 26px; height: 26px; font-size: 0.8rem;
+  }
 
   .no-pasar-section { padding: 0 1.25rem 1.25rem; }
   .no-pasar-title {
@@ -6614,15 +6622,15 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
     <div class="detail-ter-tabs" id="detail-ter-tabs" style="display:none">
       <button class="detail-ter-tab active" id="detail-ter-tab-1" onclick="switchDetailTerTab(1)">
         <span class="tab-badge" id="detail-ter-tab-badge-1"></span>
-        <span id="detail-ter-tab-label-1">Territorio 1</span>
+        <span class="detail-ter-tab-label" id="detail-ter-tab-label-1">Territorio 1</span>
       </button>
       <button class="detail-ter-tab" id="detail-ter-tab-2" onclick="switchDetailTerTab(2)">
         <span class="tab-badge" id="detail-ter-tab-badge-2"></span>
-        <span id="detail-ter-tab-label-2">Territorio 2</span>
+        <span class="detail-ter-tab-label" id="detail-ter-tab-label-2">Territorio 2</span>
       </button>
       <button class="detail-ter-tab" id="detail-ter-tab-3" onclick="switchDetailTerTab(3)" style="display:none">
         <span class="tab-badge" id="detail-ter-tab-badge-3"></span>
-        <span id="detail-ter-tab-label-3">Territorio 3</span>
+        <span class="detail-ter-tab-label" id="detail-ter-tab-label-3">Territorio 3</span>
       </button>
     </div>
     <div class="detail-manzanas-card" id="detail-manzanas-line" style="display:none">
@@ -8168,7 +8176,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.30.7-beta';
+const APP_VERSION = '1.30.8-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -12369,6 +12377,10 @@ async function viewAssignment(id) {
     } else {
       tab3.style.display = 'none';
     }
+    // v1.30.8-beta: con 3 territorios se ocultan las etiquetas de texto y
+    // solo se deja el indicador circular, para que el menú no se vea
+    // apretado en pantallas angostas. Con 1 o 2 territorios no cambia nada.
+    tabsBar.classList.toggle('compact', !!ter3);
     tabsBar.style.display = '';
     // Store territories on panel for tab switching
     panel._ter1 = ter; panel._ter2 = ter2; panel._ter3 = ter3;
