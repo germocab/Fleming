@@ -532,9 +532,17 @@
     background: var(--surface3); border: none; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     color: var(--text2); transition: all 0.2s; flex-shrink: 0;
+    transform: scale(var(--navbar-btn-scale, 1));
   }
   .nav-icon-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .nav-icon-btn:hover { background: var(--surface2); }
+
+  /* ── Botones NavBar más Grandes (Experimental, v1.30.0-beta): escala solo
+     los botones de Sección, Sub-sección, Notificaciones y Más Opciones/Foto
+     de Perfil de la NavBar. No afecta el contenido ni las tarjetas. ── */
+  .main-segment { transform: scale(var(--navbar-btn-scale, 1)); transform-origin: center; }
+  #sub-tabs-wrap .sub-tab { transform: scale(var(--navbar-btn-scale, 1)); }
+  .nav-avatar-btn { transform: scale(var(--navbar-btn-scale, 1)); }
 
   .options-wrap { position: relative; }
   .options-dropdown {
@@ -5733,7 +5741,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           </button>
           <button class="dropdown-item danger" onclick="openReportIssueModal();closeOptionsMenu()">
             <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            Reportar un problema
+            Sugerencias
           </button>
         </div>
       </div>
@@ -7066,11 +7074,22 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         </div>
         <div class="profile-row-content">
           <div class="profile-row-label" data-i18n="settings.ayuda">Ayuda</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.ayuda.desc">Tutoriales y reporte de problemas</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.ayuda.desc">Tutoriales y Tips</div>
+        </div>
+        <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="pref-nav-row" id="pref-nav-row-soporte" style="border-top:1px solid var(--border)" onclick="openPrefScreen('soporte')">
+        <div class="profile-row-icon" style="background:var(--ter-5-bg);color:var(--ter-5)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="settings.soporte">Soporte</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.soporte.desc">Sugerencias y mantenimiento</div>
         </div>
         <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
     </div>
+
 
     <!-- Acerca de / Versión -->
     <div class="profile-section">
@@ -7351,6 +7370,23 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         </div>
       </div>
     </div>
+    <!-- Live Siempre Activo: función oficial (antes en Experimentos), v1.30.0-beta -->
+    <div class="profile-section">
+      <div class="profile-section-title" data-i18n="exp.liveaa.section">Live</div>
+      <div class="profile-row" style="cursor:pointer" onclick="toggleLiveAlwaysOnPref()">
+        <div class="profile-row-icon" style="background:var(--ter-8-bg,rgba(52,199,89,0.12));color:var(--green)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="exp.liveaa.title">Live Siempre Activo</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.liveaa.desc">Live sigue activo en segundo plano al salir de una asignación.</div>
+        </div>
+        <div id="live-always-on-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="live-always-on-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
+      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.liveaa.help">Para detener la sesión: entra a la asignación y presiona Pausa en la tarjeta Live, o detenla desde Notificaciones.</div>
+    </div>
   </div>
 </div>
 
@@ -7487,22 +7523,27 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         </div>
       </div>
     </div>
-    <!-- Live Siempre Activo (v1.24.0-beta) -->
+    <!-- Botones NavBar más Grandes: slider experimental (v1.30.0-beta) -->
     <div class="profile-section">
-      <div class="profile-section-title" data-i18n="exp.liveaa.section">Live</div>
-      <div class="profile-row" style="cursor:pointer" onclick="toggleLiveAlwaysOnPref()">
-        <div class="profile-row-icon" style="background:var(--ter-8-bg,rgba(52,199,89,0.12));color:var(--green)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      <div class="profile-section-title" data-i18n="exp.navbarbtnsize.section">NavBar</div>
+      <div class="profile-row" style="cursor:default">
+        <div class="profile-row-icon" style="background:var(--ter-6-bg);color:var(--ter-6)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="9" width="18" height="6" rx="3"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="exp.liveaa.title">Live Siempre Activo</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.liveaa.desc">Live sigue activo en segundo plano al salir de una asignación.</div>
-        </div>
-        <div id="live-always-on-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="live-always-on-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+          <div class="profile-row-label" data-i18n="exp.navbarbtnsize.title">Botones NavBar más Grandes</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.navbarbtnsize.desc">Agranda los botones de Sección, Sub-sección, Notificaciones y Más Opciones/Foto de Perfil, sin cambiar el tamaño de la interfaz.</div>
         </div>
       </div>
-      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.liveaa.help">Para detener la sesión: entra a la asignación y presiona Pausa en la tarjeta Live, o detenla desde Notificaciones.</div>
+      <div style="border-top:1px solid var(--border);padding:0.85rem 1rem 1rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem">
+          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase" data-i18n="exp.intensidad">Tamaño</span>
+          <span id="pref-navbar-btn-size-label" style="font-size:0.78rem;font-weight:700;color:var(--accent)">100%</span>
+        </div>
+        <input type="range" id="pref-navbar-btn-size-slider" min="100" max="140" step="5" value="100"
+          oninput="setNavbarBtnSize(parseInt(this.value,10))"
+          style="width:100%;accent-color:var(--accent);cursor:pointer">
+      </div>
     </div>
     <!-- Versión Simplificada de la plataforma (solo móvil) -->
     <div class="profile-section">
@@ -7575,14 +7616,26 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         <div class="loader-wrap" style="padding:1rem"><div class="loader"></div></div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ── Sub-pantalla: Soporte ── -->
+<div id="page-pref-soporte" class="pref-subpage">
+  <nav class="subpage-topbar">
+    <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración" data-i18n-title="settings.title">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span class="pill-header-title" data-i18n="settings.soporte">Soporte</span>
+  </nav>
+  <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 0 2.5rem">
     <div class="profile-section">
-      <div class="profile-section-title" data-i18n="settings.soporte">Soporte</div>
+      <div class="profile-section-title" data-i18n="settings.sugerencias">Sugerencias</div>
       <div class="profile-row" style="cursor:pointer" onclick="openReportIssueModal()">
         <div class="profile-row-icon" style="background:var(--ter-5-bg);color:var(--ter-5)">
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="settings.reportar">Reportar un problema</div>
+          <div class="profile-row-label" data-i18n="settings.reportar">Sugerencias</div>
           <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.reportar.desc">Esta plataforma está en fase Beta — cuéntanos si algo falla</div>
         </div>
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
@@ -7670,7 +7723,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="modal-overlay" id="report-issue-modal">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title" data-i18n="report.titulo">Reportar un problema</div>
+      <div class="modal-title" data-i18n="report.titulo">Sugerencias</div>
       <button class="modal-close" onclick="closeReportIssueModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="modal-body">
@@ -8355,21 +8408,23 @@ const I18N = {
   'settings.experimentos':      { es: 'Experimentos',             en: 'Experiments', nl: 'Experimenten' },
   'settings.experimentos.desc': { es: 'Color de acento, animaciones y blur', en: 'Accent color, animations and blur', nl: 'Accentkleur, animaties en blur' },
   'settings.ayuda':             { es: 'Ayuda',                    en: 'Help',   nl: 'Help' },
-  'settings.ayuda.desc':        { es: 'Tutoriales y reporte de problemas', en: 'Tutorials and issue reporting', nl: 'Tutorials en probleemmeldingen' },
+  'settings.ayuda.desc':        { es: 'Tutoriales y Tips', en: 'Tutorials and Tips', nl: 'Tutorials en Tips' },
   'settings.tutoriales':        { es: 'Tutoriales',               en: 'Tutorials', nl: 'Tutorials' },
   'settings.soporte':           { es: 'Soporte',                  en: 'Support',   nl: 'Ondersteuning' },
+  'settings.soporte.desc':      { es: 'Sugerencias y mantenimiento', en: 'Suggestions and maintenance', nl: 'Suggesties en onderhoud' },
+  'settings.sugerencias':       { es: 'Sugerencias',              en: 'Suggestions', nl: 'Suggesties' },
   'settings.tips':               { es: 'Tips',                     en: 'Tips',      nl: 'Tips' },
   'settings.tips.vacio':         { es: 'Todavía no hay Tips publicados', en: 'No Tips published yet', nl: 'Er zijn nog geen Tips gepubliceerd' },
   'settings.tutorial':          { es: 'Ver tutorial',             en: 'View tutorial', nl: 'Tutorial bekijken' },
   'settings.tutorial.desc':     { es: 'Repasa cómo funcionan las secciones y funciones principales', en: 'Review how the main sections and features work', nl: 'Bekijk hoe de belangrijkste secties en functies werken' },
   'settings.tutorial.h2h':      { es: 'Ver tutorial de Asignaciones', en: 'View Assignments tutorial', nl: 'Tutorial Toewijzingen bekijken' },
   'settings.tutorial.h2h.desc': { es: 'Repasa la pantalla de detalle de una asignación de casa en casa', en: 'Review the detail screen of a door-to-door assignment', nl: 'Bekijk het detailscherm van een huis-aan-huis toewijzing' },
-  'settings.reportar':          { es: 'Reportar un problema',     en: 'Report a problem', nl: 'Een probleem melden' },
+  'settings.reportar':          { es: 'Sugerencias',              en: 'Suggestions', nl: 'Suggesties' },
   'settings.reportar.desc':     { es: 'Esta plataforma está en fase Beta — cuéntanos si algo falla', en: 'This platform is in Beta — let us know if something breaks', nl: 'Dit platform bevindt zich in de Beta-fase — laat ons weten als er iets misgaat' },
   'settings.mantenimiento':     { es: 'Mantenimiento',            en: 'Maintenance', nl: 'Onderhoud' },
   'settings.restablecer':       { es: 'Restablecer plataforma',   en: 'Reset platform', nl: 'Platform herstellen' },
   'settings.restablecer.desc':  { es: 'Restaura todas las preferencias y configuraciones a sus valores predeterminados. No cierra tu sesión ni modifica tu perfil', en: 'Restores all preferences and settings to their default values. Does not sign you out or modify your profile', nl: 'Herstelt alle voorkeuren en instellingen naar hun standaardwaarden. Meldt je niet af en wijzigt je profiel niet' },
-  'report.titulo':          { es: 'Reportar un problema',     en: 'Report a problem', nl: 'Een probleem melden' },
+  'report.titulo':          { es: 'Sugerencias',     en: 'Suggestions', nl: 'Suggesties' },
   'report.pregunta':        { es: '¿Qué ocurrió?',            en: 'What happened?',   nl: 'Wat is er gebeurd?' },
   'report.placeholder':     { es: 'Describe el problema con el mayor detalle posible (qué hacías, qué esperabas que pasara, qué pasó en realidad)...', en: 'Describe the problem in as much detail as possible (what you were doing, what you expected to happen, what actually happened)...', nl: 'Beschrijf het probleem zo gedetailleerd mogelijk (wat je deed, wat je verwachtte dat er zou gebeuren, wat er werkelijk gebeurde)...' },
   'report.enviar':          { es: 'Enviar',                   en: 'Send',              nl: 'Versturen' },
@@ -8431,6 +8486,9 @@ const I18N = {
   'exp.clima.title':   { es: 'Clima en asignaciones', en: 'Weather in assignments', nl: 'Weer bij toewijzingen' },
   'exp.clima.desc':    { es: 'Muestra el pronóstico del día en cada asignación de casa en casa', en: 'Shows the forecast for the day and time of each door-to-door assignment, next to the time', nl: 'Toont de weersverwachting voor de dag en het tijdstip van elke huis-aan-huis toewijzing, naast de tijd' },
   'exp.clima.help':    { es: 'El pronóstico solo está disponible para fechas cercanas y depende de que el territorio o la dirección puedan ubicarse en el mapa.', en: 'The forecast is only available for nearby dates and depends on the territory or address being locatable on the map.', nl: 'De verwachting is alleen beschikbaar voor nabije data en is afhankelijk van of het gebied of adres op de kaart gevonden kan worden.' },
+  'exp.navbarbtnsize.section': { es: 'NavBar', en: 'NavBar', nl: 'NavBar' },
+  'exp.navbarbtnsize.title':   { es: 'Botones NavBar más Grandes', en: 'Bigger NavBar Buttons', nl: 'Grotere NavBar-knoppen' },
+  'exp.navbarbtnsize.desc':    { es: 'Agranda los botones de Sección, Sub-sección, Notificaciones y Más Opciones/Foto de Perfil, sin cambiar el tamaño de la interfaz.', en: 'Enlarges the Section, Sub-section, Notifications and More Options/Profile Photo buttons, without changing the interface size.', nl: 'Vergroot de knoppen voor Sectie, Subsectie, Meldingen en Meer opties/Profielfoto, zonder de interfacegrootte te wijzigen.' },
   'exp.liveaa.section': { es: 'Live', en: 'Live', nl: 'Live' },
   'exp.liveaa.title':   { es: 'Live Siempre Activo', en: 'Live Always On', nl: 'Live Altijd Actief' },
   'exp.liveaa.desc':    { es: 'Live sigue activo en segundo plano al salir de la asignación. La tarjeta con Live activo brilla en verde en Inicio', en: 'Live keeps running in the background when you leave the assignment. The card with active Live glows green on Home', nl: 'Live blijft actief op de achtergrond wanneer je de toewijzing verlaat. De kaart met actieve Live licht groen op bij Start' },
@@ -8753,6 +8811,7 @@ function initTheme() {
   initAnimationsMode();
   applyTransparencyPref();
   applyUiSizePref();
+  applyNavbarBtnSize();
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
     if (document.documentElement.getAttribute('data-theme') === 'auto') {
       _updateThemeActive('auto');
@@ -16397,17 +16456,17 @@ function closePreferencias() {
   document.body.style.overflow = '';
 }
 // ── Navegación entre las sub-pantallas de Configuración ──────────────────────
-const PREF_SCREENS = ['preferencias', 'funciones', 'notificaciones', 'almacenamiento', 'experimentos', 'ayuda', 'version'];
+const PREF_SCREENS = ['preferencias', 'funciones', 'notificaciones', 'almacenamiento', 'experimentos', 'ayuda', 'soporte', 'version'];
 function openPrefScreen(name) {
   if (!PREF_SCREENS.includes(name)) return;
   if (name === 'experimentos' && localStorage.getItem('fleming_egg_unlocked') !== '1') return;
   document.getElementById('page-pref-' + name)?.classList.add('open');
-  if (name === 'funciones') { updateH2HViewModeUI(); updateNavbarShrinkToggleUI(); }
+  if (name === 'funciones') { updateH2HViewModeUI(); updateNavbarShrinkToggleUI(); if (typeof updateLiveAlwaysOnToggleUI === 'function') updateLiveAlwaysOnToggleUI(); }
   if (name === 'notificaciones') renderPrefNotifList();
   if (name === 'almacenamiento') renderStorageList();
   if (name === 'ayuda') renderAyudaTipsList();
   if (name === 'preferencias') { updateAnimationsEnabledToggleUI(); updateWeatherToggleUI(); }
-  if (name === 'experimentos') { updateAccentSwatchesUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarAvatarToggleUI(); if (typeof updateLiveAlwaysOnToggleUI === 'function') updateLiveAlwaysOnToggleUI(); }
+  if (name === 'experimentos') { updateAccentSwatchesUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarAvatarToggleUI(); updateNavbarBtnSizeUI(); }
   if (name === 'version') {
     const val = document.getElementById('pref-version-screen-value');
     if (val) val.textContent = 'Versión ' + APP_VERSION;
@@ -16600,6 +16659,29 @@ function applyTransparencyPref() {
   root.style.setProperty('--nav-bg', `rgba(${navRgb},${lvl.alpha})`);
   root.style.setProperty('--tab-bar-bg', `rgba(${navRgb},${lvl.alpha})`);
   root.style.setProperty('--modal-overlay-bg', `rgba(0,0,0,${(0.62 - lvl.alpha * 0.32).toFixed(2)})`);
+}
+// ── Botones NavBar más Grandes (Experimental, v1.30.0-beta) ──────────────────
+// Escala (100–140%) los botones de Sección, Sub-sección, Notificaciones y
+// Más Opciones/Foto de Perfil de la NavBar mediante --navbar-btn-scale.
+// No afecta el tamaño de la interfaz general ni el contenido/tarjetas.
+function getNavbarBtnSize() {
+  const v = parseInt(localStorage.getItem('fleming_navbar_btn_size') || '100', 10);
+  return Math.min(140, Math.max(100, isNaN(v) ? 100 : v));
+}
+function setNavbarBtnSize(pct) {
+  localStorage.setItem('fleming_navbar_btn_size', String(Math.min(140, Math.max(100, pct))));
+  applyNavbarBtnSize();
+  updateNavbarBtnSizeUI();
+}
+function applyNavbarBtnSize() {
+  document.documentElement.style.setProperty('--navbar-btn-scale', (getNavbarBtnSize() / 100).toFixed(2));
+}
+function updateNavbarBtnSizeUI() {
+  const pct = getNavbarBtnSize();
+  const slider = document.getElementById('pref-navbar-btn-size-slider');
+  const label  = document.getElementById('pref-navbar-btn-size-label');
+  if (slider) slider.value = pct;
+  if (label) label.textContent = pct + '%';
 }
 function updateTransparencyToggleUI() {
   const enabled = isTransparencyEnabled();
@@ -17786,7 +17868,7 @@ const PLATFORM_RESET_KEYS = [
   'fleming_accent', 'fleming_accent_bg', 'fleming_animations', 'fleming_blur_level',
   'fleming_dark_maps', 'fleming_egg_unlocked', 'fleming_group_screen_mode', 'fleming_h2h_view',
   'fleming_lang', 'fleming_live_always_on', 'fleming_live_enabled', 'fleming_navbar_mode',
-  'fleming_navbar_options_avatar', 'fleming_notif_levels', 'fleming_notif_prefs',
+  'fleming_navbar_options_avatar', 'fleming_navbar_btn_size', 'fleming_notif_levels', 'fleming_notif_prefs',
   'fleming_notif_templates', 'fleming_simplified_mode', 'fleming_theme', 'fleming_tip_font_scale',
   'fleming_transparency', 'fleming_ui_size', 'fleming_weather_enabled'
 ];
