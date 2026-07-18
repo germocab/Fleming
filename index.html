@@ -6776,15 +6776,21 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         <div class="form-group2"><label class="form-label2">Territorio (1º)</label>
           <select class="form-select" id="as-territory"><option value="">Sin territorio</option></select>
         </div>
-        <div class="form-group2"><label class="form-label2">Territorio (2º) <span style="font-weight:400;color:var(--text3)">— opcional</span></label>
-          <select class="form-select" id="as-territory2"><option value="">Sin segundo territorio</option></select>
-        </div>
-        <div class="form-group2"><label class="form-label2">Territorio (3º) <span style="font-weight:400;color:var(--text3)">— opcional</span></label>
-          <select class="form-select" id="as-territory3"><option value="">Sin tercer territorio</option></select>
-        </div>
-        <div class="form-group2"><label class="form-label2">Manzanas a abarcar <span style="font-weight:400;color:var(--text3)">— opcional</span></label>
+        <div class="form-group2" id="as-manzanas-wrap"><label class="form-label2">Manzanas a abarcar <span style="font-weight:400;color:var(--text3)">— opcional</span></label>
           <input type="text" class="form-input" id="as-manzanas" placeholder="Ej: A, D, G, H">
           <div style="font-size:0.74rem;color:var(--text3);margin-top:4px">Úsalo cuando solo se deban cubrir ciertas manzanas del territorio (por ejemplo, las que quedaron pendientes de una asignación pasada).</div>
+        </div>
+        <div class="form-group2"><label class="form-label2">Territorio (2º) <span style="font-weight:400;color:var(--text3)">— opcional</span></label>
+          <select class="form-select" id="as-territory2" onchange="_toggleAsManzanasWrap(2)"><option value="">Sin segundo territorio</option></select>
+        </div>
+        <div class="form-group2" id="as-manzanas2-wrap" style="display:none"><label class="form-label2">Manzanas a abarcar <span style="font-weight:400;color:var(--text3)">(Territorio 2º) — opcional</span></label>
+          <input type="text" class="form-input" id="as-manzanas2" placeholder="Ej: A, D, G, H">
+        </div>
+        <div class="form-group2"><label class="form-label2">Territorio (3º) <span style="font-weight:400;color:var(--text3)">— opcional</span></label>
+          <select class="form-select" id="as-territory3" onchange="_toggleAsManzanasWrap(3)"><option value="">Sin tercer territorio</option></select>
+        </div>
+        <div class="form-group2" id="as-manzanas3-wrap" style="display:none"><label class="form-label2">Manzanas a abarcar <span style="font-weight:400;color:var(--text3)">(Territorio 3º) — opcional</span></label>
+          <input type="text" class="form-input" id="as-manzanas3" placeholder="Ej: A, D, G, H">
         </div>
       </div>
       <div class="form-group2"><label class="form-label2">Notas</label><textarea class="form-textarea" id="as-notes" placeholder="Observaciones adicionales..."></textarea></div>
@@ -8162,7 +8168,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.30.5-beta';
+const APP_VERSION = '1.30.7-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -11817,6 +11823,11 @@ function renderSchedule() {
 
   const grouped = {};
   assignments.forEach(a => { if (!grouped[a.date]) grouped[a.date]=[]; grouped[a.date].push(a); });
+  // v1.30.6-beta: cuando un día tiene más de una asignación, se ordenan por
+  // hora (la que empieza antes tiene prioridad y se muestra primero).
+  Object.keys(grouped).forEach(date => {
+    grouped[date].sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+  });
 
   const DAY = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
   const MON = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
@@ -12366,18 +12377,15 @@ async function viewAssignment(id) {
   } else {
     tabsBar.style.display = 'none';
   }
+  // v1.30.7-beta: "Manzanas a abarcar" es individual por territorio — se
+  // guardan las 3 listas en el panel para poder mostrar la que corresponde
+  // según la pestaña de territorio activa.
+  panel._manz1 = (!isEspecial && Array.isArray(a.manzanas_asignadas))   ? a.manzanas_asignadas.filter(Boolean)   : [];
+  panel._manz2 = (!isEspecial && Array.isArray(a.manzanas_asignadas_2)) ? a.manzanas_asignadas_2.filter(Boolean) : [];
+  panel._manz3 = (!isEspecial && Array.isArray(a.manzanas_asignadas_3)) ? a.manzanas_asignadas_3.filter(Boolean) : [];
   // ── Manzanas asignadas (si la asignación solo cubre ciertas manzanas del territorio) ──
-  const manzanasLine = document.getElementById('detail-manzanas-line');
-  const manzanasList = (!isEspecial && Array.isArray(a.manzanas_asignadas)) ? a.manzanas_asignadas.filter(Boolean) : [];
-  if (manzanasLine) {
-    if (manzanasList.length) {
-      document.getElementById('detail-manzanas-value').innerHTML =
-        manzanasList.map(m => `<span class="detail-manzanas-pill">${m}</span>`).join('');
-      manzanasLine.style.display = 'flex';
-    } else {
-      manzanasLine.style.display = 'none';
-    }
-  }
+  // Se muestran las del territorio activo (tab 1 por defecto).
+  _renderDetailManzanas(panel._manz1);
 
   // "No pasar" no depende del mapa, se pinta de inmediato (no aplica a "Especial")
   _renderDetailNoPasar(isEspecial ? null : ter);
@@ -12487,6 +12495,18 @@ function _renderDetailNoPasar(ter) {
   setTimeout(_liveUpdateBtnVisibility, 0);
 }
 
+function _renderDetailManzanas(manzanasList) {
+  const manzanasLine = document.getElementById('detail-manzanas-line');
+  if (!manzanasLine) return;
+  if (manzanasList && manzanasList.length) {
+    document.getElementById('detail-manzanas-value').innerHTML =
+      manzanasList.map(m => `<span class="detail-manzanas-pill">${m}</span>`).join('');
+    manzanasLine.style.display = 'flex';
+  } else {
+    manzanasLine.style.display = 'none';
+  }
+}
+
 function switchDetailTerTab(tabNum) {
   const panel = document.getElementById('detail-panel');
   document.getElementById('detail-ter-tab-1').classList.toggle('active', tabNum === 1);
@@ -12494,6 +12514,8 @@ function switchDetailTerTab(tabNum) {
   document.getElementById('detail-ter-tab-3').classList.toggle('active', tabNum === 3);
   const terForTab = tabNum === 1 ? panel._ter1 : (tabNum === 2 ? panel._ter2 : panel._ter3);
   _renderDetailTerContent(terForTab);
+  const manzForTab = tabNum === 1 ? panel._manz1 : (tabNum === 2 ? panel._manz2 : panel._manz3);
+  _renderDetailManzanas(manzForTab);
 }
 
 function toggleSuggestNpForm() {
@@ -12552,6 +12574,7 @@ function closeDetail() {
   document.getElementById('detail-ter-tab-2').classList.remove('active');
   const panel = document.getElementById('detail-panel');
   panel._ter1 = null; panel._ter2 = null; panel._ter3 = null;
+  panel._manz1 = null; panel._manz2 = null; panel._manz3 = null;
   document.getElementById('detail-overlay').classList.remove('open');
   document.getElementById('detail-overlay').classList.remove('sidebar-mode');
   document.body.classList.remove('h2h-sidebar-open');
@@ -13321,6 +13344,11 @@ function renderAdminAssignments() {
   // orden y la lectura sean consistentes entre ambas pantallas.
   const grouped = {};
   sorted.forEach(a => { (grouped[a.date] = grouped[a.date] || []).push(a); });
+  // v1.30.6-beta: dentro de un mismo día, la asignación con hora más temprana
+  // tiene prioridad y se muestra primero.
+  Object.keys(grouped).forEach(date => {
+    grouped[date].sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+  });
 
   let html = '';
   Object.keys(grouped).sort((a,b) => b < a ? -1 : 1).forEach(date => {
@@ -13391,6 +13419,20 @@ async function renderAdminTerritories() {
   }).join('') + `</div>`;
 }
 
+// v1.30.7-beta: "Manzanas a abarcar" es individual por territorio. Este helper
+// muestra/oculta el campo de manzanas del 2º/3º territorio según si ese
+// territorio está seleccionado en el formulario de asignación.
+function _toggleAsManzanasWrap(n) {
+  const sel = document.getElementById(`as-territory${n}`);
+  const wrap = document.getElementById(`as-manzanas${n}-wrap`);
+  if (!sel || !wrap) return;
+  wrap.style.display = sel.value ? '' : 'none';
+  if (!sel.value) {
+    const input = document.getElementById(`as-manzanas${n}`);
+    if (input) input.value = '';
+  }
+}
+
 function openAssignmentModal(a) {
   if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   editingAssignmentId = a ? a.id : null;
@@ -13400,6 +13442,8 @@ function openAssignmentModal(a) {
   document.getElementById('as-type').value = a?.type || 'presencial';
   document.getElementById('as-notes').value = a?.notes || '';
   document.getElementById('as-manzanas').value = Array.isArray(a?.manzanas_asignadas) ? a.manzanas_asignadas.join(', ') : (a?.manzanas_asignadas || '');
+  document.getElementById('as-manzanas2').value = Array.isArray(a?.manzanas_asignadas_2) ? a.manzanas_asignadas_2.join(', ') : (a?.manzanas_asignadas_2 || '');
+  document.getElementById('as-manzanas3').value = Array.isArray(a?.manzanas_asignadas_3) ? a.manzanas_asignadas_3.join(', ') : (a?.manzanas_asignadas_3 || '');
 
   // ── Campos "Especial" ──
   document.getElementById('as-especial-titulo').value = a?.especial_titulo || '';
@@ -13441,6 +13485,9 @@ function openAssignmentModal(a) {
   const selTer3 = document.getElementById('as-territory3');
   selTer3.innerHTML = '<option value="">Sin tercer territorio</option>' +
     territories.map(t => `<option value="${t.id}"${a?.territory_id_3===t.id?' selected':''}>Territorio ${t.number}</option>`).join('');
+
+  _toggleAsManzanasWrap(2);
+  _toggleAsManzanasWrap(3);
 
   // ── Grupo de Servicio field (visible only for Saturdays) ──
   const selGrupo = document.getElementById('as-grupo-select');
@@ -13582,6 +13629,10 @@ async function saveAssignment() {
     grupo_id: isEspecial ? null : grupoId,
     manzanas_asignadas: isEspecial ? [] : (document.getElementById('as-manzanas').value || '')
       .split(',').map(s => s.trim().toUpperCase()).filter(Boolean),
+    manzanas_asignadas_2: isEspecial ? [] : (document.getElementById('as-manzanas2').value || '')
+      .split(',').map(s => s.trim().toUpperCase()).filter(Boolean),
+    manzanas_asignadas_3: isEspecial ? [] : (document.getElementById('as-manzanas3').value || '')
+      .split(',').map(s => s.trim().toUpperCase()).filter(Boolean),
     especial_titulo: isEspecial ? document.getElementById('as-especial-titulo').value.trim() : null,
     especial_subtitulo: isEspecial ? document.getElementById('as-especial-subtitulo').value.trim() : null,
     especial_descripcion: isEspecial ? document.getElementById('as-especial-descripcion').value.trim() : null,
@@ -13643,7 +13694,7 @@ async function saveAssignment() {
       }
     }
     if (res.error && res.error.message && res.error.message.includes('manzanas_asignadas')) {
-      const pl2 = { ...pl }; delete pl2.manzanas_asignadas;
+      const pl2 = { ...pl }; delete pl2.manzanas_asignadas; delete pl2.manzanas_asignadas_2; delete pl2.manzanas_asignadas_3;
       if (editingAssignmentId) {
         res = await sb.from('assignments').update(pl2).eq('id', editingAssignmentId);
       } else {
