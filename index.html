@@ -1180,6 +1180,23 @@
 
   .detail-ter-badge { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800; color: white; flex-shrink: 0; }
 
+  /* v1.30.9-beta: cuando hay más de 1 territorio, el indicador superior deja
+     de mostrar solo el Territorio 1 y en su lugar muestra círculos
+     superpuestos (uno por territorio), igual que en las mini-cards de
+     "Otros grupos" del Sábado — dan una idea general sin competir en
+     espacio con las pestañas de detalle de más abajo. */
+  .detail-ter-badge.multi {
+    width: auto; height: auto; border-radius: 0; background: transparent !important;
+  }
+  .detail-ter-badge-mini {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.86rem; font-weight: 800; color: #fff; flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    border: 2px solid var(--surface);
+  }
+  .detail-ter-badge-mini + .detail-ter-badge-mini { margin-left: -12px; }
+
   .detail-actions { display: flex; gap: 0.75rem; padding: 0 1.25rem 1rem; }
   .detail-btn-primary {
     flex: 1; padding: 0.75rem; border: none; border-radius: 999px;
@@ -8176,7 +8193,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.30.8-beta';
+const APP_VERSION = '1.30.9-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -12261,10 +12278,24 @@ async function viewAssignment(id) {
   const badge = document.getElementById('detail-ter-badge');
   if (isEspecial) {
     badge.style.display = 'none';
+    badge.classList.remove('multi');
   } else if (ter) {
-    badge.textContent = ter.number;
-    badge.style.background = getTerColor(ter.number);
-    badge.style.display = 'flex';
+    const _multiTers = [ter, ter2, ter3].filter(Boolean);
+    if (_multiTers.length > 1) {
+      // v1.30.9-beta: con más de 1 territorio, el indicador superior muestra
+      // círculos superpuestos (uno por territorio) en vez de solo el 1º,
+      // igual que en las mini-cards de "Otros grupos" del Sábado.
+      badge.classList.add('multi');
+      badge.innerHTML = _multiTers.map(t =>
+        `<div class="detail-ter-badge-mini" style="background:${getTerColor(t.number)}">${t.number}</div>`
+      ).join('');
+      badge.style.display = 'flex';
+    } else {
+      badge.classList.remove('multi');
+      badge.textContent = ter.number;
+      badge.style.background = getTerColor(ter.number);
+      badge.style.display = 'flex';
+    }
   } else if (a.type !== 'presencial') {
     badge.style.display = 'none';
   } else {
@@ -12714,8 +12745,12 @@ async function _liveOnPosition(pos) {
     // Count matches and fire notifications if there are No Pasar in this street
     var matchedItems = document.querySelectorAll('#detail-no-pasar-list .no-pasar-item.live-match');
     if (matchedItems.length > 0) {
+      // v1.30.9-beta: el badge superior ahora puede mostrar varios círculos
+      // superpuestos (uno por territorio) en vez de un solo número, así que
+      // el número de territorio activo se toma de la pestaña seleccionada.
+      var activeTabBadge = document.querySelector('.detail-ter-tab.active .tab-badge');
       var terBadge = document.getElementById('detail-ter-badge');
-      var terNum = terBadge ? terBadge.textContent.trim() : '?';
+      var terNum = activeTabBadge ? activeTabBadge.textContent.trim() : (terBadge ? terBadge.textContent.trim() : '?');
       _liveSendBrowserNotif(road, matchedItems.length, terNum);
       _liveSendInternalNotif(road, matchedItems.length, terNum);
     }
@@ -17063,6 +17098,7 @@ async function viewTerritory(id) {
 
   // Badge — número del territorio en su círculo de color distintivo, debajo del título
   const badge = document.getElementById('detail-ter-badge');
+  badge.classList.remove('multi');
   badge.textContent = t.number;
   badge.style.background = color;
   badge.style.display = 'flex';
