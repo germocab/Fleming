@@ -1705,6 +1705,28 @@
   .live-pause-btn:hover { opacity: 0.85; }
   .live-pause-btn:active { transform: scale(0.94); }
   .live-pause-btn svg { width: 13px; height: 13px; fill: currentColor; stroke: none; }
+  /* ── LiveHost (Experimentos, v1.30.0-beta): banner que muestra la calle del
+       Encargado a quienes ven la asignación. Va justo arriba del menú de Live. */
+  .live-host-banner {
+    display: none; align-items: center; gap: 10px;
+    margin: 0 1.25rem 0.75rem;
+    padding: 0.65rem 0.9rem;
+    background: rgba(0,122,255,0.1);
+    border: 1px solid rgba(0,122,255,0.28);
+    border-radius: 10px;
+    animation: fadeIn 0.3s var(--ease-fluid-soft);
+  }
+  .live-host-banner.visible { display: flex; }
+  .live-host-icon {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: rgba(0,122,255,0.18); color: var(--accent);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .live-host-icon svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .live-host-info { flex: 1; min-width: 0; }
+  .live-host-label { font-size: 0.68rem; font-weight: 700; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; }
+  .live-host-name  { font-size: 0.88rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .live-host-sub   { font-size: 0.7rem; color: var(--text3); margin-top: 1px; }
   /* ── Live: banner en estado pausado ──────────────────────────────────────── */
   .live-street-banner.paused {
     padding: 0.45rem 0.75rem;
@@ -6605,6 +6627,21 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         <span data-i18n="offline.mapaindisponible">Mapa no disponible sin conexión</span>
       </div>
     </div>
+    <!-- LiveHost (Experimentos, v1.30.0-beta): muestra a quien mira esta
+         asignación la calle en la que está el Encargado, si este activó la
+         función (requiere haberla desbloqueado antes en Experimentos). Va
+         justo arriba del menú de Live. Dura máximo 2 horas, tanto para el
+         Encargado como para quienes ven la ubicación. -->
+    <div class="live-host-banner" id="live-host-banner">
+      <div class="live-host-icon">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <div class="live-host-info">
+        <div class="live-host-label">LiveHost</div>
+        <div class="live-host-name" id="live-host-name">—</div>
+        <div class="live-host-sub" id="live-host-sub"></div>
+      </div>
+    </div>
     <!-- Live Mode: ya no se muestra un botón manual. Live se activa/desactiva
          automáticamente según la preferencia en Configuración (ver función
          _liveUpdateBtnVisibility más abajo). Se conservan estos nodos ocultos
@@ -7703,6 +7740,26 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       </div>
     </div>
 
+    <!-- LiveHost: función en pruebas, v1.30.0-beta. Permite al Encargado de una
+         asignación de casa en casa compartir la calle en la que está (no un
+         punto exacto en un mapa) con quienes vean esa asignación, por hasta 2
+         horas, para que puedan ubicar al grupo si se pierden. -->
+    <div class="profile-section">
+      <div class="profile-section-title" data-i18n="exp.livehost.section">LiveHost</div>
+      <div class="profile-row" style="cursor:pointer" onclick="toggleLiveHostPref()">
+        <div class="profile-row-icon" style="background:var(--ter-2-bg);color:var(--accent)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="exp.livehost.title">Activar LiveHost</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.livehost.desc">Como Encargado, comparte la calle en la que estás con quienes vean tu asignación de casa en casa, por hasta 2 horas.</div>
+        </div>
+        <div id="live-host-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="live-host-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
+      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.livehost.help">Solo comparte el nombre de la calle, nunca un punto exacto en un mapa. Tú decides si activarla; se apaga sola a las 2 horas.</div>
+    </div>
     <!-- Foto de perfil en Más opciones (reemplaza solo el botón Opciones) -->
     <div class="profile-section">
       <div class="profile-row" id="navbar-avatar-row" style="cursor:pointer" onclick="toggleNavbarAvatarPref()">
@@ -8093,7 +8150,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.29.10-beta';
+const APP_VERSION = '1.30.0-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -8638,6 +8695,10 @@ const I18N = {
   'exp.liveaa.title':   { es: 'Live Siempre Activo', en: 'Live Always On', nl: 'Live Altijd Actief' },
   'exp.liveaa.desc':    { es: 'Live sigue activo en segundo plano al salir de la asignación. La tarjeta con Live activo brilla en verde en Inicio', en: 'Live keeps running in the background when you leave the assignment. The card with active Live glows green on Home', nl: 'Live blijft actief op de achtergrond wanneer je de toewijzing verlaat. De kaart met actieve Live licht groen op bij Start' },
   'exp.liveaa.help':    { es: 'Para detener la sesión: entra a la asignación y presiona Pausa en la tarjeta Live, o detenla desde el panel de Notificaciones.', en: 'To stop the session: open the assignment and press Pause on the Live card, or stop it from the Notifications panel.', nl: 'Om de sessie te stoppen: open de toewijzing en druk op Pauze op de Live-kaart, of stop deze via het Meldingenpaneel.' },
+  'exp.livehost.section': { es: 'LiveHost', en: 'LiveHost', nl: 'LiveHost' },
+  'exp.livehost.title':   { es: 'Activar LiveHost', en: 'Enable LiveHost', nl: 'LiveHost inschakelen' },
+  'exp.livehost.desc':    { es: 'Como Encargado, comparte la calle en la que estás con quienes vean tu asignación de casa en casa, por hasta 2 horas.', en: 'As the person in charge, share the street you are on with anyone viewing your house-to-house assignment, for up to 2 hours.', nl: 'Deel als verantwoordelijke de straat waar je bent met iedereen die je huis-aan-huis-toewijzing bekijkt, tot 2 uur lang.' },
+  'exp.livehost.help':    { es: 'Solo comparte el nombre de la calle, nunca un punto exacto en un mapa. Tú decides si activarla; se apaga sola a las 2 horas.', en: 'Only shares the street name, never an exact point on a map. You decide whether to turn it on; it turns off by itself after 2 hours.', nl: 'Deelt alleen de straatnaam, nooit een exact punt op een kaart. Jij beslist of je het inschakelt; het schakelt na 2 uur vanzelf uit.' },
   // ── Mi Perfil ──
   'profile.title':          { es: 'Mi Perfil',               en: 'My Profile' },
   'nav.inicio':             { es: 'Inicio',                  en: 'Home',              nl: 'Start' },
@@ -12301,6 +12362,9 @@ async function viewAssignment(id) {
   // ── Abrimos la pantalla de inmediato: el mapa del territorio y los permisos ──
   // de admin (ambos requieren red) se resuelven después, sin bloquear el tap.
   panel._openAssignmentId = id;
+  // LiveHost (Experimentos, v1.30.0-beta): revisa si el Encargado de esta
+  // asignación tiene una sesión LiveHost activa y, de ser así, la muestra.
+  if (typeof _liveHostOnOpenDetail === 'function') _liveHostOnOpenDetail(id, isEspecial ? null : a);
   const _detailOverlay = document.getElementById('detail-overlay');
   const _useSidebarMode = window.innerWidth >= 640 && typeof getHouseToHouseViewMode === 'function' && getHouseToHouseViewMode() === 'sidebar';
   _detailOverlay.classList.toggle('sidebar-mode', _useSidebarMode);
@@ -12479,6 +12543,7 @@ function closeDetail() {
       stopLiveMode();
     }
   }
+  if (typeof _liveHostOnCloseDetail === 'function') _liveHostOnCloseDetail();
 }
 
 function handleOverlayClick(e) {
@@ -12590,6 +12655,10 @@ async function _liveOnPosition(pos) {
       _liveSendBrowserNotif(road, matchedItems.length, terNum);
       _liveSendInternalNotif(road, matchedItems.length, terNum);
     }
+    // LiveHost (Experimentos, v1.30.0-beta): si el usuario activó LiveHost y
+    // es el Encargado de la asignación cuyo detalle tiene abierto, comparte
+    // la calle detectada con quienes vean esa asignación.
+    if (typeof _liveHostPublishIfApplicable === 'function') _liveHostPublishIfApplicable(road);
   } else if (!road) {
     const nameEl = document.getElementById('live-street-name');
     if (nameEl) nameEl.textContent = 'Calle no identificada';
@@ -12634,6 +12703,7 @@ function startLiveMode() {
 function stopLiveMode() {
   _liveActive = false;
   _livePaused = false;
+  if (typeof _liveHostClearOwnSession === 'function') _liveHostClearOwnSession();
   if (_liveWatchId !== null) { navigator.geolocation.clearWatch(_liveWatchId); _liveWatchId = null; }
   if (_liveGeoThrottle) { clearTimeout(_liveGeoThrottle); _liveGeoThrottle = null; }
   _liveLastRoad = null;
@@ -12906,6 +12976,127 @@ function _liveApplyCardGlow() {
     el.classList.add('live-card-glow');
   });
 }
+
+// ── LiveHost (Experimentos, v1.30.0-beta) ───────────────────────────────────
+// Permite al Encargado de una asignación de casa en casa compartir, de forma
+// temporal, la calle en la que está (nunca un punto exacto en un mapa) con
+// cualquiera que abra el detalle de esa asignación — útil para que el resto
+// del grupo lo ubique si se pierde. Es una función en pruebas: el Encargado
+// debe activarla primero en Configuración → Experimentos. Dura un máximo de
+// 2 horas tanto para el Encargado como para quienes ven su ubicación.
+// Requiere una tabla en Supabase, p.ej.:
+//   live_host_sessions (assignment_id text primary key, encargado_name text,
+//     road text, updated_at timestamptz, expires_at timestamptz)
+const LIVEHOST_DURATION_MS = 2 * 60 * 60 * 1000; // 2 horas
+let _liveHostPollInterval = null;
+let _liveHostOpenAssignmentId = null;
+let _liveHostPublishedAssignmentId = null;
+let _liveHostLastPublishedRoad = null;
+
+function isLiveHostEnabled() {
+  return localStorage.getItem('fleming_livehost_enabled') === 'true';
+}
+function toggleLiveHostPref() {
+  const next = !isLiveHostEnabled();
+  localStorage.setItem('fleming_livehost_enabled', next ? 'true' : 'false');
+  updateLiveHostToggleUI();
+  showToast(next ? 'LiveHost activado' : 'LiveHost desactivado', next ? 'success' : '');
+}
+function updateLiveHostToggleUI() {
+  const toggle = document.getElementById('live-host-toggle');
+  const thumb  = document.getElementById('live-host-thumb');
+  if (!toggle || !thumb) return;
+  const on = isLiveHostEnabled();
+  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
+  thumb.style.left = on ? '21px' : '3px';
+}
+
+// Se llama desde _liveOnPosition cada vez que Live detecta una calle nueva.
+// Publica la calle en Supabase solo si LiveHost está activado y el usuario
+// es el Encargado de la asignación cuyo detalle tiene abierto ahora mismo.
+async function _liveHostPublishIfApplicable(road) {
+  if (!road || !isLiveHostEnabled() || !currentUser) return;
+  const panel = document.getElementById('detail-panel');
+  const assignmentId = panel ? panel._openAssignmentId : null;
+  if (!assignmentId || assignmentId !== _liveAssignmentId) return;
+  const a = (typeof assignments !== 'undefined' ? assignments : []).find(x => x.id === assignmentId);
+  if (!a || !_namesMatch(getIdentityName(), a.conductor)) return;
+  if (_liveHostPublishedAssignmentId === assignmentId && _liveHostLastPublishedRoad === road) return;
+  _liveHostPublishedAssignmentId = assignmentId;
+  _liveHostLastPublishedRoad = road;
+  try {
+    const nowIso = new Date().toISOString();
+    const expIso = new Date(Date.now() + LIVEHOST_DURATION_MS).toISOString();
+    await sb.from('live_host_sessions').upsert({
+      assignment_id: String(assignmentId),
+      encargado_name: getIdentityName(),
+      road: road,
+      updated_at: nowIso,
+      expires_at: expIso,
+    }, { onConflict: 'assignment_id' });
+  } catch(e) { console.warn('[LiveHost] No se pudo publicar la ubicación:', e); }
+}
+
+// Si el Encargado detiene Live antes de que se cumplan las 2 horas, se borra
+// la sesión LiveHost publicada para que quienes miren el detalle dejen de
+// ver una ubicación que ya no es vigente.
+async function _liveHostClearOwnSession() {
+  if (!_liveHostPublishedAssignmentId) return;
+  const idToClear = _liveHostPublishedAssignmentId;
+  _liveHostPublishedAssignmentId = null;
+  _liveHostLastPublishedRoad = null;
+  try { await sb.from('live_host_sessions').delete().eq('assignment_id', String(idToClear)); }
+  catch(e) { console.warn('[LiveHost] No se pudo cerrar la sesión:', e); }
+}
+
+// Al abrir el detalle de una asignación, revisa si tiene una sesión LiveHost
+// vigente (aunque quien mira no sea el Encargado) y la muestra. Sigue
+// consultando cada 20s mientras el detalle permanezca abierto, para que la
+// calle se actualice y para que el banner desaparezca solo al cumplirse las
+// 2 horas (o si el Encargado detiene Live antes).
+function _liveHostOnOpenDetail(assignmentId, a) {
+  _liveHostClearPoll();
+  _liveHostOpenAssignmentId = assignmentId;
+  const banner = document.getElementById('live-host-banner');
+  if (banner) banner.classList.remove('visible');
+  if (!assignmentId) return;
+  _liveHostRefreshBanner(assignmentId);
+  _liveHostPollInterval = setInterval(() => {
+    if (_liveHostOpenAssignmentId === assignmentId) _liveHostRefreshBanner(assignmentId);
+  }, 20000);
+}
+function _liveHostOnCloseDetail() {
+  _liveHostClearPoll();
+  _liveHostOpenAssignmentId = null;
+  const banner = document.getElementById('live-host-banner');
+  if (banner) banner.classList.remove('visible');
+}
+function _liveHostClearPoll() {
+  if (_liveHostPollInterval) { clearInterval(_liveHostPollInterval); _liveHostPollInterval = null; }
+}
+async function _liveHostRefreshBanner(assignmentId) {
+  const banner = document.getElementById('live-host-banner');
+  if (!banner) return;
+  try {
+    const { data } = await sb.from('live_host_sessions')
+      .select('encargado_name, road, expires_at')
+      .eq('assignment_id', String(assignmentId))
+      .maybeSingle();
+    if (_liveHostOpenAssignmentId !== assignmentId) return; // cambió de asignación mientras se consultaba
+    if (!data || !data.expires_at || new Date(data.expires_at).getTime() <= Date.now()) {
+      banner.classList.remove('visible');
+      return;
+    }
+    const nameEl = document.getElementById('live-host-name');
+    const subEl  = document.getElementById('live-host-sub');
+    if (nameEl) nameEl.textContent = (data.encargado_name || 'El encargado') + ' está en la calle: ' + (data.road || '—');
+    if (subEl)  subEl.textContent  = 'Ubicación compartida temporalmente por el Encargado';
+    banner.classList.add('visible');
+  } catch(e) {
+    console.warn('[LiveHost] No se pudo cargar la sesión:', e);
+  }
+}
+// ── Fin LiveHost ─────────────────────────────────────────────────────────────
 
 // ── Fin Live Mode ──────────────────────────────────────────────────────────────
 
@@ -17001,7 +17192,7 @@ function openPrefScreen(name) {
   if (name === 'almacenamiento') renderStorageList();
   if (name === 'ayuda') renderAyudaTipsList();
   if (name === 'preferencias') { updateAnimationsEnabledToggleUI(); updateWeatherToggleUI(); }
-  if (name === 'experimentos') { updateAccentSwatchesUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarAvatarToggleUI(); updateNavbarBtnSizeUI(); }
+  if (name === 'experimentos') { updateAccentSwatchesUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarAvatarToggleUI(); updateNavbarBtnSizeUI(); if (typeof updateLiveHostToggleUI === 'function') updateLiveHostToggleUI(); }
   if (name === 'version') {
     const val = document.getElementById('pref-version-screen-value');
     if (val) val.textContent = 'Versión ' + APP_VERSION;
@@ -18421,7 +18612,7 @@ async function renderAdminTipsList() {
 const PLATFORM_RESET_KEYS = [
   'fleming_accent', 'fleming_accent_bg', 'fleming_animations', 'fleming_blur_level',
   'fleming_dark_maps', 'fleming_egg_unlocked', 'fleming_group_screen_mode', 'fleming_h2h_view',
-  'fleming_lang', 'fleming_live_always_on', 'fleming_live_enabled', 'fleming_navbar_mode',
+  'fleming_lang', 'fleming_live_always_on', 'fleming_live_enabled', 'fleming_livehost_enabled', 'fleming_navbar_mode',
   'fleming_navbar_options_avatar', 'fleming_navbar_btn_size', 'fleming_notif_levels', 'fleming_notif_prefs',
   'fleming_notif_templates', 'fleming_simplified_mode', 'fleming_theme', 'fleming_tip_font_scale',
   'fleming_transparency', 'fleming_transparency_level', 'fleming_ui_size', 'fleming_weather_enabled'
