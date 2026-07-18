@@ -1418,6 +1418,22 @@
   .no-pasar-item:hover { background: var(--surface3); }
   .no-pasar-item:active { transform: scale(0.98); }
 
+  /* ── v1.29.9-beta: formulario del selector Punto/Día/Turno de "Invitar a
+       Carritos" (mismo look que .ct-form-* pero fuera del contenedor de
+       Carritos, así que se declara aparte). ── */
+  #cart-invite-picker-overlay .ct-form-group { margin-bottom: 16px; text-align: left; }
+  #cart-invite-picker-overlay .ct-form-group label { display:block; font-size:0.78rem; font-weight:700; color:var(--text3); margin-bottom:6px; }
+  #cart-invite-picker-overlay .ct-form-input {
+    width: 100%; padding: 0.7rem 0.85rem; border-radius: 10px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text); font-family: var(--font); font-size: 0.92rem;
+  }
+  #cart-invite-picker-overlay .ct-form-actions { display: flex; gap: 10px; margin-top: 6px; margin-bottom: 1rem; }
+  #cart-invite-picker-overlay .ct-admin-btn-secondary, #cart-invite-picker-overlay .ct-admin-btn-primary {
+    flex: 1; padding: 0.75rem; border-radius: 12px; border: none; font-family: var(--font); font-weight: 700; font-size: 0.9rem; cursor: pointer;
+  }
+  #cart-invite-picker-overlay .ct-admin-btn-secondary { background: var(--surface3); color: var(--text); }
+  #cart-invite-picker-overlay .ct-admin-btn-primary { background: var(--accent); color: #fff; }
+
   /* ── No Pasar action sheet ────────────────────────────────────────────────── */
   .np-action-overlay {
     display: none; position: fixed; inset: 0;
@@ -6168,6 +6184,8 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
             <div class="ct-admin-tab" data-tab="turnos" role="tab" aria-selected="false" tabindex="0" onclick="cartSwitchAdminTab('turnos')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); cartSwitchAdminTab('turnos');}"><span class="ct-tab-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg></span> Turnos</div>
             <div class="ct-admin-tab" data-tab="personas" role="tab" aria-selected="false" tabindex="0" onclick="cartSwitchAdminTab('personas')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); cartSwitchAdminTab('personas');}"><span class="ct-tab-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Personas</div>
             <div class="ct-admin-tab" data-tab="acceso" role="tab" aria-selected="false" tabindex="0" onclick="cartSwitchAdminTab('acceso')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); cartSwitchAdminTab('acceso');}"><span class="ct-tab-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span> Acceso</div>
+            <!-- v1.29.9-beta: solicitudes de invitación entre usuarios ("Invitar a Carritos") -->
+            <div class="ct-admin-tab" data-tab="solicitudes" role="tab" aria-selected="false" tabindex="0" onclick="cartSwitchAdminTab('solicitudes')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); cartSwitchAdminTab('solicitudes');}"><span class="ct-tab-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span> Solicitudes</div>
           </div>
           <div class="ct-scroll-container" id="cartAdminBody" style="padding-top:5px;"></div>
         </div>
@@ -7074,6 +7092,58 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
     <div class="mperfil-name" id="mperfil-name">—</div>
     <div class="mperfil-cargos" id="mperfil-cargos"></div>
     <div class="mperfil-tags" id="mperfil-tags"></div>
+    <!-- v1.29.9-beta: botón "Invitar" — solo visible cuando quien mira el perfil
+         y la persona del perfil tienen ambos acceso a Carritos. Abre un menú de
+         acciones (mismo estilo que el de direcciones "No Pasar") que por ahora
+         solo ofrece "Invitar a Carritos". -->
+    <button type="button" id="mperfil-invite-btn" class="btn-secondary" style="display:none;margin-top:0.9rem;width:auto;padding:0.55rem 1.3rem" onclick="openCartInviteMenu()">Invitar</button>
+  </div>
+</div>
+
+<!-- ── v1.29.9-beta: Menú "Invitar" del Perfil — mismo componente visual que el
+     action sheet de "No Pasar" (.np-action-*). Por ahora solo tiene una opción:
+     "Invitar a Carritos". ── -->
+<div class="np-action-overlay" id="cart-invite-menu-overlay" onclick="if(event.target===this) closeCartInviteMenu()">
+  <div class="np-action-sheet">
+    <div class="np-action-handle"></div>
+    <div class="np-action-header">
+      <div class="np-action-addr" id="cart-invite-menu-name">Invitar</div>
+      <div class="np-action-sub">Elige qué quieres hacer</div>
+    </div>
+    <button type="button" class="np-action-btn np-action-btn-sugerir" onclick="openCartInvitePicker()">
+      <div class="np-action-icon"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div>
+      <span>Invitar a Carritos</span>
+    </button>
+    <button type="button" class="np-action-btn-cancel" onclick="closeCartInviteMenu()">Cancelar</button>
+  </div>
+</div>
+
+<!-- ── v1.29.9-beta: Selector de Punto / Día / Turno para la invitación ── -->
+<div class="np-action-overlay" id="cart-invite-picker-overlay" onclick="if(event.target===this) closeCartInvitePicker()">
+  <div class="np-action-sheet">
+    <div class="np-action-handle"></div>
+    <div class="np-action-header">
+      <div class="np-action-addr">Invitar a Carritos</div>
+      <div class="np-action-sub" id="cart-invite-picker-sub">Elige punto, día y turno</div>
+    </div>
+    <div style="padding:1rem 1.25rem 0">
+      <div class="ct-form-group">
+        <label for="cinv_punto">Punto</label>
+        <select class="ct-form-input" id="cinv_punto" onchange="cartInvitePopulateDias()"></select>
+      </div>
+      <div class="ct-form-group">
+        <label for="cinv_dia">Día</label>
+        <select class="ct-form-input" id="cinv_dia" onchange="cartInvitePopulateTurnos()"></select>
+      </div>
+      <div class="ct-form-group">
+        <label for="cinv_turno">Turno</label>
+        <select class="ct-form-input" id="cinv_turno"></select>
+      </div>
+    </div>
+    <div class="ct-form-actions" style="padding:0.5rem 1.25rem 0.25rem">
+      <button class="ct-admin-btn-secondary" style="margin:0;" onclick="closeCartInvitePicker()">Cancelar</button>
+      <button class="ct-admin-btn-primary" onclick="submitCartInvite()">Enviar solicitud</button>
+    </div>
   </div>
 </div>
 
@@ -8034,7 +8104,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.29.5-beta';
+const APP_VERSION = '1.29.9-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -9730,6 +9800,12 @@ async function openMemberPerfil(nombre, esPrecursorGrupo, rolGrupo) {
   cargosEl.innerHTML = '';
   tagsEl.innerHTML = '<span class="profile-tag" style="opacity:0.5">Cargando…</span>';
 
+  // v1.29.9-beta: por defecto, el botón "Invitar" se oculta mientras se
+  // resuelve si esta persona también tiene acceso a Carritos.
+  _mperfilTarget = { name: nombre, role: null, permissions: null, genero: null };
+  const inviteBtn = document.getElementById('mperfil-invite-btn');
+  if (inviteBtn) inviteBtn.style.display = 'none';
+
   // Cargos dentro del Grupo de Servicio (Superintendente/Auxiliar/Precursor)
   const cargoBadges = [];
   if (rolGrupo === 'superintendente') cargoBadges.push(`<span class="grupo-member-role-label role-super">${t('grupos.rol.superintendente')}</span>`);
@@ -9740,7 +9816,12 @@ async function openMemberPerfil(nombre, esPrecursorGrupo, rolGrupo) {
   // Etiquetas generales + AdminTag, si esta persona tiene cuenta registrada
   try {
     const { data: me } = await sb.from('platform_users')
-      .select('avatar, labels, admin_tag_id, role').ilike('name', nombre).single();
+      .select('avatar, labels, admin_tag_id, role, permissions, genero').ilike('name', nombre).single();
+
+    // v1.29.9-beta: guarda los datos necesarios para decidir si mostrar
+    // "Invitar" y para validar el género al momento de solicitar el turno.
+    _mperfilTarget = { name: nombre, role: me?.role || null, permissions: parsePermissions(me?.permissions), genero: me?.genero || null };
+    await mperfilUpdateInviteButton();
 
     if (me?.avatar) avatarEl.innerHTML = `<img src="${me.avatar}" style="width:100%;height:100%;object-fit:cover">`;
 
@@ -9771,6 +9852,153 @@ async function openMemberPerfil(nombre, esPrecursorGrupo, rolGrupo) {
 function closeMemberPerfil() {
   document.getElementById('page-member-perfil')?.classList.remove('open');
   document.body.style.overflow = '';
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// ── v1.29.9-beta: Invitar a Carritos desde el Perfil de otro usuario ───────
+// Un usuario con acceso a Carritos puede invitar a otro usuario que también
+// tenga acceso a Carritos a compartir un turno (mismo punto/día/turno). Por
+// ahora la invitación solo puede hacerse entre personas del mismo género; si
+// no coincide, no hay error visible, solo un mensaje genérico. La solicitud
+// queda pendiente hasta que un Admin con el módulo Carritos habilitado (o el
+// DEV) la apruebe desde el Panel de Administración.
+//
+// Requiere una tabla `cart_invitaciones` en Supabase con, al menos, las
+// columnas: id (uuid, default gen_random_uuid()), from_name (text),
+// to_name (text), punto_id (uuid), punto_nombre (text), dia (text),
+// turno_id (uuid), tipo (text), hora (text), estado (text, default
+// 'pendiente'), created_at (timestamptz, default now()).
+// ══════════════════════════════════════════════════════════════════════════
+let _mperfilTarget = null; // { name, role, permissions, genero }
+
+// Determina si `nombre` (con el rol/permisos ya resueltos) tiene acceso a
+// la Sub-sección Carritos, usando el mismo criterio que carritosVisibleForCurrentUser().
+async function carritosCanAccessName(nombre, role, permissions) {
+  if (role === 'dev') return true;
+  if (role === 'admin') return !!(permissions && permissions.carritos !== false);
+  if (_carritosAllowedUsers === null) await loadCarritosVisibility();
+  const lower = (nombre || '').trim().toLowerCase();
+  return (_carritosAllowedUsers || []).some(n => (n || '').trim().toLowerCase() === lower);
+}
+
+async function mperfilUpdateInviteButton() {
+  const btn = document.getElementById('mperfil-invite-btn');
+  if (!btn || !_mperfilTarget) return;
+  btn.style.display = 'none';
+  if (!currentUser) return;
+  if (_mperfilTarget.name.trim().toLowerCase() === (getIdentityName() || '').trim().toLowerCase()) return; // no invitarse a sí mismo
+  const iCanUseCarritos = carritosVisibleForCurrentUser();
+  if (!iCanUseCarritos) return;
+  const theyCanUseCarritos = await carritosCanAccessName(_mperfilTarget.name, _mperfilTarget.role, _mperfilTarget.permissions);
+  if (!theyCanUseCarritos) return;
+  btn.style.display = '';
+}
+
+function openCartInviteMenu() {
+  if (!_mperfilTarget) return;
+  document.getElementById('cart-invite-menu-name').textContent = `Invitar a ${_mperfilTarget.name}`;
+  document.getElementById('cart-invite-menu-overlay').classList.add('open');
+}
+function closeCartInviteMenu() {
+  document.getElementById('cart-invite-menu-overlay').classList.remove('open');
+}
+
+async function openCartInvitePicker() {
+  closeCartInviteMenu();
+  if (!cartDataLoaded) await cartLoadAllData();
+  const puntoSel = document.getElementById('cinv_punto');
+  puntoSel.innerHTML = cartPUNTOS.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('') || '<option value="">Sin puntos disponibles</option>';
+  cartInvitePopulateDias();
+  document.getElementById('cart-invite-picker-overlay').classList.add('open');
+}
+function closeCartInvitePicker() {
+  document.getElementById('cart-invite-picker-overlay').classList.remove('open');
+}
+
+function cartInvitePopulateDias() {
+  const puntoId = document.getElementById('cinv_punto').value;
+  const punto = cartPUNTOS.find(p => p.id === puntoId);
+  const dias = (punto && punto.dias && punto.dias.length) ? punto.dias : CART_DIAS;
+  const diaSel = document.getElementById('cinv_dia');
+  diaSel.innerHTML = dias.map(d => `<option value="${d}">${d}</option>`).join('');
+  cartInvitePopulateTurnos();
+}
+
+function cartInvitePopulateTurnos() {
+  const puntoId = document.getElementById('cinv_punto').value;
+  const dia = document.getElementById('cinv_dia').value;
+  const turnoSel = document.getElementById('cinv_turno');
+  const disponibles = cartTURNOS.filter(t => t.punto_id === puntoId && t.dia === dia);
+  turnoSel.innerHTML = disponibles.length
+    ? disponibles.map(t => `<option value="${t.id}">${t.tipo} — ${t.hora}</option>`).join('')
+    : '<option value="">No hay turnos para ese día</option>';
+}
+
+async function submitCartInvite() {
+  if (!_mperfilTarget || !currentUser) return;
+  const turnoId = document.getElementById('cinv_turno').value;
+  if (!turnoId) { showToast('Elige un turno válido.', 'error'); return; }
+  const turno = cartTURNOS.find(t => t.id === turnoId);
+  if (!turno) { showToast('Elige un turno válido.', 'error'); return; }
+
+  // Solo se puede invitar a personas del mismo género. Si no coincide, no se
+  // muestra ningún error explicativo: solo el mensaje genérico de siempre.
+  const myName = getIdentityName();
+  let myGenero = null;
+  try {
+    const { data: myData } = await sb.from('platform_users').select('genero').ilike('name', myName).single();
+    myGenero = myData?.genero || null;
+  } catch (e) { /* noop */ }
+
+  if (!myGenero || !_mperfilTarget.genero || myGenero !== _mperfilTarget.genero) {
+    showToast('No se pudo solicitar el turno.', 'error');
+    closeCartInvitePicker();
+    return;
+  }
+
+  const payload = {
+    from_name: myName,
+    to_name: _mperfilTarget.name,
+    punto_id: turno.punto_id,
+    punto_nombre: turno.punto,
+    dia: turno.dia,
+    turno_id: turno.id,
+    tipo: turno.tipo,
+    hora: turno.hora,
+    estado: 'pendiente'
+  };
+
+  const { error } = await sb.from('cart_invitaciones').insert(payload);
+  if (error) {
+    showToast('No se pudo enviar la solicitud. Es posible que falte crear la tabla "cart_invitaciones" en Supabase.', 'error');
+    return;
+  }
+
+  closeCartInvitePicker();
+  showToast('Solicitud enviada. Quedará pendiente de aprobación.', 'success');
+
+  // Notifica a los Admin con el módulo Carritos habilitado y al DEV.
+  try {
+    const targets = await cartAdminAndDevNames();
+    const title = 'Nueva solicitud de invitación — Carritos';
+    const body = `${myName} invitó a ${_mperfilTarget.name} a un turno en ${turno.punto} (${turno.dia}, ${turno.hora}).`;
+    await sb.from('notifications').insert({ title, body, target_names: targets, notif_category: 'carritos' });
+    cartNotifyPush(title, body, targets);
+  } catch (err) {
+    console.warn('No se pudo notificar la solicitud de invitación:', err.message);
+  }
+}
+
+// Devuelve los nombres de todos los DEV y los Admin con el módulo "carritos"
+// habilitado, para dirigir hacia ellos las notificaciones de aprobación.
+async function cartAdminAndDevNames() {
+  try {
+    const { data } = await sb.from('platform_users').select('name, role, permissions').in('role', ['dev', 'admin']);
+    return (data || [])
+      .filter(u => u.role === 'dev' || parsePermissions(u.permissions).carritos !== false)
+      .map(u => u.name)
+      .filter(Boolean);
+  } catch (e) { return []; }
 }
 
 async function renderProfilePage() {
@@ -22808,6 +23036,66 @@ function cartSwitchAdminTab(tab) {
   if (tab === 'turnos') cartRenderAdminTurnos();
   if (tab === 'personas') cartRenderAdminPersonas();
   if (tab === 'acceso') cartRenderAdminAcceso();
+  if (tab === 'solicitudes') cartRenderAdminSolicitudes();
+}
+
+// ---------- SOLICITUDES (v1.29.9-beta: invitaciones entre usuarios) ----------
+async function cartRenderAdminSolicitudes() {
+  const body = document.getElementById('cartAdminBody');
+  body.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando solicitudes</div></div>';
+  let rows = [];
+  try {
+    const { data, error } = await sb.from('cart_invitaciones')
+      .select('*').eq('estado', 'pendiente').order('created_at', { ascending: false });
+    if (error) throw error;
+    rows = data || [];
+  } catch (e) {
+    body.innerHTML = `<div class="ct-empty-state">No se pudieron cargar las solicitudes. Es posible que falte crear la tabla "cart_invitaciones" en Supabase.</div>`;
+    return;
+  }
+  if (!rows.length) { body.innerHTML = `<div class="ct-empty-state">No hay solicitudes pendientes.</div>`; return; }
+  body.innerHTML = rows.map(r => `
+    <div class="ct-admin-list-item">
+      <div class="ct-info">
+        <div class="ct-title">${r.from_name} → ${r.to_name}</div>
+        <div class="ct-sub">${r.punto_nombre} · ${r.dia} · ${r.tipo} — ${r.hora}</div>
+      </div>
+      <div class="ct-admin-actions">
+        <button class="ct-icon-btn" style="color:var(--primary-green)" onclick="cartResolveSolicitud('${r.id}', true)" aria-label="Aprobar">✓</button>
+        <button class="ct-icon-btn ct-danger" onclick="cartResolveSolicitud('${r.id}', false)" aria-label="Rechazar">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+async function cartResolveSolicitud(id, aprobar) {
+  if (!cartIsAdmin()) { showToast('No tienes permisos de administrador.', 'error'); return; }
+  const { data: sol, error: errSel } = await sb.from('cart_invitaciones').select('*').eq('id', id).single();
+  if (errSel || !sol) { showToast('No se encontró la solicitud.', 'error'); return; }
+
+  if (aprobar) {
+    const turno = cartTURNOS.find(t => t.id === sol.turno_id) || (await sb.from('cart_turnos').select('*').eq('id', sol.turno_id).single()).data;
+    if (turno) {
+      const nombresActuales = (turno.nombres || '').split(',').map(n => n.trim()).filter(Boolean);
+      [sol.from_name, sol.to_name].forEach(n => { if (n && !nombresActuales.includes(n)) nombresActuales.push(n); });
+      await sb.from('cart_turnos').update({ nombres: nombresActuales.join(', ') }).eq('id', sol.turno_id);
+    }
+  }
+
+  await sb.from('cart_invitaciones').update({ estado: aprobar ? 'aprobado' : 'rechazado' }).eq('id', id);
+
+  const title = aprobar ? 'Invitación a Carritos aprobada' : 'Invitación a Carritos rechazada';
+  const body = aprobar
+    ? `Tu turno con ${sol.to_name === sol.from_name ? '' : ''}${sol.to_name} en ${sol.punto_nombre} (${sol.dia}, ${sol.hora}) fue aprobado.`
+    : `La solicitud para compartir el turno en ${sol.punto_nombre} (${sol.dia}, ${sol.hora}) fue rechazada.`;
+  try {
+    const targets = [sol.from_name, sol.to_name].filter(Boolean);
+    await sb.from('notifications').insert({ title, body, target_names: targets, notif_category: 'carritos' });
+    cartNotifyPush(title, body, targets);
+  } catch (err) { console.warn('No se pudo notificar la resolución:', err.message); }
+
+  showToast(aprobar ? 'Solicitud aprobada.' : 'Solicitud rechazada.', 'success');
+  await cartLoadAllData(true);
+  cartRenderAdminSolicitudes();
 }
 
 // ---------- ACCESO (visibilidad de la sub-sección Carritos) ----------
