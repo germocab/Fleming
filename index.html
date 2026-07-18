@@ -3265,6 +3265,23 @@
     border: 3px solid rgba(255,255,255,0.45);
     box-shadow: 0 8px 32px rgba(0,0,0,0.25);
   }
+  /* ── Botón "Eliminar foto de perfil" (Admin con módulo Usuarios / DEV,
+     v1.27.1-beta): badge circular sobre la esquina del avatar en el perfil
+     de otro usuario, visible solo si esa cuenta tiene foto y quien mira
+     tiene permiso para gestionarla. ── */
+  .uprofile-avatar-wrap { position: relative; width: 90px; margin: 0 auto 0.9rem; }
+  .uprofile-avatar-wrap .uprofile-avatar { margin: 0; }
+  .uprofile-avatar-del-btn {
+    position: absolute; bottom: -4px; right: -4px;
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--red, #ff3b30); color: #fff; border: 2.5px solid var(--surface);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25); cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .uprofile-avatar-del-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; }
+  .uprofile-avatar-del-btn:hover { opacity: 0.85; }
+  .uprofile-avatar-del-btn:active { transform: scale(0.9); }
   .uprofile-name { font-size: 1.5rem; font-weight: 900; color: #fff; letter-spacing: -0.03em; text-shadow: 0 2px 8px rgba(0,0,0,0.2); }
   .uprofile-role-badge {
     display: inline-flex; align-items: center; margin-top: 8px;
@@ -6961,7 +6978,12 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 
   <!-- Hero -->
   <div class="uprofile-hero" id="uprofile-hero">
-    <div class="uprofile-avatar" id="uprofile-avatar">—</div>
+    <div class="uprofile-avatar-wrap" id="uprofile-avatar-wrap">
+      <div class="uprofile-avatar" id="uprofile-avatar">—</div>
+      <button class="uprofile-avatar-del-btn" id="uprofile-avatar-del-btn" style="display:none" onclick="adminRemoveUserPhoto()" title="Eliminar foto de perfil" aria-label="Eliminar foto de perfil">
+        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+      </button>
+    </div>
     <div class="uprofile-name" id="uprofile-name">—</div>
     <div class="uprofile-role-badge" id="uprofile-role-badge">—</div>
     <div class="uprofile-status" id="uprofile-status">
@@ -7950,7 +7972,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.27.0-beta';
+const APP_VERSION = '1.27.1-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -10209,6 +10231,32 @@ async function removeProfilePhoto() {
   delete _avatarCache[currentUser.name];
   showToast('Foto eliminada', 'success');
   renderProfilePage();
+  renderGruposView();
+}
+
+// ── Eliminar foto de perfil de OTRO usuario (Admin con módulo "usuarios" /
+// DEV, v1.27.1-beta) — se usa desde el botón circular sobre el avatar en el
+// Perfil de administración de un usuario (Panel de Usuarios).
+async function adminRemoveUserPhoto() {
+  const uid = _currentProfileUserId;
+  const u = uid ? activeUsers.find(x => x.id === uid) : null;
+  if (!u) return;
+  const canManageUserPhotos = currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, 'usuarios'));
+  if (!canManageUserPhotos) { showToast('Sin permisos.', 'error'); return; }
+  if (!confirm(`¿Eliminar la foto de perfil de ${u.name}?`)) return;
+
+  const { error } = await sb.from('platform_users').update({ avatar: null }).eq('id', u.id);
+  if (error) { showToast('Error al eliminar foto', 'error'); return; }
+
+  u.avatar = null;
+  delete _avatarCache[u.name];
+  showToast('Foto de perfil eliminada', 'success');
+
+  // Refresca el perfil abierto, la tarjeta en la lista y, si correspondía a
+  // la propia sesión (ej. DEV mirando su propio registro como Admin), el
+  // resto de la plataforma donde se muestra el avatar.
+  openUserProfilePage(u.id);
+  renderUsersCards();
   renderGruposView();
 }
 
@@ -15348,6 +15396,13 @@ async function openUserProfilePage(uid) {
   document.getElementById('uprofile-role-badge').textContent = roleLabel;
   document.getElementById('uprofile-status-dot').style.background = isOnline ? '#4ade80' : 'rgba(255,255,255,0.4)';
   document.getElementById('uprofile-status-text').textContent = isOnline ? 'En línea' : `Últ. actividad: ${since}`;
+
+  // ── Eliminar foto de perfil (Admin con módulo "usuarios" / DEV, v1.27.1-beta) ──
+  // Solo visible en perfiles de otros usuarios que sí tienen foto, y solo
+  // para quien tenga permiso para gestionar el Panel de Usuarios.
+  const canManageUserPhotos = currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, 'usuarios'));
+  const delPhotoBtn = document.getElementById('uprofile-avatar-del-btn');
+  if (delPhotoBtn) delPhotoBtn.style.display = (!isCurrentUser && u.avatar && canManageUserPhotos) ? 'flex' : 'none';
 
   // Body
   const labelChipsFull = [
