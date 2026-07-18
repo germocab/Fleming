@@ -8108,7 +8108,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.29.9.1-beta';
+const APP_VERSION = '1.29.9.2-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -9932,7 +9932,7 @@ function cartInvitePopulateTurnos() {
   const puntoId = document.getElementById('cinv_punto').value;
   const dia = document.getElementById('cinv_dia').value;
   const turnoSel = document.getElementById('cinv_turno');
-  const disponibles = cartTURNOS.filter(t => t.punto_id === puntoId && t.dia === dia);
+  const disponibles = cartTURNOS.filter(t => t.punto_id === puntoId && t.dia === dia && t.tipo === 'TD');
   turnoSel.innerHTML = disponibles.length
     ? disponibles.map(t => `<option value="${t.id}">${t.tipo} — ${t.hora}</option>`).join('')
     : '<option value="">No hay turnos para ese día</option>';
