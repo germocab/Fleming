@@ -948,6 +948,11 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 0.85rem; font-weight: 800; color: white;
   }
+  /* Triple territory badge — three smaller circles side by side */
+  .ter-badge-duo.ter-badge-trio { gap: 3px; }
+  .ter-badge-duo.ter-badge-trio .ter-badge-sm {
+    width: 32px; height: 32px; font-size: 0.72rem;
+  }
 
   /* Territory color picker swatches */
   .ter-color-swatch {
@@ -6605,7 +6610,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       </div>
       <div class="detail-especial-block-value" id="detail-especial-desc-value" style="white-space:pre-wrap"></div>
     </div>
-    <!-- Territory tabs (shown only when 2 territories assigned) -->
+    <!-- Territory tabs (shown only when 2 or 3 territories assigned) -->
     <div class="detail-ter-tabs" id="detail-ter-tabs" style="display:none">
       <button class="detail-ter-tab active" id="detail-ter-tab-1" onclick="switchDetailTerTab(1)">
         <span class="tab-badge" id="detail-ter-tab-badge-1"></span>
@@ -6614,6 +6619,10 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       <button class="detail-ter-tab" id="detail-ter-tab-2" onclick="switchDetailTerTab(2)">
         <span class="tab-badge" id="detail-ter-tab-badge-2"></span>
         <span id="detail-ter-tab-label-2">Territorio 2</span>
+      </button>
+      <button class="detail-ter-tab" id="detail-ter-tab-3" onclick="switchDetailTerTab(3)" style="display:none">
+        <span class="tab-badge" id="detail-ter-tab-badge-3"></span>
+        <span id="detail-ter-tab-label-3">Territorio 3</span>
       </button>
     </div>
     <div class="detail-manzanas-card" id="detail-manzanas-line" style="display:none">
@@ -6769,6 +6778,9 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         </div>
         <div class="form-group2"><label class="form-label2">Territorio (2º) <span style="font-weight:400;color:var(--text3)">— opcional</span></label>
           <select class="form-select" id="as-territory2"><option value="">Sin segundo territorio</option></select>
+        </div>
+        <div class="form-group2"><label class="form-label2">Territorio (3º) <span style="font-weight:400;color:var(--text3)">— opcional</span></label>
+          <select class="form-select" id="as-territory3"><option value="">Sin tercer territorio</option></select>
         </div>
         <div class="form-group2"><label class="form-label2">Manzanas a abarcar <span style="font-weight:400;color:var(--text3)">— opcional</span></label>
           <input type="text" class="form-input" id="as-manzanas" placeholder="Ej: A, D, G, H">
@@ -8150,7 +8162,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.30.0-beta';
+const APP_VERSION = '1.30.5-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -11838,9 +11850,11 @@ function renderSchedule() {
   function _buildRightBadge(a) {
     const ter  = territories.find(t => t.id === a.territory_id)  || null;
     const ter2 = a.territory_id_2 ? (territories.find(t => t.id === a.territory_id_2) || null) : null;
+    const ter3 = a.territory_id_3 ? (territories.find(t => t.id === a.territory_id_3) || null) : null;
     if (a.type === 'zoom') return `<div class="ter-badge-icon zoom-badge"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="15" height="10" rx="2"/><polygon points="17 9 22 6 22 18 17 15"/></svg></div>`;
     if (a.type === 'telefono') return `<div class="ter-badge-icon phone-badge"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.35 2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>`;
     if (a.type === 'cartas') return `<div class="ter-badge-icon cartas-badge"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>`;
+    if (ter && ter2 && ter3) return `<div class="ter-badge-duo ter-badge-trio"><div class="ter-badge-sm" style="background:${getTerColor(ter.number)}">${ter.number}</div><div class="ter-badge-sm" style="background:${getTerColor(ter2.number)}">${ter2.number}</div><div class="ter-badge-sm" style="background:${getTerColor(ter3.number)}">${ter3.number}</div></div>`;
     if (ter && ter2) return `<div class="ter-badge-duo"><div class="ter-badge-sm" style="background:${getTerColor(ter.number)}">${ter.number}</div><div class="ter-badge-sm" style="background:${getTerColor(ter2.number)}">${ter2.number}</div></div>`;
     if (ter) return `<div class="ter-badge" style="background:${getTerColor(ter.number)}">${ter.number}</div>`;
     return '';
@@ -11986,13 +12000,14 @@ function renderSchedule() {
         otherAssignments.forEach(a => {
           const ter  = territories.find(t => t.id === a.territory_id) || null;
           const ter2 = a.territory_id_2 ? (territories.find(t => t.id === a.territory_id_2) || null) : null;
+          const ter3 = a.territory_id_3 ? (territories.find(t => t.id === a.territory_id_3) || null) : null;
           const grupoAsoc = _findGrupoForAssignment(a);
           const grupoNum = grupoAsoc ? grupoAsoc.numero : null;
           const tagColor = grupoNum != null ? grupoColorFor(grupoNum) : '#64748b';
           const timeStr = a.time ? a.time.substring(0,5) : '--:--';
           const conductorDisplay = a.conductor || 'Sin conductor';
 
-          const terCircles = [ter, ter2].filter(Boolean).map(t =>
+          const terCircles = [ter, ter2, ter3].filter(Boolean).map(t =>
             `<div class="sabado-grupo-ter-circle" style="background:${getTerColor(t.number)}">${t.number}</div>`
           ).join('');
 
@@ -12134,10 +12149,12 @@ function openOtrosGruposScreen(date) {
           const houseLabel = a.house ? ((_c && _c.tipo === 'departamento' ? 'Depto' : 'Casa') + ' de ') + a.house : '';
           const ter  = territories.find(t => t.id === a.territory_id)  || null;
           const ter2 = a.territory_id_2 ? (territories.find(t => t.id === a.territory_id_2) || null) : null;
+          const ter3 = a.territory_id_3 ? (territories.find(t => t.id === a.territory_id_3) || null) : null;
           let rightBadge = '';
           if (a.type === 'zoom') rightBadge = `<div class="ter-badge-icon zoom-badge"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="15" height="10" rx="2"/><polygon points="17 9 22 6 22 18 17 15"/></svg></div>`;
           else if (a.type === 'telefono') rightBadge = `<div class="ter-badge-icon phone-badge"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.35 2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>`;
           else if (a.type === 'cartas') rightBadge = `<div class="ter-badge-icon cartas-badge"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>`;
+          else if (ter && ter2 && ter3) rightBadge = `<div class="ter-badge-duo ter-badge-trio"><div class="ter-badge-sm" style="background:${getTerColor(ter.number)}">${ter.number}</div><div class="ter-badge-sm" style="background:${getTerColor(ter2.number)}">${ter2.number}</div><div class="ter-badge-sm" style="background:${getTerColor(ter3.number)}">${ter3.number}</div></div>`;
           else if (ter && ter2) rightBadge = `<div class="ter-badge-duo"><div class="ter-badge-sm" style="background:${getTerColor(ter.number)}">${ter.number}</div><div class="ter-badge-sm" style="background:${getTerColor(ter2.number)}">${ter2.number}</div></div>`;
           else if (ter) rightBadge = `<div class="ter-badge" style="background:${getTerColor(ter.number)}">${ter.number}</div>`;
           const typeChip = a.type === 'zoom' ? `<span class="type-chip chip-zoom">Zoom</span>`
@@ -12180,6 +12197,7 @@ async function viewAssignment(id) {
   // la apertura de la pantalla.
   const ter  = territories.find(t => t.id === a.territory_id) || null;
   const ter2 = a.territory_id_2 ? (territories.find(t => t.id === a.territory_id_2) || null) : null;
+  const ter3 = a.territory_id_3 ? (territories.find(t => t.id === a.territory_id_3) || null) : null;
   const d = new Date(a.date+'T00:00:00');
   const DAY = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
   const MON = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
@@ -12325,17 +12343,26 @@ async function viewAssignment(id) {
     // Show tabs bar
     const tab1 = document.getElementById('detail-ter-tab-1');
     const tab2 = document.getElementById('detail-ter-tab-2');
+    const tab3 = document.getElementById('detail-ter-tab-3');
     const badge1 = document.getElementById('detail-ter-tab-badge-1');
     const badge2 = document.getElementById('detail-ter-tab-badge-2');
+    const badge3 = document.getElementById('detail-ter-tab-badge-3');
     badge1.textContent = ter.number;  badge1.style.background = getTerColor(ter.number);
     badge2.textContent = ter2.number; badge2.style.background = getTerColor(ter2.number);
     document.getElementById('detail-ter-tab-label-1').textContent = terLabel(ter.number);
     document.getElementById('detail-ter-tab-label-2').textContent = terLabel(ter2.number);
+    if (ter3) {
+      badge3.textContent = ter3.number; badge3.style.background = getTerColor(ter3.number);
+      document.getElementById('detail-ter-tab-label-3').textContent = terLabel(ter3.number);
+      tab3.style.display = '';
+    } else {
+      tab3.style.display = 'none';
+    }
     tabsBar.style.display = '';
-    // Store both territories on panel for tab switching
-    panel._ter1 = ter; panel._ter2 = ter2;
+    // Store territories on panel for tab switching
+    panel._ter1 = ter; panel._ter2 = ter2; panel._ter3 = ter3;
     // Activate tab 1 by default
-    tab1.classList.add('active'); tab2.classList.remove('active');
+    tab1.classList.add('active'); tab2.classList.remove('active'); tab3.classList.remove('active');
   } else {
     tabsBar.style.display = 'none';
   }
@@ -12464,7 +12491,9 @@ function switchDetailTerTab(tabNum) {
   const panel = document.getElementById('detail-panel');
   document.getElementById('detail-ter-tab-1').classList.toggle('active', tabNum === 1);
   document.getElementById('detail-ter-tab-2').classList.toggle('active', tabNum === 2);
-  _renderDetailTerContent(tabNum === 1 ? panel._ter1 : panel._ter2);
+  document.getElementById('detail-ter-tab-3').classList.toggle('active', tabNum === 3);
+  const terForTab = tabNum === 1 ? panel._ter1 : (tabNum === 2 ? panel._ter2 : panel._ter3);
+  _renderDetailTerContent(terForTab);
 }
 
 function toggleSuggestNpForm() {
@@ -12522,7 +12551,7 @@ function closeDetail() {
   document.getElementById('detail-ter-tab-1').classList.add('active');
   document.getElementById('detail-ter-tab-2').classList.remove('active');
   const panel = document.getElementById('detail-panel');
-  panel._ter1 = null; panel._ter2 = null;
+  panel._ter1 = null; panel._ter2 = null; panel._ter3 = null;
   document.getElementById('detail-overlay').classList.remove('open');
   document.getElementById('detail-overlay').classList.remove('sidebar-mode');
   document.body.classList.remove('h2h-sidebar-open');
@@ -13216,9 +13245,11 @@ function renderAdminAssignments() {
   function buildRightBadge(a) {
     const ter  = territories.find(t => t.id === a.territory_id)  || null;
     const ter2 = a.territory_id_2 ? (territories.find(t => t.id === a.territory_id_2) || null) : null;
+    const ter3 = a.territory_id_3 ? (territories.find(t => t.id === a.territory_id_3) || null) : null;
     if (a.type === 'zoom') return `<div class="ter-badge-icon zoom-badge"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="15" height="10" rx="2"/><polygon points="17 9 22 6 22 18 17 15"/></svg></div>`;
     if (a.type === 'telefono') return `<div class="ter-badge-icon phone-badge"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.35 2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>`;
     if (a.type === 'cartas') return `<div class="ter-badge-icon cartas-badge"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>`;
+    if (ter && ter2 && ter3) return `<div class="ter-badge-duo ter-badge-trio"><div class="ter-badge-sm" style="background:${getTerColor(ter.number)}">${ter.number}</div><div class="ter-badge-sm" style="background:${getTerColor(ter2.number)}">${ter2.number}</div><div class="ter-badge-sm" style="background:${getTerColor(ter3.number)}">${ter3.number}</div></div>`;
     if (ter && ter2) return `<div class="ter-badge-duo"><div class="ter-badge-sm" style="background:${getTerColor(ter.number)}">${ter.number}</div><div class="ter-badge-sm" style="background:${getTerColor(ter2.number)}">${ter2.number}</div></div>`;
     if (ter) return `<div class="ter-badge" style="background:${getTerColor(ter.number)}">${ter.number}</div>`;
     return '';
@@ -13407,6 +13438,10 @@ function openAssignmentModal(a) {
   selTer2.innerHTML = '<option value="">Sin segundo territorio</option>' +
     territories.map(t => `<option value="${t.id}"${a?.territory_id_2===t.id?' selected':''}>Territorio ${t.number}</option>`).join('');
 
+  const selTer3 = document.getElementById('as-territory3');
+  selTer3.innerHTML = '<option value="">Sin tercer territorio</option>' +
+    territories.map(t => `<option value="${t.id}"${a?.territory_id_3===t.id?' selected':''}>Territorio ${t.number}</option>`).join('');
+
   // ── Grupo de Servicio field (visible only for Saturdays) ──
   const selGrupo = document.getElementById('as-grupo-select');
   selGrupo.innerHTML = '<option value="">Semana (todos los grupos)</option>' +
@@ -13541,6 +13576,7 @@ async function saveAssignment() {
     type: asType,
     territory_id: isEspecial ? null : (document.getElementById('as-territory').value || null),
     territory_id_2: isEspecial ? null : (document.getElementById('as-territory2').value || null),
+    territory_id_3: isEspecial ? null : (document.getElementById('as-territory3').value || null),
     notes: document.getElementById('as-notes').value.trim(),
     phone: isEspecial ? null : (conductor?.telefono || null),
     grupo_id: isEspecial ? null : grupoId,
@@ -13584,6 +13620,14 @@ async function saveAssignment() {
     }
     if (res.error && res.error.message && res.error.message.includes('territory_id_2')) {
       const pl2 = { ...pl }; delete pl2.territory_id_2;
+      if (editingAssignmentId) {
+        res = await sb.from('assignments').update(pl2).eq('id', editingAssignmentId);
+      } else {
+        res = await sb.from('assignments').insert(pl2);
+      }
+    }
+    if (res.error && res.error.message && res.error.message.includes('territory_id_3')) {
+      const pl2 = { ...pl }; delete pl2.territory_id_3;
       if (editingAssignmentId) {
         res = await sb.from('assignments').update(pl2).eq('id', editingAssignmentId);
       } else {
@@ -13640,7 +13684,8 @@ async function saveAssignment() {
       oldAssign.conductor    !== payload.conductor    ||
       oldAssign.type         !== payload.type         ||
       (oldAssign.territory_id   || null) !== (payload.territory_id   || null) ||
-      (oldAssign.territory_id_2 || null) !== (payload.territory_id_2 || null)
+      (oldAssign.territory_id_2 || null) !== (payload.territory_id_2 || null) ||
+      (oldAssign.territory_id_3 || null) !== (payload.territory_id_3 || null)
     );
 
     if (hasChanged) {
