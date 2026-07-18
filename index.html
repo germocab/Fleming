@@ -1434,6 +1434,10 @@
   #cart-invite-picker-overlay .ct-admin-btn-secondary { background: var(--surface3); color: var(--text); }
   #cart-invite-picker-overlay .ct-admin-btn-primary { background: var(--accent); color: #fff; }
 
+  /* ── v1.29.9.1-beta: los overlays de "Invitar" se abren desde el Perfil
+       (#page-member-perfil, z-index:500), así que deben quedar por encima. ── */
+  #cart-invite-menu-overlay, #cart-invite-picker-overlay { z-index: 600; }
+
   /* ── No Pasar action sheet ────────────────────────────────────────────────── */
   .np-action-overlay {
     display: none; position: fixed; inset: 0;
@@ -8104,7 +8108,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.29.9-beta';
+const APP_VERSION = '1.29.9.1-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
