@@ -5106,49 +5106,54 @@
 #sub-content-carritos .ct-fab-add:active, #admin-carritos .ct-fab-add:active { transform: scale(0.97); }
 
 /* ---------- FORM OVERLAY ---------- */
-#sub-content-carritos .ct-form-overlay, #admin-carritos .ct-form-overlay {
+/* v1.31.5-beta: #cartFormOverlay ahora vive como elemento de nivel superior
+   (fuera de #sub-content-carritos y de #admin-carritos) para que no quede
+   oculto cuando su antiguo contenedor padre tenía display:none (por eso el
+   botón Editar de Puntos no abría nada desde el Panel de Administración).
+   Se usa el propio ID, sin exigir un ancestro específico. */
+#cartFormOverlay, #sub-content-carritos .ct-form-overlay, #admin-carritos .ct-form-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.55);
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 7000; display: none;
   align-items: flex-end; justify-content: center;
 }
-@media (min-width: 768px) { #sub-content-carritos .ct-form-overlay, #admin-carritos .ct-form-overlay { align-items: center; } }
-#sub-content-carritos .ct-form-sheet, #admin-carritos .ct-form-sheet {
+@media (min-width: 768px) { #cartFormOverlay, #sub-content-carritos .ct-form-overlay, #admin-carritos .ct-form-overlay { align-items: center; } }
+#cartFormSheet, #sub-content-carritos .ct-form-sheet, #admin-carritos .ct-form-sheet {
   background: var(--bg-ct-screen); width: 100%; max-width: 500px; border-radius: 24px 24px 0 0;
   padding: 28px 24px; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border-color);
   scrollbar-width: thin; scrollbar-color: var(--border-color) transparent;
 }
-@media (min-width: 768px) { #sub-content-carritos .ct-form-sheet, #admin-carritos .ct-form-sheet { border-radius: 24px; } }
-#sub-content-carritos .ct-form-group, #admin-carritos .ct-form-group { margin-bottom: 16px; text-align: left; }
-#sub-content-carritos .ct-form-group label, #admin-carritos .ct-form-group label {
+@media (min-width: 768px) { #cartFormSheet, #sub-content-carritos .ct-form-sheet, #admin-carritos .ct-form-sheet { border-radius: 24px; } }
+#cartFormOverlay .ct-form-group, #sub-content-carritos .ct-form-group, #admin-carritos .ct-form-group { margin-bottom: 16px; text-align: left; }
+#cartFormOverlay .ct-form-group label, #sub-content-carritos .ct-form-group label, #admin-carritos .ct-form-group label {
   display: block; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px;
   color: var(--text-gray); margin-bottom: 7px;
 }
-#sub-content-carritos .ct-form-input, #admin-carritos .ct-form-input, #sub-content-carritos .ct-form-select, #admin-carritos .ct-form-select, #sub-content-carritos .ct-form-textarea, #admin-carritos .ct-form-textarea {
+#cartFormOverlay .ct-form-input, #sub-content-carritos .ct-form-input, #admin-carritos .ct-form-input, #cartFormOverlay .ct-form-select, #sub-content-carritos .ct-form-select, #admin-carritos .ct-form-select, #cartFormOverlay .ct-form-textarea, #sub-content-carritos .ct-form-textarea, #admin-carritos .ct-form-textarea {
   width: 100%; padding: 13px 15px; border-radius: 12px; border: 1.5px solid var(--border-color);
   background: var(--bg-card); color: var(--text-main); font-size: 0.95rem; outline: none; font-family: inherit;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
-#sub-content-carritos .ct-form-input:focus, #admin-carritos .ct-form-input:focus, #sub-content-carritos .ct-form-select:focus, #admin-carritos .ct-form-select:focus, #sub-content-carritos .ct-form-textarea:focus, #admin-carritos .ct-form-textarea:focus {
+#cartFormOverlay .ct-form-input:focus, #sub-content-carritos .ct-form-input:focus, #admin-carritos .ct-form-input:focus, #cartFormOverlay .ct-form-select:focus, #sub-content-carritos .ct-form-select:focus, #admin-carritos .ct-form-select:focus, #cartFormOverlay .ct-form-textarea:focus, #sub-content-carritos .ct-form-textarea:focus, #admin-carritos .ct-form-textarea:focus {
   border-color: var(--ct-accent); box-shadow: 0 0 0 3px var(--ct-accent-light);
 }
-#sub-content-carritos .ct-form-row, #admin-carritos .ct-form-row { display: flex; gap: 10px; }
-#sub-content-carritos .ct-form-row .ct-form-group, #admin-carritos .ct-form-row .ct-form-group { flex: 1; }
-#sub-content-carritos .ct-chip-multi, #admin-carritos .ct-chip-multi { display: flex; flex-wrap: wrap; gap: 8px; }
-#sub-content-carritos .ct-chip-multi .ct-filter-chip, #admin-carritos .ct-chip-multi .ct-filter-chip { margin: 0; }
-#sub-content-carritos .ct-form-actions, #admin-carritos .ct-form-actions { display: flex; gap: 10px; margin-top: 22px; }
-#sub-content-carritos .ct-admin-btn-primary, #admin-carritos .ct-admin-btn-primary {
+#cartFormOverlay .ct-form-row, #sub-content-carritos .ct-form-row, #admin-carritos .ct-form-row { display: flex; gap: 10px; }
+#cartFormOverlay .ct-form-row .ct-form-group, #sub-content-carritos .ct-form-row .ct-form-group, #admin-carritos .ct-form-row .ct-form-group { flex: 1; }
+#cartFormOverlay .ct-chip-multi, #sub-content-carritos .ct-chip-multi, #admin-carritos .ct-chip-multi { display: flex; flex-wrap: wrap; gap: 8px; }
+#cartFormOverlay .ct-chip-multi .ct-filter-chip, #sub-content-carritos .ct-chip-multi .ct-filter-chip, #admin-carritos .ct-chip-multi .ct-filter-chip { margin: 0; }
+#cartFormOverlay .ct-form-actions, #sub-content-carritos .ct-form-actions, #admin-carritos .ct-form-actions { display: flex; gap: 10px; margin-top: 22px; }
+#cartFormOverlay .ct-admin-btn-primary, #sub-content-carritos .ct-admin-btn-primary, #admin-carritos .ct-admin-btn-primary {
   width: 100%; padding: 15px; border-radius: 14px; border: none; background: var(--ct-accent);
   color: white; font-weight: 800; font-size: 1rem; cursor: pointer; box-shadow: 0 3px 12px rgba(243,97,0,0.3);
   transition: filter var(--transition-fast), transform var(--transition-fast);
 }
-#sub-content-carritos .ct-admin-btn-primary:hover, #admin-carritos .ct-admin-btn-primary:hover { filter: brightness(1.06); }
-#sub-content-carritos .ct-admin-btn-primary:active, #admin-carritos .ct-admin-btn-primary:active { transform: scale(0.97); }
-#sub-content-carritos .ct-admin-btn-secondary, #admin-carritos .ct-admin-btn-secondary {
+#cartFormOverlay .ct-admin-btn-primary:hover, #sub-content-carritos .ct-admin-btn-primary:hover, #admin-carritos .ct-admin-btn-primary:hover { filter: brightness(1.06); }
+#cartFormOverlay .ct-admin-btn-primary:active, #sub-content-carritos .ct-admin-btn-primary:active, #admin-carritos .ct-admin-btn-primary:active { transform: scale(0.97); }
+#cartFormOverlay .ct-admin-btn-secondary, #sub-content-carritos .ct-admin-btn-secondary, #admin-carritos .ct-admin-btn-secondary {
   width: 100%; padding: 14px; border-radius: 14px; border: 1.5px solid var(--border-color); background: var(--bg-card);
   color: var(--text-main); font-weight: 700; font-size: 0.95rem; cursor: pointer; margin-top: 10px;
   transition: background-color var(--transition-fast);
 }
-#sub-content-carritos .ct-admin-btn-secondary:hover, #admin-carritos .ct-admin-btn-secondary:hover { background: var(--bg-card-hover); }
+#cartFormOverlay .ct-admin-btn-secondary:hover, #sub-content-carritos .ct-admin-btn-secondary:hover, #admin-carritos .ct-admin-btn-secondary:hover { background: var(--bg-card-hover); }
 
 #sub-content-carritos .ct-empty-state, #admin-carritos .ct-empty-state { text-align: center; padding: 48px 20px; color: var(--text-gray); font-size: 0.95rem; line-height: 1.6; }
 
@@ -5755,10 +5760,6 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
     </div>
   </div>
 
-  <!-- FORMULARIO GENÉRICO (puntos / turnos / personas) -->
-  <div class="ct-form-overlay" id="cartFormOverlay" role="dialog" aria-modal="true">
-    <div class="ct-form-sheet" id="cartFormSheet"></div>
-  </div>
       </div>
       <div id="sub-content-territorios" class="sub-page" style="display:none">
         <div id="admin-shortcut-territorios" style="display:none"></div>
@@ -5892,7 +5893,8 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       <div class="admin-tabs-row" data-section="reuniones">
         <button class="admin-tab" data-tab="vmc" data-i18n="admin.tab.vmc" onclick="switchAdminTab('vmc')">Vida y Ministerio</button>
         <button class="admin-tab" data-tab="fin-semana" data-i18n="admin.tab.fin-semana" onclick="switchAdminTab('fin-semana')">Pública</button>
-        <button class="admin-tab" data-tab="responsabilidades" data-i18n="admin.tab.responsabilidades" onclick="switchAdminTab('responsabilidades')">Responsabilidades</button>
+        <button class="admin-tab" data-tab="audiovideo" data-i18n="admin.tab.audiovideo" onclick="switchAdminTab('audiovideo')">Audio y Video</button>
+        <button class="admin-tab" data-tab="acomodacion" data-i18n="admin.tab.acomodacion" onclick="switchAdminTab('acomodacion')">Acomodación</button>
         <button class="admin-tab" data-tab="aseo-salon" data-i18n="admin.tab.aseo-salon" onclick="switchAdminTab('aseo-salon')">Aseo Salón</button>
       </div>
       <div class="admin-tabs-row" data-section="fleming">
@@ -6024,7 +6026,18 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <div class="ct-scroll-container" id="cartAdminBody" style="padding-top:5px;"></div>
         </div>
       </div>
-      <div class="admin-section" id="admin-responsabilidades">
+      <div class="admin-section" id="admin-audiovideo"></div>
+      <div class="admin-section" id="admin-acomodacion"></div>
+      <!-- v1.31.5-beta: "Responsabilidades" del Admin se dividió en dos
+           módulos/pestañas independientes (Audio y Video / Acomodación), con
+           permisos separados, porque quien asigna una cosa no es
+           necesariamente quien asigna la otra. El Viewer no cambia: sigue
+           mostrando todo junto en su única sub-sección "Responsabilidades".
+           Para no duplicar todo el HTML/JS de Hermanos + Asignar, este bloque
+           es compartido: switchAdminTab() lo reubica (appendChild) dentro de
+           #admin-audiovideo o #admin-acomodacion según cuál esté activa, y
+           respActiveModulo controla qué cargos se muestran/editan/borran. -->
+      <div id="resp-admin-shared">
         <div class="sub-tabs" style="margin-bottom:1.1rem">
           <button class="sub-tab active" id="resp-admin-tab-hermanos" onclick="switchRespAdminTab('hermanos')">Hermanos</button>
           <button class="sub-tab" id="resp-admin-tab-asignar" onclick="switchRespAdminTab('asignar')">Asignar Jueves/Sábado</button>
@@ -7971,7 +7984,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.31-beta';
+const APP_VERSION = '1.31.5-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -8379,7 +8392,8 @@ const I18N = {
   'admin.tab.carritos':     { es: 'Carritos',                en: 'Carts' },
   'admin.tab.vmc':          { es: 'Vida y Ministerio',       en: 'Christian Life and Ministry' },
   'admin.tab.fin-semana':   { es: 'Pública',                 en: 'Public Meeting' },
-  'admin.tab.responsabilidades': { es: 'Responsabilidades', en: 'Responsibilities' },
+  'admin.tab.audiovideo':   { es: 'Audio y Video',           en: 'Audio & Video' },
+  'admin.tab.acomodacion':  { es: 'Acomodación',             en: 'Ushering' },
   'admin.tab.aseo-salon':   { es: 'Aseo Salón',              en: 'Hall Cleaning' },
   'admin.tab.usuarios':     { es: 'Usuarios',                en: 'Users' },
   'admin.tab.notificaciones': { es: 'Notificaciones',        en: 'Notifications',     nl: 'Meldingen' },
@@ -8698,32 +8712,51 @@ const RESP_CARGOS = [
 // Agrupación visual de los cargos en categorías para el formulario de asignación.
 // Cada categoría tiene su propio color e ícono distintivo, que se usa tanto en
 // el panel de administración como en la vista del usuario final.
+// v1.31.5-beta: cada categoría ahora declara a qué módulo de Administración
+// pertenece ("audiovideo" o "acomodacion"), ya que esos dos módulos ahora
+// tienen permisos y pestañas de Admin independientes (el Viewer sigue
+// mostrando todo junto, sin cambios, en la sub-sección "Responsabilidades").
 const RESP_CATEGORIAS = [
   {
     nombre: 'Audio y Video',
     cargos: ['Encargado de Audio y Video', 'Auxiliar de Audio y Video'],
     color: '#a855f7',
+    modulo: 'audiovideo',
     icon: '<path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>',
   },
   {
     nombre: 'Micrófonos',
     cargos: ['Micrófono 1', 'Micrófono 2'],
     color: '#22c55e',
+    modulo: 'audiovideo',
     icon: '<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/>',
   },
   {
     nombre: 'Plataforma',
     cargos: ['Plataforma'],
     color: '#f59e0b',
+    modulo: 'audiovideo',
     icon: '<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
   },
   {
     nombre: 'Acomodadores',
     cargos: ['Acomodador 1', 'Acomodador 2'],
     color: '#3b82f6',
+    modulo: 'acomodacion',
     icon: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
   },
 ];
+// Cargos que corresponden a cada módulo de Administración (usado para
+// filtrar el formulario de asignación, el historial y el borrado por fecha,
+// de modo que un Admin de Acomodación nunca vea ni borre cargos de Audio y
+// Video, y viceversa).
+const RESP_CARGOS_BY_MODULO = {
+  audiovideo:  RESP_CATEGORIAS.filter(c => c.modulo === 'audiovideo').flatMap(c => c.cargos),
+  acomodacion: RESP_CATEGORIAS.filter(c => c.modulo === 'acomodacion').flatMap(c => c.cargos),
+};
+// Módulo actualmente activo en el Panel de Administración ('audiovideo' o
+// 'acomodacion'), fijado por switchAdminTab() al entrar a cada pestaña.
+let respActiveModulo = 'audiovideo';
 // Devuelve { color, icon } para un cargo específico, buscando la categoría a la
 // que pertenece. Se usa para pintar el ícono sobre una base de color distintiva
 // tanto en el formulario de asignación como en la vista del usuario final.
@@ -11196,7 +11229,12 @@ const VIEWER_TO_ADMIN_TAB = {
   'vida-ministerio':   'vmc',
   'fin-semana':        'fin-semana',
   'aseo-salon':        'aseo-salon',
-  'responsabilidades': 'responsabilidades',
+  // v1.31.5-beta: el módulo "Responsabilidades" del Admin se dividió en
+  // "Audio y Video" y "Acomodación". El Viewer sigue teniendo una sola
+  // sub-sección "Responsabilidades", así que este atajo apunta por defecto
+  // a "Audio y Video"; updateAdminShortcuts() ajusta el destino real según
+  // qué módulo(s) tenga habilitado el Admin (ver caso especial más abajo).
+  'responsabilidades': 'audiovideo',
 };
 // Human-readable labels per sub-tab
 const VIEWER_SECTION_LABELS = {
@@ -11218,7 +11256,10 @@ const VIEWER_PERM_KEY = {
   'vida-ministerio':   'vida_ministerio',
   'fin-semana':        'fin_semana',
   'aseo-salon':        'aseo_salon',
-  'responsabilidades': 'responsabilidades',
+  // Caso especial: ver el manejo dedicado en updateAdminShortcuts(), ya que
+  // "Responsabilidades" ahora depende de DOS módulos posibles (audiovideo /
+  // acomodacion), no de uno solo.
+  'responsabilidades': null,
 };
 
 async function updateAdminShortcuts() {
@@ -11248,9 +11289,19 @@ async function updateAdminShortcuts() {
     const el = document.getElementById('admin-shortcut-' + sub);
     if (!el) return;
 
-    const adminTab = VIEWER_TO_ADMIN_TAB[sub];
+    let adminTab = VIEWER_TO_ADMIN_TAB[sub];
     const permKey = VIEWER_PERM_KEY[sub];
-    const allowed = currentRole === 'dev' || !permKey || canAccessModule(perms, permKey);
+    let allowed;
+    if (sub === 'responsabilidades') {
+      // Depende de cualquiera de los dos módulos nuevos; el atajo lleva al
+      // primero que el Admin tenga habilitado.
+      const hasAV = currentRole === 'dev' || canAccessModule(perms, 'audiovideo');
+      const hasAcom = currentRole === 'dev' || canAccessModule(perms, 'acomodacion');
+      allowed = hasAV || hasAcom;
+      adminTab = hasAV ? 'audiovideo' : 'acomodacion';
+    } else {
+      allowed = currentRole === 'dev' || !permKey || canAccessModule(perms, permKey);
+    }
     if (!allowed) { el.style.display = 'none'; el.innerHTML = ''; return; }
 
     el.style.display = '';
@@ -11366,7 +11417,7 @@ function _openAdminPageOverlay(targetTab) {
 const ADMIN_TAB_SECTION = {
   assignments: 'predicacion', territories: 'predicacion', conductores: 'predicacion',
   casas: 'predicacion', grupos: 'predicacion', carritos: 'predicacion', reports: 'predicacion',
-  vmc: 'reuniones', 'fin-semana': 'reuniones', responsabilidades: 'reuniones', 'aseo-salon': 'reuniones',
+  vmc: 'reuniones', 'fin-semana': 'reuniones', audiovideo: 'reuniones', acomodacion: 'reuniones', 'aseo-salon': 'reuniones',
   usuarios: 'fleming', notificaciones: 'fleming', tips: 'fleming',
 };
 
@@ -11405,7 +11456,15 @@ async function switchAdminTab(tab) {
   // Mantiene sincronizado el selector de sección de arriba con el tab que quedó activo.
   const section = ADMIN_TAB_SECTION[tab];
   if (section) switchAdminSection(section, true);
-  if (tab === 'responsabilidades') loadResponsabilidadesAdmin();
+  if (tab === 'audiovideo' || tab === 'acomodacion') {
+    // Reubica el bloque compartido (Hermanos/Asignar) dentro de la pestaña
+    // recién activada y fija qué cargos corresponden a este módulo.
+    respActiveModulo = tab;
+    const shared = document.getElementById('resp-admin-shared');
+    const target = document.getElementById('admin-' + tab);
+    if (shared && target && shared.parentElement !== target) target.appendChild(shared);
+    loadResponsabilidadesAdmin();
+  }
   if (tab === 'aseo-salon') loadAseoSalonAdmin();
   if (tab === 'usuarios') {
     document.getElementById('users-panel-body').innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Usuarios</div></div>';
@@ -11437,7 +11496,7 @@ async function switchAdminTab(tab) {
 const ADMIN_TAB_PERM_KEY = {
   assignments: 'assignments', territories: 'territories', conductores: 'conductores',
   casas: 'casas', grupos: 'grupos', carritos: 'carritos', reports: 'territory_reports',
-  vmc: 'vida_ministerio', 'fin-semana': 'fin_semana', responsabilidades: 'responsabilidades',
+  vmc: 'vida_ministerio', 'fin-semana': 'fin_semana', audiovideo: 'audiovideo', acomodacion: 'acomodacion',
   'aseo-salon': 'aseo_salon', usuarios: 'usuarios', notificaciones: 'notificaciones',
 };
 
@@ -14482,10 +14541,10 @@ function renderRespDateChips() {
   const DIA = ['dom','lun','mar','mié','jue','vie','sáb'];
   wrap.innerHTML = fechas.map(f => {
     const d = new Date(f + 'T00:00:00');
-    const rows = responsabilidades.filter(r => r.fecha === f);
+    const rows = responsabilidades.filter(r => r.fecha === f && RESP_CARGOS_BY_MODULO[respActiveModulo].includes(r.cargo));
     let dot = '';
     if (rows.length) {
-      const completo = rows.length >= RESP_CARGOS.length && rows.every(r => r.hermano);
+      const completo = rows.length >= RESP_CARGOS_BY_MODULO[respActiveModulo].length && rows.every(r => r.hermano);
       dot = `<div class="resp-date-chip-dot ${completo ? 'complete' : 'incomplete'}"></div>`;
     }
     const isActive = respSelectedDate === f;
@@ -14546,18 +14605,19 @@ function renderRespCargosForm(dateStr) {
     hermanos.map(h => `<option value="${h.nombre}">${h.nombre}</option>`).join('');
   document.getElementById('resp-cargos-day-title').textContent = capitalizar(respDiaLabel(dateStr));
 
-  let cargoIndex = 0;
+  // v1.31.5-beta: solo se pintan las categorías del módulo activo
+  // (Audio y Video / Acomodación) — cada uno gestiona sus propios cargos.
+  const categorias = RESP_CATEGORIAS.filter(cat => cat.modulo === respActiveModulo);
   const list = document.getElementById('resp-asignar-cargos-list');
-  list.innerHTML = RESP_CATEGORIAS.map(cat => {
+  list.innerHTML = categorias.map(cat => {
     const rowsHtml = cat.cargos.map(cargo => {
-      const i = cargoIndex++;
       const found = existing.find(r => r.cargo === cargo);
       const opts = hermanoOptions.replace(`value="${(found?.hermano||'').replace(/"/g,'')}"`, `value="${(found?.hermano||'').replace(/"/g,'')}" selected`);
       return `
       <div class="resp-cargo-row">
         <div class="resp-cargo-icon" style="background:${cat.color}22;color:${cat.color}"><svg viewBox="0 0 24 24">${cat.icon}</svg></div>
         <span class="resp-cargo-name">${cargo}</span>
-        <select class="resp-cargo-select" id="resp-cargo-sel-${i}" data-cargo="${cargo}">${found?.hermano ? opts : hermanoOptions}</select>
+        <select class="resp-cargo-select" data-cargo="${cargo}">${found?.hermano ? opts : hermanoOptions}</select>
       </div>`;
     }).join('');
     return `
@@ -14578,10 +14638,14 @@ async function saveResponsabilidadesAsignacion() {
   const btn = document.getElementById('save-resp-btn');
   btn.disabled = true; btn.textContent = 'Guardando...';
 
+  // v1.31.5-beta: solo se guardan los cargos que están efectivamente
+  // renderizados en el formulario (los del módulo activo), leyéndolos por su
+  // atributo data-cargo — así un Admin de Acomodación jamás toca ni
+  // sobrescribe los cargos de Audio y Video, y viceversa.
+  const selects = Array.from(document.querySelectorAll('#resp-asignar-cargos-list .resp-cargo-select'));
   const newlyAssigned = []; // names newly assigned/changed, to notify
-  for (let i = 0; i < RESP_CARGOS.length; i++) {
-    const cargo = RESP_CARGOS[i];
-    const sel = document.getElementById('resp-cargo-sel-' + i);
+  for (const sel of selects) {
+    const cargo = sel.dataset.cargo;
     const hermanoName = sel.value || null;
     const prev = existing.find(r => r.cargo === cargo);
 
@@ -14651,15 +14715,19 @@ function renderAdminRespUpcoming() {
   }
 
   const renderItem = (dateStr, isPast) => {
-    const rows = allRows.filter(r => r.fecha === dateStr);
+    const cargosModulo = RESP_CARGOS_BY_MODULO[respActiveModulo];
+    const rows = allRows.filter(r => r.fecha === dateStr && cargosModulo.includes(r.cargo));
     const filled = rows.filter(r => r.hermano).length;
-    const detalle = rows.map(r => `${r.cargo}: <strong style="color:var(--text2)">${r.hermano || 'Sin asignar'}</strong>`).join(' · ');
+    const detalle = cargosModulo.map(cargo => {
+      const r = rows.find(x => x.cargo === cargo);
+      return `${cargo}: <strong style="color:var(--text2)">${r?.hermano || 'Sin asignar'}</strong>`;
+    }).join(' · ');
     return `
     <div class="resp-history-item" style="cursor:default;align-items:flex-start;flex-direction:column;gap:0.5rem">
       <div style="display:flex;width:100%;align-items:center;gap:10px">
         <div class="resp-history-item-main">
           <div class="resp-history-item-title">${capitalizar(respDiaLabel(dateStr))}</div>
-          <div class="resp-history-item-sub">${filled}/${RESP_CARGOS.length} cargos asignados${isPast ? ' · ya ocurrió' : ''}</div>
+          <div class="resp-history-item-sub">${filled}/${cargosModulo.length} cargos asignados${isPast ? ' · ya ocurrió' : ''}</div>
         </div>
         <div class="list-item-actions">
           ${isPast ? '' : `<button class="btn-sm" onclick="editRespDate('${dateStr}')">Editar</button>`}
@@ -14741,8 +14809,10 @@ function editRespDate(dateStr) {
 
 async function deleteRespDate(dateStr, isPast) {
   if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
-  if (!confirm(`¿Eliminar toda la asignación del ${respDiaLabel(dateStr)}?`)) return;
-  const {error} = await sb.from('responsabilidades').delete().eq('fecha', dateStr);
+  if (!confirm(`¿Eliminar la asignación del ${respDiaLabel(dateStr)} para este módulo?`)) return;
+  // v1.31.5-beta: solo se borran los cargos del módulo activo (Audio y Video
+  // o Acomodación), nunca los del otro módulo para esa misma fecha.
+  const { error } = await sb.from('responsabilidades').delete().eq('fecha', dateStr).in('cargo', RESP_CARGOS_BY_MODULO[respActiveModulo]);
   if (error) { showToast('Error al eliminar','error'); return; }
   showToast('Asignación eliminada','success');
   if (isPast) {
@@ -15629,18 +15699,27 @@ const PERM_MODULES = [
   { key: 'fin_semana',        label: 'Pública',            group: 'reuniones', icon: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/></svg>' },
   { key: 'hospitalidad',      label: 'Hospitalidad',       group: 'reuniones', icon: '<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' },
   { key: 'aseo_salon',        label: 'Aseo del Salón',     group: 'reuniones', icon: '<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>' },
-  { key: 'responsabilidades', label: 'Responsabilidades',  group: 'reuniones', icon: '<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
+  { key: 'audiovideo',        label: 'Audio y Video',       group: 'reuniones', icon: '<svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>' },
+  { key: 'acomodacion',       label: 'Acomodación',         group: 'reuniones', icon: '<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
   // ── Sistema ────────────────────────────────────────────────────────────────
   { key: 'usuarios',          label: 'Usuarios',            group: 'sistema',   icon: '<svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg>' },
   { key: 'admin_tags',        label: 'AdminTags',           group: 'sistema',   icon: '<svg viewBox="0 0 24 24"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>' },
   { key: 'notificaciones',    label: 'Notificaciones',      group: 'sistema',   icon: '<svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>' },
 ];
 
+// v1.31.5-beta: el módulo "Responsabilidades" del Panel de Administración se
+// dividió en dos módulos independientes — "Audio y Video" y "Acomodación" —
+// porque quien asigna una cosa no es necesariamente quien asigna la otra.
+// Para no dejar sin acceso a Admins que ya tenían "responsabilidades: true"
+// (o sin el campo, que por defecto era true), si el registro guardado aún
+// trae la clave legada "responsabilidades" y no trae las nuevas claves, se
+// usa ese valor legado como punto de partida para ambos módulos nuevos.
 function parsePermissions(raw) {
-  const defaults = { territories: true, assignments: true, conductores: true, casas: true, grupos: true, carritos: true, territory_reports: false, vida_ministerio: true, fin_semana: true, hospitalidad: true, responsabilidades: true, aseo_salon: true, usuarios: false, admin_tags: false, notificaciones: false };
+  const defaults = { territories: true, assignments: true, conductores: true, casas: true, grupos: true, carritos: true, territory_reports: false, vida_ministerio: true, fin_semana: true, hospitalidad: true, audiovideo: true, acomodacion: true, aseo_salon: true, usuarios: false, admin_tags: false, notificaciones: false };
   if (!raw) return { ...defaults };
   try {
     const p = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    const legacyResp = p.responsabilidades !== false; // valor legado (v1.31.4-beta y anteriores)
     return {
       territories:       p.territories       !== false,
       assignments:       p.assignments       !== false,
@@ -15652,7 +15731,8 @@ function parsePermissions(raw) {
       vida_ministerio:   p.vida_ministerio   !== false,
       fin_semana:        p.fin_semana        !== false,
       hospitalidad:      p.hospitalidad      !== false,
-      responsabilidades: p.responsabilidades !== false,
+      audiovideo:        p.audiovideo != null ? p.audiovideo !== false : legacyResp,
+      acomodacion:       p.acomodacion != null ? p.acomodacion !== false : legacyResp,
       aseo_salon:        p.aseo_salon        !== false,
       usuarios:          p.usuarios          === true,
       admin_tags:        p.admin_tags        === true,
@@ -15982,7 +16062,7 @@ async function openUserProfilePage(uid) {
     : '';
 
   // Permissions text
-  const permNames = { assignments:'Asignaciones', territories:'Territorios', conductores:'Conductores', casas:'Casas', grupos:'Grupos', responsabilidades:'Responsabilidades' };
+  const permNames = { assignments:'Asignaciones', territories:'Territorios', conductores:'Conductores', casas:'Casas', grupos:'Grupos', audiovideo:'Audio y Video', acomodacion:'Acomodación' };
   const permList = PERM_MODULES.filter(m => perms[m.key]).map(m => m.label).join(', ') || 'Ninguno';
 
   // Role options
@@ -24624,5 +24704,15 @@ function shareCasaEnCasaAssignment() {
   panel.appendChild(wrap);
 })();
 </script>
+
+<!-- FORMULARIO GENÉRICO DE CARRITOS (puntos / turnos / personas) -->
+<!-- v1.31.5-beta: se movió aquí, como elemento de nivel superior, porque antes
+     vivía dentro de #sub-content-carritos y quedaba oculto (display:none)
+     cada vez que esa sub-sección no era la visible — por ejemplo al abrirlo
+     desde el Panel de Administración. Esto hacía que el botón Editar de un
+     Punto de Carrito no mostrara nada. -->
+<div class="ct-form-overlay" id="cartFormOverlay" role="dialog" aria-modal="true">
+  <div class="ct-form-sheet" id="cartFormSheet"></div>
+</div>
 </body>
 </html>
