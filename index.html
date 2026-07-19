@@ -28,7 +28,6 @@
 </script>
 <style>
   :root {
-    /* ── Animaciones: curvas "fluidas" al estilo Apple (springy, sin cortes) ── */
     --ease-fluid: cubic-bezier(0.32, 0.72, 0, 1);
     --ease-fluid-snappy: cubic-bezier(0.22, 1, 0.36, 1);
     --ease-fluid-soft: cubic-bezier(0.16, 1, 0.3, 1);
@@ -73,11 +72,7 @@
     --ui-blur: 34px;
   }
 
-  /* ── Barra de desplazamiento propia de la plataforma: reemplaza la barra
-     nativa del sistema por una delgada, redondeada y "flotante" (con
-     padding transparente vía background-clip), que se adapta al alto/ancho
-     de cualquier contenedor con scroll (no solo la página completa) y
-     respeta el tema claro/oscuro. ── */
+  
   * {
     scrollbar-width: thin;
     scrollbar-color: var(--border-active) transparent;
@@ -93,10 +88,7 @@
   *::-webkit-scrollbar-thumb:hover { background-color: var(--text3); }
   *::-webkit-scrollbar-corner { background: transparent; }
 
-  /* ── Quita el resaltado azul de selección/tap que el navegador dibuja por
-     defecto sobre cualquier elemento tocable (botones, links, tarjetas, SVG,
-     inputs, etc.). Antes solo se aplicaba a un componente puntual (mapa de
-     Reportes de Territorio); ahora es global para toda la plataforma. ── */
+  
   html {
     -webkit-tap-highlight-color: transparent;
   }
@@ -119,18 +111,10 @@
     outline-offset: 2px;
   }
 
-  /* ── Transparencias (Configuración > "Activa el efecto blur") ─────────────────
-     Cuando el switch está APAGADO, se quita el desenfoque (backdrop-filter) Y
-     además se fuerzan a opacos los fondos que normalmente usan transparencia
-     (--nav-bg, --modal-overlay-bg, --tab-bar-bg), para que el resultado sea
-     realmente "sin transparencias" y no un vidrio sin desenfocar (que se ve
-     incluso más transparente). Cuando está ENCENDIDO (por defecto), todo se
-     comporta como siempre. ── */
+ 
   .pref-blur-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--surface3); transition: background 0.2s, transform 0.2s; }
   .pref-blur-dot.active { background: var(--accent); transform: scale(1.25); }
-  /* ── Vista previa del Slider de blur/transparencia: foto colorida de fondo
-     para poder apreciar con claridad cuánto blur y transparencia aplica
-     cada nivel sobre los elementos flotantes reales de la plataforma. ── */
+ 
   .pref-blur-preview-bg {
     margin-top: 0.9rem; height: 150px; border-radius: 18px; overflow: hidden;
     position: relative; display: flex; align-items: center; justify-content: center;
@@ -152,12 +136,7 @@
     --tab-bar-bg: var(--surface) !important;
   }
 
-  /* ── Modo invitado (enlace compartido de una asignación de Casa en casa) ──────
-     Se activa agregando la clase .guest-share-mode al <body> cuando la URL trae
-     ?share=<id>. Oculta todo lo que no debe ver un invitado sin sesión: no puede
-     cerrar el detalle (no hay nada más que mostrarle detrás), no puede administrar,
-     no puede reportar territorio, no puede volver a compartir, y no puede sugerir
-     ni corregir direcciones "No Pasar" (solo verlas). ── */
+  
   body.guest-share-mode .detail-close,
   body.guest-share-mode .pill-back-btn,
   body.guest-share-mode .detail-sidebar-fab,
@@ -181,7 +160,7 @@
     padding: 2rem; text-align: center; font-family: var(--font); color: var(--text2);
   }
 
-  /* ── DEV Version Pill ─────────────────────────────────────────────────────── */
+
   #dev-version-pill {
     display: none; /* shown via JS only for DEV */
     align-items: center;
@@ -258,7 +237,6 @@
   .dev-pill-item.danger:hover { background: rgba(255,59,48,0.07); }
   .dev-pill-divider { height: 1px; background: var(--border); margin: 4px 0; }
 
-  /* Auto mode: respects system preference when data-theme="auto" */
   @media (prefers-color-scheme: dark) {
     :root[data-theme="auto"] {
       --bg: #000000;
@@ -318,12 +296,7 @@
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
-    /* overflow-x:hidden (en vez de clip) hace que los navegadores basados en
-       Chromium/WebKit fuercen overflow-y a "auto" automáticamente, lo que
-       convierte a <body> en su propio contenedor de scroll y ROMPE
-       position:sticky en la NavBar (y en cualquier otro elemento sticky de
-       la página). "clip" logra el mismo efecto visual (sin scroll
-       horizontal) sin gatillar ese comportamiento. */
+   
     overflow-x: clip;
     max-width: 100vw;
     transition: background 0.3s, color 0.3s;
@@ -397,11 +370,7 @@
 
   #app { display: none; flex-direction: column; min-height: 100vh; }
 
-  /* ── Header shell: envuelve topnav + sub-tabs. En Desktop queda "fixed"
-     (sticky) arriba de la pantalla al hacer scroll, encogiéndose con
-     transparencia/blur. En Móvil NO es fijo: se desplaza junto con el
-     contenido igual que el resto de la página, para que la información no
-     quede tapada detrás de la barra. ── */
+ 
   .app-header-shell {
     position: static;
   }
@@ -417,12 +386,7 @@
       box-shadow: var(--shadow-lg);
       transition: margin 0.25s ease, border-radius 0.25s ease, box-shadow 0.25s ease;
     }
-    /* ── Navbar compacta al hacer scroll (solo Desktop): al bajar, la barra
-       se "encoge" (menos alto, más pegada al borde) manteniendo el efecto de
-       transparencia y blur para ver el contenido detrás; al subir, recupera
-       su tamaño y distribución original. El efecto de transparencia/blur en
-       sí respeta el toggle de "Activa el efecto blur" de Configuración
-       (clase html.no-transparency, definida arriba). ── */
+  
     .app-header-shell.shell-compact {
       margin: 0.55rem 0.55rem 0;
       border-radius: 20px;
@@ -434,8 +398,7 @@
     .app-header-shell .main-seg-btn { transition: padding 0.25s ease, font-size 0.25s ease; }
   }
 
-  /* 3-column grid: [left ghost 1fr] [toggle auto] [icons 1fr]
-     Both outer columns get the same 1fr → toggle is always perfectly centered */
+ 
   .topnav {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
@@ -451,12 +414,7 @@
     display: flex; align-items: center; justify-content: center; gap: 0;
     min-width: 0;
   }
-  /* ── Sub-secciones (Territorios/Cartitos/Grupos, días de la semana, etc.)
-     en modo compacto (Desktop, tras hacer scroll): se mueven junto al
-     segmento principal (Predicación/Reuniones) en la misma fila, en vez de
-     ocupar su propia fila debajo — así la NavBar puede encogerse más.
-     El reacomodo real del nodo (moverlo dentro de #nav-center-row) lo hace
-     JS; estas reglas sólo definen su apariencia una vez movido. ── */
+  
   .shell-compact .nav-center-row { gap: 0.6rem; }
   .shell-compact .nav-center-row .sub-tabs-wrap {
     padding: 0; overflow: visible; display: flex;
@@ -481,11 +439,7 @@
     z-index: 0;
     pointer-events: none;
   }
-  /* Con Animaciones = "Fluidas": el thumb se desliza detrás del botón activo,
-     tanto en Desktop como en Móvil (antes era exclusivo de Desktop). El botón
-     activo deja de pintar su propio fondo para que no "compita" con el thumb.
-     Con Animaciones = "Reducidas" no se muestra: el botón activo vuelve a
-     pintar su propio fondo (ver regla .main-seg-btn.active más abajo). */
+ 
   [data-animations="fluid"] .main-seg-thumb { display: block; }
   [data-animations="fluid"] .main-seg-btn.active {
     background: transparent;
@@ -509,11 +463,9 @@
   }
 
   @media (min-width: 640px) {
-    /* (el thumb en sí ya se define arriba, activo en cualquier ancho vía [data-animations="fluid"]) */
   }
 
   @media (max-width: 639px) {
-    /* En mobile: layout flex en vez de grid — toggle a la izquierda, iconos a la derecha */
     .topnav {
       display: flex;
       justify-content: space-between;
@@ -522,12 +474,10 @@
       height: 64px;
     }
     .nav-spacer { display: none; }
-    /* Toggle: tamaño intermedio — más pequeño que desktop pero no tanto */
     .main-seg-btn {
       padding: 7px 16px;
       font-size: 0.82rem;
     }
-    /* Iconos: vuelven a su tamaño original */
   }
   .nav-icon-btn {
     width: 42px; height: 42px; border-radius: 50%;
@@ -539,9 +489,7 @@
   .nav-icon-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .nav-icon-btn:hover { background: var(--surface2); }
 
-  /* ── Botones NavBar más Grandes (Experimental, v1.30.0-beta): escala solo
-     los botones de Sección, Sub-sección, Notificaciones y Más Opciones/Foto
-     de Perfil de la NavBar. No afecta el contenido ni las tarjetas. ── */
+  
   .main-segment { transform: scale(var(--navbar-btn-scale, 1)); transform-origin: center; }
   #sub-tabs-wrap .sub-tab { transform: scale(var(--navbar-btn-scale, 1)); }
   .nav-avatar-btn { transform: scale(var(--navbar-btn-scale, 1)); }
@@ -557,8 +505,7 @@
   }
   .options-dropdown.open { display: block; animation: menuMorphIn 0.32s var(--ease-fluid-snappy); }
   @keyframes fadeDown { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
-  /* ── Menús desplegables (botón → menú): crecen desde el botón que los abre,
-     con un ligero rebote de escala en vez de un simple fundido/desplazamiento. ── */
+ 
   @keyframes menuMorphIn { from { opacity:0; transform: scale(0.85) translateY(-8px); } to { opacity:1; transform: scale(1) translateY(0); } }
   @keyframes menuMorphInUp { from { opacity:0; transform: scale(0.85) translateY(8px); } to { opacity:1; transform: scale(1) translateY(0); } }
 
@@ -576,8 +523,7 @@
   .options-user-name { font-size: 0.88rem; font-weight: 700; color: var(--text); line-height: 1.2; }
   .options-user-role { font-size: 0.72rem; color: var(--text3); }
 
-  /* ── Experimentos: Foto de perfil en Más opciones (reemplaza solo el botón
-     Más opciones/Opciones por el avatar del usuario) — v1.25.0-beta ── */
+ 
   .nav-avatar-btn {
     display: none; width: 42px; height: 42px; border-radius: 50%;
     border: none; cursor: pointer; padding: 0; flex-shrink: 0;
@@ -631,7 +577,6 @@
 
   .dropdown-divider { height: 1px; background: var(--border); margin: 4px 0; }
 
-  /* Appearance submenu */
   .appearance-submenu {
     display: none;
     flex-direction: column;
@@ -675,7 +620,6 @@
   .sub-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
 
   @media (min-width: 640px) {
-    /* Desktop: mismo lenguaje visual que el segmento Predicación/Reuniones — pill con fondo, sin barra propia. */
     .sub-tabs-wrap { padding: 0 1.1rem 1.1rem; display: flex; justify-content: center; }
     .sub-tabs {
       display: inline-flex; background: rgba(120,120,128,0.14);
@@ -691,11 +635,7 @@
       border-bottom-color: transparent;
       box-shadow: 0 2px 8px rgba(0,0,0,0.18);
     }
-    /* v1.22.8-beta: la barra de Sub-secciones (Casa en casa/Territorios/Carritos/Grupos, etc.)
-       es a propósito ligeramente más pequeña que el segmento principal (Predicación/Reuniones),
-       para reforzar la jerarquía visual entre ambas barras. Exclusivo de Desktop/Tablet — acotado
-       a #sub-tabs-wrap para no afectar los ".sub-tabs" reutilizados dentro del Panel de Administración.
-       En móvil (regla base, fuera de este media query) el tamaño no cambia. */
+   
     #sub-tabs-wrap .sub-tabs {
       border-radius: 19px; padding: 3px;
     }
@@ -713,7 +653,6 @@
   .page.active { display: block; animation: fadeIn 0.3s var(--ease-fluid-soft); }
   @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
 
-  /* ── Pantalla de Inicio (experimental) ── */
   .inicio-header { margin-bottom: 1.4rem; }
   .inicio-header-title { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text); }
   .inicio-header-sub { font-size: 0.88rem; color: var(--text3); margin-top: 2px; }
@@ -750,8 +689,7 @@
     font-size: 0.68rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase;
     color: var(--orange); background: rgba(255,149,0,0.12); border-radius: 8px; padding: 2px 8px; margin-left: 6px;
   }
-  /* ── "Mis Asignaciones" dentro de Mi Perfil: filas planas, mismo lenguaje
-     visual que el resto de las tarjetas del perfil (.profile-row) ── */
+ 
   .pia-group-title {
     padding: 0.7rem 1rem 0.4rem; font-size: 0.66rem; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3);
@@ -783,7 +721,6 @@
     margin-bottom: 0.85rem; color: var(--text);
     letter-spacing: -0.01em;
   }
-  /* "Hoy" header with inline date */
   .date-section-header-today {
     display: flex; align-items: baseline; gap: 8px;
     margin-bottom: 0.85rem;
@@ -795,7 +732,6 @@
     font-size: 0.84rem; font-weight: 500; color: var(--text3);
   }
 
-  /* "Hoy" header with inline date */
   .date-section-header-today {
     display: flex; align-items: baseline; gap: 8px;
     margin-bottom: 0.85rem;
@@ -807,7 +743,6 @@
     font-size: 0.84rem; font-weight: 500; color: var(--text3);
   }
 
-  /* Featured "today" card */
   .assignment-card-today {
     background: var(--surface);
     border-radius: 25px;
@@ -847,8 +782,7 @@
   .assignment-card:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
   .assignment-card:active { transform: scale(0.985); }
 
-  /* ── Tarjeta "Especial": reemplaza la asignación de casa en casa cuando hay
-     un evento a nivel congregación (asamblea, visita, etc.) ── */
+ 
   .assignment-card-especial {
     position: relative; border-radius: 22px; overflow: hidden;
     margin-bottom: 0.6rem; cursor: pointer; min-height: 130px;
@@ -938,7 +872,6 @@
   }
   .ter-badge-icon svg { width: 24px; height: 24px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; }
 
-  /* Double territory badge — two circles side by side */
   .ter-badge-duo {
     display: flex; flex-direction: row; gap: 5px;
     align-items: center; flex-shrink: 0;
@@ -948,13 +881,11 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 0.85rem; font-weight: 800; color: white;
   }
-  /* Triple territory badge — three smaller circles side by side */
   .ter-badge-duo.ter-badge-trio { gap: 3px; }
   .ter-badge-duo.ter-badge-trio .ter-badge-sm {
     width: 32px; height: 32px; font-size: 0.72rem;
   }
 
-  /* Territory color picker swatches */
   .ter-color-swatch {
     width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
     border: 3px solid transparent; transition: transform 0.12s, border-color 0.12s;
@@ -981,8 +912,7 @@
   .detail-overlay {
     display: none; position: fixed; inset: 0;
     background: var(--modal-overlay-bg); backdrop-filter: blur(10px);
-    /* v1.29.0-beta: debe quedar por encima de #page-otros-grupos (z-index:260)
-       para que el detalle de una asignación se abra sobre esa pantalla y no detrás. */
+  
     z-index: 280; align-items: flex-end; justify-content: center;
   }
   .detail-overlay.open { display: flex; animation: fadeIn 0.26s var(--ease-fluid-soft); }
@@ -995,9 +925,7 @@
   }
   @keyframes slideUpPanel { from{transform:translateY(100%)} to{transform:translateY(0)} }
 
-  /* En pantallas anchas (tablets/desktop), el detalle de la asignación se
-     muestra como un popup centrado y compacto en vez de una hoja a ancho
-     completo, para no estirar la información innecesariamente. */
+ 
   @media(min-width: 640px) {
     .detail-overlay { align-items: center; padding: 1.5rem; }
     .detail-panel {
@@ -1006,11 +934,7 @@
       box-shadow: 0 20px 60px rgba(0,0,0,0.25);
       animation: slideUp 0.42s var(--ease-fluid-soft);
     }
-    /* ── Vista Lateral (Tablet/Desktop): la asignación se abre en un panel
-       lateral no-bloqueante, dejando la lista de asignaciones visible y
-       usable a la izquierda, en vez de un popup centrado y modal. El panel
-       "flota" separado del borde de la pantalla, con esquinas redondeadas,
-       en vez de quedar pegado y superpuesto al borde. ── */
+    
     .detail-overlay.sidebar-mode {
       background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none;
       align-items: stretch; justify-content: flex-end; padding: 1rem;
@@ -1027,11 +951,7 @@
   }
   @keyframes slideInDetailSidebar { from{transform:translateX(100%)} to{transform:translateX(0)} }
 
-  /* ── Cuando el panel Lateral está abierto (Tablet/Escritorio): la NavBar y
-     la lista de asignaciones ceden el espacio que ocupa el panel a la
-     derecha, en vez de quedar tapadas debajo de él. El ancho reservado
-     replica el cálculo real del panel (clamp entre 340px y 460px, según
-     34vw), más el margen que separa al panel del borde. ── */
+ 
   body.h2h-sidebar-open {
     --h2h-reserved: clamp(340px, 34vw, 460px);
   }
@@ -1044,9 +964,7 @@
     .app-header-shell, .main-content { transition: margin-right 0.28s cubic-bezier(0.16,1,0.3,1); }
   }
 
-  /* ── Botón circular "Administrar" (lápiz) — reemplaza el botón de ancho
-     completo dentro del detalle de asignación de casa en casa. Vive en la
-     misma fila que el botón Back y el título, arriba a la derecha. ── */
+
   .detail-admin-fab, .detail-sidebar-fab {
     display: flex; align-items: center; justify-content: center;
     width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
@@ -1064,14 +982,11 @@
   .detail-sidebar-fab { color: var(--text2); }
   .detail-admin-fab:hover, .detail-sidebar-fab:hover { opacity: 0.75; }
   .detail-admin-fab:active, .detail-sidebar-fab:active { transform: scale(0.92); }
-  /* El botón para cambiar entre PopUp y Lateral solo tiene sentido en
-     pantallas anchas (Tablet/Escritorio), donde ambos modos existen. */
+ 
   .detail-sidebar-fab { display: none; }
   @media (min-width: 640px) { .detail-sidebar-fab { display: flex; } }
 
-  /* ── Botón circular "Descargar territorio" (uso sin conexión) — misma
-     forma que .detail-admin-fab/.detail-sidebar-fab. Cambia a un check verde
-     una vez que el territorio queda descargado. ── */
+ 
   .detail-download-fab {
     display: flex; align-items: center; justify-content: center;
     width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
@@ -1097,18 +1012,14 @@
 
 
   .detail-handle { width: 36px; height: 4px; background: var(--surface3); border-radius: 2px; margin: 10px auto 0; }
-  /* ── Detalle de Territorio: usa el mismo header estándar (back + título
-     centrado) que el resto de las pantallas de la plataforma (Notificaciones,
-     Configuración, etc.), en vez del header de fecha/cerrar por defecto del
-     panel de detalle. Se activa vía .detail-panel.territory-mode. ── */
+ 
   .detail-panel .detail-territory-topbar { display: none; }
   .detail-panel.territory-mode .detail-territory-topbar { display: flex; }
   .detail-panel.territory-mode .detail-header-bar,
   .detail-panel.territory-mode .detail-mobile-topbar,
   .detail-panel.territory-mode .detail-handle { display: none; }
   .detail-panel.territory-mode .detail-address { display: none; }
-  /* v1.27.0-beta: el Clima es exclusivo de Casa en Casa; nunca debe verse en
-     el detalle de Territorio individual, sin importar el estado en JS. */
+  
   .detail-panel.territory-mode .detail-weather-chip { display: none !important; }
   .detail-panel.territory-mode .detail-ter-badge {
     display: flex !important; position: static; margin: 0.75rem auto 0.25rem;
@@ -1129,10 +1040,7 @@
   }
   .detail-close svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
 
-  /* ── En Móvil, el detalle de la asignación ya no es una card parcial: se
-     abre como una pantalla propia a pantalla completa, con el mismo header
-     de botón Back + título en pill (transparencia + blur) que el resto de
-     las pantallas de la plataforma. ── */
+ 
   @media (max-width: 639px) {
     .detail-overlay {
       align-items: stretch; justify-content: stretch; padding: 0;
@@ -1172,19 +1080,14 @@
   .detail-weather-chip.weather-cloud  { color: var(--text2); background: var(--surface3); }
   .detail-weather-chip.weather-rain   { color: #0a6cd1; background: rgba(10,108,209,0.12); }
   .detail-address { font-size: 1.1rem; font-weight: 700; line-height: 1.3; }
-  /* "Casa de X" / "Depto de X" — dato independiente de la dirección, en gris
-     para distinguirlo visualmente, tal como el resto de los datos del bloque. */
+ 
   .detail-house-label { font-size: 0.86rem; color: var(--text3); font-weight: 500; margin-top: 2px; }
   .detail-house-label:empty { display: none; }
   .detail-conductor { font-size: 0.9rem; color: var(--accent); font-weight: 500; margin-top: 4px; }
 
   .detail-ter-badge { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800; color: white; flex-shrink: 0; }
 
-  /* v1.30.9-beta: cuando hay más de 1 territorio, el indicador superior deja
-     de mostrar solo el Territorio 1 y en su lugar muestra círculos
-     superpuestos (uno por territorio), igual que en las mini-cards de
-     "Otros grupos" del Sábado — dan una idea general sin competir en
-     espacio con las pestañas de detalle de más abajo. */
+  
   .detail-ter-badge.multi {
     width: auto; height: auto; border-radius: 0; background: transparent !important;
   }
@@ -1271,7 +1174,6 @@
   .lightbox-close:hover { background: rgba(255,255,255,0.25); }
   .lightbox-close svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
 
-  /* ── Sugerir corrección de mapa (dentro del lightbox de Pantalla Completa) ── */
   .lightbox-suggest-btn {
     position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
     display: flex; align-items: center; gap: 7px;
@@ -1306,7 +1208,6 @@
   .lightbox-correccion-send  { background: var(--accent); color: #fff; }
   .lightbox-correccion-cancel{ background: var(--surface3); color: var(--text); }
 
-  /* ── Sábado — Grupos de Servicio Grid ───────────────────────────────────── */
   .sabado-section-label {
     font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
     color: var(--text3); padding: 0.5rem 0 0.5rem; display: flex; align-items: center; gap: 8px;
@@ -1384,7 +1285,6 @@
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
 
-  /* ── Campo Grupo en el modal de asignación (visible solo sábados) ── */
   #as-grupo-wrap { display: none; }
   #as-grupo-wrap.visible { display: flex; }
   .detail-ter-tabs {
@@ -1408,10 +1308,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     font-size: 0.72rem; font-weight: 800; color: white; flex-shrink: 0;
   }
-  /* v1.30.8-beta: con 3 territorios asignados, se ocultan las etiquetas de
-     texto ("Territorio X") y solo se muestra el indicador circular, para
-     evitar que el menú se vea apretado o pierda formato en pantallas
-     angostas. Con 1 o 2 territorios el comportamiento no cambia. */
+  
   .detail-ter-tabs.compact .detail-ter-tab-label { display: none; }
   .detail-ter-tabs.compact .tab-badge {
     width: 26px; height: 26px; font-size: 0.8rem;
@@ -1440,7 +1337,6 @@
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
 
-  /* ── No Pasar item: clickable ─────────────────────────────────────────────── */
   .no-pasar-item {
     cursor: pointer;
     transition: background 0.15s, transform 0.1s;
@@ -1448,9 +1344,7 @@
   .no-pasar-item:hover { background: var(--surface3); }
   .no-pasar-item:active { transform: scale(0.98); }
 
-  /* ── v1.29.9-beta: formulario del selector Punto/Día/Turno de "Invitar a
-       Carritos" (mismo look que .ct-form-* pero fuera del contenedor de
-       Carritos, así que se declara aparte). ── */
+ 
   #cart-invite-picker-overlay .ct-form-group { margin-bottom: 16px; text-align: left; }
   #cart-invite-picker-overlay .ct-form-group label { display:block; font-size:0.78rem; font-weight:700; color:var(--text3); margin-bottom:6px; }
   #cart-invite-picker-overlay .ct-form-input {
@@ -1464,11 +1358,9 @@
   #cart-invite-picker-overlay .ct-admin-btn-secondary { background: var(--surface3); color: var(--text); }
   #cart-invite-picker-overlay .ct-admin-btn-primary { background: var(--accent); color: #fff; }
 
-  /* ── v1.29.9.1-beta: los overlays de "Invitar" se abren desde el Perfil
-       (#page-member-perfil, z-index:500), así que deben quedar por encima. ── */
+  
   #cart-invite-menu-overlay, #cart-invite-picker-overlay { z-index: 600; }
 
-  /* ── No Pasar action sheet ────────────────────────────────────────────────── */
   .np-action-overlay {
     display: none; position: fixed; inset: 0;
     background: var(--modal-overlay-bg); backdrop-filter: blur(8px);
@@ -1524,7 +1416,6 @@
   .np-action-btn-cancel:hover { background: var(--surface2); }
   .np-action-divider { height:1px; background: var(--border); margin: 0 1.25rem; }
 
-  /* ── Sugerir Quitado inline form (inside action sheet) ───────────────────── */
   .np-sugerir-form {
     display: none; flex-direction: column; gap: 0.6rem;
     padding: 0.9rem 1.25rem 0;
@@ -1570,7 +1461,6 @@
   }
   .np-sugerir-cancel:hover { background: var(--surface2); }
 
-  /* ── Sugerir Corrección ────────────────────────────────────────────────────── */
   .np-action-btn-correccion .np-action-icon { background: rgba(59,130,246,0.12); color: var(--ter-2); }
   .np-action-btn-fecha .np-action-icon { background: rgba(52,199,89,0.12); color: var(--green); }
   .np-action-btn-descripcion .np-action-icon { background: rgba(168,85,247,0.12); color: #a855f7; }
@@ -1620,7 +1510,6 @@
   .np-correccion-send:hover { opacity: 0.88; }
   .np-correccion-send:disabled { opacity: 0.45; cursor: not-allowed; }
 
-  /* Suggest no-pasar button */
   .suggest-np-btn {
     display: flex; align-items: center; justify-content: center; gap: 7px;
     width: 100%; margin-top: 4px; padding: 0.62rem;
@@ -1632,7 +1521,6 @@
   .suggest-np-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
   .suggest-np-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
 
-  /* Suggest no-pasar inline form */
   .suggest-np-form {
     display: none; flex-direction: column; gap: 0.6rem;
     margin-top: 6px; padding: 0.9rem;
@@ -1668,7 +1556,6 @@
   }
   .suggest-np-cancel:hover { background: var(--surface3); }
 
-  /* ── Live Mode ────────────────────────────────────────────────────────────── */
   .live-btn-wrap {
     padding: 0 1.25rem 0.75rem;
   }
@@ -1735,8 +1622,7 @@
   .live-pause-btn:hover { opacity: 0.85; }
   .live-pause-btn:active { transform: scale(0.94); }
   .live-pause-btn svg { width: 13px; height: 13px; fill: currentColor; stroke: none; }
-  /* ── LiveHost (Experimentos, v1.30.0-beta): banner que muestra la calle del
-       Encargado a quienes ven la asignación. Va justo arriba del menú de Live. */
+  
   .live-host-banner {
     display: none; align-items: center; gap: 10px;
     margin: 0 1.25rem 0.75rem;
@@ -1757,7 +1643,6 @@
   .live-host-label { font-size: 0.68rem; font-weight: 700; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; }
   .live-host-name  { font-size: 0.88rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .live-host-sub   { font-size: 0.7rem; color: var(--text3); margin-top: 1px; }
-  /* ── Live: banner en estado pausado ──────────────────────────────────────── */
   .live-street-banner.paused {
     padding: 0.45rem 0.75rem;
     background: var(--surface2);
@@ -1787,8 +1672,7 @@
   }
   .live-match-badge svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; flex-shrink: 0; }
 
-  /* ── Live Siempre Activo (Experimentos): borde que brilla en la tarjeta
-       de la asignación que tiene una sesión Live activa en segundo plano ── */
+ 
   .live-card-glow {
     position: relative;
     border-color: var(--green) !important;
@@ -1817,7 +1701,6 @@
   .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem; }
   .page-header-title { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; }
   .page-header-sub { font-size: 0.84rem; color: var(--text3); margin-top: 2px; }
-  /* Selector de sección (Predicación / Reuniones) dentro de Administración */
   .admin-section-tabs {
     display: flex; gap: 4px; margin-bottom: 0.9rem;
     border-bottom: 1px solid var(--border);
@@ -1831,7 +1714,6 @@
   }
   .admin-section-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
 
-  /* Pastillas de sub-secciones: una sola fila con scroll horizontal (sin wrap) */
   .admin-tabs-row {
     display: none; gap: 6px; overflow-x: auto; scrollbar-width: none;
     padding: 2px 2px 12px; margin-bottom: 0.35rem;
@@ -1849,7 +1731,6 @@
   .admin-section { display: none; }
   .admin-section.active { display: block; }
 
-  /* ── Week Builder (Casa en Casa weekly upload) ────────────────────────── */
   .wb-overlay {
     display: none; position: fixed; inset: 0; z-index: 400;
     background: var(--bg); overflow-y: auto;
@@ -1887,7 +1768,6 @@
     text-transform: uppercase; padding-bottom: 0.7rem; border-bottom: 1px solid var(--border);
     margin-bottom: 0.9rem;
   }
-  /* ── Suggested row: desktop wraps, mobile scrolls horizontally ── */
   .wb-suggested-row {
     display: flex; gap: 0.7rem; flex-wrap: wrap;
   }
@@ -1898,7 +1778,6 @@
       -webkit-overflow-scrolling: touch;
       scroll-snap-type: x mandatory;
       padding-bottom: 4px;
-      /* hide scrollbar but keep functionality */
       scrollbar-width: none;
     }
     .wb-suggested-row::-webkit-scrollbar { display: none; }
@@ -1922,7 +1801,6 @@
   }
   .wb-ter-add:hover { background: rgba(255,255,255,0.32); }
 
-  /* "+N más" chip at the end of the suggested row */
   .wb-ter-chip-more {
     width: 80px; flex-shrink: 0; border-radius: 14px; padding: 0.8rem 0.6rem;
     background: var(--surface2); border: 2px dashed var(--border-active);
@@ -1939,7 +1817,6 @@
     font-size: 0.72rem; color: var(--text3); margin-top: 0.7rem; display: flex; align-items: center; gap: 5px;
   }
 
-  /* ── Territory Picker Pop-Up ── */
   .wb-ter-picker-overlay {
     display: none; position: fixed; inset: 0; z-index: 600;
     background: var(--modal-overlay-bg); backdrop-filter: blur(10px);
@@ -2027,7 +1904,6 @@
   }
   .wb-ter-picker-cancel:hover { background: var(--surface2); }
 
-  /* ── Shift special mode badge (Telefónico / Zoom) ── */
   .wb-shift-mode-badge {
     display: inline-flex; align-items: center; gap: 4px;
     padding: 2px 8px 2px 6px; border-radius: 20px;
@@ -2166,7 +2042,6 @@
     padding: 1rem 1.25rem; border-top: 1px solid var(--border);
     position: sticky; bottom: 0; background: var(--surface);
   }
-  /* v1.28.0-beta: botón "Eliminar asignación" al fondo del Edit Mode de Asignaciones */
   .btn-danger-block {
     display: flex; align-items: center; justify-content: center; gap: 7px;
     width: 100%; margin-top: 1.4rem; padding: 0.75rem 1rem;
@@ -2176,9 +2051,7 @@
   .btn-danger-block:hover { background: rgba(255,59,48,0.08); }
   .btn-danger-block:active { transform: scale(0.98); }
 
-  /* v1.28.1-beta: modo selección múltiple (móvil) en Admin → Asignaciones */
-  /* v1.28.1.3-beta: la barra de selección va fija/flotante abajo, sobre el
-     contenido, no empujando el layout arriba de la lista. */
+ 
   .admin-select-bar {
     display: none; align-items: center; gap: 10px; flex-wrap: wrap;
     position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%);
@@ -2262,7 +2135,6 @@
   .empty-state h4 { font-size: 1rem; color: var(--text2); margin-bottom: 0.3rem; }
   .empty-state p { font-size: 0.84rem; }
 
-  /* ── Asignar Jueves/Sábado (Responsabilidades) ── */
   .resp-intro { font-size: 0.82rem; color: var(--text3); margin-bottom: 0.9rem; }
   .resp-date-chips {
     display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 10px;
@@ -2348,7 +2220,6 @@
     .resp-cargo-name { min-width: 96px; font-size: 0.78rem; }
   }
 
-  /* ── Aseo del Salón ── */
   .aseo-match-badge {
     display: flex; align-items: center; gap: 7px; padding: 7px 10px;
     border-radius: 9px; margin-bottom: 1.1rem; font-size: 0.74rem;
@@ -2357,14 +2228,12 @@
   .aseo-match-badge.warn { background: rgba(255,149,0,0.1); color: var(--orange); }
   .aseo-match-badge svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; flex-shrink: 0; }
 
-  /* Tarjetas de aseo: clicables en escritorio para abrir modo pantalla/TV */
   .aseo-card { cursor: default; }
   @media (min-width: 640px) {
     .aseo-card { cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; }
     .aseo-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
   }
 
-  /* ── Aseo del Salón: modo pantalla completa (proyección en TV) ── */
   .aseo-tv-overlay {
     display: none; position: fixed; inset: 0; z-index: 1000;
     background: var(--bg); color: var(--text);
@@ -2372,7 +2241,6 @@
     overflow-y: auto; padding: 3vh 4vw;
     --aseo-tv-scale: 1;
   }
-  /* Tema local del Full Screen / PopUp: independiente del tema global de la plataforma */
   .aseo-tv-overlay[data-local-theme="light"] {
     background: #f4f5f7; color: #0b0c0f;
   }
@@ -2457,7 +2325,6 @@
   .aseo-tv-close:hover { background: var(--surface3); transform: scale(1.05); }
   .aseo-tv-close svg { width: 44%; height: 44%; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
 
-  /* Botón "Más opciones" dentro del Full Screen / PopUp */
   .aseo-tv-more-wrap {
     position: fixed; top: clamp(1.25rem, 2.5vw, 2.25rem); right: calc(clamp(48px, 4vw, 60px) + clamp(1.25rem, 2.5vw, 2.25rem) + 0.75rem);
   }
@@ -2507,7 +2374,6 @@
   .aseo-tv-more-scale-val { font-size: 0.85rem; font-weight: 600; color: var(--text2); min-width: 42px; text-align: center; }
   .aseo-tv-more-divider { height: 1px; background: var(--border); margin: 4px 0; }
 
-  /* Modal de selección de modo: Full Screen vs PopUp */
   .aseo-mode-overlay {
     display: none; position: fixed; inset: 0; z-index: 1100;
     background: rgba(0,0,0,0.45);
@@ -2566,7 +2432,6 @@
   .coming-soon-icon { margin-bottom: 0.5rem; opacity: 0.4; }
   .coming-soon-icon svg { width: 40px; height: 40px; stroke: var(--text2); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 
-  /* Notifications: dropdown solo en desktop, fullscreen solo en mobile */
   @media (min-width: 640px) {
     #page-notifications { display: none !important; }
   }
@@ -2604,7 +2469,6 @@
   .notif-delete-btn:hover { background: rgba(255,59,48,0.1); color: var(--red); }
   .notif-delete-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
 
-  /* ── Notif category pill (badge dentro de cada tarjeta) ── */
   .notif-pill {
     display: inline-flex; align-items: center; gap: 4px;
     padding: 2px 8px 2px 6px; border-radius: 20px;
@@ -2613,11 +2477,7 @@
   }
   .notif-pill svg { width: 10px; height: 10px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
 
-  /* ── Notif search bar ── (alineada al estilo estándar de búsqueda de la
-     plataforma, mismo look que .grupos-search-input) */
-  /* Botón circular "Borrar todo" — reemplaza el botón de texto por un ícono
-     de basurero rojo, tanto en el dropdown de Escritorio como en la pantalla
-     completa de Notificaciones en Móvil. */
+  
   .notif-clear-icon-btn {
     display: flex; align-items: center; justify-content: center;
     width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
@@ -2634,10 +2494,7 @@
     position: relative; padding: 0 0 0.85rem;
   }
   .notif-search-wrap .notif-search-icon {
-    /* El wrap tiene padding sólo abajo (0.85rem) para separar del contenido
-       siguiente, así que su 50% no coincide con el centro real del input;
-       se descuenta la mitad de ese padding para centrar el ícono respecto
-       al input, no respecto al wrap completo. */
+    
     position: absolute; left: 12px; top: calc(50% - 0.425rem); transform: translateY(-50%);
     width: 16px; height: 16px; stroke: var(--text3); fill: none; stroke-width: 2; stroke-linecap: round; pointer-events: none;
   }
@@ -2651,8 +2508,7 @@
   .notif-search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
   .notif-search-input::placeholder { color: var(--text3); }
 
-  /* ── Notif filter chips → ahora un slider horizontal de categorías,
-     igual al segmented-control/slider usado en el resto de la plataforma. ── */
+  
   .notif-filter-chips {
     display: flex; gap: 6px; flex-wrap: nowrap; overflow-x: auto;
     padding-bottom: 0.85rem; scrollbar-width: none;
@@ -2670,7 +2526,6 @@
   .notif-filter-chip svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
   .notif-filter-chip.active { color: #fff; background: var(--accent); box-shadow: 0 2px 8px rgba(0,122,255,0.3); }
 
-  /* ── Notif empty (sin resultados de filtro/búsqueda) ── */
   .notif-empty-filtered { text-align: center; padding: 2rem 1rem; color: var(--text3); font-size: 0.85rem; }
 
   .filter-row { display: flex; gap: 8px; margin-bottom: 1.25rem; flex-wrap: wrap; align-items: center; }
@@ -2688,11 +2543,7 @@
   .section-divider { height: 1px; background: var(--border); margin: 1rem 0; }
 
 
-  /* ══════════════════════════════════════════════════════════════════
-     VMC — Vida y Ministerio (Admin + Vista usuario)
-  ══════════════════════════════════════════════════════════════════ */
 
-  /* ── Admin: week cards list ── */
   .vmc-week-card {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 1rem 1.1rem;
@@ -2726,7 +2577,6 @@
     border-top: 1px solid var(--border);
   }
 
-  /* ── Admin week editor modal ── */
   .vmc-modal-overlay {
     display: none; position: fixed; inset: 0; z-index: 500;
     background: var(--modal-overlay-bg);
@@ -2757,7 +2607,6 @@
     flex-shrink: 0;
   }
 
-  /* ── Section block inside editor ── */
   .vmc-section-block {
     border: 1px solid var(--border); border-radius: var(--radius-sm);
     margin-bottom: 1rem; overflow: hidden;
@@ -2771,7 +2620,6 @@
   .vmc-section-header-maestros { background: rgba(245,158,11,0.08); color: #b45309; border-bottom: 1px solid rgba(245,158,11,0.2); }
   .vmc-section-header-vida     { background: rgba(239,68,68,0.08); color: #b91c1c; border-bottom: 1px solid rgba(239,68,68,0.2); }
 
-  /* ── Part row inside section ── */
   .vmc-part-row {
     display: flex; align-items: flex-start; gap: 8px;
     padding: 0.65rem 0.9rem; border-bottom: 1px solid var(--border);
@@ -2851,9 +2699,7 @@
   .vmc-part-detail-close:hover { background: rgba(255,59,48,0.1); color: var(--red); }
   .vmc-part-detail-close svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
 
-  /* ── Selector de persona VMC (botón reemplaza input libre) ── */
   .vmc-assign-wrap { position: relative; width: 100%; }
-  /* legacy dropdown — ya no se usa, queda oculto por si acaso */
   .vmc-assign-dropdown { display: none !important; }
 
   .vmc-person-btn {
@@ -2882,12 +2728,10 @@
   .vmc-person-btn-clear:hover { background: rgba(255,59,48,0.15); color: var(--red); }
   .vmc-person-btn-clear svg { width: 10px; height: 10px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
 
-  /* Meta row button variant */
   .vmc-meta-val-input.vmc-person-btn-meta {
     cursor: pointer; text-align: left;
   }
 
-  /* ── VMC People Picker Modal ── */
   .vmc-pp-overlay {
     display: none; position: fixed; inset: 0;
     background: var(--modal-overlay-bg); backdrop-filter: blur(10px);
@@ -2974,7 +2818,6 @@
   .vmc-pp-create-text { font-size: 0.84rem; color: var(--text2); }
   .vmc-pp-create-text strong { color: var(--green); font-weight: 700; }
 
-  /* Create person mini-form inside picker */
   .vmc-pp-create-form {
     display: none; flex-direction: column; gap: 0.55rem;
     padding: 0.85rem 1.1rem; border-top: 1px solid var(--border);
@@ -3035,7 +2878,6 @@
   }
   .vmc-meta-val-input:focus { border-color: var(--accent); }
 
-  /* ── Notify button ── */
   .vmc-notify-btn {
     display: flex; align-items: center; gap: 6px;
     padding: 0.55rem 1rem; border: 1.5px solid var(--accent);
@@ -3046,9 +2888,7 @@
   .vmc-notify-btn:hover { background: var(--accent-light); }
   .vmc-notify-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
 
-  /* ─────────────────────────────────────────────────────────────────
-     VMC — Vista de usuario (sub-content-vida-ministerio)
-  ───────────────────────────────────────────────────────────────── */
+ 
   .vmc-user-week-selector {
     display: flex; align-items: center; gap: 10px;
     padding: 0 1rem 0.75rem; margin-bottom: 0.25rem;
@@ -3066,9 +2906,7 @@
   }
   .vmc-week-pill.active { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
 
-  /* ── Selector de semana + botón de calendario (v1.26.0-beta) ──────────────
-     Envuelve el pill-row de semanas junto al botón circular que abre el
-     mini-calendario para elegir la fecha directamente. */
+  
   .vmc-week-selector-row {
     position: relative;
     display: flex; align-items: center; gap: 8px;
@@ -3204,7 +3042,6 @@
   }
   .vmc-song-row svg { width: 14px; height: 14px; stroke: var(--text3); fill: none; stroke-width: 2.2; stroke-linecap: round; flex-shrink: 0; }
 
-  /* ── My assignments highlight card ── */
   .vmc-my-assignments {
     background: var(--surface); border: 1.5px solid var(--accent);
     border-radius: var(--radius); padding: 0.85rem 1rem;
@@ -3221,16 +3058,13 @@
   .vmc-my-item:last-child { border-bottom: none; padding-bottom: 0; }
   .vmc-my-item-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
 
-  /* ── Empty / loader ── */
   .vmc-empty {
     text-align: center; padding: 3rem 1rem;
     color: var(--text3); font-size: 0.88rem;
   }
   .vmc-empty svg { width: 44px; height: 44px; stroke: var(--text3); fill: none; stroke-width: 1.5; stroke-linecap: round; opacity: 0.35; margin-bottom: 0.75rem; }
 
-  /* ── Users panel modal ── */
-  /* ── Users Panel (fullscreen page) ── */
-  /* ── Users Panel fullscreen ─────────────────────────────────────────────── */
+  
   .users-panel-overlay {
     display: none; position: fixed; inset: 0;
     background: var(--bg); z-index: 400; flex-direction: column;
@@ -3238,7 +3072,6 @@
   .users-panel-overlay.open { display: flex; animation: fadeIn 0.26s var(--ease-fluid-soft); }
   .users-panel { background: var(--bg); width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
 
-  /* Top nav */
   .users-panel-header {
     display: flex; align-items: center; gap: 12px;
     padding: 0.75rem 1rem; border-bottom: 1px solid var(--border);
@@ -3261,10 +3094,8 @@
     padding: 2px 9px; border-radius: 20px; letter-spacing: 0;
   }
 
-  /* Body */
   .users-panel-body { flex: 1; overflow-y: auto; padding: 1rem 1rem 4rem; }
 
-  /* Stats strip */
   .users-stats-strip {
     display: flex; gap: 10px; margin-bottom: 1.25rem; flex-wrap: wrap;
   }
@@ -3275,14 +3106,12 @@
     font-size: 0.78rem; font-weight: 600; color: var(--text2);
   }
   .users-stat-chip-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  /* ── Usuarios: barra de búsqueda + filtros (reemplaza los indicadores) ─── */
   .users-filter-check {
     display: flex; align-items: center; gap: 8px;
     font-size: 0.83rem; color: var(--text2); padding: 0.35rem 0; cursor: pointer;
   }
   .users-filter-check input { width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer; }
 
-  /* User card — list view */
   .user-card {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 18px; margin-bottom: 10px; overflow: hidden;
@@ -3306,10 +3135,7 @@
     width: 14px; height: 14px; border-radius: 50%;
     border: 2px solid var(--surface); background: var(--green);
   }
-  /* ── Marcos de color para Admin / Admin+AdminTag (v1.20.0-beta) ──────────
-     Admin sin AdminTag: marco azul fijo (--accent). Admin con AdminTag
-     asignada: marco con el color propio de esa AdminTag (--atag-frame-color).
-     Se aplica como box-shadow en anillo para no alterar el tamaño del avatar. */
+  
   .avatar-frame-admin {
     box-shadow: 0 0 0 2.5px var(--surface), 0 0 0 4.5px var(--accent);
   }
@@ -3322,7 +3148,6 @@
   .user-card-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
   .user-card-chevron { width: 18px; height: 18px; stroke: var(--text3); fill: none; stroke-width: 2.5; stroke-linecap: round; flex-shrink: 0; }
 
-  /* Role badge pills */
   .role-badge-pill {
     display: inline-flex; align-items: center;
     padding: 3px 10px; border-radius: 20px;
@@ -3333,7 +3158,6 @@
     .role-badge-viewer    { background: var(--surface3);        color: var(--text3); border: 1px solid var(--border); }
   .role-badge-dev       { background: rgba(255,149,0,0.12);   color: var(--orange); border: 1px solid rgba(255,149,0,0.35); }
 
-  /* ── User Profile fullscreen page ── */
   #page-user-profile {
     display: none; position: fixed; inset: 0; z-index: 500;
     background: var(--bg); flex-direction: column; overflow-y: auto;
@@ -3341,8 +3165,7 @@
   }
   #page-user-profile.open { display: flex; }
 
-  /* ── Perfil (miembro de Grupo de Servicio) — solo lectura: foto, nombre,
-     cargos, etiquetas y AdminTags. No muestra asignaciones ni responsabilidades. ── */
+
   #page-member-perfil {
     display: none; position: fixed; inset: 0; z-index: 500;
     background: var(--bg); flex-direction: column; overflow-y: auto;
@@ -3383,10 +3206,7 @@
     border: 3px solid rgba(255,255,255,0.45);
     box-shadow: 0 8px 32px rgba(0,0,0,0.25);
   }
-  /* ── Botón "Eliminar foto de perfil" (Admin con módulo Usuarios / DEV,
-     v1.27.1-beta): badge circular sobre la esquina del avatar en el perfil
-     de otro usuario, visible solo si esa cuenta tiene foto y quien mira
-     tiene permiso para gestionarla. ── */
+  
   .uprofile-avatar-wrap { position: relative; width: 90px; margin: 0 auto 0.9rem; }
   .uprofile-avatar-wrap .uprofile-avatar { margin: 0; }
   .uprofile-avatar-del-btn {
@@ -3473,7 +3293,6 @@
   .btn-danger-sm:hover { background: rgba(255,59,48,0.14); border-color: rgba(255,59,48,0.5); }
   .btn-danger-sm svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
 
-  /* label chips reuse */
 
   .role-select-inline {
     padding: 7px 10px; font-size: 0.84rem; font-weight: 600;
@@ -3486,7 +3305,6 @@
   }
   .role-select-inline:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
 
-  /* Permissions grid */
   .perms-grid {
     display: flex; flex-direction: column;
     gap: 6px;
@@ -3568,7 +3386,6 @@
   .users-empty-icon svg { width: 26px; height: 26px; stroke: var(--text3); fill: none; stroke-width: 1.5; stroke-linecap: round; opacity: 0.6; }
   .users-empty p { font-size: 0.84rem; line-height: 1.5; }
 
-  /* Online dot */
   .online-dot {
     width: 7px; height: 7px; border-radius: 50%;
     background: var(--green); flex-shrink: 0;
@@ -3578,7 +3395,6 @@
     background: var(--surface3); flex-shrink: 0;
   }
 
-  /* ── Territory grid ── */
   .ter-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -3652,7 +3468,6 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
 
-  /* ── Botón "Descargar todo" al final de la sub-sección Territorios ── */
   .ter-download-all-btn {
     width: 100%; margin-top: 1.1rem; padding: 0.9rem 1rem;
     display: flex; align-items: center; gap: 0.8rem;
@@ -3671,7 +3486,6 @@
   .ter-download-all-btn.loading .ter-download-all-icon { animation: ter-dl-spin 1s linear infinite; }
   @keyframes ter-dl-spin { to { transform: rotate(360deg); } }
 
-  /* ── Full congregation map button ── */
   .ter-view-header {
     display: flex; align-items: center; justify-content: space-between;
     margin-bottom: 1rem; flex-wrap: wrap; gap: 10px;
@@ -3680,7 +3494,6 @@
     font-size: 1.05rem; font-weight: 700; color: var(--text);
   }
 
-  /* ── Contextual Admin Shortcut ────────────────────────────────────────────── */
   .admin-shortcut-wrap {
     display: flex; justify-content: flex-end;
     margin: 0 0 0.75rem;
@@ -3714,7 +3527,6 @@
   .btn-map-full:active { transform: scale(0.97); }
   .btn-map-full svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-  /* ── Full map banner (card visible para todos los usuarios en Territorios) ── */
   .ter-map-banner {
     display: none;
     background: var(--surface);
@@ -3750,10 +3562,7 @@
     .ter-map-banner-label { font-size: 0.88rem; }
   }
 
-  /* ── Mapa de la congregación: visor de pantalla completa (v1.22.7.2-beta) ──
-     Ya no es un lightbox centrado con ancho máximo: ocupa toda la pantalla,
-     igual que el resto de las pantallas completas de la plataforma (Tips,
-     Notificación, etc.), para aprovechar más espacio y ver más detalle. ── */
+ 
   .full-map-lightbox {
     position: fixed; inset: 0; z-index: 260;
     background: var(--bg);
@@ -3761,9 +3570,7 @@
   }
   .full-map-lightbox.open { display: flex; animation: fadeIn 0.26s var(--ease-fluid-soft); }
   .full-map-lb-actions { display: flex; gap: 8px; align-items: center; }
-  /* v1.27.0-beta: el botón de Descarga pasó de pill verde con texto a un
-     botón circular con ícono, igual al usado en las pantallas de Territorio
-     individual (.detail-download-fab), para mantener consistencia visual. */
+ 
   .full-map-lb-download-btn {
     display: flex; align-items: center; justify-content: center;
     width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
@@ -3800,7 +3607,6 @@
   }
   .map-zoom-hint.zoom-hint-hidden { opacity: 0; }
 
-  /* ── Admin full map card ── */
   .full-map-admin-card {
     background: var(--surface);
     border: 2px dashed var(--border-active);
@@ -3843,7 +3649,6 @@
   .fm-page-nav button svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; }
   .fm-page-nav span { color: var(--text2); font-size: 0.78rem; font-weight: 600; }
 
-  /* ── Admin fullscreen mode ─────────────────────────────────── */
   #page-admin {
     display: none;
     position: fixed;
@@ -3887,11 +3692,7 @@
   .admin-back-btn:hover { opacity: 0.72; }
   .admin-back-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
-  /* ── Header "pill" de las secciones (Móvil + Desktop) ─────────────────────────
-     Reemplaza la barra sólida de arriba por: botón Back circular + título
-     dentro de un pill con transparencia y background blur, ambos flotando
-     sobre el contenido. Se usa en Notificaciones, Configuración, Perfil,
-     Grupo, Administración, etc. ── */
+  
   .subpage-topbar {
     display: flex;
     align-items: center;
@@ -3933,9 +3734,7 @@
   .pill-back-btn:hover { opacity: 0.75; }
   .pill-back-btn:active { transform: scale(0.92); }
   .pill-back-btn svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-  /* El título se centra respecto a la barra completa (no respecto al espacio
-     libre entre el back-btn y las acciones), igual que en el resto de la
-     plataforma. Se posiciona en absoluto sobre .subpage-topbar. */
+  
   .pill-header-title {
     display: flex;
     align-items: center;
@@ -3988,13 +3787,7 @@
   @media (max-width: 639px) {
     .subpage-topbar { padding: 0.7rem 0.85rem; }
   }
-  /* ── v1.5.0-beta: contraste adaptativo para títulos/íconos flotantes ──────
-     .pill-header-title, .pill-back-btn, .detail-admin-fab y .detail-sidebar-fab
-     son "pills" con transparencia + blur que flotan sobre contenido que se
-     desplaza debajo (fotos, tarjetas oscuras, superficies blancas, etc). El
-     color de texto/ícono se recalcula en tiempo real (ver
-     updateAdaptiveGlassColors en el JS) según el brillo real de lo que quede
-     debajo, para garantizar legibilidad sin importar el fondo. */
+ 
   .pill-header-title, .pill-back-btn, .detail-admin-fab, .detail-sidebar-fab {
     transition: color 0.18s ease;
   }
@@ -4026,7 +3819,6 @@
     .admin-topbar { height: 56px; padding: 0 1rem; }
   }
 
-  /* ── Casa modal — días disponibles ────────────────────────────────────────── */
   .dias-picker {
     display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 4px;
   }
@@ -4050,7 +3842,6 @@
   }
   .dia-btn.selected .dia-btn-num { color: rgba(255,255,255,0.75); }
 
-  /* Tipo de propiedad + amo inline */
   .tipo-amo-row { display: flex; gap: 8px; align-items: stretch; }
   .tipo-amo-row .tipo-select { flex: 0 0 auto; min-width: 130px; }
   .tipo-amo-row .form-input { flex: 1; }
@@ -4062,7 +3853,6 @@
     .dia-btn-letter { font-size: 0.7rem; }
   }
 
-  /* Días chip display in list */
   .dias-chips { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 3px; }
   .dia-chip {
     font-size: 0.62rem; font-weight: 700; padding: 2px 6px;
@@ -4070,9 +3860,7 @@
     border: 1px solid rgba(0,122,255,0.2);
   }
 
-  /* ── Grupos de Servicio — vista pública ───────────────────────────────────── */
 
-  /* Grid de tarjetas */
   .grupos-btn-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -4106,11 +3894,9 @@
     font-size: 0.72rem; font-weight: 600; color: var(--text3);
     margin-top: 2px;
   }
-  /* Ocultar elementos del diseño anterior */
   .grupo-btn-count, .grupo-btn-bar, .grupo-btn-body, .grupo-btn-info,
   .grupo-btn-sublabel, .grupo-btn-right, .grupo-btn-arrow { display: none; }
 
-  /* ── Group detail fullscreen page ── */
   #page-grupo {
     display: none; position: fixed; inset: 0; z-index: 260;
     background: var(--bg); flex-direction: column;
@@ -4118,11 +3904,7 @@
   }
   #page-grupo.open { display: flex; }
 
-  /* ── Pantalla "Otros Grupos" (v1.23.0-beta): lista independiente de las
-     asignaciones de los demás Grupos de Servicio del Sábado, agrupadas por
-     Grupo. Solo existe cuando la preferencia "Habilitar pantalla de
-     asignaciones por grupo" está activada; si no, esas asignaciones se
-     siguen mostrando como mini-cards en la pantalla principal. ── */
+ 
   #page-otros-grupos {
     display: none; position: fixed; inset: 0; z-index: 260;
     background: var(--bg); flex-direction: column;
@@ -4151,10 +3933,7 @@
   .og-group-cards { display: flex; flex-direction: column; gap: 0.6rem; }
   .og-empty { text-align: center; padding: 3rem 1.25rem; color: var(--text3); font-size: 0.85rem; }
 
-  /* El título "Grupo X" en pill (con blur/transparencia) del header estándar
-     permanece oculto mientras se ve el hero grande (círculo + título + nº de
-     miembros); aparece con una transición suave recién cuando el usuario
-     baja por la lista de miembros, para no duplicar la información. */
+ 
   #page-grupo .pill-header-title {
     opacity: 0; transform: translate(-50%, -46%);
     transition: opacity 0.2s ease, transform 0.2s ease;
@@ -4219,7 +3998,6 @@
   .role-aux   { background: var(--green-light);  color: var(--green); }
   .role-prec  { background: rgba(168,85,247,0.12); color: #a855f7; }
 
-  /* Map section */
   .grupo-map-wrap {
     margin: 0.75rem 1rem; border-radius: var(--radius-sm);
     overflow: hidden; background: var(--surface2);
