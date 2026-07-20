@@ -7346,14 +7346,14 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
           <div id="pref-dark-maps-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
-      <!-- Toggle: pantalla de asignaciones por grupo (v1.23.0-beta) -->
+      <!-- Toggle: Mini Cards de Grupos ajenos (v1.23.0-beta, invertido en v1.32.6-beta) -->
       <div class="profile-row" style="cursor:pointer;border-top:1px solid var(--border)" onclick="toggleGroupScreenPref()">
         <div class="profile-row-icon" style="background:var(--ter-2-bg);color:var(--ter-2)">
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label">Habilitar pantalla de asignaciones por grupo</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Muestra las asignaciones de otros Grupos de Servicio en una pantalla aparte</div>
+          <div class="profile-row-label">Mostrar Grupos ajenos como Mini Cards</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Muestra las asignaciones de otros Grupos de Servicio directamente en la pantalla principal, en vez del botón "Otros Grupos"</div>
         </div>
         <div id="pref-group-screen-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
           <div id="pref-group-screen-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
@@ -8104,7 +8104,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.32.5-beta';
+const APP_VERSION = '1.32.6-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -12051,11 +12051,12 @@ function renderSchedule() {
           </div>`;
       }
 
-      // ── Other groups: mini-cards inline (comportamiento clásico) o botón
-      //    hacia la pantalla independiente "Otros Grupos", según la
+      // ── Other groups: mini-cards inline (comportamiento clásico, ahora
+      //    opcional) o botón hacia la pantalla independiente "Otros Grupos"
+      //    (comportamiento por defecto desde v1.27.0-beta), según la
       //    preferencia de Configuración → Apariencia (v1.23.0-beta) ──
       if (otherAssignments.length) {
-        if (isGroupScreenPrefEnabled()) {
+        if (!isGroupMinicardsEnabled()) {
           // Guarda los datos de este Sábado para que la pantalla "Otros
           // Grupos" los pueda leer al abrirse.
           _otrosGruposByDate[date] = otherAssignments;
@@ -17442,19 +17443,18 @@ function toggleDarkMapsPref() {
   if (currentSubTab === 'territorios') renderTerritoryView();
 }
 
-// ── Toggle: pantalla de asignaciones por grupo (v1.23.0-beta) ───────────────
-// Activado por defecto desde v1.27.0-beta: las asignaciones de Grupos de
-// Servicio ajenos no se muestran como mini-cards en la pantalla principal de
-// Casa en Casa; en cambio, se mueven a la pantalla independiente "Otros
-// Grupos", accesible mediante un botón bajo la tarjeta del grupo del
-// usuario. El usuario puede desactivarlo manualmente desde Configuración
-// para volver al comportamiento anterior (mini-cards en la pantalla principal).
-function isGroupScreenPrefEnabled() {
-  const v = localStorage.getItem('fleming_group_screen_mode');
-  return v === null ? true : v === 'true';
+// ── Toggle: Mini Cards de Grupos ajenos (v1.23.0-beta, invertido en v1.32.6-beta) ─
+// Desde v1.27.0-beta la pantalla independiente "Otros Grupos" es el
+// comportamiento por defecto de la plataforma (no requiere activar nada).
+// Este toggle, desactivado por defecto, permite volver a la vista clásica:
+// al activarlo, las asignaciones de Grupos de Servicio ajenos se muestran
+// como mini-cards directamente en la pantalla principal de Casa en Casa,
+// en vez del botón hacia "Otros Grupos".
+function isGroupMinicardsEnabled() {
+  return localStorage.getItem('fleming_group_minicards') === 'true';
 }
 function updateGroupScreenToggleUI() {
-  const enabled = isGroupScreenPrefEnabled();
+  const enabled = isGroupMinicardsEnabled();
   const toggle = document.getElementById('pref-group-screen-toggle');
   const thumb  = document.getElementById('pref-group-screen-thumb');
   if (!toggle || !thumb) return;
@@ -17462,8 +17462,8 @@ function updateGroupScreenToggleUI() {
   thumb.style.left = enabled ? '21px' : '3px';
 }
 function toggleGroupScreenPref() {
-  const current = isGroupScreenPrefEnabled();
-  localStorage.setItem('fleming_group_screen_mode', current ? 'false' : 'true');
+  const current = isGroupMinicardsEnabled();
+  localStorage.setItem('fleming_group_minicards', current ? 'false' : 'true');
   updateGroupScreenToggleUI();
   // Si Casa en Casa ya está renderizado, refleja el cambio de inmediato.
   if (typeof renderSchedule === 'function' && assignments && assignments.length) renderSchedule();
@@ -18809,7 +18809,7 @@ async function renderAdminTipsList() {
 // sus valores predeterminados sin cerrar sesión ni tocar el perfil del usuario ──
 const PLATFORM_RESET_KEYS = [
   'fleming_accent', 'fleming_accent_bg', 'fleming_animations', 'fleming_blur_level',
-  'fleming_dark_maps', 'fleming_egg_unlocked', 'fleming_group_screen_mode', 'fleming_h2h_view',
+  'fleming_dark_maps', 'fleming_egg_unlocked', 'fleming_group_minicards', 'fleming_h2h_view',
   'fleming_lang', 'fleming_live_always_on', 'fleming_live_enabled', 'fleming_livehost_enabled', 'fleming_navbar_mode',
   'fleming_navbar_options_avatar', 'fleming_navbar_btn_size', 'fleming_notif_levels', 'fleming_notif_prefs',
   'fleming_notif_templates', 'fleming_simplified_mode', 'fleming_theme', 'fleming_tip_font_scale',
