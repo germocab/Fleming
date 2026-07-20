@@ -632,39 +632,41 @@
 
   .subnav-menu-overlay {
     display: none; position: fixed; inset: 0; z-index: 240;
-    background: var(--modal-overlay-bg); backdrop-filter: blur(14px) saturate(180%);
+    background: rgba(242,242,247,0.78); backdrop-filter: blur(14px) saturate(180%);
     -webkit-backdrop-filter: blur(14px) saturate(180%);
     flex-direction: column;
   }
   .subnav-menu-overlay.open { display: flex; animation: fadeIn 0.24s var(--ease-fluid-soft); }
   .subnav-menu-list {
-    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 10px; padding: 1.5rem 1.5rem 3rem; max-width: 420px; margin: 0 auto; width: 100%;
+    flex: 1; display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+    gap: 10px; padding: 0.5rem 1.5rem 1.5rem; max-width: 420px; margin: 0 auto; width: 100%;
   }
   .subnav-menu-item {
     display: inline-flex; align-items: center; justify-content: center;
     font-family: var(--font); font-size: 0.96rem; font-weight: 700; text-align: center;
-    color: #1c1c1e; background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.7);
-    border-radius: 999px; padding: 12px 24px; width: auto; white-space: nowrap; cursor: pointer;
+    color: #1c1c1e; background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.55);
+    border-radius: 999px; padding: 12px 24px; width: auto; max-width: 100%; white-space: nowrap; cursor: pointer;
     backdrop-filter: blur(10px) saturate(160%); -webkit-backdrop-filter: blur(10px) saturate(160%);
-    transition: transform 0.15s, background 0.15s;
+    transition: transform 0.15s, background 0.15s, color 0.15s, border-color 0.15s;
     animation: subnavPopIn 0.34s var(--ease-fluid-soft) both;
   }
-  .subnav-menu-item:active { transform: scale(0.94); background: rgba(255,255,255,0.78); }
-  .subnav-menu-item.active { border-color: rgba(255,255,255,0.95); background: rgba(255,255,255,0.85); }
+  .subnav-menu-item:active { transform: scale(0.96); background: rgba(255,255,255,0.6); }
+  .subnav-menu-item.active { background: rgba(255,255,255,0.55); border-color: var(--accent); color: var(--accent); }
   /* Modo oscuro: mismo lenguaje (translúcido + blur), pero con texto/ícono
      en blanco para asegurar buena legibilidad sobre el overlay oscuro. ── */
+  :root[data-theme="dark"] .subnav-menu-overlay { background: rgba(28,28,30,0.82); }
   :root[data-theme="dark"] .subnav-menu-item {
-    color: #fff; background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.22);
+    color: #fff; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.18);
   }
-  :root[data-theme="dark"] .subnav-menu-item:active { background: rgba(255,255,255,0.24); }
-  :root[data-theme="dark"] .subnav-menu-item.active { background: rgba(255,255,255,0.3); border-color: rgba(255,255,255,0.4); }
+  :root[data-theme="dark"] .subnav-menu-item:active { background: rgba(255,255,255,0.2); }
+  :root[data-theme="dark"] .subnav-menu-item.active { background: rgba(255,255,255,0.16); border-color: var(--accent); color: var(--accent); }
   @media (prefers-color-scheme: dark) {
+    :root[data-theme="auto"] .subnav-menu-overlay { background: rgba(28,28,30,0.82); }
     :root[data-theme="auto"] .subnav-menu-item {
-      color: #fff; background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.22);
+      color: #fff; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.18);
     }
-    :root[data-theme="auto"] .subnav-menu-item:active { background: rgba(255,255,255,0.24); }
-    :root[data-theme="auto"] .subnav-menu-item.active { background: rgba(255,255,255,0.3); border-color: rgba(255,255,255,0.4); }
+    :root[data-theme="auto"] .subnav-menu-item:active { background: rgba(255,255,255,0.2); }
+    :root[data-theme="auto"] .subnav-menu-item.active { background: rgba(255,255,255,0.16); border-color: var(--accent); color: var(--accent); }
   }
   /* Animación de salida ("pop out"): se dispara al elegir una Sub-sección,
      antes de navegar y cerrar el overlay. */
@@ -8294,7 +8296,7 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.32.7.3-beta';
+const APP_VERSION = '1.32.8-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
