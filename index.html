@@ -2970,17 +2970,17 @@
   /* ── Navegación de semanas con chip centrado + flechas (v1.32.9-beta):
      reemplaza al slider horizontal de chips de semanas en Vida y Ministerio
      y Reunión Pública, ya que ahora esa acción de swipe se usa para cambiar
-     rápido de Sub-sección. Solo el chip de la semana seleccionada queda
-     visible, centrado, con una flecha a la derecha para avanzar y, en
-     cuanto se deja de estar en "Esta semana", también una a la izquierda
-     para retroceder.
+     rápido de Sub-sección.
      v1.32.10-beta: se elimina el botón de Calendario aparte (quedaba
      desalineado verticalmente respecto al chip) y, junto con él, el hack de
      centrado absoluto que necesitaba para compensar su espacio — ya no hace
      falta, pues ahora .vmc-user-week-nav es el único contenido de la fila y
-     un centrado por flexbox normal es suficiente y siempre correcto, tanto
-     en "Esta semana" (sin flechas) como con una o dos flechas visibles.
-     Tocar el chip abre la vista de calendario (antes exclusiva del botón). ── */
+     un centrado por flexbox normal es suficiente. Tocar el chip abre la
+     vista de calendario (antes exclusiva del botón).
+     v1.32.10.1-beta: ambas flechas (anterior/siguiente) se muestran siempre,
+     en vez de ocultarse cuando no hay semana disponible hacia ese lado —
+     ocultarlas rompía el centrado del chip. Ahora la flecha sin semana
+     disponible solo se atenúa (.vmc-week-arrow-disabled). ── */
   .vmc-user-week-nav {
     display: flex; align-items: center; justify-content: center; gap: 6px;
     width: 100%;
@@ -2994,6 +2994,11 @@
   .vmc-week-arrow svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; }
   .vmc-week-arrow:hover { background: var(--accent-light); color: var(--accent); }
   .vmc-week-arrow:active { transform: scale(0.88); }
+  /* v1.32.10.1-beta: ambas flechas se muestran siempre para que el chip
+     quede centrado sin importar si hay o no semana anterior/siguiente;
+     cuando no hay semana disponible hacia ese lado, se atenúa en vez de
+     ocultarse, y deja de reaccionar a hover/click. */
+  .vmc-week-arrow-disabled { opacity: 0.3; cursor: default; pointer-events: none; }
   /* El chip ahora es el disparador de la vista de calendario (v1.32.10-beta). */
   .vmc-user-week-nav .vmc-week-pill { transition: border-color 0.2s, background 0.2s, color 0.2s, transform 0.15s, box-shadow 0.2s; }
   .vmc-user-week-nav .vmc-week-pill:hover { filter: brightness(0.97); }
@@ -7971,7 +7976,7 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="settings.tutorial.vmc">Ver tutorial de Reuniones</div>
+          <div class="profile-row-label" data-i18n="settings.tutorial.vmc">Ver tutorial de Vida y Ministerio</div>
           <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.tutorial.vmc.desc">Repasa cómo funciona el sistema de semanas y las asignaciones</div>
         </div>
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
@@ -8317,7 +8322,7 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.32.10-beta';
+const APP_VERSION = '1.32.10.1-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -8787,7 +8792,7 @@ const I18N = {
   'settings.tutorial.desc':     { es: 'Repasa cómo funcionan las secciones y funciones principales', en: 'Review how the main sections and features work', nl: 'Bekijk hoe de belangrijkste secties en functies werken' },
   'settings.tutorial.h2h':      { es: 'Ver tutorial de Asignaciones', en: 'View Assignments tutorial', nl: 'Tutorial Toewijzingen bekijken' },
   'settings.tutorial.h2h.desc': { es: 'Repasa la pantalla de detalle de una asignación de casa en casa', en: 'Review the detail screen of a door-to-door assignment', nl: 'Bekijk het detailscherm van een huis-aan-huis toewijzing' },
-  'settings.tutorial.vmc':      { es: 'Ver tutorial de Reuniones', en: 'View Life and Ministry tutorial', nl: 'Tutorial Leven en Bediening bekijken' },
+  'settings.tutorial.vmc':      { es: 'Ver tutorial de Vida y Ministerio', en: 'View Life and Ministry tutorial', nl: 'Tutorial Leven en Bediening bekijken' },
   'settings.tutorial.vmc.desc': { es: 'Repasa cómo funciona el sistema de semanas y las asignaciones', en: 'Review how the weeks system and assignments work', nl: 'Bekijk hoe het weeksysteem en de toewijzingen werken' },
   'settings.reportar':          { es: 'Sugerencias',              en: 'Suggestions', nl: 'Suggesties' },
   'settings.reportar.desc':     { es: 'Esta plataforma está en fase Beta — cuéntanos si algo falla', en: 'This platform is in Beta — let us know if something breaks', nl: 'Dit platform bevindt zich in de Beta-fase — laat ons weten als er iets misgaat' },
@@ -18508,7 +18513,7 @@ const TUTORIAL_STEPS_H2H = [
 // también se puede repasar desde Configuración > Ayuda > Tutoriales.
 const TUTORIAL_STEPS_VMC = [
   {
-    title: { es: 'Reuniones', en: 'Meetings' },
+    title: { es: 'Vida y Ministerio', en: 'Life and Ministry' },
     text: { es: 'Aquí ves el programa semanal de la reunión Vida y Ministerio. Te mostramos rápidamente cómo moverte entre semanas y qué esperar cuando tienes una parte asignada.', en: 'Here you can see the weekly program for the Life and Ministry meeting. We\'ll quickly show you how to move between weeks and what to expect when you have an assigned part.' }
   },
   {
@@ -18519,14 +18524,14 @@ const TUTORIAL_STEPS_VMC = [
   },
   {
     selector: '.vmc-my-assignments',
-    title: { es: 'Tus asignaciones ', en: 'Your assigned sections' },
+    title: { es: 'Tus partes asignadas', en: 'Your assigned parts' },
     text: { es: 'Cuando se te asigna una parte de la reunión — como Presidente, una oración o una parte del programa — aparecerá destacada aquí arriba para que la veas de inmediato.', en: 'When you\'re assigned a part of the meeting — like Chairman, a prayer or a program part — it will appear highlighted right here so you see it right away.' },
     waitFor: true
   },
   {
     selector: '.vmc-part-link-display',
     title: { es: 'Enlaces externos', en: 'External links' },
-    text: { es: 'Algunas partes incluyen un enlace externo, por ejemplo a un video o la guía de actividades.', en: 'Some sections include an external link, for example to a supporting video or Meeting Workbook.' },
+    text: { es: 'Algunas partes incluyen un enlace externo, por ejemplo un video o documento de apoyo. Cuando veas este ícono en una tarjeta, puedes tocarla para abrir el enlace.', en: 'Some parts include an external link, for example a supporting video or document. When you see this icon on a card, you can tap it to open the link.' },
     waitFor: true
   },
 ];
@@ -22186,23 +22191,25 @@ function renderVmcUserView() {
   const week = sorted[idx];
   const isCurrent = vmcWeekStatus(week) === 'current';
   const label = isCurrent ? 'Esta semana' : vmcShortRange(week);
-  // Flecha izquierda: solo aparece una vez que ya no se está en "Esta
-  // semana" (para volver hacia la semana anterior a la seleccionada).
-  const showLeftArrow = !isCurrent && idx > 0;
-  const showRightArrow = idx < sorted.length - 1;
+  // v1.32.10.1-beta: las dos flechas se muestran siempre (haya o no semana
+  // anterior/siguiente), para que el chip quede perfectamente centrado en
+  // cualquier estado. Cuando no hay semana disponible hacia ese lado, la
+  // flecha correspondiente solo se atenúa (disabled) en vez de desaparecer.
+  const hasLeft = idx > 0;
+  const hasRight = idx < sorted.length - 1;
 
   const programHtml = vmcRenderWeekProgram(week);
 
   container.innerHTML = `
     <div class="vmc-week-selector-row">
       <div class="vmc-user-week-nav">
-        ${showLeftArrow ? `<button class="vmc-week-arrow" onclick="vmcStepWeek(-1)" title="Semana anterior" aria-label="Semana anterior">
+        <button class="vmc-week-arrow${hasLeft ? '' : ' vmc-week-arrow-disabled'}" ${hasLeft ? `onclick="vmcStepWeek(-1)"` : 'tabindex="-1" aria-disabled="true"'} title="Semana anterior" aria-label="Semana anterior">
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-        </button>` : ''}
+        </button>
         <div class="vmc-week-pill active" id="vmc-cal-btn" onclick="calToggle('vmc')" title="Ver calendario" aria-label="Ver calendario">${label}</div>
-        ${showRightArrow ? `<button class="vmc-week-arrow" onclick="vmcStepWeek(1)" title="Semana siguiente" aria-label="Semana siguiente">
+        <button class="vmc-week-arrow${hasRight ? '' : ' vmc-week-arrow-disabled'}" ${hasRight ? `onclick="vmcStepWeek(1)"` : 'tabindex="-1" aria-disabled="true"'} title="Semana siguiente" aria-label="Semana siguiente">
           <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>` : ''}
+        </button>
       </div>
       <div class="vmc-cal-popover" id="vmc-cal-popover"></div>
     </div>
@@ -22581,21 +22588,22 @@ function renderFsUserView() {
   const week = sorted[idx];
   const isCurrent = fsWeekStatus(week) === 'current';
   const label = isCurrent ? 'Esta semana' : fsShortRange(week);
-  const showLeftArrow = !isCurrent && idx > 0;
-  const showRightArrow = idx < sorted.length - 1;
+  // v1.32.10.1-beta: ver nota equivalente en renderVmcUserView.
+  const hasLeft = idx > 0;
+  const hasRight = idx < sorted.length - 1;
 
   const programHtml = fsRenderWeekProgram(week);
 
   container.innerHTML = `
     <div class="vmc-week-selector-row">
       <div class="vmc-user-week-nav">
-        ${showLeftArrow ? `<button class="vmc-week-arrow" onclick="fsStepWeek(-1)" title="Semana anterior" aria-label="Semana anterior">
+        <button class="vmc-week-arrow${hasLeft ? '' : ' vmc-week-arrow-disabled'}" ${hasLeft ? `onclick="fsStepWeek(-1)"` : 'tabindex="-1" aria-disabled="true"'} title="Semana anterior" aria-label="Semana anterior">
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-        </button>` : ''}
+        </button>
         <div class="vmc-week-pill active" id="fs-cal-btn" onclick="calToggle('fs')" title="Ver calendario" aria-label="Ver calendario">${label}</div>
-        ${showRightArrow ? `<button class="vmc-week-arrow" onclick="fsStepWeek(1)" title="Semana siguiente" aria-label="Semana siguiente">
+        <button class="vmc-week-arrow${hasRight ? '' : ' vmc-week-arrow-disabled'}" ${hasRight ? `onclick="fsStepWeek(1)"` : 'tabindex="-1" aria-disabled="true"'} title="Semana siguiente" aria-label="Semana siguiente">
           <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>` : ''}
+        </button>
       </div>
       <div class="vmc-cal-popover" id="fs-cal-popover"></div>
     </div>
