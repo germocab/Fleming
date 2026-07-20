@@ -7546,6 +7546,22 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
           <div id="pref-group-screen-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
+      <!-- Toggle: Ícono de Más Opciones en vez de Foto de Perfil (v1.32.11-beta).
+           La Foto de Perfil en el botón "Más Opciones" es ahora la
+           configuración por defecto; este toggle permite volver a mostrar el
+           botón con el ícono de siempre, para quien lo prefiera. -->
+      <div class="profile-row" style="cursor:pointer;border-top:1px solid var(--border)" onclick="toggleNavbarIconPref()">
+        <div class="profile-row-icon" style="background:var(--ter-3-bg);color:var(--ter-3)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="pref.navbaricon.title">Mostrar ícono en vez de tu foto de perfil</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="pref.navbaricon.desc">El botón "Más opciones" de la NavBar usa tu foto de perfil por defecto. Actívalo para volver a ver el botón con el ícono de siempre.</div>
+        </div>
+        <div id="navbar-icon-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="navbar-icon-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
     </div>
     <!-- Tamaño de la interfaz: debajo de Apariencia -->
     <div class="profile-section">
@@ -7921,21 +7937,6 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
         </div>
       </div>
       <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.livehost.help">Solo comparte el nombre de la calle, nunca un punto exacto en un mapa. Tú decides si activarla; se apaga sola a las 2 horas.</div>
-    </div>
-    <!-- Foto de perfil en Más opciones (reemplaza solo el botón Opciones) -->
-    <div class="profile-section">
-      <div class="profile-row" id="navbar-avatar-row" style="cursor:pointer" onclick="toggleNavbarAvatarPref()">
-        <div class="profile-row-icon" style="background:var(--ter-3-bg);color:var(--ter-3)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="exp.navbaravatar.title">Foto de perfil en Más opciones</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.navbaravatar.desc">Reemplaza el botón Más opciones de la NavBar por tu foto de perfil.</div>
-        </div>
-        <div id="navbar-avatar-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="navbar-avatar-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
-      </div>
     </div>
   </div>
 </div>
@@ -8322,7 +8323,7 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.32.10.1-beta';
+const APP_VERSION = '1.32.11-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -8857,8 +8858,8 @@ const I18N = {
   'exp.simplificada.desc.mobile': { es: 'Reemplaza el NavBar por un menú simple', en: 'Replaces the NavBar with a simple menu.', nl: 'Vervangt de NavBar door een eenvoudig menu met titel en hamburgerpictogram.' },
   'exp.simplificada.desc.desktop': { es: 'Disponible solo en dispositivos móviles. Actívala y ábrela desde tu teléfono.', en: 'Only available on mobile devices. Enable it and open it from your phone.', nl: 'Alleen beschikbaar op mobiele apparaten. Schakel het in en open het vanaf je telefoon.' },
   'exp.simplificada.help': { es: 'Al activarla, se desactivan las Notificaciones, Live, el Tutorial y el panel de administración. Para volver a la versión normal, entra a Configuración desde el título "Fleming".', en: 'When enabled, Notifications, Live, the Tutorial and the admin panel are disabled. To return to the normal version, open Settings from the "Fleming" title.', nl: 'Bij activering worden Meldingen, Live, de Tutorial en het beheerpaneel uitgeschakeld. Ga naar Instellingen via de titel "Fleming" om terug te keren naar de normale versie.' },
-  'exp.navbaravatar.title': { es: 'Foto de perfil en Más opciones', en: 'Profile photo in More options', nl: 'Profielfoto in Meer opties' },
-  'exp.navbaravatar.desc':  { es: 'Reemplaza el botón Más opciones de la NavBar por tu foto de perfil, manteniendo el resto igual', en: 'Replaces the More options button in the NavBar with your profile photo, keeping everything else the same', nl: 'Vervangt de knop Meer opties in de NavBar door je profielfoto, de rest blijft hetzelfde' },
+  'pref.navbaricon.title':  { es: 'Mostrar ícono en vez de tu foto de perfil', en: 'Show icon instead of your profile photo', nl: 'Toon icoon in plaats van je profielfoto' },
+  'pref.navbaricon.desc':   { es: 'El botón "Más opciones" de la NavBar usa tu foto de perfil por defecto. Actívalo para volver a ver el botón con el ícono de siempre.', en: 'The "More options" button in the NavBar uses your profile photo by default. Turn this on to go back to seeing the button with the usual icon.', nl: 'De knop "Meer opties" in de NavBar gebruikt standaard je profielfoto. Zet dit aan om de knop weer met het gebruikelijke icoon te zien.' },
   'exp.clima.section': { es: 'Clima', en: 'Weather', nl: 'Weer' },
   'exp.clima.title':   { es: 'Clima en asignaciones', en: 'Weather in assignments', nl: 'Weer bij toewijzingen' },
   'exp.clima.desc':    { es: 'Muestra el pronóstico del día en cada asignación de casa en casa', en: 'Shows the forecast for the day and time of each door-to-door assignment, next to the time', nl: 'Toont de weersverwachting voor de dag en het tijdstip van elke huis-aan-huis toewijzing, naast de tijd' },
@@ -17632,8 +17633,8 @@ function openPrefScreen(name) {
   if (name === 'notificaciones') renderPrefNotifList();
   if (name === 'almacenamiento') renderStorageList();
   if (name === 'ayuda') renderAyudaTipsList();
-  if (name === 'preferencias') { updateAnimationsEnabledToggleUI(); updateWeatherToggleUI(); }
-  if (name === 'experimentos') { updateAccentSwatchesUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarAvatarToggleUI(); updateNavbarBtnSizeUI(); if (typeof updateLiveHostToggleUI === 'function') updateLiveHostToggleUI(); if (typeof updateSubnavMenuToggleUI === 'function') updateSubnavMenuToggleUI(); if (typeof updateModoSencilloToggleUI === 'function') updateModoSencilloToggleUI(); }
+  if (name === 'preferencias') { updateAnimationsEnabledToggleUI(); updateWeatherToggleUI(); updateNavbarIconToggleUI(); }
+  if (name === 'experimentos') { updateAccentSwatchesUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBtnSizeUI(); if (typeof updateLiveHostToggleUI === 'function') updateLiveHostToggleUI(); if (typeof updateSubnavMenuToggleUI === 'function') updateSubnavMenuToggleUI(); if (typeof updateModoSencilloToggleUI === 'function') updateModoSencilloToggleUI(); }
   if (name === 'version') {
     const val = document.getElementById('pref-version-screen-value');
     if (val) val.textContent = 'Versión ' + APP_VERSION;
@@ -20578,17 +20579,26 @@ function applySimplifiedModeUI() {
 }
 window.addEventListener('resize', () => { try { applySimplifiedModeUI(); } catch {} });
 
-// ══════════════ Experimentos: Foto de perfil en Más opciones (v1.25.0-beta) ══
+// ══════════════ Foto de perfil en Más opciones (v1.25.0-beta; por defecto
+// desde v1.32.11-beta) ══════════════════════════════════════════════════
 // Reemplaza el botón "Más opciones" de la NavBar por un botón con la foto de
 // perfil del usuario, que abre el mismo Menú de Opciones de siempre. El resto
 // de la NavBar (incluyendo Notificaciones) no cambia.
+// v1.32.11-beta: deja de ser un experimento (ya no requiere desbloquear
+// Experimentos) y pasa a ser la configuración por defecto. Quien prefiera
+// seguir viendo el botón con el ícono de siempre puede activarlo desde
+// Preferencias → Apariencia (toggleNavbarIconPref, más abajo) — internamente
+// sigue siendo la misma preferencia invertida, solo cambia dónde se controla
+// y cuál es su valor por defecto cuando el usuario nunca la ha tocado.
 function isNavbarAvatarSelected() {
-  return localStorage.getItem('fleming_navbar_options_avatar') === 'true';
+  const v = localStorage.getItem('fleming_navbar_options_avatar');
+  return v === null ? true : v === 'true';
 }
 function toggleNavbarAvatarPref() {
   const next = !isNavbarAvatarSelected();
   localStorage.setItem('fleming_navbar_options_avatar', next ? 'true' : 'false');
   updateNavbarAvatarToggleUI();
+  updateNavbarIconToggleUI();
   applyNavbarAvatarUI();
   if (next) {
     showToast('Foto de perfil en Más opciones activada', 'success');
@@ -20601,6 +20611,28 @@ function updateNavbarAvatarToggleUI() {
   const thumb  = document.getElementById('navbar-avatar-thumb');
   if (!toggle || !thumb) return;
   const on = isNavbarAvatarSelected();
+  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
+  thumb.style.left = on ? '21px' : '3px';
+}
+// Toggle "invertido" en Preferencias → Apariencia: activarlo trae de vuelta
+// el ícono de Más Opciones (equivale a desactivar la Foto de Perfil).
+function toggleNavbarIconPref() {
+  const wantIcon = isNavbarAvatarSelected(); // estado actual: avatar activo → al tocar, se pasa a ícono
+  localStorage.setItem('fleming_navbar_options_avatar', wantIcon ? 'false' : 'true');
+  updateNavbarIconToggleUI();
+  updateNavbarAvatarToggleUI();
+  applyNavbarAvatarUI();
+  if (wantIcon) {
+    showToast('Ícono de Más Opciones activado', 'success');
+  } else {
+    showToast('Foto de perfil en Más opciones activada', 'success');
+  }
+}
+function updateNavbarIconToggleUI() {
+  const toggle = document.getElementById('navbar-icon-toggle');
+  const thumb  = document.getElementById('navbar-icon-thumb');
+  if (!toggle || !thumb) return;
+  const on = !isNavbarAvatarSelected(); // ON = mostrando ícono (avatar desactivado)
   toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
   thumb.style.left = on ? '21px' : '3px';
 }
