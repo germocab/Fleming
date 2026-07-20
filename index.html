@@ -2970,8 +2970,23 @@
   .vmc-cal-cell.empty { visibility: hidden; }
   .vmc-cal-cell.has-week { color: var(--text); cursor: pointer; transition: background 0.15s, color 0.15s; }
   .vmc-cal-cell.has-week:hover { background: var(--accent-light); color: var(--accent); }
-  .vmc-cal-cell.today:not(.selected) { box-shadow: inset 0 0 0 1.5px var(--accent); color: var(--accent); }
-  .vmc-cal-cell.selected { background: var(--accent); color: #fff; box-shadow: none; }
+  .vmc-cal-cell.today { box-shadow: inset 0 0 0 1.5px var(--accent); color: var(--accent); position: relative; z-index: 2; }
+  /* v1.31.10-beta: la semana seleccionada ya no marca cada día con un círculo
+     sólido; ahora se dibuja un rectángulo translúcido continuo detrás de los
+     días de esa semana, para que se lea como "una semana" y no como días
+     individuales seleccionados. */
+  .vmc-cal-cell.week-highlight { color: var(--text); }
+  .vmc-cal-cell.week-highlight::before {
+    content: '';
+    position: absolute;
+    top: 8%; bottom: 8%; left: -2px; right: -2px;
+    background: var(--accent);
+    opacity: 0.16;
+    z-index: -1;
+  }
+  .vmc-cal-cell.week-highlight-start::before { left: 0; border-radius: 999px 0 0 999px; }
+  .vmc-cal-cell.week-highlight-end::before { right: 0; border-radius: 0 999px 999px 0; }
+  .vmc-cal-cell.week-highlight.today { color: var(--accent); }
   .vmc-cal-empty-msg { text-align: center; font-size: 0.78rem; color: var(--text3); padding: 0.5rem 0 0.15rem; }
 
   .vmc-program-container { padding: 0 1rem 5rem; }
@@ -5892,7 +5907,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       </div>
       <div class="admin-tabs-row" data-section="reuniones">
         <button class="admin-tab" data-tab="vmc" data-i18n="admin.tab.vmc" onclick="switchAdminTab('vmc')">Vida y Ministerio</button>
-        <button class="admin-tab" data-tab="fin-semana" data-i18n="admin.tab.fin-semana" onclick="switchAdminTab('fin-semana')">Pública</button>
+        <button class="admin-tab" data-tab="fin-semana" data-i18n="admin.tab.fin-semana" onclick="switchAdminTab('fin-semana')">Reunión Pública</button>
         <button class="admin-tab" data-tab="audiovideo" data-i18n="admin.tab.audiovideo" onclick="switchAdminTab('audiovideo')">Audio y Video</button>
         <button class="admin-tab" data-tab="acomodacion" data-i18n="admin.tab.acomodacion" onclick="switchAdminTab('acomodacion')">Acomodación</button>
         <button class="admin-tab" data-tab="aseo-salon" data-i18n="admin.tab.aseo-salon" onclick="switchAdminTab('aseo-salon')">Aseo Salón</button>
@@ -6037,7 +6052,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
            es compartido: switchAdminTab() lo reubica (appendChild) dentro de
            #admin-audiovideo o #admin-acomodacion según cuál esté activa, y
            respActiveModulo controla qué cargos se muestran/editan/borran. -->
-      <div id="resp-admin-shared">
+      <div id="resp-admin-shared" style="display:none">
         <div class="sub-tabs" style="margin-bottom:1.1rem">
           <button class="sub-tab active" id="resp-admin-tab-hermanos" onclick="switchRespAdminTab('hermanos')">Hermanos</button>
           <button class="sub-tab" id="resp-admin-tab-asignar" onclick="switchRespAdminTab('asignar')">Asignar Jueves/Sábado</button>
@@ -6140,10 +6155,10 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
         <div id="admin-vmc-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando VMC</div></div></div>
       </div>
 
-      <!-- ── Pública Admin Section ── -->
+      <!-- ── Reunión Pública Admin Section ── -->
       <div class="admin-section" id="admin-fin-semana">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
-          <span style="flex:1;font-size:0.95rem;font-weight:700">Pública</span>
+          <span style="flex:1;font-size:0.95rem;font-weight:700">Reunión Pública</span>
           <button class="btn-secondary" onclick="openFsWeekModal(null)">+ Nueva semana</button>
         </div>
         <div id="admin-fs-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Servicio de Campo</div></div></div>
@@ -7984,7 +7999,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.31.5-beta';
+const APP_VERSION = '1.31.10-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -8376,7 +8391,7 @@ const I18N = {
   'subtab.carritos':        { es: 'Carritos',                en: 'Carts',              nl: 'Karretjes' },
   'subtab.grupos':          { es: 'Grupos',                  en: 'Groups',             nl: 'Groepen' },
   'subtab.vida-ministerio': { es: 'Vida y Ministerio',       en: 'Christian Life and Ministry' },
-  'subtab.fin-semana':      { es: 'Pública',                 en: 'Public Meeting' },
+  'subtab.fin-semana':      { es: 'Reunión Pública',         en: 'Public Meeting' },
   'subtab.aseo-salon':      { es: 'Aseo del Salón',          en: 'Hall Cleaning' },
   'subtab.hospitalidad':    { es: 'Hospitalidad',            en: 'Hospitality' },
   'subtab.responsabilidades': { es: 'Responsabilidades',     en: 'Responsibilities' },
@@ -8391,7 +8406,7 @@ const I18N = {
   'admin.tab.grupos':       { es: 'Grupos',                  en: 'Groups',            nl: 'Groepen' },
   'admin.tab.carritos':     { es: 'Carritos',                en: 'Carts' },
   'admin.tab.vmc':          { es: 'Vida y Ministerio',       en: 'Christian Life and Ministry' },
-  'admin.tab.fin-semana':   { es: 'Pública',                 en: 'Public Meeting' },
+  'admin.tab.fin-semana':   { es: 'Reunión Pública',         en: 'Public Meeting' },
   'admin.tab.audiovideo':   { es: 'Audio y Video',           en: 'Audio & Video' },
   'admin.tab.acomodacion':  { es: 'Acomodación',             en: 'Ushering' },
   'admin.tab.aseo-salon':   { es: 'Aseo Salón',              en: 'Hall Cleaning' },
@@ -10277,7 +10292,7 @@ async function renderInicio() {
     }
     if (items.length) {
       sections.push({
-        key: 'fs', title: 'Pública', color: '#34c759', bg: 'rgba(52,199,89,0.12)',
+        key: 'fs', title: 'Reunión Pública', color: '#34c759', bg: 'rgba(52,199,89,0.12)',
         icon: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
         items: items.slice(0, 5),
       });
@@ -11243,7 +11258,7 @@ const VIEWER_SECTION_LABELS = {
   'grupos':            'Grupos',
   'carritos':          'Carritos',
   'vida-ministerio':   'Vida y Ministerio',
-  'fin-semana':        'Pública',
+  'fin-semana':        'Reunión Pública',
   'aseo-salon':        'Aseo del Salón',
   'responsabilidades': 'Responsabilidades',
 };
@@ -11463,6 +11478,7 @@ async function switchAdminTab(tab) {
     const shared = document.getElementById('resp-admin-shared');
     const target = document.getElementById('admin-' + tab);
     if (shared && target && shared.parentElement !== target) target.appendChild(shared);
+    if (shared) shared.style.display = '';
     loadResponsabilidadesAdmin();
   }
   if (tab === 'aseo-salon') loadAseoSalonAdmin();
@@ -15696,7 +15712,7 @@ const PERM_MODULES = [
   { key: 'territory_reports', label: 'Reportes de Territorio', group: 'predicacion', icon: '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="11" x2="15" y2="11"/></svg>' },
   // ── Reuniones ──────────────────────────────────────────────────────────────
   { key: 'vida_ministerio',   label: 'Vida y Ministerio',  group: 'reuniones', icon: '<svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>' },
-  { key: 'fin_semana',        label: 'Pública',            group: 'reuniones', icon: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/></svg>' },
+  { key: 'fin_semana',        label: 'Reunión Pública',    group: 'reuniones', icon: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/></svg>' },
   { key: 'hospitalidad',      label: 'Hospitalidad',       group: 'reuniones', icon: '<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' },
   { key: 'aseo_salon',        label: 'Aseo del Salón',     group: 'reuniones', icon: '<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>' },
   { key: 'audiovideo',        label: 'Audio y Video',       group: 'reuniones', icon: '<svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>' },
@@ -21791,7 +21807,7 @@ async function openFsWeekModal(id) {
   overlay.classList.add('open');
 
   const week = id ? fsWeeks.find(w => w.id === id) : null;
-  document.getElementById('fs-modal-title').textContent = week ? 'Editar semana — Pública' : 'Nueva semana — Pública';
+  document.getElementById('fs-modal-title').textContent = week ? 'Editar semana — Reunión Pública' : 'Nueva semana — Reunión Pública';
 
   document.getElementById('fs-date-start').value          = week?.date_start          || '';
   document.getElementById('fs-date-end').value            = week?.date_end            || '';
@@ -22069,16 +22085,38 @@ function calRenderMonth(prefix) {
   const monthLabel = md.toLocaleDateString('es-CL', { month: 'long', year: 'numeric' });
   const dayNames = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
-  let cells = '';
-  for (let i = 0; i < startOffset; i++) cells += `<div class="vmc-cal-cell empty"></div>`;
+  // v1.31.10-beta: primero se arma la info de cada día (incluyendo si
+  // pertenece a la semana seleccionada) para poder saber, en una segunda
+  // pasada, cuál es el primer y último día resaltado de cada fila — así el
+  // rectángulo de semana seleccionada se dibuja continuo, con esquinas
+  // redondeadas solo en sus extremos, en vez de un círculo por día.
+  const dayInfos = [];
+  for (let i = 0; i < startOffset; i++) dayInfos.push(null);
   for (let d = 1; d <= daysInMonth; d++) {
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
     const week = weeks.find(w => dateStr >= w.date_start && dateStr <= w.date_end);
-    const isSelected = !!week && week.id === selId;
-    const isToday = dateStr === todayStr;
+    dayInfos.push({
+      d, week,
+      isSelected: !!week && week.id === selId,
+      isToday: dateStr === todayStr,
+    });
+  }
+
+  let cells = '';
+  for (let i = 0; i < dayInfos.length; i++) {
+    const info = dayInfos[i];
+    if (!info) { cells += `<div class="vmc-cal-cell empty"></div>`; continue; }
+    const { d, week, isSelected, isToday } = info;
+    const col = i % 7;
+    const prevSelected = col > 0 && dayInfos[i - 1] && dayInfos[i - 1].isSelected;
+    const nextSelected = col < 6 && dayInfos[i + 1] && dayInfos[i + 1].isSelected;
     const classes = ['vmc-cal-cell'];
     if (week) classes.push('has-week');
-    if (isSelected) classes.push('selected');
+    if (isSelected) {
+      classes.push('week-highlight');
+      if (!prevSelected) classes.push('week-highlight-start');
+      if (!nextSelected) classes.push('week-highlight-end');
+    }
     if (isToday) classes.push('today');
     cells += `<div class="${classes.join(' ')}"${week ? ` onclick="calPickDate('${prefix}','${week.id}')"` : ''}>${d}</div>`;
   }
@@ -22727,7 +22765,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
         <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         Volver
       </button>
-      <div class="vmc-modal-title" id="fs-modal-title">Nueva semana — Pública</div>
+      <div class="vmc-modal-title" id="fs-modal-title">Nueva semana — Reunión Pública</div>
     </div>
     <div class="vmc-modal-body" id="fs-modal-body">
 
