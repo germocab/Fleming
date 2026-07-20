@@ -608,9 +608,47 @@
     background: transparent;
     padding: 0 1.25rem;
     overflow-x: auto; scrollbar-width: none;
+    display: flex; align-items: center; gap: 4px;
   }
   .sub-tabs-wrap::-webkit-scrollbar { display: none; }
   .sub-tabs { display: flex; gap: 0; white-space: nowrap; }
+
+  /* ── Menú de Sub-secciones (Experimentos, v1.32.0-beta): botón "hamburguesa"
+     al inicio de la barra de Sub-secciones, exclusivo de móvil/pantallas
+     pequeñas. Abre una pantalla con transparencia/blur que lista todas las
+     Sub-secciones de la sección actual, para quienes no saben que la barra
+     es deslizable. ── */
+  .subnav-menu-btn {
+    display: none; flex-shrink: 0; align-items: center; justify-content: center;
+    width: 34px; height: 34px; margin: 8px 0; border-radius: 10px; border: none;
+    background: var(--surface3); color: var(--text2); cursor: pointer;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .subnav-menu-btn:active { transform: scale(0.92); background: var(--surface2); }
+  .subnav-menu-btn svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2.3; stroke-linecap: round; }
+  @media (max-width: 639px) {
+    body.subnavmenu-enabled .subnav-menu-btn { display: flex; }
+  }
+
+  .subnav-menu-overlay {
+    display: none; position: fixed; inset: 0; z-index: 240;
+    background: var(--modal-overlay-bg); backdrop-filter: blur(14px) saturate(180%);
+    -webkit-backdrop-filter: blur(14px) saturate(180%);
+    flex-direction: column;
+  }
+  .subnav-menu-overlay.open { display: flex; animation: fadeIn 0.22s var(--ease-fluid-soft); }
+  .subnav-menu-list {
+    flex: 1; display: flex; flex-direction: column; align-items: stretch; justify-content: center;
+    gap: 12px; padding: 1.5rem 1.5rem 3rem; max-width: 420px; margin: 0 auto; width: 100%;
+  }
+  .subnav-menu-item {
+    font-family: var(--font); font-size: 1rem; font-weight: 700; text-align: center;
+    color: var(--text); background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 16px 18px; cursor: pointer; box-shadow: var(--shadow);
+    transition: transform 0.15s, background 0.15s;
+  }
+  .subnav-menu-item:active { transform: scale(0.97); background: var(--surface2); }
+  .subnav-menu-item.active { background: var(--accent); color: #fff; border-color: transparent; }
   .sub-tab {
     padding: 15px 18px; border: none; background: transparent;
     font-family: var(--font); font-size: 0.92rem; font-weight: 500;
@@ -5686,6 +5724,20 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
   </div>
   </div>
 
+  <!-- ══ Menú de Sub-secciones (Experimentos, v1.32.0-beta): pantalla con
+       transparencia que lista todas las Sub-secciones de la sección actual.
+       Exclusivo de móvil/pantallas pequeñas — se abre desde el botón
+       hamburguesa al inicio de la barra de Sub-secciones. ══ -->
+  <div class="subnav-menu-overlay" id="subnav-menu-overlay" onclick="if(event.target===this) closeSubnavMenu()">
+    <nav class="subpage-topbar">
+      <button class="pill-back-btn" onclick="closeSubnavMenu()" title="Atrás">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="pill-header-title" id="subnav-menu-title">—</span>
+    </nav>
+    <div class="subnav-menu-list" id="subnav-menu-list"></div>
+  </div>
+
   <!-- ══ Versión Simplificada: header alternativo (solo móvil + Experimentos) ══ -->
   <div class="simplified-header-shell" id="simplified-header-shell" style="display:none">
     <div class="simp-topbar">
@@ -7589,6 +7641,28 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       </div>
     </div>
 
+    <!-- Menú de Sub-secciones: función en pruebas, v1.32.0-beta. Agrega un botón
+         "hamburguesa" al inicio de la barra de Sub-secciones en Predicación y
+         Reuniones (solo móvil/pantallas pequeñas) que abre una pantalla con
+         transparencia y lista todas las Sub-secciones de la sección actual,
+         para quienes no saben que esa barra se puede deslizar. -->
+    <div class="profile-section">
+      <div class="profile-section-title" data-i18n="exp.subnavmenu.section">Menú de Sub-secciones</div>
+      <div class="profile-row" style="cursor:pointer" onclick="toggleSubnavMenuPref()">
+        <div class="profile-row-icon" style="background:var(--ter-4-bg);color:var(--ter-4)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.3;stroke-linecap:round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="exp.subnavmenu.title">Activar Menú de Sub-secciones</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.subnavmenu.desc">Agrega un botón al inicio de la barra de Sub-secciones (Predicación y Reuniones) que abre la lista completa. Solo en móvil.</div>
+        </div>
+        <div id="subnav-menu-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="subnav-menu-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
+      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.subnavmenu.help">Pensada para quienes no saben que la barra de Sub-secciones se puede deslizar horizontalmente. En Desktop no aplica, ya que ahí caben todas.</div>
+    </div>
+
     <!-- LiveHost: función en pruebas, v1.30.0-beta. Permite al Encargado de una
          asignación de casa en casa compartir la calle en la que está (no un
          punto exacto en un mapa) con quienes vean esa asignación, por hasta 2
@@ -7999,7 +8073,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.31.10-beta';
+const APP_VERSION = '1.32.0-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -8545,6 +8619,10 @@ const I18N = {
   'exp.liveaa.title':   { es: 'Live Siempre Activo', en: 'Live Always On', nl: 'Live Altijd Actief' },
   'exp.liveaa.desc':    { es: 'Live sigue activo en segundo plano al salir de la asignación. La tarjeta con Live activo brilla en verde en Inicio', en: 'Live keeps running in the background when you leave the assignment. The card with active Live glows green on Home', nl: 'Live blijft actief op de achtergrond wanneer je de toewijzing verlaat. De kaart met actieve Live licht groen op bij Start' },
   'exp.liveaa.help':    { es: 'Para detener la sesión: entra a la asignación y presiona Pausa en la tarjeta Live, o detenla desde el panel de Notificaciones.', en: 'To stop the session: open the assignment and press Pause on the Live card, or stop it from the Notifications panel.', nl: 'Om de sessie te stoppen: open de toewijzing en druk op Pauze op de Live-kaart, of stop deze via het Meldingenpaneel.' },
+  'exp.subnavmenu.section': { es: 'Menú de Sub-secciones', en: 'Sub-section Menu', nl: 'Subsectiemenu' },
+  'exp.subnavmenu.title':   { es: 'Activar Menú de Sub-secciones', en: 'Enable Sub-section Menu', nl: 'Subsectiemenu inschakelen' },
+  'exp.subnavmenu.desc':    { es: 'Agrega un botón al inicio de la barra de Sub-secciones (Predicación y Reuniones) que abre la lista completa. Solo en móvil.', en: 'Adds a button at the start of the Sub-section bar (Preaching and Meetings) that opens the full list. Mobile only.', nl: 'Voegt een knop toe aan het begin van de subsectiebalk (Prediking en Vergaderingen) die de volledige lijst opent. Alleen op mobiel.' },
+  'exp.subnavmenu.help':    { es: 'Pensada para quienes no saben que la barra de Sub-secciones se puede deslizar horizontalmente. En Desktop no aplica, ya que ahí caben todas.', en: "Designed for people who don't know the Sub-section bar can be swiped horizontally. Does not apply on Desktop, where all of them already fit.", nl: 'Bedoeld voor mensen die niet weten dat de subsectiebalk horizontaal geveegd kan worden. Niet van toepassing op Desktop, waar ze allemaal al passen.' },
   'exp.livehost.section': { es: 'LiveHost', en: 'LiveHost', nl: 'LiveHost' },
   'exp.livehost.title':   { es: 'Activar LiveHost', en: 'Enable LiveHost', nl: 'LiveHost inschakelen' },
   'exp.livehost.desc':    { es: 'Como Encargado, comparte la calle en la que estás con quienes vean tu asignación de casa en casa, por hasta 2 horas.', en: 'As the person in charge, share the street you are on with anyone viewing your house-to-house assignment, for up to 2 hours.', nl: 'Deel als verantwoordelijke de straat waar je bent met iedereen die je huis-aan-huis-toewijzing bekijkt, tot 2 uur lang.' },
@@ -10781,6 +10859,7 @@ async function enterApp() {
 
   const app = document.getElementById('app');
   app.style.display = 'flex'; app.style.flexDirection = 'column';
+  applySubnavMenuBodyClass();
 
   const initials = currentUser.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
   document.getElementById('user-avatar').textContent = initials;
@@ -11042,10 +11121,69 @@ function renderSubTabs(mainTab) {
   const wrap = document.getElementById('sub-tabs-wrap');
   const tabs = (SUB_TABS[mainTab] || []).filter(t => t.id !== 'carritos' || carritosVisibleForCurrentUser());
   if (!tabs.length) { wrap.innerHTML = ''; return; }
-  wrap.innerHTML = '<div class="sub-tabs">' +
+  const hamburger = tabs.length > 1
+    ? `<button class="subnav-menu-btn" onclick="openSubnavMenu()" title="Menú de Sub-secciones" aria-label="Menú de Sub-secciones">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>`
+    : '';
+  wrap.innerHTML = hamburger + '<div class="sub-tabs">' +
     tabs.map(t => `<button class="sub-tab${currentSubTab===t.id?' active':''}" onclick="switchSubTab('${t.id}')">${t.label}</button>`).join('') +
     '</div>';
+  // Si el Menú de Sub-secciones está abierto mientras se re-renderiza la barra
+  // (p.ej. al cambiar de Sub-sección desde dentro del propio menú), refresca
+  // su lista para reflejar cuál quedó activa.
+  if (document.getElementById('subnav-menu-overlay')?.classList.contains('open')) {
+    renderSubnavMenuList(mainTab, tabs);
+  }
 }
+
+// ── Menú de Sub-secciones (Experimentos, v1.32.0-beta) ──────────────────────
+// Ayuda a quienes no saben que la barra de Sub-secciones es deslizable: un
+// botón "hamburguesa" al inicio de la barra abre una pantalla con
+// transparencia que lista todas las Sub-secciones de la sección actual.
+// Exclusiva de móvil/pantallas pequeñas; en Desktop la NavBar ya tiene
+// espacio de sobra para mostrarlas todas. Función experimental: debe
+// activarse primero en Configuración → Experimentos.
+function isSubnavMenuEnabled() {
+  return localStorage.getItem('fleming_subnavmenu_enabled') === 'true';
+}
+function toggleSubnavMenuPref() {
+  const next = !isSubnavMenuEnabled();
+  localStorage.setItem('fleming_subnavmenu_enabled', next ? 'true' : 'false');
+  updateSubnavMenuToggleUI();
+  applySubnavMenuBodyClass();
+  showToast(next ? 'Menú de Sub-secciones activado' : 'Menú de Sub-secciones desactivado', next ? 'success' : '');
+}
+function updateSubnavMenuToggleUI() {
+  const toggle = document.getElementById('subnav-menu-toggle');
+  const thumb  = document.getElementById('subnav-menu-thumb');
+  if (!toggle || !thumb) return;
+  const on = isSubnavMenuEnabled();
+  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
+  thumb.style.left = on ? '21px' : '3px';
+}
+function applySubnavMenuBodyClass() {
+  document.body.classList.toggle('subnavmenu-enabled', isSubnavMenuEnabled());
+}
+function renderSubnavMenuList(mainTab, tabsParam) {
+  const list = document.getElementById('subnav-menu-list');
+  const title = document.getElementById('subnav-menu-title');
+  if (!list || !title) return;
+  const tabs = tabsParam || (SUB_TABS[mainTab] || []).filter(t => t.id !== 'carritos' || carritosVisibleForCurrentUser());
+  title.textContent = mainTab === 'reuniones' ? t('nav.reuniones') : t('nav.predicacion');
+  list.innerHTML = tabs.map(tb =>
+    `<button class="subnav-menu-item${currentSubTab===tb.id?' active':''}" onclick="switchSubTab('${tb.id}');closeSubnavMenu()">${tb.label}</button>`
+  ).join('');
+}
+function openSubnavMenu() {
+  if (!isMobile()) return;
+  renderSubnavMenuList(currentMainTab);
+  document.getElementById('subnav-menu-overlay')?.classList.add('open');
+}
+function closeSubnavMenu() {
+  document.getElementById('subnav-menu-overlay')?.classList.remove('open');
+}
+window.addEventListener('resize', () => { if (!isMobile()) closeSubnavMenu(); });
 
 // ── Nav state persistence (survives reload) ──────────────────────────────────
 function _saveNavState() {
@@ -17210,7 +17348,7 @@ function openPrefScreen(name) {
   if (name === 'almacenamiento') renderStorageList();
   if (name === 'ayuda') renderAyudaTipsList();
   if (name === 'preferencias') { updateAnimationsEnabledToggleUI(); updateWeatherToggleUI(); }
-  if (name === 'experimentos') { updateAccentSwatchesUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarAvatarToggleUI(); updateNavbarBtnSizeUI(); if (typeof updateLiveHostToggleUI === 'function') updateLiveHostToggleUI(); }
+  if (name === 'experimentos') { updateAccentSwatchesUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarAvatarToggleUI(); updateNavbarBtnSizeUI(); if (typeof updateLiveHostToggleUI === 'function') updateLiveHostToggleUI(); if (typeof updateSubnavMenuToggleUI === 'function') updateSubnavMenuToggleUI(); }
   if (name === 'version') {
     const val = document.getElementById('pref-version-screen-value');
     if (val) val.textContent = 'Versión ' + APP_VERSION;
