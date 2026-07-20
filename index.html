@@ -2973,16 +2973,18 @@
      rápido de Sub-sección. Solo el chip de la semana seleccionada queda
      visible, centrado, con una flecha a la derecha para avanzar y, en
      cuanto se deja de estar en "Esta semana", también una a la izquierda
-     para retroceder. ── */
+     para retroceder.
+     v1.32.10-beta: se elimina el botón de Calendario aparte (quedaba
+     desalineado verticalmente respecto al chip) y, junto con él, el hack de
+     centrado absoluto que necesitaba para compensar su espacio — ya no hace
+     falta, pues ahora .vmc-user-week-nav es el único contenido de la fila y
+     un centrado por flexbox normal es suficiente y siempre correcto, tanto
+     en "Esta semana" (sin flechas) como con una o dos flechas visibles.
+     Tocar el chip abre la vista de calendario (antes exclusiva del botón). ── */
   .vmc-user-week-nav {
     display: flex; align-items: center; justify-content: center; gap: 6px;
-    /* v1.32.9.1-beta: centrado absoluto respecto al ancho total de la fila
-       (no solo del espacio libre a la izquierda del botón de Calendario),
-       para que el chip quede realmente centrado en la plataforma. */
-    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-    pointer-events: none;
+    width: 100%;
   }
-  .vmc-user-week-nav > * { pointer-events: auto; }
   .vmc-week-arrow {
     flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
@@ -2992,37 +2994,27 @@
   .vmc-week-arrow svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; }
   .vmc-week-arrow:hover { background: var(--accent-light); color: var(--accent); }
   .vmc-week-arrow:active { transform: scale(0.88); }
-  .vmc-user-week-nav .vmc-week-pill { cursor: default; }
+  /* El chip ahora es el disparador de la vista de calendario (v1.32.10-beta). */
+  .vmc-user-week-nav .vmc-week-pill { transition: border-color 0.2s, background 0.2s, color 0.2s, transform 0.15s, box-shadow 0.2s; }
+  .vmc-user-week-nav .vmc-week-pill:hover { filter: brightness(0.97); }
+  .vmc-user-week-nav .vmc-week-pill:active { transform: scale(0.96); }
+  .vmc-user-week-nav .vmc-week-pill.cal-open { box-shadow: 0 0 0 2px var(--accent); }
 
   
   .vmc-week-selector-row {
     position: relative;
-    display: flex; align-items: center; gap: 8px;
+    display: flex; align-items: center;
     padding: 0 1rem 0.75rem; margin-bottom: 0.25rem;
   }
-  .vmc-week-selector-row .vmc-user-week-selector { padding: 0; margin-bottom: 0; flex: 1; min-width: 0; }
-
-  .vmc-cal-btn {
-    flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%;
-    margin-left: auto;
-    display: flex; align-items: center; justify-content: center;
-    background: var(--surface2); border: 1.5px solid var(--border);
-    color: var(--text2); cursor: pointer; padding: 0;
-    transition: border-color 0.2s, background 0.2s, color 0.2s, transform 0.15s;
-  }
-  .vmc-cal-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
-  .vmc-cal-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
-  .vmc-cal-btn:active { transform: scale(0.92); }
-  .vmc-cal-btn.active { border-color: var(--accent); background: var(--accent); color: #fff; }
 
   .vmc-cal-popover {
     display: none;
-    position: absolute; top: calc(100% + 6px); right: 1rem;
+    position: absolute; top: calc(100% + 6px); left: 0; right: 0; margin: 0 auto;
     width: min(310px, calc(100vw - 2rem));
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius); box-shadow: var(--shadow-lg);
     padding: 0.85rem 0.9rem 1rem; z-index: 40;
-    transform-origin: top right;
+    transform-origin: top center;
   }
   .vmc-cal-popover.open { display: block; animation: menuMorphIn 0.28s var(--ease-fluid-snappy); }
   @media (max-width: 480px) { .vmc-cal-popover { right: -0.25rem; left: -0.25rem; width: auto; } }
@@ -7974,6 +7966,16 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
         </div>
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
+      <div class="profile-row" id="pref-tutorial-vmc-row" style="cursor:pointer" onclick="startVmcTutorial()">
+        <div class="profile-row-icon" style="background:var(--ter-3-bg);color:var(--ter-3)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="settings.tutorial.vmc">Ver tutorial de Vida y Ministerio</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.tutorial.vmc.desc">Repasa cómo funciona el sistema de semanas y las asignaciones</div>
+        </div>
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
     </div>
     <div class="profile-section" id="pref-tips-section">
       <div class="profile-section-title" data-i18n="settings.tips">Tips</div>
@@ -8315,7 +8317,7 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.32.9.1-beta';
+const APP_VERSION = '1.32.10-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -8785,6 +8787,8 @@ const I18N = {
   'settings.tutorial.desc':     { es: 'Repasa cómo funcionan las secciones y funciones principales', en: 'Review how the main sections and features work', nl: 'Bekijk hoe de belangrijkste secties en functies werken' },
   'settings.tutorial.h2h':      { es: 'Ver tutorial de Asignaciones', en: 'View Assignments tutorial', nl: 'Tutorial Toewijzingen bekijken' },
   'settings.tutorial.h2h.desc': { es: 'Repasa la pantalla de detalle de una asignación de casa en casa', en: 'Review the detail screen of a door-to-door assignment', nl: 'Bekijk het detailscherm van een huis-aan-huis toewijzing' },
+  'settings.tutorial.vmc':      { es: 'Ver tutorial de Vida y Ministerio', en: 'View Life and Ministry tutorial', nl: 'Tutorial Leven en Bediening bekijken' },
+  'settings.tutorial.vmc.desc': { es: 'Repasa cómo funciona el sistema de semanas y las asignaciones', en: 'Review how the weeks system and assignments work', nl: 'Bekijk hoe het weeksysteem en de toewijzingen werken' },
   'settings.reportar':          { es: 'Sugerencias',              en: 'Suggestions', nl: 'Suggesties' },
   'settings.reportar.desc':     { es: 'Esta plataforma está en fase Beta — cuéntanos si algo falla', en: 'This platform is in Beta — let us know if something breaks', nl: 'Dit platform bevindt zich in de Beta-fase — laat ons weten als er iets misgaat' },
   'settings.mantenimiento':     { es: 'Mantenimiento',            en: 'Maintenance', nl: 'Onderhoud' },
@@ -18494,6 +18498,39 @@ const TUTORIAL_STEPS_H2H = [
   },
 ];
 
+// ── Tutorial de Vida y Ministerio (v1.32.10-beta) ─────────────────────────
+// Ahora que la vista de calendario de "Vida y Ministerio" y "Reunión
+// Pública" solo se abre tocando el chip de la semana (ya no hay un botón de
+// Calendario aparte), este comportamiento queda "escondido" a simple vista.
+// Este tutorial se muestra automáticamente la primera vez que el usuario
+// entra a Reuniones (solo para Vida y Ministerio, ya que Reunión Pública usa
+// la misma interfaz y sistema de semanas y no necesita uno propio), y
+// también se puede repasar desde Configuración > Ayuda > Tutoriales.
+const TUTORIAL_STEPS_VMC = [
+  {
+    title: { es: 'Vida y Ministerio', en: 'Life and Ministry' },
+    text: { es: 'Aquí ves el programa semanal de la reunión Vida y Ministerio. Te mostramos rápidamente cómo moverte entre semanas y qué esperar cuando tienes una parte asignada.', en: 'Here you can see the weekly program for the Life and Ministry meeting. We\'ll quickly show you how to move between weeks and what to expect when you have an assigned part.' }
+  },
+  {
+    selector: '#vmc-cal-btn',
+    title: { es: 'El chip de la semana', en: 'The week chip' },
+    text: { es: 'Este chip muestra la semana que estás viendo. Usa las flechas a los costados para moverte semana a semana, o toca el chip para abrir un calendario y saltar directo a la fecha que quieras.', en: 'This chip shows the week you\'re viewing. Use the arrows on the sides to move week by week, or tap the chip to open a calendar and jump straight to the date you want.' },
+    waitFor: true
+  },
+  {
+    selector: '.vmc-my-assignments',
+    title: { es: 'Tus partes asignadas', en: 'Your assigned parts' },
+    text: { es: 'Cuando se te asigna una parte de la reunión — como Presidente, una oración o una parte del programa — aparecerá destacada aquí arriba para que la veas de inmediato.', en: 'When you\'re assigned a part of the meeting — like Chairman, a prayer or a program part — it will appear highlighted right here so you see it right away.' },
+    waitFor: true
+  },
+  {
+    selector: '.vmc-part-link-display',
+    title: { es: 'Enlaces externos', en: 'External links' },
+    text: { es: 'Algunas partes incluyen un enlace externo, por ejemplo un video o documento de apoyo. Cuando veas este ícono en una tarjeta, puedes tocarla para abrir el enlace.', en: 'Some parts include an external link, for example a supporting video or document. When you see this icon on a card, you can tap it to open the link.' },
+    waitFor: true
+  },
+];
+
 let _tutorialIndex = 0;
 let _tutorialResizeHandler = null;
 let _activeTutorialSteps = TUTORIAL_STEPS;
@@ -18504,6 +18541,50 @@ function shouldAutoShowTutorial() {
 
 function markTutorialSeen() {
   try { localStorage.setItem(TUTORIAL_SEEN_KEY, 'true'); } catch {}
+}
+
+const TUTORIAL_SEEN_KEY_VMC = 'fleming_tutorial_vmc_seen';
+
+function shouldAutoShowVmcTutorial() {
+  try {
+    return !(typeof isSimplifiedModeActive === 'function' && isSimplifiedModeActive())
+      && !localStorage.getItem(TUTORIAL_SEEN_KEY_VMC)
+      && !document.getElementById('tutorial-overlay')?.classList.contains('active');
+  } catch { return false; }
+}
+
+function markVmcTutorialSeen() {
+  try { localStorage.setItem(TUTORIAL_SEEN_KEY_VMC, 'true'); } catch {}
+}
+
+// isAuto=true evita el toast de "no disponible en Modo Simplificado" cuando
+// se dispara solo (silencioso), y evita reabrir Configuración si no estaba abierta.
+function startVmcTutorial(isAuto) {
+  if (typeof isSimplifiedModeActive === 'function' && isSimplifiedModeActive()) {
+    if (!isAuto) showToast(currentLang === 'en' ? 'The tutorial is not available in Simplified Mode.' : 'El tutorial no está disponible en la Versión Simplificada.', 'error');
+    return;
+  }
+  closePreferencias();
+  try {
+    const reunBtn = document.querySelector('.main-seg-btn[data-tab="reuniones"]');
+    if (reunBtn && typeof currentMainTab !== 'undefined' && currentMainTab !== 'reuniones') {
+      switchMainTab('reuniones', reunBtn);
+    }
+    if (typeof currentSubTab !== 'undefined' && currentSubTab !== 'vida-ministerio' && typeof switchSubTab === 'function') {
+      switchSubTab('vida-ministerio');
+    }
+  } catch {}
+  const overlay = document.getElementById('tutorial-overlay');
+  if (!overlay) return;
+  _activeTutorialSteps = TUTORIAL_STEPS_VMC;
+  _tutorialIndex = 0;
+  overlay.classList.add('active');
+  if (!_tutorialResizeHandler) {
+    _tutorialResizeHandler = () => renderTutorialStep(_tutorialIndex, true);
+    window.addEventListener('resize', _tutorialResizeHandler);
+    window.addEventListener('scroll', _tutorialResizeHandler, { passive: true });
+  }
+  requestAnimationFrame(() => renderTutorialStep(0));
 }
 
 function startTutorial() {
@@ -18608,6 +18689,7 @@ function endTutorial() {
     _tutorialResizeHandler = null;
   }
   if (_activeTutorialSteps === TUTORIAL_STEPS) markTutorialSeen();
+  else if (_activeTutorialSteps === TUTORIAL_STEPS_VMC) markVmcTutorialSeen();
 }
 
 function tutorialGo(delta) {
@@ -22070,6 +22152,12 @@ let vmcSelectedWeekId = null;
 async function loadAndRenderVmcUserView() {
   await loadVmcWeeks();
   renderVmcUserView();
+  // Tutorial de Vida y Ministerio: solo la primera vez que este dispositivo
+  // ve esta vista. Se retrasa un poco para que el chip de semana y las
+  // tarjetas del programa ya estén montados antes de resaltar nada.
+  if (typeof shouldAutoShowVmcTutorial === 'function' && shouldAutoShowVmcTutorial()) {
+    setTimeout(() => { try { startVmcTutorial(true); } catch {} }, 700);
+  }
 }
 
 function renderVmcUserView() {
@@ -22111,14 +22199,11 @@ function renderVmcUserView() {
         ${showLeftArrow ? `<button class="vmc-week-arrow" onclick="vmcStepWeek(-1)" title="Semana anterior" aria-label="Semana anterior">
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>` : ''}
-        <div class="vmc-week-pill active">${label}</div>
+        <div class="vmc-week-pill active" id="vmc-cal-btn" onclick="calToggle('vmc')" title="Ver calendario" aria-label="Ver calendario">${label}</div>
         ${showRightArrow ? `<button class="vmc-week-arrow" onclick="vmcStepWeek(1)" title="Semana siguiente" aria-label="Semana siguiente">
           <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </button>` : ''}
       </div>
-      <button class="vmc-cal-btn" id="vmc-cal-btn" onclick="calToggle('vmc')" title="Elegir fecha" aria-label="Elegir fecha">
-        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      </button>
       <div class="vmc-cal-popover" id="vmc-cal-popover"></div>
     </div>
     <div class="vmc-program-container" id="vmc-program-container">${programHtml}</div>`;
@@ -22507,14 +22592,11 @@ function renderFsUserView() {
         ${showLeftArrow ? `<button class="vmc-week-arrow" onclick="fsStepWeek(-1)" title="Semana anterior" aria-label="Semana anterior">
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>` : ''}
-        <div class="vmc-week-pill active">${label}</div>
+        <div class="vmc-week-pill active" id="fs-cal-btn" onclick="calToggle('fs')" title="Ver calendario" aria-label="Ver calendario">${label}</div>
         ${showRightArrow ? `<button class="vmc-week-arrow" onclick="fsStepWeek(1)" title="Semana siguiente" aria-label="Semana siguiente">
           <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </button>` : ''}
       </div>
-      <button class="vmc-cal-btn" id="fs-cal-btn" onclick="calToggle('fs')" title="Elegir fecha" aria-label="Elegir fecha">
-        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      </button>
       <div class="vmc-cal-popover" id="fs-cal-popover"></div>
     </div>
     <div class="vmc-program-container" id="fs-program-container">${programHtml}</div>`;
@@ -22558,7 +22640,7 @@ function calToggle(prefix) {
   const pop = document.getElementById(prefix + '-cal-popover');
   const btn = document.getElementById(prefix + '-cal-btn');
   if (pop) { pop.innerHTML = calRenderMonth(prefix); pop.classList.add('open'); }
-  if (btn) btn.classList.add('active');
+  if (btn) btn.classList.add('cal-open');
   document.addEventListener('click', calOutsideHandler, true);
 }
 
@@ -22569,7 +22651,7 @@ function calClose(prefix) {
   const pop = document.getElementById(prefix + '-cal-popover');
   const btn = document.getElementById(prefix + '-cal-btn');
   if (pop) pop.classList.remove('open');
-  if (btn) btn.classList.remove('active');
+  if (btn) btn.classList.remove('cal-open');
   if (!calState.vmc.open && !calState.fs.open) {
     document.removeEventListener('click', calOutsideHandler, true);
   }
