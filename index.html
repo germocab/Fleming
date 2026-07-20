@@ -5511,6 +5511,97 @@
 html.simplified-mode .app-header-shell { display: none !important; }
 html.simplified-mode .simplified-header-shell { display: flex !important; }
 
+/* ══════════════════════════ Modo Sencillo (Experimentos, v1.32.7-beta) ══════
+   Simplifica la interfaz completa: reemplaza la NavBar por defecto por un
+   encabezado mínimo (título + botón hamburguesa) y condensa TODAS las
+   opciones de navegación — Secciones, Sub-secciones, Perfil, Notificaciones
+   y Configuración — en un menú overlay de pantalla completa. ──────────── */
+html.modo-sencillo-mode .app-header-shell { display: none !important; }
+html.modo-sencillo-mode .simplified-header-shell { display: none !important; }
+html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
+
+.ms-header-shell {
+  display: none; position: sticky; top: 0; z-index: 60;
+  align-items: center; justify-content: space-between;
+  height: 60px; padding: 0 1rem;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+}
+.ms-header-title {
+  font-family: var(--font); font-size: 1.08rem; font-weight: 800; letter-spacing: -0.01em;
+  color: var(--text);
+}
+.ms-hamburger-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 42px; height: 42px; border-radius: 14px; border: none;
+  background: var(--surface3); color: var(--text); cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+.ms-hamburger-btn svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 2.3; stroke-linecap: round; }
+.ms-hamburger-btn:active { transform: scale(0.9); background: var(--surface2); }
+
+.ms-overlay {
+  display: none; position: fixed; inset: 0; z-index: 500;
+  flex-direction: column;
+  background: var(--bg);
+}
+.ms-overlay.open { display: flex; animation: fadeIn 0.22s var(--ease-fluid-soft, ease); }
+.ms-overlay-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 60px; padding: 0 1rem; flex-shrink: 0;
+}
+.ms-overlay-title { font-family: var(--font); font-size: 1.05rem; font-weight: 800; color: var(--text); }
+.ms-overlay-close {
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border);
+  background: var(--surface); color: var(--text); cursor: pointer;
+  transition: transform 0.15s, background 0.15s;
+}
+.ms-overlay-close svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.ms-overlay-close:active { transform: scale(0.9); background: var(--surface2); }
+
+.ms-overlay-body { flex: 1; overflow-y: auto; padding: 0.25rem 1rem 1rem; display: flex; flex-direction: column; gap: 10px; max-width: 520px; width: 100%; margin: 0 auto; }
+
+.ms-sec-btn {
+  width: 100%; text-align: center; font-family: var(--font); font-size: 1.02rem; font-weight: 700;
+  color: var(--text); background: var(--surface3); border: 2px solid transparent; border-radius: 18px;
+  padding: 1rem 1.1rem; cursor: pointer; transition: background 0.15s, border-color 0.15s, transform 0.1s, color 0.15s;
+}
+.ms-sec-btn:active { transform: scale(0.98); }
+.ms-sec-btn.ms-current { background: var(--surface); border-color: var(--accent); color: var(--accent); }
+.ms-sec-btn.ms-selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.ms-sub-list { display: flex; flex-direction: column; gap: 8px; padding: 2px 2px 4px; }
+.ms-sub-btn {
+  width: 100%; text-align: center; font-family: var(--font); font-size: 0.96rem; font-weight: 700;
+  color: var(--text2); background: var(--surface3); border: none; border-radius: 15px;
+  padding: 0.85rem 1rem; cursor: pointer; transition: background 0.15s, color 0.15s, transform 0.1s;
+}
+.ms-sub-btn:active { transform: scale(0.98); }
+.ms-sub-btn.ms-selected { background: var(--text); color: var(--bg); }
+
+.ms-overlay-footer {
+  flex-shrink: 0; display: flex; align-items: center; gap: 10px;
+  padding: 0.8rem 1rem calc(0.8rem + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border); background: var(--surface);
+}
+.ms-footer-icon-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; border-radius: 50%; border: none;
+  background: var(--surface3); color: var(--text); cursor: pointer; flex-shrink: 0; position: relative;
+  transition: background 0.15s, transform 0.1s;
+}
+.ms-footer-icon-btn:active { transform: scale(0.92); background: var(--surface2); }
+.ms-footer-icon-btn svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ms-footer-profile-btn {
+  flex: 1; display: flex; align-items: center; gap: 10px; min-width: 0;
+  background: var(--surface3); border: none; border-radius: 26px; padding: 6px 14px 6px 6px; cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.ms-footer-profile-btn:active { transform: scale(0.98); background: var(--surface2); }
+.ms-footer-avatar { width: 34px; height: 34px; border-radius: 50%; overflow: hidden; flex-shrink: 0; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; color: var(--text2); }
+.ms-footer-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ms-footer-name { font-family: var(--font); font-size: 0.9rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
 </style>
 </head>
 <body>
@@ -5788,6 +5879,42 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
   </div>
   <!-- Fondo semitransparente (con leve sombra) para cerrar Opciones/Menú al tocar fuera -->
   <div class="simp-overlay-backdrop" id="simp-overlay-backdrop" onclick="simplifiedCloseAll()"></div>
+
+  <!-- ══ Modo Sencillo (Experimentos, v1.32.7-beta): header mínimo (título +
+       botón hamburguesa) que reemplaza por completo a la NavBar mientras el
+       Modo Sencillo está activo. ══ -->
+  <div class="ms-header-shell" id="ms-header-shell">
+    <span class="ms-header-title">Fleming</span>
+    <button class="ms-hamburger-btn" id="ms-hamburger-btn" onclick="msOpenOverlay()" title="Menú" aria-label="Menú">
+      <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+
+  <!-- ══ Modo Sencillo: menú overlay de pantalla completa. Condensa Secciones,
+       Sub-secciones, Perfil, Notificaciones y Configuración en un solo lugar,
+       con botones grandes de fácil acceso. ══ -->
+  <div class="ms-overlay" id="ms-overlay">
+    <nav class="ms-overlay-topbar">
+      <span class="ms-overlay-title">Menú</span>
+      <button class="ms-overlay-close" onclick="msCloseOverlay()" title="Cerrar" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+    </nav>
+    <div class="ms-overlay-body" id="ms-overlay-body"></div>
+    <div class="ms-overlay-footer">
+      <button class="ms-footer-icon-btn" title="Configuración" aria-label="Configuración" onclick="msOpenSettings()">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+      <button class="ms-footer-icon-btn" title="Notificaciones" aria-label="Notificaciones" onclick="msOpenNotifications()">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <div id="ms-notif-badge" style="display:none;position:absolute;top:6px;right:6px;width:9px;height:9px;background:var(--red);border-radius:50%;border:2px solid var(--surface3);pointer-events:none"></div>
+      </button>
+      <button class="ms-footer-profile-btn" onclick="msOpenProfile()">
+        <div class="ms-footer-avatar" id="ms-footer-avatar">?</div>
+        <span class="ms-footer-name" id="ms-footer-name">—</span>
+      </button>
+    </div>
+  </div>
 
   <div class="main-content">
     <div class="page active" id="page-schedule">
@@ -7694,6 +7821,27 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
       <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.subnavmenu.help">Pensada para quienes no saben que la barra de Sub-secciones se puede deslizar horizontalmente. En Desktop no aplica, ya que ahí caben todas.</div>
     </div>
 
+    <!-- Modo Sencillo: función en pruebas, v1.32.7-beta. Reemplaza toda la
+         navegación por defecto por un encabezado mínimo + un menú overlay de
+         pantalla completa con botones grandes, para quienes tienen
+         dificultad para usar la interfaz por defecto. -->
+    <div class="profile-section">
+      <div class="profile-section-title" data-i18n="exp.modosencillo.section">Modo Sencillo</div>
+      <div class="profile-row" style="cursor:pointer" onclick="toggleModoSencilloPref()">
+        <div class="profile-row-icon" style="background:var(--ter-1-bg);color:var(--ter-1)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="3" width="18" height="18" rx="4"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="14" x2="16" y2="14"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="exp.modosencillo.title">Activar Modo Sencillo</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.modosencillo.desc">Simplifica la interfaz: reemplaza la navegación por un menú de pantalla completa con botones grandes.</div>
+        </div>
+        <div id="modo-sencillo-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="modo-sencillo-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
+      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.modosencillo.help">Pensado para quienes tienen dificultad para usar la versión por defecto. Notificaciones y Live siguen activas, accesibles desde el menú.</div>
+    </div>
+
     <!-- LiveHost: función en pruebas, v1.30.0-beta. Permite al Encargado de una
          asignación de casa en casa compartir la calle en la que está (no un
          punto exacto en un mapa) con quienes vean esa asignación, por hasta 2
@@ -8104,7 +8252,7 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.32.6-beta';
+const APP_VERSION = '1.32.7-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -8650,6 +8798,10 @@ const I18N = {
   'exp.liveaa.title':   { es: 'Live Siempre Activo', en: 'Live Always On', nl: 'Live Altijd Actief' },
   'exp.liveaa.desc':    { es: 'Live sigue activo en segundo plano al salir de la asignación. La tarjeta con Live activo brilla en verde en Inicio', en: 'Live keeps running in the background when you leave the assignment. The card with active Live glows green on Home', nl: 'Live blijft actief op de achtergrond wanneer je de toewijzing verlaat. De kaart met actieve Live licht groen op bij Start' },
   'exp.liveaa.help':    { es: 'Para detener la sesión: entra a la asignación y presiona Pausa en la tarjeta Live, o detenla desde el panel de Notificaciones.', en: 'To stop the session: open the assignment and press Pause on the Live card, or stop it from the Notifications panel.', nl: 'Om de sessie te stoppen: open de toewijzing en druk op Pauze op de Live-kaart, of stop deze via het Meldingenpaneel.' },
+  'exp.modosencillo.section': { es: 'Modo Sencillo', en: 'Simple Mode', nl: 'Eenvoudige modus' },
+  'exp.modosencillo.title':   { es: 'Activar Modo Sencillo', en: 'Enable Simple Mode', nl: 'Eenvoudige modus inschakelen' },
+  'exp.modosencillo.desc':    { es: 'Simplifica la interfaz: reemplaza la navegación por un menú de pantalla completa con botones grandes.', en: 'Simplifies the interface: replaces navigation with a full-screen menu with large buttons.', nl: 'Vereenvoudigt de interface: vervangt navigatie door een volledig-scherm menu met grote knoppen.' },
+  'exp.modosencillo.help':    { es: 'Pensado para quienes tienen dificultad para usar la versión por defecto. Notificaciones y Live siguen activas, accesibles desde el menú.', en: 'Designed for those who have difficulty using the default version. Notifications and Live remain active, accessible from the menu.', nl: 'Bedoeld voor wie moeite heeft met de standaardversie. Meldingen en Live blijven actief, toegankelijk vanuit het menu.' },
   'exp.subnavmenu.section': { es: 'Menú de Sub-secciones', en: 'Sub-section Menu', nl: 'Subsectiemenu' },
   'exp.subnavmenu.title':   { es: 'Activar Menú de Sub-secciones', en: 'Enable Sub-section Menu', nl: 'Subsectiemenu inschakelen' },
   'exp.subnavmenu.desc':    { es: 'Agrega un botón al inicio de la barra de Sub-secciones (Predicación y Reuniones) que abre la lista completa. Solo en móvil.', en: 'Adds a button at the start of the Sub-section bar (Preaching and Meetings) that opens the full list. Mobile only.', nl: 'Voegt een knop toe aan het begin van de subsectiebalk (Prediking en Vergaderingen) die de volledige lijst opent. Alleen op mobiel.' },
@@ -10860,7 +11012,7 @@ function applyOwnAvatarToDropdowns() {
   if (!currentUser) return;
   const col   = userColor(currentUser.name);
   const inits = userInitials(currentUser.name);
-  ['user-avatar', 'user-avatar-admin', 'user-avatar-navbtn'].forEach(id => {
+  ['user-avatar', 'user-avatar-admin', 'user-avatar-navbtn', 'ms-footer-avatar'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.style.background = col;
@@ -10895,6 +11047,8 @@ async function enterApp() {
   const initials = currentUser.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
   document.getElementById('user-avatar').textContent = initials;
   document.getElementById('dropdown-name').textContent = currentUser.name;
+  const msNameEl = document.getElementById('ms-footer-name');
+  if (msNameEl) msNameEl.textContent = currentUser.name;
   loadOwnAvatarForDropdown(); // en segundo plano, no bloquea el resto del arranque
 
   // Cargar preferencias de notificaciones (en segundo plano, no bloquea el resto del arranque)
@@ -10939,6 +11093,7 @@ async function enterApp() {
   renderSubTabs(currentMainTab);
 
   if (typeof applySimplifiedModeUI === 'function') applySimplifiedModeUI();
+  if (typeof applyModoSencilloUI === 'function') applyModoSencilloUI();
   if (typeof applyNavbarAvatarUI === 'function') applyNavbarAvatarUI();
 
   // Restore sub-page visibility
@@ -17391,7 +17546,7 @@ function openPrefScreen(name) {
   if (name === 'almacenamiento') renderStorageList();
   if (name === 'ayuda') renderAyudaTipsList();
   if (name === 'preferencias') { updateAnimationsEnabledToggleUI(); updateWeatherToggleUI(); }
-  if (name === 'experimentos') { updateAccentSwatchesUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarAvatarToggleUI(); updateNavbarBtnSizeUI(); if (typeof updateLiveHostToggleUI === 'function') updateLiveHostToggleUI(); if (typeof updateSubnavMenuToggleUI === 'function') updateSubnavMenuToggleUI(); }
+  if (name === 'experimentos') { updateAccentSwatchesUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarAvatarToggleUI(); updateNavbarBtnSizeUI(); if (typeof updateLiveHostToggleUI === 'function') updateLiveHostToggleUI(); if (typeof updateSubnavMenuToggleUI === 'function') updateSubnavMenuToggleUI(); if (typeof updateModoSencilloToggleUI === 'function') updateModoSencilloToggleUI(); }
   if (name === 'version') {
     const val = document.getElementById('pref-version-screen-value');
     if (val) val.textContent = 'Versión ' + APP_VERSION;
@@ -18812,7 +18967,7 @@ const PLATFORM_RESET_KEYS = [
   'fleming_dark_maps', 'fleming_egg_unlocked', 'fleming_group_minicards', 'fleming_h2h_view',
   'fleming_lang', 'fleming_live_always_on', 'fleming_live_enabled', 'fleming_livehost_enabled', 'fleming_navbar_mode',
   'fleming_navbar_options_avatar', 'fleming_navbar_btn_size', 'fleming_notif_levels', 'fleming_notif_prefs',
-  'fleming_notif_templates', 'fleming_simplified_mode', 'fleming_theme', 'fleming_tip_font_scale',
+  'fleming_notif_templates', 'fleming_simplified_mode', 'fleming_modo_sencillo', 'fleming_theme', 'fleming_tip_font_scale',
   'fleming_transparency', 'fleming_transparency_level', 'fleming_ui_size', 'fleming_weather_enabled'
 ];
 function confirmResetPlatform() {
@@ -20294,6 +20449,8 @@ function setNotifBadgeVisible(show) {
   if (badge) badge.style.display = show ? 'block' : 'none';
   const menuDot = document.getElementById('notif-badge-menu');
   if (menuDot) menuDot.style.display = show ? 'block' : 'none';
+  const msBadge = document.getElementById('ms-notif-badge');
+  if (msBadge) msBadge.style.display = show ? 'block' : 'none';
 }
 
 
@@ -20504,6 +20661,103 @@ function simplifiedSelectSub(subId) {
 // El título "Fleming" siempre queda igual (nombre de la plataforma); no se
 // reemplaza por el nombre de la sección para mantener fiel el wireframe.
 function simplifiedSyncHeaderTitle() {}
+
+// ══════════════════════ Modo Sencillo (Experimentos, v1.32.7-beta) ═════════
+// Simplifica la interfaz completa: reemplaza la NavBar por defecto por un
+// encabezado mínimo (título "Fleming" + botón hamburguesa) y condensa TODAS
+// las opciones de navegación — Secciones, Sub-secciones, Perfil,
+// Notificaciones y Configuración — en un menú overlay de pantalla completa
+// con botones grandes, para quienes tienen dificultad para usar la interfaz
+// por defecto. Función experimental: debe activarse primero en
+// Configuración → Experimentos. Notificaciones y Live siguen funcionando
+// con normalidad mientras el Modo Sencillo está activo.
+const MS_MAIN_TABS = [
+  { id: 'predicacion', label: 'Predicación' },
+  { id: 'reuniones',   label: 'Reuniones' },
+];
+function isModoSencilloEnabled() {
+  return localStorage.getItem('fleming_modo_sencillo') === 'true';
+}
+function isModoSencilloActive() {
+  return isModoSencilloEnabled();
+}
+function toggleModoSencilloPref() {
+  const next = !isModoSencilloEnabled();
+  localStorage.setItem('fleming_modo_sencillo', next ? 'true' : 'false');
+  updateModoSencilloToggleUI();
+  applyModoSencilloUI();
+  showToast(next ? 'Modo Sencillo activado' : 'Modo Sencillo desactivado', next ? 'success' : '');
+}
+function updateModoSencilloToggleUI() {
+  const toggle = document.getElementById('modo-sencillo-toggle');
+  const thumb  = document.getElementById('modo-sencillo-thumb');
+  if (!toggle || !thumb) return;
+  const on = isModoSencilloEnabled();
+  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
+  thumb.style.left = on ? '21px' : '3px';
+}
+function applyModoSencilloUI() {
+  const active = isModoSencilloActive();
+  document.documentElement.classList.toggle('modo-sencillo-mode', active);
+  if (!active) msCloseOverlay();
+  if (typeof applyOwnAvatarToDropdowns === 'function') applyOwnAvatarToDropdowns();
+  const msNameEl = document.getElementById('ms-footer-name');
+  if (msNameEl && currentUser) msNameEl.textContent = currentUser.name;
+}
+
+// ── Botón hamburguesa → abre/cierra el overlay de pantalla completa ──
+function msOpenOverlay() {
+  msRenderBody();
+  document.getElementById('ms-overlay')?.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function msCloseOverlay() {
+  document.getElementById('ms-overlay')?.classList.remove('open');
+  document.body.style.overflow = '';
+}
+function msRenderBody() {
+  const body = document.getElementById('ms-overlay-body');
+  if (!body) return;
+  const mt = typeof currentMainTab !== 'undefined' ? currentMainTab : 'predicacion';
+  const st = typeof currentSubTab  !== 'undefined' ? currentSubTab  : 'casa';
+  let html = '';
+  MS_MAIN_TABS.forEach(m => {
+    const isOpen = m.id === mt;
+    html += `<button class="ms-sec-btn${isOpen ? ' ms-selected' : ' ms-current'}" onclick="msSelectMain('${m.id}')">${m.label}</button>`;
+    if (isOpen) {
+      const subs = (typeof SUB_TABS !== 'undefined' ? (SUB_TABS[m.id] || []) : [])
+        .filter(t => t.id !== 'carritos' || (typeof carritosVisibleForCurrentUser === 'function' && carritosVisibleForCurrentUser()));
+      html += '<div class="ms-sub-list">' + subs.map(t =>
+        `<button class="ms-sub-btn${st === t.id ? ' ms-selected' : ''}" onclick="msSelectSub('${t.id}')">${t.label}</button>`
+      ).join('') + '</div>';
+    }
+  });
+  body.innerHTML = html;
+}
+function msSelectMain(tabId) {
+  if (tabId !== (typeof currentMainTab !== 'undefined' ? currentMainTab : null)) {
+    const btn = document.querySelector(`.main-seg-btn[data-tab="${tabId}"]`);
+    if (btn && typeof switchMainTab === 'function') switchMainTab(tabId, btn);
+  }
+  msRenderBody();
+}
+function msSelectSub(subId) {
+  if (typeof switchSubTab === 'function') switchSubTab(subId);
+  msCloseOverlay();
+}
+function msOpenSettings() {
+  msCloseOverlay();
+  if (typeof openPreferencias === 'function') openPreferencias();
+}
+function msOpenNotifications() {
+  msCloseOverlay();
+  if (typeof openNotificationsPage === 'function') openNotificationsPage();
+}
+function msOpenProfile() {
+  msCloseOverlay();
+  if (typeof openProfilePage === 'function') openProfilePage();
+}
+window.addEventListener('resize', () => { try { applyModoSencilloUI(); } catch {} });
 
 
 function toggleNotificationsMenu() {
