@@ -5542,15 +5542,14 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 .ms-overlay {
   display: none; position: fixed; inset: 0; z-index: 500;
   flex-direction: column;
-  background: var(--modal-overlay-bg); backdrop-filter: blur(14px) saturate(180%);
+  background: rgba(242,242,247,0.78); backdrop-filter: blur(14px) saturate(180%);
   -webkit-backdrop-filter: blur(14px) saturate(180%);
 }
 .ms-overlay.open { display: flex; animation: fadeIn 0.24s var(--ease-fluid-soft, ease); }
 .ms-overlay-topbar {
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; align-items: center; justify-content: flex-end;
   height: 60px; padding: 0 1rem; flex-shrink: 0;
 }
-.ms-overlay-title { font-family: var(--font); font-size: 1.05rem; font-weight: 800; color: #1c1c1e; }
 .ms-overlay-close {
   display: flex; align-items: center; justify-content: center;
   width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.7);
@@ -5558,20 +5557,20 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
   backdrop-filter: blur(10px) saturate(160%); -webkit-backdrop-filter: blur(10px) saturate(160%);
   transition: transform 0.15s, background 0.15s;
 }
-.ms-overlay-close svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.ms-overlay-close svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .ms-overlay-close:active { transform: scale(0.9); background: rgba(255,255,255,0.78); }
 
 .ms-overlay-body {
   flex: 1; overflow-y: auto; padding: 0.5rem 1.5rem 1.5rem;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  display: flex; flex-direction: column; align-items: flex-end; justify-content: center;
   gap: 10px; max-width: 420px; width: 100%; margin: 0 auto;
 }
 
 .ms-sec-btn {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 100%; text-align: center; font-family: var(--font); font-size: 1rem; font-weight: 800;
+  width: auto; max-width: 100%; text-align: center; font-family: var(--font); font-size: 1rem; font-weight: 800;
   color: #1c1c1e; background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.7);
-  border-radius: 999px; padding: 15px 24px; cursor: pointer; white-space: nowrap;
+  border-radius: 999px; padding: 15px 26px; cursor: pointer; white-space: nowrap;
   backdrop-filter: blur(10px) saturate(160%); -webkit-backdrop-filter: blur(10px) saturate(160%);
   transition: transform 0.15s, background 0.15s, color 0.15s, border-color 0.15s;
   animation: subnavPopIn 0.34s var(--ease-fluid-soft) both;
@@ -5580,12 +5579,12 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 .ms-sec-btn.ms-current { border-color: var(--accent); color: var(--accent); }
 .ms-sec-btn.ms-selected { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-.ms-sub-list { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; padding: 2px 0 6px; }
+.ms-sub-list { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; width: 100%; padding: 2px 0 6px; }
 .ms-sub-btn {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 100%; text-align: center; font-family: var(--font); font-size: 0.9rem; font-weight: 700;
+  width: auto; max-width: 100%; text-align: center; font-family: var(--font); font-size: 0.9rem; font-weight: 700;
   color: #1c1c1e; background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.55);
-  border-radius: 999px; padding: 11px 20px; cursor: pointer; white-space: nowrap;
+  border-radius: 999px; padding: 11px 22px; cursor: pointer; white-space: nowrap;
   backdrop-filter: blur(10px) saturate(160%); -webkit-backdrop-filter: blur(10px) saturate(160%);
   transition: transform 0.15s, background 0.15s, color 0.15s, border-color 0.15s;
   animation: subnavPopIn 0.34s var(--ease-fluid-soft) both;
@@ -5594,7 +5593,7 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 .ms-sub-btn.ms-selected { background: rgba(255,255,255,0.9); border-color: rgba(255,255,255,0.95); color: var(--accent); }
 
 /* Modo oscuro: mismo lenguaje (translúcido + blur), texto en blanco ── */
-:root[data-theme="dark"] .ms-overlay-title { color: #fff; }
+:root[data-theme="dark"] .ms-overlay { background: rgba(28,28,30,0.82); }
 :root[data-theme="dark"] .ms-overlay-close { color: #fff; background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.22); }
 :root[data-theme="dark"] .ms-overlay-close:active { background: rgba(255,255,255,0.24); }
 :root[data-theme="dark"] .ms-sec-btn { color: #fff; background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.22); }
@@ -5604,7 +5603,7 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 :root[data-theme="dark"] .ms-sub-btn:active { background: rgba(255,255,255,0.2); }
 :root[data-theme="dark"] .ms-sub-btn.ms-selected { background: rgba(255,255,255,0.3); border-color: rgba(255,255,255,0.4); color: #fff; }
 @media (prefers-color-scheme: dark) {
-  :root[data-theme="auto"] .ms-overlay-title { color: #fff; }
+  :root[data-theme="auto"] .ms-overlay { background: rgba(28,28,30,0.82); }
   :root[data-theme="auto"] .ms-overlay-close { color: #fff; background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.22); }
   :root[data-theme="auto"] .ms-overlay-close:active { background: rgba(255,255,255,0.24); }
   :root[data-theme="auto"] .ms-sec-btn { color: #fff; background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.22); }
@@ -5627,35 +5626,21 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 }
 .ms-footer-icon-btn {
   display: flex; align-items: center; justify-content: center;
-  width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.7);
-  background: rgba(255,255,255,0.6); color: #1c1c1e; cursor: pointer; flex-shrink: 0; position: relative;
-  backdrop-filter: blur(10px) saturate(160%); -webkit-backdrop-filter: blur(10px) saturate(160%);
+  width: 44px; height: 44px; border-radius: 50%; border: none;
+  background: var(--surface3); color: var(--text); cursor: pointer; flex-shrink: 0; position: relative;
   transition: background 0.15s, transform 0.1s;
 }
-.ms-footer-icon-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.78); }
+.ms-footer-icon-btn:active { transform: scale(0.92); background: var(--surface2); }
 .ms-footer-icon-btn svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .ms-footer-profile-btn {
   flex: 1; display: flex; align-items: center; gap: 10px; min-width: 0;
-  background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.7); border-radius: 26px; padding: 6px 14px 6px 6px; cursor: pointer;
-  backdrop-filter: blur(10px) saturate(160%); -webkit-backdrop-filter: blur(10px) saturate(160%);
+  background: var(--surface3); border: none; border-radius: 26px; padding: 6px 14px 6px 6px; cursor: pointer;
   transition: background 0.15s, transform 0.1s;
 }
-.ms-footer-profile-btn:active { transform: scale(0.98); background: rgba(255,255,255,0.78); }
+.ms-footer-profile-btn:active { transform: scale(0.98); background: var(--surface2); }
 .ms-footer-avatar { width: 34px; height: 34px; border-radius: 50%; overflow: hidden; flex-shrink: 0; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; color: var(--text2); }
 .ms-footer-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.ms-footer-name { font-family: var(--font); font-size: 0.9rem; font-weight: 700; color: #1c1c1e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-:root[data-theme="dark"] .ms-footer-icon-btn,
-:root[data-theme="dark"] .ms-footer-profile-btn { color: #fff; background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.22); }
-:root[data-theme="dark"] .ms-footer-icon-btn:active,
-:root[data-theme="dark"] .ms-footer-profile-btn:active { background: rgba(255,255,255,0.24); }
-:root[data-theme="dark"] .ms-footer-name { color: #fff; }
-@media (prefers-color-scheme: dark) {
-  :root[data-theme="auto"] .ms-footer-icon-btn,
-  :root[data-theme="auto"] .ms-footer-profile-btn { color: #fff; background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.22); }
-  :root[data-theme="auto"] .ms-footer-icon-btn:active,
-  :root[data-theme="auto"] .ms-footer-profile-btn:active { background: rgba(255,255,255,0.24); }
-  :root[data-theme="auto"] .ms-footer-name { color: #fff; }
-}
+.ms-footer-name { font-family: var(--font); font-size: 0.9rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 </style>
 </head>
@@ -5950,9 +5935,8 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
        con botones grandes de fácil acceso. ══ -->
   <div class="ms-overlay" id="ms-overlay">
     <nav class="ms-overlay-topbar">
-      <span class="ms-overlay-title">Menú</span>
       <button class="ms-overlay-close" onclick="msCloseOverlay()" title="Cerrar" aria-label="Cerrar">
-        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </nav>
     <div class="ms-overlay-body" id="ms-overlay-body"></div>
@@ -8307,7 +8291,7 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.32.7.1-beta';
+const APP_VERSION = '1.32.7.2-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
