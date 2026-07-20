@@ -2976,8 +2976,13 @@
      para retroceder. ── */
   .vmc-user-week-nav {
     display: flex; align-items: center; justify-content: center; gap: 6px;
-    flex: 1; min-width: 0;
+    /* v1.32.9.1-beta: centrado absoluto respecto al ancho total de la fila
+       (no solo del espacio libre a la izquierda del botón de Calendario),
+       para que el chip quede realmente centrado en la plataforma. */
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    pointer-events: none;
   }
+  .vmc-user-week-nav > * { pointer-events: auto; }
   .vmc-week-arrow {
     flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
@@ -2999,6 +3004,7 @@
 
   .vmc-cal-btn {
     flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%;
+    margin-left: auto;
     display: flex; align-items: center; justify-content: center;
     background: var(--surface2); border: 1.5px solid var(--border);
     color: var(--text2); cursor: pointer; padding: 0;
@@ -8309,7 +8315,7 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.32.9-beta';
+const APP_VERSION = '1.32.9.1-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
