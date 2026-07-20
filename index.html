@@ -5553,8 +5553,9 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 .ms-overlay-close {
   display: flex; align-items: center; justify-content: center;
   width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.7);
-  background: rgba(255,255,255,0.6); color: #1c1c1e; cursor: pointer;
+  background: rgba(255,255,255,0.6); color: var(--red, #ff3b30); cursor: pointer;
   backdrop-filter: blur(10px) saturate(160%); -webkit-backdrop-filter: blur(10px) saturate(160%);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.22);
   transition: transform 0.15s, background 0.15s;
 }
 .ms-overlay-close svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
@@ -5576,7 +5577,7 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
   animation: subnavPopIn 0.34s var(--ease-fluid-soft) both;
 }
 .ms-sec-btn:active { transform: scale(0.96); background: rgba(255,255,255,0.78); }
-.ms-sec-btn.ms-current { border-color: var(--accent); color: var(--accent); }
+.ms-sec-btn.ms-current { border-color: var(--text3); color: var(--text3); }
 .ms-sec-btn.ms-selected { background: var(--accent); border-color: var(--accent); color: #fff; }
 
 .ms-sub-list { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; width: 100%; padding: 2px 0 6px; }
@@ -5590,28 +5591,28 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
   animation: subnavPopIn 0.34s var(--ease-fluid-soft) both;
 }
 .ms-sub-btn:active { transform: scale(0.96); background: rgba(255,255,255,0.6); }
-.ms-sub-btn.ms-selected { background: rgba(255,255,255,0.9); border-color: rgba(255,255,255,0.95); color: var(--accent); }
+.ms-sub-btn.ms-selected { background: rgba(255,255,255,0.55); border-color: var(--accent); color: var(--accent); }
 
 /* Modo oscuro: mismo lenguaje (translúcido + blur), texto en blanco ── */
 :root[data-theme="dark"] .ms-overlay { background: rgba(28,28,30,0.82); }
-:root[data-theme="dark"] .ms-overlay-close { color: #fff; background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.22); }
+:root[data-theme="dark"] .ms-overlay-close { color: var(--red, #ff453a); background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.22); box-shadow: 0 6px 18px rgba(0,0,0,0.45); }
 :root[data-theme="dark"] .ms-overlay-close:active { background: rgba(255,255,255,0.24); }
 :root[data-theme="dark"] .ms-sec-btn { color: #fff; background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.22); }
 :root[data-theme="dark"] .ms-sec-btn:active { background: rgba(255,255,255,0.24); }
-:root[data-theme="dark"] .ms-sec-btn.ms-current { border-color: var(--accent); color: var(--accent); }
+:root[data-theme="dark"] .ms-sec-btn.ms-current { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.6); }
 :root[data-theme="dark"] .ms-sub-btn { color: #fff; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.18); }
 :root[data-theme="dark"] .ms-sub-btn:active { background: rgba(255,255,255,0.2); }
-:root[data-theme="dark"] .ms-sub-btn.ms-selected { background: rgba(255,255,255,0.3); border-color: rgba(255,255,255,0.4); color: #fff; }
+:root[data-theme="dark"] .ms-sub-btn.ms-selected { background: rgba(255,255,255,0.16); border-color: var(--accent); color: var(--accent); }
 @media (prefers-color-scheme: dark) {
   :root[data-theme="auto"] .ms-overlay { background: rgba(28,28,30,0.82); }
-  :root[data-theme="auto"] .ms-overlay-close { color: #fff; background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.22); }
+  :root[data-theme="auto"] .ms-overlay-close { color: var(--red, #ff453a); background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.22); box-shadow: 0 6px 18px rgba(0,0,0,0.45); }
   :root[data-theme="auto"] .ms-overlay-close:active { background: rgba(255,255,255,0.24); }
   :root[data-theme="auto"] .ms-sec-btn { color: #fff; background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.22); }
   :root[data-theme="auto"] .ms-sec-btn:active { background: rgba(255,255,255,0.24); }
-  :root[data-theme="auto"] .ms-sec-btn.ms-current { border-color: var(--accent); color: var(--accent); }
+  :root[data-theme="auto"] .ms-sec-btn.ms-current { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.6); }
   :root[data-theme="auto"] .ms-sub-btn { color: #fff; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.18); }
   :root[data-theme="auto"] .ms-sub-btn:active { background: rgba(255,255,255,0.2); }
-  :root[data-theme="auto"] .ms-sub-btn.ms-selected { background: rgba(255,255,255,0.3); border-color: rgba(255,255,255,0.4); color: #fff; }
+  :root[data-theme="auto"] .ms-sub-btn.ms-selected { background: rgba(255,255,255,0.16); border-color: var(--accent); color: var(--accent); }
 }
 /* Animación de salida ("pop out"): al elegir una Sub-sección, antes de
    navegar y cerrar el overlay — mismo lenguaje que el Menú de Sub-secciones. */
@@ -5628,6 +5629,7 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
   display: flex; align-items: center; justify-content: center;
   width: 44px; height: 44px; border-radius: 50%; border: none;
   background: var(--surface3); color: var(--text); cursor: pointer; flex-shrink: 0; position: relative;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.18);
   transition: background 0.15s, transform 0.1s;
 }
 .ms-footer-icon-btn:active { transform: scale(0.92); background: var(--surface2); }
@@ -5635,6 +5637,7 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 .ms-footer-profile-btn {
   flex: 1; display: flex; align-items: center; gap: 10px; min-width: 0;
   background: var(--surface3); border: none; border-radius: 26px; padding: 6px 14px 6px 6px; cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.18);
   transition: background 0.15s, transform 0.1s;
 }
 .ms-footer-profile-btn:active { transform: scale(0.98); background: var(--surface2); }
@@ -8291,7 +8294,7 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.32.7.2-beta';
+const APP_VERSION = '1.32.7.3-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
