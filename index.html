@@ -613,9 +613,9 @@
   .sub-tabs-wrap::-webkit-scrollbar { display: none; }
   .sub-tabs { display: flex; gap: 0; white-space: nowrap; }
 
-  /* ── Menú de Sub-secciones (Experimentos, v1.32.8.5-beta): exclusivo de
-     móvil/pantallas pequeñas. Se abre manteniendo presionado 1 segundo
-     cualquier botón de Sub-sección de la NavBar superior; lista, con
+  /* ── Menú de Sub-secciones (Experimentos, v1.32.9-beta): exclusivo de
+     móvil/pantallas pequeñas. Se abre presionando el botón de la
+     Sub-sección ya activa en la NavBar superior; lista, con
      transparencia/blur, todas las Sub-secciones de la sección actual, para
      quienes no saben que la barra es deslizable. ── */
   .subnav-menu-overlay {
@@ -2966,6 +2966,28 @@
     white-space: nowrap;
   }
   .vmc-week-pill.active { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+
+  /* ── Navegación de semanas con chip centrado + flechas (v1.32.9-beta):
+     reemplaza al slider horizontal de chips de semanas en Vida y Ministerio
+     y Reunión Pública, ya que ahora esa acción de swipe se usa para cambiar
+     rápido de Sub-sección. Solo el chip de la semana seleccionada queda
+     visible, centrado, con una flecha a la derecha para avanzar y, en
+     cuanto se deja de estar en "Esta semana", también una a la izquierda
+     para retroceder. ── */
+  .vmc-user-week-nav {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    flex: 1; min-width: 0;
+  }
+  .vmc-week-arrow {
+    flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: none; border: none; color: var(--text2); cursor: pointer; padding: 0;
+    transition: background 0.15s, color 0.15s, transform 0.15s;
+  }
+  .vmc-week-arrow svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; }
+  .vmc-week-arrow:hover { background: var(--accent-light); color: var(--accent); }
+  .vmc-week-arrow:active { transform: scale(0.88); }
+  .vmc-user-week-nav .vmc-week-pill { cursor: default; }
 
   
   .vmc-week-selector-row {
@@ -5881,11 +5903,11 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
   </div>
   </div>
 
-  <!-- ══ Menú de Sub-secciones (Experimentos, v1.32.8.5-beta): pantalla con
+  <!-- ══ Menú de Sub-secciones (Experimentos, v1.32.9-beta): pantalla con
        transparencia que lista todas las Sub-secciones de la sección actual.
-       Exclusivo de móvil/pantallas pequeñas — se abre manteniendo presionado
-       1 segundo cualquier botón de Sub-sección de la NavBar superior. Tocar
-       el fondo (fuera de los botones de la lista) cierra el menú. ══ -->
+       Exclusivo de móvil/pantallas pequeñas — se abre presionando el botón
+       de la Sub-sección ya activa en la NavBar superior. Tocar el fondo
+       (fuera de los botones de la lista) cierra el menú. ══ -->
   <div class="subnav-menu-overlay" id="subnav-menu-overlay" onclick="if(event.target===this) closeSubnavMenu()">
     <nav class="subpage-topbar">
       <button class="pill-back-btn" onclick="closeSubnavMenu()" title="Atrás">
@@ -7834,12 +7856,11 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
       </div>
     </div>
 
-    <!-- Menú de Sub-secciones: función en pruebas, v1.32.8.5-beta. Mantener
-         presionado 1 segundo cualquier botón de Sub-sección de la barra en
-         Predicación y Reuniones (solo móvil/pantallas pequeñas) abre una
-         pantalla con transparencia que lista todas las Sub-secciones de la
-         sección actual, para quienes no saben que esa barra se puede
-         deslizar. -->
+    <!-- Menú de Sub-secciones: función en pruebas, v1.32.9-beta. Presionar el
+         botón de la Sub-sección ya activa en la barra en Predicación y
+         Reuniones (solo móvil/pantallas pequeñas) abre una pantalla con
+         transparencia que lista todas las Sub-secciones de la sección
+         actual, para quienes no saben que esa barra se puede deslizar. -->
     <div class="profile-section">
       <div class="profile-section-title" data-i18n="exp.subnavmenu.section">Menú de Sub-secciones</div>
       <div class="profile-row" style="cursor:pointer" onclick="toggleSubnavMenuPref()">
@@ -7848,7 +7869,7 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
         </div>
         <div class="profile-row-content">
           <div class="profile-row-label" data-i18n="exp.subnavmenu.title">Activar Menú de Sub-secciones</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.subnavmenu.desc">Mantén presionado 1 segundo cualquier botón de Sub-sección de la barra (Predicación y Reuniones) para abrir la lista completa. Solo en móvil.</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.subnavmenu.desc">Presiona el botón de la Sub-sección activa en la barra (Predicación y Reuniones) para abrir la lista completa. Solo en móvil.</div>
         </div>
         <div id="subnav-menu-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
           <div id="subnav-menu-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
@@ -8288,7 +8309,7 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.32.8.5-beta';
+const APP_VERSION = '1.32.9-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -8840,7 +8861,7 @@ const I18N = {
   'exp.modosencillo.help':    { es: 'Pensado para quienes tienen dificultad para usar la versión por defecto. Notificaciones y Live siguen activas, accesibles desde el menú.', en: 'Designed for those who have difficulty using the default version. Notifications and Live remain active, accessible from the menu.', nl: 'Bedoeld voor wie moeite heeft met de standaardversie. Meldingen en Live blijven actief, toegankelijk vanuit het menu.' },
   'exp.subnavmenu.section': { es: 'Menú de Sub-secciones', en: 'Sub-section Menu', nl: 'Subsectiemenu' },
   'exp.subnavmenu.title':   { es: 'Activar Menú de Sub-secciones', en: 'Enable Sub-section Menu', nl: 'Subsectiemenu inschakelen' },
-  'exp.subnavmenu.desc':    { es: 'Mantén presionado 1 segundo cualquier botón de Sub-sección de la barra (Predicación y Reuniones) para abrir la lista completa. Solo en móvil.', en: 'Press and hold any Sub-section bar button (Preaching and Meetings) for 1 second to open the full list. Mobile only.', nl: 'Houd een subsectieknop van de balk (Prediking en Vergaderingen) 1 seconde ingedrukt om de volledige lijst te openen. Alleen op mobiel.' },
+  'exp.subnavmenu.desc':    { es: 'Presiona el botón de la Sub-sección activa en la barra (Predicación y Reuniones) para abrir la lista completa. Solo en móvil.', en: 'Press the already-active Sub-section bar button (Preaching and Meetings) to open the full list. Mobile only.', nl: 'Druk op de knop van de actieve subsectie in de balk (Prediking en Vergaderingen) om de volledige lijst te openen. Alleen op mobiel.' },
   'exp.subnavmenu.help':    { es: 'Pensada para quienes no saben que la barra de Sub-secciones se puede deslizar horizontalmente. En Desktop no aplica, ya que ahí caben todas.', en: "Designed for people who don't know the Sub-section bar can be swiped horizontally. Does not apply on Desktop, where all of them already fit.", nl: 'Bedoeld voor mensen die niet weten dat de subsectiebalk horizontaal geveegd kan worden. Niet van toepassing op Desktop, waar ze allemaal al passen.' },
   'exp.livehost.section': { es: 'LiveHost', en: 'LiveHost', nl: 'LiveHost' },
   'exp.livehost.title':   { es: 'Activar LiveHost', en: 'Enable LiveHost', nl: 'LiveHost inschakelen' },
@@ -11344,7 +11365,7 @@ function renderSubTabs(mainTab) {
   const tabs = (SUB_TABS[mainTab] || []).filter(t => t.id !== 'carritos' || carritosVisibleForCurrentUser());
   if (!tabs.length) { wrap.innerHTML = ''; return; }
   wrap.innerHTML = '<div class="sub-tabs">' +
-    tabs.map(t => `<button class="sub-tab${currentSubTab===t.id?' active':''}" onclick="handleSubTabClick(event,'${t.id}')" onpointerdown="startSubTabLongPress('${t.id}')" onpointerup="cancelSubTabLongPress()" onpointerleave="cancelSubTabLongPress()" onpointercancel="cancelSubTabLongPress()">${t.label}</button>`).join('') +
+    tabs.map(t => `<button class="sub-tab${currentSubTab===t.id?' active':''}" onclick="handleSubTabClick(event,'${t.id}')">${t.label}</button>`).join('') +
     '</div>';
   // Si el Menú de Sub-secciones está abierto mientras se re-renderiza la barra
   // (p.ej. al cambiar de Sub-sección desde dentro del propio menú), refresca
@@ -11354,36 +11375,19 @@ function renderSubTabs(mainTab) {
   }
 }
 
-// ── Menú de Sub-secciones (Experimentos, v1.32.8.5-beta) ────────────────────
+// ── Menú de Sub-secciones (Experimentos, v1.32.9-beta) ──────────────────────
 // Ayuda a quienes no saben que la barra de Sub-secciones es deslizable:
-// manteniendo presionado 1 segundo cualquier botón de Sub-sección de la
-// NavBar superior se abre una pantalla con transparencia que lista todas
-// las Sub-secciones de la sección actual. Exclusiva de móvil/pantallas
-// pequeñas; en Desktop la NavBar ya tiene espacio de sobra para mostrarlas
-// todas. Función experimental: debe activarse primero en Configuración →
-// Experimentos.
-let _subTabLongPressTimer = null;
-let _subTabLongPressFired = false;
-function startSubTabLongPress(tabId) {
-  clearTimeout(_subTabLongPressTimer);
-  _subTabLongPressFired = false;
-  if (!isMobile() || !isSubnavMenuEnabled()) return;
-  const tabs = (SUB_TABS[currentMainTab] || []).filter(t => t.id !== 'carritos' || carritosVisibleForCurrentUser());
-  if (tabs.length <= 1) return;
-  _subTabLongPressTimer = setTimeout(() => {
-    _subTabLongPressFired = true;
-    if (navigator.vibrate) navigator.vibrate(10);
-    openSubnavMenu();
-  }, 1000);
-}
-function cancelSubTabLongPress() {
-  clearTimeout(_subTabLongPressTimer);
-}
+// presionar el botón de la Sub-sección ya activa (la que ya se está viendo)
+// abre una pantalla con transparencia que lista todas las Sub-secciones de
+// la sección actual. Presionar un botón de Sub-sección distinto (no activo)
+// simplemente navega a esa Sub-sección, como siempre. Exclusiva de
+// móvil/pantallas pequeñas; en Desktop la NavBar ya tiene espacio de sobra
+// para mostrarlas todas. Función experimental: debe activarse primero en
+// Configuración → Experimentos.
 function handleSubTabClick(ev, tabId) {
-  if (_subTabLongPressFired) {
-    ev.preventDefault();
-    _subTabLongPressFired = false;
-    return;
+  if (tabId === currentSubTab && isMobile() && isSubnavMenuEnabled()) {
+    const tabs = (SUB_TABS[currentMainTab] || []).filter(t => t.id !== 'carritos' || carritosVisibleForCurrentUser());
+    if (tabs.length > 1) { openSubnavMenu(); return; }
   }
   switchSubTab(tabId);
 }
@@ -22066,15 +22070,11 @@ function renderVmcUserView() {
   const container = document.getElementById('vmc-user-view');
   if (!container) return;
 
-  // Sort chronologically for user view
+  // Orden cronológico ascendente: base para saber cuál es la semana
+  // anterior/siguiente a la seleccionada.
   const sorted = [...vmcWeeks].sort((a,b) => a.date_start.localeCompare(b.date_start));
-  // Show current + upcoming first, then past
-  const relevant = [
-    ...sorted.filter(w => vmcWeekStatus(w) !== 'past'),
-    ...sorted.filter(w => vmcWeekStatus(w) === 'past')
-  ];
 
-  if (!relevant.length) {
+  if (!sorted.length) {
     container.innerHTML = `<div class="vmc-empty">
       <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
       <p>Aún no hay programa cargado.</p>
@@ -22082,27 +22082,34 @@ function renderVmcUserView() {
     return;
   }
 
-  // Pick default selected week (current or first upcoming)
-  const currentWeek = relevant.find(w => vmcWeekStatus(w) === 'current') || relevant[0];
-  if (!vmcSelectedWeekId || !relevant.find(w => w.id === vmcSelectedWeekId)) {
+  // Selección por defecto: la semana actual, o la primera disponible.
+  const currentWeek = sorted.find(w => vmcWeekStatus(w) === 'current') || sorted[0];
+  if (!vmcSelectedWeekId || !sorted.find(w => w.id === vmcSelectedWeekId)) {
     vmcSelectedWeekId = currentWeek.id;
   }
 
-  // Build week selector pills
-  const pills = relevant.map(w => {
-    const st = vmcWeekStatus(w);
-    const label = st === 'current' ? 'Esta semana' : vmcShortRange(w);
-    return `<div class="vmc-week-pill${w.id === vmcSelectedWeekId ? ' active' : ''}"
-      onclick="vmcSelectWeek('${w.id}')">${label}</div>`;
-  }).join('');
+  const idx = sorted.findIndex(w => w.id === vmcSelectedWeekId);
+  const week = sorted[idx];
+  const isCurrent = vmcWeekStatus(week) === 'current';
+  const label = isCurrent ? 'Esta semana' : vmcShortRange(week);
+  // Flecha izquierda: solo aparece una vez que ya no se está en "Esta
+  // semana" (para volver hacia la semana anterior a la seleccionada).
+  const showLeftArrow = !isCurrent && idx > 0;
+  const showRightArrow = idx < sorted.length - 1;
 
-  // Render selected week program
-  const week = relevant.find(w => w.id === vmcSelectedWeekId);
-  const programHtml = week ? vmcRenderWeekProgram(week) : '';
+  const programHtml = vmcRenderWeekProgram(week);
 
   container.innerHTML = `
     <div class="vmc-week-selector-row">
-      <div class="vmc-user-week-selector">${pills}</div>
+      <div class="vmc-user-week-nav">
+        ${showLeftArrow ? `<button class="vmc-week-arrow" onclick="vmcStepWeek(-1)" title="Semana anterior" aria-label="Semana anterior">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>` : ''}
+        <div class="vmc-week-pill active">${label}</div>
+        ${showRightArrow ? `<button class="vmc-week-arrow" onclick="vmcStepWeek(1)" title="Semana siguiente" aria-label="Semana siguiente">
+          <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>` : ''}
+      </div>
       <button class="vmc-cal-btn" id="vmc-cal-btn" onclick="calToggle('vmc')" title="Elegir fecha" aria-label="Elegir fecha">
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       </button>
@@ -22111,15 +22118,13 @@ function renderVmcUserView() {
     <div class="vmc-program-container" id="vmc-program-container">${programHtml}</div>`;
 }
 
-function vmcSelectWeek(id) {
-  vmcSelectedWeekId = id;
-  const week = vmcWeeks.find(w => w.id === id);
-  // Update pills
-  document.querySelectorAll('.vmc-week-pill').forEach(p => p.classList.remove('active'));
-  event.target.classList.add('active');
-  // Update program
-  const c = document.getElementById('vmc-program-container');
-  if (c && week) c.innerHTML = vmcRenderWeekProgram(week);
+function vmcStepWeek(dir) {
+  const sorted = [...vmcWeeks].sort((a,b) => a.date_start.localeCompare(b.date_start));
+  const idx = sorted.findIndex(w => w.id === vmcSelectedWeekId);
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= sorted.length) return;
+  vmcSelectedWeekId = sorted[newIdx].id;
+  renderVmcUserView();
   calClose('vmc');
 }
 
@@ -22467,12 +22472,8 @@ function renderFsUserView() {
   if (!container) return;
 
   const sorted = [...fsWeeks].sort((a,b) => a.date_start.localeCompare(b.date_start));
-  const relevant = [
-    ...sorted.filter(w => fsWeekStatus(w) !== 'past'),
-    ...sorted.filter(w => fsWeekStatus(w) === 'past')
-  ];
 
-  if (!relevant.length) {
+  if (!sorted.length) {
     container.innerHTML = `<div class="vmc-empty">
       <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       <p>Aún no hay programa cargado.</p>
@@ -22480,24 +22481,31 @@ function renderFsUserView() {
     return;
   }
 
-  const currentWeek = relevant.find(w => fsWeekStatus(w) === 'current') || relevant[0];
-  if (!fsSelectedWeekId || !relevant.find(w => w.id === fsSelectedWeekId)) {
+  const currentWeek = sorted.find(w => fsWeekStatus(w) === 'current') || sorted[0];
+  if (!fsSelectedWeekId || !sorted.find(w => w.id === fsSelectedWeekId)) {
     fsSelectedWeekId = currentWeek.id;
   }
 
-  const pills = relevant.map(w => {
-    const st = fsWeekStatus(w);
-    const label = st === 'current' ? 'Esta semana' : fsShortRange(w);
-    return `<div class="vmc-week-pill${w.id === fsSelectedWeekId ? ' active' : ''}"
-      onclick="fsSelectWeek('${w.id}')">${label}</div>`;
-  }).join('');
+  const idx = sorted.findIndex(w => w.id === fsSelectedWeekId);
+  const week = sorted[idx];
+  const isCurrent = fsWeekStatus(week) === 'current';
+  const label = isCurrent ? 'Esta semana' : fsShortRange(week);
+  const showLeftArrow = !isCurrent && idx > 0;
+  const showRightArrow = idx < sorted.length - 1;
 
-  const week = relevant.find(w => w.id === fsSelectedWeekId);
-  const programHtml = week ? fsRenderWeekProgram(week) : '';
+  const programHtml = fsRenderWeekProgram(week);
 
   container.innerHTML = `
     <div class="vmc-week-selector-row">
-      <div class="vmc-user-week-selector">${pills}</div>
+      <div class="vmc-user-week-nav">
+        ${showLeftArrow ? `<button class="vmc-week-arrow" onclick="fsStepWeek(-1)" title="Semana anterior" aria-label="Semana anterior">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>` : ''}
+        <div class="vmc-week-pill active">${label}</div>
+        ${showRightArrow ? `<button class="vmc-week-arrow" onclick="fsStepWeek(1)" title="Semana siguiente" aria-label="Semana siguiente">
+          <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>` : ''}
+      </div>
       <button class="vmc-cal-btn" id="fs-cal-btn" onclick="calToggle('fs')" title="Elegir fecha" aria-label="Elegir fecha">
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       </button>
@@ -22506,13 +22514,13 @@ function renderFsUserView() {
     <div class="vmc-program-container" id="fs-program-container">${programHtml}</div>`;
 }
 
-function fsSelectWeek(id) {
-  fsSelectedWeekId = id;
-  const week = fsWeeks.find(w => w.id === id);
-  document.querySelectorAll('#fs-user-view .vmc-week-pill').forEach(p => p.classList.remove('active'));
-  event.target.classList.add('active');
-  const c = document.getElementById('fs-program-container');
-  if (c && week) c.innerHTML = fsRenderWeekProgram(week);
+function fsStepWeek(dir) {
+  const sorted = [...fsWeeks].sort((a,b) => a.date_start.localeCompare(b.date_start));
+  const idx = sorted.findIndex(w => w.id === fsSelectedWeekId);
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= sorted.length) return;
+  fsSelectedWeekId = sorted[newIdx].id;
+  renderFsUserView();
   calClose('fs');
 }
 
