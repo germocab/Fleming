@@ -1350,12 +1350,12 @@
   #as-grupo-wrap.visible { display: flex; }
   .detail-ter-tabs {
     display: flex; gap: 0; margin: 0 1.25rem 0.75rem;
-    background: var(--surface2); border-radius: 10px; padding: 3px;
+    background: var(--surface2); border-radius: 999px; padding: 4px;
     border: 1px solid var(--border);
   }
   .detail-ter-tab {
-    flex: 1; padding: 0.45rem 0.75rem; border: none; cursor: pointer;
-    border-radius: 8px; font-size: 0.82rem; font-weight: 600;
+    flex: 1; padding: 0.5rem 0.9rem; border: none; cursor: pointer;
+    border-radius: 999px; font-size: 0.82rem; font-weight: 600;
     background: transparent; color: var(--text3);
     transition: background 0.15s, color 0.15s;
     display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -8323,7 +8323,8 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-const APP_VERSION = '1.32.11-beta';
+// v1.32.20-beta: menú de Territorio (1/2/3) ahora con forma de píldora/ovalada.
+const APP_VERSION = '1.32.20-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
