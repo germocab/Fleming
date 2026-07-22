@@ -5876,52 +5876,104 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 <!-- ══════════════════════════════════════════════════════════════════════
      EXHIBIDORES — página pública "Detalles y Mantención" (?extoken=)
      Sin sesión: cualquier publicador que escanee el QR de un exhibidor
-     llega aquí y puede reportar una necesidad. v1.34.0-beta
+     llega aquí y puede reportar una o más necesidades. Reutiliza el mismo
+     lenguaje visual del detalle de Casa en Casa (detail-*): tarjetas
+     redondeadas, chips y botones píldora, sin emojis — solo íconos SVG.
+     v1.34.1-beta
      ══════════════════════════════════════════════════════════════════════ -->
+<style>
+  #exh-public-screen .exh-pub-opt {
+    display: flex; align-items: center; gap: 12px;
+    padding: 0.9rem 1rem; border-radius: var(--radius-sm, 14px);
+    border: 1.5px solid var(--border); background: var(--surface2); color: var(--text);
+    cursor: pointer; transition: border-color 0.15s, background 0.15s; user-select: none;
+  }
+  #exh-public-screen .exh-pub-opt:hover { border-color: var(--accent); }
+  #exh-public-screen .exh-pub-opt.active { border-color: var(--accent); background: var(--accent-light); }
+  #exh-public-screen .exh-pub-opt-icon {
+    width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+    background: var(--surface3); color: var(--text2);
+    display: flex; align-items: center; justify-content: center; transition: background 0.15s, color 0.15s;
+  }
+  #exh-public-screen .exh-pub-opt.active .exh-pub-opt-icon { background: var(--accent); color: #fff; }
+  #exh-public-screen .exh-pub-opt-icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
+  #exh-public-screen .exh-pub-opt-label { flex: 1; font-weight: 600; font-size: 0.9rem; }
+  #exh-public-screen .exh-pub-opt-check {
+    width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+    border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  #exh-public-screen .exh-pub-opt.active .exh-pub-opt-check { background: var(--accent); border-color: var(--accent); }
+  #exh-public-screen .exh-pub-opt-check svg { width: 12px; height: 12px; stroke: #fff; fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; opacity: 0; transition: opacity 0.15s; }
+  #exh-public-screen .exh-pub-opt.active .exh-pub-opt-check svg { opacity: 1; }
+  #exh-public-screen textarea:focus { outline: none; border-color: var(--accent); }
+</style>
 <div id="exh-public-screen" style="display:none;position:fixed;inset:0;z-index:99999;background:var(--bg);color:var(--text);font-family:inherit;overflow-y:auto">
-  <div style="max-width:480px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;padding:1.25rem 1.1rem 2.5rem">
+  <div style="max-width:480px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;">
 
-    <div style="display:flex;justify-content:flex-end;">
-      <button onclick="toggleTheme()" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text)" title="Modo claro/oscuro"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg></button>
+    <div class="detail-header-bar">
+      <span class="detail-date-label">Exhibidor</span>
+      <button class="detail-close" onclick="toggleTheme()" title="Modo claro/oscuro">
+        <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+      </button>
     </div>
 
     <div id="exh-pub-loading" style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:0.9rem;">Cargando...</div>
 
-    <div id="exh-pub-content" style="display:none;flex:1;flex-direction:column;gap:1rem;">
-      <div id="exh-pub-img" style="width:100%;aspect-ratio:16/10;border-radius:16px;overflow:hidden;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;"></div>
+    <div id="exh-pub-content" style="display:none;flex:1;flex-direction:column;padding:0 1.25rem 2rem;gap:1.2rem;">
+
       <div>
-        <h1 id="exh-pub-nombre" style="font-size:1.35rem;font-weight:800;margin:0 0 4px;"></h1>
-        <p id="exh-pub-puntos" style="color:var(--text3);font-size:0.85rem;margin:0;"></p>
+        <div class="detail-address" id="exh-pub-nombre">—</div>
+        <div class="detail-conductor" id="exh-pub-puntos" style="color:var(--text3);"></div>
       </div>
 
-      <div id="exh-pub-step-opts">
-        <div style="font-weight:700;font-size:0.95rem;margin-bottom:10px;">¿Qué necesita este exhibidor?</div>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          <button class="exh-pub-opt" onclick="exhPubSelect('faltan_publicaciones')" style="text-align:left;padding:0.9rem 1rem;border-radius:14px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-weight:600;font-size:0.92rem;cursor:pointer;display:flex;align-items:center;gap:12px;">📚 Faltan publicaciones</button>
-          <button class="exh-pub-opt" onclick="exhPubSelect('desgaste_estructural')" style="text-align:left;padding:0.9rem 1rem;border-radius:14px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-weight:600;font-size:0.92rem;cursor:pointer;display:flex;align-items:center;gap:12px;">🛠️ Desgaste estructural del exhibidor</button>
-          <button class="exh-pub-opt" onclick="exhPubSelect('falta_limpieza')" style="text-align:left;padding:0.9rem 1rem;border-radius:14px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-weight:600;font-size:0.92rem;cursor:pointer;display:flex;align-items:center;gap:12px;">🧹 Falta de limpieza</button>
-          <button class="exh-pub-opt" onclick="exhPubSelect('otro')" style="text-align:left;padding:0.9rem 1rem;border-radius:14px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-weight:600;font-size:0.92rem;cursor:pointer;display:flex;align-items:center;gap:12px;">✏️ Otro</button>
+      <div id="exh-pub-step-opts" style="display:flex;flex-direction:column;gap:1rem;">
+        <div style="font-weight:700;font-size:0.95rem;">¿Qué necesita este exhibidor?</div>
+        <div style="font-size:0.78rem;color:var(--text3);margin-top:-8px;">Puedes seleccionar más de una opción.</div>
+
+        <div style="display:flex;flex-direction:column;gap:0.65rem;">
+          <div class="exh-pub-opt" data-tipo="faltan_publicaciones" onclick="exhPubToggleOpt(this)" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
+            <div class="exh-pub-opt-icon"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+            <div class="exh-pub-opt-label">Faltan publicaciones</div>
+            <div class="exh-pub-opt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
+          <div class="exh-pub-opt" data-tipo="desgaste_estructural" onclick="exhPubToggleOpt(this)" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
+            <div class="exh-pub-opt-icon"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94z"/></svg></div>
+            <div class="exh-pub-opt-label">Desgaste estructural del exhibidor</div>
+            <div class="exh-pub-opt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
+          <div class="exh-pub-opt" data-tipo="falta_limpieza" onclick="exhPubToggleOpt(this)" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
+            <div class="exh-pub-opt-icon"><svg viewBox="0 0 24 24"><path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/></svg></div>
+            <div class="exh-pub-opt-label">Falta de limpieza</div>
+            <div class="exh-pub-opt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
+          <div class="exh-pub-opt" data-tipo="otro" onclick="exhPubToggleOpt(this)" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
+            <div class="exh-pub-opt-icon"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
+            <div class="exh-pub-opt-label">Otro</div>
+            <div class="exh-pub-opt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
         </div>
-      </div>
 
-      <div id="exh-pub-step-otro" style="display:none;flex-direction:column;gap:10px;">
-        <label style="font-size:0.85rem;font-weight:600;" for="exh-pub-otro-text">Cuéntanos qué ocurre</label>
-        <textarea id="exh-pub-otro-text" rows="4" placeholder="Escribe la observación..." style="width:100%;box-sizing:border-box;padding:0.8rem;border-radius:12px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:inherit;font-size:0.9rem;"></textarea>
-        <div style="display:flex;gap:10px;">
-          <button onclick="exhPubBack()" style="flex:1;padding:0.8rem;border-radius:12px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-weight:600;cursor:pointer;">Volver</button>
-          <button class="btn-primary" onclick="exhPubSubmit('otro')" style="flex:1;padding:0.8rem;border-radius:12px;font-weight:700;">Enviar</button>
+        <div id="exh-pub-otro-wrap" style="display:none;flex-direction:column;gap:0.5rem;">
+          <label style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);" for="exh-pub-otro-text">Cuéntanos qué ocurre</label>
+          <textarea id="exh-pub-otro-text" rows="3" placeholder="Escribe la observación..." style="width:100%;box-sizing:border-box;padding:0.8rem 0.9rem;border-radius:var(--radius-sm,14px);border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-family:inherit;font-size:0.9rem;resize:vertical;"></textarea>
         </div>
+
+        <button class="detail-btn-primary" id="exh-pub-submit-btn" onclick="exhPubSubmit()" style="width:100%;margin-top:0.4rem;">Enviar reporte</button>
       </div>
 
-      <div id="exh-pub-step-done" style="display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;padding:2rem 0;">
-        <div style="font-size:2.2rem;">✓</div>
-        <h2 style="font-size:1.15rem;font-weight:700;margin:0;">¡Gracias por tu reporte!</h2>
+      <div id="exh-pub-step-done" style="display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:0.6rem;padding:2.5rem 0;">
+        <div style="width:52px;height:52px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h2 style="font-size:1.1rem;font-weight:700;margin:0;">¡Gracias por tu reporte!</h2>
         <p style="color:var(--text3);font-size:0.85rem;margin:0;">Los encargados de Carritos han sido notificados.</p>
       </div>
+
     </div>
 
-    <div id="exh-pub-error" style="display:none;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;">
-      <h2 style="font-size:1.2rem;margin-bottom:4px;">Enlace inválido</h2>
+    <div id="exh-pub-error" style="display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;padding:2rem;">
+      <h2 style="font-size:1.15rem;margin-bottom:2px;">Enlace inválido</h2>
       <p style="color:var(--text3);font-size:0.85rem;">Este código QR no corresponde a ningún exhibidor activo.</p>
     </div>
 
@@ -8581,7 +8633,7 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.34.0-beta';
+const APP_VERSION = '1.34.1-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -25979,7 +26031,7 @@ async function notifyReportRecipients(territoryObj, submission) {
 // EXHIBIDORES — página pública "Detalles y Mantención" (?extoken=)
 // ══════════════════════════════════════════════════════════════════════════
 let exhPubExhibidor = null;
-let exhPubTipoActual = null;
+let exhPubSelectedTipos = new Set();
 
 async function exhInitPublicScreen(token) {
   document.getElementById('exh-public-screen').style.display = 'block';
@@ -25996,11 +26048,7 @@ async function exhInitPublicScreen(token) {
   const content = document.getElementById('exh-pub-content');
   content.style.display = 'flex';
 
-  const imgBox = document.getElementById('exh-pub-img');
-  imgBox.innerHTML = data.imagen
-    ? `<img src="${data.imagen}" style="width:100%;height:100%;object-fit:cover;">`
-    : `<span style="color:var(--text3);font-size:0.8rem;">Sin imagen</span>`;
-
+  // Nota: la imagen del exhibidor no se muestra por ahora en esta pantalla.
   document.getElementById('exh-pub-nombre').textContent = data.nombre;
 
   let puntosTxt = 'Sin puntos asignados.';
@@ -26013,40 +26061,51 @@ async function exhInitPublicScreen(token) {
   document.getElementById('exh-pub-puntos').textContent = puntosTxt;
 }
 
-function exhPubSelect(tipo) {
-  exhPubTipoActual = tipo;
-  if (tipo === 'otro') {
-    document.getElementById('exh-pub-step-opts').style.display = 'none';
-    document.getElementById('exh-pub-step-otro').style.display = 'flex';
+// Selección múltiple: cada opción se activa/desactiva de forma independiente.
+function exhPubToggleOpt(el) {
+  const tipo = el.dataset.tipo;
+  const active = el.classList.toggle('active');
+  if (active) exhPubSelectedTipos.add(tipo); else exhPubSelectedTipos.delete(tipo);
+
+  const otroWrap = document.getElementById('exh-pub-otro-wrap');
+  otroWrap.style.display = exhPubSelectedTipos.has('otro') ? 'flex' : 'none';
+}
+
+async function exhPubSubmit() {
+  if (!exhPubExhibidor) return;
+  if (!exhPubSelectedTipos.size) {
+    (typeof showToast === 'function' ? showToast('Selecciona al menos una opción.', 'error') : alert('Selecciona al menos una opción.'));
     return;
   }
-  exhPubSubmit(tipo);
-}
 
-function exhPubBack() {
-  document.getElementById('exh-pub-step-otro').style.display = 'none';
-  document.getElementById('exh-pub-step-opts').style.display = 'block';
-}
-
-async function exhPubSubmit(tipo) {
-  if (!exhPubExhibidor) return;
-  let descripcion = null;
-  if (tipo === 'otro') {
-    descripcion = (document.getElementById('exh-pub-otro-text').value || '').trim();
-    if (!descripcion) { showToast ? showToast('Escribe una breve descripción.', 'error') : alert('Escribe una breve descripción.'); return; }
+  let descripcionOtro = null;
+  if (exhPubSelectedTipos.has('otro')) {
+    descripcionOtro = (document.getElementById('exh-pub-otro-text').value || '').trim();
+    if (!descripcionOtro) {
+      (typeof showToast === 'function' ? showToast('Escribe una breve descripción para "Otro".', 'error') : alert('Escribe una breve descripción para "Otro".'));
+      return;
+    }
   }
 
-  const reportadoPor = (typeof currentUser !== 'undefined' && currentUser) ? getIdentityName() : null;
+  const submitBtn = document.getElementById('exh-pub-submit-btn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Enviando...';
 
-  const { error } = await sb.from('cart_exhibidor_informes').insert({
+  const reportadoPor = (typeof currentUser !== 'undefined' && currentUser) ? getIdentityName() : null;
+  const tipos = Array.from(exhPubSelectedTipos);
+  const rows = tipos.map(tipo => ({
     exhibidor_id: exhPubExhibidor.id,
     tipo,
-    descripcion,
+    descripcion: tipo === 'otro' ? descripcionOtro : null,
     reportado_por: reportadoPor,
     estado: 'pendiente'
-  });
+  }));
+
+  const { error } = await sb.from('cart_exhibidor_informes').insert(rows);
 
   if (error) {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Enviar reporte';
     alert('No se pudo enviar el reporte. Inténtalo nuevamente.');
     console.error(error);
     return;
@@ -26056,9 +26115,8 @@ async function exhPubSubmit(tipo) {
   try {
     const targets = await cartAdminAndDevNames();
     const title = `Nuevo informe de Exhibidor — ${exhPubExhibidor.nombre}`;
-    const body = tipo === 'otro'
-      ? `Observación: ${descripcion}`
-      : (CART_EXH_TIPOS[tipo] || tipo) + (reportadoPor ? ` (reportado por ${reportadoPor})` : '');
+    const listado = tipos.map(t => t === 'otro' ? `Otro: ${descripcionOtro}` : (CART_EXH_TIPOS[t] || t)).join(' · ');
+    const body = listado + (reportadoPor ? ` (reportado por ${reportadoPor})` : '');
     await sb.from('notifications').insert({ title, body, target_names: targets, notif_category: 'carritos' });
     await notifyUsersPush('carritos', { title, body, target_names: targets });
   } catch (err) {
@@ -26066,7 +26124,6 @@ async function exhPubSubmit(tipo) {
   }
 
   document.getElementById('exh-pub-step-opts').style.display = 'none';
-  document.getElementById('exh-pub-step-otro').style.display = 'none';
   document.getElementById('exh-pub-step-done').style.display = 'flex';
 }
 
