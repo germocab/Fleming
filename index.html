@@ -1836,6 +1836,35 @@
     color: var(--text2); cursor: pointer; transition: all 0.2s; font-family: var(--font);
   }
   .admin-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+  /* ── Monitor (v1.33.7-beta) ── */
+  .monitor-subtabs { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 1.1rem; scrollbar-width: none; }
+  .monitor-subtabs::-webkit-scrollbar { display: none; }
+  .monitor-subtab {
+    flex-shrink: 0; padding: 0.5rem 0.85rem; border-radius: 999px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text2); font-size: 0.8rem; font-weight: 600; cursor: pointer;
+    white-space: nowrap; transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .monitor-subtab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .monitor-pane { display: none; }
+  .monitor-pane.active { display: block; }
+  .monitor-stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+  .monitor-stat-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 0.95rem 1rem;
+  }
+  .monitor-stat-value { font-size: 1.5rem; font-weight: 800; color: var(--text); line-height: 1.15; }
+  .monitor-stat-label { font-size: 0.78rem; color: var(--text3); font-weight: 600; margin-top: 3px; }
+  .monitor-stat-sub { font-size: 0.72rem; color: var(--text3); margin-top: 8px; line-height: 1.4; }
+  .monitor-stat-sub-row { display: flex; justify-content: space-between; gap: 8px; margin-top: 3px; }
+  .monitor-list-item {
+    padding: 0.85rem 1rem; border-radius: 14px; background: var(--surface); border: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+  .monitor-list-item-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .monitor-list-item-title { font-weight: 700; font-size: 0.88rem; color: var(--text); }
+  .monitor-list-item-date { font-size: 0.72rem; color: var(--text3); flex-shrink: 0; }
+  .monitor-list-item-body { font-size: 0.82rem; color: var(--text2); margin-top: 4px; line-height: 1.45; }
+  .monitor-list-item-meta { font-size: 0.72rem; color: var(--text3); margin-top: 6px; }
+  .monitor-empty { padding: 2rem 1rem; text-align: center; color: var(--text3); font-size: 0.85rem; }
   .admin-section { display: none; }
   .admin-section.active { display: block; }
 
@@ -6310,6 +6339,7 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
         <button class="admin-tab" data-tab="usuarios" data-i18n="admin.tab.usuarios" onclick="switchAdminTab('usuarios')">Usuarios</button>
         <button class="admin-tab" id="admin-tab-notificaciones" data-tab="notificaciones" data-i18n="admin.tab.notificaciones" onclick="switchAdminTab('notificaciones')" style="display:none">Notificaciones</button>
         <button class="admin-tab" id="admin-tab-tips" data-tab="tips" onclick="switchAdminTab('tips')" style="display:none">Tips</button>
+        <button class="admin-tab" id="admin-tab-monitor" data-tab="monitor" onclick="switchAdminTab('monitor')" style="display:none">Monitor</button>
       </div>
       <div class="admin-section active" id="admin-assignments">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
@@ -6731,6 +6761,41 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
         </div>
         <div style="font-size:0.8rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;margin:0.5rem 0 0.6rem">Tips publicados</div>
         <div id="admin-tips-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Tips</div></div></div>
+      </div>
+
+      <!-- ── Monitor (v1.33.7-beta): patrones de uso de la plataforma (no
+           acciones individuales de cada usuario) + Sugerencias de No Pasar,
+           Sugerencias de la plataforma y Reportes de problema, todo en un
+           solo lugar para el Usuario DEV. ── -->
+      <div class="admin-section" id="admin-monitor">
+        <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
+          <span style="flex:1;font-size:0.95rem;font-weight:700">Monitor</span>
+        </div>
+        <div class="monitor-subtabs">
+          <button class="monitor-subtab active" data-msub="stats" onclick="switchMonitorTab('stats')">Estadísticas</button>
+          <button class="monitor-subtab" data-msub="np" onclick="switchMonitorTab('np')">Sugerencias No Pasar</button>
+          <button class="monitor-subtab" data-msub="plataforma" onclick="switchMonitorTab('plataforma')">Sugerencias Plataforma</button>
+          <button class="monitor-subtab" data-msub="reportes" onclick="switchMonitorTab('reportes')">Reportes de Problema</button>
+        </div>
+
+        <div class="monitor-pane active" id="monitor-pane-stats">
+          <div style="font-size:0.78rem;color:var(--text3);line-height:1.4;margin-bottom:1rem">
+            Estadísticas de uso y preferencias agregadas de todos los usuarios. No refleja acciones individuales.
+          </div>
+          <div id="monitor-stats-grid" class="monitor-stats-grid"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando estadísticas</div></div></div>
+        </div>
+
+        <div class="monitor-pane" id="monitor-pane-np" style="display:none">
+          <div id="monitor-np-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Sugerencias</div></div></div>
+        </div>
+
+        <div class="monitor-pane" id="monitor-pane-plataforma" style="display:none">
+          <div id="monitor-plataforma-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Sugerencias</div></div></div>
+        </div>
+
+        <div class="monitor-pane" id="monitor-pane-reportes" style="display:none">
+          <div id="monitor-reportes-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Reportes</div></div></div>
+        </div>
       </div>
 
       </div><!-- /.admin-body -->
@@ -8458,13 +8523,32 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.33.5.3-beta';
+const APP_VERSION = '1.33.7-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
 function getAppVersionMajor() {
   const m = APP_VERSION.match(/^(\d+\.\d+)/);
   return m ? m[1] : APP_VERSION;
+}
+
+// ── Monitor (v1.33.7-beta): registro de patrones de uso ─────────────────────
+// trackEvent() guarda eventos anónimos y agregables de uso de la plataforma
+// (qué Sub-sección se visita, si Live está activo, qué notificaciones se
+// silencian, qué pantallas de Configuración se abren, etc.) para que el
+// Usuario DEV pueda ver ESTADÍSTICAS de uso en Administración > FlemingApp >
+// Monitor. NO es un registro de auditoría por usuario: no se usa para
+// rastrear acciones individuales, solo para calcular conteos/porcentajes
+// agregados. Falla en silencio si no hay red o la tabla no existe todavía.
+// Tabla Supabase esperada: usage_events (
+//   id uuid PK default gen_random_uuid(), event text, meta jsonb,
+//   app_version text, created_at timestamptz default now()
+// )
+function trackEvent(event, meta) {
+  try {
+    sb.from('usage_events').insert({ event, meta: meta || {}, app_version: APP_VERSION })
+      .then(({ error }) => { if (error) console.warn('trackEvent:', event, error.message); });
+  } catch (e) { console.warn('trackEvent falló:', event, e.message); }
 }
 
 // ══════════════════════════ Modo Offline ══════════════════════════════════
@@ -11280,6 +11364,8 @@ async function enterApp() {
   if (notifAdminTab) notifAdminTab.style.display = (currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, 'notificaciones'))) ? '' : 'none';
   const tipsAdminTab = document.getElementById('admin-tab-tips');
   if (tipsAdminTab) tipsAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
+  const monitorAdminTab = document.getElementById('admin-tab-monitor');
+  if (monitorAdminTab) monitorAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
 
   // Restore navigation position from before reload (if any)
   const _nav = _loadNavState();
@@ -11700,6 +11786,7 @@ function switchSubTab(tabId) {
   if (tabId === 'carritos' && !carritosVisibleForCurrentUser()) { tabId = 'casa'; }
   currentSubTab = tabId;
   renderSubTabs(currentMainTab);
+  trackEvent('subsection_use', { tab: tabId });
 
   // Predicación sub-tabs
   const predTabs = ['casa','territorios','carritos','grupos'];
@@ -12020,6 +12107,12 @@ async function switchAdminTab(tab) {
     showToast('No tienes permisos para acceder a este módulo.', 'error');
     return;
   }
+  // Monitor (v1.33.7-beta): estadísticas de uso, Sugerencias y Reportes de
+  // problema — exclusivo del Usuario DEV, no delegable a Admins.
+  if (tab === 'monitor' && currentRole !== 'dev') {
+    showToast('No tienes permisos para acceder a este módulo.', 'error');
+    return;
+  }
   if (currentRole === 'admin' && ADMIN_TAB_PERM_KEY[tab] && !canAccessModule(_currentUserPermsCache, ADMIN_TAB_PERM_KEY[tab])) {
     showToast('No tienes permisos para acceder a este módulo.', 'error');
     return;
@@ -12061,6 +12154,7 @@ async function switchAdminTab(tab) {
   if (tab === 'fin-semana') { loadFsWeeks().then(() => renderAdminFs()); }
   if (tab === 'notificaciones') { renderNotifAdminTemplates(); renderNotifAdminCategories(); loadNotifLevels().then(renderNotifAdminLevels); }
   if (tab === 'tips') { renderAdminTipsList(); }
+  if (tab === 'monitor') { switchMonitorTab(_monitorActiveTab || 'stats'); }
   if (tab === 'carritos') { cartOpenAdminSection(); }
   if (tab === 'reports') { trepOpenAdminSection(); }
 }
@@ -17472,6 +17566,8 @@ async function syncRoleFromServer() {
       if (notifAdminTab) notifAdminTab.style.display = (currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, 'notificaciones'))) ? '' : 'none';
       const tipsAdminTab = document.getElementById('admin-tab-tips');
       if (tipsAdminTab) tipsAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
+      const monitorAdminTab = document.getElementById('admin-tab-monitor');
+      if (monitorAdminTab) monitorAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
       // If user was viewing the Fleming App / Usuarios section and lost access, send them back to predicación
       const usuariosSection = document.getElementById('admin-usuarios');
       if (usuariosSection && usuariosSection.classList.contains('active') && !['dev','admin'].includes(currentRole)) {
@@ -17799,6 +17895,7 @@ function openPrefScreen(name) {
   if (!PREF_SCREENS.includes(name)) return;
   if (name === 'experimentos' && localStorage.getItem('fleming_egg_unlocked') !== '1') return;
   document.getElementById('page-pref-' + name)?.classList.add('open');
+  trackEvent('settings_open', { screen: name });
   if (name === 'funciones') { updateH2HViewModeUI(); updateNavbarShrinkToggleUI(); if (typeof updateLiveAlwaysOnToggleUI === 'function') updateLiveAlwaysOnToggleUI(); }
   if (name === 'notificaciones') renderPrefNotifList();
   if (name === 'almacenamiento') renderStorageList();
@@ -18199,6 +18296,7 @@ function toggleLiveFeaturePref() {
   updateLiveToggleUI();
   if (!next && _liveActive) stopLiveMode();
   _liveUpdateBtnVisibility();
+  trackEvent('live_toggle', { enabled: next });
 }
 
 // ── Modo Experimentos: Accent Color Picker ──────────────────────────────────
@@ -18368,6 +18466,7 @@ function triggerEggUnlock() {
     localStorage.removeItem('fleming_navbar_options_avatar');
     applyNavbarAvatarUI();
     updateExperimentosNavVisibility();
+    trackEvent('experiments_toggle', { enabled: false });
     showToast('Experimentos desactivados', '');
     return;
   }
@@ -18375,6 +18474,7 @@ function triggerEggUnlock() {
   localStorage.setItem('fleming_egg_unlocked', '1');
   revealAccentSection();
   updateExperimentosNavVisibility();
+  trackEvent('experiments_toggle', { enabled: true });
   const overlay = document.getElementById('egg-unlock-overlay');
   overlay.classList.add('active');
 }
@@ -19073,6 +19173,7 @@ async function togglePrefNotif(categoryId, el) {
   const turningOn = !el.classList.contains('on');
   el.classList.toggle('on');
   await setNotifPref(categoryId, turningOn);
+  trackEvent('notif_toggle', { category: categoryId, enabled: turningOn });
 }
 
 // ── Tips (v1.22.0-beta) ───────────────────────────────────────────────────────
@@ -19371,6 +19472,211 @@ async function submitIssueReport() {
   showToast('Reporte enviado. ¡Gracias por ayudar a mejorar la plataforma!', 'success');
 }
 
+// ══════════════════════ Monitor (v1.33.7-beta) ══════════════════════════
+// Administración > FlemingApp > Monitor. Reúne, en un solo lugar, tres
+// tipos de contenido para el Usuario DEV:
+//  1) Estadísticas agregadas de uso de la plataforma (tabla usage_events,
+//     alimentada por trackEvent() a lo largo de la app).
+//  2) Sugerencias de No Pasar (direcciones, fechas, correcciones, etc.)
+//  3) Sugerencias de la plataforma (correcciones de mapa y otras sugerencias
+//     generales que no son específicas de una dirección "No Pasar")
+//  4) Reportes de problema (tabla bug_reports)
+// Ninguna de estas vistas identifica acciones de un usuario en particular
+// de forma aislada: son listas/conteos pensados como estudio de patrones y
+// preferencias de uso, no como auditoría individual.
+
+let _monitorActiveTab = 'stats';
+
+function switchMonitorTab(tab) {
+  _monitorActiveTab = tab;
+  document.querySelectorAll('.monitor-subtab').forEach(b => b.classList.toggle('active', b.dataset.msub === tab));
+  document.querySelectorAll('.monitor-pane').forEach(p => p.style.display = 'none');
+  const pane = document.getElementById('monitor-pane-' + tab);
+  if (pane) pane.style.display = '';
+  if (tab === 'stats') renderMonitorStats();
+  if (tab === 'np') renderMonitorSugerencias('np');
+  if (tab === 'plataforma') renderMonitorSugerencias('plataforma');
+  if (tab === 'reportes') renderMonitorReportes();
+}
+
+function _monitorFmtDate(iso) {
+  if (!iso) return '';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString('es', { day: '2-digit', month: 'short' }) + ' · ' +
+           d.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+  } catch (e) { return ''; }
+}
+
+// ── Estadísticas ─────────────────────────────────────────────────────────
+async function renderMonitorStats() {
+  const grid = document.getElementById('monitor-stats-grid');
+  if (!grid) return;
+  grid.innerHTML = `<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando estadísticas</div></div>`;
+
+  let events = [];
+  try {
+    const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const { data, error } = await sb.from('usage_events').select('*').gte('created_at', since).order('created_at', { ascending: false }).limit(5000);
+    if (error) throw error;
+    events = data || [];
+  } catch (e) {
+    console.warn('No se pudieron cargar usage_events (¿tabla inexistente?):', e.message);
+    grid.innerHTML = `<div class="monitor-empty">Aún no hay datos de uso registrados (o la tabla "usage_events" todavía no existe en Supabase).</div>`;
+    return;
+  }
+
+  if (!events.length) {
+    grid.innerHTML = `<div class="monitor-empty">Todavía no hay eventos de uso en los últimos 30 días.</div>`;
+    return;
+  }
+
+  const todayStr = new Date().toDateString();
+  const byEvent = {};
+  events.forEach(e => { (byEvent[e.event] = byEvent[e.event] || []).push(e); });
+
+  // Live: activaciones hoy / últimos 30 días
+  const liveEvents = byEvent['live_toggle'] || [];
+  const liveToday = liveEvents.filter(e => new Date(e.created_at).toDateString() === todayStr && e.meta?.enabled).length;
+  const liveOnTotal = liveEvents.filter(e => e.meta?.enabled).length;
+
+  // Experimentos: activaciones vs desactivaciones registradas
+  const expEvents = byEvent['experiments_toggle'] || [];
+  const expOn  = expEvents.filter(e => e.meta?.enabled).length;
+  const expOff = expEvents.filter(e => !e.meta?.enabled).length;
+
+  // Sub-secciones más usadas
+  const subCounts = {};
+  (byEvent['subsection_use'] || []).forEach(e => { const t = e.meta?.tab || '—'; subCounts[t] = (subCounts[t] || 0) + 1; });
+  const topSubs = Object.entries(subCounts).sort((a, b) => b[1] - a[1]).slice(0, 4);
+
+  // Notificaciones más silenciadas (togglePrefNotif con enabled:false)
+  const muteCounts = {};
+  (byEvent['notif_toggle'] || []).forEach(e => {
+    if (e.meta?.enabled === false) { const c = e.meta?.category || '—'; muteCounts[c] = (muteCounts[c] || 0) + 1; }
+  });
+  const topMuted = Object.entries(muteCounts).sort((a, b) => b[1] - a[1]).slice(0, 4);
+
+  // Pantallas de Configuración más abiertas (incluye "notificaciones" = panel de notificaciones)
+  const screenCounts = {};
+  (byEvent['settings_open'] || []).forEach(e => { const s = e.meta?.screen || '—'; screenCounts[s] = (screenCounts[s] || 0) + 1; });
+  const topScreens = Object.entries(screenCounts).sort((a, b) => b[1] - a[1]).slice(0, 4);
+  const notifPanelOpens = screenCounts['notificaciones'] || 0;
+
+  const rowsHtml = (arr, emptyMsg) => arr.length
+    ? arr.map(([k, v]) => `<div class="monitor-stat-sub-row"><span>${k}</span><span>${v}</span></div>`).join('')
+    : `<div class="monitor-stat-sub-row" style="opacity:0.6">${emptyMsg}</div>`;
+
+  grid.innerHTML = `
+    <div class="monitor-stat-card">
+      <div class="monitor-stat-value">${liveToday}</div>
+      <div class="monitor-stat-label">Activaciones de Live hoy</div>
+      <div class="monitor-stat-sub">${liveOnTotal} en los últimos 30 días</div>
+    </div>
+    <div class="monitor-stat-card">
+      <div class="monitor-stat-value">${expOn}</div>
+      <div class="monitor-stat-label">Veces que se activaron Experimentos</div>
+      <div class="monitor-stat-sub">${expOff} desactivaciones registradas (30 días)</div>
+    </div>
+    <div class="monitor-stat-card">
+      <div class="monitor-stat-value">${notifPanelOpens}</div>
+      <div class="monitor-stat-label">Aperturas del panel de Notificaciones</div>
+      <div class="monitor-stat-sub">Últimos 30 días</div>
+    </div>
+    <div class="monitor-stat-card" style="grid-column: span 2">
+      <div class="monitor-stat-label" style="margin-bottom:6px">Sub-secciones más usadas</div>
+      ${rowsHtml(topSubs, 'Sin datos aún')}
+    </div>
+    <div class="monitor-stat-card" style="grid-column: span 2">
+      <div class="monitor-stat-label" style="margin-bottom:6px">Notificaciones más silenciadas</div>
+      ${rowsHtml(topMuted, 'Ninguna silenciada aún')}
+    </div>
+    <div class="monitor-stat-card" style="grid-column: span 2">
+      <div class="monitor-stat-label" style="margin-bottom:6px">Pantallas de Configuración más visitadas</div>
+      ${rowsHtml(topScreens, 'Sin datos aún')}
+    </div>
+  `;
+}
+
+// ── Sugerencias (No Pasar / Plataforma) ─────────────────────────────────
+// Todas viajan como notificaciones con dev_only:true. Las de "No Pasar"
+// (agregar, quitar, corregir nombre/fecha/descripción de una dirección)
+// se distinguen porque su título incluye "No Pasar"; el resto (p.ej.
+// correcciones de mapa de territorio u otras sugerencias generales de la
+// plataforma) se agrupan en "Sugerencias Plataforma".
+async function renderMonitorSugerencias(kind) {
+  const containerId = kind === 'np' ? 'monitor-np-list' : 'monitor-plataforma-list';
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = `<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Sugerencias</div></div>`;
+
+  let rows = [];
+  try {
+    const { data, error } = await sb.from('notifications').select('*').eq('dev_only', true).order('created_at', { ascending: false }).limit(200);
+    if (error) throw error;
+    rows = data || [];
+  } catch (e) {
+    console.warn('No se pudieron cargar las sugerencias:', e.message);
+    container.innerHTML = `<div class="monitor-empty">No se pudieron cargar las sugerencias.</div>`;
+    return;
+  }
+
+  // "Reportar un problema" también inserta una notificación dev_only, pero
+  // ya se muestra aparte en la pestaña "Reportes de Problema": se excluye aquí.
+  const filtered = rows.filter(n => n.title !== 'Nuevo reporte de problema');
+  const isNoPasar = n => /no pasar/i.test(n.title || '');
+  const list = kind === 'np' ? filtered.filter(isNoPasar) : filtered.filter(n => !isNoPasar(n));
+
+  if (!list.length) {
+    container.innerHTML = `<div class="monitor-empty">${kind === 'np' ? 'No hay Sugerencias de No Pasar todavía.' : 'No hay Sugerencias de la plataforma todavía.'}</div>`;
+    return;
+  }
+
+  container.innerHTML = list.map(n => `
+    <div class="monitor-list-item">
+      <div class="monitor-list-item-top">
+        <span class="monitor-list-item-title">${(n.title || '').replace(/</g, '&lt;')}</span>
+        <span class="monitor-list-item-date">${_monitorFmtDate(n.created_at)}</span>
+      </div>
+      <div class="monitor-list-item-body">${(n.body || '').replace(/</g, '&lt;')}</div>
+    </div>
+  `).join('');
+}
+
+// ── Reportes de Problema (tabla bug_reports) ────────────────────────────
+async function renderMonitorReportes() {
+  const container = document.getElementById('monitor-reportes-list');
+  if (!container) return;
+  container.innerHTML = `<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Reportes</div></div>`;
+
+  let rows = [];
+  try {
+    const { data, error } = await sb.from('bug_reports').select('*').order('created_at', { ascending: false }).limit(200);
+    if (error) throw error;
+    rows = data || [];
+  } catch (e) {
+    console.warn('No se pudieron cargar los bug_reports (¿tabla inexistente?):', e.message);
+    container.innerHTML = `<div class="monitor-empty">No se pudieron cargar los reportes de problema.</div>`;
+    return;
+  }
+
+  if (!rows.length) {
+    container.innerHTML = `<div class="monitor-empty">No hay reportes de problema todavía.</div>`;
+    return;
+  }
+
+  container.innerHTML = rows.map(r => `
+    <div class="monitor-list-item">
+      <div class="monitor-list-item-top">
+        <span class="monitor-list-item-title">${(r.reporter_name || 'Usuario desconocido').replace(/</g, '&lt;')}</span>
+        <span class="monitor-list-item-date">${_monitorFmtDate(r.created_at)}</span>
+      </div>
+      <div class="monitor-list-item-body">${(r.description || '').replace(/</g, '&lt;')}</div>
+      <div class="monitor-list-item-meta">Versión: ${r.app_version || '—'}</div>
+    </div>
+  `).join('');
+}
+
 function toggleAdminOptionsMenu() { document.getElementById('options-dropdown-admin').classList.toggle('open'); }
 function closeAdminOptionsMenu() {
   document.getElementById('options-dropdown-admin').classList.remove('open');
@@ -19552,6 +19858,8 @@ function syncAdminDropdown() {
   if (notifAdminTab) notifAdminTab.style.display = (currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, 'notificaciones'))) ? '' : 'none';
   const tipsAdminTab = document.getElementById('admin-tab-tips');
   if (tipsAdminTab) tipsAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
+  const monitorAdminTab = document.getElementById('admin-tab-monitor');
+  if (monitorAdminTab) monitorAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
   const themeLabel = document.getElementById('theme-btn-label-admin');
   if (themeLabel) _updateThemeActive(document.documentElement.getAttribute('data-theme') || 'auto');
 }
