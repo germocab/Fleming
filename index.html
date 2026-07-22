@@ -8454,12 +8454,11 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-// v1.33.5.2-beta: fix del Modo Edición (v1.33.5-beta) — el flujo asíncrono
-// para usuarios con rol "admin" (no dev) seguía llamando a la navegación
-// vieja (goToAdminAssignment) en vez de activar el Modo Edición in-situ; y
-// el ícono "Guardar" no se dibujaba porque se insertaban los <path> sin su
-// elemento <svg> contenedor. Ambos corregidos.
-const APP_VERSION = '1.33.5.2-beta';
+// v1.33.5.3-beta: se revierte el Modo Edición in-situ del detalle (v1.33.5 /
+// v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
+// lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
+// como antes. El código del Modo Edición queda sin usar por ahora.
+const APP_VERSION = '1.33.5.3-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -12780,10 +12779,7 @@ async function viewAssignment(id) {
     document.getElementById('detail-admin-fab-desktop'),
   ];
   if (currentRole === 'dev') {
-    adminFabs.forEach(btn => { if (btn) { btn.style.display = 'flex'; btn.onclick = () => toggleDetailEditMode(a.id); } });
-    _exitDetailEditMode(); // cada asignación nueva que se abre empieza fuera de Modo Edición
-    const addFab = document.getElementById('detail-edit-add-fab');
-    if (addFab) addFab.onclick = () => editAssignment(a.id);
+    adminFabs.forEach(btn => { if (btn) { btn.style.display = 'flex'; btn.onclick = () => goToAdminAssignment(a.id); } });
   } else {
     adminFabs.forEach(btn => { if (btn) { btn.style.display = 'none'; btn.onclick = null; } });
   }
@@ -12918,10 +12914,7 @@ async function viewAssignment(id) {
       if (panel._openAssignmentId !== id) return;
       const canManageAssignments = canAccessModule(_currentUserPermsCache, 'assignments');
       if (canManageAssignments) {
-        adminFabs.forEach(btn => { if (btn) { btn.style.display = 'flex'; btn.onclick = () => toggleDetailEditMode(a.id); } });
-        _exitDetailEditMode(); // empieza fuera de Modo Edición
-        const addFab = document.getElementById('detail-edit-add-fab');
-        if (addFab) addFab.onclick = () => editAssignment(a.id);
+        adminFabs.forEach(btn => { if (btn) { btn.style.display = 'flex'; btn.onclick = () => goToAdminAssignment(a.id); } });
       } else {
         adminFabs.forEach(btn => { if (btn) { btn.style.display = 'none'; btn.onclick = null; } });
       }
@@ -13025,7 +13018,6 @@ function closeDetail() {
   // En modo invitado (enlace compartido) no hay nada detrás que mostrar,
   // así que no se permite cerrar el detalle.
   if (window._guestShareMode) return;
-  _exitDetailEditMode();
   // Reset any state that viewTerritory may have changed
   document.getElementById('detail-panel').classList.remove('territory-mode');
   document.getElementById('detail-time-chip').style.display = '';
