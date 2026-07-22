@@ -1160,6 +1160,41 @@
 
   .detail-ter-badge { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800; color: white; flex-shrink: 0; }
 
+  /* ══════════════════════ Modo Edición del detalle (v1.33.5-beta) ══════════
+     Al presionar "Administrar" en una asignación de Casa en Casa, en vez de
+     saltar a la pantalla de Admin se activa este modo directamente sobre el
+     panel de detalle: resalta con un recuadro cada bloque editable
+     (dirección, Territorio, Manzanas a Abarcar, mapa), atenúa las acciones
+     que no aplican mientras se edita, y cambia el ícono de "Administrar"
+     por uno de Guardar. Es más directo: uno ve exactamente qué puede
+     cambiar, sin salir de la asignación. ── */
+  .detail-panel.edit-mode .detail-info {
+    border: 2px solid var(--border-active);
+    border-radius: 16px;
+    padding: 0.7rem 0.85rem;
+    margin: -0.7rem 0 -0.7rem -0.85rem;
+  }
+  .detail-panel.edit-mode .detail-actions #detail-map-btn {
+    opacity: 0.45; pointer-events: none;
+  }
+  .detail-panel.edit-mode .detail-ter-tabs,
+  .detail-panel.edit-mode .detail-manzanas-card,
+  .detail-panel.edit-mode .detail-map-wrap {
+    border: 2px solid var(--border-active) !important;
+  }
+  .detail-edit-add-fab {
+    display: none;
+    width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
+    align-items: center; justify-content: center;
+    border: 2px solid var(--border-active); background: transparent; color: var(--text2);
+    cursor: pointer; transition: background 0.15s, transform 0.12s;
+  }
+  .detail-edit-add-fab svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
+  .detail-edit-add-fab:hover { background: var(--surface2); }
+  .detail-edit-add-fab:active { transform: scale(0.94); }
+  .detail-panel.edit-mode .detail-edit-add-fab { display: flex; }
+  .detail-admin-fab.saving { color: var(--green); }
+
   
   .detail-ter-badge.multi {
     width: auto; height: auto; border-radius: 0; background: transparent !important;
@@ -6774,6 +6809,9 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
         </div>
       </div>
       <div class="detail-ter-badge" id="detail-ter-badge" style="display:none"></div>
+      <button class="detail-edit-add-fab" id="detail-edit-add-fab" title="Editar más detalles">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
     </div>
     <div class="detail-actions" id="detail-actions">
       <button class="detail-btn-primary" id="detail-call-btn">Llamar</button>
@@ -8416,10 +8454,11 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-// v1.33.0-beta: nuevo sistema de Animaciones "Ultra Fluida", junto a las ya
-// existentes "Fluidas" y "Reducidas" — curvas de rebote/elasticidad en toda
-// la plataforma y transiciones más generosas en overlays/paneles/modales.
-const APP_VERSION = '1.33.0-beta';
+// v1.33.5-beta: nueva interfaz de edición directa sobre el detalle de una
+// asignación de Casa en Casa — "Administrar" ahora activa un Modo Edición
+// in-situ (recuadros en los bloques editables, ícono de Guardar, botón "+"
+// para abrir el formulario completo) en vez de saltar a la pantalla de Admin.
+const APP_VERSION = '1.33.5-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -12740,7 +12779,10 @@ async function viewAssignment(id) {
     document.getElementById('detail-admin-fab-desktop'),
   ];
   if (currentRole === 'dev') {
-    adminFabs.forEach(btn => { if (btn) { btn.style.display = 'flex'; btn.onclick = () => goToAdminAssignment(a.id); } });
+    adminFabs.forEach(btn => { if (btn) { btn.style.display = 'flex'; btn.onclick = () => toggleDetailEditMode(a.id); } });
+    _exitDetailEditMode(); // cada asignación nueva que se abre empieza fuera de Modo Edición
+    const addFab = document.getElementById('detail-edit-add-fab');
+    if (addFab) addFab.onclick = () => editAssignment(a.id);
   } else {
     adminFabs.forEach(btn => { if (btn) { btn.style.display = 'none'; btn.onclick = null; } });
   }
@@ -12979,6 +13021,7 @@ function closeDetail() {
   // En modo invitado (enlace compartido) no hay nada detrás que mostrar,
   // así que no se permite cerrar el detalle.
   if (window._guestShareMode) return;
+  _exitDetailEditMode();
   // Reset any state that viewTerritory may have changed
   document.getElementById('detail-panel').classList.remove('territory-mode');
   document.getElementById('detail-time-chip').style.display = '';
@@ -13975,6 +14018,40 @@ function handleEspecialImage(event) {
 
 // Va desde la pantalla de detalle de una asignación directo al panel de
 // administración, con esa asignación específica lista para editar.
+// ── Modo Edición del detalle (v1.33.5-beta) ─────────────────────────────────
+// Reemplaza el salto directo a la pantalla de Admin: ahora "Administrar"
+// activa/desactiva un modo visual sobre el propio panel de detalle, que
+// resalta los bloques editables (dirección, Territorio, Manzanas, mapa) y
+// atenúa lo que no aplica mientras se edita. El ícono cambia a "Guardar".
+// Los campos más profundos (teléfono, conductor, hora, territorio asignado)
+// se editan con el botón "+", que abre el formulario completo ya existente.
+const ADMIN_FAB_PENCIL_SVG = '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>';
+const ADMIN_FAB_SAVE_SVG = '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>';
+let _detailEditMode = false;
+function toggleDetailEditMode(id) {
+  _detailEditMode = !_detailEditMode;
+  document.getElementById('detail-panel')?.classList.toggle('edit-mode', _detailEditMode);
+  ['detail-admin-fab-ter', 'detail-admin-fab-mobile', 'detail-admin-fab-desktop'].forEach(elId => {
+    const btn = document.getElementById(elId);
+    if (!btn) return;
+    btn.innerHTML = _detailEditMode ? ADMIN_FAB_SAVE_SVG : ADMIN_FAB_PENCIL_SVG;
+    btn.classList.toggle('saving', _detailEditMode);
+    btn.title = _detailEditMode ? 'Guardar' : 'Administrar';
+  });
+  if (!_detailEditMode) showToast('Cambios guardados', 'success');
+}
+function _exitDetailEditMode() {
+  _detailEditMode = false;
+  document.getElementById('detail-panel')?.classList.remove('edit-mode');
+  ['detail-admin-fab-ter', 'detail-admin-fab-mobile', 'detail-admin-fab-desktop'].forEach(elId => {
+    const btn = document.getElementById(elId);
+    if (!btn) return;
+    btn.innerHTML = ADMIN_FAB_PENCIL_SVG;
+    btn.classList.remove('saving');
+    btn.title = 'Administrar';
+  });
+}
+
 async function goToAdminAssignment(id) {
   closeDetail();
   const opened = await showPage('admin', 'assignments');
