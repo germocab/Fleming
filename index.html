@@ -1623,7 +1623,7 @@
   .live-btn {
     display: flex; align-items: center; justify-content: center; gap: 8px;
     width: 100%; padding: 0.72rem 1rem;
-    border-radius: 12px;
+    border-radius: 999px;
     font-family: var(--font); font-size: 0.9rem; font-weight: 700;
     cursor: pointer; transition: all 0.2s;
     background: rgba(52,199,89,0.13); color: var(--green);
@@ -1656,15 +1656,15 @@
   .live-street-banner {
     display: none; align-items: center; gap: 10px;
     margin: 0 1.25rem 0.75rem;
-    padding: 0.65rem 0.9rem;
+    padding: 0.65rem 0.9rem 0.65rem 0.65rem;
     background: rgba(52,199,89,0.1);
     border: 1px solid rgba(52,199,89,0.28);
-    border-radius: 10px;
+    border-radius: 999px;
     animation: fadeIn 0.3s var(--ease-fluid-soft);
   }
   .live-street-banner.visible { display: flex; }
   .live-street-icon {
-    width: 30px; height: 30px; border-radius: 8px;
+    width: 30px; height: 30px; border-radius: 50%;
     background: rgba(52,199,89,0.18); color: var(--green);
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   }
@@ -1687,15 +1687,15 @@
   .live-host-banner {
     display: none; align-items: center; gap: 10px;
     margin: 0 1.25rem 0.75rem;
-    padding: 0.65rem 0.9rem;
+    padding: 0.65rem 0.9rem 0.65rem 0.65rem;
     background: rgba(0,122,255,0.1);
     border: 1px solid rgba(0,122,255,0.28);
-    border-radius: 10px;
+    border-radius: 999px;
     animation: fadeIn 0.3s var(--ease-fluid-soft);
   }
   .live-host-banner.visible { display: flex; }
   .live-host-icon {
-    width: 30px; height: 30px; border-radius: 8px;
+    width: 30px; height: 30px; border-radius: 50%;
     background: rgba(0,122,255,0.18); color: var(--accent);
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   }
@@ -1710,7 +1710,7 @@
     border-color: var(--border);
   }
   .live-street-banner.paused .live-street-icon {
-    width: 24px; height: 24px;
+    width: 24px; height: 24px; border-radius: 50%;
     background: var(--surface3); color: var(--text3);
   }
   .live-street-banner.paused .live-street-icon svg { width: 12px; height: 12px; }
@@ -1749,7 +1749,7 @@
     margin: 0 1.25rem 0.75rem;
     padding: 0.6rem 0.9rem;
     background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 10px; font-size: 0.82rem; color: var(--text3); font-weight: 500;
+    border-radius: 999px; font-size: 0.82rem; color: var(--text3); font-weight: 500;
   }
   .live-locating-wrap.visible { display: flex; }
   .live-locating-spinner {
@@ -8323,8 +8323,9 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-// v1.32.20-beta: menú de Territorio (1/2/3) ahora con forma de píldora/ovalada.
-const APP_VERSION = '1.32.20-beta';
+// v1.32.30-beta: el cuadro de Live (banner de calle, LiveHost, botón Live y
+// estado "localizando") ahora es bien redondeado, estilo píldora.
+const APP_VERSION = '1.32.30-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
