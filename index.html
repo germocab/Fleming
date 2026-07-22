@@ -21,6 +21,8 @@
      Se usa la 3.11.174 (última versión con build clásico "pdf.min.js"; desde la 4.x pdf.js
      solo se distribuye como módulo ES ".mjs", que no funciona con <script src="..."> normal). -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<!-- Exhibidores (Carritos): generación de códigos QR en el cliente -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
   if (window.pdfjsLib) {
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -5871,6 +5873,61 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════════════════════════
+     EXHIBIDORES — página pública "Detalles y Mantención" (?extoken=)
+     Sin sesión: cualquier publicador que escanee el QR de un exhibidor
+     llega aquí y puede reportar una necesidad. v1.34.0-beta
+     ══════════════════════════════════════════════════════════════════════ -->
+<div id="exh-public-screen" style="display:none;position:fixed;inset:0;z-index:99999;background:var(--bg);color:var(--text);font-family:inherit;overflow-y:auto">
+  <div style="max-width:480px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;padding:1.25rem 1.1rem 2.5rem">
+
+    <div style="display:flex;justify-content:flex-end;">
+      <button onclick="toggleTheme()" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text)" title="Modo claro/oscuro"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg></button>
+    </div>
+
+    <div id="exh-pub-loading" style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:0.9rem;">Cargando...</div>
+
+    <div id="exh-pub-content" style="display:none;flex:1;flex-direction:column;gap:1rem;">
+      <div id="exh-pub-img" style="width:100%;aspect-ratio:16/10;border-radius:16px;overflow:hidden;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;"></div>
+      <div>
+        <h1 id="exh-pub-nombre" style="font-size:1.35rem;font-weight:800;margin:0 0 4px;"></h1>
+        <p id="exh-pub-puntos" style="color:var(--text3);font-size:0.85rem;margin:0;"></p>
+      </div>
+
+      <div id="exh-pub-step-opts">
+        <div style="font-weight:700;font-size:0.95rem;margin-bottom:10px;">¿Qué necesita este exhibidor?</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <button class="exh-pub-opt" onclick="exhPubSelect('faltan_publicaciones')" style="text-align:left;padding:0.9rem 1rem;border-radius:14px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-weight:600;font-size:0.92rem;cursor:pointer;display:flex;align-items:center;gap:12px;">📚 Faltan publicaciones</button>
+          <button class="exh-pub-opt" onclick="exhPubSelect('desgaste_estructural')" style="text-align:left;padding:0.9rem 1rem;border-radius:14px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-weight:600;font-size:0.92rem;cursor:pointer;display:flex;align-items:center;gap:12px;">🛠️ Desgaste estructural del exhibidor</button>
+          <button class="exh-pub-opt" onclick="exhPubSelect('falta_limpieza')" style="text-align:left;padding:0.9rem 1rem;border-radius:14px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-weight:600;font-size:0.92rem;cursor:pointer;display:flex;align-items:center;gap:12px;">🧹 Falta de limpieza</button>
+          <button class="exh-pub-opt" onclick="exhPubSelect('otro')" style="text-align:left;padding:0.9rem 1rem;border-radius:14px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-weight:600;font-size:0.92rem;cursor:pointer;display:flex;align-items:center;gap:12px;">✏️ Otro</button>
+        </div>
+      </div>
+
+      <div id="exh-pub-step-otro" style="display:none;flex-direction:column;gap:10px;">
+        <label style="font-size:0.85rem;font-weight:600;" for="exh-pub-otro-text">Cuéntanos qué ocurre</label>
+        <textarea id="exh-pub-otro-text" rows="4" placeholder="Escribe la observación..." style="width:100%;box-sizing:border-box;padding:0.8rem;border-radius:12px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:inherit;font-size:0.9rem;"></textarea>
+        <div style="display:flex;gap:10px;">
+          <button onclick="exhPubBack()" style="flex:1;padding:0.8rem;border-radius:12px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-weight:600;cursor:pointer;">Volver</button>
+          <button class="btn-primary" onclick="exhPubSubmit('otro')" style="flex:1;padding:0.8rem;border-radius:12px;font-weight:700;">Enviar</button>
+        </div>
+      </div>
+
+      <div id="exh-pub-step-done" style="display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;padding:2rem 0;">
+        <div style="font-size:2.2rem;">✓</div>
+        <h2 style="font-size:1.15rem;font-weight:700;margin:0;">¡Gracias por tu reporte!</h2>
+        <p style="color:var(--text3);font-size:0.85rem;margin:0;">Los encargados de Carritos han sido notificados.</p>
+      </div>
+    </div>
+
+    <div id="exh-pub-error" style="display:none;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;">
+      <h2 style="font-size:1.2rem;margin-bottom:4px;">Enlace inválido</h2>
+      <p style="color:var(--text3);font-size:0.85rem;">Este código QR no corresponde a ningún exhibidor activo.</p>
+    </div>
+
+  </div>
+</div>
+
 <div id="auth-screen">
   <div class="auth-card">
     <div class="auth-logo">
@@ -6461,6 +6518,7 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
             <div class="ct-admin-tab" data-tab="acceso" role="tab" aria-selected="false" tabindex="0" onclick="cartSwitchAdminTab('acceso')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); cartSwitchAdminTab('acceso');}"><span class="ct-tab-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span> Acceso</div>
             <!-- v1.29.9-beta: solicitudes de invitación entre usuarios ("Invitar a Carritos") -->
             <div class="ct-admin-tab" data-tab="solicitudes" role="tab" aria-selected="false" tabindex="0" onclick="cartSwitchAdminTab('solicitudes')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); cartSwitchAdminTab('solicitudes');}"><span class="ct-tab-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span> Solicitudes</div>
+            <div class="ct-admin-tab" data-tab="exhibidores" role="tab" aria-selected="false" tabindex="0" onclick="cartSwitchAdminTab('exhibidores')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); cartSwitchAdminTab('exhibidores');}"><span class="ct-tab-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 14h2v2h-2zM14 19h2v2h-2zM19 19h2v2h-2z"/></svg></span> Exhibidores</div>
           </div>
           <div class="ct-scroll-container" id="cartAdminBody" style="padding-top:5px;"></div>
         </div>
@@ -8523,7 +8581,7 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.33.7-beta';
+const APP_VERSION = '1.34.0-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -24390,6 +24448,7 @@ function cartSwitchAdminTab(tab) {
   if (tab === 'personas') cartRenderAdminPersonas();
   if (tab === 'acceso') cartRenderAdminAcceso();
   if (tab === 'solicitudes') cartRenderAdminSolicitudes();
+  if (tab === 'exhibidores') cartRenderAdminExhibidores();
 }
 
 // ---------- SOLICITUDES (v1.29.9-beta: invitaciones entre usuarios) ----------
@@ -24604,6 +24663,324 @@ async function cartDeletePunto(id) {
   showToast('Punto eliminado.', 'success');
   await cartLoadAllData(true);
   cartRenderAdminPuntos();
+}
+
+// ---------- EXHIBIDORES (v1.34.0-beta) ----------
+// Gestión de Exhibidores para el módulo Carritos. El DEV y los Admin con el
+// módulo "carritos" habilitado crean/administran exhibidores (nombre, puntos
+// que cubre, estado). Cada exhibidor tiene un código QR único (token) que,
+// al escanearse, abre una página pública (sin sesión) de "Detalles y
+// Mantención" donde cualquier publicador puede reportar necesidades. Los
+// reportes generan una notificación (Panel + Push) al DEV y a los Admin con
+// acceso a Carritos, y quedan disponibles en Panel de Administración →
+// Predicación → Carritos → Exhibidores → Informes.
+//
+// Tablas en Supabase (crear una vez):
+//
+// create table if not exists cart_exhibidores (
+//   id uuid primary key default gen_random_uuid(),
+//   nombre text not null,
+//   puntos_ids uuid[] default '{}',
+//   estado text not null default 'activo' check (estado in ('activo','inactivo','mantencion')),
+//   imagen text,
+//   qr_token text not null unique,
+//   orden integer default 0,
+//   created_at timestamptz default now(),
+//   created_by text
+// );
+//
+// create table if not exists cart_exhibidor_informes (
+//   id uuid primary key default gen_random_uuid(),
+//   exhibidor_id uuid references cart_exhibidores(id) on delete cascade,
+//   tipo text not null check (tipo in ('faltan_publicaciones','desgaste_estructural','falta_limpieza','otro')),
+//   descripcion text,
+//   estado text not null default 'pendiente' check (estado in ('pendiente','resuelto')),
+//   reportado_por text,
+//   created_at timestamptz default now(),
+//   resolved_at timestamptz,
+//   resolved_by text
+// );
+
+let cartEXHIBIDORES = [];
+let cartExhInformes = [];
+let cartExhSubTab = 'lista'; // 'lista' | 'informes'
+let cartExhLoaded = false;
+
+const CART_EXH_ESTADOS = { activo: 'Activo', inactivo: 'Inactivo', mantencion: 'En mantención' };
+const CART_EXH_TIPOS = {
+  faltan_publicaciones: 'Faltan publicaciones',
+  desgaste_estructural: 'Desgaste estructural',
+  falta_limpieza: 'Falta de limpieza',
+  otro: 'Otro'
+};
+
+function cartExhGenToken() {
+  return 'ex_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
+}
+
+// URL pública que se codifica en el QR del exhibidor.
+function cartExhPublicUrl(token) {
+  return `${location.origin}${location.pathname}?extoken=${encodeURIComponent(token)}`;
+}
+
+async function cartLoadExhibidores(force) {
+  if (cartExhLoaded && !force) return;
+  const [{ data: exh, error: e1 }, { data: inf, error: e2 }] = await Promise.all([
+    sb.from('cart_exhibidores').select('*').order('orden', { ascending: true }),
+    sb.from('cart_exhibidor_informes').select('*').order('created_at', { ascending: false })
+  ]);
+  if (e1 || e2) {
+    console.error(e1 || e2);
+    showToast('Error cargando Exhibidores. Es posible que falten las tablas "cart_exhibidores" y "cart_exhibidor_informes" en Supabase.', 'error');
+    return;
+  }
+  cartEXHIBIDORES = exh || [];
+  cartExhInformes = inf || [];
+  cartExhLoaded = true;
+}
+
+async function cartRenderAdminExhibidores() {
+  const body = document.getElementById('cartAdminBody');
+  body.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando exhibidores</div></div>';
+  await cartLoadExhibidores();
+  cartExhSubTab = 'lista';
+  cartRenderExhBody();
+}
+
+function cartExhSwitchSubTab(sub) {
+  cartExhSubTab = sub;
+  cartRenderExhBody();
+}
+
+function cartRenderExhBody() {
+  const body = document.getElementById('cartAdminBody');
+  const pendientes = cartExhInformes.filter(i => i.estado === 'pendiente').length;
+  const subnav = `
+    <div class="ct-admin-tabs" style="padding:0 0 14px;">
+      <div class="ct-admin-tab ${cartExhSubTab === 'lista' ? 'ct-active' : ''}" onclick="cartExhSwitchSubTab('lista')">Exhibidores</div>
+      <div class="ct-admin-tab ${cartExhSubTab === 'informes' ? 'ct-active' : ''}" onclick="cartExhSwitchSubTab('informes')">Informes${pendientes ? ` (${pendientes})` : ''}</div>
+    </div>`;
+  body.innerHTML = subnav + '<div id="cartExhSubBody"></div>';
+  const sub = document.getElementById('cartExhSubBody');
+  if (cartExhSubTab === 'lista') cartRenderExhList(sub);
+  else cartRenderExhInformes(sub);
+}
+
+function cartRenderExhList(container) {
+  const items = cartEXHIBIDORES.map(x => {
+    const puntosNombres = (x.puntos_ids || []).map(pid => cartPUNTOS.find(p => p.id === pid)?.nombre).filter(Boolean);
+    const estLabel = CART_EXH_ESTADOS[x.estado] || x.estado;
+    const dotColor = x.estado === 'activo' ? 'var(--primary-green, #22c55e)' : x.estado === 'mantencion' ? '#f59e0b' : 'var(--text-light)';
+    return `
+    <div class="ct-admin-list-item">
+      ${x.imagen ? `<img src="${x.imagen}" style="width:34px;height:34px;border-radius:9px;object-fit:cover;flex-shrink:0;">` : `<div style="width:34px;height:34px;border-radius:9px;background:var(--ct-accent-light);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--ct-accent);">${cartICONS.pin}</div>`}
+      <div class="ct-info">
+        <div class="ct-title">${x.nombre}</div>
+        <div class="ct-sub"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${dotColor};margin-right:5px;"></span>${estLabel}${puntosNombres.length ? ' · ' + puntosNombres.join(', ') : ''}</div>
+      </div>
+      <div class="ct-admin-actions">
+        <button class="ct-icon-btn" onclick="cartOpenExhQr('${x.id}')" aria-label="Ver código QR" title="Código QR"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><line x1="14" y1="14" x2="14" y2="21"/><line x1="21" y1="14" x2="21" y2="21"/><line x1="17.5" y1="14" x2="17.5" y2="17.5"/><line x1="14" y1="17.5" x2="21" y2="17.5"/></svg></button>
+        <button class="ct-icon-btn" onclick="cartOpenExhForm('${x.id}')" aria-label="Editar ${(x.nombre || '').replace(/"/g, '&quot;')}">${cartICONS.edit}</button>
+        <button class="ct-icon-btn ct-danger" onclick="cartConfirmDeleteExh('${x.id}')" aria-label="Borrar ${(x.nombre || '').replace(/"/g, '&quot;')}">${cartICONS.trash}</button>
+      </div>
+    </div>`;
+  }).join('') || `<div class="ct-empty-state">No hay exhibidores creados aún.</div>`;
+  container.innerHTML = items + `<button class="ct-fab-add" onclick="cartOpenExhForm()">${cartICONS.plus} Agregar exhibidor</button>`;
+}
+
+function cartOpenExhForm(id) {
+  const x = id ? cartEXHIBIDORES.find(e => e.id === id) : null;
+  const selPuntos = x ? (x.puntos_ids || []) : [];
+  document.getElementById('cartFormSheet').innerHTML = `
+    <h2 style="margin-top:0;">${x ? 'Editar exhibidor' : 'Nuevo exhibidor'}</h2>
+    <div class="ct-form-group">
+      <label for="cfx_imagen_input">Imagen del exhibidor</label>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div id="cfx_imagen_preview" style="width:64px;height:64px;border-radius:12px;overflow:hidden;background:var(--bg-card-hover);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--text-light);border:1px solid var(--border-color);">${x && x.imagen ? `<img src="${x.imagen}" style="width:100%;height:100%;object-fit:cover;">` : cartICONS.pin}</div>
+        <input type="file" accept="image/*" id="cfx_imagen_input" onchange="cartExhHandleImage(event)" style="flex:1;">
+      </div>
+      <input type="hidden" id="cfx_imagen_data" value="${x && x.imagen ? x.imagen.replace(/"/g, '&quot;') : ''}">
+    </div>
+    <div class="ct-form-group"><label for="cfx_nombre">Nombre del exhibidor</label><input class="ct-form-input" id="cfx_nombre" value="${x ? x.nombre.replace(/"/g, '&quot;') : ''}" placeholder="Ej: Exhibidor Plaza Central"></div>
+    <div class="ct-form-group">
+      <label id="cfx_puntos_label">Puntos que cubre</label>
+      <div class="ct-chip-multi" id="cfx_puntos" role="group" aria-labelledby="cfx_puntos_label">
+        ${cartPUNTOS.map(p => `<div class="ct-filter-chip ${selPuntos.includes(p.id) ? 'ct-active' : ''}" data-punto="${p.id}" role="button" tabindex="0" aria-pressed="${selPuntos.includes(p.id)}" onclick="this.classList.toggle('ct-active'); this.setAttribute('aria-pressed', this.classList.contains('ct-active'));" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); this.click();}">${p.nombre}</div>`).join('') || '<span style="font-size:0.82rem;color:var(--text-light);">Primero crea Puntos en la otra pestaña.</span>'}
+      </div>
+    </div>
+    <div class="ct-form-group">
+      <label for="cfx_estado">Estado</label>
+      <select class="ct-form-select" id="cfx_estado">
+        ${Object.entries(CART_EXH_ESTADOS).map(([k, v]) => `<option value="${k}" ${x && x.estado === k ? 'selected' : ''}>${v}</option>`).join('')}
+      </select>
+    </div>
+    <div class="ct-form-actions">
+      <button class="ct-admin-btn-secondary" style="margin:0;" onclick="cartCloseForm()">Cancelar</button>
+      <button class="ct-admin-btn-primary" onclick="cartSaveExh('${x ? x.id : ''}')">${x ? 'Guardar cambios' : 'Crear exhibidor'}</button>
+    </div>`;
+  cartOpenForm();
+}
+
+function cartExhHandleImage(event) {
+  const file = event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { showToast('Solo se aceptan imágenes', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const SIZE = 500;
+      const canvas = document.createElement('canvas');
+      const scale = Math.min(SIZE / img.width, SIZE / img.height, 1);
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      const base64 = canvas.toDataURL('image/jpeg', 0.82);
+      document.getElementById('cfx_imagen_data').value = base64;
+      document.getElementById('cfx_imagen_preview').innerHTML = `<img src="${base64}" style="width:100%;height:100%;object-fit:cover;">`;
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function cartSaveExh(id) {
+  if (!cartIsAdmin()) { showToast('No tienes permisos de administrador.', 'error'); return; }
+  const nombre = document.getElementById('cfx_nombre').value.trim();
+  if (!nombre) { showToast('El nombre es obligatorio.', 'error'); return; }
+  const puntos_ids = Array.from(document.querySelectorAll('#cfx_puntos .ct-filter-chip.ct-active')).map(c => c.dataset.punto);
+  const payload = {
+    nombre,
+    puntos_ids,
+    estado: document.getElementById('cfx_estado').value,
+    imagen: document.getElementById('cfx_imagen_data').value || null
+  };
+
+  let res;
+  if (id) {
+    res = await sb.from('cart_exhibidores').update(payload).eq('id', id);
+  } else {
+    // Al crearse un Exhibidor nuevo, la plataforma genera automáticamente
+    // el token único que se codifica en su código QR.
+    payload.qr_token = cartExhGenToken();
+    payload.orden = cartEXHIBIDORES.length + 1;
+    payload.created_by = cartUserName();
+    res = await sb.from('cart_exhibidores').insert(payload).select().single();
+  }
+
+  if (res.error) { showToast('Error: ' + res.error.message, 'error'); return; }
+  showToast(id ? 'Exhibidor actualizado.' : 'Exhibidor creado. Ya puedes imprimir su código QR.', 'success');
+  cartCloseForm();
+  await cartLoadExhibidores(true);
+  cartRenderExhBody();
+  // Si se acaba de crear, muestra directamente su QR para imprimirlo.
+  if (!id && res.data) cartOpenExhQr(res.data.id);
+}
+
+function cartConfirmDeleteExh(id) {
+  const x = cartEXHIBIDORES.find(e => e.id === id);
+  if (!confirm(`¿Borrar "${x ? x.nombre : 'este exhibidor'}"? Esto también borrará sus informes asociados.`)) return;
+  cartDeleteExh(id);
+}
+async function cartDeleteExh(id) {
+  if (!cartIsAdmin()) { showToast('No tienes permisos de administrador.', 'error'); return; }
+  await sb.from('cart_exhibidor_informes').delete().eq('exhibidor_id', id);
+  const { error } = await sb.from('cart_exhibidores').delete().eq('id', id);
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  showToast('Exhibidor eliminado.', 'success');
+  await cartLoadExhibidores(true);
+  cartRenderExhBody();
+}
+
+// ---------- QR: ver / imprimir ----------
+function cartOpenExhQr(id) {
+  const x = cartEXHIBIDORES.find(e => e.id === id);
+  if (!x) return;
+  const url = cartExhPublicUrl(x.qr_token);
+  document.getElementById('cartFormSheet').innerHTML = `
+    <h2 style="margin-top:0;">Código QR — ${x.nombre}</h2>
+    <p style="font-size:0.85rem;color:var(--text-gray);margin-top:-8px;">Imprime este código y pégalo en el exhibidor físico. Al escanearlo, cualquier publicador accederá a la página de Detalles y Mantención.</p>
+    <div id="cfx_qr_canvas" style="display:flex;justify-content:center;padding:18px;background:#fff;border-radius:14px;margin:14px 0;"></div>
+    <div class="ct-form-group"><label>Enlace directo</label><input class="ct-form-input" readonly value="${url}" onclick="this.select();"></div>
+    <div class="ct-form-actions">
+      <button class="ct-admin-btn-secondary" style="margin:0;" onclick="cartCloseForm()">Cerrar</button>
+      <button class="ct-admin-btn-primary" onclick="cartPrintExhQr('${x.id}')">Imprimir</button>
+    </div>`;
+  cartOpenForm();
+  const holder = document.getElementById('cfx_qr_canvas');
+  holder.innerHTML = '';
+  if (typeof QRCode !== 'undefined') {
+    new QRCode(holder, { text: url, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M });
+  } else {
+    holder.innerHTML = `<span style="color:#333;font-size:0.8rem;">No se pudo cargar el generador de QR.</span>`;
+  }
+}
+
+function cartPrintExhQr(id) {
+  const x = cartEXHIBIDORES.find(e => e.id === id);
+  if (!x) return;
+  const url = cartExhPublicUrl(x.qr_token);
+  const w = window.open('', '_blank');
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>QR — ${x.nombre}</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+    <style>body{font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;margin:0;text-align:center;}
+    h1{font-size:1.1rem;margin:14px 0 2px;} p{font-size:0.8rem;color:#555;margin:0 0 10px;}
+    #qr{padding:16px;} @media print { button{display:none;} }</style></head>
+    <body><div id="qr"></div><h1>${x.nombre}</h1><p>Exhibidor de publicaciones — Escanea para reportar</p>
+    <button onclick="window.print()" style="margin-top:14px;padding:8px 18px;">Imprimir</button>
+    <script>new QRCode(document.getElementById('qr'), { text: ${JSON.stringify(url)}, width: 260, height: 260 });<\/script>
+    </body></html>`);
+  w.document.close();
+}
+
+// ---------- INFORMES (reportes de publicadores vía QR) ----------
+function cartRenderExhInformes(container) {
+  if (!cartExhInformes.length) {
+    container.innerHTML = `<div class="ct-empty-state">No hay informes registrados.</div>`;
+    return;
+  }
+  const pendientes = cartExhInformes.filter(i => i.estado === 'pendiente');
+  const resueltos = cartExhInformes.filter(i => i.estado === 'resuelto');
+  const row = (i) => {
+    const x = cartEXHIBIDORES.find(e => e.id === i.exhibidor_id);
+    const fecha = new Date(i.created_at).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+    return `
+    <div class="ct-admin-list-item">
+      <div style="width:34px;height:34px;border-radius:9px;background:${i.estado === 'pendiente' ? 'var(--ct-accent-light)' : 'rgba(34,197,94,0.12)'};flex-shrink:0;display:flex;align-items:center;justify-content:center;color:${i.estado === 'pendiente' ? 'var(--ct-accent)' : 'var(--primary-green,#22c55e)'};">${cartICONS.bell}</div>
+      <div class="ct-info">
+        <div class="ct-title">${x ? x.nombre : 'Exhibidor eliminado'} — ${CART_EXH_TIPOS[i.tipo] || i.tipo}</div>
+        <div class="ct-sub">${i.descripcion ? i.descripcion + ' · ' : ''}${i.reportado_por ? i.reportado_por + ' · ' : ''}${fecha}</div>
+      </div>
+      <div class="ct-admin-actions">
+        ${i.estado === 'pendiente' ? `<button class="ct-icon-btn" style="color:var(--primary-green,#22c55e)" onclick="cartResolveExhInforme('${i.id}')" aria-label="Marcar como resuelto">✓</button>` : `<span style="font-size:0.72rem;color:var(--text-light);white-space:nowrap;">Resuelto</span>`}
+        <button class="ct-icon-btn ct-danger" onclick="cartDeleteExhInforme('${i.id}')" aria-label="Eliminar informe">${cartICONS.trash}</button>
+      </div>
+    </div>`;
+  };
+  container.innerHTML =
+    (pendientes.length ? `<div class="ct-section-title">Pendientes (${pendientes.length})</div>` + pendientes.map(row).join('') : `<div class="ct-empty-state">No hay informes pendientes.</div>`) +
+    (resueltos.length ? `<div class="ct-section-title" style="margin-top:16px;">Resueltos</div>` + resueltos.map(row).join('') : '');
+}
+
+async function cartResolveExhInforme(id) {
+  if (!cartIsAdmin()) { showToast('No tienes permisos de administrador.', 'error'); return; }
+  const { error } = await sb.from('cart_exhibidor_informes')
+    .update({ estado: 'resuelto', resolved_at: new Date().toISOString(), resolved_by: cartUserName() })
+    .eq('id', id);
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  showToast('Informe marcado como resuelto.', 'success');
+  await cartLoadExhibidores(true);
+  cartRenderExhBody();
+}
+
+async function cartDeleteExhInforme(id) {
+  if (!cartIsAdmin()) { showToast('No tienes permisos de administrador.', 'error'); return; }
+  if (!confirm('¿Eliminar este informe?')) return;
+  const { error } = await sb.from('cart_exhibidor_informes').delete().eq('id', id);
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  await cartLoadExhibidores(true);
+  cartRenderExhBody();
 }
 
 // ---------- TURNOS ----------
@@ -25597,6 +25974,110 @@ async function notifyReportRecipients(territoryObj, submission) {
     notifyUsersPush('reporte-territorio', { title, body, target_names: pushTargets }).catch(() => {});
   }
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+// EXHIBIDORES — página pública "Detalles y Mantención" (?extoken=)
+// ══════════════════════════════════════════════════════════════════════════
+let exhPubExhibidor = null;
+let exhPubTipoActual = null;
+
+async function exhInitPublicScreen(token) {
+  document.getElementById('exh-public-screen').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+
+  const { data, error } = await sb.from('cart_exhibidores').select('*').eq('qr_token', token).single();
+  document.getElementById('exh-pub-loading').style.display = 'none';
+  if (error || !data) {
+    document.getElementById('exh-pub-error').style.display = 'flex';
+    return;
+  }
+  exhPubExhibidor = data;
+
+  const content = document.getElementById('exh-pub-content');
+  content.style.display = 'flex';
+
+  const imgBox = document.getElementById('exh-pub-img');
+  imgBox.innerHTML = data.imagen
+    ? `<img src="${data.imagen}" style="width:100%;height:100%;object-fit:cover;">`
+    : `<span style="color:var(--text3);font-size:0.8rem;">Sin imagen</span>`;
+
+  document.getElementById('exh-pub-nombre').textContent = data.nombre;
+
+  let puntosTxt = 'Sin puntos asignados.';
+  try {
+    if (data.puntos_ids && data.puntos_ids.length) {
+      const { data: puntos } = await sb.from('cart_puntos').select('nombre').in('id', data.puntos_ids);
+      if (puntos && puntos.length) puntosTxt = 'Cubre: ' + puntos.map(p => p.nombre).join(', ');
+    }
+  } catch (e) { /* noop */ }
+  document.getElementById('exh-pub-puntos').textContent = puntosTxt;
+}
+
+function exhPubSelect(tipo) {
+  exhPubTipoActual = tipo;
+  if (tipo === 'otro') {
+    document.getElementById('exh-pub-step-opts').style.display = 'none';
+    document.getElementById('exh-pub-step-otro').style.display = 'flex';
+    return;
+  }
+  exhPubSubmit(tipo);
+}
+
+function exhPubBack() {
+  document.getElementById('exh-pub-step-otro').style.display = 'none';
+  document.getElementById('exh-pub-step-opts').style.display = 'block';
+}
+
+async function exhPubSubmit(tipo) {
+  if (!exhPubExhibidor) return;
+  let descripcion = null;
+  if (tipo === 'otro') {
+    descripcion = (document.getElementById('exh-pub-otro-text').value || '').trim();
+    if (!descripcion) { showToast ? showToast('Escribe una breve descripción.', 'error') : alert('Escribe una breve descripción.'); return; }
+  }
+
+  const reportadoPor = (typeof currentUser !== 'undefined' && currentUser) ? getIdentityName() : null;
+
+  const { error } = await sb.from('cart_exhibidor_informes').insert({
+    exhibidor_id: exhPubExhibidor.id,
+    tipo,
+    descripcion,
+    reportado_por: reportadoPor,
+    estado: 'pendiente'
+  });
+
+  if (error) {
+    alert('No se pudo enviar el reporte. Inténtalo nuevamente.');
+    console.error(error);
+    return;
+  }
+
+  // Notifica (Panel + Push) al DEV y a los Admin con el módulo Carritos habilitado.
+  try {
+    const targets = await cartAdminAndDevNames();
+    const title = `Nuevo informe de Exhibidor — ${exhPubExhibidor.nombre}`;
+    const body = tipo === 'otro'
+      ? `Observación: ${descripcion}`
+      : (CART_EXH_TIPOS[tipo] || tipo) + (reportadoPor ? ` (reportado por ${reportadoPor})` : '');
+    await sb.from('notifications').insert({ title, body, target_names: targets, notif_category: 'carritos' });
+    await notifyUsersPush('carritos', { title, body, target_names: targets });
+  } catch (err) {
+    console.warn('No se pudo notificar el informe del exhibidor:', err.message);
+  }
+
+  document.getElementById('exh-pub-step-opts').style.display = 'none';
+  document.getElementById('exh-pub-step-otro').style.display = 'none';
+  document.getElementById('exh-pub-step-done').style.display = 'flex';
+}
+
+// ── Router: activa la pantalla pública si la URL trae ?extoken= (Exhibidores) ──
+(function exhCheckPublicRoute() {
+  const params = new URLSearchParams(location.search);
+  const extoken = params.get('extoken');
+  if (extoken) {
+    window.addEventListener('DOMContentLoaded', () => exhInitPublicScreen(extoken));
+  }
+})();
 
 // ── Router: activa la pantalla pública si la URL trae ?rtoken= ──
 (function trepCheckPublicRoute() {
