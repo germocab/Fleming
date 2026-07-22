@@ -8454,11 +8454,12 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-// v1.33.5-beta: nueva interfaz de edición directa sobre el detalle de una
-// asignación de Casa en Casa — "Administrar" ahora activa un Modo Edición
-// in-situ (recuadros en los bloques editables, ícono de Guardar, botón "+"
-// para abrir el formulario completo) en vez de saltar a la pantalla de Admin.
-const APP_VERSION = '1.33.5-beta';
+// v1.33.5.2-beta: fix del Modo Edición (v1.33.5-beta) — el flujo asíncrono
+// para usuarios con rol "admin" (no dev) seguía llamando a la navegación
+// vieja (goToAdminAssignment) en vez de activar el Modo Edición in-situ; y
+// el ícono "Guardar" no se dibujaba porque se insertaban los <path> sin su
+// elemento <svg> contenedor. Ambos corregidos.
+const APP_VERSION = '1.33.5.2-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -12917,7 +12918,10 @@ async function viewAssignment(id) {
       if (panel._openAssignmentId !== id) return;
       const canManageAssignments = canAccessModule(_currentUserPermsCache, 'assignments');
       if (canManageAssignments) {
-        adminFabs.forEach(btn => { if (btn) { btn.style.display = 'flex'; btn.onclick = () => goToAdminAssignment(a.id); } });
+        adminFabs.forEach(btn => { if (btn) { btn.style.display = 'flex'; btn.onclick = () => toggleDetailEditMode(a.id); } });
+        _exitDetailEditMode(); // empieza fuera de Modo Edición
+        const addFab = document.getElementById('detail-edit-add-fab');
+        if (addFab) addFab.onclick = () => editAssignment(a.id);
       } else {
         adminFabs.forEach(btn => { if (btn) { btn.style.display = 'none'; btn.onclick = null; } });
       }
@@ -14025,8 +14029,8 @@ function handleEspecialImage(event) {
 // atenúa lo que no aplica mientras se edita. El ícono cambia a "Guardar".
 // Los campos más profundos (teléfono, conductor, hora, territorio asignado)
 // se editan con el botón "+", que abre el formulario completo ya existente.
-const ADMIN_FAB_PENCIL_SVG = '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>';
-const ADMIN_FAB_SAVE_SVG = '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>';
+const ADMIN_FAB_PENCIL_SVG = '<svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+const ADMIN_FAB_SAVE_SVG = '<svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>';
 let _detailEditMode = false;
 function toggleDetailEditMode(id) {
   _detailEditMode = !_detailEditMode;
