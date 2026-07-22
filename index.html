@@ -6780,7 +6780,7 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 
         <div class="monitor-pane active" id="monitor-pane-stats">
           <div style="font-size:0.78rem;color:var(--text3);line-height:1.4;margin-bottom:1rem">
-            Estadísticas de uso y preferencias agregadas de todos los usuarios. No refleja acciones individuales.
+            Estadísticas de uso y preferencias agregadas de todos los usuarios en las últimas 24 horas. No refleja acciones individuales.
           </div>
           <div id="monitor-stats-grid" class="monitor-stats-grid"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando estadísticas</div></div></div>
         </div>
@@ -19516,7 +19516,7 @@ async function renderMonitorStats() {
 
   let events = [];
   try {
-    const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const { data, error } = await sb.from('usage_events').select('*').gte('created_at', since).order('created_at', { ascending: false }).limit(5000);
     if (error) throw error;
     events = data || [];
@@ -19527,18 +19527,16 @@ async function renderMonitorStats() {
   }
 
   if (!events.length) {
-    grid.innerHTML = `<div class="monitor-empty">Todavía no hay eventos de uso en los últimos 30 días.</div>`;
+    grid.innerHTML = `<div class="monitor-empty">Todavía no hay eventos de uso en las últimas 24 horas.</div>`;
     return;
   }
 
-  const todayStr = new Date().toDateString();
   const byEvent = {};
   events.forEach(e => { (byEvent[e.event] = byEvent[e.event] || []).push(e); });
 
-  // Live: activaciones hoy / últimos 30 días
+  // Live: activaciones en las últimas 24 horas
   const liveEvents = byEvent['live_toggle'] || [];
-  const liveToday = liveEvents.filter(e => new Date(e.created_at).toDateString() === todayStr && e.meta?.enabled).length;
-  const liveOnTotal = liveEvents.filter(e => e.meta?.enabled).length;
+  const liveOn = liveEvents.filter(e => e.meta?.enabled).length;
 
   // Experimentos: activaciones vs desactivaciones registradas
   const expEvents = byEvent['experiments_toggle'] || [];
@@ -19569,19 +19567,19 @@ async function renderMonitorStats() {
 
   grid.innerHTML = `
     <div class="monitor-stat-card">
-      <div class="monitor-stat-value">${liveToday}</div>
-      <div class="monitor-stat-label">Activaciones de Live hoy</div>
-      <div class="monitor-stat-sub">${liveOnTotal} en los últimos 30 días</div>
+      <div class="monitor-stat-value">${liveOn}</div>
+      <div class="monitor-stat-label">Activaciones de Live</div>
+      <div class="monitor-stat-sub">Últimas 24 horas</div>
     </div>
     <div class="monitor-stat-card">
       <div class="monitor-stat-value">${expOn}</div>
       <div class="monitor-stat-label">Veces que se activaron Experimentos</div>
-      <div class="monitor-stat-sub">${expOff} desactivaciones registradas (30 días)</div>
+      <div class="monitor-stat-sub">${expOff} desactivaciones registradas (últimas 24 horas)</div>
     </div>
     <div class="monitor-stat-card">
       <div class="monitor-stat-value">${notifPanelOpens}</div>
       <div class="monitor-stat-label">Aperturas del panel de Notificaciones</div>
-      <div class="monitor-stat-sub">Últimos 30 días</div>
+      <div class="monitor-stat-sub">Últimas 24 horas</div>
     </div>
     <div class="monitor-stat-card" style="grid-column: span 2">
       <div class="monitor-stat-label" style="margin-bottom:6px">Sub-secciones más usadas</div>
