@@ -8343,6 +8343,26 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
       <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.subnavmenu.help">Pensada para quienes no saben que la barra de Sub-secciones se puede deslizar horizontalmente. En Desktop no aplica, ya que ahí caben todas.</div>
     </div>
 
+    <!-- Versión Simplificada: reemplaza el NavBar por un header mínimo
+         (título + hamburguesa) con tarjetas de asignación rediseñadas.
+         Reactivado en v1.35.1-beta. Solo tiene efecto en móvil. -->
+    <div class="profile-section">
+      <div class="profile-section-title" data-i18n="exp.simplificada.section">Versión Simplificada</div>
+      <div class="profile-row" style="cursor:pointer" onclick="toggleSimplifiedModePref()">
+        <div class="profile-row-icon" style="background:var(--ter-2-bg);color:var(--ter-2)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="exp.simplificada.title">Versión Simplificada</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.simplificada.desc.mobile">Reemplaza el NavBar por un menú simple</div>
+        </div>
+        <div id="simplified-mode-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="simplified-mode-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
+      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.simplificada.help">Al activarla, se desactivan las Notificaciones, Live, el Tutorial y el panel de administración. Para volver a la versión normal, entra a Configuración desde el título "Fleming".</div>
+    </div>
+
     <!-- Modo Sencillo: función en pruebas, v1.32.7-beta. Reemplaza toda la
          navegación por defecto por un encabezado mínimo + un menú overlay de
          pantalla completa con botones grandes, para quienes tienen
@@ -8829,7 +8849,7 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.35.1-beta';
+const APP_VERSION = '1.35.2-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -9379,6 +9399,7 @@ const I18N = {
   'exp.fondoacento.title': { es: 'Ajustar el fondo al color de acento', en: 'Match background to accent color', nl: 'Achtergrond aanpassen aan accentkleur' },
   'exp.fondoacento.desc':  { es: 'El fondo de la plataforma toma un tono derivado del color de acento elegido', en: 'The platform background takes on a tone derived from the chosen accent color', nl: 'De achtergrond van het platform krijgt een tint afgeleid van de gekozen accentkleur' },
   'exp.layout':            { es: 'Layout',                  en: 'Layout', nl: 'Lay-out' },
+  'exp.simplificada.section':{ es: 'Versión Simplificada', en: 'Simplified Mode', nl: 'Vereenvoudigde versie' },
   'exp.simplificada.title':{ es: 'Versión Simplificada',    en: 'Simplified Mode', nl: 'Vereenvoudigde versie' },
   'exp.simplificada.desc': { es: 'Reemplaza el NavBar por un menú simple. Solo disponible en móvil.', en: 'Replaces the NavBar with a simple menu. Only available on mobile.', nl: 'Vervangt de NavBar door een eenvoudig menu. Alleen beschikbaar op mobiel.' },
   'exp.simplificada.desc.mobile': { es: 'Reemplaza el NavBar por un menú simple', en: 'Replaces the NavBar with a simple menu.', nl: 'Vervangt de NavBar door een eenvoudig menu met titel en hamburgerpictogram.' },
@@ -21688,24 +21709,34 @@ function scheduleMidnightRefresh() {
 function isMobile() { return window.innerWidth < 640; }
 
 // ══════════════════════════ Versión Simplificada ═══════════════════════════
-// v1.29.10-beta: función retirada — ya no está disponible ni seguirá
-// usándose. Quien la tenía activada vuelve automáticamente al valor por
-// defecto de la plataforma (desactivada). Se conservan estas funciones (como
-// no-ops seguros) para no romper otras llamadas existentes en el código.
-function isSimplifiedModeSelected() {
-  try { localStorage.removeItem('fleming_simplified_mode'); } catch {}
-  return false;
+// v1.35.1-beta: se reactiva el switch en Experimentos. Solo tiene efecto en
+// móvil (< 640px) — igual que documentan las ayudas de la sección.
+function isSimplifiedModeEnabled() {
+  try { return localStorage.getItem('fleming_simplified_mode') === 'true'; } catch { return false; }
 }
 function isSimplifiedModeActive() {
-  return false;
+  return isSimplifiedModeEnabled() && isMobile();
 }
 
 function updateSimplifiedModeToggleUI() {
-  // No-op: el control fue retirado de Experimentos.
+  const toggle = document.getElementById('simplified-mode-toggle');
+  const thumb  = document.getElementById('simplified-mode-thumb');
+  if (!toggle || !thumb) return;
+  const on = isSimplifiedModeEnabled();
+  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
+  thumb.style.left = on ? '21px' : '3px';
 }
 
 function toggleSimplifiedModePref() {
-  // No-op: el control fue retirado de Experimentos.
+  const next = !isSimplifiedModeEnabled();
+  try { localStorage.setItem('fleming_simplified_mode', next ? 'true' : 'false'); } catch {}
+  updateSimplifiedModeToggleUI();
+  applySimplifiedModeUI();
+  if (next && !isMobile()) {
+    showToast('Versión Simplificada activada. Ábrela desde tu teléfono para verla.', 'success');
+  } else {
+    showToast(next ? 'Versión Simplificada activada' : 'Versión Simplificada desactivada', next ? 'success' : '');
+  }
 }
 
 // Aplica/retira el layout simplificado y las restricciones de funciones
