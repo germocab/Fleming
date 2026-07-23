@@ -362,6 +362,45 @@
     border-radius: var(--radius-sm); font-size: 0.84rem; color: var(--red); display: none;
   }
 
+  /* ── PIN numérico (v1.34.5-beta): pantalla de login y configuración ── */
+  .pin-icon-wrap {
+    width: 56px; height: 56px; border-radius: 16px; margin: 0 auto 1.1rem;
+    background: var(--accent-light); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .pin-icon-wrap svg { width: 26px; height: 26px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .pin-display {
+    min-height: 2.1rem; text-align: center; font-size: 1.6rem; font-weight: 700;
+    letter-spacing: 0.35em; color: var(--text); margin-bottom: 1.1rem;
+    font-variant-numeric: tabular-nums; user-select: none;
+  }
+  .pin-display.placeholder { color: var(--text3); font-weight: 500; }
+  .pin-dots { display: flex; align-items: center; justify-content: center; gap: 18px; margin-bottom: 1.5rem; }
+  .pin-dot {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid var(--border); background: transparent;
+    transition: background 0.15s var(--ease-fluid-snappy), border-color 0.15s, transform 0.15s var(--ease-fluid-snappy);
+  }
+  .pin-dot.filled { background: var(--accent); border-color: var(--accent); transform: scale(1.08); }
+  .pin-dots.shake { animation: pinShake 0.42s var(--ease-fluid); }
+  .pin-dots.shake .pin-dot { border-color: var(--red); }
+  @keyframes pinShake {
+    10%, 90% { transform: translateX(-1px); }
+    20%, 80% { transform: translateX(2px); }
+    30%, 50%, 70% { transform: translateX(-6px); }
+    40%, 60% { transform: translateX(6px); }
+  }
+  .pin-hidden-input {
+    position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none;
+  }
+  .pin-back-link {
+    display: block; text-align: center; font-size: 0.85rem; color: var(--text3);
+    margin-top: 0.75rem; cursor: pointer; background: none; border: none; font-family: var(--font); width: 100%;
+  }
+  .pin-back-link:hover { color: var(--text2); }
+  .pin-setup-step { display: none; }
+  .pin-setup-step.active { display: block; }
+
   .pass-wrap { position: relative; }
   .pass-wrap .form-input { padding-right: 2.75rem; }
   .pass-toggle {
@@ -6034,6 +6073,23 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
   </div>
 </div>
 
+<div id="auth-pin-screen" style="display:none;align-items:center;justify-content:center;min-height:100vh;padding:1rem;background:var(--bg)">
+  <div class="auth-card" style="text-align:center">
+    <div class="pin-icon-wrap">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
+    <h2 class="auth-title">Ingresa tu PIN</h2>
+    <p class="auth-sub" id="auth-pin-sub">Hola. Ingresa tu PIN de 4 dígitos para continuar.</p>
+    <div class="pin-display placeholder" id="auth-pin-display">– – – –</div>
+    <div class="pin-dots" id="auth-pin-dots">
+      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+    </div>
+    <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" class="pin-hidden-input" id="auth-pin-input" oninput="handleAuthPinInput()">
+    <div class="auth-error" id="auth-pin-error"></div>
+    <button type="button" class="pin-back-link" onclick="cancelPinScreen()">Cerrar sesión</button>
+  </div>
+</div>
+
 <div id="app">
   <div class="app-header-shell" id="app-header-shell">
   <nav class="topnav">
@@ -8250,6 +8306,34 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
       </div>
       <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.livehost.help">Solo comparte el nombre de la calle, nunca un punto exacto en un mapa. Tú decides si activarla; se apaga sola a las 2 horas.</div>
     </div>
+
+    <!-- PIN de acceso: función experimental, v1.34.5-beta. Permite fijar un PIN
+         numérico de 4 dígitos personal, distinto de la contraseña compartida
+         del rol, que se pide únicamente al iniciar sesión. -->
+    <div class="profile-section">
+      <div class="profile-section-title" data-i18n="exp.pin.section">Seguridad</div>
+      <div class="profile-row" style="cursor:pointer" onclick="togglePinFeaturePref()">
+        <div class="profile-row-icon" style="background:var(--ter-5-bg);color:var(--ter-5)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="exp.pin.title">PIN de acceso</div>
+          <div class="profile-row-value" style="font-size:0.8rem" id="exp-pin-status-text" data-i18n="exp.pin.desc">Añade un PIN numérico de 4 dígitos, personal, que se pedirá cada vez que inicies sesión.</div>
+        </div>
+        <div id="pin-feature-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="pin-feature-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
+      <div class="profile-row" id="pin-change-row" style="cursor:pointer;display:none" onclick="openPinSetupModal()">
+        <div class="profile-row-icon" style="background:var(--ter-5-bg);color:var(--ter-5)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 21v-4L16.5 4.5a2.1 2.1 0 0 1 3 3L7 20H4z"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="exp.pin.change">Cambiar PIN</div>
+        </div>
+      </div>
+      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.pin.help">Es independiente de la contraseña de tu rol. Se guarda de forma cifrada y solo se pide al iniciar sesión, no cada vez que abres la app.</div>
+    </div>
   </div>
 </div>
 
@@ -8421,6 +8505,34 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
     <div class="modal-footer">
       <button class="btn-secondary" onclick="closeReportIssueModal()" data-i18n="btn.cancelar">Cancelar</button>
       <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" id="report-issue-send-btn" onclick="submitIssueReport()" data-i18n="report.enviar">Enviar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="pin-setup-modal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-header">
+      <div class="modal-title" id="pin-setup-title">Crear PIN de acceso</div>
+      <button class="modal-close" onclick="closePinSetupModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body" style="text-align:center">
+      <div class="pin-setup-step active" id="pin-setup-step-1">
+        <p class="auth-sub" style="margin-bottom:1.1rem">Elige un PIN numérico de 4 dígitos. Se te pedirá cada vez que inicies sesión.</p>
+        <div class="pin-display placeholder" id="pin-setup-display-1">– – – –</div>
+        <div class="pin-dots" id="pin-setup-dots-1">
+          <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+        </div>
+        <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" class="pin-hidden-input" id="pin-setup-input-1" oninput="handlePinSetupStep1Input()">
+      </div>
+      <div class="pin-setup-step" id="pin-setup-step-2">
+        <p class="auth-sub" style="margin-bottom:1.1rem">Confirma tu PIN.</p>
+        <div class="pin-display placeholder" id="pin-setup-display-2">– – – –</div>
+        <div class="pin-dots" id="pin-setup-dots-2">
+          <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+        </div>
+        <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" class="pin-hidden-input" id="pin-setup-input-2" oninput="handlePinSetupStep2Input()">
+      </div>
+      <div class="auth-error" id="pin-setup-error"></div>
     </div>
   </div>
 </div>
@@ -8639,7 +8751,7 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.34.1.2-beta';
+const APP_VERSION = '1.34.5-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -9219,6 +9331,11 @@ const I18N = {
   'exp.livehost.title':   { es: 'Activar LiveHost', en: 'Enable LiveHost', nl: 'LiveHost inschakelen' },
   'exp.livehost.desc':    { es: 'Como Encargado, comparte la calle en la que estás con quienes vean tu asignación de casa en casa, por hasta 2 horas.', en: 'As the person in charge, share the street you are on with anyone viewing your house-to-house assignment, for up to 2 hours.', nl: 'Deel als verantwoordelijke de straat waar je bent met iedereen die je huis-aan-huis-toewijzing bekijkt, tot 2 uur lang.' },
   'exp.livehost.help':    { es: 'Solo comparte el nombre de la calle, nunca un punto exacto en un mapa. Tú decides si activarla; se apaga sola a las 2 horas.', en: 'Only shares the street name, never an exact point on a map. You decide whether to turn it on; it turns off by itself after 2 hours.', nl: 'Deelt alleen de straatnaam, nooit een exact punt op een kaart. Jij beslist of je het inschakelt; het schakelt na 2 uur vanzelf uit.' },
+  'exp.pin.section': { es: 'Seguridad', en: 'Security', nl: 'Beveiliging' },
+  'exp.pin.title':   { es: 'PIN de acceso', en: 'Access PIN', nl: 'Toegangspincode' },
+  'exp.pin.desc':    { es: 'Añade un PIN numérico de 4 dígitos, personal, que se pedirá cada vez que inicies sesión.', en: 'Add a personal 4-digit numeric PIN, requested every time you sign in.', nl: 'Voeg een persoonlijke 4-cijferige pincode toe, die telkens wordt gevraagd wanneer je inlogt.' },
+  'exp.pin.change':  { es: 'Cambiar PIN', en: 'Change PIN', nl: 'Pincode wijzigen' },
+  'exp.pin.help':    { es: 'Es independiente de la contraseña de tu rol. Se guarda de forma cifrada y solo se pide al iniciar sesión, no cada vez que abres la app.', en: "It's independent of your role's password. It is stored encrypted and only requested when signing in, not every time you open the app.", nl: 'Dit staat los van het wachtwoord van je rol. Het wordt versleuteld opgeslagen en alleen gevraagd bij het inloggen, niet elke keer dat je de app opent.' },
   // ── Mi Perfil ──
   'profile.title':          { es: 'Mi Perfil',               en: 'My Profile' },
   'nav.inicio':             { es: 'Inicio',                  en: 'Home',              nl: 'Start' },
@@ -11558,6 +11675,183 @@ async function enterApp() {
   }
 }
   
+// ── PIN de acceso (v1.34.5-beta) ─────────────────────────────────────────────
+// PIN numérico personal de 4 dígitos, independiente de la contraseña
+// compartida del rol. Vive en platform_users.pin_enabled / pin_hash (nunca se
+// guarda en texto plano: se hashea con SHA-256 antes de enviarse a Supabase).
+//   alter table platform_users add column if not exists pin_enabled boolean default false;
+//   alter table platform_users add column if not exists pin_hash text;
+async function hashPin(pin) {
+  const enc = new TextEncoder().encode('fleming-pin::' + pin);
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+let _pinPendingUser = null; // { name, role } — credenciales ya validadas, esperando el PIN
+
+async function userHasPinEnabled(name) {
+  try {
+    const { data } = await sb.from('platform_users').select('pin_enabled').ilike('name', name).single();
+    return !!(data && data.pin_enabled);
+  } catch { return false; }
+}
+
+function showPinEntryScreen(user) {
+  _pinPendingUser = user;
+  document.getElementById('auth-screen').style.display = 'none';
+  const sub = document.getElementById('auth-pin-sub');
+  if (sub) sub.textContent = `Hola, ${user.name.split(' ')[0]}. Ingresa tu PIN de 4 dígitos para continuar.`;
+  const input = document.getElementById('auth-pin-input');
+  input.value = '';
+  updatePinDotsUI('auth-pin-dots', 'auth-pin-display', '');
+  document.getElementById('auth-pin-error').style.display = 'none';
+  document.getElementById('auth-pin-screen').style.display = 'flex';
+  setTimeout(() => input.focus(), 200);
+}
+
+function updatePinDotsUI(dotsId, displayId, digits) {
+  const dots = document.querySelectorAll('#' + dotsId + ' .pin-dot');
+  dots.forEach((d, i) => d.classList.toggle('filled', i < digits.length));
+  const display = document.getElementById(displayId);
+  if (!display) return;
+  if (!digits) {
+    display.textContent = '– – – –';
+    display.classList.add('placeholder');
+  } else {
+    display.textContent = digits.split('').join(' ');
+    display.classList.remove('placeholder');
+  }
+}
+
+async function handleAuthPinInput() {
+  const input = document.getElementById('auth-pin-input');
+  const digits = input.value.replace(/\D/g, '').slice(0, 4);
+  input.value = digits;
+  updatePinDotsUI('auth-pin-dots', 'auth-pin-display', digits);
+  if (digits.length < 4) return;
+  const errEl = document.getElementById('auth-pin-error');
+  errEl.style.display = 'none';
+  const user = _pinPendingUser;
+  if (!user) return;
+  const hash = await hashPin(digits);
+  const { data } = await sb.from('platform_users').select('pin_hash').ilike('name', user.name).single();
+  if (data && data.pin_hash === hash) {
+    _pinPendingUser = null;
+    document.getElementById('auth-pin-screen').style.display = 'none';
+    currentUser = { name: user.name, role: user.role };
+    currentRole = user.role;
+    saveSession(currentUser);
+    enterApp();
+  } else {
+    const dotsWrap = document.getElementById('auth-pin-dots');
+    dotsWrap.classList.add('shake');
+    errEl.style.display = 'block';
+    errEl.textContent = 'PIN incorrecto. Intenta de nuevo.';
+    setTimeout(() => {
+      dotsWrap.classList.remove('shake');
+      input.value = '';
+      updatePinDotsUI('auth-pin-dots', 'auth-pin-display', '');
+      input.focus();
+    }, 420);
+  }
+}
+
+function cancelPinScreen() {
+  _pinPendingUser = null;
+  document.getElementById('auth-pin-screen').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+  clearSession(); currentUser = null; currentRole = 'viewer';
+}
+
+// ── Configuración del PIN (pantalla Preferencias → Experimentos) ────────────
+let _pinSetupFirstDigits = '';
+
+async function updatePinFeatureToggleUI() {
+  const toggle = document.getElementById('pin-feature-toggle');
+  const thumb  = document.getElementById('pin-feature-thumb');
+  const changeRow = document.getElementById('pin-change-row');
+  if (!toggle || !thumb || !currentUser) return;
+  const on = await userHasPinEnabled(currentUser.name);
+  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
+  thumb.style.left = on ? '21px' : '3px';
+  if (changeRow) changeRow.style.display = on ? '' : 'none';
+}
+
+async function togglePinFeaturePref() {
+  if (!currentUser) return;
+  const on = await userHasPinEnabled(currentUser.name);
+  if (on) {
+    if (!confirm('¿Desactivar el PIN de acceso? Ya no se te pedirá al iniciar sesión.')) return;
+    await sb.from('platform_users').update({ pin_enabled: false, pin_hash: null }).ilike('name', currentUser.name);
+    showToast('PIN de acceso desactivado', '');
+    updatePinFeatureToggleUI();
+  } else {
+    openPinSetupModal();
+  }
+}
+
+function openPinSetupModal() {
+  _pinSetupFirstDigits = '';
+  document.getElementById('pin-setup-title').textContent = 'Crear PIN de acceso';
+  document.getElementById('pin-setup-step-1').classList.add('active');
+  document.getElementById('pin-setup-step-2').classList.remove('active');
+  document.getElementById('pin-setup-input-1').value = '';
+  document.getElementById('pin-setup-input-2').value = '';
+  updatePinDotsUI('pin-setup-dots-1', 'pin-setup-display-1', '');
+  updatePinDotsUI('pin-setup-dots-2', 'pin-setup-display-2', '');
+  document.getElementById('pin-setup-error').style.display = 'none';
+  document.getElementById('pin-setup-modal').classList.add('open');
+  setTimeout(() => document.getElementById('pin-setup-input-1').focus(), 250);
+}
+
+function closePinSetupModal() {
+  document.getElementById('pin-setup-modal').classList.remove('open');
+}
+
+function handlePinSetupStep1Input() {
+  const input = document.getElementById('pin-setup-input-1');
+  const digits = input.value.replace(/\D/g, '').slice(0, 4);
+  input.value = digits;
+  updatePinDotsUI('pin-setup-dots-1', 'pin-setup-display-1', digits);
+  if (digits.length < 4) return;
+  _pinSetupFirstDigits = digits;
+  document.getElementById('pin-setup-title').textContent = 'Confirma tu PIN';
+  document.getElementById('pin-setup-step-1').classList.remove('active');
+  document.getElementById('pin-setup-step-2').classList.add('active');
+  const input2 = document.getElementById('pin-setup-input-2');
+  input2.value = '';
+  updatePinDotsUI('pin-setup-dots-2', 'pin-setup-display-2', '');
+  setTimeout(() => input2.focus(), 200);
+}
+
+async function handlePinSetupStep2Input() {
+  const input = document.getElementById('pin-setup-input-2');
+  const digits = input.value.replace(/\D/g, '').slice(0, 4);
+  input.value = digits;
+  updatePinDotsUI('pin-setup-dots-2', 'pin-setup-display-2', digits);
+  if (digits.length < 4) return;
+  const errEl = document.getElementById('pin-setup-error');
+  if (digits !== _pinSetupFirstDigits) {
+    errEl.style.display = 'block';
+    errEl.textContent = 'Los PIN no coinciden. Intenta de nuevo.';
+    const dotsWrap = document.getElementById('pin-setup-dots-2');
+    dotsWrap.classList.add('shake');
+    setTimeout(() => {
+      dotsWrap.classList.remove('shake');
+      input.value = '';
+      updatePinDotsUI('pin-setup-dots-2', 'pin-setup-display-2', '');
+      input.focus();
+    }, 420);
+    return;
+  }
+  errEl.style.display = 'none';
+  const hash = await hashPin(digits);
+  await sb.from('platform_users').update({ pin_enabled: true, pin_hash: hash }).ilike('name', currentUser.name);
+  closePinSetupModal();
+  showToast('PIN de acceso activado', 'success');
+  updatePinFeatureToggleUI();
+}
+
 async function doAccess() {
   const first = document.getElementById('auth-first').value.trim();
   const last  = document.getElementById('auth-last').value.trim();
@@ -11589,7 +11883,14 @@ async function doAccess() {
   }
 
   if (btn) { btn.disabled = false; btn.textContent = 'Ingresar'; }
-  currentUser = { name: first + ' ' + last, role };
+
+  const fullName = first + ' ' + last;
+  if (await userHasPinEnabled(fullName)) {
+    showPinEntryScreen({ name: fullName, role });
+    return;
+  }
+
+  currentUser = { name: fullName, role };
   currentRole = role;
   saveSession(currentUser);
   enterApp();
@@ -18017,7 +18318,7 @@ function openPrefScreen(name) {
   if (name === 'almacenamiento') renderStorageList();
   if (name === 'ayuda') renderAyudaTipsList();
   if (name === 'preferencias') { updateAnimationsEnabledToggleUI(); updateWeatherToggleUI(); updateNavbarIconToggleUI(); }
-  if (name === 'experimentos') { updateAccentSwatchesUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBtnSizeUI(); if (typeof updateLiveHostToggleUI === 'function') updateLiveHostToggleUI(); if (typeof updateSubnavMenuToggleUI === 'function') updateSubnavMenuToggleUI(); if (typeof updateModoSencilloToggleUI === 'function') updateModoSencilloToggleUI(); }
+  if (name === 'experimentos') { updateAccentSwatchesUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBtnSizeUI(); if (typeof updateLiveHostToggleUI === 'function') updateLiveHostToggleUI(); if (typeof updateSubnavMenuToggleUI === 'function') updateSubnavMenuToggleUI(); if (typeof updateModoSencilloToggleUI === 'function') updateModoSencilloToggleUI(); if (typeof updatePinFeatureToggleUI === 'function') updatePinFeatureToggleUI(); }
   if (name === 'version') {
     const val = document.getElementById('pref-version-screen-value');
     if (val) val.textContent = 'Versión ' + APP_VERSION;
