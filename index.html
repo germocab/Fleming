@@ -912,6 +912,48 @@
     content: ''; position: absolute; inset: 0;
     background: linear-gradient(180deg, rgba(0,0,0,0.02) 30%, rgba(0,0,0,0.72) 100%);
   }
+
+  /* ══════════ Tarjeta de asignación — Versión Simplificada (v1.35.1-beta) ══════════
+     Diseño exclusivo del modo Simplificado: más simple y visible que la
+     tarjeta normal. Dirección + habitante arriba; abajo una sola fila con
+     hora (pill), encargado y una etiqueta clara "Territorio X". ──────── */
+  .simp-assign-card {
+    background: var(--surface);
+    border-radius: 24px;
+    padding: 1.05rem 1.2rem;
+    margin-bottom: 0.65rem;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    border: 1px solid var(--border);
+  }
+  .simp-assign-card:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+  .simp-assign-card:active { transform: scale(0.985); }
+  .simp-assign-address { font-size: 1.12rem; font-weight: 800; color: var(--text); line-height: 1.3; }
+  .simp-assign-house { font-size: 1rem; font-weight: 500; color: var(--text2); margin-top: 1px; }
+  .simp-assign-row {
+    display: flex; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap;
+  }
+  .simp-time-pill {
+    display: inline-flex; align-items: center; height: 30px; padding: 0 12px;
+    border-radius: 15px; background: var(--accent); color: #fff;
+    font-size: 0.86rem; font-weight: 700; flex-shrink: 0;
+  }
+  .simp-assign-conductor { font-size: 0.94rem; font-weight: 600; color: var(--text2); }
+  .simp-ter-tag {
+    display: inline-flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0;
+  }
+  .simp-ter-tag-label { font-size: 0.86rem; font-weight: 600; color: var(--text3); }
+  .simp-ter-tag-circle {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%; color: #fff;
+    font-size: 0.82rem; font-weight: 800;
+  }
+  .simp-ter-tag-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%; background: var(--surface3); color: var(--text2);
+  }
+  .simp-ter-tag-icon svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
   .especial-card-body { position: relative; z-index: 1; padding: 1rem 1.1rem; color: #fff; width: 100%; }
   .especial-card-title { font-size: 1.02rem; font-weight: 800; line-height: 1.25; letter-spacing: -0.01em; }
   .especial-card-subtitle { font-size: 0.82rem; font-weight: 500; opacity: 0.9; margin-top: 2px; }
@@ -5635,25 +5677,25 @@
    está activa. ────────────────────────────────────────────────────────── */
 .simplified-header-shell {
   position: sticky; top: 0; z-index: 60;
-  background: var(--bg);
+  background: none; /* v1.35.1-beta: sin fondo de NavBar — título y menú quedan flotando sobre el contenido */
   flex-direction: column;
   padding: 0.7rem 0.85rem 0.55rem;
 }
 .simp-topbar {
   display: flex; align-items: center; justify-content: space-between;
-  height: 56px; padding: 0 0.9rem;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 18px; box-shadow: var(--shadow-lg);
+  height: 56px;
 }
 .simp-title-btn {
   font-family: var(--font); font-size: 1.05rem; font-weight: 800; letter-spacing: -0.01em;
-  color: var(--text); background: none; border: none; padding: 6px 4px; cursor: pointer;
+  color: var(--text); background: var(--surface); border: 1px solid var(--border); cursor: pointer;
+  height: 46px; padding: 0 18px; border-radius: 23px; box-shadow: var(--shadow-lg);
+  display: flex; align-items: center;
 }
 .simp-title-btn:active { opacity: 0.6; }
 .simp-hamburger-btn {
   display: flex; align-items: center; justify-content: center;
-  width: 38px; height: 38px; border-radius: 12px; border: none;
-  background: var(--surface3); color: var(--text); cursor: pointer;
+  width: 46px; height: 46px; border-radius: 50%; border: 1px solid var(--border);
+  background: var(--surface); color: var(--text); cursor: pointer; box-shadow: var(--shadow-lg);
   transition: background 0.15s, transform 0.15s;
 }
 .simp-hamburger-btn:active { transform: scale(0.92); background: var(--surface2); }
@@ -8787,7 +8829,7 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.35.0-beta';
+const APP_VERSION = '1.35.1-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -12879,6 +12921,23 @@ function renderSchedule() {
     return '';
   }
 
+  // v1.35.1-beta: etiqueta clara "Territorio X" (o el ícono del tipo) para la
+  // tarjeta de asignación del modo Simplificado.
+  function _buildSimpTerTag(a) {
+    const ter  = territories.find(t => t.id === a.territory_id)  || null;
+    const ter2 = a.territory_id_2 ? (territories.find(t => t.id === a.territory_id_2) || null) : null;
+    const ter3 = a.territory_id_3 ? (territories.find(t => t.id === a.territory_id_3) || null) : null;
+    const icon = (svg) => `<span class="simp-ter-tag-icon" style="margin-left:auto">${svg}</span>`;
+    if (a.type === 'zoom') return icon(`<svg viewBox="0 0 24 24"><rect x="2" y="7" width="15" height="10" rx="2"/><polygon points="17 9 22 6 22 18 17 15"/></svg>`);
+    if (a.type === 'telefono') return icon(`<svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.35 2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`);
+    if (a.type === 'cartas') return icon(`<svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`);
+    const nums = [ter, ter2, ter3].filter(Boolean);
+    if (!nums.length) return '';
+    const label = nums.length > 1 ? 'Territorios' : 'Territorio';
+    const circles = nums.map(t => `<span class="simp-ter-tag-circle" style="background:${getTerColor(t.number)}">${t.number}</span>`).join('');
+    return `<span class="simp-ter-tag"><span class="simp-ter-tag-label">${label}</span>${circles}</span>`;
+  }
+
   Object.keys(grouped).sort().filter(date => date >= todayStr).forEach(date => {
     const d = new Date(date+'T00:00:00');
     const isToday = date === todayStr;
@@ -13031,12 +13090,29 @@ function renderSchedule() {
 
     } else {
       // ── Regular days + today ──────────────────────────────────────────────
+      const _simp = typeof isSimplifiedModeActive === 'function' && isSimplifiedModeActive();
       regularItems.forEach(a => {
         const timeStr = a.time ? a.time.substring(0,5) : '--:--';
         const rightBadge = _buildRightBadge(a);
         const typeChip = _buildTypeChip(a);
         const _c = casas.find(c => c.id === a.casa_id);
         const houseLabel = casaHouseLabel(_c && _c.tipo, a.house);
+
+        if (_simp) {
+          // v1.35.1-beta: tarjeta rediseñada, exclusiva de la Versión
+          // Simplificada — dirección/habitante arriba, y una sola fila abajo
+          // con hora, encargado y la etiqueta "Territorio X".
+          html += `<div class="simp-assign-card" data-assignment-id="${a.id}" onclick="viewAssignment('${a.id}')">
+            <div class="simp-assign-address">${a.address||'Sin dirección'}</div>
+            ${houseLabel ? `<div class="simp-assign-house">${houseLabel}</div>` : ''}
+            <div class="simp-assign-row">
+              <span class="simp-time-pill">${timeStr}hrs</span>
+              <span class="simp-assign-conductor">${a.conductor||'Sin conductor'}</span>
+              ${_buildSimpTerTag(a)}
+            </div>
+          </div>`;
+          return;
+        }
 
         if (isToday) {
           html += `<div class="assignment-card-today" data-assignment-id="${a.id}" onclick="viewAssignment('${a.id}')">
