@@ -5770,8 +5770,14 @@ html.simplified-mode .simplified-header-shell { display: flex !important; }
    opciones de navegación — Secciones, Sub-secciones, Perfil, Notificaciones
    y Configuración — en un menú overlay de pantalla completa. ──────────── */
 html.modo-sencillo-mode .app-header-shell { display: none !important; }
-html.modo-sencillo-mode .simplified-header-shell { display: none !important; }
-html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
+/* v1.35.3-beta: Modo Sencillo ahora usa el NavBar de la Versión Simplificada
+   (título "Fleming" + botón hamburguesa) en vez de su propio header — el
+   header propio de Modo Sencillo (.ms-header-shell) queda sin uso. Lo único
+   que sigue siendo exclusivo de Modo Sencillo es su menú "Más opciones" a
+   pantalla completa (.ms-overlay), ver simplifiedToggleOptions()/
+   simplifiedToggleMenu() más abajo. */
+html.modo-sencillo-mode .simplified-header-shell { display: flex !important; }
+html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 
 .ms-header-shell {
   display: none; position: sticky; top: 0; z-index: 60;
@@ -8849,7 +8855,7 @@ html.modo-sencillo-mode .ms-header-shell { display: flex !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.35.2-beta';
+const APP_VERSION = '1.35.3-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -21973,6 +21979,9 @@ function _simpSyncBackdrop() {
   if (backdrop) backdrop.classList.toggle('open', _simpOptionsOpen || _simpMenuOpen);
 }
 function simplifiedToggleOptions() {
+  // v1.35.3-beta: en Modo Sencillo, tocar el título "Fleming" no abre nada —
+  // todo lo necesario vive en el menú "Más opciones" (botón hamburguesa).
+  if (typeof isModoSencilloActive === 'function' && isModoSencilloActive()) return;
   if (_simpMenuOpen) simplifiedCloseMenu();
   _simpOptionsOpen = !_simpOptionsOpen;
   const dd = document.getElementById('simp-options-dropdown');
@@ -22005,6 +22014,13 @@ const SIMP_MAIN_TABS = [
   { id: 'reuniones',   label: 'Reuniones' },
 ];
 function simplifiedToggleMenu() {
+  // v1.35.3-beta: en Modo Sencillo, el botón hamburguesa del NavBar de la
+  // Versión Simplificada abre el menú "Más opciones" a pantalla completa de
+  // Modo Sencillo (.ms-overlay) en vez del menú desplegable simp-menu-row.
+  if (typeof isModoSencilloActive === 'function' && isModoSencilloActive()) {
+    if (typeof msOpenOverlay === 'function') msOpenOverlay();
+    return;
+  }
   if (_simpOptionsOpen) simplifiedCloseOptions();
   _simpMenuOpen = !_simpMenuOpen;
   const row = document.getElementById('simp-menu-row');
