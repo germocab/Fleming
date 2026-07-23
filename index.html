@@ -8340,33 +8340,13 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         </div>
         <div class="profile-row-content">
           <div class="profile-row-label" data-i18n="exp.subnavmenu.title">Activar Menú de Sub-secciones</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.subnavmenu.desc">Presiona el botón de la Sub-sección activa en la barra (Predicación y Reuniones) para abrir la lista completa. Solo en móvil.</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.subnavmenu.desc">Activado por defecto. Presiona el botón de la Sub-sección activa en la barra (Predicación y Reuniones) para abrir la lista completa. Solo en móvil.</div>
         </div>
         <div id="subnav-menu-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
           <div id="subnav-menu-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
       <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.subnavmenu.help">Pensada para quienes no saben que la barra de Sub-secciones se puede deslizar horizontalmente. En Desktop no aplica, ya que ahí caben todas.</div>
-    </div>
-
-    <!-- Versión Simplificada: reemplaza el NavBar por un header mínimo
-         (título + hamburguesa) con tarjetas de asignación rediseñadas.
-         Reactivado en v1.35.1-beta. Solo tiene efecto en móvil. -->
-    <div class="profile-section">
-      <div class="profile-section-title" data-i18n="exp.simplificada.section">Versión Simplificada</div>
-      <div class="profile-row" style="cursor:pointer" onclick="toggleSimplifiedModePref()">
-        <div class="profile-row-icon" style="background:var(--ter-2-bg);color:var(--ter-2)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="exp.simplificada.title">Versión Simplificada</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.simplificada.desc.mobile">Reemplaza el NavBar por un menú simple</div>
-        </div>
-        <div id="simplified-mode-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="simplified-mode-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
-      </div>
-      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.simplificada.help">Al activarla, se desactivan las Notificaciones, Live, el Tutorial y el panel de administración. Para volver a la versión normal, entra a Configuración desde el título "Fleming".</div>
     </div>
 
     <!-- Modo Sencillo: función en pruebas, v1.32.7-beta. Reemplaza toda la
@@ -8855,7 +8835,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.35.3-beta';
+const APP_VERSION = '1.35.4-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -9430,7 +9410,7 @@ const I18N = {
   'exp.modosencillo.help':    { es: 'Pensado para quienes tienen dificultad para usar la versión por defecto. Notificaciones y Live siguen activas, accesibles desde el menú.', en: 'Designed for those who have difficulty using the default version. Notifications and Live remain active, accessible from the menu.', nl: 'Bedoeld voor wie moeite heeft met de standaardversie. Meldingen en Live blijven actief, toegankelijk vanuit het menu.' },
   'exp.subnavmenu.section': { es: 'Menú de Sub-secciones', en: 'Sub-section Menu', nl: 'Subsectiemenu' },
   'exp.subnavmenu.title':   { es: 'Activar Menú de Sub-secciones', en: 'Enable Sub-section Menu', nl: 'Subsectiemenu inschakelen' },
-  'exp.subnavmenu.desc':    { es: 'Presiona el botón de la Sub-sección activa en la barra (Predicación y Reuniones) para abrir la lista completa. Solo en móvil.', en: 'Press the already-active Sub-section bar button (Preaching and Meetings) to open the full list. Mobile only.', nl: 'Druk op de knop van de actieve subsectie in de balk (Prediking en Vergaderingen) om de volledige lijst te openen. Alleen op mobiel.' },
+  'exp.subnavmenu.desc':    { es: 'Activado por defecto. Presiona el botón de la Sub-sección activa en la barra (Predicación y Reuniones) para abrir la lista completa. Solo en móvil.', en: 'Enabled by default. Press the already-active Sub-section bar button (Preaching and Meetings) to open the full list. Mobile only.', nl: 'Standaard ingeschakeld. Druk op de knop van de actieve subsectie in de balk (Prediking en Vergaderingen) om de volledige lijst te openen. Alleen op mobiel.' },
   'exp.subnavmenu.help':    { es: 'Pensada para quienes no saben que la barra de Sub-secciones se puede deslizar horizontalmente. En Desktop no aplica, ya que ahí caben todas.', en: "Designed for people who don't know the Sub-section bar can be swiped horizontally. Does not apply on Desktop, where all of them already fit.", nl: 'Bedoeld voor mensen die niet weten dat de subsectiebalk horizontaal geveegd kan worden. Niet van toepassing op Desktop, waar ze allemaal al passen.' },
   'exp.livehost.section': { es: 'LiveHost', en: 'LiveHost', nl: 'LiveHost' },
   'exp.livehost.title':   { es: 'Activar LiveHost', en: 'Enable LiveHost', nl: 'LiveHost inschakelen' },
@@ -12152,7 +12132,11 @@ function handleSubTabClick(ev, tabId) {
   switchSubTab(tabId);
 }
 function isSubnavMenuEnabled() {
-  return localStorage.getItem('fleming_subnavmenu_enabled') === 'true';
+  // v1.35.4-beta: activado por defecto. Solo se desactiva si el usuario,
+  // habiendo desbloqueado Experimentos, apagó el toggle explícitamente
+  // (queda guardado como 'false'); cualquier otro valor (incluido "nunca
+  // tocado") cuenta como activado.
+  return localStorage.getItem('fleming_subnavmenu_enabled') !== 'false';
 }
 function toggleSubnavMenuPref() {
   const next = !isSubnavMenuEnabled();
@@ -21718,7 +21702,11 @@ function isMobile() { return window.innerWidth < 640; }
 // v1.35.1-beta: se reactiva el switch en Experimentos. Solo tiene efecto en
 // móvil (< 640px) — igual que documentan las ayudas de la sección.
 function isSimplifiedModeEnabled() {
-  try { return localStorage.getItem('fleming_simplified_mode') === 'true'; } catch { return false; }
+  // v1.35.4-beta: se quitó el toggle de "Versión Simplificada" en
+  // Experimentos — ya no se usa como función independiente (su NavBar sigue
+  // vivo, pero solo reutilizado por Modo Sencillo). Queda deshabilitada de
+  // forma permanente, sin importar lo que haya quedado guardado antes.
+  return false;
 }
 function isSimplifiedModeActive() {
   return isSimplifiedModeEnabled() && isMobile();
