@@ -7939,8 +7939,8 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
       <div class="profile-row" id="pref-version-row" style="user-select:none;-webkit-user-select:none;cursor:pointer;position:relative"
         onmousedown="startVersionHold()" onmouseup="endVersionHold(true)" onmouseleave="endVersionHold(false)"
         ontouchstart="startVersionHold(event)" ontouchend="endVersionHold(true)" ontouchcancel="endVersionHold(false)">
-        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text3)" id="pref-version-icon">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div class="profile-row-icon" style="background:transparent;overflow:hidden" id="pref-version-icon">
+          <img src="icons/version.png" alt="FlemingApp" style="width:100%;height:100%;object-fit:cover;border-radius:9px">
         </div>
         <div class="profile-row-content">
           <div class="profile-row-label" data-i18n="settings.version">Versión de la plataforma</div>
@@ -8913,13 +8913,12 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.35.7-beta';
-// Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
-// de Configuración; la versión completa (con parche y sufijo) solo se
-// muestra en el detalle de la pantalla "Versión".
+const APP_VERSION = '1.35.7.5-beta';
+// v1.35.7.5-beta: el botón de "Acerca de" en Configuración ahora muestra la
+// versión COMPLETA (ej. "1.35.8"), no solo major.minor como antes — se le
+// quita únicamente el sufijo de canal ("-beta") para que quede limpia.
 function getAppVersionMajor() {
-  const m = APP_VERSION.match(/^(\d+\.\d+)/);
-  return m ? m[1] : APP_VERSION;
+  return APP_VERSION.replace(/-.*$/, '');
 }
 
 // ── Monitor (v1.33.7-beta): registro de patrones de uso ─────────────────────
