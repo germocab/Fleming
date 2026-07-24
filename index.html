@@ -8912,7 +8912,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.35.5.3-beta';
+const APP_VERSION = '1.35.5.4-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -17950,12 +17950,18 @@ async function saveProfileChanges(uid) {
   if (roleSel) u.role = roleSel.value;
   if (taskEl)  u.task = taskEl.value.trim();
 
-  // DEV puede cambiar el nombre de usuario
-  let newName = u.name;
+  // DEV puede cambiar el nombre de usuario. v1.35.5.4-beta: se compara contra
+  // el nombre YA recortado (trim) — antes, si el nombre guardado en Supabase
+  // tenía un espacio de más al inicio/final (dato antiguo mal cargado), la
+  // app creía que el DEV había pedido un cambio de nombre aunque solo
+  // guardara otra cosa (p. ej. Módulos permitidos), y ese "cambio" fantasma
+  // podía chocar con el nombre de otro usuario y tumbar el guardado entero.
+  let newName = (u.name || '').trim();
   if (currentRole === 'dev' && nameInput) {
     newName = nameInput.value.trim();
     if (!newName) { showToast('El nombre no puede estar vacío.', 'error'); return; }
   }
+  const nameChanged = currentRole === 'dev' && newName !== (u.name || '').trim();
 
   // DEV puede vincular esta cuenta al nombre bajo el cual la persona aparece
   // registrada en Grupos de Servicio, Asignaciones, etc. (ver getIdentityName()).
@@ -17966,8 +17972,10 @@ async function saveProfileChanges(uid) {
   }
 
   const perms = parsePermissions(u.permissions);
+  // v1.35.5.4-beta: el nombre YA NO viaja en este payload — se guarda aparte
+  // (ver más abajo) para que un conflicto de nombre duplicado no impida
+  // guardar el rol, la nota, las Etiquetas ni los Módulos permitidos.
   const updatePayload = { role: u.role, task: u.task, permissions: perms, labels: parseLabels(u.labels) };
-  if (currentRole === 'dev' && newName !== u.name) updatePayload.name = newName;
   if (currentRole === 'dev' && newLinkedName !== (u.linked_name || '')) updatePayload.linked_name = newLinkedName || null;
 
   // v1.29.5-beta: Género — exclusivo DEV.
@@ -17993,7 +18001,6 @@ async function saveProfileChanges(uid) {
     // Reintento sin linked_name/admin_tag_id/genero por si las columnas aún no
     // existen en Supabase (ver bloques SQL correspondientes para agregarlas).
     const fallback = { role: u.role, task: u.task, labels: parseLabels(u.labels) };
-    if (currentRole === 'dev' && newName !== u.name) fallback.name = newName;
     const retry = await sb.from('platform_users').update(fallback).eq('id', u.id);
     if (retry.error) { showToast('Error: ' + retry.error.message, 'error'); return; }
     if (currentRole === 'dev' && newLinkedName !== (u.linked_name || '')) {
@@ -18005,15 +18012,32 @@ async function saveProfileChanges(uid) {
     }
   }
 
+  // v1.35.5.4-beta: el cambio de nombre se guarda en un UPDATE aparte, para
+  // que si choca con el nombre de otro usuario (unique constraint) solo
+  // falle ESO — el resto de los cambios (rol, nota, Etiquetas, Módulos
+  // permitidos, vínculo, AdminTag, Género) ya quedó guardado arriba.
+  let nameSaved = !nameChanged;
+  if (nameChanged) {
+    const { error: nameErr } = await sb.from('platform_users').update({ name: newName }).eq('id', u.id);
+    if (nameErr) {
+      const isDuplicate = nameErr.code === '23505' || /duplicate key|unique constraint/i.test(nameErr.message || '');
+      showToast(isDuplicate
+        ? `No se pudo cambiar el nombre: ya existe otro usuario llamado "${newName}".`
+        : 'No se pudo cambiar el nombre: ' + nameErr.message, 'error');
+    } else {
+      nameSaved = true;
+    }
+  }
+
   const wasCurrentUser = currentUser && u.name === currentUser.name;
-  if (currentRole === 'dev' && newName !== u.name) u.name = newName;
+  if (nameSaved && nameChanged) u.name = newName;
   if (currentRole === 'dev') u.linked_name = newLinkedName || null;
   if (currentRole === 'dev') u.admin_tag_id = newAdminTagId;
   if (currentRole === 'dev') u.genero = newGenero;
   if (wasCurrentUser) {
     currentRole = u.role;
     currentUser.role = u.role;
-    if (currentRole === 'dev' && newName) currentUser.name = u.name;
+    if (nameSaved && nameChanged) currentUser.name = u.name;
     if (currentRole === 'dev') currentUser.linkedName = u.linked_name || null;
     saveSession(currentUser);
     // Update displayed name in the nav dropdown
