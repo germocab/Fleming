@@ -8912,7 +8912,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.35.5.2-beta';
+const APP_VERSION = '1.35.5.3-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -11691,15 +11691,16 @@ function showGuestShareError() {
 }
 
 // ── Link de referencia: pantalla de bienvenida para ?ref=<token> ───────────
-// No inicia sesión ni carga datos de la plataforma. "Reclama" el token de
-// forma ATÓMICA (UPDATE ... WHERE used_at IS NULL): solo la primera persona
-// que abre el link logra marcarlo como usado, así quien lo recibió no puede
-// reenviarlo a alguien más sin que la app lo detecte — cualquier apertura
-// posterior (por esa misma persona reenviándolo, o por quien lo reciba de
-// segunda mano) ve "Link ya utilizado" en vez de la bienvenida.
+// No inicia sesión ni carga datos de la plataforma. Solo CONSULTA el token
+// (sin marcarlo como usado todavía) para mostrar quién invitó — así, con
+// solo abrir/previsualizar el link (incluso el propio Admin que lo generó,
+// para probarlo) no se "quema" el link. El reclamo real (marcar used_at) se
+// hace de forma atómica recién al presionar "Ingresar", ver
+// acceptInviteAndGoToLogin() más abajo.
 // Requiere una tabla `referral_links` en Supabase con columnas:
 // token (text, PK), created_by (text), expires_at (timestamptz),
 // used_at (timestamptz, nullable), created_at (timestamptz, default now()).
+let _pendingInviteToken = null;
 async function initGuestInviteMode(token) {
   document.getElementById('auth-screen').style.display = 'none';
   const authPending = document.getElementById('auth-pending-screen');
@@ -11709,34 +11710,22 @@ async function initGuestInviteMode(token) {
   const btnEl   = document.getElementById('invite-screen-btn');
   const screen  = document.getElementById('invite-screen');
   try {
-    const nowIso = new Date().toISOString();
-    // Intento de reclamo: solo afecta la fila si sigue sin usarse Y sigue
-    // vigente. Si otra apertura (o esta misma recargada) ya la reclamó antes,
-    // esto no actualiza nada y "claimed" vuelve null.
-    const { data: claimed, error: claimErr } = await sb.from('referral_links')
-      .update({ used_at: nowIso })
-      .eq('token', token)
-      .is('used_at', null)
-      .gt('expires_at', nowIso)
-      .select('created_by')
-      .maybeSingle();
-    if (claimErr) throw claimErr;
-    if (claimed) {
-      titleEl.textContent = `'${claimed.created_by}' te ha invitado a FlemingApp`;
+    const { data, error } = await sb.from('referral_links').select('created_by, expires_at, used_at').eq('token', token).maybeSingle();
+    if (error) throw error;
+    const expired = data && data.expires_at && new Date(data.expires_at).getTime() < Date.now();
+    if (data && data.used_at) {
+      titleEl.textContent = 'Link ya utilizado';
+      subEl.textContent = 'Este Link de referencia ya fue usado antes por alguien más. Pide uno nuevo a quien te invitó.';
+      btnEl.style.display = 'none';
+    } else if (!data || expired) {
+      titleEl.textContent = 'Link no disponible';
+      subEl.textContent = 'Este Link de referencia ya no es válido o ha expirado.';
+      btnEl.style.display = 'none';
+    } else {
+      titleEl.textContent = `'${data.created_by}' te ha invitado a FlemingApp`;
       subEl.textContent = 'Presiona Ingresar para continuar.';
       btnEl.style.display = '';
-    } else {
-      // No se pudo reclamar: averigua la razón exacta para dar un mensaje
-      // más útil (ya usado, o simplemente no existe/expiró).
-      const { data: existing } = await sb.from('referral_links').select('used_at').eq('token', token).maybeSingle();
-      if (existing && existing.used_at) {
-        titleEl.textContent = 'Link ya utilizado';
-        subEl.textContent = 'Este Link de referencia ya fue abierto antes por alguien más. Pide uno nuevo a quien te invitó.';
-      } else {
-        titleEl.textContent = 'Link no disponible';
-        subEl.textContent = 'Este Link de referencia ya no es válido o ha expirado.';
-      }
-      btnEl.style.display = 'none';
+      _pendingInviteToken = token;
     }
   } catch (e) {
     console.error('initGuestInviteMode:', e);
@@ -11746,21 +11735,54 @@ async function initGuestInviteMode(token) {
   }
   screen.style.display = 'flex';
 }
-// Botón "Ingresar" de la pantalla de invitación: no autentica, solo lleva
-// al Inicio de Sesión normal (el usuario invitado igual debe crear/usar sus
-// propias credenciales) — PERO, desde v1.35.5.2-beta, activa el modo de
-// login sin contraseña (ver _inviteLoginMode / doAccess): como el link ya
-// era de un solo uso y con caducidad, y solo lo puede generar un Admin con
-// el módulo "Compartir" activado, se considera un canal suficientemente
-// controlado como para saltarse ese paso.
-function acceptInviteAndGoToLogin() {
+// Botón "Ingresar" de la pantalla de invitación. Primero "reclama" el token
+// de forma ATÓMICA (UPDATE ... WHERE used_at IS NULL AND expires_at > ahora):
+// solo la primera persona que presiona Ingresar logra marcarlo como usado,
+// así quien recibió el link no puede reenviarlo a alguien más sin que la app
+// lo detecte (esa segunda persona vería "Link ya utilizado" al abrirlo). Si
+// el reclamo tiene éxito, lleva al Inicio de Sesión normal — PERO, desde
+// v1.35.5.2-beta, en modo sin contraseña (ver _inviteLoginMode / doAccess):
+// como el link ya era de un solo uso y con caducidad, y solo lo puede
+// generar un Admin con el módulo "Compartir" activado, se considera un
+// canal suficientemente controlado como para saltarse ese paso.
+async function acceptInviteAndGoToLogin() {
+  const token = _pendingInviteToken;
+  if (!token) return;
+  const btnEl  = document.getElementById('invite-screen-btn');
+  const titleEl = document.getElementById('invite-screen-title');
+  const subEl   = document.getElementById('invite-screen-sub');
+  if (btnEl) { btnEl.disabled = true; btnEl.textContent = 'Ingresando…'; }
+  try {
+    const nowIso = new Date().toISOString();
+    const { data: claimed, error: claimErr } = await sb.from('referral_links')
+      .update({ used_at: nowIso })
+      .eq('token', token)
+      .is('used_at', null)
+      .gt('expires_at', nowIso)
+      .select('created_by')
+      .maybeSingle();
+    if (claimErr) throw claimErr;
+    if (!claimed) {
+      // Alguien más lo reclamó primero (o venció) justo antes de este click.
+      titleEl.textContent = 'Link ya utilizado';
+      subEl.textContent = 'Este Link de referencia ya fue usado antes por alguien más. Pide uno nuevo a quien te invitó.';
+      btnEl.style.display = 'none';
+      return;
+    }
+  } catch (e) {
+    console.error('acceptInviteAndGoToLogin:', e);
+    if (btnEl) { btnEl.disabled = false; btnEl.textContent = 'Ingresar'; }
+    showToast('No se pudo validar el link. Intenta de nuevo.', 'error');
+    return;
+  }
+  _pendingInviteToken = null;
   document.getElementById('invite-screen').style.display = 'none';
   _inviteLoginMode = true;
-  const titleEl = document.getElementById('auth-title-text');
-  const subEl   = document.getElementById('auth-sub-text');
-  const passGroup = document.getElementById('auth-pass-group');
-  if (titleEl) titleEl.textContent = 'Bienvenido';
-  if (subEl) subEl.textContent = 'Llegaste por un Link de referencia: no necesitas contraseña. Ingresa tu nombre y apellido.';
+  const authTitleEl = document.getElementById('auth-title-text');
+  const authSubEl   = document.getElementById('auth-sub-text');
+  const passGroup   = document.getElementById('auth-pass-group');
+  if (authTitleEl) authTitleEl.textContent = 'Bienvenido';
+  if (authSubEl) authSubEl.textContent = 'Llegaste por un Link de referencia: no necesitas contraseña. Ingresa tu nombre y apellido.';
   if (passGroup) passGroup.style.display = 'none';
   document.getElementById('auth-screen').style.display = 'flex';
 }
