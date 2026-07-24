@@ -6090,8 +6090,8 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         <div class="auth-logo-name">Congr. Fleming</div>
       </div>
     </div>
-    <h2 class="auth-title">Bienvenido</h2>
-    <p class="auth-sub">Ingresa tus datos para continuar.</p>
+    <h2 class="auth-title" id="auth-title-text">Bienvenido</h2>
+    <p class="auth-sub" id="auth-sub-text">Ingresa tus datos para continuar.</p>
     <div class="form-group">
       <label class="form-label">Nombre</label>
       <input type="text" class="form-input" id="auth-first" placeholder="Tu nombre">
@@ -6100,7 +6100,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
       <label class="form-label">Apellido</label>
       <input type="text" class="form-input" id="auth-last" placeholder="Tu apellido">
     </div>
-    <div class="form-group">
+    <div class="form-group" id="auth-pass-group">
       <label class="form-label">Contraseña</label>
       <div class="pass-wrap">
         <input type="password" class="form-input" id="auth-pass" placeholder="••••••••••••">
@@ -8912,7 +8912,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.35.6-beta';
+const APP_VERSION = '1.35.5.2-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -11748,10 +11748,35 @@ async function initGuestInviteMode(token) {
 }
 // Botón "Ingresar" de la pantalla de invitación: no autentica, solo lleva
 // al Inicio de Sesión normal (el usuario invitado igual debe crear/usar sus
-// propias credenciales).
+// propias credenciales) — PERO, desde v1.35.5.2-beta, activa el modo de
+// login sin contraseña (ver _inviteLoginMode / doAccess): como el link ya
+// era de un solo uso y con caducidad, y solo lo puede generar un Admin con
+// el módulo "Compartir" activado, se considera un canal suficientemente
+// controlado como para saltarse ese paso.
 function acceptInviteAndGoToLogin() {
   document.getElementById('invite-screen').style.display = 'none';
+  _inviteLoginMode = true;
+  const titleEl = document.getElementById('auth-title-text');
+  const subEl   = document.getElementById('auth-sub-text');
+  const passGroup = document.getElementById('auth-pass-group');
+  if (titleEl) titleEl.textContent = 'Bienvenido';
+  if (subEl) subEl.textContent = 'Llegaste por un Link de referencia: no necesitas contraseña. Ingresa tu nombre y apellido.';
+  if (passGroup) passGroup.style.display = 'none';
   document.getElementById('auth-screen').style.display = 'flex';
+}
+// Vuelve la pantalla de Inicio de Sesión a su estado normal (con contraseña
+// visible). Se llama al cerrar sesión, para que un login posterior por la
+// vía normal (no invitado) no siga saltándose la contraseña.
+function resetAuthScreenToNormal() {
+  _inviteLoginMode = false;
+  const titleEl = document.getElementById('auth-title-text');
+  const subEl   = document.getElementById('auth-sub-text');
+  const passGroup = document.getElementById('auth-pass-group');
+  if (titleEl) titleEl.textContent = 'Bienvenido';
+  if (subEl) subEl.textContent = 'Ingresa tus datos para continuar.';
+  if (passGroup) passGroup.style.display = '';
+  const passInput = document.getElementById('auth-pass');
+  if (passInput) passInput.value = '';
 }
 
 // ── Foto de perfil en el Menú Opciones: se carga desde el arranque, sin
@@ -12083,6 +12108,11 @@ async function handlePinSetupStep2Input() {
   updatePinFeatureToggleUI();
 }
 
+// v1.35.5.2-beta: true mientras la persona llegó a esta pantalla desde un
+// Link de referencia (botón "Ingresar" de #invite-screen). En ese caso,
+// doAccess() no pide contraseña y asume directamente el rol Visitante.
+let _inviteLoginMode = false;
+
 async function doAccess() {
   const first = document.getElementById('auth-first').value.trim();
   const last  = document.getElementById('auth-last').value.trim();
@@ -12091,12 +12121,23 @@ async function doAccess() {
   const btn   = document.querySelector('#auth-screen .btn-primary');
   errEl.style.display = 'none';
   if (!first || !last) { errEl.style.display='block'; errEl.textContent='Ingresa tu nombre y apellido.'; return; }
-  if (!pass)           { errEl.style.display='block'; errEl.textContent='Ingresa la contraseña.'; return; }
-  let baseRole = pass === PASS_DEV ? 'dev' : pass === PASS_ADMIN ? 'admin' : pass === PASS_VIEWER ? 'viewer' : null;
-  if (!baseRole) { errEl.style.display='block'; errEl.textContent='Contraseña incorrecta.'; return; }
-  // El usuario DEV solo puede iniciar sesión con nombre "DEV" y apellido "Tester"
-  if (baseRole === 'dev' && (first !== 'DEV' || last !== 'Tester')) {
-    errEl.style.display='block'; errEl.textContent='Contraseña incorrecta.'; return;
+
+  let baseRole;
+  if (_inviteLoginMode) {
+    // Viene de un Link de referencia: de un solo uso, con caducidad y solo
+    // generable por un Admin con el módulo "Compartir" activado — se
+    // considera un canal ya controlado, así que se salta la contraseña y
+    // entra directo como Visitante.
+    baseRole = 'viewer';
+    _inviteLoginMode = false;
+  } else {
+    if (!pass) { errEl.style.display='block'; errEl.textContent='Ingresa la contraseña.'; return; }
+    baseRole = pass === PASS_DEV ? 'dev' : pass === PASS_ADMIN ? 'admin' : pass === PASS_VIEWER ? 'viewer' : null;
+    if (!baseRole) { errEl.style.display='block'; errEl.textContent='Contraseña incorrecta.'; return; }
+    // El usuario DEV solo puede iniciar sesión con nombre "DEV" y apellido "Tester"
+    if (baseRole === 'dev' && (first !== 'DEV' || last !== 'Tester')) {
+      errEl.style.display='block'; errEl.textContent='Contraseña incorrecta.'; return;
+    }
   }
 
   if (btn) { btn.disabled = true; btn.textContent = 'Entrando…'; }
@@ -12186,6 +12227,7 @@ function doLogout() {
   const pendingScreen = document.getElementById('auth-pending-screen');
   if (pendingScreen) pendingScreen.style.display = 'none';
   if (_pendingPollInterval) { clearInterval(_pendingPollInterval); _pendingPollInterval = null; }
+  resetAuthScreenToNormal();
   document.getElementById('auth-screen').style.display = 'flex';
 }
 
