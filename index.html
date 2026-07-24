@@ -6115,10 +6115,12 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
   </div>
 </div>
 
-<!-- ── Pantalla de Link de referencia (v1.35.5-beta) ────────────────────────
-     Se muestra cuando la URL trae ?ref=<token> y ese link sigue vigente. No
-     inicia sesión: solo da la bienvenida y dirige, con el botón "Ingresar",
-     a la pantalla normal de Inicio de Sesión (#auth-screen). ── -->
+<!-- ── Pantalla de Link de referencia (v1.35.5-beta / single-use v1.35.6-beta) ──
+     Se muestra cuando la URL trae ?ref=<token> y ese link sigue vigente y
+     SIN USAR — cada link solo funciona para la primera persona que lo abre,
+     para que quien lo reciba no pueda reenviarlo a alguien más. No inicia
+     sesión: solo da la bienvenida y dirige, con el botón "Ingresar", a la
+     pantalla normal de Inicio de Sesión (#auth-screen). ── -->
 <div id="invite-screen" style="display:none">
   <div class="auth-card">
     <div class="auth-logo">
@@ -6131,7 +6133,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
     </div>
     <h2 class="auth-title" id="invite-screen-title">Te han invitado</h2>
     <p class="auth-sub" id="invite-screen-sub">a FlemingApp</p>
-    <button class="btn-primary" onclick="acceptInviteAndGoToLogin()">Ingresar</button>
+    <button class="btn-primary" id="invite-screen-btn" onclick="acceptInviteAndGoToLogin()">Ingresar</button>
   </div>
 </div>
 
@@ -8910,7 +8912,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.35.5-beta';
+const APP_VERSION = '1.35.6-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -11689,31 +11691,58 @@ function showGuestShareError() {
 }
 
 // ── Link de referencia: pantalla de bienvenida para ?ref=<token> ───────────
-// No inicia sesión ni carga datos de la plataforma: solo consulta el token
-// en Supabase (tabla referral_links) para mostrar quién invitó, y ofrece el
-// botón "Ingresar" que lleva al Inicio de Sesión normal (#auth-screen).
+// No inicia sesión ni carga datos de la plataforma. "Reclama" el token de
+// forma ATÓMICA (UPDATE ... WHERE used_at IS NULL): solo la primera persona
+// que abre el link logra marcarlo como usado, así quien lo recibió no puede
+// reenviarlo a alguien más sin que la app lo detecte — cualquier apertura
+// posterior (por esa misma persona reenviándolo, o por quien lo reciba de
+// segunda mano) ve "Link ya utilizado" en vez de la bienvenida.
 // Requiere una tabla `referral_links` en Supabase con columnas:
-// token (text, PK), created_by (text), expires_at (timestamptz), created_at.
+// token (text, PK), created_by (text), expires_at (timestamptz),
+// used_at (timestamptz, nullable), created_at (timestamptz, default now()).
 async function initGuestInviteMode(token) {
   document.getElementById('auth-screen').style.display = 'none';
   const authPending = document.getElementById('auth-pending-screen');
   if (authPending) authPending.style.display = 'none';
   const titleEl = document.getElementById('invite-screen-title');
   const subEl   = document.getElementById('invite-screen-sub');
+  const btnEl   = document.getElementById('invite-screen-btn');
   const screen  = document.getElementById('invite-screen');
   try {
-    const { data, error } = await sb.from('referral_links').select('created_by, expires_at').eq('token', token).maybeSingle();
-    if (error || !data || (data.expires_at && new Date(data.expires_at).getTime() < Date.now())) {
-      titleEl.textContent = 'Link no disponible';
-      subEl.textContent = 'Este Link de referencia ya no es válido o ha expirado.';
-    } else {
-      titleEl.textContent = `'${data.created_by}' te ha invitado a FlemingApp`;
+    const nowIso = new Date().toISOString();
+    // Intento de reclamo: solo afecta la fila si sigue sin usarse Y sigue
+    // vigente. Si otra apertura (o esta misma recargada) ya la reclamó antes,
+    // esto no actualiza nada y "claimed" vuelve null.
+    const { data: claimed, error: claimErr } = await sb.from('referral_links')
+      .update({ used_at: nowIso })
+      .eq('token', token)
+      .is('used_at', null)
+      .gt('expires_at', nowIso)
+      .select('created_by')
+      .maybeSingle();
+    if (claimErr) throw claimErr;
+    if (claimed) {
+      titleEl.textContent = `'${claimed.created_by}' te ha invitado a FlemingApp`;
       subEl.textContent = 'Presiona Ingresar para continuar.';
+      btnEl.style.display = '';
+    } else {
+      // No se pudo reclamar: averigua la razón exacta para dar un mensaje
+      // más útil (ya usado, o simplemente no existe/expiró).
+      const { data: existing } = await sb.from('referral_links').select('used_at').eq('token', token).maybeSingle();
+      if (existing && existing.used_at) {
+        titleEl.textContent = 'Link ya utilizado';
+        subEl.textContent = 'Este Link de referencia ya fue abierto antes por alguien más. Pide uno nuevo a quien te invitó.';
+      } else {
+        titleEl.textContent = 'Link no disponible';
+        subEl.textContent = 'Este Link de referencia ya no es válido o ha expirado.';
+      }
+      btnEl.style.display = 'none';
     }
   } catch (e) {
     console.error('initGuestInviteMode:', e);
     titleEl.textContent = 'Link no disponible';
     subEl.textContent = 'Este Link de referencia ya no es válido o ha expirado.';
+    btnEl.style.display = 'none';
   }
   screen.style.display = 'flex';
 }
