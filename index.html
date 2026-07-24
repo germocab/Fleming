@@ -316,6 +316,13 @@
     display: flex; align-items: center; justify-content: center;
     min-height: 100vh; padding: 1rem; background: var(--bg);
   }
+  #invite-screen {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 1rem; background: var(--bg);
+  }
+  #invite-screen .auth-card { text-align: center; }
+  #invite-screen .auth-logo { justify-content: center; }
+  .invite-duration-opt { min-width: 84px; }
   .auth-card {
     background: var(--surface); border-radius: 20px;
     padding: 2rem; width: 100%; max-width: 380px;
@@ -6108,6 +6115,26 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
   </div>
 </div>
 
+<!-- ── Pantalla de Link de referencia (v1.35.5-beta) ────────────────────────
+     Se muestra cuando la URL trae ?ref=<token> y ese link sigue vigente. No
+     inicia sesión: solo da la bienvenida y dirige, con el botón "Ingresar",
+     a la pantalla normal de Inicio de Sesión (#auth-screen). ── -->
+<div id="invite-screen" style="display:none">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">
+        <img src="android-chrome-192x192.png" alt="Fleming" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">
+      </div>
+      <div>
+        <div class="auth-logo-name">Congr. Fleming</div>
+      </div>
+    </div>
+    <h2 class="auth-title" id="invite-screen-title">Te han invitado</h2>
+    <p class="auth-sub" id="invite-screen-sub">a FlemingApp</p>
+    <button class="btn-primary" onclick="acceptInviteAndGoToLogin()">Ingresar</button>
+  </div>
+</div>
+
 <div id="auth-pending-screen" style="display:none;align-items:center;justify-content:center;min-height:100vh;padding:1rem;background:var(--bg)">
   <div class="auth-card" style="text-align:center">
     <div style="width:64px;height:64px;border-radius:18px;background:var(--orange-light,rgba(255,149,0,0.12));color:var(--orange);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem">
@@ -6812,6 +6839,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
           <span style="flex:1;font-size:0.95rem;font-weight:700">Usuarios <span class="users-count-badge" id="users-count-badge">0</span></span>
           <button class="btn-secondary" id="open-new-user-btn" style="display:none;width:auto;padding:0.5rem 0.9rem;font-size:0.82rem" title="Agregar usuario" onclick="openNewUserModal()">+ Nuevo Usuario</button>
+          <button class="btn-secondary" id="open-invite-btn" style="display:none;width:auto;padding:0.5rem 0.9rem;font-size:0.82rem" title="Invitar por link de referencia" onclick="openInviteModal()">Invitar</button>
           <button class="admintags-icon-btn" id="open-admintags-btn" style="display:none" title="Gestionar AdminTags" onclick="openAdminTagsModal()">
             <svg viewBox="0 0 24 24"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
           </button>
@@ -7651,6 +7679,53 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="saveNewUser()" id="save-newuser-btn">Crear usuario</button>
       </div>
       <div class="auth-error" id="newuser-error"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Invitar / Link de referencia (v1.35.5-beta) ──────────────────────────
+     Disponible para DEV y Admin con el módulo "Compartir" activado, desde el
+     Panel de Administración → Usuarios. Genera un enlace con caducidad
+     (1h/2h/12h/24h) que, al abrirse, muestra una pantalla de bienvenida con
+     el nombre de quien invita y un botón "Ingresar" hacia el Inicio de
+     Sesión — no inicia sesión automáticamente. ── -->
+<div class="modal-overlay" id="invite-link-modal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <div class="modal-title">Invitar</div>
+      <button class="modal-close" onclick="closeInviteModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:0.78rem;color:var(--text3);margin-bottom:0.9rem;line-height:1.4">
+        Genera un Link de referencia para invitar a alguien a FlemingApp. Quien lo abra verá una pantalla de bienvenida con tu nombre y un botón para ir al Inicio de Sesión. El link deja de funcionar al vencer el tiempo que elijas.
+      </div>
+      <div id="invite-step-choose">
+        <div class="form-group2">
+          <label class="form-label2">Duración del link</label>
+          <div class="pref-theme-row" id="invite-duration-row" style="flex-wrap:wrap">
+            <button type="button" class="pref-theme-opt invite-duration-opt active" data-hours="1" onclick="setInviteDuration(1)">1 Hora</button>
+            <button type="button" class="pref-theme-opt invite-duration-opt" data-hours="2" onclick="setInviteDuration(2)">2 Horas</button>
+            <button type="button" class="pref-theme-opt invite-duration-opt" data-hours="12" onclick="setInviteDuration(12)">12 Horas</button>
+            <button type="button" class="pref-theme-opt invite-duration-opt" data-hours="24" onclick="setInviteDuration(24)">24 Horas</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:1.25rem;justify-content:flex-end">
+          <button class="btn-secondary" onclick="closeInviteModal()">Cancelar</button>
+          <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="generateInviteLink()" id="generate-invite-btn">Generar link</button>
+        </div>
+      </div>
+      <div id="invite-step-result" style="display:none">
+        <div class="form-group2">
+          <label class="form-label2">Tu Link de referencia</label>
+          <input type="text" class="form-input" id="invite-link-output" readonly onclick="this.select()">
+        </div>
+        <div style="font-size:0.75rem;color:var(--text3);margin-top:0.4rem" id="invite-link-expiry"></div>
+        <div style="display:flex;gap:10px;margin-top:1.25rem;justify-content:flex-end">
+          <button class="btn-secondary" onclick="closeInviteModal()">Cerrar</button>
+          <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="shareInviteLink()">Compartir</button>
+        </div>
+      </div>
+      <div class="auth-error" id="invite-error"></div>
     </div>
   </div>
 </div>
@@ -8835,7 +8910,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.35.4-beta';
+const APP_VERSION = '1.35.5-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -9858,6 +9933,11 @@ function getIdentityName() {
 
 async function init() {
   initTheme();
+  // ── Link de referencia (?ref=<token>) ───────────────────────────────────
+  // No requiere sesión: muestra una pantalla de bienvenida con el nombre de
+  // quien invitó; el botón "Ingresar" lleva al Inicio de Sesión normal.
+  const _refToken = new URLSearchParams(location.search).get('ref');
+  if (_refToken) { await initGuestInviteMode(_refToken); return; }
   // ── Enlace compartido de una asignación de Casa en casa (?share=<id>) ──────
   // No requiere sesión: se salta por completo la pantalla de acceso y muestra
   // únicamente el detalle de esa asignación, en modo solo-lectura.
@@ -11608,6 +11688,43 @@ function showGuestShareError() {
   </div></div>`;
 }
 
+// ── Link de referencia: pantalla de bienvenida para ?ref=<token> ───────────
+// No inicia sesión ni carga datos de la plataforma: solo consulta el token
+// en Supabase (tabla referral_links) para mostrar quién invitó, y ofrece el
+// botón "Ingresar" que lleva al Inicio de Sesión normal (#auth-screen).
+// Requiere una tabla `referral_links` en Supabase con columnas:
+// token (text, PK), created_by (text), expires_at (timestamptz), created_at.
+async function initGuestInviteMode(token) {
+  document.getElementById('auth-screen').style.display = 'none';
+  const authPending = document.getElementById('auth-pending-screen');
+  if (authPending) authPending.style.display = 'none';
+  const titleEl = document.getElementById('invite-screen-title');
+  const subEl   = document.getElementById('invite-screen-sub');
+  const screen  = document.getElementById('invite-screen');
+  try {
+    const { data, error } = await sb.from('referral_links').select('created_by, expires_at').eq('token', token).maybeSingle();
+    if (error || !data || (data.expires_at && new Date(data.expires_at).getTime() < Date.now())) {
+      titleEl.textContent = 'Link no disponible';
+      subEl.textContent = 'Este Link de referencia ya no es válido o ha expirado.';
+    } else {
+      titleEl.textContent = `'${data.created_by}' te ha invitado a FlemingApp`;
+      subEl.textContent = 'Presiona Ingresar para continuar.';
+    }
+  } catch (e) {
+    console.error('initGuestInviteMode:', e);
+    titleEl.textContent = 'Link no disponible';
+    subEl.textContent = 'Este Link de referencia ya no es válido o ha expirado.';
+  }
+  screen.style.display = 'flex';
+}
+// Botón "Ingresar" de la pantalla de invitación: no autentica, solo lleva
+// al Inicio de Sesión normal (el usuario invitado igual debe crear/usar sus
+// propias credenciales).
+function acceptInviteAndGoToLogin() {
+  document.getElementById('invite-screen').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+}
+
 // ── Foto de perfil en el Menú Opciones: se carga desde el arranque, sin
 // esperar a que el usuario entre a "Mi Perfil" (v1.22.11-beta) ──────────────
 let _ownAvatarUrl; // undefined = aún no consultado, null = sin foto, string = URL/base64
@@ -12653,6 +12770,10 @@ async function switchAdminTab(tab) {
       // módulo "Usuarios" encendido).
       const newUserBtn = document.getElementById('open-new-user-btn');
       if (newUserBtn) newUserBtn.style.display = '';
+      // El botón "Invitar" (Links de referencia) solo aparece para DEV, o
+      // para un Admin con el módulo "Compartir" activado por el DEV.
+      const inviteBtn = document.getElementById('open-invite-btn');
+      if (inviteBtn) inviteBtn.style.display = (currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, 'compartir'))) ? '' : 'none';
       renderUsersPanel();
     });
   }
@@ -17108,6 +17229,9 @@ const PERM_MODULES = [
   { key: 'usuarios',          label: 'Usuarios',            group: 'sistema',   icon: '<svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg>' },
   { key: 'admin_tags',        label: 'AdminTags',           group: 'sistema',   icon: '<svg viewBox="0 0 24 24"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>' },
   { key: 'notificaciones',    label: 'Notificaciones',      group: 'sistema',   icon: '<svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>' },
+  // v1.35.5-beta: módulo "Compartir" — habilita el botón "Invitar" en el
+  // Panel de Usuarios para generar Links de referencia con caducidad.
+  { key: 'compartir',         label: 'Compartir',           group: 'sistema',   icon: '<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>' },
 ];
 
 // v1.31.5-beta: el módulo "Responsabilidades" del Panel de Administración se
@@ -17199,6 +17323,78 @@ async function openNewUserModal() {
 function closeNewUserModal() {
   document.getElementById('new-user-modal').classList.remove('open');
 }
+
+// ── Invitar / Link de referencia (v1.35.5-beta) ─────────────────────────────
+// Disponible para DEV y Admin con el módulo "Compartir" activado. Genera un
+// token aleatorio, lo guarda en Supabase (tabla referral_links) junto con la
+// fecha de caducidad elegida (1h/2h/12h/24h) y arma un link con ?ref=<token>
+// para compartir. Requiere una tabla `referral_links` en Supabase con
+// columnas: token (text, PK), created_by (text), expires_at (timestamptz),
+// created_at (timestamptz, default now()).
+let _inviteDurationHours = 1;
+let _lastInviteUrl = '';
+function setInviteDuration(hours) {
+  _inviteDurationHours = hours;
+  document.querySelectorAll('.invite-duration-opt').forEach(b => b.classList.toggle('active', Number(b.dataset.hours) === hours));
+}
+function openInviteModal() {
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  document.getElementById('invite-step-choose').style.display = '';
+  document.getElementById('invite-step-result').style.display = 'none';
+  const errEl = document.getElementById('invite-error');
+  errEl.style.display = 'none';
+  setInviteDuration(1);
+  document.getElementById('invite-link-modal').classList.add('open');
+}
+function closeInviteModal() {
+  document.getElementById('invite-link-modal').classList.remove('open');
+}
+function _genInviteToken() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID().replace(/-/g, '');
+  return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+}
+async function generateInviteLink() {
+  const btn = document.getElementById('generate-invite-btn');
+  const errEl = document.getElementById('invite-error');
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  try {
+    const token = _genInviteToken();
+    const expiresAt = new Date(Date.now() + _inviteDurationHours * 3600 * 1000).toISOString();
+    const { error } = await sb.from('referral_links').insert({ token, created_by: currentUser.name, expires_at: expiresAt });
+    if (error) throw error;
+    const url = new URL(location.href);
+    url.search = ''; url.hash = '';
+    url.searchParams.set('ref', token);
+    _lastInviteUrl = url.toString();
+    document.getElementById('invite-link-output').value = _lastInviteUrl;
+    const horasLabel = _inviteDurationHours === 1 ? '1 hora' : `${_inviteDurationHours} horas`;
+    document.getElementById('invite-link-expiry').textContent = `Válido por ${horasLabel}, hasta ${new Date(expiresAt).toLocaleString()}.`;
+    document.getElementById('invite-step-choose').style.display = 'none';
+    document.getElementById('invite-step-result').style.display = '';
+  } catch (e) {
+    console.error('generateInviteLink:', e);
+    errEl.textContent = 'No se pudo generar el link. Intenta de nuevo.';
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+  }
+}
+function shareInviteLink() {
+  if (!_lastInviteUrl) return;
+  if (navigator.share) {
+    navigator.share({ title: 'Invitación a FlemingApp', text: 'Te han invitado a usar FlemingApp', url: _lastInviteUrl }).catch(() => {});
+    return;
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(_lastInviteUrl)
+      .then(() => showToast('Enlace copiado al portapapeles', 'success'))
+      .catch(() => window.prompt('Copia este enlace para compartir:', _lastInviteUrl));
+    return;
+  }
+  window.prompt('Copia este enlace para compartir:', _lastInviteUrl);
+}
+
 function onNewUserRoleChange() {
   const isAdmin = document.getElementById('newuser-role-sel').value === 'admin';
   document.getElementById('newuser-admin-extra').style.display = (isAdmin && currentRole === 'dev') ? '' : 'none';
