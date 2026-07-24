@@ -4528,6 +4528,9 @@
   /* ── Botón "Compartir" — al final del panel de detalle, respeta los mismos
      márgenes horizontales que el resto de las secciones del panel ── */
   .detail-share-wrap { padding: 0.4rem 1.25rem 1.5rem; }
+  /* v1.35.7-beta: solo se pueden compartir asignaciones de Casa en casa —
+     el panel de detalle de un Territorio individual usa .territory-mode. */
+  .detail-panel.territory-mode .detail-share-wrap { display: none !important; }
   .detail-share-btn {
     display: flex; align-items: center; justify-content: center; gap: 7px;
     width: 100%; border-radius: 20px; padding: 0.65rem;
@@ -8197,8 +8200,10 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
     <span class="pill-header-title" data-i18n="settings.funciones">Funciones especiales</span>
   </nav>
   <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 0 2.5rem">
-    <!-- Función Live -->
+    <!-- Live + Live Siempre Activo: unidas en una sola sección "Live"
+         (v1.35.7-beta). Antes eran dos tarjetas separadas. -->
     <div class="profile-section">
+      <div class="profile-section-title" data-i18n="exp.liveaa.section">Live</div>
       <!-- Toggle: función Live -->
       <div class="profile-row" style="cursor:pointer" onclick="toggleLiveFeaturePref()">
         <div class="profile-row-icon" style="background:var(--ter-1-bg);color:var(--ter-1)">
@@ -8206,16 +8211,12 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         </div>
         <div class="profile-row-content">
           <div class="profile-row-label" data-i18n="func.live">Función Live</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="func.live.desc">Activo automáticamente. Detección de calles y avisos de No Pasar en tiempo real</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="func.live.desc">Detección de calles y avisos de No Pasar en tiempo real</div>
         </div>
         <div id="pref-live-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
           <div id="pref-live-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
-    </div>
-    <!-- Live Siempre Activo: función oficial (antes en Experimentos), v1.30.0-beta -->
-    <div class="profile-section">
-      <div class="profile-section-title" data-i18n="exp.liveaa.section">Live</div>
       <div class="profile-row" style="cursor:pointer" onclick="toggleLiveAlwaysOnPref()">
         <div class="profile-row-icon" style="background:var(--ter-8-bg,rgba(52,199,89,0.12));color:var(--green)">
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
@@ -8912,7 +8913,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.35.5.4-beta';
+const APP_VERSION = '1.35.7-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -9440,7 +9441,7 @@ const I18N = {
   'func.escritorio':       { es: 'Escritorio',              en: 'Desktop',  nl: 'Desktop' },
   'func.auto.help':        { es: 'En "Automático" (por defecto), la barra se encoge apenas haces scroll y solo recupera su tamaño al volver hasta arriba del todo.', en: 'In "Automatic" (default), the bar shrinks as soon as you scroll and only returns to full size when you reach the very top.', nl: 'Bij "Automatisch" (standaard) krimpt de balk zodra je scrolt en herstelt deze pas als je helemaal naar boven gaat.' },
   'func.live':             { es: 'Función Live',            en: 'Live Feature', nl: 'Live-functie' },
-  'func.live.desc':        { es: 'Activo automáticamente. Detección de calles y avisos de No Pasar en tiempo real', en: 'Active automatically. Real-time street detection and Do-Not-Pass alerts', nl: 'Wordt automatisch geactiveerd. Realtime straatdetectie en Niet-Bezoeken-meldingen' },
+  'func.live.desc':        { es: 'Detección de calles y avisos de No Pasar en tiempo real', en: 'Real-time street detection and Do-Not-Pass alerts', nl: 'Realtime straatdetectie en Niet-Bezoeken-meldingen' },
   // ── Experimentos ──
   'exp.restricted.title':  { es: 'Blur, color de acento y animaciones', en: 'Blur, accent color and animations', nl: 'Blur, accentkleur en animaties' },
   'exp.restricted.desc':   { es: 'No están disponibles mientras la Versión Simplificada está activa', en: 'Not available while Simplified Mode is active', nl: 'Niet beschikbaar terwijl de Vereenvoudigde Versie actief is' },
@@ -17891,6 +17892,17 @@ async function openUserProfilePage(uid) {
       </div>
     </div>` : '';
 
+  // ── Invitar / Link de referencia (v1.35.7-beta) ──────────────────────────
+  // Al entrar al Perfil de OTRO usuario (no el propio), muestra abajo del
+  // todo el mismo botón "Invitar" del Panel de Usuarios, con el formato del
+  // botón "Buscar actualizaciones" de Versión de la plataforma. Visible para
+  // DEV o Admin con el módulo "Compartir" activado.
+  const canInvite = currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, 'compartir'));
+  const inviteSection = (!isCurrentUser && canInvite) ? `
+    <div style="padding:0 0 0.25rem">
+      <button class="btn-primary" style="width:100%;padding:0.85rem;border-radius:12px;font-weight:700" onclick="openInviteModal()">Invitar</button>
+    </div>` : '';
+
   document.getElementById('uprofile-body').innerHTML = `
     <div class="uprofile-section">
       <div class="uprofile-section-title">Información</div>
@@ -17904,6 +17916,7 @@ async function openUserProfilePage(uid) {
     ${(labelChipsFull || adminTagChipHTML) ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.1rem">${labelChipsFull}${adminTagChipHTML}</div>` : ''}
     ${editSection}
     ${dangerSection}
+    ${inviteSection}
   `;
 
   document.getElementById('page-user-profile').classList.add('open');
