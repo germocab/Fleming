@@ -6462,7 +6462,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
           </div>
           <div class="ter-map-banner-body">
             <div class="ter-map-banner-label" data-i18n="territorios.mapabanner">Mapa de la congregación</div>
-            <div style="font-size:0.72rem;color:var(--text3);margin-top:2px" id="ter-map-banner-sub">PDF · Toca para descargar</div>
+            <div style="font-size:0.72rem;color:var(--text3);margin-top:2px" id="ter-map-banner-sub">PDF · Toca para ver</div>
           </div>
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-right:1rem"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
@@ -7869,7 +7869,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         </div>
         <div class="profile-row-content">
           <div class="profile-row-label" data-i18n="settings.preferencias">Preferencias</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.preferencias.desc">Idioma, tema, tamaño, animaciones y almacenamiento</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.preferencias.desc">Idioma, tema, mapas, transparencia, NavBar y almacenamiento</div>
         </div>
         <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
@@ -8064,8 +8064,8 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label">Otros grupos de servicio</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Las asignaciones de otros Grupos ahora aparecen en la pantalla principal./div>
+          <div class="profile-row-label">Mostrar Grupos ajenos como Mini Cards</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Muestra las asignaciones de otros Grupos de Servicio directamente en la pantalla principal, en vez del botón "Otros Grupos"</div>
         </div>
         <div id="pref-group-screen-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
           <div id="pref-group-screen-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
@@ -8080,8 +8080,8 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="pref.navbaricon.title">Botón "Más Opciones"</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="pref.navbaricon.desc">Quita tu foto de perfil de la NavBar</div>
+          <div class="profile-row-label" data-i18n="pref.navbaricon.title">Mostrar ícono en vez de tu foto de perfil</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="pref.navbaricon.desc">El botón "Más opciones" de la NavBar usa tu foto de perfil por defecto. Actívalo para volver a ver el botón con el ícono de siempre.</div>
         </div>
         <div id="navbar-icon-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
           <div id="navbar-icon-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
@@ -8116,20 +8116,20 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
     <div class="profile-section">
       <div class="profile-section-title" data-i18n="pref.animaciones">Animaciones</div>
       <div class="pref-theme-row" id="pref-animations-row">
+        <button class="pref-theme-opt" id="pref-animations-fluid" onclick="setAnimationsMode('fluid')">
+          <svg viewBox="0 0 24 24" style="width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+          <span data-i18n="pref.animaciones.fluidas">Fluidas</span>
+        </button>
         <button class="pref-theme-opt" id="pref-animations-ultra" onclick="setAnimationsMode('ultra')">
           <svg viewBox="0 0 24 24" style="width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/><path d="M20 3v4"/><path d="M22 5h-4"/></svg>
-          <span data-i18n="pref.animaciones.ultra">Fluídas</span>
-        </button>
-           <button class="pref-theme-opt" id="pref-animations-fluid" onclick="setAnimationsMode('fluid')">
-          <svg viewBox="0 0 24 24" style="width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>
-          <span data-i18n="pref.animaciones.fluidas">Normal</span>
+          <span data-i18n="pref.animaciones.ultra">Ultra Fluida</span>
         </button>
         <button class="pref-theme-opt" id="pref-animations-reduced" onclick="setAnimationsMode('reduced')">
           <svg viewBox="0 0 24 24" style="width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
           <span data-i18n="pref.animaciones.reducidas">Reducidas</span>
         </button>
       </div>
-      <div style="padding:0.55rem 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="pref.animaciones.desc">La plataforma usa animaciones. Prueba animaciones "Fluídas" para animaciones aún más vivas y notorias, o elige "Reducidas" si eres sensible al movimiento.</div>
+      <div style="padding:0.55rem 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="pref.animaciones.desc">Usa transiciones fluidas en toda la plataforma. Prueba "Ultra Fluida" para animaciones aún más vivas y notorias, o elige "Reducidas" si eres sensible al movimiento.</div>
     </div>
 
     <!-- Vista de Contenido + NavBar Grow&Shrink: comparten zona (ambos son
@@ -8142,7 +8142,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
       <div class="pref-theme-row pref-desktop-only-row" id="pref-h2h-view-row" style="margin:0 1rem 0.4rem">
         <button class="pref-theme-opt" id="pref-h2h-popup" onclick="setHouseToHouseViewMode('popup')">
           <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 12h8"/></svg>
-          Pop Up
+          PopUp
         </button>
         <button class="pref-theme-opt" id="pref-h2h-sidebar" onclick="setHouseToHouseViewMode('sidebar')">
           <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="10" y1="4" x2="10" y2="20"/></svg>
@@ -8159,11 +8159,11 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
       <div class="pref-theme-row pref-desktop-only-row" id="pref-navbar-mode-row" style="margin:0 1rem 0.4rem">
         <button class="pref-theme-opt" id="pref-navbar-mode-grow" onclick="setNavbarGrowMode('grow')">
           <svg viewBox="0 0 24 24"><polyline points="7 8 12 3 17 8"/><polyline points="7 16 12 21 17 16"/></svg>
-          Ampliado
+          Grow
         </button>
         <button class="pref-theme-opt" id="pref-navbar-mode-shrink" onclick="setNavbarGrowMode('shrink')">
           <svg viewBox="0 0 24 24"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
-          Pequeño
+          Shrink
         </button>
         <button class="pref-theme-opt" id="pref-navbar-mode-auto" onclick="setNavbarGrowMode('auto')">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/><path d="M21 12.79A9 9 0 1 1 11.21 3" opacity="0.35"/></svg>
@@ -8198,21 +8198,23 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
   </nav>
   <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 0 2.5rem">
     <!-- Función Live -->
-    
-    <!-- Live Siempre Activo: función oficial (antes en Experimentos), v1.30.0-beta -->
     <div class="profile-section">
-         <div class="profile-row" style="cursor:pointer" onclick="toggleLiveFeaturePref()">
+      <!-- Toggle: función Live -->
+      <div class="profile-row" style="cursor:pointer" onclick="toggleLiveFeaturePref()">
         <div class="profile-row-icon" style="background:var(--ter-1-bg);color:var(--ter-1)">
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
         </div>
         <div class="profile-row-content">
           <div class="profile-row-label" data-i18n="func.live">Función Live</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="func.live.desc">Detección de calles y avisos de No Pasar en tiempo real</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="func.live.desc">Activo automáticamente. Detección de calles y avisos de No Pasar en tiempo real</div>
         </div>
         <div id="pref-live-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
           <div id="pref-live-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
+    </div>
+    <!-- Live Siempre Activo: función oficial (antes en Experimentos), v1.30.0-beta -->
+    <div class="profile-section">
       <div class="profile-section-title" data-i18n="exp.liveaa.section">Live</div>
       <div class="profile-row" style="cursor:pointer" onclick="toggleLiveAlwaysOnPref()">
         <div class="profile-row-icon" style="background:var(--ter-8-bg,rgba(52,199,89,0.12));color:var(--green)">
@@ -8220,7 +8222,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         </div>
         <div class="profile-row-content">
           <div class="profile-row-label" data-i18n="exp.liveaa.title">Live Siempre Activo</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.liveaa.desc">Live sigue activo en segundo plano y notifica al salir de una asignación o la plataforma</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.liveaa.desc">Live sigue activo en segundo plano al salir de una asignación.</div>
         </div>
         <div id="live-always-on-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
           <div id="live-always-on-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
@@ -8512,7 +8514,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="settings.tutorial">Ver tutorial general</div>
+          <div class="profile-row-label" data-i18n="settings.tutorial">Ver tutorial</div>
           <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.tutorial.desc">Repasa cómo funcionan las secciones y funciones principales</div>
         </div>
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
@@ -8910,7 +8912,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.35.6.1-beta';
+const APP_VERSION = '1.35.5.4-beta';
 // Versión "mayor" (ej. "1.15" a partir de "1.15.8-beta"), usada en el botón
 // de Configuración; la versión completa (con parche y sufijo) solo se
 // muestra en el detalle de la pantalla "Versión".
@@ -9519,7 +9521,7 @@ const I18N = {
   'notif.vacio.recientes':  { es: 'Sin notificaciones recientes', en: 'No recent notifications', nl: 'Geen recente meldingen' },
   'notif.group.grupos':     { es: 'Grupos de Servicio',      en: 'Service Groups',    nl: 'Dienstgroepen' },
   'notif.group.sistema':    { es: 'Sistema',                 en: 'System',            nl: 'Systeem' },
-  'notif.mandatory':        { es: 'No se puede desactivar', en: 'Cannot be turned off', nl: 'Kan niet worden uitgeschakeld' },
+  'notif.mandatory':        { es: 'Obligatoria, no se puede desactivar', en: 'Mandatory, cannot be turned off', nl: 'Verplicht, kan niet worden uitgeschakeld' },
   'notifcat.casa':              { es: 'Predicación de Casa en Casa', en: 'House-to-House Preaching', nl: 'Huis-aan-huisprediking' },
   'notifcat.grupo':              { es: 'Grupo de Servicio',           en: 'Service Group',            nl: 'Dienstgroep' },
   'notifcat.live':                { es: 'Notificaciones Live',          en: 'Live Notifications',       nl: 'Live-meldingen' },
@@ -9533,7 +9535,7 @@ const I18N = {
   'notifcat.sistema':           { es: 'Avisos de la Plataforma',     en: 'Platform Alerts',           nl: 'Platformmeldingen' },
   'notifcat.solicitud-cuenta':  { es: 'Solicitudes de cuenta',        en: 'Account Requests',          nl: 'Accountverzoeken' },
   'notifcat.reporte-territorio': { es: 'Reportes de Territorio',      en: 'Territory Reports',         nl: 'Gebiedsrapporten' },
-  'notifcat.tips':               { es: 'Tips',                 en: 'Tips',                  nl: 'Tips' },
+  'notifcat.tips':               { es: 'Nuevos Tips',                 en: 'New Tips',                  nl: 'Nieuwe Tips' },
   'notif.group.tips':            { es: 'Tips',                        en: 'Tips',                       nl: 'Tips' },
   // ── Barras de búsqueda (Grupos, Carritos, Territorios, Vida y Ministerio) ──
   'search.buscar-nombre':      { es: 'Buscar por nombre…',   en: 'Search by name…',   nl: 'Zoeken op naam…' },
