@@ -6862,6 +6862,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
           <button class="sub-tab" id="notif-admin-tab-plantillas" onclick="switchNotifAdminTab('plantillas')">Plantillas</button>
           <button class="sub-tab" id="notif-admin-tab-niveles" onclick="switchNotifAdminTab('niveles')">Niveles</button>
           <button class="sub-tab" id="notif-admin-tab-live" onclick="switchNotifAdminTab('live')">Live</button>
+          <button class="sub-tab" id="notif-admin-tab-recordatorios" onclick="switchNotifAdminTab('recordatorios')">Recordatorios</button>
         </div>
 
         <!-- Anuncios -->
@@ -6946,6 +6947,24 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
           </div>
           <div style="font-size:0.8rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;margin:0 0 0.6rem">Historial de alertas Live</div>
           <div id="live-admin-history"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Historial de Live</div></div></div>
+        </div>
+
+        <!-- Recordatorios (v1.36.0-beta) -->
+        <div id="notif-admin-recordatorios" style="display:none">
+          <div class="notif-gestor-card">
+            <div style="font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:0.4rem">Reporte de Territorio</div>
+            <div style="font-size:0.8rem;color:var(--text3);margin-bottom:0.9rem;line-height:1.4">
+              Si el Encargado de una asignación de Casa en casa aún no envía el Reporte de Territorio pasado este tiempo desde el inicio de su asignación, recibirá un recordatorio push. Por ejemplo, si la asignación comenzó a las 09:45hrs y el recordatorio está en 2 horas, llegará a las 11:45hrs.
+            </div>
+            <div class="form-group2">
+              <label class="form-label2">Recordatorio después de</label>
+              <div class="pref-theme-row" id="reminder-hours-row" style="flex-wrap:wrap">
+                <button type="button" class="pref-theme-opt reminder-hours-opt" data-hours="1" onclick="setReminderHoursUI(1)">1 Hora</button>
+                <button type="button" class="pref-theme-opt reminder-hours-opt active" data-hours="2" onclick="setReminderHoursUI(2)">2 Horas</button>
+              </div>
+            </div>
+            <button class="btn-primary" style="width:auto;padding:0.6rem 1.3rem" onclick="saveReminderHoursSetting()" id="save-reminder-hours-btn">Guardar</button>
+          </div>
         </div>
 
         <!-- Plantillas -->
@@ -7701,11 +7720,24 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
       <button class="modal-close" onclick="closeInviteModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="modal-body">
-      <div style="font-size:0.78rem;color:var(--text3);margin-bottom:0.9rem;line-height:1.4">
-        Genera un Link de referencia para invitar a alguien a FlemingApp. Quien lo abra verá una pantalla de bienvenida con tu nombre y un botón para ir al Inicio de Sesión. El link deja de funcionar al vencer el tiempo que elijas.
+      <div style="font-size:0.78rem;color:var(--text3);margin-bottom:0.9rem;line-height:1.4" id="invite-intro-text">
+        Genera un Link de referencia para invitar a alguien a FlemingApp. Quien lo abra verá una pantalla de bienvenida con tu nombre y un botón para ir al Inicio de Sesión.
       </div>
       <div id="invite-step-choose">
+        <!-- v1.36.0-beta: Tipo de link — Único uso (sin caducidad, se desactiva
+             tras el primer uso) o Con límite de tiempo (reutilizable hasta que
+             vence, o hasta que un Admin/DEV lo termine manualmente). -->
         <div class="form-group2">
+          <label class="form-label2">Tipo de link</label>
+          <div class="pref-theme-row" id="invite-type-row" style="flex-wrap:wrap">
+            <button type="button" class="pref-theme-opt invite-type-opt active" data-type="single_use" onclick="setInviteLinkType('single_use')">Único uso</button>
+            <button type="button" class="pref-theme-opt invite-type-opt" data-type="limited" onclick="setInviteLinkType('limited')">Con límite de tiempo</button>
+          </div>
+          <div style="font-size:0.72rem;color:var(--text3);margin-top:0.5rem;line-height:1.4" id="invite-type-hint">
+            Se desactiva automáticamente en cuanto alguien lo usa una vez. No tiene límite de tiempo.
+          </div>
+        </div>
+        <div class="form-group2" id="invite-duration-group">
           <label class="form-label2">Duración del link</label>
           <div class="pref-theme-row" id="invite-duration-row" style="flex-wrap:wrap">
             <button type="button" class="pref-theme-opt invite-duration-opt active" data-hours="1" onclick="setInviteDuration(1)">1 Hora</button>
@@ -7714,9 +7746,12 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
             <button type="button" class="pref-theme-opt invite-duration-opt" data-hours="24" onclick="setInviteDuration(24)">24 Horas</button>
           </div>
         </div>
-        <div style="display:flex;gap:10px;margin-top:1.25rem;justify-content:flex-end">
-          <button class="btn-secondary" onclick="closeInviteModal()">Cancelar</button>
-          <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="generateInviteLink()" id="generate-invite-btn">Generar link</button>
+        <div style="display:flex;gap:10px;margin-top:1.25rem;justify-content:space-between;align-items:center">
+          <button type="button" class="btn-secondary" style="width:auto;padding:0.55rem 0.9rem;font-size:0.78rem" onclick="openActiveLinksManager()">Links activos</button>
+          <div style="display:flex;gap:10px">
+            <button class="btn-secondary" onclick="closeInviteModal()">Cancelar</button>
+            <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="generateInviteLink()" id="generate-invite-btn">Generar link</button>
+          </div>
         </div>
       </div>
       <div id="invite-step-result" style="display:none">
@@ -7731,6 +7766,26 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         </div>
       </div>
       <div class="auth-error" id="invite-error"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── v1.36.0-beta: Links activos (gestión de Links "Con límite de tiempo") ──
+     Permite a DEV / Admin con el módulo "Compartir" ver los links de tipo
+     "limited" aún vigentes y terminarlos antes de que venza su tiempo. Los
+     links de "Único uso" no aparecen aquí porque ya se desactivan solos tras
+     el primer uso. ── -->
+<div class="modal-overlay" id="active-links-modal">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header">
+      <div class="modal-title">Links activos</div>
+      <button class="modal-close" onclick="closeActiveLinksManager()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:0.78rem;color:var(--text3);margin-bottom:0.9rem;line-height:1.4">
+        Links "Con límite de tiempo" que aún están vigentes. Puedes terminarlos antes de que venza su tiempo.
+      </div>
+      <div id="active-links-list"><div class="loader-wrap"><div class="loader"></div></div></div>
     </div>
   </div>
 </div>
@@ -8913,7 +8968,13 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.35.7.5-beta';
+const APP_VERSION = '1.36.0-beta';
+// v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
+// (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
+// tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
+// manualmente). (2) Recordatorio push a los Encargados de una asignación de
+// Casa en casa para que llenen el Reporte de Territorio, configurable desde
+// Panel de Administración → Notificaciones → Recordatorios.
 // v1.35.7.5-beta: el botón de "Acerca de" en Configuración ahora muestra la
 // versión COMPLETA (ej. "1.35.8"), no solo major.minor como antes — se le
 // quita únicamente el sufijo de canal ("-beta") para que quede limpia.
@@ -9310,7 +9371,9 @@ function _checkDownloadedTerritoriesForUpdates() {
 document.addEventListener('DOMContentLoaded', updateOnlineStatusUI);
 // Recordatorios de reporte de territorio en el Perfil (Inicio): desactivados
 // momentáneamente. La función de Reportes sigue intacta; solo se oculta el aviso.
-const RECORDATORIOS_TERRITORIO_ENABLED = false;
+// v1.36.0-beta: recordatorios de Reporte de Territorio reactivados — ahora se
+// complementan con un push automático (ver checkTerritoryReportReminders).
+const RECORDATORIOS_TERRITORIO_ENABLED = true;
 
 // ── i18n ── Español / Inglés. El contenido (nombres, direcciones, textos
 // cargados por el usuario) NUNCA se traduce — solo la interfaz (chrome).
@@ -11300,7 +11363,7 @@ async function renderInicio() {
             label: `Reportar territorio${ter ? ' N.º ' + ter.number : ''}`,
             sub: `Predicaste el ${fmtInicioDate(a.date)}`,
             badge: 'Pendiente',
-            onClick: () => inicioGoTo('predicacion', 'casa'),
+            onClick: () => reportarTerritorioDesdeAsignacion(a.id),
           };
         }),
       });
@@ -11701,6 +11764,7 @@ function showGuestShareError() {
 // token (text, PK), created_by (text), expires_at (timestamptz),
 // used_at (timestamptz, nullable), created_at (timestamptz, default now()).
 let _pendingInviteToken = null;
+let _pendingInviteIsSingleUse = true;
 async function initGuestInviteMode(token) {
   document.getElementById('auth-screen').style.display = 'none';
   const authPending = document.getElementById('auth-pending-screen');
@@ -11710,12 +11774,18 @@ async function initGuestInviteMode(token) {
   const btnEl   = document.getElementById('invite-screen-btn');
   const screen  = document.getElementById('invite-screen');
   try {
-    const { data, error } = await sb.from('referral_links').select('created_by, expires_at, used_at').eq('token', token).maybeSingle();
+    const { data, error } = await sb.from('referral_links').select('created_by, expires_at, used_at, link_type, revoked_at').eq('token', token).maybeSingle();
     if (error) throw error;
+    const isSingleUse = !data || data.link_type !== 'limited'; // por defecto (dato legado) se trata como único uso
     const expired = data && data.expires_at && new Date(data.expires_at).getTime() < Date.now();
-    if (data && data.used_at) {
+    const revoked = data && !!data.revoked_at;
+    if (data && isSingleUse && data.used_at) {
       titleEl.textContent = 'Link ya utilizado';
       subEl.textContent = 'Este Link de referencia ya fue usado antes por alguien más. Pide uno nuevo a quien te invitó.';
+      btnEl.style.display = 'none';
+    } else if (data && !isSingleUse && revoked) {
+      titleEl.textContent = 'Link no disponible';
+      subEl.textContent = 'Quien te invitó ya desactivó este Link de referencia. Pide uno nuevo.';
       btnEl.style.display = 'none';
     } else if (!data || expired) {
       titleEl.textContent = 'Link no disponible';
@@ -11726,6 +11796,7 @@ async function initGuestInviteMode(token) {
       subEl.textContent = 'Presiona Ingresar para continuar.';
       btnEl.style.display = '';
       _pendingInviteToken = token;
+      _pendingInviteIsSingleUse = isSingleUse;
     }
   } catch (e) {
     console.error('initGuestInviteMode:', e);
@@ -11754,20 +11825,39 @@ async function acceptInviteAndGoToLogin() {
   if (btnEl) { btnEl.disabled = true; btnEl.textContent = 'Ingresando…'; }
   try {
     const nowIso = new Date().toISOString();
-    const { data: claimed, error: claimErr } = await sb.from('referral_links')
-      .update({ used_at: nowIso })
-      .eq('token', token)
-      .is('used_at', null)
-      .gt('expires_at', nowIso)
-      .select('created_by')
-      .maybeSingle();
-    if (claimErr) throw claimErr;
-    if (!claimed) {
-      // Alguien más lo reclamó primero (o venció) justo antes de este click.
-      titleEl.textContent = 'Link ya utilizado';
-      subEl.textContent = 'Este Link de referencia ya fue usado antes por alguien más. Pide uno nuevo a quien te invitó.';
-      btnEl.style.display = 'none';
-      return;
+    if (_pendingInviteIsSingleUse) {
+      // Único uso: reclamo ATÓMICO (UPDATE ... WHERE used_at IS NULL) — solo
+      // la primera persona que presiona "Ingresar" logra marcarlo como usado.
+      // No tiene expires_at que revisar.
+      const { data: claimed, error: claimErr } = await sb.from('referral_links')
+        .update({ used_at: nowIso })
+        .eq('token', token)
+        .is('used_at', null)
+        .select('created_by')
+        .maybeSingle();
+      if (claimErr) throw claimErr;
+      if (!claimed) {
+        // Alguien más lo reclamó primero justo antes de este click.
+        titleEl.textContent = 'Link ya utilizado';
+        subEl.textContent = 'Este Link de referencia ya fue usado antes por alguien más. Pide uno nuevo a quien te invitó.';
+        btnEl.style.display = 'none';
+        return;
+      }
+    } else {
+      // Con límite de tiempo: NO se marca used_at (es reutilizable por varias
+      // personas). Solo se re-valida que siga vigente y no haya sido
+      // terminado por el Admin justo antes de este click.
+      const { data: linkRow, error: checkErr } = await sb.from('referral_links')
+        .select('created_by, expires_at, revoked_at')
+        .eq('token', token).maybeSingle();
+      if (checkErr) throw checkErr;
+      const stillValid = linkRow && !linkRow.revoked_at && linkRow.expires_at && new Date(linkRow.expires_at).getTime() > Date.now();
+      if (!stillValid) {
+        titleEl.textContent = 'Link no disponible';
+        subEl.textContent = linkRow && linkRow.revoked_at ? 'Quien te invitó ya desactivó este Link de referencia. Pide uno nuevo.' : 'Este Link de referencia ya no es válido o ha expirado.';
+        btnEl.style.display = 'none';
+        return;
+      }
     }
   } catch (e) {
     console.error('acceptInviteAndGoToLogin:', e);
@@ -11861,6 +11951,8 @@ async function enterApp() {
   loadNotifLevels();
   refreshCurrentUserPermsCache();
   loadCarritosVisibility();
+  // v1.36.0-beta: recordatorio de Reporte de Territorio (en segundo plano).
+  hookTerritoryReportReminderTimer();
 
   // Update UI based on final role
   const roleLabelsMap = { dev:'DEV', admin:'Administrador', viewer:'Visitante' };
@@ -17426,6 +17518,27 @@ function closeNewUserModal() {
 // created_at (timestamptz, default now()).
 let _inviteDurationHours = 1;
 let _lastInviteUrl = '';
+// v1.36.0-beta: 'single_use' (sin caducidad, se desactiva tras el primer uso)
+// o 'limited' (reutilizable hasta que vence, o hasta que un Admin/DEV lo
+// termina manualmente desde "Links activos"). Requiere en Supabase, en la
+// tabla `referral_links`, dos columnas nuevas además de las ya existentes
+// (token, created_by, expires_at, used_at, created_at):
+//   link_type   text        default 'limited'   -- 'single_use' | 'limited'
+//   revoked_at  timestamptz null                 -- lo llena openInviteModal→revokeInviteLink()
+let _inviteLinkType = 'single_use';
+function setInviteLinkType(type) {
+  _inviteLinkType = type;
+  document.querySelectorAll('.invite-type-opt').forEach(b => b.classList.toggle('active', b.dataset.type === type));
+  const durGroup = document.getElementById('invite-duration-group');
+  const hintEl = document.getElementById('invite-type-hint');
+  if (type === 'single_use') {
+    durGroup.style.display = 'none';
+    hintEl.textContent = 'Se desactiva automáticamente en cuanto alguien lo usa una vez. No tiene límite de tiempo.';
+  } else {
+    durGroup.style.display = '';
+    hintEl.textContent = 'Se puede usar más de una vez hasta que venza el tiempo elegido, o hasta que lo termines manualmente desde "Links activos".';
+  }
+}
 function setInviteDuration(hours) {
   _inviteDurationHours = hours;
   document.querySelectorAll('.invite-duration-opt').forEach(b => b.classList.toggle('active', Number(b.dataset.hours) === hours));
@@ -17436,6 +17549,7 @@ function openInviteModal() {
   document.getElementById('invite-step-result').style.display = 'none';
   const errEl = document.getElementById('invite-error');
   errEl.style.display = 'none';
+  setInviteLinkType('single_use');
   setInviteDuration(1);
   document.getElementById('invite-link-modal').classList.add('open');
 }
@@ -17453,16 +17567,23 @@ async function generateInviteLink() {
   btn.disabled = true;
   try {
     const token = _genInviteToken();
-    const expiresAt = new Date(Date.now() + _inviteDurationHours * 3600 * 1000).toISOString();
-    const { error } = await sb.from('referral_links').insert({ token, created_by: currentUser.name, expires_at: expiresAt });
+    const isSingleUse = _inviteLinkType === 'single_use';
+    const expiresAt = isSingleUse ? null : new Date(Date.now() + _inviteDurationHours * 3600 * 1000).toISOString();
+    const { error } = await sb.from('referral_links').insert({
+      token, created_by: currentUser.name, expires_at: expiresAt, link_type: _inviteLinkType,
+    });
     if (error) throw error;
     const url = new URL(location.href);
     url.search = ''; url.hash = '';
     url.searchParams.set('ref', token);
     _lastInviteUrl = url.toString();
     document.getElementById('invite-link-output').value = _lastInviteUrl;
-    const horasLabel = _inviteDurationHours === 1 ? '1 hora' : `${_inviteDurationHours} horas`;
-    document.getElementById('invite-link-expiry').textContent = `Válido por ${horasLabel}, hasta ${new Date(expiresAt).toLocaleString()}.`;
+    if (isSingleUse) {
+      document.getElementById('invite-link-expiry').textContent = 'Único uso: se desactivará en cuanto alguien lo use una vez.';
+    } else {
+      const horasLabel = _inviteDurationHours === 1 ? '1 hora' : `${_inviteDurationHours} horas`;
+      document.getElementById('invite-link-expiry').textContent = `Con límite de tiempo: válido por ${horasLabel}, hasta ${new Date(expiresAt).toLocaleString()}. Se puede usar más de una vez mientras esté vigente.`;
+    }
     document.getElementById('invite-step-choose').style.display = 'none';
     document.getElementById('invite-step-result').style.display = '';
   } catch (e) {
@@ -17471,6 +17592,53 @@ async function generateInviteLink() {
     errEl.style.display = 'block';
   } finally {
     btn.disabled = false;
+  }
+}
+
+// ── v1.36.0-beta: "Links activos" — gestión de links "Con límite de tiempo" ──
+async function openActiveLinksManager() {
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  document.getElementById('active-links-modal').classList.add('open');
+  const listEl = document.getElementById('active-links-list');
+  listEl.innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
+  try {
+    const nowIso = new Date().toISOString();
+    let q = sb.from('referral_links').select('token,created_by,expires_at,created_at')
+      .eq('link_type', 'limited').is('revoked_at', null).gt('expires_at', nowIso)
+      .order('created_at', { ascending: false });
+    // Un Admin (no DEV) solo ve/termina los links que él mismo generó.
+    if (currentRole === 'admin') q = q.eq('created_by', currentUser.name);
+    const { data, error } = await q;
+    if (error) throw error;
+    if (!data || !data.length) {
+      listEl.innerHTML = '<div class="notif-gestor-hint" style="margin:0"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>No hay links "Con límite de tiempo" vigentes.</div>';
+      return;
+    }
+    listEl.innerHTML = data.map(l => `
+      <div class="notif-gestor-card" style="display:flex;align-items:center;gap:10px;margin-bottom:0.6rem">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:0.85rem;font-weight:700;color:var(--text)">${l.created_by}</div>
+          <div style="font-size:0.75rem;color:var(--text3)">Vence: ${new Date(l.expires_at).toLocaleString()}</div>
+        </div>
+        <button type="button" class="btn-danger-sm" onclick="revokeInviteLink('${l.token}')">Terminar</button>
+      </div>`).join('');
+  } catch (e) {
+    console.error('openActiveLinksManager:', e);
+    listEl.innerHTML = '<div class="auth-error" style="display:block">No se pudieron cargar los links activos.</div>';
+  }
+}
+function closeActiveLinksManager() {
+  document.getElementById('active-links-modal').classList.remove('open');
+}
+async function revokeInviteLink(token) {
+  try {
+    const { error } = await sb.from('referral_links').update({ revoked_at: new Date().toISOString() }).eq('token', token);
+    if (error) throw error;
+    showToast('Link terminado.', 'success');
+    openActiveLinksManager();
+  } catch (e) {
+    console.error('revokeInviteLink:', e);
+    showToast('No se pudo terminar el link.', 'error');
   }
 }
 function shareInviteLink() {
@@ -21476,7 +21644,7 @@ async function resetCategoryLabel(catId) {
 
 // ── Gestor de Notificaciones — UI (solo DEV) ─────────────────────────────────
 function switchNotifAdminTab(tab) {
-  ['anuncios','plantillas','niveles','live'].forEach(function(t) {
+  ['anuncios','plantillas','niveles','live','recordatorios'].forEach(function(t) {
     var btn = document.getElementById('notif-admin-tab-' + t);
     var sec = document.getElementById('notif-admin-' + t);
     if (btn) btn.classList.toggle('active', t === tab);
@@ -21484,6 +21652,7 @@ function switchNotifAdminTab(tab) {
   });
   if (tab === 'niveles') renderNotifAdminLevels();
   if (tab === 'live') renderLiveAdminPanel();
+  if (tab === 'recordatorios') loadReminderHoursSettingUI();
 }
 
 document.addEventListener('change', (e) => {
@@ -21880,6 +22049,19 @@ const NOTIF_TEMPLATES_DEFAULT = [
     title: 'Solicitud de cuenta',
     body: '{nombre} fue eliminado anteriormente e intentó iniciar sesión de nuevo. Acepta o deniega la solicitud para que pueda volver a acceder.',
     vars: ['nombre'],
+  },
+  {
+    // v1.36.0-beta: recordatorio al Encargado de una asignación de Casa en
+    // casa para que llene el Reporte de Territorio. Se envía automáticamente
+    // 1 o 2 horas (configurable en Notificaciones → Recordatorios) después
+    // de la hora de inicio de la asignación, si aún no se ha enviado el
+    // reporte. Ver checkTerritoryReportReminders().
+    id: 'recordatorio_reporte_territorio',
+    label: 'Recordatorio de Reporte de Territorio',
+    desc: 'Se envía al Encargado de una asignación de Casa en casa si, pasado cierto tiempo desde el inicio, aún no ha enviado el Reporte de Territorio.',
+    title: 'Recuerda enviar tu Reporte de Territorio',
+    body: 'Predicaste en {territorio} el {fecha} a las {hora}hrs y aún no envías el reporte. Puedes hacerlo ahora mismo, o más tarde desde Mi Perfil → Mis Asignaciones.',
+    vars: ['territorio', 'fecha', 'hora'],
   },
 ];
 
@@ -26681,8 +26863,18 @@ async function trepLoadPublicFormRow(formRow) {
 // territorio/fecha/encargado y abre la misma pantalla de reporte que se usa vía enlace.
 let _trepInAppOpen = false;
 async function reportarTerritorioDesdeAsignacion(assignmentId) {
-  const a = assignments.find(x => x.id === assignmentId);
-  if (!a || !a.territory_id) return;
+  let a = assignments.find(x => x.id === assignmentId);
+  // v1.36.0-beta: si se llama desde "Mis Asignaciones" (Perfil) el arreglo
+  // global `assignments` puede no estar cargado todavía (esa sección solo se
+  // llena al entrar a Casa en Casa) — en ese caso se busca la asignación
+  // puntual directo en Supabase para no bloquear el flujo.
+  if (!a) {
+    try {
+      const { data } = await sb.from('assignments').select('*').eq('id', assignmentId).maybeSingle();
+      a = data;
+    } catch (e) { console.warn('reportarTerritorioDesdeAsignacion: no se pudo cargar la asignación:', e.message); }
+  }
+  if (!a || !a.territory_id) { showToast('No se pudo cargar la asignación.', 'error'); return; }
   const hostName = a.conductor || currentUser?.name || 'Publicador';
 
   showToast('Cargando reporte...', 'info');
@@ -26963,6 +27155,120 @@ async function notifyReportRecipients(territoryObj, submission) {
   if (pushTargets.length) {
     notifyUsersPush('reporte-territorio', { title, body, target_names: pushTargets }).catch(() => {});
   }
+}
+
+// ── v1.36.0-beta: Recordatorio de Reporte de Territorio ────────────────────
+// El Encargado de una asignación de Casa en casa recibe un recordatorio push
+// si, pasadas 1 o 2 horas (configurable) desde la hora de INICIO de su
+// asignación, aún no ha enviado el Reporte de Territorio. Desde "Mis
+// Asignaciones" en el Perfil también puede enviarlo tarde en cualquier
+// momento (ver reportarTerritorioDesdeAsignacion).
+//
+// Requiere en Supabase:
+//   platform_settings (key text primary key, value jsonb)
+//     -- fila: { key: 'territory_report_reminder', value: { hours: 2 } }
+//   territory_reminder_log (assignment_id text primary key, sent_at timestamptz default now())
+//     -- evita reenviar el mismo recordatorio más de una vez.
+//
+// NOTA IMPORTANTE: esta función solo puede disparar el recordatorio mientras
+// la app está abierta en el teléfono/navegador de alguien (se ejecuta al
+// iniciar sesión y luego cada 15 min, ver hookTerritoryReportReminderTimer).
+// Para que el push llegue de forma 100% confiable incluso con la app cerrada,
+// se recomienda además programar en Supabase un Edge Function + pg_cron que
+// llame a esta misma lógica (o a la Edge Function notify-users directamente)
+// cada 15-30 min server-side.
+
+const DEFAULT_TERRITORY_REMINDER_HOURS = 2;
+let _territoryReminderHoursCache = null;
+
+async function getTerritoryReportReminderHours() {
+  if (_territoryReminderHoursCache != null) return _territoryReminderHoursCache;
+  try {
+    const { data, error } = await sb.from('platform_settings').select('value').eq('key', 'territory_report_reminder').maybeSingle();
+    if (error) throw error;
+    _territoryReminderHoursCache = (data && data.value && Number(data.value.hours)) || DEFAULT_TERRITORY_REMINDER_HOURS;
+  } catch (e) {
+    console.warn('No se pudo cargar el ajuste de Recordatorios (usando valor por defecto):', e.message);
+    _territoryReminderHoursCache = DEFAULT_TERRITORY_REMINDER_HOURS;
+  }
+  return _territoryReminderHoursCache;
+}
+async function setTerritoryReportReminderHours(hours) {
+  const { error } = await sb.from('platform_settings').upsert({ key: 'territory_report_reminder', value: { hours } });
+  if (error) throw error;
+  _territoryReminderHoursCache = hours;
+}
+
+// ── Admin UI (Notificaciones → Recordatorios) ───────────────────────────────
+let _reminderHoursUISelected = DEFAULT_TERRITORY_REMINDER_HOURS;
+function setReminderHoursUI(hours) {
+  _reminderHoursUISelected = hours;
+  document.querySelectorAll('.reminder-hours-opt').forEach(b => b.classList.toggle('active', Number(b.dataset.hours) === hours));
+}
+async function loadReminderHoursSettingUI() {
+  const hours = await getTerritoryReportReminderHours();
+  setReminderHoursUI(hours);
+}
+async function saveReminderHoursSetting() {
+  const btn = document.getElementById('save-reminder-hours-btn');
+  if (btn) btn.disabled = true;
+  try {
+    await setTerritoryReportReminderHours(_reminderHoursUISelected);
+    showToast('Recordatorio actualizado ✓', 'success');
+  } catch (e) {
+    console.error('saveReminderHoursSetting:', e);
+    showToast('No se pudo guardar el ajuste.', 'error');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+// ── Detección + envío del recordatorio (se ejecuta para el propio usuario) ──
+async function checkTerritoryReportReminders() {
+  if (!currentUser) return;
+  try {
+    const hours = await getTerritoryReportReminderHours();
+    const today = new Date().toISOString().slice(0, 10);
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 2); // ventana corta: solo hoy/ayer
+    const cutoffStr = cutoff.toISOString().slice(0, 10);
+    const [{ data: recentAssignments }, { data: submissions }, { data: territories }, { data: alreadySent }] = await Promise.all([
+      sb.from('assignments').select('id,date,time,conductor,territory_id').lte('date', today).gte('date', cutoffStr),
+      sb.from('territory_report_submissions').select('territory_id,submitted_at'),
+      sb.from('territories').select('id,number'),
+      sb.from('territory_reminder_log').select('assignment_id'),
+    ]);
+    const sentIds = new Set((alreadySent || []).map(r => r.assignment_id));
+    const mine = (recentAssignments || []).filter(a => a.territory_id && a.time && _namesMatch(a.conductor, getIdentityName()));
+    const now = Date.now();
+    for (const a of mine) {
+      if (sentIds.has(a.id)) continue;
+      const startMs = new Date(`${a.date}T${a.time}`).getTime();
+      if (isNaN(startMs)) continue;
+      const dueMs = startMs + hours * 3600 * 1000;
+      if (now < dueMs) continue; // todavía no toca
+      const reported = (submissions || []).some(s => s.territory_id === a.territory_id && s.submitted_at && s.submitted_at.slice(0, 10) >= a.date);
+      if (reported) continue;
+      // Toca enviar el recordatorio — se marca ANTES de enviar para evitar
+      // duplicados si dos pestañas/dispositivos corren esta función a la vez.
+      const { error: logErr } = await sb.from('territory_reminder_log').insert({ assignment_id: a.id });
+      if (logErr) continue; // ya lo insertó otra pestaña/dispositivo (choque de PK) — no reenviar
+      const ter = (territories || []).find(t => t.id === a.territory_id);
+      const { title, body } = renderTemplate('recordatorio_reporte_territorio', {
+        territorio: ter ? `Territorio ${ter.number}` : 'tu territorio',
+        fecha: fmtInicioDate(a.date),
+        hora: (a.time || '').substring(0, 5),
+      });
+      await sb.from('notifications').insert({ title, body, notif_category: 'reporte-territorio', target_names: [getIdentityName().toLowerCase()] });
+      notifyUsersPush('reporte-territorio', { title, body, target_names: [getIdentityName().toLowerCase()] }).catch(() => {});
+    }
+  } catch (e) {
+    console.warn('checkTerritoryReportReminders:', e.message);
+  }
+}
+// Corre una vez al entrar a la app y luego cada 15 min mientras siga abierta.
+function hookTerritoryReportReminderTimer() {
+  checkTerritoryReportReminders();
+  setInterval(checkTerritoryReportReminders, 15 * 60 * 1000);
 }
 
 // ══════════════════════════════════════════════════════════════════════════
