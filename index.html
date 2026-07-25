@@ -8129,22 +8129,8 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
           <div id="pref-group-screen-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
-      <!-- Toggle: Ícono de Más Opciones en vez de Foto de Perfil (v1.32.11-beta).
-           La Foto de Perfil en el botón "Más Opciones" es ahora la
-           configuración por defecto; este toggle permite volver a mostrar el
-           botón con el ícono de siempre, para quien lo prefiera. -->
-      <div class="profile-row" style="cursor:pointer;border-top:1px solid var(--border)" onclick="toggleNavbarIconPref()">
-        <div class="profile-row-icon" style="background:var(--ter-3-bg);color:var(--ter-3)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="pref.navbaricon.title">Mostrar ícono en vez de tu foto de perfil</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="pref.navbaricon.desc">El botón "Más opciones" de la NavBar usa tu foto de perfil por defecto. Actívalo para volver a ver el botón con el ícono de siempre.</div>
-        </div>
-        <div id="navbar-icon-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="navbar-icon-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
-      </div>
+      <!-- v1.36.7-beta: el toggle "Mostrar ícono en vez de tu foto de perfil"
+           se movió a Experimentos (ver page-pref-experimentos). -->
     </div>
     <!-- Tamaño de la interfaz: debajo de Apariencia -->
     <div class="profile-section">
@@ -8522,6 +8508,26 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         </div>
       </div>
       <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.livehost.help">Solo comparte el nombre de la calle, nunca un punto exacto en un mapa. Tú decides si activarla; se apaga sola a las 2 horas.</div>
+    </div>
+
+    <!-- Ícono de Perfil en la NavBar: movido desde Preferencias → Apariencia
+         a Experimentos (v1.36.7-beta). La Foto de Perfil en el botón "Más
+         Opciones" sigue siendo la configuración por defecto; este toggle
+         permite volver a mostrar el botón con el ícono de siempre. -->
+    <div class="profile-section">
+      <div class="profile-section-title" data-i18n="exp.navbaricon.section">Ícono de Perfil</div>
+      <div class="profile-row" style="cursor:pointer" onclick="toggleNavbarIconPref()">
+        <div class="profile-row-icon" style="background:var(--ter-3-bg);color:var(--ter-3)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="pref.navbaricon.title">Mostrar ícono en vez de tu foto de perfil</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="pref.navbaricon.desc">El botón "Más opciones" de la NavBar usa tu foto de perfil por defecto. Actívalo para volver a ver el botón con el ícono de siempre.</div>
+        </div>
+        <div id="navbar-icon-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="navbar-icon-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
     </div>
 
     <!-- PIN de acceso: función experimental, v1.34.5-beta. Permite fijar un PIN
@@ -8968,7 +8974,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.36.5-beta';
+const APP_VERSION = '1.36.7-beta';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -9553,6 +9559,7 @@ const I18N = {
   'exp.subnavmenu.desc':    { es: 'Activado por defecto. Presiona el botón de la Sub-sección activa en la barra (Predicación y Reuniones) para abrir la lista completa. Solo en móvil.', en: 'Enabled by default. Press the already-active Sub-section bar button (Preaching and Meetings) to open the full list. Mobile only.', nl: 'Standaard ingeschakeld. Druk op de knop van de actieve subsectie in de balk (Prediking en Vergaderingen) om de volledige lijst te openen. Alleen op mobiel.' },
   'exp.subnavmenu.help':    { es: 'Pensada para quienes no saben que la barra de Sub-secciones se puede deslizar horizontalmente. En Desktop no aplica, ya que ahí caben todas.', en: "Designed for people who don't know the Sub-section bar can be swiped horizontally. Does not apply on Desktop, where all of them already fit.", nl: 'Bedoeld voor mensen die niet weten dat de subsectiebalk horizontaal geveegd kan worden. Niet van toepassing op Desktop, waar ze allemaal al passen.' },
   'exp.livehost.section': { es: 'LiveHost', en: 'LiveHost', nl: 'LiveHost' },
+  'exp.navbaricon.section': { es: 'Ícono de Perfil', en: 'Profile Icon', nl: 'Profielicoon' },
   'exp.livehost.title':   { es: 'Activar LiveHost', en: 'Enable LiveHost', nl: 'LiveHost inschakelen' },
   'exp.livehost.desc':    { es: 'Como Encargado, comparte la calle en la que estás con quienes vean tu asignación de casa en casa, por hasta 2 horas.', en: 'As the person in charge, share the street you are on with anyone viewing your house-to-house assignment, for up to 2 hours.', nl: 'Deel als verantwoordelijke de straat waar je bent met iedereen die je huis-aan-huis-toewijzing bekijkt, tot 2 uur lang.' },
   'exp.livehost.help':    { es: 'Solo comparte el nombre de la calle, nunca un punto exacto en un mapa. Tú decides si activarla; se apaga sola a las 2 horas.', en: 'Only shares the street name, never an exact point on a map. You decide whether to turn it on; it turns off by itself after 2 hours.', nl: 'Deelt alleen de straatnaam, nooit een exact punt op een kaart. Jij beslist of je het inschakelt; het schakelt na 2 uur vanzelf uit.' },
@@ -11094,6 +11101,34 @@ function inicioGoTo(mainTab, subTab, after) {
   if (typeof after === 'function') setTimeout(after, 60);
 }
 
+// v1.36.7-beta: "Mis Asignaciones" ahora ordena todo por jerarquía temporal
+// (lo más próximo primero, lo más lejano al final) en vez de agrupar por
+// categoría. _inicioSortKey calcula un epoch ms comparable a partir de una
+// fecha (+ hora opcional) para poder ordenar ítems de distintas categorías
+// entre sí. Los ítems sin fecha calculable quedan al final (Infinity).
+function _inicioSortKey(dateStr, timeStr) {
+  if (!dateStr) return Infinity;
+  const t = (timeStr && /^\d{1,2}:\d{2}/.test(timeStr)) ? timeStr : '00:00:00';
+  const ms = new Date(`${dateStr}T${t}`).getTime();
+  return isNaN(ms) ? Infinity : ms;
+}
+// Carritos no guarda una fecha exacta, solo un día de la semana recurrente
+// (CART_DIAS) + una hora. Para poder ordenarlo junto al resto, se calcula la
+// próxima ocurrencia real de ese día/hora (hoy mismo si aún no pasa la hora,
+// si no la próxima semana).
+const CART_DIA_TO_JSDAY = { 'Lunes': 1, 'Martes': 2, 'Miercoles': 3, 'Jueves': 4, 'Viernes': 5, 'Sabado': 6, 'Domingo': 0 };
+function _inicioNextWeekdaySortKey(diaName, horaStr) {
+  const targetDay = CART_DIA_TO_JSDAY[diaName];
+  if (targetDay == null) return Infinity;
+  const [hh, mm] = (horaStr && /^\d{1,2}:\d{2}/.test(horaStr)) ? horaStr.split(':').map(Number) : [0, 0];
+  const now = new Date();
+  for (let add = 0; add < 8; add++) {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + add, hh || 0, mm || 0, 0);
+    if (d.getDay() === targetDay && d.getTime() >= now.getTime() - 60000) return d.getTime();
+  }
+  return Infinity;
+}
+
 async function renderInicio() {
   const wrap = document.getElementById('inicio-content');
   if (!wrap || !currentUser) return;
@@ -11119,6 +11154,7 @@ async function renderInicio() {
         items: mine.slice(0, 5).map(a => ({
           label: 'Asignación de predicación',
           sub: `${fmtInicioDate(a.date)}${a.time ? ' • ' + a.time : ''}`,
+          sortKey: _inicioSortKey(a.date, a.time),
           onClick: () => inicioGoTo('predicacion', 'casa'),
         })),
       });
@@ -11167,6 +11203,7 @@ async function renderInicio() {
             label: `Reportar territorio${ter ? ' N.º ' + ter.number : ''}`,
             sub: a.date < today ? `Predicaste el ${fmtInicioDate(a.date)}` : `Predicaste hoy a las ${(a.time || '').substring(0, 5)}hrs`,
             badge: 'Pendiente',
+            sortKey: _inicioSortKey(a.date, a.time),
             onClick: () => reportarTerritorioDesdeAsignacion(a.id),
           };
         }),
@@ -11191,6 +11228,7 @@ async function renderInicio() {
           return {
             label: punto ? punto.nombre : 'Punto de carrito',
             sub: `${t.dia || ''}${t.hora ? ' • ' + t.hora : ''}`,
+            sortKey: _inicioNextWeekdaySortKey(t.dia, t.hora),
             onClick: () => inicioGoTo('predicacion', 'carritos'),
           };
         }),
@@ -11214,6 +11252,7 @@ async function renderInicio() {
         items: mine.slice(0, 5).map(r => ({
           label: _namesMatch(r.encargado_nombre, getIdentityName()) ? 'Encargado del aseo' : 'Tu grupo de servicio limpia el salón',
           sub: fmtInicioDate(r.fecha),
+          sortKey: _inicioSortKey(r.fecha, null),
           onClick: () => inicioGoTo('reuniones', 'aseo-salon'),
         })),
       });
@@ -11232,7 +11271,7 @@ async function renderInicio() {
       for (const p of parts) {
         const a1 = (p.assigned || '').trim().toLowerCase();
         const a2 = (p.assigned2 || '').trim().toLowerCase();
-        if (a1 === myName || a2 === myName) items.push({ label: p.name || 'Parte', sub: rango, onClick: () => inicioGoTo('reuniones', 'vida-ministerio') });
+        if (a1 === myName || a2 === myName) items.push({ label: p.name || 'Parte', sub: rango, sortKey: _inicioSortKey(w.date_start, null), onClick: () => inicioGoTo('reuniones', 'vida-ministerio') });
       }
       const roles = [
         { field: 'presidente',   label: 'Presidente' },
@@ -11240,7 +11279,7 @@ async function renderInicio() {
         { field: 'prayer_close', label: 'Oración de cierre' },
       ];
       for (const rol of roles) {
-        if ((w[rol.field] || '').trim().toLowerCase() === myName) items.push({ label: rol.label, sub: rango, onClick: () => inicioGoTo('reuniones', 'vida-ministerio') });
+        if ((w[rol.field] || '').trim().toLowerCase() === myName) items.push({ label: rol.label, sub: rango, sortKey: _inicioSortKey(w.date_start, null), onClick: () => inicioGoTo('reuniones', 'vida-ministerio') });
       }
     }
     if (items.length) {
@@ -11265,7 +11304,7 @@ async function renderInicio() {
         { field: 'watchtower_reader', label: 'Lector de La Atalaya' },
       ];
       for (const rol of roles) {
-        if ((w[rol.field] || '').trim().toLowerCase() === myName) items.push({ label: rol.label, sub: rango, onClick: () => inicioGoTo('reuniones', 'fin-semana') });
+        if ((w[rol.field] || '').trim().toLowerCase() === myName) items.push({ label: rol.label, sub: rango, sortKey: _inicioSortKey(w.date_start, null), onClick: () => inicioGoTo('reuniones', 'fin-semana') });
       }
     }
     if (items.length) {
@@ -11288,6 +11327,7 @@ async function renderInicio() {
         items: data.slice(0, 5).map(r => ({
           label: r.cargo || 'Responsabilidad',
           sub: typeof respDiaLabel === 'function' ? respDiaLabel(r.fecha) : fmtInicioDate(r.fecha),
+          sortKey: _inicioSortKey(r.fecha, null),
           onClick: () => inicioGoTo('reuniones', 'responsabilidades'),
         })),
       });
@@ -11307,29 +11347,49 @@ function fmtInicioDate(dateStr) {
 function renderInicioSections(sections) {
   const wrap = document.getElementById('inicio-content');
   if (!wrap) return;
-  if (!sections.length) {
+  window._inicioSections = sections;
+
+  // v1.36.7-beta: "Mis Asignaciones" ahora sigue una jerarquía temporal —
+  // una sola lista ordenada de lo más próximo a lo más lejano, en vez de
+  // agrupar por categoría (Casa en Casa, Carritos, etc. por separado). Cada
+  // fila conserva el color/ícono de su categoría de origen para distinguirla
+  // de un vistazo; el onClick sigue resolviéndose igual que antes, por
+  // sección + índice (ver _inicioCardClick), así que no hubo que tocar
+  // ninguna de las acciones ya definidas más arriba.
+  const flat = [];
+  sections.forEach(sec => {
+    sec.items.forEach((it, i) => {
+      flat.push({ sectionKey: sec.key, idx: i, color: sec.color, bg: sec.bg, icon: sec.icon, item: it });
+    });
+  });
+
+  if (!flat.length) {
     wrap.innerHTML = `<div class="pia-empty">
       <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       <p data-i18n="casa.sinasignaciones.desc">Sin asignaciones por ahora. Cuando tengas una asignación de predicación, un turno, un cargo o una parte en el programa, aparecerá aquí.</p>
     </div>`;
     return;
   }
-  wrap.innerHTML = sections.map(sec => `
-    <div class="pia-group">
-      <div class="pia-group-title">${sec.title}</div>
-      ${sec.items.map((it, i) => `
-        <div class="pia-row" onclick="_inicioCardClick('${sec.key}',${i})">
-          <div class="pia-row-icon" style="background:${sec.bg};color:${sec.color}">
-            <svg viewBox="0 0 24 24">${sec.icon}</svg>
-          </div>
-          <div class="pia-row-content">
-            <div class="pia-row-label">${it.label}${it.badge ? `<span class="inicio-badge-reminder">${it.badge}</span>` : ''}</div>
-            ${it.sub ? `<div class="pia-row-sub">${it.sub}</div>` : ''}
-          </div>
-          <svg class="pia-row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-        </div>`).join('')}
-    </div>`).join('');
-  window._inicioSections = sections;
+
+  flat.sort((a, b) => {
+    const ak = (a.item.sortKey == null || isNaN(a.item.sortKey)) ? Infinity : a.item.sortKey;
+    const bk = (b.item.sortKey == null || isNaN(b.item.sortKey)) ? Infinity : b.item.sortKey;
+    return ak - bk;
+  });
+
+  wrap.innerHTML = `<div class="pia-group">
+    ${flat.map(f => `
+      <div class="pia-row" onclick="_inicioCardClick('${f.sectionKey}',${f.idx})">
+        <div class="pia-row-icon" style="background:${f.bg};color:${f.color}">
+          <svg viewBox="0 0 24 24">${f.icon}</svg>
+        </div>
+        <div class="pia-row-content">
+          <div class="pia-row-label">${f.item.label}${f.item.badge ? `<span class="inicio-badge-reminder">${f.item.badge}</span>` : ''}</div>
+          ${f.item.sub ? `<div class="pia-row-sub">${f.item.sub}</div>` : ''}
+        </div>
+        <svg class="pia-row-chevron" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>`).join('')}
+  </div>`;
 }
 function _inicioCardClick(key, idx) {
   const sec = (window._inicioSections || []).find(s => s.key === key);
@@ -17492,7 +17552,18 @@ async function generateInviteLink() {
   try {
     const token = _genInviteToken();
     const isSingleUse = _inviteLinkType === 'single_use';
-    const expiresAt = isSingleUse ? null : new Date(Date.now() + _inviteDurationHours * 3600 * 1000).toISOString();
+    // v1.36.7-beta: antes, para "Único uso" se guardaba expires_at: null.
+    // Si en Supabase la columna expires_at es NOT NULL (lo más probable, ya
+    // que originalmente solo existían links "Con límite de tiempo"), ese
+    // insert fallaba siempre con error — por eso "Único uso" nunca funcionaba
+    // mientras "Con límite de tiempo" (que sí manda una fecha real) sí lo
+    // hacía. Toda la lógica de validación/uso de estos links se basa en
+    // `link_type`, no en si expires_at es null, así que para "Único uso" ahora
+    // se guarda una fecha muy lejana (100 años) en vez de null: nunca se
+    // considerará "expirado" por fecha, y sigue desactivándose igual apenas
+    // alguien lo usa (eso lo controla used_at, no expires_at).
+    const FAR_FUTURE_ISO = new Date(Date.now() + 100 * 365 * 24 * 3600 * 1000).toISOString();
+    const expiresAt = isSingleUse ? FAR_FUTURE_ISO : new Date(Date.now() + _inviteDurationHours * 3600 * 1000).toISOString();
     const { error } = await sb.from('referral_links').insert({
       token, created_by: currentUser.name, expires_at: expiresAt, link_type: _inviteLinkType,
     });
@@ -22219,9 +22290,10 @@ window.addEventListener('resize', () => { try { applySimplifiedModeUI(); } catch
 // v1.32.11-beta: deja de ser un experimento (ya no requiere desbloquear
 // Experimentos) y pasa a ser la configuración por defecto. Quien prefiera
 // seguir viendo el botón con el ícono de siempre puede activarlo desde
-// Preferencias → Apariencia (toggleNavbarIconPref, más abajo) — internamente
-// sigue siendo la misma preferencia invertida, solo cambia dónde se controla
-// y cuál es su valor por defecto cuando el usuario nunca la ha tocado.
+// Experimentos → Ícono de Perfil (toggleNavbarIconPref, más abajo; movido
+// desde Preferencias → Apariencia en v1.36.7-beta) — internamente sigue
+// siendo la misma preferencia invertida, solo cambia dónde se controla y
+// cuál es su valor por defecto cuando el usuario nunca la ha tocado.
 function isNavbarAvatarSelected() {
   const v = localStorage.getItem('fleming_navbar_options_avatar');
   return v === null ? true : v === 'true';
@@ -23924,7 +23996,7 @@ function vmcRenderWeekProgram(week) {
     <div class="vmc-my-assignments">
       <div class="vmc-my-assignments-title">
         <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;vertical-align:middle;margin-right:4px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        Tus partes esta semana
+        Tus asignaciones esta semana
       </div>
       ${allMine.map(p => `<div class="vmc-my-item"><span class="vmc-my-item-dot"></span>${p.name}${p.mins ? ` <span style="color:var(--text3);font-size:0.75rem">(${p.mins} min)</span>` : ''}</div>`).join('')}
     </div>` : '';
@@ -24453,7 +24525,7 @@ function fsRenderWeekProgram(week) {
     <div class="vmc-my-assignments">
       <div class="vmc-my-assignments-title">
         <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;vertical-align:middle;margin-right:4px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        Tus partes esta semana
+        Tus asignaciones esta semana
       </div>
       ${myMeta.map(m => `<div class="vmc-my-item"><span class="vmc-my-item-dot"></span>${m}</div>`).join('')}
     </div>` : '';
