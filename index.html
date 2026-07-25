@@ -6647,6 +6647,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         <div class="sub-tabs" style="margin-bottom:1.1rem">
           <button class="sub-tab active" id="trep-admin-tab-forms" onclick="trepSwitchAdminTab('forms')">Formularios</button>
           <button class="sub-tab" id="trep-admin-tab-received" onclick="trepSwitchAdminTab('received')">Reportes recibidos</button>
+          <button class="sub-tab" id="trep-admin-tab-recordatorios" onclick="trepSwitchAdminTab('recordatorios')">Recordatorios</button>
         </div>
 
         <!-- Formularios -->
@@ -6680,6 +6681,24 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
             <span id="trep-reports-count" style="font-size:0.78rem;color:var(--text3)"></span>
           </div>
           <div id="trep-reports-cards"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Reportes</div></div></div>
+        </div>
+
+        <!-- Recordatorios (v1.36.5-beta: movido desde Notificaciones → Recordatorios a Reportes → Recordatorios) -->
+        <div id="trep-admin-recordatorios" style="display:none">
+          <div class="notif-gestor-card">
+            <div style="font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:0.4rem">Reporte de Territorio</div>
+            <div style="font-size:0.8rem;color:var(--text3);margin-bottom:0.9rem;line-height:1.4">
+              Si el Encargado de una asignación de Casa en casa aún no envía el Reporte de Territorio pasado este tiempo desde el inicio de su asignación, recibirá un recordatorio push. Por ejemplo, si la asignación comenzó a las 09:45hrs y el recordatorio está en 2 horas, llegará a las 11:45hrs.
+            </div>
+            <div class="form-group2">
+              <label class="form-label2">Recordatorio después de</label>
+              <div class="pref-theme-row" id="reminder-hours-row" style="flex-wrap:wrap">
+                <button type="button" class="pref-theme-opt reminder-hours-opt" data-hours="1" onclick="setReminderHoursUI(1)">1 Hora</button>
+                <button type="button" class="pref-theme-opt reminder-hours-opt active" data-hours="2" onclick="setReminderHoursUI(2)">2 Horas</button>
+              </div>
+            </div>
+            <button class="btn-primary" style="width:auto;padding:0.6rem 1.3rem" onclick="saveReminderHoursSetting()" id="save-reminder-hours-btn">Guardar</button>
+          </div>
         </div>
       </div>
       <div class="admin-section" id="admin-conductores">
@@ -6862,7 +6881,6 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
           <button class="sub-tab" id="notif-admin-tab-plantillas" onclick="switchNotifAdminTab('plantillas')">Plantillas</button>
           <button class="sub-tab" id="notif-admin-tab-niveles" onclick="switchNotifAdminTab('niveles')">Niveles</button>
           <button class="sub-tab" id="notif-admin-tab-live" onclick="switchNotifAdminTab('live')">Live</button>
-          <button class="sub-tab" id="notif-admin-tab-recordatorios" onclick="switchNotifAdminTab('recordatorios')">Recordatorios</button>
         </div>
 
         <!-- Anuncios -->
@@ -6947,24 +6965,6 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
           </div>
           <div style="font-size:0.8rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;margin:0 0 0.6rem">Historial de alertas Live</div>
           <div id="live-admin-history"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Historial de Live</div></div></div>
-        </div>
-
-        <!-- Recordatorios (v1.36.0-beta) -->
-        <div id="notif-admin-recordatorios" style="display:none">
-          <div class="notif-gestor-card">
-            <div style="font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:0.4rem">Reporte de Territorio</div>
-            <div style="font-size:0.8rem;color:var(--text3);margin-bottom:0.9rem;line-height:1.4">
-              Si el Encargado de una asignación de Casa en casa aún no envía el Reporte de Territorio pasado este tiempo desde el inicio de su asignación, recibirá un recordatorio push. Por ejemplo, si la asignación comenzó a las 09:45hrs y el recordatorio está en 2 horas, llegará a las 11:45hrs.
-            </div>
-            <div class="form-group2">
-              <label class="form-label2">Recordatorio después de</label>
-              <div class="pref-theme-row" id="reminder-hours-row" style="flex-wrap:wrap">
-                <button type="button" class="pref-theme-opt reminder-hours-opt" data-hours="1" onclick="setReminderHoursUI(1)">1 Hora</button>
-                <button type="button" class="pref-theme-opt reminder-hours-opt active" data-hours="2" onclick="setReminderHoursUI(2)">2 Horas</button>
-              </div>
-            </div>
-            <button class="btn-primary" style="width:auto;padding:0.6rem 1.3rem" onclick="saveReminderHoursSetting()" id="save-reminder-hours-btn">Guardar</button>
-          </div>
         </div>
 
         <!-- Plantillas -->
@@ -8968,7 +8968,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.36.0-beta';
+const APP_VERSION = '1.36.5-beta';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -11023,99 +11023,11 @@ async function renderProfilePage() {
     groupSec.style.display = '';
   }
 
-  // Partes asignadas: Vida y Ministerio + Pública
-  await renderProfilePartes();
+  // v1.36.5-beta: "Partes asignadas" se eliminó de aquí porque duplicaba
+  // exactamente lo que ya muestra "Mis Asignaciones" (Vida y Ministerio /
+  // Pública vienen incluidas en renderInicio() más abajo).
   await renderInicio();
 
-}
-
-async function renderProfilePartes() {
-  const userName = getIdentityName().trim().toLowerCase();
-  const today = todayStr();
-  const partesSection = document.getElementById('profile-partes-section');
-  const partesList = document.getElementById('profile-partes-list');
-  if (!partesSection || !partesList) return;
-
-  const foundPartes = [];
-
-  // Buscar en vmc_weeks (partes y roles de cabecera)
-  try {
-    const { data: vmcData } = await sb.from('vmc_weeks')
-      .select('id,date_start,date_end,parts,presidente,prayer_open,prayer_close')
-      .gte('date_end', today)
-      .order('date_start');
-    if (vmcData) {
-      for (const w of vmcData) {
-        const rango = vmcFormatRange(w);
-        // Partes internas del array parts
-        const parts = Array.isArray(w.parts) ? w.parts : [];
-        for (const p of parts) {
-          const a1 = (p.assigned  || '').trim().toLowerCase();
-          const a2 = (p.assigned2 || '').trim().toLowerCase();
-          if (a1 === userName || a2 === userName) {
-            foundPartes.push({
-              tipo: 'vmc',
-              label: p.name || 'Parte',
-              rango,
-              color: 'var(--accent)',
-              bgColor: 'var(--accent-light)',
-            });
-          }
-        }
-        // Roles de cabecera VMC
-        const roles = [
-          { field: 'presidente',    label: 'Presidente — Vida y Ministerio' },
-          { field: 'prayer_open',   label: 'Oración de apertura — Vida y Ministerio' },
-          { field: 'prayer_close',  label: 'Oración de cierre — Vida y Ministerio' },
-        ];
-        for (const rol of roles) {
-          if ((w[rol.field] || '').trim().toLowerCase() === userName) {
-            foundPartes.push({ tipo: 'vmc', label: rol.label, rango, color: 'var(--accent)', bgColor: 'var(--accent-light)' });
-          }
-        }
-      }
-    }
-  } catch(e) { console.warn('renderProfilePartes VMC:', e); }
-
-  // Buscar en fs_weeks (roles de cabecera)
-  try {
-    const { data: fsData } = await sb.from('fs_weeks')
-      .select('id,date_start,date_end,presidente,watchtower_reader')
-      .gte('date_end', today)
-      .order('date_start');
-    if (fsData) {
-      const fsRoles = [
-        { field: 'presidente',        label: 'Presidente — Pública' },
-        { field: 'watchtower_reader', label: 'Lector de La Atalaya' },
-      ];
-      for (const w of fsData) {
-        const rango = fsFormatRange(w);
-        for (const rol of fsRoles) {
-          if ((w[rol.field] || '').trim().toLowerCase() === userName) {
-            foundPartes.push({ tipo: 'fs', label: rol.label, rango, color: '#34c759', bgColor: 'rgba(52,199,89,0.12)' });
-          }
-        }
-      }
-    }
-  } catch(e) { console.warn('renderProfilePartes FS:', e); }
-
-  if (!foundPartes.length) {
-    partesSection.style.display = 'none';
-    return;
-  }
-
-  partesSection.style.display = '';
-  partesList.innerHTML = foundPartes.map(p => `
-    <div class="profile-row">
-      <div class="profile-row-icon" style="background:${p.bgColor};color:${p.color}">
-        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-      </div>
-      <div class="profile-row-content">
-        <div class="profile-row-label">${p.rango}</div>
-        <div class="profile-row-value" style="font-size:0.88rem">${p.label}</div>
-      </div>
-    </div>
-  `).join('');
 }
 
 async function loadGruposIfNeeded() {
@@ -11212,6 +11124,55 @@ async function renderInicio() {
       });
     }
   } catch (e) { console.warn('Inicio (casa en casa):', e); }
+
+  // ── Recordatorios: Reporte de Territorio pendiente (v1.36.5-beta: se muestra
+  // justo debajo de "Casa en Casa"). Antes solo se detectaban asignaciones de
+  // días anteriores (.lt('date', today)), por lo que una asignación de HOY
+  // nunca aparecía aquí aunque ya hubieran pasado las horas del recordatorio.
+  // Ahora se incluye el día de hoy y, para esas, solo se considera vencida
+  // una vez transcurridas las horas configuradas en Reportes → Recordatorios
+  // (mismo criterio que usa el push de checkTerritoryReportReminders). ──
+  if (RECORDATORIOS_TERRITORIO_ENABLED) try {
+    const reminderHours = await getTerritoryReportReminderHours();
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 45);
+    const cutoffStr = cutoff.toISOString().slice(0, 10);
+    const [{ data: recentAssignments }, { data: submissions }, { data: territories }] = await Promise.all([
+      sb.from('assignments').select('id,date,time,conductor,territory_id').lte('date', today).gte('date', cutoffStr).order('date', { ascending: false }),
+      sb.from('territory_report_submissions').select('territory_id,submitted_at'),
+      sb.from('territories').select('id,number'),
+    ]);
+    const now = Date.now();
+    const mine = (recentAssignments || []).filter(a => {
+      if (!a.territory_id || !_namesMatch(a.conductor, getIdentityName())) return false;
+      if (a.date < today) return true; // días anteriores: siempre se considera vencido
+      if (!a.time) return false; // asignación de hoy sin hora: no se puede calcular vencimiento
+      const startMs = new Date(`${a.date}T${a.time}`).getTime();
+      if (isNaN(startMs)) return false;
+      return now >= startMs + reminderHours * 3600 * 1000; // hoy: solo si ya pasaron las X horas
+    });
+    const pending = mine.filter(a => {
+      const reported = (submissions || []).some(s => s.territory_id === a.territory_id && s.submitted_at && s.submitted_at.slice(0, 10) >= a.date);
+      return !reported;
+    });
+    // Evitar duplicados si el mismo territorio aparece en varias asignaciones recientes
+    const seenTer = new Set();
+    const pendingUnique = pending.filter(a => (seenTer.has(a.territory_id) ? false : (seenTer.add(a.territory_id), true)));
+    if (pendingUnique.length) {
+      sections.push({
+        key: 'recordatorios', title: 'Recordatorios', color: 'var(--red)', bg: 'rgba(255,59,48,0.12)',
+        icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="11" x2="15" y2="11"/>',
+        items: pendingUnique.slice(0, 5).map(a => {
+          const ter = (territories || []).find(t => t.id === a.territory_id);
+          return {
+            label: `Reportar territorio${ter ? ' N.º ' + ter.number : ''}`,
+            sub: a.date < today ? `Predicaste el ${fmtInicioDate(a.date)}` : `Predicaste hoy a las ${(a.time || '').substring(0, 5)}hrs`,
+            badge: 'Pendiente',
+            onClick: () => reportarTerritorioDesdeAsignacion(a.id),
+          };
+        }),
+      });
+    }
+  } catch (e) { console.warn('Inicio (recordatorios territorio):', e); }
 
   // ── Carritos: turnos fijos donde aparezco como encargado ──
   try {
@@ -11332,43 +11293,6 @@ async function renderInicio() {
       });
     }
   } catch (e) { console.warn('Inicio (responsabilidades):', e); }
-
-  // ── Recordatorios: predicación pasada como conductor sin reporte de territorio enviado ──
-  // NOTA: desactivados momentáneamente (flag RECORDATORIOS_TERRITORIO_ENABLED más abajo).
-  // La función de Reportes en sí sigue funcionando con normalidad; solo se oculta este
-  // recordatorio en el Perfil del encargado de Predicación de casa en casa.
-  if (RECORDATORIOS_TERRITORIO_ENABLED) try {
-    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 45);
-    const cutoffStr = cutoff.toISOString().slice(0, 10);
-    const [{ data: pastAssignments }, { data: submissions }, { data: territories }] = await Promise.all([
-      sb.from('assignments').select('id,date,conductor,territory_id').lt('date', today).gte('date', cutoffStr).order('date', { ascending: false }),
-      sb.from('territory_report_submissions').select('territory_id,submitted_at'),
-      sb.from('territories').select('id,number'),
-    ]);
-    const mine = (pastAssignments || []).filter(a => a.territory_id && _namesMatch(a.conductor, getIdentityName()));
-    const pending = mine.filter(a => {
-      const reported = (submissions || []).some(s => s.territory_id === a.territory_id && s.submitted_at && s.submitted_at.slice(0, 10) >= a.date);
-      return !reported;
-    });
-    // Evitar duplicados si el mismo territorio aparece en varias asignaciones recientes
-    const seenTer = new Set();
-    const pendingUnique = pending.filter(a => (seenTer.has(a.territory_id) ? false : (seenTer.add(a.territory_id), true)));
-    if (pendingUnique.length) {
-      sections.push({
-        key: 'recordatorios', title: 'Recordatorios', color: 'var(--red)', bg: 'rgba(255,59,48,0.12)',
-        icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="11" x2="15" y2="11"/>',
-        items: pendingUnique.slice(0, 5).map(a => {
-          const ter = (territories || []).find(t => t.id === a.territory_id);
-          return {
-            label: `Reportar territorio${ter ? ' N.º ' + ter.number : ''}`,
-            sub: `Predicaste el ${fmtInicioDate(a.date)}`,
-            badge: 'Pendiente',
-            onClick: () => reportarTerritorioDesdeAsignacion(a.id),
-          };
-        }),
-      });
-    }
-  } catch (e) { console.warn('Inicio (recordatorios territorio):', e); }
 
   renderInicioSections(sections);
 }
@@ -21644,7 +21568,7 @@ async function resetCategoryLabel(catId) {
 
 // ── Gestor de Notificaciones — UI (solo DEV) ─────────────────────────────────
 function switchNotifAdminTab(tab) {
-  ['anuncios','plantillas','niveles','live','recordatorios'].forEach(function(t) {
+  ['anuncios','plantillas','niveles','live'].forEach(function(t) {
     var btn = document.getElementById('notif-admin-tab-' + t);
     var sec = document.getElementById('notif-admin-' + t);
     if (btn) btn.classList.toggle('active', t === tab);
@@ -21652,7 +21576,6 @@ function switchNotifAdminTab(tab) {
   });
   if (tab === 'niveles') renderNotifAdminLevels();
   if (tab === 'live') renderLiveAdminPanel();
-  if (tab === 'recordatorios') loadReminderHoursSettingUI();
 }
 
 document.addEventListener('change', (e) => {
@@ -24651,12 +24574,6 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
       </div>
     </div>
 
-    <!-- Partes asignadas (VMC y Pública) -->
-    <div class="profile-section" id="profile-partes-section" style="display:none">
-      <div class="profile-section-title" data-i18n="profile.partes">Partes asignadas</div>
-      <div id="profile-partes-list"></div>
-    </div>
-
     <!-- Mis Asignaciones: agrega todo lo asignado a este usuario en cualquier sección/sub-sección -->
     <div class="profile-section" id="profile-assignments-section">
       <div class="profile-section-title" data-i18n="profile.misasignaciones">Mis Asignaciones</div>
@@ -26522,9 +26439,12 @@ let trepFormsCache = [];
 function trepSwitchAdminTab(tab) {
   document.getElementById('trep-admin-tab-forms').classList.toggle('active', tab === 'forms');
   document.getElementById('trep-admin-tab-received').classList.toggle('active', tab === 'received');
+  document.getElementById('trep-admin-tab-recordatorios').classList.toggle('active', tab === 'recordatorios');
   document.getElementById('trep-admin-forms').style.display = tab === 'forms' ? '' : 'none';
   document.getElementById('trep-admin-received').style.display = tab === 'received' ? '' : 'none';
+  document.getElementById('trep-admin-recordatorios').style.display = tab === 'recordatorios' ? '' : 'none';
   if (tab === 'received') trepLoadReports();
+  if (tab === 'recordatorios') loadReminderHoursSettingUI();
 }
 
 async function trepOpenAdminSection() {
@@ -27199,7 +27119,7 @@ async function setTerritoryReportReminderHours(hours) {
   _territoryReminderHoursCache = hours;
 }
 
-// ── Admin UI (Notificaciones → Recordatorios) ───────────────────────────────
+// ── Admin UI (Reportes → Recordatorios) ─────────────────────────────────────
 let _reminderHoursUISelected = DEFAULT_TERRITORY_REMINDER_HOURS;
 function setReminderHoursUI(hours) {
   _reminderHoursUISelected = hours;
@@ -27231,14 +27151,31 @@ async function checkTerritoryReportReminders() {
     const today = new Date().toISOString().slice(0, 10);
     const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 2); // ventana corta: solo hoy/ayer
     const cutoffStr = cutoff.toISOString().slice(0, 10);
-    const [{ data: recentAssignments }, { data: submissions }, { data: territories }, { data: alreadySent }] = await Promise.all([
+    // v1.36.5-beta: antes esto era Promise.all — si UNA sola de las 4 consultas
+    // fallaba (p.ej. porque falta la tabla territory_reminder_log o
+    // platform_settings en Supabase), la función completa abortaba en
+    // silencio y jamás se enviaba ningún recordatorio, sin ningún error
+    // visible para quien probaba la función. Con Promise.allSettled cada
+    // consulta se resuelve por separado y una que falle no bloquea a las demás.
+    const results = await Promise.allSettled([
       sb.from('assignments').select('id,date,time,conductor,territory_id').lte('date', today).gte('date', cutoffStr),
       sb.from('territory_report_submissions').select('territory_id,submitted_at'),
       sb.from('territories').select('id,number'),
       sb.from('territory_reminder_log').select('assignment_id'),
     ]);
-    const sentIds = new Set((alreadySent || []).map(r => r.assignment_id));
-    const mine = (recentAssignments || []).filter(a => a.territory_id && a.time && _namesMatch(a.conductor, getIdentityName()));
+    const [assignRes, subsRes, terRes, sentRes] = results;
+    results.forEach((r, i) => {
+      if (r.status === 'rejected' || (r.value && r.value.error)) {
+        const labels = ['assignments', 'territory_report_submissions', 'territories', 'territory_reminder_log'];
+        console.warn(`checkTerritoryReportReminders: falló la consulta "${labels[i]}" — revisa que la tabla exista en Supabase.`, r.reason || (r.value && r.value.error));
+      }
+    });
+    const recentAssignments = (assignRes.status === 'fulfilled' && assignRes.value.data) || [];
+    const submissions = (subsRes.status === 'fulfilled' && subsRes.value.data) || [];
+    const territories = (terRes.status === 'fulfilled' && terRes.value.data) || [];
+    const alreadySent = (sentRes.status === 'fulfilled' && sentRes.value.data) || [];
+    const sentIds = new Set(alreadySent.map(r => r.assignment_id));
+    const mine = recentAssignments.filter(a => a.territory_id && a.time && _namesMatch(a.conductor, getIdentityName()));
     const now = Date.now();
     for (const a of mine) {
       if (sentIds.has(a.id)) continue;
@@ -27246,13 +27183,13 @@ async function checkTerritoryReportReminders() {
       if (isNaN(startMs)) continue;
       const dueMs = startMs + hours * 3600 * 1000;
       if (now < dueMs) continue; // todavía no toca
-      const reported = (submissions || []).some(s => s.territory_id === a.territory_id && s.submitted_at && s.submitted_at.slice(0, 10) >= a.date);
+      const reported = submissions.some(s => s.territory_id === a.territory_id && s.submitted_at && s.submitted_at.slice(0, 10) >= a.date);
       if (reported) continue;
       // Toca enviar el recordatorio — se marca ANTES de enviar para evitar
       // duplicados si dos pestañas/dispositivos corren esta función a la vez.
       const { error: logErr } = await sb.from('territory_reminder_log').insert({ assignment_id: a.id });
-      if (logErr) continue; // ya lo insertó otra pestaña/dispositivo (choque de PK) — no reenviar
-      const ter = (territories || []).find(t => t.id === a.territory_id);
+      if (logErr) continue; // ya lo insertó otra pestaña/dispositivo (choque de PK), o la tabla no existe — no reenviar
+      const ter = territories.find(t => t.id === a.territory_id);
       const { title, body } = renderTemplate('recordatorio_reporte_territorio', {
         territorio: ter ? `Territorio ${ter.number}` : 'tu territorio',
         fecha: fmtInicioDate(a.date),
@@ -27265,10 +27202,22 @@ async function checkTerritoryReportReminders() {
     console.warn('checkTerritoryReportReminders:', e.message);
   }
 }
-// Corre una vez al entrar a la app y luego cada 15 min mientras siga abierta.
+// Corre una vez al entrar a la app, luego cada 5 min mientras siga abierta
+// (antes eran 15 min), y además cada vez que la pestaña/app vuelve a estar
+// visible o recupera el foco — así, si estuvo en segundo plano cuando "tocaba"
+// el recordatorio, lo detecta apenas se vuelve a abrir en vez de esperar hasta
+// el próximo ciclo de 5 min. IMPORTANTE: mientras la app esté cerrada o en
+// segundo plano por mucho tiempo, los navegadores/SO suspenden estos timers,
+// por lo que esta verificación en el cliente no reemplaza un envío 100%
+// confiable — para eso se recomienda además un Edge Function + pg_cron en
+// Supabase que llame a esta misma lógica del lado del servidor.
 function hookTerritoryReportReminderTimer() {
   checkTerritoryReportReminders();
-  setInterval(checkTerritoryReportReminders, 15 * 60 * 1000);
+  setInterval(checkTerritoryReportReminders, 5 * 60 * 1000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') checkTerritoryReportReminders();
+  });
+  window.addEventListener('focus', () => checkTerritoryReportReminders());
 }
 
 // ══════════════════════════════════════════════════════════════════════════
