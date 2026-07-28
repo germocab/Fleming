@@ -9006,7 +9006,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.37.0-beta';
+const APP_VERSION = '1.37.5-beta';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -9741,8 +9741,8 @@ function terLabel(number) {
   return prefix + number;
 }
 
-const SUPABASE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoaW9ocXhteWVsc210aXBpeWd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDU1MTQsImV4cCI6MjA5NTkyMTUxNH0.O9KqHCYeOzw3CpRyCnBlx9Ocm5sej153Xzonko4iBbU';
+const SUPABASE_URL = 'https://eaimwununtgoyxvryony.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhaW13dW51bnRnb3l4dnJ5b255Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxOTA1NDEsImV4cCI6MjEwMDc2NjU0MX0.7vu8XJHOEVUp9n4NlJSNz5jGS4N2wtpS5Iulf2z_uF8';
 // 'cache: no-store' evita que el navegador (o un Service Worker mal configurado)
 // reutilice una respuesta vieja de la API en vez de pedir los datos frescos.
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
@@ -21651,7 +21651,7 @@ async function notifyUsersPush(catId, body) {
   const level = getCategoryLevel(catId);
   if (level === 'silencio') return; // no debe llegar al teléfono
   try {
-    const resp = await fetch('https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users', {
+    const resp = await fetch('https://eaimwununtgoyxvryony.supabase.co/functions/v1/notify-users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
       body: JSON.stringify({ ...body, notif_level: level })
@@ -23954,7 +23954,7 @@ async function vmcNotifyNewAssignments(newWeek, prevWeek, range) {
 
   if (!toNotify.length) return;
 
-  const EDGE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users';
+  const EDGE_URL = 'https://eaimwununtgoyxvryony.supabase.co/functions/v1/notify-users';
 
   for (const { name, roles } of toNotify) {
     const isRole = (r) => ['Presidente','Oración de apertura','Oración de cierre'].includes(r);
@@ -24362,7 +24362,7 @@ async function fsNotifyNewAssignments(newWeek, prevWeek, range) {
 
   if (!toNotify.length) return;
 
-  const EDGE_URL = 'https://chiohqxmyelsmtipiygw.supabase.co/functions/v1/notify-users';
+  const EDGE_URL = 'https://eaimwununtgoyxvryony.supabase.co/functions/v1/notify-users';
 
   for (const { name, roles } of toNotify) {
     const rolesText = roles.map(r => `el rol de "${r}"`).join(' y ');
