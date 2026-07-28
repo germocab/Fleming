@@ -6083,6 +6083,18 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
   </div>
 </div>
 
+<!-- ── Modo Mantenimiento (v1.37.0-beta): pantalla de bloqueo global,
+     activable/desactivable por el Usuario DEV desde Monitor → Modo
+     Mantenimiento. Se muestra por encima de todo (auth-screen, app, etc.)
+     para cualquier usuario cuyo rol no sea 'dev'. Un tap x5 rápido sobre el
+     ícono permite al DEV llegar a la pantalla de acceso normal desde un
+     navegador sin sesión guardada. ── -->
+<div id="maintenance-screen" style="display:none;position:fixed;inset:0;z-index:99999;background:#ffffff;align-items:center;justify-content:center;flex-direction:column;padding:2rem;text-align:center">
+  <img src="icons/apple-touch-icon.png" alt="FlemingApp" onclick="_handleMaintenanceIconTap()" style="width:84px;height:84px;border-radius:20px;box-shadow:0 4px 18px rgba(0,0,0,0.12);margin-bottom:1.5rem;cursor:pointer;user-select:none">
+  <h2 style="font-size:1.3rem;font-weight:800;color:#1c1c1e;margin:0 0 0.6rem">FlemingApp en mantenimiento</h2>
+  <p style="font-size:0.92rem;color:#6e6e73;max-width:360px;line-height:1.5;margin:0">Por favor, revisa más tarde para saber si la plataforma vuelve a su funcionamiento normal. Te recomendamos usar la plataforma original por el momento.</p>
+</div>
+
 <div id="auth-screen">
   <div class="auth-card">
     <div class="auth-logo">
@@ -7051,6 +7063,26 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         </div>
 
         <div class="monitor-pane active" id="monitor-pane-stats">
+          <!-- ── Modo Mantenimiento (v1.37.0-beta): exclusivo del Usuario DEV.
+               Al activarlo, todos los demás usuarios (Admins y Miembros) ven
+               una pantalla de mantenimiento en vez de la plataforma. ── -->
+          <div class="notif-gestor-card" style="margin-bottom:1.1rem;border:1px solid rgba(255,59,48,0.2)">
+            <div class="profile-row" style="cursor:pointer;padding:0.4rem 0" onclick="toggleMaintenanceModeUI()">
+              <div class="profile-row-icon" style="background:rgba(255,59,48,0.12);color:#ff3b30">
+                <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              </div>
+              <div class="profile-row-content">
+                <div class="profile-row-label" style="font-size:0.9rem;font-weight:700">Modo Mantenimiento</div>
+                <div class="profile-row-value" style="font-size:0.78rem">Muestra una pantalla de mantenimiento a todos los usuarios, excepto a ti (Usuario DEV)</div>
+              </div>
+              <div id="maintenance-mode-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+                <div id="maintenance-mode-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+              </div>
+            </div>
+            <div id="maintenance-mode-warning" style="display:none;margin-top:0.7rem;padding:0.6rem 0.8rem;background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.28);border-radius:10px;font-size:0.78rem;color:#ff3b30;line-height:1.4">
+              ⚠️ Modo Mantenimiento ACTIVO — todos los usuarios (excepto tú) están viendo la pantalla de mantenimiento.
+            </div>
+          </div>
           <div style="font-size:0.78rem;color:var(--text3);line-height:1.4;margin-bottom:1rem">
             Estadísticas de uso y preferencias agregadas de todos los usuarios en las últimas 24 horas. No refleja acciones individuales.
           </div>
@@ -8974,7 +9006,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.36.7-beta';
+const APP_VERSION = '1.37.0-beta';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -10019,9 +10051,44 @@ async function init() {
   const saved = loadSession();
   if (saved) {
     if (saved.role === 'semiadmin') { saved.role = 'admin'; }
-    currentUser = saved; currentRole = saved.role; enterApp();
+    currentUser = saved; currentRole = saved.role;
+    // Modo Mantenimiento (v1.37.0-beta): se revisa antes de entrar. Si está
+    // activo y el usuario guardado no es DEV, se bloquea con la pantalla de
+    // mantenimiento en vez de continuar hacia la app.
+    const maintActive = await getMaintenanceMode();
+    if (maintActive && currentRole !== 'dev') {
+      applyMaintenanceModeUI(true);
+      startMaintenancePolling();
+      return;
+    }
+    enterApp();
   }
-  else { document.getElementById('auth-screen').style.display = 'flex'; }
+  else {
+    // Sin sesión guardada: si el Modo Mantenimiento está activo, se muestra
+    // el bloqueo (el DEV puede revelar el acceso normal con 5 taps en el ícono).
+    const maintActive = await getMaintenanceMode();
+    if (maintActive) {
+      applyMaintenanceModeUI(true);
+      startMaintenancePolling();
+      return;
+    }
+    document.getElementById('auth-screen').style.display = 'flex';
+  }
+}
+
+// ── Sondeo del Modo Mantenimiento mientras la pantalla de bloqueo está
+//    visible (usuario sin sesión activa dentro de la app) ──────────────────
+let _maintenancePollInterval = null;
+function startMaintenancePolling() {
+  if (_maintenancePollInterval) clearInterval(_maintenancePollInterval);
+  _maintenancePollInterval = setInterval(async () => {
+    const active = await getMaintenanceMode();
+    if (!active) {
+      clearInterval(_maintenancePollInterval);
+      _maintenancePollInterval = null;
+      location.reload(); // vuelve a evaluar sesión/rol desde cero
+    }
+  }, 20000);
 }
 
 // El cargo "SemiAdmin" fue eliminado de la plataforma (v0.30.2-alpha): ahora
@@ -11916,6 +11983,17 @@ async function enterApp() {
     showPendingScreen();
     return;
   }
+
+  // Modo Mantenimiento (v1.37.0-beta): última verificación justo antes de
+  // mostrar la app, por si se activó en el instante mismo del login.
+  if (currentRole !== 'dev') {
+    const maintActive = await getMaintenanceMode();
+    if (maintActive) {
+      applyMaintenanceModeUI(true);
+      startMaintenancePolling();
+      return;
+    }
+  }
   document.getElementById('auth-pending-screen').style.display = 'none';
 
   const app = document.getElementById('app');
@@ -12950,7 +13028,7 @@ async function switchAdminTab(tab) {
   if (tab === 'fin-semana') { loadFsWeeks().then(() => renderAdminFs()); }
   if (tab === 'notificaciones') { renderNotifAdminTemplates(); renderNotifAdminCategories(); loadNotifLevels().then(renderNotifAdminLevels); }
   if (tab === 'tips') { renderAdminTipsList(); }
-  if (tab === 'monitor') { switchMonitorTab(_monitorActiveTab || 'stats'); }
+  if (tab === 'monitor') { switchMonitorTab(_monitorActiveTab || 'stats'); loadMaintenanceModeUI(); }
   if (tab === 'carritos') { cartOpenAdminSection(); }
   if (tab === 'reports') { trepOpenAdminSection(); }
 }
@@ -18721,7 +18799,12 @@ function stopRolePolling() {
 }
 
 async function syncRoleFromServer() {
-  if (!currentUser || currentRole === 'dev') return;
+  if (!currentUser) return;
+  // Modo Mantenimiento (v1.37.0-beta): se revisa en cada ciclo de sondeo para
+  // que, si el DEV lo activa mientras alguien ya está dentro de la app, el
+  // bloqueo se aplique casi al instante sin esperar a un refresco manual.
+  checkMaintenanceMode();
+  if (currentRole === 'dev') return;
   try {
     const { data } = await sb.from('platform_users')
       .select('role, task, permissions')
@@ -27189,6 +27272,117 @@ async function setTerritoryReportReminderHours(hours) {
   const { error } = await sb.from('platform_settings').upsert({ key: 'territory_report_reminder', value: { hours } });
   if (error) throw error;
   _territoryReminderHoursCache = hours;
+}
+
+// ── Modo Mantenimiento (v1.37.0-beta) ───────────────────────────────────────
+// El Usuario DEV puede activar/desactivar, desde Monitor → Modo
+// Mantenimiento, una pantalla de bloqueo global que se muestra a TODOS los
+// usuarios (Admins y Miembros) en vez de la plataforma. El Usuario DEV nunca
+// se ve afectado por este modo: sigue viendo la app con normalidad.
+//
+// Requiere en Supabase:
+//   platform_settings (key text primary key, value jsonb)
+//     -- fila: { key: 'maintenance_mode', value: { active: true|false } }
+//
+// El estado se revisa: (1) al iniciar la app (init/enterApp), y (2) cada 20s
+// mientras la app está abierta, reutilizando el mismo ciclo de sondeo que
+// syncRoleFromServer, para que el bloqueo/desbloqueo se refleje casi al
+// instante sin necesidad de recargar.
+
+const DEFAULT_MAINTENANCE_MODE = false;
+let _maintenanceModeCache = null;
+
+async function getMaintenanceMode() {
+  try {
+    const { data, error } = await sb.from('platform_settings').select('value').eq('key', 'maintenance_mode').maybeSingle();
+    if (error) throw error;
+    _maintenanceModeCache = !!(data && data.value && data.value.active);
+  } catch (e) {
+    console.warn('No se pudo cargar el Modo Mantenimiento (usando valor por defecto):', e.message);
+    _maintenanceModeCache = DEFAULT_MAINTENANCE_MODE;
+  }
+  return _maintenanceModeCache;
+}
+
+async function setMaintenanceMode(active) {
+  const { error } = await sb.from('platform_settings').upsert({ key: 'maintenance_mode', value: { active } });
+  if (error) throw error;
+  _maintenanceModeCache = active;
+}
+
+// ── Aplicación del bloqueo en pantalla ──────────────────────────────────────
+// Muestra/oculta la pantalla de mantenimiento según el rol actual. El Usuario
+// DEV jamás es bloqueado, aunque el modo esté activo.
+function applyMaintenanceModeUI(active) {
+  const screen = document.getElementById('maintenance-screen');
+  if (!screen) return;
+  const blocked = !!active && currentRole !== 'dev';
+  if (blocked) {
+    screen.style.display = 'flex';
+  } else {
+    screen.style.display = 'none';
+  }
+}
+
+// Revisa el estado en Supabase y aplica el bloqueo si corresponde. Se llama
+// al arrancar la app (con o sin sesión) y periódicamente mientras está
+// abierta. Errores de red se ignoran en silencio (no se bloquea a nadie por
+// un fallo transitorio de conexión).
+async function checkMaintenanceMode() {
+  try {
+    const active = await getMaintenanceMode();
+    applyMaintenanceModeUI(active);
+  } catch (e) {
+    // Silencioso: no se bloquea la app por un error de red al consultar.
+  }
+}
+
+// ── Admin UI (Monitor → Modo Mantenimiento) ─────────────────────────────────
+function setMaintenanceToggleUI(active) {
+  const toggle = document.getElementById('maintenance-mode-toggle');
+  const thumb = document.getElementById('maintenance-mode-thumb');
+  const warn = document.getElementById('maintenance-mode-warning');
+  if (toggle) toggle.style.background = active ? '#ff3b30' : 'var(--surface3)';
+  if (thumb) thumb.style.left = active ? '21px' : '3px';
+  if (warn) warn.style.display = active ? '' : 'none';
+}
+
+async function loadMaintenanceModeUI() {
+  const active = await getMaintenanceMode();
+  setMaintenanceToggleUI(active);
+}
+
+async function toggleMaintenanceModeUI() {
+  if (currentRole !== 'dev') return;
+  const next = !_maintenanceModeCache;
+  setMaintenanceToggleUI(next); // optimista
+  try {
+    await setMaintenanceMode(next);
+    showToast(next ? 'Modo Mantenimiento activado ✓' : 'Modo Mantenimiento desactivado ✓', next ? 'error' : 'success');
+    // El propio DEV nunca se bloquea, pero por consistencia se re-evalúa la UI.
+    applyMaintenanceModeUI(next);
+  } catch (e) {
+    console.error('toggleMaintenanceModeUI:', e);
+    setMaintenanceToggleUI(!next); // revertir
+    showToast('No se pudo actualizar el Modo Mantenimiento.', 'error');
+  }
+}
+
+// ── Acceso oculto para el DEV (v1.37.0-beta) ────────────────────────────────
+// Si un dispositivo sin sesión guardada necesita ingresar como DEV mientras
+// el Modo Mantenimiento está activo, 5 taps rápidos sobre el ícono de la
+// pantalla de mantenimiento revelan la pantalla de acceso normal.
+let _maintenanceTapCount = 0;
+let _maintenanceTapTimer = null;
+function _handleMaintenanceIconTap() {
+  _maintenanceTapCount++;
+  if (_maintenanceTapTimer) clearTimeout(_maintenanceTapTimer);
+  _maintenanceTapTimer = setTimeout(() => { _maintenanceTapCount = 0; }, 1500);
+  if (_maintenanceTapCount >= 5) {
+    _maintenanceTapCount = 0;
+    document.getElementById('maintenance-screen').style.display = 'none';
+    document.getElementById('auth-screen').style.display = 'flex';
+  }
 }
 
 // ── Admin UI (Reportes → Recordatorios) ─────────────────────────────────────
