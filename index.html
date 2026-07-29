@@ -9065,7 +9065,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.38.0-stable-beta';
+const APP_VERSION = '1.38.1-stable-beta';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -18770,27 +18770,49 @@ async function registerUserSession(name, role) {
     }
   } catch(e) { /* ignore — proceed normally */ }
 
-  const { data: existing } = await sb.from('platform_users')
-    .select('id, role, linked_name').ilike('name', name).single();
+  // v1.38.1-stable-beta: FIX — esta consulta (y todo lo que sigue) ya no puede
+  // tumbar la sesión. Antes, si el teléfono volvía de segundo plano con la red
+  // aún reconectando (wifi/datos "despertando"), esta llamada a Supabase fallaba
+  // sin capturarse, enterApp() se cortaba a la mitad y la persona veía la app
+  // como si la sesión se hubiera cerrado — aunque seguía guardada en localStorage.
+  // También podía insertar un usuario duplicado si el error se confundía con
+  // "no existe". Ahora cualquier falla de red aquí se ignora silenciosamente:
+  // se sigue usando el rol/datos ya guardados localmente y se reintenta en la
+  // próxima entrada a la app.
+  try {
+    const { data: existing, error } = await sb.from('platform_users')
+      .select('id, role, linked_name').ilike('name', name).single();
 
-  if (existing) {
-    await sb.from('platform_users').update({ last_seen: now }).eq('id', existing.id);
-    // Always adopt the role Supabase has — this is the source of truth
-    // (incluye 'pending': si ya hay una solicitud en curso, no se reinserta).
-    let sessionChanged = false;
-    if (existing.role !== currentRole) {
-      currentRole = existing.role;
-      currentUser.role = existing.role;
-      sessionChanged = true;
+    // PGRST116 = "no rows found" (código normal de .single() cuando el
+    // usuario todavía no existe en la tabla): no es un fallo de red, así que
+    // se deja pasar para crear el registro nuevo más abajo. Cualquier otro
+    // error (timeout, sin conexión, etc.) sí se trata como falla real.
+    if (error && error.code !== 'PGRST116') throw error;
+
+    if (existing) {
+      await sb.from('platform_users').update({ last_seen: now }).eq('id', existing.id);
+      // Always adopt the role Supabase has — this is the source of truth
+      // (incluye 'pending': si ya hay una solicitud en curso, no se reinserta).
+      let sessionChanged = false;
+      if (existing.role !== currentRole) {
+        currentRole = existing.role;
+        currentUser.role = existing.role;
+        sessionChanged = true;
+      }
+      if ((existing.linked_name || null) !== (currentUser.linkedName || null)) {
+        currentUser.linkedName = existing.linked_name || null;
+        sessionChanged = true;
+      }
+      if (sessionChanged) saveSession(currentUser);
+    } else {
+      // Solo llega aquí si Supabase realmente confirmó "sin filas" (PGRST116
+      // se captura arriba como error también, así que si no hubo error y
+      // existing es null, es un caso legítimo de usuario nuevo).
+      await sb.from('platform_users')
+        .insert({ name, role, task: '', joined_at: now, last_seen: now });
     }
-    if ((existing.linked_name || null) !== (currentUser.linkedName || null)) {
-      currentUser.linkedName = existing.linked_name || null;
-      sessionChanged = true;
-    }
-    if (sessionChanged) saveSession(currentUser);
-  } else {
-    await sb.from('platform_users')
-      .insert({ name, role, task: '', joined_at: now, last_seen: now });
+  } catch (e) {
+    console.warn('[registerUserSession] No se pudo sincronizar con Supabase (probablemente red inestable). Se mantiene la sesión local sin cambios:', e.message);
   }
 }
 
