@@ -9150,7 +9150,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.38.3-beta';
+const APP_VERSION = '1.40.0-stable-beta';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -10161,9 +10161,60 @@ function toggleTheme() {
 // NOTA: se usa localStorage (no sessionStorage) para que la sesión persista
 // aunque se cierre la pestaña, el navegador o la app PWA. La única forma de
 // volver a ver la pantalla de inicio de sesión es llamando a doLogout().
-function saveSession(u) { localStorage.setItem('fleming_user', JSON.stringify(u)); }
+//
+// FIX (v1.40.0-stable-beta): en apps instaladas como PWA en iOS, Safari puede
+// borrar el localStorage por su política de "Intelligent Tracking Prevention"
+// si el usuario no vuelve a abrir la app en varios días — esto cerraba la
+// sesión sin que el usuario presionara "Cerrar Sesión". Como respaldo, la
+// sesión también se guarda en IndexedDB (mismo patrón que el cache offline de
+// territorios), que no está sujeto a ese borrado. Si al iniciar la app el
+// localStorage aparece vacío pero IndexedDB todavía tiene la sesión, se
+// restaura automáticamente (ver init()).
+const SESSION_DB_NAME = 'fleming_session_db';
+const SESSION_STORE = 'session';
+let _sessionDBPromise = null;
+function _openSessionDB() {
+  if (_sessionDBPromise) return _sessionDBPromise;
+  _sessionDBPromise = new Promise((resolve, reject) => {
+    try {
+      const req = indexedDB.open(SESSION_DB_NAME, 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(SESSION_STORE)) db.createObjectStore(SESSION_STORE, { keyPath: 'id' });
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    } catch (e) { reject(e); }
+  });
+  return _sessionDBPromise;
+}
+function _saveSessionToIDB(u) {
+  _openSessionDB().then(db => {
+    const tx = db.transaction(SESSION_STORE, 'readwrite');
+    tx.objectStore(SESSION_STORE).put({ id: 'current', user: u });
+  }).catch(e => console.warn('[Session] No se pudo respaldar la sesión en IndexedDB:', e.message));
+}
+function _loadSessionFromIDB() {
+  return _openSessionDB().then(db => new Promise(resolve => {
+    const tx = db.transaction(SESSION_STORE, 'readonly');
+    const req = tx.objectStore(SESSION_STORE).get('current');
+    req.onsuccess = () => resolve(req.result ? req.result.user : null);
+    req.onerror = () => resolve(null);
+  })).catch(() => null);
+}
+function _clearSessionFromIDB() {
+  _openSessionDB().then(db => {
+    const tx = db.transaction(SESSION_STORE, 'readwrite');
+    tx.objectStore(SESSION_STORE).delete('current');
+  }).catch(() => {});
+}
+
+function saveSession(u) {
+  localStorage.setItem('fleming_user', JSON.stringify(u));
+  _saveSessionToIDB(u);
+}
 function loadSession() { try { return JSON.parse(localStorage.getItem('fleming_user')); } catch { return null; } }
-function clearSession() { localStorage.removeItem('fleming_user'); }
+function clearSession() { localStorage.removeItem('fleming_user'); _clearSessionFromIDB(); }
 
 // ── Vinculación de cuentas (v1.18.0-beta) ───────────────────────────────────
 // El DEV puede enlazar una cuenta (ej. "Alison Gutiérrez") con el nombre bajo
@@ -10192,7 +10243,20 @@ async function init() {
   const _sharedAssignmentId = new URLSearchParams(location.search).get('share');
   if (_sharedAssignmentId) { await initGuestShareMode(_sharedAssignmentId); return; }
   migrateSemiAdminsToAdmin(); // El cargo SemiAdmin fue eliminado: se promueve a Admin.
-  const saved = loadSession();
+  let saved = loadSession();
+  // FIX (v1.40.0-stable-beta): si el localStorage fue borrado por el navegador
+  // (p.ej. límites de almacenamiento en PWA de iOS) pero el respaldo en
+  // IndexedDB todavía existe, se restaura la sesión en vez de mandar al
+  // usuario a la pantalla de inicio de sesión.
+  if (!saved) {
+    try {
+      const fromIDB = await _loadSessionFromIDB();
+      if (fromIDB) {
+        localStorage.setItem('fleming_user', JSON.stringify(fromIDB));
+        saved = fromIDB;
+      }
+    } catch (e) { /* sin respaldo disponible, se sigue el flujo normal */ }
+  }
   if (saved) {
     if (saved.role === 'semiadmin') { saved.role = 'admin'; }
     currentUser = saved; currentRole = saved.role;
@@ -28043,7 +28107,11 @@ async function toggleMaintenanceModeUI() {
   } catch (e) {
     console.error('toggleMaintenanceModeUI:', e);
     setMaintenanceToggleUI(!next); // revertir
-    showToast('No se pudo actualizar el Modo Mantenimiento.', 'error');
+    // FIX (v1.40.0-stable-beta): se muestra el motivo real del error (antes
+    // era un mensaje genérico). La causa más común es que la tabla
+    // "platform_settings" todavía no existe en Supabase — ver SQL de
+    // migración en la documentación del proyecto.
+    showToast('No se pudo actualizar el Modo Mantenimiento: ' + (e.message || 'revisa que la tabla "platform_settings" exista en Supabase.'), 'error');
   }
 }
 
