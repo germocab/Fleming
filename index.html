@@ -13167,7 +13167,11 @@ async function checkPendingApproval() {
   const btn = document.getElementById('pending-check-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Verificando…'; }
   try {
-    const { data } = await sb.from('platform_users').select('role').ilike('name', currentUser.name).single();
+    // FIX (v1.40.0-stable-beta): .single() trataba CUALQUIER desajuste (cero
+    // filas O más de una) como "la cuenta fue eliminada" y forzaba doLogout().
+    // .maybeSingle() solo interpreta "cero filas" como cuenta eliminada.
+    const { data, error } = await sb.from('platform_users').select('role').ilike('name', currentUser.name).maybeSingle();
+    if (error) throw error;
     if (!data) {
       // La solicitud fue denegada: el registro fue eliminado.
       if (_pendingPollInterval) { clearInterval(_pendingPollInterval); _pendingPollInterval = null; }
@@ -19437,27 +19441,46 @@ async function registerUserSession(name, role) {
     }
   } catch(e) { /* ignore — proceed normally */ }
 
-  const { data: existing } = await sb.from('platform_users')
-    .select('id, role, linked_name').ilike('name', name).single();
+  // FIX (v1.40.0-stable-beta): esta consulta usaba .single(), que exige
+  // EXACTAMENTE una fila coincidente y devuelve un error silencioso (no
+  // revisado) si hay cero o más de una. Eso hacía que, en cuanto había el
+  // más mínimo desajuste (mayúsculas, espacios, tildes, o filas duplicadas
+  // ya generadas por este mismo bug), "existing" quedara null y la app
+  // insertara una fila NUEVA en cada recarga, en vez de reconocer al usuario
+  // ya registrado — y sin la fila correcta, la sesión podía parecer
+  // "cerrada" o con datos inconsistentes al volver a entrar.
+  // .maybeSingle() no falla si hay cero filas, y todo el bloque queda
+  // envuelto en try/catch para que un error transitorio (p.ej. sin red al
+  // recargar) no interrumpa el ingreso y deje al usuario varado.
+  try {
+    const { data: existing, error: existingErr } = await sb.from('platform_users')
+      .select('id, role, linked_name').ilike('name', name).maybeSingle();
+    if (existingErr) throw existingErr;
 
-  if (existing) {
-    await sb.from('platform_users').update({ last_seen: now }).eq('id', existing.id);
-    // Always adopt the role Supabase has — this is the source of truth
-    // (incluye 'pending': si ya hay una solicitud en curso, no se reinserta).
-    let sessionChanged = false;
-    if (existing.role !== currentRole) {
-      currentRole = existing.role;
-      currentUser.role = existing.role;
-      sessionChanged = true;
+    if (existing) {
+      await sb.from('platform_users').update({ last_seen: now }).eq('id', existing.id);
+      // Always adopt the role Supabase has — this is the source of truth
+      // (incluye 'pending': si ya hay una solicitud en curso, no se reinserta).
+      let sessionChanged = false;
+      if (existing.role !== currentRole) {
+        currentRole = existing.role;
+        currentUser.role = existing.role;
+        sessionChanged = true;
+      }
+      if ((existing.linked_name || null) !== (currentUser.linkedName || null)) {
+        currentUser.linkedName = existing.linked_name || null;
+        sessionChanged = true;
+      }
+      if (sessionChanged) saveSession(currentUser);
+    } else {
+      await sb.from('platform_users')
+        .insert({ name, role, task: '', joined_at: now, last_seen: now });
     }
-    if ((existing.linked_name || null) !== (currentUser.linkedName || null)) {
-      currentUser.linkedName = existing.linked_name || null;
-      sessionChanged = true;
-    }
-    if (sessionChanged) saveSession(currentUser);
-  } else {
-    await sb.from('platform_users')
-      .insert({ name, role, task: '', joined_at: now, last_seen: now });
+  } catch (e) {
+    // No se pudo confirmar/actualizar el registro en Supabase (p.ej. sin
+    // conexión al recargar). Se continúa con la sesión guardada localmente
+    // en vez de dejar al usuario varado o forzar un cierre de sesión.
+    console.warn('registerUserSession: no se pudo sincronizar con Supabase, se continúa con la sesión local:', e.message);
   }
 }
 
@@ -22248,9 +22271,18 @@ document.addEventListener('keydown', e => {
   }
 });
 
-init();
-
-// ── Notification badge logic ──────────────────────────────────────────────────
+// FIX (v1.40.0-stable-beta): el HTML tiene el código repartido en varias
+// etiquetas <script> separadas. init() llama a getMaintenanceMode(), que
+// está definida en una etiqueta <script> posterior en el documento — al
+// llamarse init() de forma inmediata y sincrónica aquí, esa etiqueta
+// posterior todavía no se había ejecutado, y el navegador lanzaba
+// "ReferenceError: getMaintenanceMode is not defined" cortando init() a
+// mitad de camino. Nunca se llegaba a mostrar ni la app ni el login — esta
+// era la causa real de que pareciera que "se cerraba la sesión" al recargar,
+// y también de que el Modo Mantenimiento nunca funcionara. Se espera al
+// evento 'load' para asegurar que TODAS las etiquetas <script> del documento
+// ya se ejecutaron antes de arrancar la app.
+window.addEventListener('load', init);
 // Stores the ISO timestamp of the last notification the user has seen.
 // ── Notification groups (macro-categorías visuales) ──────────────────────────
 // Cada notificación se clasifica en uno de estos 4 grupos para mostrarse con
