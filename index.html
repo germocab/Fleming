@@ -1191,31 +1191,6 @@
   .detail-sidebar-fab { display: none; }
   @media (min-width: 640px) { .detail-sidebar-fab { display: flex; } }
 
- 
-  .detail-download-fab {
-    display: flex; align-items: center; justify-content: center;
-    width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
-    background: var(--nav-bg);
-    backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%);
-    -webkit-backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%);
-    border: 1px solid var(--border); box-shadow: var(--shadow);
-    color: var(--accent); cursor: pointer; position: relative;
-    transition: opacity 0.2s, transform 0.15s, color 0.15s;
-  }
-  .detail-download-fab svg {
-    width: 17px; height: 17px; stroke: currentColor; fill: none;
-    stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
-  }
-  .detail-download-fab:hover { opacity: 0.75; }
-  .detail-download-fab:active { transform: scale(0.92); }
-  .detail-download-fab.downloaded { color: var(--green, #30c97a); }
-  .detail-download-fab .dl-update-dot {
-    position: absolute; top: 1px; right: 1px; width: 9px; height: 9px; border-radius: 50%;
-    background: var(--orange, #ff9500); border: 2px solid var(--nav-bg); display: none;
-  }
-  .detail-download-fab.update-available .dl-update-dot { display: block; }
-
-
   .detail-handle { width: 36px; height: 4px; background: var(--surface3); border-radius: 2px; margin: 10px auto 0; }
  
   .detail-panel .detail-territory-topbar { display: none; }
@@ -3776,24 +3751,6 @@
     font-size: 0.8rem; font-weight: 800; color: white;
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
-
-  .ter-download-all-btn {
-    width: 100%; margin-top: 1.1rem; padding: 0.9rem 1rem;
-    display: flex; align-items: center; gap: 0.8rem;
-    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius);
-    font-family: var(--font); cursor: pointer; transition: all 0.2s; text-align: left;
-  }
-  .ter-download-all-btn:hover { background: var(--surface3); border-color: var(--border-active); }
-  .ter-download-all-btn:active { transform: scale(0.985); }
-  .ter-download-all-icon {
-    width: 19px; height: 19px; flex-shrink: 0; color: var(--accent, #007AFF);
-  }
-  .ter-download-all-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-  .ter-download-all-label { font-size: 0.9rem; font-weight: 700; color: var(--text); }
-  .ter-download-all-sub { font-size: 0.75rem; color: var(--text3); }
-  .ter-download-all-btn.loading { pointer-events: none; opacity: 0.75; }
-  .ter-download-all-btn.loading .ter-download-all-icon { animation: ter-dl-spin 1s linear infinite; }
-  @keyframes ter-dl-spin { to { transform: rotate(360deg); } }
 
   .ter-view-header {
     display: flex; align-items: center; justify-content: space-between;
@@ -7230,11 +7187,6 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
       </button>
       <span class="pill-header-title" id="detail-territory-title">Territorio</span>
       <div class="subpage-topbar-right">
-        <button class="detail-download-fab" id="detail-download-fab" onclick="toggleTerritoryDownload()" title="Descargar territorio para uso sin conexión">
-          <svg class="dl-icon-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <svg class="dl-icon-check" viewBox="0 0 24 24" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
-          <span class="dl-update-dot"></span>
-        </button>
         <button class="detail-sidebar-fab" id="detail-sidebar-fab-ter" onclick="toggleH2HSidebarLive()" title="Cambiar a vista Lateral">
           <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="10" y1="4" x2="10" y2="20"/></svg>
         </button>
@@ -8068,7 +8020,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         </div>
         <div class="profile-row-content">
           <div class="profile-row-label" data-i18n="settings.preferencias">Preferencias</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.preferencias.desc">Idioma, tema, mapas, transparencia, NavBar y almacenamiento</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.preferencias.desc">Idioma, tema, mapas, transparencia y NavBar</div>
         </div>
         <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
@@ -8368,19 +8320,6 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
       </div>
       <div class="pref-desktop-only-row" style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="func.auto.help">En "Automático" (por defecto), la barra se encoge apenas haces scroll y solo recupera su tamaño al volver hasta arriba del todo.</div>
     </div>
-    <!-- Almacenamiento (v1.20.0-beta) -->
-    <div class="profile-section">
-      <div class="pref-nav-row" id="pref-nav-row-almacenamiento" onclick="openPrefScreen('almacenamiento')">
-        <div class="profile-row-icon" style="background:var(--ter-6-bg);color:var(--ter-6)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label">Almacenamiento</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Mapas de Territorio descargados</div>
-        </div>
-        <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -8456,30 +8395,6 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
     <div class="profile-section">
       <div id="pref-notif-list"></div>
     </div>
-  </div>
-</div>
-
-<!-- ── Sub-pantalla: Almacenamiento (v1.20.0-beta) ── -->
-<div id="page-pref-almacenamiento" class="pref-subpage">
-  <nav class="subpage-topbar">
-    <button class="pill-back-btn" onclick="closePrefScreenToConfig()" title="Configuración" data-i18n-title="settings.title">
-      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-    </button>
-    <span class="pill-header-title">Almacenamiento</span>
-  </nav>
-  <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 1rem 2.5rem">
-    <div class="notif-gestor-hint" style="margin-bottom:1rem">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-      Aquí puedes ver los mapas de Territorio descargados para uso sin conexión, revisar si hay actualizaciones disponibles, y borrarlos para liberar espacio.
-    </div>
-    <div class="profile-section">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:0.85rem 1rem;border-bottom:1px solid var(--border)">
-        <span style="font-size:0.85rem;font-weight:600;color:var(--text2)">Espacio usado</span>
-        <span style="font-size:0.9rem;font-weight:700" id="storage-total-value">—</span>
-      </div>
-      <div id="storage-territories-list" style="padding:0.5rem 0.75rem"></div>
-    </div>
-    <button class="btn-secondary" style="width:100%;margin-top:1rem" onclick="clearAllOfflineTerritoriesFromUI()">Borrar todas las descargas</button>
   </div>
 </div>
 
@@ -9275,7 +9190,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.41.0-stable_beta';
+const APP_VERSION = '1.41.1-sb';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -9356,214 +9271,17 @@ window.addEventListener('offline', () => {
   if (typeof updateLiveToggleUI === 'function') updateLiveToggleUI();
 });
 
-// ── Descarga de Territorios para uso sin conexión ───────────────────────────
-// Guarda una copia local (mapa + direcciones No Pasar) de un territorio para
-// que se pueda seguir viendo y usando sin necesidad de esperar a tener
-// conexión. Si el territorio se actualiza en el servidor (nuevo mapa, nuevas
-// direcciones No Pasar, etc.), se detecta comparando una "huella" simple de
-// sus datos y se avisa para poder actualizar la copia descargada.
-//
-// NOTA (fix v1.15.30-beta): antes esto se guardaba en localStorage, que tiene
-// una cuota muy chica (5-10MB) compartida con el resto de la app. Los mapas
-// de los territorios (imágenes en base64) la llenan rápido, sobre todo con
-// "Descargar todo", así que el guardado fallaba silenciosamente con
-// "No se pudo guardar el territorio en este dispositivo" apenas se acumulaban
-// unos pocos territorios con mapa. Ahora se usa IndexedDB (cuota mucho mayor,
-// pensada para este tipo de datos) y se mantiene un cache en memoria para que
-// las lecturas sigan siendo síncronas en el resto del código.
-const OFFLINE_TER_KEY = 'fleming_offline_territories'; // clave legacy (localStorage), solo para migrar datos viejos
-const OFFLINE_TER_DB_NAME = 'fleming_offline_db';
-const OFFLINE_TER_STORE = 'territories';
-let _offlineTerritoriesCache = {};
-let _offlineDBPromise = null;
+// ── Descarga de Territorios para uso sin conexión: ELIMINADA (v1.41.1-sb) ──
+// La función de descargar Territorios para verlos sin conexión (y el
+// apartado "Almacenamiento" en Configuración → Preferencias) se retiró de la
+// plataforma. Se mantienen estos dos stubs solo porque otras partes del
+// código (badges de estado, fallback del mapa sin conexión) los invocan por
+// nombre; ahora siempre devuelven "no descargado", sin acceder a IndexedDB
+// ni a localStorage.
+function getDownloadedTerritory(id) { return null; }
+function isTerritoryDownloaded(id) { return false; }
+function _updateDownloadBtnUI(id) { /* botón de descarga eliminado — no-op */ }
 
-function _openOfflineTerDB() {
-  if (_offlineDBPromise) return _offlineDBPromise;
-  _offlineDBPromise = new Promise((resolve, reject) => {
-    try {
-      const req = indexedDB.open(OFFLINE_TER_DB_NAME, 1);
-      req.onupgradeneeded = () => {
-        const db = req.result;
-        if (!db.objectStoreNames.contains(OFFLINE_TER_STORE)) db.createObjectStore(OFFLINE_TER_STORE, { keyPath: 'id' });
-      };
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    } catch (e) { reject(e); }
-  });
-  return _offlineDBPromise;
-}
-
-async function _loadAllOfflineTerritoriesFromDB() {
-  try {
-    const db = await _openOfflineTerDB();
-    const fromDB = await new Promise((resolve, reject) => {
-      const tx = db.transaction(OFFLINE_TER_STORE, 'readonly');
-      const req = tx.objectStore(OFFLINE_TER_STORE).getAll();
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror = () => reject(req.error);
-    });
-    const map = {};
-    fromDB.forEach(entry => { map[entry.id] = entry; });
-    // Migración única desde localStorage (versiones anteriores a 1.15.30-beta)
-    if (!fromDB.length) {
-      try {
-        const legacy = JSON.parse(localStorage.getItem(OFFLINE_TER_KEY) || '{}');
-        const legacyIds = Object.keys(legacy);
-        if (legacyIds.length) {
-          for (const id of legacyIds) {
-            const entry = { id, ...legacy[id] };
-            map[id] = entry;
-            await _putOfflineTerritoryInDB(entry);
-          }
-          localStorage.removeItem(OFFLINE_TER_KEY);
-        }
-      } catch (e) { /* sin datos legacy o corruptos, se ignora */ }
-    }
-    return map;
-  } catch (e) {
-    console.warn('[Offline] No se pudo abrir IndexedDB, usando localStorage como respaldo:', e.message);
-    try { return JSON.parse(localStorage.getItem(OFFLINE_TER_KEY) || '{}'); } catch (e2) { return {}; }
-  }
-}
-
-function _putOfflineTerritoryInDB(entryWithId) {
-  return _openOfflineTerDB().then(db => new Promise((resolve, reject) => {
-    const tx = db.transaction(OFFLINE_TER_STORE, 'readwrite');
-    tx.objectStore(OFFLINE_TER_STORE).put(entryWithId);
-    tx.oncomplete = () => resolve(true);
-    tx.onerror = () => reject(tx.error);
-  }));
-}
-
-let _offlineTerCacheReady = (async () => {
-  _offlineTerritoriesCache = await _loadAllOfflineTerritoriesFromDB();
-})();
-
-function _getOfflineTerritories() { return _offlineTerritoriesCache; }
-function _saveOfflineTerritories(store) {
-  // Se mantiene por compatibilidad de firma; ya no escribe todo el store de
-  // golpe (eso era parte del problema), sino que cada territorio se guarda
-  // individualmente vía _putOfflineTerritoryInDB en downloadTerritoryOffline().
-  _offlineTerritoriesCache = store;
-  return true;
-}
-function _territoryFingerprint(terr) {
-  return JSON.stringify({
-    color: terr.color, no_pasar: terr.no_pasar,
-    map_data: terr.map_data || null, map_data_dark: terr.map_data_dark || null,
-  });
-}
-function getDownloadedTerritory(id) { return _getOfflineTerritories()[id] || null; }
-function isTerritoryDownloaded(id) { return !!getDownloadedTerritory(id); }
-
-async function downloadTerritoryOffline(terr) {
-  const entry = {
-    id: terr.id,
-    number: terr.number, color: terr.color, no_pasar: terr.no_pasar,
-    map_data: terr.map_data || null, map_data_dark: terr.map_data_dark || null,
-    fingerprint: _territoryFingerprint(terr), downloadedAt: Date.now(),
-  };
-  _offlineTerritoriesCache[terr.id] = entry;
-  let ok = true;
-  try {
-    await _putOfflineTerritoryInDB(entry);
-  } catch (e) {
-    console.warn('[Offline] No se pudo guardar el territorio descargado:', e.message);
-    ok = false;
-  }
-  _updateDownloadBtnUI(terr.id);
-  return ok;
-}
-
-async function toggleTerritoryDownload() {
-  try {
-    await _offlineTerCacheReady;
-    const btn = document.getElementById('detail-download-fab');
-    const id = btn && btn.dataset.territoryId;
-    if (!id) return;
-    const terr = territories.find(x => x.id === id);
-    if (!terr) return;
-    const entry = getDownloadedTerritory(id);
-
-    if (!entry) {
-      if (blockIfOffline('offline.nodownload')) return;
-      const ok = await downloadTerritoryOffline(terr);
-      if (!ok) showToast(t('offline.errorguardado'), 'error');
-      return;
-    }
-    // Ya estaba descargado
-    if (!isAppOnline()) { showToast(t('offline.yadescargado'), 'info'); return; }
-    if (entry.fingerprint !== _territoryFingerprint(terr)) {
-      const ok = await downloadTerritoryOffline(terr);
-      if (!ok) showToast(t('offline.errorguardado'), 'error');
-    } else {
-      showToast(t('offline.yadescargado'), 'info');
-    }
-  } catch (e) {
-    console.error('[Offline] Error al descargar el territorio:', e);
-    showToast(t('offline.errorguardado'), 'error');
-  }
-}
-
-// ── Gestión de Almacenamiento (v1.20.0-beta) ─────────────────────────────────
-// Permite ver y borrar los mapas de Territorio descargados para uso sin
-// conexión desde Configuración > Almacenamiento, sin tener que entrar a cada
-// Territorio individualmente.
-function _deleteOfflineTerritoryFromDB(id) {
-  return _openOfflineTerDB().then(db => new Promise((resolve, reject) => {
-    const tx = db.transaction(OFFLINE_TER_STORE, 'readwrite');
-    tx.objectStore(OFFLINE_TER_STORE).delete(id);
-    tx.oncomplete = () => resolve(true);
-    tx.onerror = () => reject(tx.error);
-  }));
-}
-async function removeOfflineTerritory(id) {
-  delete _offlineTerritoriesCache[id];
-  try {
-    await _deleteOfflineTerritoryFromDB(id);
-  } catch (e) {
-    console.warn('[Almacenamiento] No se pudo borrar el territorio descargado:', e.message);
-  }
-  _updateDownloadBtnUI(id);
-}
-async function clearAllOfflineTerritories() {
-  const ids = Object.keys(_offlineTerritoriesCache);
-  for (const id of ids) await removeOfflineTerritory(id);
-}
-// Estimación aproximada en bytes del tamaño de un territorio descargado
-// (a partir del largo del base64 de sus mapas guardados).
-function _offlineEntrySizeBytes(entry) {
-  const b64 = (entry.map_data || '') + (entry.map_data_dark || '');
-  return Math.round(b64.length * 0.75);
-}
-function _formatBytes(bytes) {
-  if (!bytes) return '0 KB';
-  if (bytes < 1024 * 1024) return Math.max(1, Math.round(bytes / 1024)) + ' KB';
-  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-}
-
-function _updateDownloadBtnUI(id) {
-  const btn = document.getElementById('detail-download-fab');
-  if (!btn) return;
-  btn.dataset.territoryId = id;
-  const entry = getDownloadedTerritory(id);
-  const downloaded = !!entry;
-  btn.classList.toggle('downloaded', downloaded);
-  const dlIcon = btn.querySelector('.dl-icon-download');
-  const okIcon = btn.querySelector('.dl-icon-check');
-  if (dlIcon) dlIcon.style.display = downloaded ? 'none' : '';
-  if (okIcon) okIcon.style.display = downloaded ? '' : 'none';
-
-  let updateAvailable = false;
-  if (downloaded) {
-    const terr = territories.find(x => x.id === id);
-    if (terr && terr.map_data !== undefined && entry.fingerprint !== _territoryFingerprint(terr)) updateAvailable = true;
-  }
-  btn.classList.toggle('update-available', updateAvailable);
-  btn.title = !downloaded
-    ? 'Descargar territorio para uso sin conexión'
-    : (updateAvailable ? 'Hay una actualización disponible — toca para descargarla' : 'Territorio descargado para uso sin conexión');
-}
 
 // Resuelve y aplica el mapa de un territorio en un .detail-map-wrap dado,
 // recurriendo a la copia descargada localmente cuando no hay conexión.
@@ -9628,40 +9346,6 @@ function _applyDetailMapSrc(ter, opts) {
   }
 }
 
-// Descarga TODOS los territorios de golpe para uso sin conexión (botón
-// "Descargar todo" al final de la sub-sección Territorios). Reutiliza
-// downloadTerritoryOffline() por cada territorio; requiere conexión, ya que
-// necesita traer los map_data de todos los territorios primero.
-let _downloadingAllTerritories = false;
-async function downloadAllTerritoriesOffline() {
-  if (_downloadingAllTerritories) return;
-  if (blockIfOffline('offline.nodownload')) return;
-  if (!territories.length) return;
-  await _offlineTerCacheReady;
-  _downloadingAllTerritories = true;
-  const btn = document.getElementById('ter-download-all-btn');
-  const label = btn ? btn.querySelector('.ter-download-all-label') : null;
-  const originalLabel = label ? label.textContent : '';
-  if (btn) btn.classList.add('loading');
-  try {
-    await ensureTerritoryMapsLoaded();
-    let anyFailed = false;
-    for (let i = 0; i < territories.length; i++) {
-      const terr = territories[i];
-      if (label) label.textContent = `${t('offline.descargandotodo')} (${i + 1}/${territories.length})`;
-      const ok = await downloadTerritoryOffline(terr);
-      if (!ok) anyFailed = true;
-    }
-    showToast(t(anyFailed ? 'offline.errordescargatodo' : 'offline.descargadotodo'), anyFailed ? 'error' : 'success');
-  } catch (e) {
-    console.error('[Offline] No se pudieron descargar todos los territorios:', e);
-    showToast(t('offline.errordescargatodo'), 'error');
-  } finally {
-    _downloadingAllTerritories = false;
-    if (btn) btn.classList.remove('loading');
-    if (label) label.textContent = originalLabel;
-  }
-}
 
 // Al volver a tener conexión y recargar los territorios, revisa si alguno de
 // los territorios descargados localmente cambió en el servidor, y si es así,
@@ -9753,7 +9437,7 @@ const I18N = {
   // ── Configuración (menú principal) ──
   'settings.title':             { es: 'Configuración',            en: 'Settings',    nl: 'Instellingen' },
   'settings.preferencias':      { es: 'Preferencias',             en: 'Preferences', nl: 'Voorkeuren' },
-  'settings.preferencias.desc': { es: 'Idioma, tema, mapas, transparencia, NavBar y almacenamiento', en: 'Language, theme, maps, transparency, NavBar and storage', nl: 'Taal, thema, kaarten, transparantie, NavBar en opslag' },
+  'settings.preferencias.desc': { es: 'Idioma, tema, mapas, transparencia y NavBar', en: 'Language, theme, maps, transparency and NavBar', nl: 'Taal, thema, kaarten, transparantie en NavBar' },
   'settings.funciones':         { es: 'Funciones especiales',     en: 'Special Features', nl: 'Speciale functies' },
   'settings.funciones.desc':    { es: 'Live y Clima', en: 'Live and Weather', nl: 'Live en weer' },
   'settings.notificaciones':    { es: 'Notificaciones',           en: 'Notifications', nl: 'Meldingen' },
@@ -20023,14 +19707,7 @@ async function renderTerritoryView() {
         <div class="ter-grid-num">${terLabel(t.number)}</div>
       </div>
     </div>`;
-  }).join('') + `</div>` + `
-    <button class="ter-download-all-btn" id="ter-download-all-btn" onclick="downloadAllTerritoriesOffline()">
-      <svg class="ter-download-all-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      <div class="ter-download-all-text">
-        <span class="ter-download-all-label" data-i18n="offline.descargartodo">${t('offline.descargartodo')}</span>
-        <span class="ter-download-all-sub" data-i18n="offline.descargartodo.desc">${t('offline.descargartodo.desc')}</span>
-      </div>
-    </button>`;
+  }).join('') + `</div>`;
 }
 
 async function viewTerritory(id) {
@@ -20290,7 +19967,7 @@ function closePreferencias() {
   document.body.style.overflow = '';
 }
 // ── Navegación entre las sub-pantallas de Configuración ──────────────────────
-const PREF_SCREENS = ['preferencias', 'funciones', 'notificaciones', 'almacenamiento', 'experimentos', 'ayuda', 'soporte', 'version', 'legal', 'legal-terms', 'legal-privacy'];
+const PREF_SCREENS = ['preferencias', 'funciones', 'notificaciones', 'experimentos', 'ayuda', 'soporte', 'version', 'legal', 'legal-terms', 'legal-privacy'];
 function openPrefScreen(name) {
   if (!PREF_SCREENS.includes(name)) return;
   if (name === 'experimentos' && localStorage.getItem('fleming_egg_unlocked') !== '1') return;
@@ -20298,7 +19975,6 @@ function openPrefScreen(name) {
   trackEvent('settings_open', { screen: name });
   if (name === 'funciones') { updateH2HViewModeUI(); updateNavbarShrinkToggleUI(); if (typeof updateLiveAlwaysOnToggleUI === 'function') updateLiveAlwaysOnToggleUI(); }
   if (name === 'notificaciones') renderPrefNotifList();
-  if (name === 'almacenamiento') renderStorageList();
   if (name === 'ayuda') renderAyudaTipsList();
   if (name === 'preferencias') { updateAnimationsEnabledToggleUI(); updateWeatherToggleUI(); updateNavbarIconToggleUI(); }
   if (name === 'experimentos') { updateAccentSwatchesUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBtnSizeUI(); if (typeof updateLiveHostToggleUI === 'function') updateLiveHostToggleUI(); if (typeof updateSubnavMenuToggleUI === 'function') updateSubnavMenuToggleUI(); if (typeof updateModoSencilloToggleUI === 'function') updateModoSencilloToggleUI(); if (typeof updatePinFeatureToggleUI === 'function') updatePinFeatureToggleUI(); }
@@ -21495,51 +21171,6 @@ function scrollActiveListToTop() {
   }
 }
 document.addEventListener('DOMContentLoaded', initScrollTopFab);
-
-async function renderStorageList() {
-  const container = document.getElementById('storage-territories-list');
-  const totalEl = document.getElementById('storage-total-value');
-  if (!container) return;
-  await _offlineTerCacheReady;
-  const entries = Object.values(_offlineTerritoriesCache);
-  if (!entries.length) {
-    container.innerHTML = `<div style="text-align:center;padding:2.5rem 1rem;color:var(--text3)">
-      <svg viewBox="0 0 24 24" style="width:40px;height:40px;stroke:var(--text3);fill:none;stroke-width:1.5;stroke-linecap:round;margin-bottom:0.85rem;opacity:0.4"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg>
-      <p style="font-size:0.85rem">Aún no has descargado ningún mapa de Territorio.</p>
-    </div>`;
-    if (totalEl) totalEl.textContent = '0 KB';
-    return;
-  }
-  let totalBytes = 0;
-  const rows = entries.map(entry => {
-    const size = _offlineEntrySizeBytes(entry);
-    totalBytes += size;
-    const terr = territories.find(x => x.id === entry.id);
-    const updateAvailable = terr && terr.map_data !== undefined && entry.fingerprint !== _territoryFingerprint(terr);
-    return `<div class="notif-cat-row" style="align-items:center">
-      <div style="flex:1;min-width:0">
-        <div style="font-size:0.88rem;font-weight:700">Territorio ${entry.number ?? '—'}</div>
-        <div style="font-size:0.72rem;color:var(--text3)">${_formatBytes(size)}${updateAvailable ? ' · <span style="color:var(--orange);font-weight:600">Actualización disponible</span>' : ''}</div>
-      </div>
-      <button class="notif-delete-btn" title="Borrar descarga" onclick="removeOfflineTerritoryFromUI('${entry.id}')">
-        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-      </button>
-    </div>`;
-  }).join('');
-  container.innerHTML = rows;
-  if (totalEl) totalEl.textContent = _formatBytes(totalBytes);
-}
-async function removeOfflineTerritoryFromUI(id) {
-  await removeOfflineTerritory(id);
-  showToast('Descarga eliminada ✓', 'success');
-  renderStorageList();
-}
-async function clearAllOfflineTerritoriesFromUI() {
-  if (!confirm('¿Borrar todos los mapas de Territorio descargados de este dispositivo?')) return;
-  await clearAllOfflineTerritories();
-  showToast('Almacenamiento liberado ✓', 'success');
-  renderStorageList();
-}
 
 async function renderPrefNotifList() {
   const list = document.getElementById('pref-notif-list');
