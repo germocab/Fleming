@@ -8567,28 +8567,6 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
       </div>
     </div>
 
-    <!-- Menú de Sub-secciones: función en pruebas, v1.32.9-beta. Presionar el
-         botón de la Sub-sección ya activa en la barra en Predicación y
-         Reuniones (solo móvil/pantallas pequeñas) abre una pantalla con
-         transparencia que lista todas las Sub-secciones de la sección
-         actual, para quienes no saben que esa barra se puede deslizar. -->
-    <div class="profile-section">
-      <div class="profile-section-title" data-i18n="exp.subnavmenu.section">Menú de Sub-secciones</div>
-      <div class="profile-row" style="cursor:pointer" onclick="toggleSubnavMenuPref()">
-        <div class="profile-row-icon" style="background:var(--ter-4-bg);color:var(--ter-4)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round"><path d="M9 11.5V6.5a1.5 1.5 0 0 1 3 0v4M12 10.5v-2a1.5 1.5 0 0 1 3 0v2.5M15 10.8V9.5a1.5 1.5 0 0 1 3 0v5.5a5 5 0 0 1-5 5h-2a5 5 0 0 1-4.2-2.3l-2.1-3.3a1.4 1.4 0 0 1 2.2-1.7L9 14.5"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="exp.subnavmenu.title">Activar Menú de Sub-secciones</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.subnavmenu.desc">Activado por defecto. Presiona el botón de la Sub-sección activa en la barra (Predicación y Reuniones) para abrir la lista completa. Solo en móvil.</div>
-        </div>
-        <div id="subnav-menu-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="subnav-menu-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
-      </div>
-      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.subnavmenu.help">Pensada para quienes no saben que la barra de Sub-secciones se puede deslizar horizontalmente. En Desktop no aplica, ya que ahí caben todas.</div>
-    </div>
-
     <!-- Modo Sencillo: función en pruebas, v1.32.7-beta. Reemplaza toda la
          navegación por defecto por un encabezado mínimo + un menú overlay de
          pantalla completa con botones grandes, para quienes tienen
@@ -8608,47 +8586,6 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         </div>
       </div>
       <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.modosencillo.help">Pensado para quienes tienen dificultad para usar la versión por defecto. Notificaciones y Live siguen activas, accesibles desde el menú.</div>
-    </div>
-
-    <!-- LiveHost: función en pruebas, v1.30.0-beta. Permite al Encargado de una
-         asignación de casa en casa compartir la calle en la que está (no un
-         punto exacto en un mapa) con quienes vean esa asignación, por hasta 2
-         horas, para que puedan ubicar al grupo si se pierden. -->
-    <div class="profile-section">
-      <div class="profile-section-title" data-i18n="exp.livehost.section">LiveHost</div>
-      <div class="profile-row" style="cursor:pointer" onclick="toggleLiveHostPref()">
-        <div class="profile-row-icon" style="background:var(--ter-2-bg);color:var(--accent)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="exp.livehost.title">Activar LiveHost</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.livehost.desc">Como Encargado, comparte la calle en la que estás con quienes vean tu asignación de casa en casa, por hasta 2 horas.</div>
-        </div>
-        <div id="live-host-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="live-host-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
-      </div>
-      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.livehost.help">Solo comparte el nombre de la calle, nunca un punto exacto en un mapa. Tú decides si activarla; se apaga sola a las 2 horas.</div>
-    </div>
-
-    <!-- Ícono de Perfil en la NavBar: movido desde Preferencias → Apariencia
-         a Experimentos (v1.36.7-beta). La Foto de Perfil en el botón "Más
-         Opciones" sigue siendo la configuración por defecto; este toggle
-         permite volver a mostrar el botón con el ícono de siempre. -->
-    <div class="profile-section">
-      <div class="profile-section-title" data-i18n="exp.navbaricon.section">Ícono de Perfil</div>
-      <div class="profile-row" style="cursor:pointer" onclick="toggleNavbarIconPref()">
-        <div class="profile-row-icon" style="background:var(--ter-3-bg);color:var(--ter-3)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="pref.navbaricon.title">Mostrar ícono en vez de tu foto de perfil</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="pref.navbaricon.desc">El botón "Más opciones" de la NavBar usa tu foto de perfil por defecto. Actívalo para volver a ver el botón con el ícono de siempre.</div>
-        </div>
-        <div id="navbar-icon-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="navbar-icon-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
-      </div>
     </div>
 
     <!-- PIN de acceso: función experimental, v1.34.5-beta. Permite fijar un PIN
@@ -9190,7 +9127,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.41.1-sb';
+const APP_VERSION = '1.41.5-sb';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -13283,26 +13220,9 @@ function handleSubTabClick(ev, tabId) {
   switchSubTab(tabId);
 }
 function isSubnavMenuEnabled() {
-  // v1.35.4-beta: activado por defecto. Solo se desactiva si el usuario,
-  // habiendo desbloqueado Experimentos, apagó el toggle explícitamente
-  // (queda guardado como 'false'); cualquier otro valor (incluido "nunca
-  // tocado") cuenta como activado.
-  return localStorage.getItem('fleming_subnavmenu_enabled') !== 'false';
-}
-function toggleSubnavMenuPref() {
-  const next = !isSubnavMenuEnabled();
-  localStorage.setItem('fleming_subnavmenu_enabled', next ? 'true' : 'false');
-  updateSubnavMenuToggleUI();
-  applySubnavMenuBodyClass();
-  showToast(next ? 'Menú de Sub-secciones activado' : 'Menú de Sub-secciones desactivado', next ? 'success' : '');
-}
-function updateSubnavMenuToggleUI() {
-  const toggle = document.getElementById('subnav-menu-toggle');
-  const thumb  = document.getElementById('subnav-menu-thumb');
-  if (!toggle || !thumb) return;
-  const on = isSubnavMenuEnabled();
-  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
-  thumb.style.left = on ? '21px' : '3px';
+  // v1.41.5-sb: deja de ser un experimento; siempre está activo, sin
+  // posibilidad de desactivarlo.
+  return true;
 }
 function applySubnavMenuBodyClass() {
   document.body.classList.toggle('subnavmenu-enabled', isSubnavMenuEnabled());
@@ -15301,21 +15221,8 @@ let _liveHostPublishedAssignmentId = null;
 let _liveHostLastPublishedRoad = null;
 
 function isLiveHostEnabled() {
-  return localStorage.getItem('fleming_livehost_enabled') === 'true';
-}
-function toggleLiveHostPref() {
-  const next = !isLiveHostEnabled();
-  localStorage.setItem('fleming_livehost_enabled', next ? 'true' : 'false');
-  updateLiveHostToggleUI();
-  showToast(next ? 'LiveHost activado' : 'LiveHost desactivado', next ? 'success' : '');
-}
-function updateLiveHostToggleUI() {
-  const toggle = document.getElementById('live-host-toggle');
-  const thumb  = document.getElementById('live-host-thumb');
-  if (!toggle || !thumb) return;
-  const on = isLiveHostEnabled();
-  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
-  thumb.style.left = on ? '21px' : '3px';
+  // v1.41.5-sb: LiveHost fue retirado de Experimentos y ya no está disponible.
+  return false;
 }
 
 // Se llama desde _liveOnPosition cada vez que Live detecta una calle nueva.
@@ -19976,8 +19883,8 @@ function openPrefScreen(name) {
   if (name === 'funciones') { updateH2HViewModeUI(); updateNavbarShrinkToggleUI(); if (typeof updateLiveAlwaysOnToggleUI === 'function') updateLiveAlwaysOnToggleUI(); }
   if (name === 'notificaciones') renderPrefNotifList();
   if (name === 'ayuda') renderAyudaTipsList();
-  if (name === 'preferencias') { updateAnimationsEnabledToggleUI(); updateWeatherToggleUI(); updateNavbarIconToggleUI(); }
-  if (name === 'experimentos') { updateAccentSwatchesUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBtnSizeUI(); if (typeof updateLiveHostToggleUI === 'function') updateLiveHostToggleUI(); if (typeof updateSubnavMenuToggleUI === 'function') updateSubnavMenuToggleUI(); if (typeof updateModoSencilloToggleUI === 'function') updateModoSencilloToggleUI(); if (typeof updatePinFeatureToggleUI === 'function') updatePinFeatureToggleUI(); }
+  if (name === 'preferencias') { updateAnimationsEnabledToggleUI(); updateWeatherToggleUI(); }
+  if (name === 'experimentos') { updateAccentSwatchesUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBtnSizeUI(); if (typeof updateModoSencilloToggleUI === 'function') updateModoSencilloToggleUI(); if (typeof updatePinFeatureToggleUI === 'function') updatePinFeatureToggleUI(); }
   if (name === 'legal-terms') renderPrefLegalTerms();
   if (name === 'legal-privacy') renderPrefLegalPrivacy();
   if (name === 'version') {
@@ -23151,57 +23058,12 @@ window.addEventListener('resize', () => { try { applySimplifiedModeUI(); } catch
 // perfil del usuario, que abre el mismo Menú de Opciones de siempre. El resto
 // de la NavBar (incluyendo Notificaciones) no cambia.
 // v1.32.11-beta: deja de ser un experimento (ya no requiere desbloquear
-// Experimentos) y pasa a ser la configuración por defecto. Quien prefiera
-// seguir viendo el botón con el ícono de siempre puede activarlo desde
-// Experimentos → Ícono de Perfil (toggleNavbarIconPref, más abajo; movido
-// desde Preferencias → Apariencia en v1.36.7-beta) — internamente sigue
-// siendo la misma preferencia invertida, solo cambia dónde se controla y
-// cuál es su valor por defecto cuando el usuario nunca la ha tocado.
+// Experimentos) y pasa a ser la configuración por defecto.
+// v1.41.5-sb: "Mostrar ícono en vez de tu foto de perfil" deja de ser un
+// experimento; el ícono siempre está activo por defecto, sin posibilidad de
+// desactivarlo (ya no se puede volver a mostrar la foto de perfil).
 function isNavbarAvatarSelected() {
-  const v = localStorage.getItem('fleming_navbar_options_avatar');
-  return v === null ? true : v === 'true';
-}
-function toggleNavbarAvatarPref() {
-  const next = !isNavbarAvatarSelected();
-  localStorage.setItem('fleming_navbar_options_avatar', next ? 'true' : 'false');
-  updateNavbarAvatarToggleUI();
-  updateNavbarIconToggleUI();
-  applyNavbarAvatarUI();
-  if (next) {
-    showToast('Foto de perfil en Más opciones activada', 'success');
-  } else {
-    showToast('Foto de perfil en Más opciones desactivada', '');
-  }
-}
-function updateNavbarAvatarToggleUI() {
-  const toggle = document.getElementById('navbar-avatar-toggle');
-  const thumb  = document.getElementById('navbar-avatar-thumb');
-  if (!toggle || !thumb) return;
-  const on = isNavbarAvatarSelected();
-  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
-  thumb.style.left = on ? '21px' : '3px';
-}
-// Toggle "invertido" en Preferencias → Apariencia: activarlo trae de vuelta
-// el ícono de Más Opciones (equivale a desactivar la Foto de Perfil).
-function toggleNavbarIconPref() {
-  const wantIcon = isNavbarAvatarSelected(); // estado actual: avatar activo → al tocar, se pasa a ícono
-  localStorage.setItem('fleming_navbar_options_avatar', wantIcon ? 'false' : 'true');
-  updateNavbarIconToggleUI();
-  updateNavbarAvatarToggleUI();
-  applyNavbarAvatarUI();
-  if (wantIcon) {
-    showToast('Ícono de Más Opciones activado', 'success');
-  } else {
-    showToast('Foto de perfil en Más opciones activada', 'success');
-  }
-}
-function updateNavbarIconToggleUI() {
-  const toggle = document.getElementById('navbar-icon-toggle');
-  const thumb  = document.getElementById('navbar-icon-thumb');
-  if (!toggle || !thumb) return;
-  const on = !isNavbarAvatarSelected(); // ON = mostrando ícono (avatar desactivado)
-  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
-  thumb.style.left = on ? '21px' : '3px';
+  return false;
 }
 function applyNavbarAvatarUI() {
   const active = isNavbarAvatarSelected();
