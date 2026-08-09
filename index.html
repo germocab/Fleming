@@ -6329,10 +6329,6 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
             Configuración
             <span id="config-update-dot" style="display:none;width:8px;height:8px;border-radius:50%;background:var(--green,#30c97a);margin-left:auto;flex-shrink:0;box-shadow:0 0 0 2px var(--surface)"></span>
           </button>
-          <button class="dropdown-item danger" onclick="openReportIssueModal();closeOptionsMenu()">
-            <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            Sugerencias
-          </button>
         </div>
       </div>
     </div>
@@ -7075,49 +7071,42 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         <div id="admin-tips-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Tips</div></div></div>
       </div>
 
-      <!-- ── Monitor (v1.33.7-beta): patrones de uso de la plataforma (no
-           acciones individuales de cada usuario) + Sugerencias de No Pasar,
-           Sugerencias de la plataforma y Reportes de problema, todo en un
-           solo lugar para el Usuario DEV. ── -->
+      <!-- ── Monitor (v1.33.7-beta): Sugerencias de No Pasar, Sugerencias de la
+           plataforma y Reportes de problema, todo en un solo lugar para el
+           Usuario DEV. v1.41.7-sb: se retiraron las Estadísticas. ── -->
       <div class="admin-section" id="admin-monitor">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
           <span style="flex:1;font-size:0.95rem;font-weight:700">Monitor</span>
         </div>
+
+        <!-- ── Modo Mantenimiento (v1.37.0-beta): exclusivo del Usuario DEV.
+             Al activarlo, todos los demás usuarios (Admins y Miembros) ven
+             una pantalla de mantenimiento en vez de la plataforma. ── -->
+        <div class="notif-gestor-card" style="margin-bottom:1.1rem;border:1px solid rgba(255,59,48,0.2)">
+          <div class="profile-row" style="cursor:pointer;padding:0.4rem 0" onclick="toggleMaintenanceModeUI()">
+            <div class="profile-row-icon" style="background:rgba(255,59,48,0.12);color:#ff3b30">
+              <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            <div class="profile-row-content">
+              <div class="profile-row-label" style="font-size:0.9rem;font-weight:700">Modo Mantenimiento</div>
+              <div class="profile-row-value" style="font-size:0.78rem">Muestra una pantalla de mantenimiento a todos los usuarios, excepto a ti (Usuario DEV)</div>
+            </div>
+            <div id="maintenance-mode-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+              <div id="maintenance-mode-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+            </div>
+          </div>
+          <div id="maintenance-mode-warning" style="display:none;margin-top:0.7rem;padding:0.6rem 0.8rem;background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.28);border-radius:10px;font-size:0.78rem;color:#ff3b30;line-height:1.4">
+            ⚠️ Modo Mantenimiento ACTIVO — todos los usuarios (excepto tú) están viendo la pantalla de mantenimiento.
+          </div>
+        </div>
+
         <div class="monitor-subtabs">
-          <button class="monitor-subtab active" data-msub="stats" onclick="switchMonitorTab('stats')">Estadísticas</button>
-          <button class="monitor-subtab" data-msub="np" onclick="switchMonitorTab('np')">Sugerencias No Pasar</button>
+          <button class="monitor-subtab active" data-msub="np" onclick="switchMonitorTab('np')">Sugerencias No Pasar</button>
           <button class="monitor-subtab" data-msub="plataforma" onclick="switchMonitorTab('plataforma')">Sugerencias Plataforma</button>
           <button class="monitor-subtab" data-msub="reportes" onclick="switchMonitorTab('reportes')">Reportes de Problema</button>
         </div>
 
-        <div class="monitor-pane active" id="monitor-pane-stats">
-          <!-- ── Modo Mantenimiento (v1.37.0-beta): exclusivo del Usuario DEV.
-               Al activarlo, todos los demás usuarios (Admins y Miembros) ven
-               una pantalla de mantenimiento en vez de la plataforma. ── -->
-          <div class="notif-gestor-card" style="margin-bottom:1.1rem;border:1px solid rgba(255,59,48,0.2)">
-            <div class="profile-row" style="cursor:pointer;padding:0.4rem 0" onclick="toggleMaintenanceModeUI()">
-              <div class="profile-row-icon" style="background:rgba(255,59,48,0.12);color:#ff3b30">
-                <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-              </div>
-              <div class="profile-row-content">
-                <div class="profile-row-label" style="font-size:0.9rem;font-weight:700">Modo Mantenimiento</div>
-                <div class="profile-row-value" style="font-size:0.78rem">Muestra una pantalla de mantenimiento a todos los usuarios, excepto a ti (Usuario DEV)</div>
-              </div>
-              <div id="maintenance-mode-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-                <div id="maintenance-mode-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-              </div>
-            </div>
-            <div id="maintenance-mode-warning" style="display:none;margin-top:0.7rem;padding:0.6rem 0.8rem;background:rgba(255,59,48,0.1);border:1px solid rgba(255,59,48,0.28);border-radius:10px;font-size:0.78rem;color:#ff3b30;line-height:1.4">
-              ⚠️ Modo Mantenimiento ACTIVO — todos los usuarios (excepto tú) están viendo la pantalla de mantenimiento.
-            </div>
-          </div>
-          <div style="font-size:0.78rem;color:var(--text3);line-height:1.4;margin-bottom:1rem">
-            Estadísticas de uso y preferencias agregadas de todos los usuarios en las últimas 24 horas. No refleja acciones individuales.
-          </div>
-          <div id="monitor-stats-grid" class="monitor-stats-grid"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando estadísticas</div></div></div>
-        </div>
-
-        <div class="monitor-pane" id="monitor-pane-np" style="display:none">
+        <div class="monitor-pane active" id="monitor-pane-np">
           <div id="monitor-np-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Sugerencias</div></div></div>
         </div>
 
@@ -8030,7 +8019,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         </div>
         <div class="profile-row-content">
           <div class="profile-row-label" data-i18n="settings.funciones">Funciones especiales</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.funciones.desc">Live y Clima</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.funciones.desc">Live, Clima y PIN de acceso</div>
         </div>
         <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
@@ -8220,19 +8209,6 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
           <div id="pref-dark-maps-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
-      <!-- Toggle: Mini Cards de Grupos ajenos (v1.23.0-beta, invertido en v1.32.6-beta) -->
-      <div class="profile-row" style="cursor:pointer;border-top:1px solid var(--border)" onclick="toggleGroupScreenPref()">
-        <div class="profile-row-icon" style="background:var(--ter-2-bg);color:var(--ter-2)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label">Mostrar Grupos ajenos como Mini Cards</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Muestra las asignaciones de otros Grupos de Servicio directamente en la pantalla principal, en vez del botón "Otros Grupos"</div>
-        </div>
-        <div id="pref-group-screen-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="pref-group-screen-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
-      </div>
       <!-- v1.36.7-beta: el toggle "Mostrar ícono en vez de tu foto de perfil"
            se movió a Experimentos (ver page-pref-experimentos). -->
     </div>
@@ -8379,6 +8355,35 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         </div>
       </div>
       <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.clima.help">El pronóstico solo está disponible para fechas cercanas y depende de que el territorio o la dirección puedan ubicarse en el mapa.</div>
+    </div>
+
+    <!-- PIN de acceso: v1.41.7-sb, dejó de ser experimental y ahora está
+         disponible para todos dentro de Funciones especiales. Permite fijar
+         un PIN numérico de 4 dígitos personal, distinto de la contraseña
+         compartida del rol, que se pide únicamente al iniciar sesión. -->
+    <div class="profile-section">
+      <div class="profile-section-title" data-i18n="exp.pin.section">Seguridad</div>
+      <div class="profile-row" style="cursor:pointer" onclick="togglePinFeaturePref()">
+        <div class="profile-row-icon" style="background:var(--ter-5-bg);color:var(--ter-5)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="exp.pin.title">PIN de acceso</div>
+          <div class="profile-row-value" style="font-size:0.8rem" id="exp-pin-status-text" data-i18n="exp.pin.desc">Añade un PIN numérico de 4 dígitos, personal, que se pedirá cada vez que inicies sesión.</div>
+        </div>
+        <div id="pin-feature-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="pin-feature-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
+      <div class="profile-row" id="pin-change-row" style="cursor:pointer;display:none" onclick="openPinSetupModal()">
+        <div class="profile-row-icon" style="background:var(--ter-5-bg);color:var(--ter-5)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 21v-4L16.5 4.5a2.1 2.1 0 0 1 3 3L7 20H4z"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="exp.pin.change">Cambiar PIN</div>
+        </div>
+      </div>
+      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.pin.help">Es independiente de la contraseña de tu rol. Se guarda de forma cifrada y solo se pide al iniciar sesión, no cada vez que abres la app.</div>
     </div>
   </div>
 </div>
@@ -8586,34 +8591,6 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         </div>
       </div>
       <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.modosencillo.help">Pensado para quienes tienen dificultad para usar la versión por defecto. Notificaciones y Live siguen activas, accesibles desde el menú.</div>
-    </div>
-
-    <!-- PIN de acceso: función experimental, v1.34.5-beta. Permite fijar un PIN
-         numérico de 4 dígitos personal, distinto de la contraseña compartida
-         del rol, que se pide únicamente al iniciar sesión. -->
-    <div class="profile-section">
-      <div class="profile-section-title" data-i18n="exp.pin.section">Seguridad</div>
-      <div class="profile-row" style="cursor:pointer" onclick="togglePinFeaturePref()">
-        <div class="profile-row-icon" style="background:var(--ter-5-bg);color:var(--ter-5)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="exp.pin.title">PIN de acceso</div>
-          <div class="profile-row-value" style="font-size:0.8rem" id="exp-pin-status-text" data-i18n="exp.pin.desc">Añade un PIN numérico de 4 dígitos, personal, que se pedirá cada vez que inicies sesión.</div>
-        </div>
-        <div id="pin-feature-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="pin-feature-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
-      </div>
-      <div class="profile-row" id="pin-change-row" style="cursor:pointer;display:none" onclick="openPinSetupModal()">
-        <div class="profile-row-icon" style="background:var(--ter-5-bg);color:var(--ter-5)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M4 21v-4L16.5 4.5a2.1 2.1 0 0 1 3 3L7 20H4z"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="exp.pin.change">Cambiar PIN</div>
-        </div>
-      </div>
-      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.pin.help">Es independiente de la contraseña de tu rol. Se guarda de forma cifrada y solo se pide al iniciar sesión, no cada vez que abres la app.</div>
     </div>
   </div>
 </div>
@@ -9127,7 +9104,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.41.5-sb';
+const APP_VERSION = '1.41.7-sb';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -13740,7 +13717,7 @@ async function switchAdminTab(tab) {
   if (tab === 'fin-semana') { loadFsWeeks().then(() => renderAdminFs()); }
   if (tab === 'notificaciones') { renderNotifAdminTemplates(); renderNotifAdminCategories(); loadNotifLevels().then(renderNotifAdminLevels); }
   if (tab === 'tips') { renderAdminTipsList(); }
-  if (tab === 'monitor') { switchMonitorTab(_monitorActiveTab || 'stats'); loadMaintenanceModeUI(); }
+  if (tab === 'monitor') { switchMonitorTab(_monitorActiveTab || 'np'); loadMaintenanceModeUI(); }
   if (tab === 'legal') { renderAdminLegal(); }
   if (tab === 'carritos') { cartOpenAdminSection(); }
   if (tab === 'reports') { trepOpenAdminSection(); }
@@ -19857,7 +19834,6 @@ async function openPreferencias() {
   document.getElementById('pref-version-value').textContent = getAppVersionMajor();
   updatePrefThemeActive();
   updateDarkMapToggleUI();
-  updateGroupScreenToggleUI();
   updateLiveToggleUI();
   updateTransparencyToggleUI();
   updateUiSizeToggleUI();
@@ -19880,11 +19856,11 @@ function openPrefScreen(name) {
   if (name === 'experimentos' && localStorage.getItem('fleming_egg_unlocked') !== '1') return;
   document.getElementById('page-pref-' + name)?.classList.add('open');
   trackEvent('settings_open', { screen: name });
-  if (name === 'funciones') { updateH2HViewModeUI(); updateNavbarShrinkToggleUI(); if (typeof updateLiveAlwaysOnToggleUI === 'function') updateLiveAlwaysOnToggleUI(); }
+  if (name === 'funciones') { updateH2HViewModeUI(); updateNavbarShrinkToggleUI(); if (typeof updateLiveAlwaysOnToggleUI === 'function') updateLiveAlwaysOnToggleUI(); if (typeof updatePinFeatureToggleUI === 'function') updatePinFeatureToggleUI(); }
   if (name === 'notificaciones') renderPrefNotifList();
   if (name === 'ayuda') renderAyudaTipsList();
   if (name === 'preferencias') { updateAnimationsEnabledToggleUI(); updateWeatherToggleUI(); }
-  if (name === 'experimentos') { updateAccentSwatchesUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBtnSizeUI(); if (typeof updateModoSencilloToggleUI === 'function') updateModoSencilloToggleUI(); if (typeof updatePinFeatureToggleUI === 'function') updatePinFeatureToggleUI(); }
+  if (name === 'experimentos') { updateAccentSwatchesUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBtnSizeUI(); if (typeof updateModoSencilloToggleUI === 'function') updateModoSencilloToggleUI(); }
   if (name === 'legal-terms') renderPrefLegalTerms();
   if (name === 'legal-privacy') renderPrefLegalPrivacy();
   if (name === 'version') {
@@ -19952,24 +19928,11 @@ function toggleDarkMapsPref() {
 // como mini-cards directamente en la pantalla principal de Casa en Casa,
 // en vez del botón hacia "Otros Grupos".
 function isGroupMinicardsEnabled() {
-  return localStorage.getItem('fleming_group_minicards') === 'true';
+  // v1.41.7-sb: "Mostrar Grupos ajenos como Mini Cards" ya no está
+  // disponible; los Grupos de Servicio ajenos siempre se muestran en la
+  // pantalla "Otros Grupos".
+  return false;
 }
-function updateGroupScreenToggleUI() {
-  const enabled = isGroupMinicardsEnabled();
-  const toggle = document.getElementById('pref-group-screen-toggle');
-  const thumb  = document.getElementById('pref-group-screen-thumb');
-  if (!toggle || !thumb) return;
-  toggle.style.background = enabled ? 'var(--accent)' : 'var(--surface3)';
-  thumb.style.left = enabled ? '21px' : '3px';
-}
-function toggleGroupScreenPref() {
-  const current = isGroupMinicardsEnabled();
-  localStorage.setItem('fleming_group_minicards', current ? 'false' : 'true');
-  updateGroupScreenToggleUI();
-  // Si Casa en Casa ya está renderizado, refleja el cambio de inmediato.
-  if (typeof renderSchedule === 'function' && assignments && assignments.length) renderSchedule();
-}
-
 // ── Navbar compacta al hacer scroll (solo Desktop, ≥640px) ──────────────────
 // Al bajar, .app-header-shell se encoge y flota con blur/transparencia sobre
 // el contenido; al subir, recupera tamaño y distribución original. El efecto
@@ -21421,17 +21384,16 @@ async function submitIssueReport() {
 // ══════════════════════ Monitor (v1.33.7-beta) ══════════════════════════
 // Administración > FlemingApp > Monitor. Reúne, en un solo lugar, tres
 // tipos de contenido para el Usuario DEV:
-//  1) Estadísticas agregadas de uso de la plataforma (tabla usage_events,
-//     alimentada por trackEvent() a lo largo de la app).
-//  2) Sugerencias de No Pasar (direcciones, fechas, correcciones, etc.)
-//  3) Sugerencias de la plataforma (correcciones de mapa y otras sugerencias
+//  1) Sugerencias de No Pasar (direcciones, fechas, correcciones, etc.)
+//  2) Sugerencias de la plataforma (correcciones de mapa y otras sugerencias
 //     generales que no son específicas de una dirección "No Pasar")
-//  4) Reportes de problema (tabla bug_reports)
+//  3) Reportes de problema (tabla bug_reports)
+// v1.41.7-sb: se retiraron las Estadísticas agregadas de uso.
 // Ninguna de estas vistas identifica acciones de un usuario en particular
 // de forma aislada: son listas/conteos pensados como estudio de patrones y
 // preferencias de uso, no como auditoría individual.
 
-let _monitorActiveTab = 'stats';
+let _monitorActiveTab = 'np';
 
 function switchMonitorTab(tab) {
   _monitorActiveTab = tab;
@@ -21439,7 +21401,6 @@ function switchMonitorTab(tab) {
   document.querySelectorAll('.monitor-pane').forEach(p => p.style.display = 'none');
   const pane = document.getElementById('monitor-pane-' + tab);
   if (pane) pane.style.display = '';
-  if (tab === 'stats') renderMonitorStats();
   if (tab === 'np') renderMonitorSugerencias('np');
   if (tab === 'plataforma') renderMonitorSugerencias('plataforma');
   if (tab === 'reportes') renderMonitorReportes();
@@ -21452,94 +21413,6 @@ function _monitorFmtDate(iso) {
     return d.toLocaleDateString('es', { day: '2-digit', month: 'short' }) + ' · ' +
            d.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
   } catch (e) { return ''; }
-}
-
-// ── Estadísticas ─────────────────────────────────────────────────────────
-async function renderMonitorStats() {
-  const grid = document.getElementById('monitor-stats-grid');
-  if (!grid) return;
-  grid.innerHTML = `<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando estadísticas</div></div>`;
-
-  let events = [];
-  try {
-    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const { data, error } = await sb.from('usage_events').select('*').gte('created_at', since).order('created_at', { ascending: false }).limit(5000);
-    if (error) throw error;
-    events = data || [];
-  } catch (e) {
-    console.warn('No se pudieron cargar usage_events (¿tabla inexistente?):', e.message);
-    grid.innerHTML = `<div class="monitor-empty">Aún no hay datos de uso registrados (o la tabla "usage_events" todavía no existe en Supabase).</div>`;
-    return;
-  }
-
-  if (!events.length) {
-    grid.innerHTML = `<div class="monitor-empty">Todavía no hay eventos de uso en las últimas 24 horas.</div>`;
-    return;
-  }
-
-  const byEvent = {};
-  events.forEach(e => { (byEvent[e.event] = byEvent[e.event] || []).push(e); });
-
-  // Live: activaciones en las últimas 24 horas
-  const liveEvents = byEvent['live_toggle'] || [];
-  const liveOn = liveEvents.filter(e => e.meta?.enabled).length;
-
-  // Experimentos: activaciones vs desactivaciones registradas
-  const expEvents = byEvent['experiments_toggle'] || [];
-  const expOn  = expEvents.filter(e => e.meta?.enabled).length;
-  const expOff = expEvents.filter(e => !e.meta?.enabled).length;
-
-  // Sub-secciones más usadas
-  const subCounts = {};
-  (byEvent['subsection_use'] || []).forEach(e => { const t = e.meta?.tab || '—'; subCounts[t] = (subCounts[t] || 0) + 1; });
-  const topSubs = Object.entries(subCounts).sort((a, b) => b[1] - a[1]).slice(0, 4);
-
-  // Notificaciones más silenciadas (togglePrefNotif con enabled:false)
-  const muteCounts = {};
-  (byEvent['notif_toggle'] || []).forEach(e => {
-    if (e.meta?.enabled === false) { const c = e.meta?.category || '—'; muteCounts[c] = (muteCounts[c] || 0) + 1; }
-  });
-  const topMuted = Object.entries(muteCounts).sort((a, b) => b[1] - a[1]).slice(0, 4);
-
-  // Pantallas de Configuración más abiertas (incluye "notificaciones" = panel de notificaciones)
-  const screenCounts = {};
-  (byEvent['settings_open'] || []).forEach(e => { const s = e.meta?.screen || '—'; screenCounts[s] = (screenCounts[s] || 0) + 1; });
-  const topScreens = Object.entries(screenCounts).sort((a, b) => b[1] - a[1]).slice(0, 4);
-  const notifPanelOpens = screenCounts['notificaciones'] || 0;
-
-  const rowsHtml = (arr, emptyMsg) => arr.length
-    ? arr.map(([k, v]) => `<div class="monitor-stat-sub-row"><span>${k}</span><span>${v}</span></div>`).join('')
-    : `<div class="monitor-stat-sub-row" style="opacity:0.6">${emptyMsg}</div>`;
-
-  grid.innerHTML = `
-    <div class="monitor-stat-card">
-      <div class="monitor-stat-value">${liveOn}</div>
-      <div class="monitor-stat-label">Activaciones de Live</div>
-      <div class="monitor-stat-sub">Últimas 24 horas</div>
-    </div>
-    <div class="monitor-stat-card">
-      <div class="monitor-stat-value">${expOn}</div>
-      <div class="monitor-stat-label">Veces que se activaron Experimentos</div>
-      <div class="monitor-stat-sub">${expOff} desactivaciones registradas (últimas 24 horas)</div>
-    </div>
-    <div class="monitor-stat-card">
-      <div class="monitor-stat-value">${notifPanelOpens}</div>
-      <div class="monitor-stat-label">Aperturas del panel de Notificaciones</div>
-      <div class="monitor-stat-sub">Últimas 24 horas</div>
-    </div>
-    <div class="monitor-stat-card" style="grid-column: span 2">
-      <div class="monitor-stat-label" style="margin-bottom:6px">Sub-secciones más usadas</div>
-      ${rowsHtml(topSubs, 'Sin datos aún')}
-    </div>
-    <div class="monitor-stat-card" style="grid-column: span 2">
-      <div class="monitor-stat-label" style="margin-bottom:6px">Notificaciones más silenciadas</div>
-      ${rowsHtml(topMuted, 'Ninguna silenciada aún')}
-    </div>
-    <div class="monitor-stat-card" style="grid-column: span 2">
-      <div class="monitor-stat-label" style="margin-bottom:6px">Pantallas de Configuración más visitadas</div>
-      ${rowsHtml(topScreens, 'Sin datos aún')}
-    </div>
-  `;
 }
 
 // ── Sugerencias (No Pasar / Plataforma) ─────────────────────────────────
@@ -23059,11 +22932,10 @@ window.addEventListener('resize', () => { try { applySimplifiedModeUI(); } catch
 // de la NavBar (incluyendo Notificaciones) no cambia.
 // v1.32.11-beta: deja de ser un experimento (ya no requiere desbloquear
 // Experimentos) y pasa a ser la configuración por defecto.
-// v1.41.5-sb: "Mostrar ícono en vez de tu foto de perfil" deja de ser un
-// experimento; el ícono siempre está activo por defecto, sin posibilidad de
-// desactivarlo (ya no se puede volver a mostrar la foto de perfil).
+// v1.41.7-sb: corrección — el valor por defecto es la Foto de Perfil (no el
+// ícono); "Mostrar ícono en vez de tu foto de perfil" ya no está disponible.
 function isNavbarAvatarSelected() {
-  return false;
+  return true;
 }
 function applyNavbarAvatarUI() {
   const active = isNavbarAvatarSelected();
