@@ -6225,6 +6225,27 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
   </div>
 </div>
 
+<!-- ── Legal (v1.41.0-stable_beta): pantalla de aceptación de Términos y
+     Privacidad en el primer inicio de sesión. Bloquea "Acepto" hasta llegar
+     al final del scroll; tiene un botón para saltar directo al final. ── -->
+<div id="legal-gate-screen" style="display:none;position:fixed;inset:0;z-index:99997;background:var(--bg);flex-direction:column">
+  <div style="padding:1.25rem 1.25rem 0.75rem;text-align:center;border-bottom:1px solid var(--border);flex-shrink:0">
+    <div style="font-size:1.05rem;font-weight:800;color:var(--text)">Antes de continuar</div>
+    <div style="font-size:0.82rem;color:var(--text3);margin-top:0.2rem">Lee y acepta nuestros Términos y Condiciones y nuestra Política de Privacidad para usar FlemingApp.</div>
+  </div>
+  <div id="legal-gate-scroll" style="flex:1;overflow-y:auto;padding:1.5rem 1.25rem;max-width:640px;margin:0 auto;width:100%;position:relative">
+    <div id="legal-gate-content"></div>
+    <button id="legal-gate-jump-btn" onclick="legalGateJumpToEnd()" style="display:flex;position:sticky;bottom:12px;margin:1.5rem auto 0;align-items:center;gap:6px;padding:0.55rem 1rem;border-radius:20px;border:none;background:var(--surface2,var(--surface));color:var(--accent);font-weight:700;font-size:0.82rem;box-shadow:var(--shadow-md);cursor:pointer">
+      Ir al final
+      <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round"><polyline points="19 12 12 19 5 12"/><line x1="12" y1="19" x2="12" y2="5"/></svg>
+    </button>
+  </div>
+  <div style="flex-shrink:0;padding:0.9rem 1.25rem calc(1.1rem + env(safe-area-inset-bottom));border-top:1px solid var(--border);display:flex;gap:10px;max-width:640px;margin:0 auto;width:100%;box-sizing:border-box">
+    <button class="btn-secondary" style="flex:1;margin:0;border-radius:14px" onclick="legalGateReject()">No acepto</button>
+    <button class="btn-primary" style="flex:1;margin:0;border-radius:14px" id="legal-gate-accept-btn" onclick="legalGateAccept()" disabled>Acepto</button>
+  </div>
+</div>
+
 <div id="app">
   <div class="app-header-shell" id="app-header-shell">
   <nav class="topnav">
@@ -6646,6 +6667,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         <button class="admin-tab" id="admin-tab-notificaciones" data-tab="notificaciones" data-i18n="admin.tab.notificaciones" onclick="switchAdminTab('notificaciones')" style="display:none">Notificaciones</button>
         <button class="admin-tab" id="admin-tab-tips" data-tab="tips" onclick="switchAdminTab('tips')" style="display:none">Tips</button>
         <button class="admin-tab" id="admin-tab-monitor" data-tab="monitor" onclick="switchAdminTab('monitor')" style="display:none">Monitor</button>
+        <button class="admin-tab" id="admin-tab-legal" data-tab="legal" onclick="switchAdminTab('legal')" style="display:none">Legal</button>
       </div>
       <div class="admin-section active" id="admin-assignments">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
@@ -7148,6 +7170,44 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 
         <div class="monitor-pane" id="monitor-pane-reportes" style="display:none">
           <div id="monitor-reportes-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Reportes</div></div></div>
+        </div>
+      </div>
+
+      <!-- ── Legal (v1.41.0-stable_beta): edición de Términos y Privacidad, y
+           toggle de la pantalla de aceptación en el primer inicio. Exclusivo
+           del Usuario DEV. ── -->
+      <div class="admin-section" id="admin-legal">
+        <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
+          <span style="flex:1;font-size:0.95rem;font-weight:700">Información Legal</span>
+        </div>
+        <div class="notif-gestor-card" style="margin-bottom:1.1rem">
+          <div class="profile-row" style="cursor:pointer;padding:0.6rem 0" onclick="toggleLegalRequireAcceptance()">
+            <div class="profile-row-content">
+              <div class="profile-row-label" style="font-size:0.9rem;font-weight:700">Pantalla de aceptación en el primer inicio</div>
+              <div class="profile-row-value" style="font-size:0.78rem">Si está activa, cada usuario debe leer y aceptar los Términos y la Privacidad antes de entrar por primera vez</div>
+            </div>
+            <div id="legal-require-toggle" data-on="1" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
+              <div id="legal-require-thumb" style="position:absolute;top:3px;left:21px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+            </div>
+          </div>
+        </div>
+        <div class="notif-gestor-card" style="margin-bottom:1.1rem">
+          <div class="form-group2">
+            <label class="form-label2">Términos y Condiciones</label>
+            <textarea class="form-input" id="admin-legal-terms" rows="10" style="width:100%;font-family:var(--font);font-size:0.85rem;line-height:1.5;resize:vertical" placeholder="Escribe aquí los Términos y Condiciones (admite HTML simple: <p>, <strong>, <ul><li>, etc.)"></textarea>
+          </div>
+          <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" id="save-legal-terms-btn" onclick="saveLegalDoc('terms')">Guardar Términos y Condiciones</button>
+        </div>
+        <div class="notif-gestor-card" style="margin-bottom:1.1rem">
+          <div class="form-group2">
+            <label class="form-label2">Política de Privacidad</label>
+            <textarea class="form-input" id="admin-legal-privacy" rows="10" style="width:100%;font-family:var(--font);font-size:0.85rem;line-height:1.5;resize:vertical" placeholder="Escribe aquí la Política de Privacidad (admite HTML simple: <p>, <strong>, <ul><li>, etc.)"></textarea>
+          </div>
+          <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" id="save-legal-privacy-btn" onclick="saveLegalDoc('privacy')">Guardar Política de Privacidad</button>
+        </div>
+        <div class="notif-gestor-hint">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          Guardar un texto no vuelve a pedir la aceptación a quienes ya aceptaron antes; usa Notificaciones para avisarles que los términos cambiaron.
         </div>
       </div>
 
@@ -8066,6 +8126,17 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         </div>
         <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
+      <!-- Información Legal (v1.41.0-stable_beta) -->
+      <div class="pref-nav-row" id="pref-nav-row-legal" style="border-top:1px solid var(--border)" onclick="openPrefScreen('legal')">
+        <div class="profile-row-icon" style="background:var(--ter-3-bg);color:var(--ter-3)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Información Legal</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Términos y Condiciones, Política de Privacidad</div>
+        </div>
+        <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
     </div>
 
 
@@ -8410,6 +8481,60 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
     </div>
     <button class="btn-secondary" style="width:100%;margin-top:1rem" onclick="clearAllOfflineTerritoriesFromUI()">Borrar todas las descargas</button>
   </div>
+</div>
+
+<!-- ── Sub-pantalla: Información Legal (v1.41.0-stable_beta) ── -->
+<div id="page-pref-legal" class="pref-subpage">
+  <nav class="subpage-topbar">
+    <button class="pill-back-btn" onclick="closePrefScreenToConfig()" title="Configuración">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span class="pill-header-title">Información Legal</span>
+  </nav>
+  <div style="max-width:600px;width:100%;margin:0 auto;padding:1.25rem 0 2.5rem">
+    <div class="profile-section">
+      <div class="pref-nav-row" onclick="openPrefScreen('legal-terms')">
+        <div class="profile-row-icon" style="background:var(--ter-3-bg);color:var(--ter-3)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Términos y Condiciones</div>
+        </div>
+        <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="pref-nav-row" style="border-top:1px solid var(--border)" onclick="openPrefScreen('legal-privacy')">
+        <div class="profile-row-icon" style="background:var(--ter-3-bg);color:var(--ter-3)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Política de Privacidad</div>
+        </div>
+        <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Sub-pantalla: Términos y Condiciones (preview de solo lectura) ── -->
+<div id="page-pref-legal-terms" class="pref-subpage">
+  <nav class="subpage-topbar">
+    <button class="pill-back-btn" onclick="closePrefScreenToLegal()" title="Información Legal">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span class="pill-header-title">Términos y Condiciones</span>
+  </nav>
+  <div style="max-width:640px;width:100%;margin:0 auto;padding:1.25rem 1rem 2.5rem;font-size:0.88rem;line-height:1.6;color:var(--text2)" id="pref-legal-terms-body"></div>
+</div>
+
+<!-- ── Sub-pantalla: Política de Privacidad (preview de solo lectura) ── -->
+<div id="page-pref-legal-privacy" class="pref-subpage">
+  <nav class="subpage-topbar">
+    <button class="pill-back-btn" onclick="closePrefScreenToLegal()" title="Información Legal">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span class="pill-header-title">Política de Privacidad</span>
+  </nav>
+  <div style="max-width:640px;width:100%;margin:0 auto;padding:1.25rem 1rem 2.5rem;font-size:0.88rem;line-height:1.6;color:var(--text2)" id="pref-legal-privacy-body"></div>
 </div>
 
 <!-- ── Sub-pantalla: Experimentos (solo si se ha desbloqueado) ── -->
@@ -9150,7 +9275,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.40.0-stable-beta';
+const APP_VERSION = '1.41.0-stable_beta';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -12202,6 +12327,14 @@ async function enterApp() {
       return;
     }
   }
+
+  // Legal (v1.41.0-stable_beta): gate de Términos y Privacidad en el primer
+  // inicio de sesión. Si no se ha aceptado aún (y el toggle admin lo exige),
+  // se muestra la pantalla y enterApp se detiene aquí; legalGateAccept()
+  // vuelve a llamar a enterApp() una vez aceptado.
+  const legalOk = await ensureLegalAcceptance();
+  if (!legalOk) return;
+
   document.getElementById('auth-pending-screen').style.display = 'none';
 
   const app = document.getElementById('app');
@@ -12239,6 +12372,8 @@ async function enterApp() {
   if (tipsAdminTab) tipsAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
   const monitorAdminTab = document.getElementById('admin-tab-monitor');
   if (monitorAdminTab) monitorAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
+  const legalAdminTab = document.getElementById('admin-tab-legal');
+  if (legalAdminTab) legalAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
   // v1.38.0-beta: botones "Subir CSV" — exclusivos del Usuario DEV.
   document.querySelectorAll('.dev-only-el').forEach(el => { el.style.display = (currentRole === 'dev') ? '' : 'none'; });
 
@@ -12492,6 +12627,230 @@ function parseDevCsv(text) {
     return obj;
   });
   return { headers, rows: dataRows };
+}
+
+// ── Egress Cache (v1.41.0-stable_beta) ───────────────────────────────────────
+// Helper genérico de caché en localStorage para reducir el consumo de Egress
+// de Supabase en TODA la plataforma: cualquier lectura que no necesite ser
+// "al segundo" (contenido que cambia poco: textos legales, plantillas, Tips,
+// etc.) puede envolverse con egressCachedFetch(key, ttlMs, fetchFn) en vez de
+// llamar a Supabase directo en cada apertura de pantalla. No se aplica a
+// datos que deben estar siempre al día (asignaciones, Live, modo
+// mantenimiento, mensajería), donde el costo de una lectura desactualizada es
+// mayor que el ahorro de Egress.
+const EGRESS_CACHE_PREFIX = 'fleming_ecache_';
+function egressCacheGet(key) {
+  try { return JSON.parse(localStorage.getItem(EGRESS_CACHE_PREFIX + key)); } catch (e) { return null; }
+}
+function egressCacheSet(key, value) {
+  try { localStorage.setItem(EGRESS_CACHE_PREFIX + key, JSON.stringify({ value, savedAt: Date.now() })); } catch (e) { /* almacenamiento lleno u otro error: seguimos sin caché */ }
+}
+function egressCacheClear(key) {
+  try { localStorage.removeItem(EGRESS_CACHE_PREFIX + key); } catch (e) {}
+}
+// ttlMs: tiempo de vida del cache. fetchFn: async () => valor a cachear (o null/undefined si falló).
+async function egressCachedFetch(key, ttlMs, fetchFn) {
+  const cached = egressCacheGet(key);
+  if (cached && (Date.now() - cached.savedAt) < ttlMs) return cached.value;
+  try {
+    const fresh = await fetchFn();
+    if (fresh !== undefined && fresh !== null) { egressCacheSet(key, fresh); return fresh; }
+    // Si la red falla, usamos el cache viejo si existe, mejor que dejar la UI vacía.
+    return cached ? cached.value : fresh;
+  } catch (e) {
+    return cached ? cached.value : null;
+  }
+}
+
+// ── Legal: Términos y Condiciones / Política de Privacidad (v1.41.0-stable_beta) ──
+// Tabla dedicada `legal_documents` (key: 'terms' | 'privacy' | 'settings').
+// Para ahorrar Egress: 1) el `content` (pesado) solo se descarga cuando la
+// `version` guardada localmente no coincide con la remota; 2) el chequeo de
+// "¿hay que mostrar el gate?" se apoya en un flag local — una vez que el
+// usuario acepta, no se vuelve a consultar Supabase por eso, aunque el texto
+// cambie después (tal como se definió con el cliente).
+let _legalGatePendingVersions = null;
+
+async function fetchLegalMeta() {
+  // Solo trae key + version + require_acceptance (unos pocos bytes), nunca el texto.
+  return egressCachedFetch('legal_meta', 5 * 60 * 1000, async () => {
+    const { data, error } = await sb.from('legal_documents').select('key,version,require_acceptance');
+    if (error || !data) return null;
+    const meta = {};
+    data.forEach(r => { meta[r.key] = r; });
+    return meta;
+  });
+}
+
+async function fetchLegalContent(docKey) {
+  const meta = await fetchLegalMeta();
+  const version = meta?.[docKey]?.version || 1;
+  const cacheKey = 'legal_content_' + docKey;
+  const cached = egressCacheGet(cacheKey);
+  if (cached && cached.value && cached.value.version === version) return cached.value.content;
+  try {
+    const { data, error } = await sb.from('legal_documents').select('content').eq('key', docKey).maybeSingle();
+    const content = (!error && data) ? (data.content || '') : (cached?.value?.content || '');
+    egressCacheSet(cacheKey, { version, content });
+    return content;
+  } catch (e) {
+    return cached?.value?.content || '';
+  }
+}
+
+function _legalInvalidateCache() {
+  egressCacheClear('legal_meta');
+  egressCacheClear('legal_content_terms');
+  egressCacheClear('legal_content_privacy');
+}
+
+// Devuelve true si se puede continuar entrando a la app; false si se mostró
+// el gate de aceptación (enterApp debe detenerse y esperar la decisión).
+async function ensureLegalAcceptance() {
+  const meta = await fetchLegalMeta();
+  const requireAcceptance = meta?.settings ? (meta.settings.require_acceptance !== false) : true;
+  if (!requireAcceptance) return true;
+  let localAccept = null;
+  try { localAccept = JSON.parse(localStorage.getItem('fleming_legal_accepted') || 'null'); } catch (e) {}
+  if (localAccept && localAccept.accepted) return true;
+  await openLegalGateScreen(meta);
+  return false;
+}
+
+async function openLegalGateScreen(meta) {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('auth-pending-screen').style.display = 'none';
+  const scr = document.getElementById('legal-gate-screen');
+  scr.style.display = 'flex';
+  const contentEl = document.getElementById('legal-gate-content');
+  contentEl.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando…</div></div>';
+  const [terms, privacy] = await Promise.all([fetchLegalContent('terms'), fetchLegalContent('privacy')]);
+  contentEl.innerHTML =
+    '<h3 style="margin:0 0 0.75rem;font-size:1.05rem;font-weight:800">Términos y Condiciones</h3>' +
+    '<div style="font-size:0.88rem;line-height:1.6;color:var(--text2)">' + (terms || 'No hay contenido disponible.') + '</div>' +
+    '<h3 style="margin:2.2rem 0 0.75rem;font-size:1.05rem;font-weight:800">Política de Privacidad</h3>' +
+    '<div style="font-size:0.88rem;line-height:1.6;color:var(--text2)">' + (privacy || 'No hay contenido disponible.') + '</div>';
+  _legalGatePendingVersions = {
+    terms: meta?.terms?.version || 1,
+    privacy: meta?.privacy?.version || 1,
+  };
+  const acceptBtn = document.getElementById('legal-gate-accept-btn');
+  if (acceptBtn) acceptBtn.disabled = true;
+  const scrollWrap = document.getElementById('legal-gate-scroll');
+  if (scrollWrap) { scrollWrap.scrollTop = 0; scrollWrap.onscroll = _checkLegalGateScrollEnd; }
+  _checkLegalGateScrollEnd();
+}
+
+function _checkLegalGateScrollEnd() {
+  const scrollWrap = document.getElementById('legal-gate-scroll');
+  const btn = document.getElementById('legal-gate-accept-btn');
+  const jumpBtn = document.getElementById('legal-gate-jump-btn');
+  if (!scrollWrap || !btn) return;
+  const atBottom = (scrollWrap.scrollTop + scrollWrap.clientHeight) >= (scrollWrap.scrollHeight - 24);
+  btn.disabled = !atBottom;
+  if (jumpBtn) jumpBtn.style.display = atBottom ? 'none' : 'flex';
+}
+
+function legalGateJumpToEnd() {
+  const scrollWrap = document.getElementById('legal-gate-scroll');
+  if (scrollWrap) scrollWrap.scrollTo({ top: scrollWrap.scrollHeight, behavior: 'smooth' });
+}
+
+async function legalGateAccept() {
+  const btn = document.getElementById('legal-gate-accept-btn');
+  if (!btn || btn.disabled) return;
+  btn.disabled = true;
+  try {
+    await sb.from('legal_acceptances').insert({
+      user_name: (currentUser && currentUser.name) || '(desconocido)',
+      accepted: true,
+      terms_version: (_legalGatePendingVersions && _legalGatePendingVersions.terms) || 1,
+      privacy_version: (_legalGatePendingVersions && _legalGatePendingVersions.privacy) || 1,
+    });
+  } catch (e) { /* si falla la auditoría, igual dejamos entrar: no es un bloqueo crítico */ }
+  localStorage.setItem('fleming_legal_accepted', JSON.stringify({ accepted: true, ts: Date.now() }));
+  document.getElementById('legal-gate-screen').style.display = 'none';
+  enterApp();
+}
+
+async function legalGateReject() {
+  try {
+    await sb.from('legal_acceptances').insert({
+      user_name: (currentUser && currentUser.name) || '(desconocido)',
+      accepted: false,
+      terms_version: (_legalGatePendingVersions && _legalGatePendingVersions.terms) || 1,
+      privacy_version: (_legalGatePendingVersions && _legalGatePendingVersions.privacy) || 1,
+    });
+  } catch (e) {}
+  document.getElementById('legal-gate-screen').style.display = 'none';
+  currentUser = null; currentRole = null;
+  try { localStorage.removeItem('fleming_user'); } catch (e) {}
+  document.getElementById('auth-screen').style.display = 'flex';
+  showToast('Debes aceptar los Términos y la Política de Privacidad para usar FlemingApp.', 'error');
+}
+
+// ── Legal: pantallas de solo lectura dentro de Configuración ──────────────
+async function renderPrefLegalTerms() {
+  const el = document.getElementById('pref-legal-terms-body');
+  if (!el) return;
+  el.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando…</div></div>';
+  const content = await fetchLegalContent('terms');
+  el.innerHTML = content || 'No hay contenido disponible.';
+}
+async function renderPrefLegalPrivacy() {
+  const el = document.getElementById('pref-legal-privacy-body');
+  if (!el) return;
+  el.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando…</div></div>';
+  const content = await fetchLegalContent('privacy');
+  el.innerHTML = content || 'No hay contenido disponible.';
+}
+
+// ── Legal: panel de administración (Administración → FlemingApp → Legal) ──
+async function renderAdminLegal() {
+  const meta = await fetchLegalMeta();
+  const [terms, privacy] = await Promise.all([fetchLegalContent('terms'), fetchLegalContent('privacy')]);
+  const termsEl = document.getElementById('admin-legal-terms');
+  const privacyEl = document.getElementById('admin-legal-privacy');
+  if (termsEl) termsEl.value = terms || '';
+  if (privacyEl) privacyEl.value = privacy || '';
+  const requireAcceptance = meta?.settings ? (meta.settings.require_acceptance !== false) : true;
+  _updateLegalToggleUI(requireAcceptance);
+}
+function _updateLegalToggleUI(on) {
+  const toggle = document.getElementById('legal-require-toggle');
+  const thumb = document.getElementById('legal-require-thumb');
+  if (!toggle || !thumb) return;
+  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
+  thumb.style.left = on ? '21px' : '3px';
+  toggle.dataset.on = on ? '1' : '0';
+}
+async function toggleLegalRequireAcceptance() {
+  const toggle = document.getElementById('legal-require-toggle');
+  const next = !(toggle && toggle.dataset.on === '1');
+  _updateLegalToggleUI(next);
+  try {
+    await sb.from('legal_documents').update({ require_acceptance: next }).eq('key', 'settings');
+    _legalInvalidateCache();
+    showToast(next ? 'Pantalla de aceptación activada' : 'Pantalla de aceptación desactivada', 'success');
+  } catch (e) {
+    _updateLegalToggleUI(!next);
+    showToast('No se pudo actualizar. Intenta de nuevo.', 'error');
+  }
+}
+async function saveLegalDoc(docKey) {
+  const el = document.getElementById(docKey === 'terms' ? 'admin-legal-terms' : 'admin-legal-privacy');
+  const btn = document.getElementById(docKey === 'terms' ? 'save-legal-terms-btn' : 'save-legal-privacy-btn');
+  if (!el) return;
+  if (btn) { btn.disabled = true; btn.textContent = 'Guardando…'; }
+  try {
+    await sb.from('legal_documents').update({ content: el.value }).eq('key', docKey);
+    _legalInvalidateCache();
+    showToast('Guardado correctamente', 'success');
+  } catch (e) {
+    showToast('No se pudo guardar. Intenta de nuevo.', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = docKey === 'terms' ? 'Guardar Términos y Condiciones' : 'Guardar Política de Privacidad'; }
+  }
 }
 
 // Configuración por sub-sección: tabla de Supabase, columnas esperadas del
@@ -13693,7 +14052,7 @@ const ADMIN_TAB_SECTION = {
   assignments: 'predicacion', territories: 'predicacion', conductores: 'predicacion',
   casas: 'predicacion', grupos: 'predicacion', carritos: 'predicacion', reports: 'predicacion',
   vmc: 'reuniones', 'fin-semana': 'reuniones', audiovideo: 'reuniones', acomodacion: 'reuniones', 'aseo-salon': 'reuniones',
-  usuarios: 'fleming', notificaciones: 'fleming', tips: 'fleming',
+  usuarios: 'fleming', notificaciones: 'fleming', tips: 'fleming', monitor: 'fleming', legal: 'fleming',
 };
 
 // Cambia la sección visible (Predicación/Reuniones) y activa la primera sub-pestaña disponible dentro de ella.
@@ -13724,6 +14083,11 @@ async function switchAdminTab(tab) {
   // Monitor (v1.33.7-beta): estadísticas de uso, Sugerencias y Reportes de
   // problema — exclusivo del Usuario DEV, no delegable a Admins.
   if (tab === 'monitor' && currentRole !== 'dev') {
+    showToast('No tienes permisos para acceder a este módulo.', 'error');
+    return;
+  }
+  // Legal (v1.41.0-stable_beta): edición exclusiva del Usuario DEV, no delegable a Admins.
+  if (tab === 'legal' && currentRole !== 'dev') {
     showToast('No tienes permisos para acceder a este módulo.', 'error');
     return;
   }
@@ -13773,6 +14137,7 @@ async function switchAdminTab(tab) {
   if (tab === 'notificaciones') { renderNotifAdminTemplates(); renderNotifAdminCategories(); loadNotifLevels().then(renderNotifAdminLevels); }
   if (tab === 'tips') { renderAdminTipsList(); }
   if (tab === 'monitor') { switchMonitorTab(_monitorActiveTab || 'stats'); loadMaintenanceModeUI(); }
+  if (tab === 'legal') { renderAdminLegal(); }
   if (tab === 'carritos') { cartOpenAdminSection(); }
   if (tab === 'reports') { trepOpenAdminSection(); }
 }
@@ -19601,6 +19966,8 @@ async function syncRoleFromServer() {
       if (tipsAdminTab) tipsAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
       const monitorAdminTab = document.getElementById('admin-tab-monitor');
       if (monitorAdminTab) monitorAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
+      const legalAdminTab = document.getElementById('admin-tab-legal');
+      if (legalAdminTab) legalAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
       // If user was viewing the Fleming App / Usuarios section and lost access, send them back to predicación
       const usuariosSection = document.getElementById('admin-usuarios');
       if (usuariosSection && usuariosSection.classList.contains('active') && !['dev','admin'].includes(currentRole)) {
@@ -19923,7 +20290,7 @@ function closePreferencias() {
   document.body.style.overflow = '';
 }
 // ── Navegación entre las sub-pantallas de Configuración ──────────────────────
-const PREF_SCREENS = ['preferencias', 'funciones', 'notificaciones', 'almacenamiento', 'experimentos', 'ayuda', 'soporte', 'version'];
+const PREF_SCREENS = ['preferencias', 'funciones', 'notificaciones', 'almacenamiento', 'experimentos', 'ayuda', 'soporte', 'version', 'legal', 'legal-terms', 'legal-privacy'];
 function openPrefScreen(name) {
   if (!PREF_SCREENS.includes(name)) return;
   if (name === 'experimentos' && localStorage.getItem('fleming_egg_unlocked') !== '1') return;
@@ -19935,6 +20302,8 @@ function openPrefScreen(name) {
   if (name === 'ayuda') renderAyudaTipsList();
   if (name === 'preferencias') { updateAnimationsEnabledToggleUI(); updateWeatherToggleUI(); updateNavbarIconToggleUI(); }
   if (name === 'experimentos') { updateAccentSwatchesUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBtnSizeUI(); if (typeof updateLiveHostToggleUI === 'function') updateLiveHostToggleUI(); if (typeof updateSubnavMenuToggleUI === 'function') updateSubnavMenuToggleUI(); if (typeof updateModoSencilloToggleUI === 'function') updateModoSencilloToggleUI(); if (typeof updatePinFeatureToggleUI === 'function') updatePinFeatureToggleUI(); }
+  if (name === 'legal-terms') renderPrefLegalTerms();
+  if (name === 'legal-privacy') renderPrefLegalPrivacy();
   if (name === 'version') {
     const val = document.getElementById('pref-version-screen-value');
     if (val) val.textContent = 'Versión ' + APP_VERSION;
@@ -19942,6 +20311,12 @@ function openPrefScreen(name) {
 }
 function closePrefScreen() {
   PREF_SCREENS.forEach(name => document.getElementById('page-pref-' + name)?.classList.remove('open'));
+}
+// Variante para las sub-pantallas de detalle Legal (Términos / Privacidad):
+// al volver, regresan a "Información Legal" en vez de saltar a Configuración.
+function closePrefScreenToLegal() {
+  PREF_SCREENS.forEach(name => document.getElementById('page-pref-' + name)?.classList.remove('open'));
+  document.getElementById('page-pref-legal')?.classList.add('open');
 }
 // Variante robusta usada por pantallas que deben volver siempre a Configuración
 // (p. ej. Almacenamiento), sin importar desde qué sub-pantalla intermedia se
@@ -21891,6 +22266,8 @@ function syncAdminDropdown() {
   if (tipsAdminTab) tipsAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
   const monitorAdminTab = document.getElementById('admin-tab-monitor');
   if (monitorAdminTab) monitorAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
+  const legalAdminTab = document.getElementById('admin-tab-legal');
+  if (legalAdminTab) legalAdminTab.style.display = (currentRole === 'dev') ? '' : 'none';
   const themeLabel = document.getElementById('theme-btn-label-admin');
   if (themeLabel) _updateThemeActive(document.documentElement.getAttribute('data-theme') || 'auto');
 }
