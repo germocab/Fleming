@@ -8708,6 +8708,16 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
     </div>
     <div class="profile-section">
       <div class="profile-section-title" data-i18n="settings.mantenimiento">Mantenimiento</div>
+      <div class="profile-row" style="cursor:pointer" onclick="debugPush()">
+        <div class="profile-row-icon" style="background:var(--accent-light);color:var(--accent)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="settings.diagnosticopush">Diagnóstico de Notificaciones Push</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.diagnosticopush.desc">Revisa paso a paso por qué las notificaciones push no llegan a este dispositivo (soporte, permiso, suscripción y guardado en la base de datos)</div>
+        </div>
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
       <div class="profile-row" style="cursor:pointer" onclick="confirmResetPlatform()">
         <div class="profile-row-icon" style="background:rgba(255,59,48,0.12);color:#ff3b30">
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
@@ -9142,7 +9152,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.42.2-stable_beta';
+const APP_VERSION = '1.42.3-sb';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -9413,6 +9423,8 @@ const I18N = {
   'settings.reportar':          { es: 'Sugerencias',              en: 'Suggestions', nl: 'Suggesties' },
   'settings.reportar.desc':     { es: 'Esta plataforma está en fase Beta — cuéntanos si algo falla', en: 'This platform is in Beta — let us know if something breaks', nl: 'Dit platform bevindt zich in de Beta-fase — laat ons weten als er iets misgaat' },
   'settings.mantenimiento':     { es: 'Mantenimiento',            en: 'Maintenance', nl: 'Onderhoud' },
+  'settings.diagnosticopush':      { es: 'Diagnóstico de Notificaciones Push', en: 'Push Notification Diagnostics', nl: 'Diagnose van pushmeldingen' },
+  'settings.diagnosticopush.desc': { es: 'Revisa paso a paso por qué las notificaciones push no llegan a este dispositivo (soporte, permiso, suscripción y guardado en la base de datos)', en: 'Step through why push notifications aren\'t reaching this device (support, permission, subscription and database save)', nl: 'Controleer stap voor stap waarom pushmeldingen dit apparaat niet bereiken (ondersteuning, toestemming, abonnement en opslag in de database)' },
   'settings.restablecer':       { es: 'Restablecer plataforma',   en: 'Reset platform', nl: 'Platform herstellen' },
   'settings.restablecer.desc':  { es: 'Restaura todas las preferencias y configuraciones a sus valores predeterminados. No cierra tu sesión ni modifica tu perfil', en: 'Restores all preferences and settings to their default values. Does not sign you out or modify your profile', nl: 'Herstelt alle voorkeuren en instellingen naar hun standaardwaarden. Meldt je niet af en wijzigt je profiel niet' },
   'report.titulo':          { es: 'Sugerencias',     en: 'Suggestions', nl: 'Suggesties' },
@@ -10125,6 +10137,30 @@ async function subscribeToPush() {
     // 4. Obtener o crear suscripción push
     let sub = await registration.pushManager.getSubscription();
 
+    // v1.42.0-stable_beta (fix): si la clave VAPID pública cambió desde que
+    // se creó la suscripción (p. ej. porque se regeneraron las claves en el
+    // servidor), el navegador sigue devolviendo la suscripción VIEJA sin
+    // avisar — y el envío desde el Edge Function falla en silencio (401/403)
+    // porque la clave privada del servidor ya no combina con ella. Esta es
+    // una causa muy común de que las notificaciones push "dejen de llegar"
+    // de un día para otro. Se detecta comparando la applicationServerKey
+    // guardada en el navegador contra la VAPID_PUBLIC_KEY actual, y si no
+    // coinciden, se descarta la suscripción vieja y se crea una nueva.
+    if (sub) {
+      try {
+        const currentKeyBytes = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+        const savedKey = sub.options && sub.options.applicationServerKey ? new Uint8Array(sub.options.applicationServerKey) : null;
+        const keysMatch = savedKey ? savedKey.length === currentKeyBytes.length && savedKey.every((b, i) => b === currentKeyBytes[i]) : true;
+        if (!keysMatch) {
+          console.warn('[Push] La clave VAPID cambió — se descarta la suscripción vieja y se crea una nueva.');
+          await sub.unsubscribe();
+          sub = null;
+        }
+      } catch (e) {
+        console.warn('[Push] No se pudo comparar la clave VAPID de la suscripción existente:', e.message);
+      }
+    }
+
     if (sub) {
       // Ya hay suscripción — igual re-guardar por si cambió el usuario
       console.log('[Push] Suscripción existente encontrada, actualizando en BD...');
@@ -10176,6 +10212,18 @@ async function debugPush() {
 
     const sub = await reg.pushManager.getSubscription();
     log('Suscripción en browser: ' + (sub ? 'SÍ existe' : 'NO existe — se intentará crear'), !!sub);
+
+    if (sub) {
+      try {
+        const currentKeyBytes = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+        const savedKey = sub.options && sub.options.applicationServerKey ? new Uint8Array(sub.options.applicationServerKey) : null;
+        const keysMatch = savedKey ? savedKey.length === currentKeyBytes.length && savedKey.every((b, i) => b === currentKeyBytes[i]) : true;
+        log('Clave VAPID de la suscripción coincide con la actual: ' + keysMatch, keysMatch);
+        if (!keysMatch) log('⚠️ Esto explica por qué las notificaciones no llegan: hay que resuscribirse.', false);
+      } catch (e) {
+        log('No se pudo comparar la clave VAPID: ' + e.message, false);
+      }
+    }
 
     if (!sub) {
       await subscribeToPush();
