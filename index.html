@@ -10705,6 +10705,9 @@ async function deleteGrupoHosp(idx) {
 
 // ── Profile page ──────────────────────────────────────────────────────────────
 
+// Etiquetas generales del Perfil (Precursor Regular, Precursor Especial,
+// Anciano, Siervo Ministerial). Requiere esta columna en Supabase:
+//   alter table platform_users add column if not exists labels jsonb default '{}'::jsonb;
 function parseLabels(raw) {
   if (!raw) return {};
   try { return typeof raw === 'object' ? raw : JSON.parse(raw); } catch { return {}; }
@@ -18904,12 +18907,31 @@ async function saveProfileChanges(uid) {
   let { error } = await sb.from('platform_users')
     .update(updatePayload)
     .eq('id', u.id);
+  let labelsSaved = !error; // si el payload completo se guardó bien, las Etiquetas también
   if (error) {
-    // Reintento sin linked_name/admin_tag_id/genero por si las columnas aún no
-    // existen en Supabase (ver bloques SQL correspondientes para agregarlas).
-    const fallback = { role: u.role, task: u.task, labels: parseLabels(u.labels) };
-    const retry = await sb.from('platform_users').update(fallback).eq('id', u.id);
-    if (retry.error) { showToast('Error: ' + retry.error.message, 'error'); return; }
+    // Reintento sin linked_name/admin_tag_id/genero por si esas columnas aún
+    // no existen en Supabase (ver bloques SQL correspondientes para
+    // agregarlas). Se mantienen permissions y labels en este nivel.
+    const fallback1 = { role: u.role, task: u.task, permissions: perms, labels: parseLabels(u.labels) };
+    let retry = await sb.from('platform_users').update(fallback1).eq('id', u.id);
+    labelsSaved = !retry.error;
+    if (retry.error) {
+      // Reintento sin permissions, por si esa columna tampoco existe aún.
+      // Se aísla "labels" en su propio intento para que un problema con
+      // permissions/rol/etc. nunca le impida guardarse.
+      const fallback2 = { role: u.role, task: u.task, labels: parseLabels(u.labels) };
+      retry = await sb.from('platform_users').update(fallback2).eq('id', u.id);
+      labelsSaved = !retry.error;
+      if (retry.error) {
+        // Último recurso: ni siquiera "labels" existe como columna — se
+        // guarda solo rol/nota para no perder por completo los cambios.
+        const fallback3 = { role: u.role, task: u.task };
+        const retry3 = await sb.from('platform_users').update(fallback3).eq('id', u.id);
+        if (retry3.error) { showToast('Error: ' + retry3.error.message, 'error'); return; }
+        showToast('Cambios guardados, pero falta crear la columna "labels" en Supabase para poder guardar las Etiquetas (Precursor, Anciano, Siervo Ministerial, etc.).', 'error');
+        labelsSaved = false;
+      }
+    }
     if (currentRole === 'dev' && newLinkedName !== (u.linked_name || '')) {
       showToast('Cambios guardados, pero falta crear la columna "linked_name" en Supabase para poder vincular cuentas.', 'error');
     } else if (currentRole === 'dev' && admintagSel) {
@@ -18951,7 +18973,7 @@ async function saveProfileChanges(uid) {
     const nameEl = document.querySelector('.options-user-name');
     if (nameEl) nameEl.textContent = currentUser.name;
   }
-  showToast('Cambios guardados ✓', 'success');
+  showToast(labelsSaved ? 'Cambios guardados ✓' : 'Cambios guardados (revisa el aviso sobre Etiquetas) ⚠️', labelsSaved ? 'success' : 'error');
   closeUserProfilePage();
   renderUsersPanel();
 }
@@ -19201,17 +19223,32 @@ async function saveUserChanges(uid) {
   const btn = document.querySelector(`#user-card-${uid} .save-user-btn`);
   if (btn) { btn.disabled = true; btn.textContent = 'Guardando…'; }
 
-  // Try with permissions column; if it doesn't exist yet, retry without it
+  // Intenta con permissions + labels; si falla, aísla labels en su propio
+  // intento para que un problema con permissions/rol nunca le impida
+  // guardarse (ver mismo patrón en saveProfileChanges).
   let { error } = await sb.from('platform_users')
     .update({ role: u.role, task: u.task, permissions: perms, labels: parseLabels(u.labels) })
     .eq('id', u.id);
+  let labelsSaved = !error;
 
   if (error) {
-    console.warn('saveUserChanges (with permissions) failed:', error.message, '— retrying without');
-    const retry = await sb.from('platform_users')
+    console.warn('saveUserChanges (con permissions) falló:', error.message, '— reintentando sin permissions');
+    let retry = await sb.from('platform_users')
       .update({ role: u.role, task: u.task, labels: parseLabels(u.labels) })
       .eq('id', u.id);
+    labelsSaved = !retry.error;
     error = retry.error;
+    if (error) {
+      console.warn('saveUserChanges (con labels) falló:', error.message, '— reintentando sin labels');
+      const retry2 = await sb.from('platform_users')
+        .update({ role: u.role, task: u.task })
+        .eq('id', u.id);
+      error = retry2.error;
+      if (!error) {
+        showToast('Cambios guardados, pero falta crear la columna "labels" en Supabase para poder guardar las Etiquetas (Precursor, Anciano, Siervo Ministerial, etc.).', 'error');
+        labelsSaved = false;
+      }
+    }
   }
 
   if (btn) { btn.disabled = false; btn.textContent = 'Guardar cambios'; }
@@ -19220,7 +19257,6 @@ async function saveUserChanges(uid) {
     showToast('Error: ' + error.message, 'error');
     return;
   }
-
   if (currentUser && u.name === currentUser.name) {
     currentRole = u.role;
     currentUser.role = u.role;
@@ -19228,7 +19264,7 @@ async function saveUserChanges(uid) {
   }
   expandedUserId = null;
   renderUsersPanel();
-  showToast('Cambios guardados ✓', 'success');
+  if (labelsSaved) showToast('Cambios guardados ✓', 'success');
 }
 
 async function revokeUser(uid) {
