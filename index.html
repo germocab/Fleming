@@ -9142,7 +9142,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.42.0-stable_beta';
+const APP_VERSION = '1.42.2-stable_beta';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -10710,7 +10710,19 @@ async function deleteGrupoHosp(idx) {
 //   alter table platform_users add column if not exists labels jsonb default '{}'::jsonb;
 function parseLabels(raw) {
   if (!raw) return {};
-  try { return typeof raw === 'object' ? raw : JSON.parse(raw); } catch { return {}; }
+  // v1.42.0-stable_beta (fix): algunas filas antiguas quedaron con "[]" (un
+  // ARRAY vacío) en vez de "{}" (un OBJETO vacío) como valor de "labels".
+  // typeof [] también es 'object' en JS, así que un array pasaba de largo
+  // sin convertirse — y al asignarle luego labels['precursor']=true y
+  // volver a serializarlo, JSON.stringify() de un array IGNORA las
+  // propiedades no numéricas, guardando siempre "[]" sin importar los
+  // toggles. Por eso las Etiquetas nunca persistían. Se normaliza aquí
+  // cualquier array (vacío o no) a un objeto plano.
+  if (Array.isArray(raw)) return {};
+  try {
+    const parsed = typeof raw === 'object' ? raw : JSON.parse(raw);
+    return Array.isArray(parsed) ? {} : (parsed || {});
+  } catch { return {}; }
 }
 
 // Build the avatar HTML (iniciales) para uso en toda la app.
