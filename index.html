@@ -9152,7 +9152,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.42.3-sb';
+const APP_VERSION = '1.43.0-stable_beta';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -10179,10 +10179,7 @@ async function subscribeToPush() {
     // 5. Guardar en Supabase
     if (currentUser) {
       const subJson = JSON.stringify(sub.toJSON ? sub.toJSON() : sub);
-      const { error } = await sb.from('push_subscriptions').upsert(
-        { user_name: getIdentityName(), subscription: subJson },
-        { onConflict: 'user_name' }
-      );
+      const error = await savePushSubscription(getIdentityName(), subJson);
       if (error) {
         console.error('[Push] Error guardando suscripción:', error.message);
       } else {
@@ -10192,6 +10189,34 @@ async function subscribeToPush() {
   } catch (error) {
     console.error('[Push] Error en subscribeToPush:', error.name, error.message);
   }
+}
+
+// v1.42.0-stable_beta (fix): guarda la suscripción push con upsert(onConflict:
+// 'user_name'), que requiere una restricción UNIQUE en esa columna
+// (ver: alter table push_subscriptions add constraint push_subscriptions_user_name_key
+// unique (user_name);). Si esa restricción no existe (error Postgres 42P10 —
+// "no unique or exclusion constraint matching the ON CONFLICT specification"),
+// se recurre a un select + update/insert manual para no dejar el guardado en
+// silencio sin funcionar como pasaba antes.
+async function savePushSubscription(userName, subJson) {
+  const { error } = await sb.from('push_subscriptions').upsert(
+    { user_name: userName, subscription: subJson },
+    { onConflict: 'user_name' }
+  );
+  if (!error) return null;
+
+  if (error.code === '42P10') {
+    console.warn('[Push] Falta la restricción UNIQUE en push_subscriptions.user_name — usando fallback manual.');
+    const { data: existing } = await sb.from('push_subscriptions').select('id').eq('user_name', userName).limit(1);
+    if (existing && existing.length) {
+      const { error: updErr } = await sb.from('push_subscriptions').update({ subscription: subJson }).eq('user_name', userName);
+      return updErr || null;
+    } else {
+      const { error: insErr } = await sb.from('push_subscriptions').insert({ user_name: userName, subscription: subJson });
+      return insErr || null;
+    }
+  }
+  return error;
 }
 
 // ── Debug push (botón temporal para diagnosticar) ────────────────────────────
@@ -10231,15 +10256,15 @@ async function debugPush() {
       log('Suscripción tras intentar crear: ' + (sub2 ? 'SÍ' : 'FALLÓ'), !!sub2);
     }
 
-    // Intentar insert directo para ver el error exacto
+    // Intentar guardar (con fallback automático) para ver el error exacto
     const subObj = await reg.pushManager.getSubscription();
     const subJson = subObj ? JSON.stringify(subObj.toJSON ? subObj.toJSON() : subObj) : null;
-    const { error: insertError } = await sb.from('push_subscriptions').upsert(
-      { user_name: currentUser ? getIdentityName() : 'test', subscription: subJson },
-      { onConflict: 'user_name' }
-    );
+    const insertError = await savePushSubscription(currentUser ? getIdentityName() : 'test', subJson);
     if (insertError) {
       log('Error al guardar: [' + insertError.code + '] ' + insertError.message + ' — ' + (insertError.hint || insertError.details || ''), false);
+      if (insertError.code === '42P10') {
+        log('⚠️ Falta la restricción UNIQUE en push_subscriptions.user_name — corre este SQL en Supabase: alter table push_subscriptions add constraint push_subscriptions_user_name_key unique (user_name);', false);
+      }
     } else {
       log('Guardado en push_subscriptions ✓', true);
     }
