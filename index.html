@@ -7493,7 +7493,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         <!-- v1.44.5-sb: Descripción y Lugar no aplican a "Visita" (solo a "Evento") -->
         <div class="form-group2" id="as-especial-desc-wrap"><label class="form-label2">Descripción <span style="font-weight:400;color:var(--text3)">— opcional</span></label><textarea class="form-textarea" id="as-especial-descripcion" placeholder="Detalles del evento..."></textarea></div>
         <div class="form-group2" id="as-especial-lugar-wrap"><label class="form-label2">Lugar <span style="font-weight:400;color:var(--text3)">— opcional</span></label><input type="text" class="form-input" id="as-especial-lugar" placeholder="Ej: Salón de Asambleas, Av. Siempre Viva 123"></div>
-        <div class="form-group2"><label class="form-label2">Enlace del Programa <span style="font-weight:400;color:var(--text3)">— opcional, habilita el botón "Ver Programa"</span></label><input type="url" class="form-input" id="as-especial-programa-url" placeholder="Ej: https://..."></div>
+        <div class="form-group2" id="as-especial-programa-wrap"><label class="form-label2">Enlace del Programa <span style="font-weight:400;color:var(--text3)">— opcional, habilita el botón "Ver Programa"</span></label><input type="url" class="form-input" id="as-especial-programa-url" placeholder="Ej: https://..."></div>
         <div class="form-group2" style="margin-bottom:1.1rem">
           <label class="form-label2">Foto <span style="font-weight:400;color:var(--text3)">— se verá en la tarjeta y en el detalle</span></label>
           <div class="img-upload-area" id="as-especial-img-area" onclick="document.getElementById('as-especial-img-file').click()">
@@ -9265,7 +9265,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.44.5-sb';
+const APP_VERSION = '1.44.6-sb';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -15041,8 +15041,9 @@ function _renderVisitaPickerGrid(ters) {
   const grid = document.getElementById('detail-visita-picker-grid');
   if (!grid) return;
   grid.innerHTML = ters.map((t, i) => {
-    const mapHtml = t.map_data
-      ? `<img src="${t.map_data}" alt="Mapa ${terLabel(t.number)}" loading="lazy">`
+    const mapSrc = getActiveTerMapSrc(t);
+    const mapHtml = mapSrc
+      ? `<img src="${mapSrc}" alt="Mapa ${terLabel(t.number)}" loading="lazy">`
       : `<div class="detail-visita-picker-map-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg></div>`;
     return `<div class="detail-visita-picker-card" data-idx="${i}" onclick="openVisitaTerFromGrid(${i})">
       <div class="detail-visita-picker-map">
@@ -16274,16 +16275,21 @@ function asTypeChanged() {
   document.getElementById('as-especial-fields').style.display = isEventoLike ? '' : 'none';
   document.getElementById('as-visita-ter-fields').style.display = isVisita ? '' : 'none';
   document.getElementById('as-regular-fields').style.display = isEventoLike ? 'none' : '';
-  document.getElementById('as-casa-wrap').style.display = isEventoLike ? 'none' : '';
+  // v1.44.6-sb: "Casa" vuelve a estar disponible en "Visita" (solo se oculta
+  // para "Evento", que no tiene ni Casa ni dirección propia).
+  document.getElementById('as-casa-wrap').style.display = isEspecial ? 'none' : '';
   // v1.44.5-sb: "Visita" sí tiene Encargado de predicación (a diferencia de
   // "Evento", que no tiene ninguno) — solo se oculta para "Evento".
   document.getElementById('as-conductor-wrap').style.display = isEspecial ? 'none' : '';
-  // v1.44.5-sb: Descripción y Lugar quedan fuera de "Visita" (no se
-  // consideran para esa modalidad); siguen disponibles para "Evento".
+  // v1.44.6-sb: Descripción, Lugar y Enlace del Programa quedan fuera de
+  // "Visita" (no se consideran para esa modalidad); siguen disponibles
+  // para "Evento".
   const descWrap = document.getElementById('as-especial-desc-wrap');
   const lugarWrap = document.getElementById('as-especial-lugar-wrap');
+  const programaWrap = document.getElementById('as-especial-programa-wrap');
   if (descWrap) descWrap.style.display = isVisita ? 'none' : '';
   if (lugarWrap) lugarWrap.style.display = isVisita ? 'none' : '';
+  if (programaWrap) programaWrap.style.display = isVisita ? 'none' : '';
   if (isVisita) _renderAsVisitaTerChecklist();
 }
 
@@ -16448,13 +16454,14 @@ async function saveAssignment() {
   const payload = {
     date: document.getElementById('as-date').value,
     time: document.getElementById('as-time').value,
-    address: isEventoLike ? '' : (casa?.direccion || ''),
-    house: isEventoLike ? '' : (casa?.amo || ''),
+    // v1.44.6-sb: "Casa" vuelve a guardarse para "Visita" (solo queda vacía en "Evento").
+    address: isEspecial ? '' : (casa?.direccion || ''),
+    house: isEspecial ? '' : (casa?.amo || ''),
     // v1.44.5-sb: "Visita" sí guarda un Encargado de predicación para ese
     // día (a diferencia de "Evento", que no tiene ninguno).
     conductor: isEspecial ? '' : (conductor ? `${conductor.nombre} ${conductor.apellido}` : ''),
     conductor_id: isEspecial ? null : conductorId,
-    casa_id: isEventoLike ? null : casaId,
+    casa_id: isEspecial ? null : casaId,
     type: asType,
     territory_id: isEventoLike ? null : (document.getElementById('as-territory').value || null),
     territory_id_2: isEventoLike ? null : (document.getElementById('as-territory2').value || null),
@@ -16476,7 +16483,8 @@ async function saveAssignment() {
     // v1.44.5-sb: Descripción y Lugar no se consideran para "Visita", solo para "Evento".
     especial_descripcion: isEspecial ? document.getElementById('as-especial-descripcion').value.trim() : null,
     especial_lugar: isEspecial ? document.getElementById('as-especial-lugar').value.trim() : null,
-    especial_programa_url: isEventoLike ? document.getElementById('as-especial-programa-url').value.trim() : null,
+    // v1.44.6-sb: Enlace del Programa tampoco aplica a "Visita", solo a "Evento".
+    especial_programa_url: isEspecial ? document.getElementById('as-especial-programa-url').value.trim() : null,
     especial_foto: isEventoLike ? (pendingEspecialBase64 || (editingAssignmentId ? undefined : null)) : null,
   };
   if (payload.especial_foto === undefined) delete payload.especial_foto; // conserva la foto existente si no se cambió
@@ -16485,7 +16493,7 @@ async function saveAssignment() {
   if (isVisita && visitaTerIds.length === 0) { showError('as-error','Selecciona al menos un territorio para la Visita'); return; }
 
   // ── Day-availability conflict check ──
-  if (!isEventoLike && casa && !isCasaAvailableOnDate(casa, payload.date)) {
+  if (!isEspecial && casa && !isCasaAvailableOnDate(casa, payload.date)) {
     const dayKey = JS_DAY_TO_KEY[new Date(payload.date + 'T12:00:00').getDay()];
     const dayName = (DIAS_SEMANA.find(d => d.key === dayKey) || {}).full || dayKey;
     const diasDisp = parseCasaDias(casa);
