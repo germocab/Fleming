@@ -9152,7 +9152,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.43.4-stable_beta';
+const APP_VERSION = '1.42.0-stable_beta';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -9678,10 +9678,17 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 // mañana se vuelve a desplegar con otro nombre, solo haya que tocar esta
 // línea en vez de buscar cada fetch() por separado.
 const PUSH_EDGE_URL = `${SUPABASE_URL}/functions/v1/notify_users`;
-// 'cache: no-store' evita que el navegador (o un Service Worker mal configurado)
-// reutilice una respuesta vieja de la API en vez de pedir los datos frescos.
+// v1.42.0-stable_beta: cambiado de 'no-store' a 'no-cache' para reducir
+// Egress de Supabase. 'no-cache' sigue validando SIEMPRE con el servidor
+// antes de usar cualquier dato (nunca muestra algo desactualizado) — la
+// única diferencia es que si el servidor responde que nada cambió (304), el
+// navegador reutiliza la respuesta ya descargada en vez de volver a bajar el
+// mismo contenido de nuevo. El comentario original mencionaba un Service
+// Worker mal configurado como riesgo de datos viejos, pero sw.js no
+// intercepta fetch() (no tiene listener 'fetch'), así que ese riesgo no
+// aplica aquí.
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-  global: { fetch: (url, options = {}) => fetch(url, { ...options, cache: 'no-store' }) }
+  global: { fetch: (url, options = {}) => fetch(url, { ...options, cache: 'no-cache' }) }
 });
 
 const PASS_VIEWER = 'Fleming2026';
