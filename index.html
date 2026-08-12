@@ -1529,6 +1529,38 @@
     width: 26px; height: 26px; font-size: 0.8rem;
   }
 
+  /* ── v1.44.0-stable_beta: grilla de territorios para asignaciones "Visita"
+       (hasta 8 territorios). Con 1 a 3 se ven en una fila (igual que los
+       tabs normales); con 4 a 8 se acomodan en una grilla de 2 columnas
+       (2x2, 2x3, 2x4) para que el usuario elija cuál territorio ver. ── */
+  .detail-visita-ter-grid {
+    display: flex; flex-wrap: wrap; gap: 6px; margin: 0 1.25rem 0.75rem;
+  }
+  .detail-visita-ter-grid.grid-2col {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+  .detail-visita-ter-chip {
+    flex: 1 1 30%; min-width: 78px; padding: 0.55rem 0.7rem; border-radius: 14px;
+    border: 1px solid var(--border); background: var(--surface2); cursor: pointer;
+    display: flex; align-items: center; gap: 8px; font-size: 0.82rem; font-weight: 600;
+    color: var(--text3); transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .detail-visita-ter-chip.active {
+    background: var(--surface); color: var(--text); border-color: var(--border-active);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+  }
+  .detail-visita-ter-chip .tab-badge {
+    width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; font-weight: 800; color: white;
+  }
+
+  /* Ícono de Territorio auto-asignable por el Encargado (v1.44.0-stable_beta):
+     al ser tocable, se resalta con un anillo del color de acento para que el
+     Encargado sepa que puede presionarlo para agregar otro territorio. */
+  .detail-ter-badge.self-assignable { cursor: pointer; transition: transform 0.12s, box-shadow 0.15s; box-shadow: 0 0 0 3px var(--accent-light); }
+  .detail-ter-badge.self-assignable:active { transform: scale(0.92); }
+
   .no-pasar-section { padding: 0 1.25rem 1.25rem; }
   .no-pasar-title {
     font-size: 0.875rem; font-weight: 700;
@@ -7240,7 +7272,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
           <span id="detail-weather-temp">—°</span>
         </div>
       </div>
-      <div class="detail-ter-badge" id="detail-ter-badge" style="display:none"></div>
+      <div class="detail-ter-badge" id="detail-ter-badge" style="display:none" onclick="onDetailTerBadgeClick()" title="Presiona para agregar otro territorio"></div>
       <button class="detail-edit-add-fab" id="detail-edit-add-fab" title="Editar más detalles">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </button>
@@ -7285,6 +7317,8 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         <span class="detail-ter-tab-label" id="detail-ter-tab-label-3">Territorio 3</span>
       </button>
     </div>
+    <!-- v1.44.0-stable_beta: grilla de territorios exclusiva de "Visita" (hasta 8) -->
+    <div class="detail-visita-ter-grid" id="detail-visita-ter-grid" style="display:none"></div>
     <div class="detail-manzanas-card" id="detail-manzanas-line" style="display:none">
       <div class="detail-manzanas-title">Manzanas a Abarcar</div>
       <div class="detail-manzanas-pills" id="detail-manzanas-value"></div>
@@ -7396,7 +7430,8 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
             <option value="zoom">Por Zoom</option>
             <option value="telefono">Telefónico</option>
             <option value="cartas">Cartas</option>
-            <option value="especial">Especial</option>
+            <option value="especial">Evento</option>
+            <option value="visita">Visita</option>
           </select>
         </div>
       </div>
@@ -7425,7 +7460,19 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         </div>
       </div>
 
-      <!-- ── Campos de asignación de casa en casa: se ocultan cuando la modalidad es "Especial" ── -->
+      <!-- ── Campos exclusivos de la modalidad "Visita": permite elegir hasta 8
+           territorios para esta asignación (a diferencia de Presencial, que
+           admite hasta 3). Se muestran junto a los campos de "Evento" de
+           arriba (imagen, título, detalle), pero con esta selección propia. ── -->
+      <div id="as-visita-ter-fields" style="display:none">
+        <div class="form-group2">
+          <label class="form-label2">Territorios <span style="font-weight:400;color:var(--text3)">— hasta 8</span></label>
+          <div id="as-visita-ter-checklist" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
+          <div style="font-size:0.74rem;color:var(--text3);margin-top:6px">Marca los territorios que se podrán elegir dentro de esta Visita (máximo 8).</div>
+        </div>
+      </div>
+
+      <!-- ── Campos de asignación de casa en casa: se ocultan cuando la modalidad es "Evento" o "Visita" ── -->
       <div id="as-regular-fields">
         <div class="form-group2" id="as-grupo-wrap">
           <label class="form-label2">Grupo de Servicio <span style="font-weight:400;color:var(--text3)">— solo Sábados</span></label>
@@ -7495,6 +7542,23 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
     <div style="display:flex;gap:10px;padding:0 1.25rem 1.25rem;justify-content:flex-end">
       <button class="btn-secondary" onclick="closeManzanaPicker()">Cancelar</button>
       <button class="btn-primary" style="width:auto;padding:0.65rem 1.4rem" onclick="confirmManzanaPicker()">Usar selección</button>
+    </div>
+  </div>
+</div>
+
+<!-- v1.44.0-stable_beta: el Encargado de una asignación toca el ícono de
+     Territorio en el detalle para asignarse él mismo un territorio adicional,
+     sin depender del Administrador. -->
+<div class="modal-overlay" id="self-assign-ter-modal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <div class="modal-title">Asignarme otro territorio</div>
+      <button class="modal-close" onclick="closeSelfAssignTerModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:0.78rem;color:var(--text3);margin-bottom:10px">Elige el territorio que quieres sumar a tu asignación actual.</div>
+      <div id="self-assign-ter-list" style="display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto"></div>
+      <div class="auth-error" id="self-assign-ter-error" style="display:none"></div>
     </div>
   </div>
 </div>
@@ -9152,7 +9216,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.42.0-stable_beta';
+const APP_VERSION = '1.44.0-stable_beta';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -14187,8 +14251,8 @@ function renderSchedule() {
     // ── Tarjetas "Especial": se muestran siempre igual (foto + título),
     //    sin importar si el día es Sábado o no, ya que reemplazan la
     //    asignación normal de casa en casa para ese día. ──
-    const especialItems = grouped[date].filter(x => x.type === 'especial');
-    const regularItems  = grouped[date].filter(x => x.type !== 'especial');
+    const especialItems = grouped[date].filter(x => x.type === 'especial' || x.type === 'visita');
+    const regularItems  = grouped[date].filter(x => x.type !== 'especial' && x.type !== 'visita');
     especialItems.forEach(a => { html += _buildEspecialCard(a); });
 
     if (!regularItems.length) {
@@ -14497,46 +14561,74 @@ async function viewAssignment(id) {
   const MON = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 
   const isEspecial = a.type === 'especial';
+  // v1.44.0-stable_beta: "Visita" comparte tarjeta con "Evento" (imagen +
+  // título + detalle), pero su pantalla de detalle es la de una asignación
+  // normal (Presencial), con la diferencia de que admite hasta 8 territorios.
+  const isVisita = a.type === 'visita';
+  const isEventoLike = isEspecial || isVisita;
+  const visitaTers = isVisita
+    ? (Array.isArray(a.visita_territorios) ? a.visita_territorios : []).map(tid => territories.find(t => t.id === tid)).filter(Boolean)
+    : [];
 
   document.getElementById('detail-date-label').textContent = fmtCasaLongDate(d);
   document.getElementById('detail-mobile-date-label').textContent = fmtCasaLongDate(d);
   document.getElementById('detail-time').textContent = (a.time ? a.time.substring(0,5) : '--:--') + 'hrs';
     const _casaTipo3 = a.casa_id ? (casas.find(c=>c.id===a.casa_id)?.tipo || 'casa') : 'casa';
   const _houseLabel3 = casaHouseLabel(_casaTipo3, a.house);
-  document.getElementById('detail-address').textContent = isEspecial ? (a.especial_titulo || 'Evento especial') : (a.address || '—');
-  document.getElementById('detail-house-label').textContent = isEspecial ? (a.especial_subtitulo || '') : _houseLabel3;
-  document.getElementById('detail-conductor').textContent = isEspecial ? '' : (a.conductor || '');
+  document.getElementById('detail-address').textContent = isEventoLike ? (a.especial_titulo || 'Evento') : (a.address || '—');
+  document.getElementById('detail-house-label').textContent = isEventoLike ? (a.especial_subtitulo || '') : _houseLabel3;
+  document.getElementById('detail-conductor').textContent = isEventoLike ? '' : (a.conductor || '');
 
   // ── Clima de la asignación (Experimentos) ──
   resetAssignmentWeatherChip();
-  if (!isEspecial && a.address) {
+  if (!isEventoLike && a.address) {
     loadAssignmentWeather(a);
   }
 
-  // ── Foto de la tarjeta "Especial" ──
+  // ── Foto de la tarjeta "Evento" / "Visita" ──
   const espPhotoWrap = document.getElementById('detail-especial-photo-wrap');
-  if (isEspecial && a.especial_foto) {
+  if (isEventoLike && a.especial_foto) {
     document.getElementById('detail-especial-photo').src = a.especial_foto;
     espPhotoWrap.style.display = '';
   } else {
     espPhotoWrap.style.display = 'none';
   }
-  // ── Descripción y Lugar del evento especial ──
+  // ── Descripción y Lugar del evento ──
   const espDescBlock = document.getElementById('detail-especial-desc-block');
-  if (isEspecial && a.especial_descripcion) {
+  if (isEventoLike && a.especial_descripcion) {
     document.getElementById('detail-especial-desc-value').textContent = a.especial_descripcion;
     espDescBlock.style.display = '';
   } else { espDescBlock.style.display = 'none'; }
   const espLugarBlock = document.getElementById('detail-especial-lugar-block');
-  if (isEspecial && a.especial_lugar) {
+  if (isEventoLike && a.especial_lugar) {
     document.getElementById('detail-especial-lugar-value').textContent = a.especial_lugar;
     espLugarBlock.style.display = '';
   } else { espLugarBlock.style.display = 'none'; }
 
+  // ── Encargados de una asignación de Predicación pueden auto-asignarse otro
+  // territorio (hasta 3) presionando este ícono, sin depender del Admin.
+  // No aplica a "Evento" ni "Visita" (no tienen un Encargado/Conductor). ──
+  const _esEncargadoParaTerIcon = !isEventoLike && _namesMatch(currentUser ? getIdentityName() : '', a.conductor);
   const badge = document.getElementById('detail-ter-badge');
-  if (isEspecial) {
+  if (isVisita) {
+    if (visitaTers.length > 1) {
+      badge.classList.add('multi');
+      badge.innerHTML = visitaTers.map(t =>
+        `<div class="detail-ter-badge-mini" style="background:${getTerColor(t.number)}">${t.number}</div>`
+      ).join('');
+      badge.style.display = 'flex';
+    } else if (visitaTers.length === 1) {
+      badge.classList.remove('multi');
+      badge.textContent = visitaTers[0].number;
+      badge.style.background = getTerColor(visitaTers[0].number);
+      badge.style.display = 'flex';
+    } else {
+      badge.style.display = 'none';
+    }
+    badge.classList.remove('self-assignable');
+  } else if (isEspecial) {
     badge.style.display = 'none';
-    badge.classList.remove('multi');
+    badge.classList.remove('multi', 'self-assignable');
   } else if (ter) {
     const _multiTers = [ter, ter2, ter3].filter(Boolean);
     if (_multiTers.length > 1) {
@@ -14554,17 +14646,20 @@ async function viewAssignment(id) {
       badge.style.background = getTerColor(ter.number);
       badge.style.display = 'flex';
     }
+    badge.classList.toggle('self-assignable', _esEncargadoParaTerIcon && _multiTers.length < 3);
   } else if (a.type !== 'presencial') {
     badge.style.display = 'none';
+    badge.classList.remove('self-assignable');
   } else {
     badge.style.display = 'none';
+    badge.classList.remove('self-assignable');
   }
 
   const actions = document.getElementById('detail-actions');
   const callBtn = document.getElementById('detail-call-btn');
   const mapBtn  = document.getElementById('detail-map-btn');
   const programaBtn = document.getElementById('detail-programa-btn');
-  if (isEspecial) {
+  if (isEventoLike) {
     // No hay Territorio, encargado ni Casa: sin botón "Llamar". El botón
     // "Cómo llegar" solo se muestra si se registró un Lugar, y "Ver Programa"
     // solo si se registró un enlace — ambos pueden convivir uno al lado del otro.
@@ -14632,8 +14727,8 @@ async function viewAssignment(id) {
   // ── Botón "Reportar Territorio" — visible solo para el encargado de ESTA asignación ──
   const reportActionsWrap = document.getElementById('detail-report-actions');
   const reportBtn = document.getElementById('detail-report-btn');
-  const esEncargadoDeEstaAsignacion = !isEspecial && _namesMatch(currentUser ? getIdentityName() : '', a.conductor);
-  if (!isEspecial && ter && esEncargadoDeEstaAsignacion) {
+  const esEncargadoDeEstaAsignacion = !isEventoLike && _namesMatch(currentUser ? getIdentityName() : '', a.conductor);
+  if (!isEventoLike && ter && esEncargadoDeEstaAsignacion) {
     reportActionsWrap.style.display = '';
     reportBtn.onclick = () => reportarTerritorioDesdeAsignacion(a.id);
   } else {
@@ -14644,10 +14739,29 @@ async function viewAssignment(id) {
   // ── Territory tabs setup — las etiquetas/badges no dependen del mapa (map_data),
   // así que se pintan de inmediato; el mapa en sí se carga en segundo plano ──
   const tabsBar = document.getElementById('detail-ter-tabs');
+  const visitaGrid = document.getElementById('detail-visita-ter-grid');
   const panel = document.getElementById('detail-panel');
-  if (isEspecial) {
+  if (isVisita) {
+    // v1.44.0-stable_beta: "Visita" no usa los 3 tabs fijos, sino la grilla
+    // de hasta 8 territorios (1-3 en fila, 4-8 en grilla de 2 columnas).
     tabsBar.style.display = 'none';
+    panel._visitaTers = visitaTers;
+    if (visitaTers.length) {
+      visitaGrid.classList.toggle('grid-2col', visitaTers.length > 3);
+      visitaGrid.innerHTML = visitaTers.map((t, i) => `
+        <button class="detail-visita-ter-chip${i===0?' active':''}" data-idx="${i}" onclick="switchVisitaTerTab(${i})">
+          <span class="tab-badge" style="background:${getTerColor(t.number)}">${t.number}</span>
+          <span>${terLabel(t.number)}</span>
+        </button>`).join('');
+      visitaGrid.style.display = 'flex';
+    } else {
+      visitaGrid.style.display = 'none';
+    }
+  } else if (isEspecial) {
+    tabsBar.style.display = 'none';
+    visitaGrid.style.display = 'none';
   } else if (ter && ter2) {
+    visitaGrid.style.display = 'none';
     // Show tabs bar
     const tab1 = document.getElementById('detail-ter-tab-1');
     const tab2 = document.getElementById('detail-ter-tab-2');
@@ -14677,19 +14791,26 @@ async function viewAssignment(id) {
     tab1.classList.add('active'); tab2.classList.remove('active'); tab3.classList.remove('active');
   } else {
     tabsBar.style.display = 'none';
+    visitaGrid.style.display = 'none';
   }
   // v1.30.7-beta: "Manzanas a abarcar" es individual por territorio — se
   // guardan las 3 listas en el panel para poder mostrar la que corresponde
-  // según la pestaña de territorio activa.
-  panel._manz1 = (!isEspecial && Array.isArray(a.manzanas_asignadas))   ? a.manzanas_asignadas.filter(Boolean)   : [];
-  panel._manz2 = (!isEspecial && Array.isArray(a.manzanas_asignadas_2)) ? a.manzanas_asignadas_2.filter(Boolean) : [];
-  panel._manz3 = (!isEspecial && Array.isArray(a.manzanas_asignadas_3)) ? a.manzanas_asignadas_3.filter(Boolean) : [];
+  // según la pestaña de territorio activa. No aplica a "Visita" (múltiples
+  // territorios sin manzanas específicas por asignación).
+  panel._manz1 = (!isEventoLike && Array.isArray(a.manzanas_asignadas))   ? a.manzanas_asignadas.filter(Boolean)   : [];
+  panel._manz2 = (!isEventoLike && Array.isArray(a.manzanas_asignadas_2)) ? a.manzanas_asignadas_2.filter(Boolean) : [];
+  panel._manz3 = (!isEventoLike && Array.isArray(a.manzanas_asignadas_3)) ? a.manzanas_asignadas_3.filter(Boolean) : [];
   // ── Manzanas asignadas (si la asignación solo cubre ciertas manzanas del territorio) ──
   // Se muestran las del territorio activo (tab 1 por defecto).
   _renderDetailManzanas(panel._manz1);
 
-  // "No pasar" no depende del mapa, se pinta de inmediato (no aplica a "Especial")
-  _renderDetailNoPasar(isEspecial ? null : ter);
+  // Territorio "activo" para el mapa y "No pasar": el primero de la lista en
+  // "Visita" (el usuario puede cambiarlo desde la grilla), o el único/1º
+  // territorio en el resto de modalidades. No aplica a "Evento".
+  const activeTer = isVisita ? (visitaTers[0] || null) : ter;
+
+  // "No pasar" no depende del mapa, se pinta de inmediato (no aplica a "Evento")
+  _renderDetailNoPasar(isEspecial ? null : activeTer);
   // Oculta el mapa mientras se resuelve en segundo plano, para no mostrar por
   // un instante el mapa de la asignación anterior.
   const mapWrap = document.getElementById('detail-map-wrap');
@@ -14700,7 +14821,7 @@ async function viewAssignment(id) {
   panel._openAssignmentId = id;
   // LiveHost (Experimentos, v1.30.0-beta): revisa si el Encargado de esta
   // asignación tiene una sesión LiveHost activa y, de ser así, la muestra.
-  if (typeof _liveHostOnOpenDetail === 'function') _liveHostOnOpenDetail(id, isEspecial ? null : a);
+  if (typeof _liveHostOnOpenDetail === 'function') _liveHostOnOpenDetail(id, isEventoLike ? null : a);
   const _detailOverlay = document.getElementById('detail-overlay');
   const _useSidebarMode = window.innerWidth >= 640 && typeof getHouseToHouseViewMode === 'function' && getHouseToHouseViewMode() === 'sidebar';
   _detailOverlay.classList.toggle('sidebar-mode', _useSidebarMode);
@@ -14714,11 +14835,11 @@ async function viewAssignment(id) {
   // se muestra de inmediato con esa copia local — sin esperar la red — para
   // que aparezca de forma instantánea. Si hay conexión, igualmente se
   // refresca en segundo plano por si el territorio cambió en el servidor.
-  const _dlTer = ter ? getDownloadedTerritory(ter.id) : null;
+  const _dlTer = activeTer ? getDownloadedTerritory(activeTer.id) : null;
   if (_dlTer) {
-    ter.map_data = _dlTer.map_data; ter.map_data_dark = _dlTer.map_data_dark;
-    if (ter && ter2) { _renderDetailTerContent(ter); } else { _applyDetailMapSrc(ter); }
-  } else if (ter && !isEspecial) {
+    activeTer.map_data = _dlTer.map_data; activeTer.map_data_dark = _dlTer.map_data_dark;
+    if (ter && ter2) { _renderDetailTerContent(ter); } else { _applyDetailMapSrc(activeTer); }
+  } else if (activeTer && !isEspecial) {
     // El territorio no está descargado localmente: mientras se resuelve el
     // mapa (requiere red), mostramos un indicador de carga con el mensaje
     // "Cargando Territorio". Descargar el territorio en Almacenamiento hace
@@ -14732,9 +14853,9 @@ async function viewAssignment(id) {
   }
   (async () => {
     if (isAppOnline()) await ensureTerritoryMapsLoaded();
-    else if (ter && !_dlTer) {
-      const dl = getDownloadedTerritory(ter.id);
-      if (dl) { ter.map_data = dl.map_data; ter.map_data_dark = dl.map_data_dark; }
+    else if (activeTer && !_dlTer) {
+      const dl = getDownloadedTerritory(activeTer.id);
+      if (dl) { activeTer.map_data = dl.map_data; activeTer.map_data_dark = dl.map_data_dark; }
     }
     if (panel._openAssignmentId !== id) return; // el usuario ya cambió de tarjeta
     if (mapWrap && !_dlTer) {
@@ -14748,7 +14869,7 @@ async function viewAssignment(id) {
     if (ter && ter2) {
       _renderDetailTerContent(ter);
     } else {
-      _applyDetailMapSrc(ter);
+      _applyDetailMapSrc(activeTer);
     }
   })();
 
@@ -14819,6 +14940,63 @@ function switchDetailTerTab(tabNum) {
   _renderDetailManzanas(manzForTab);
 }
 
+// v1.44.0-stable_beta: alterna entre los hasta 8 territorios de una
+// asignación "Visita" desde la grilla (equivalente a switchDetailTerTab,
+// pero sin el límite de 3 pestañas fijas).
+function switchVisitaTerTab(idx) {
+  const panel = document.getElementById('detail-panel');
+  const ters = panel._visitaTers || [];
+  const grid = document.getElementById('detail-visita-ter-grid');
+  grid.querySelectorAll('.detail-visita-ter-chip').forEach((chip, i) => chip.classList.toggle('active', i === idx));
+  const ter = ters[idx];
+  if (!ter) return;
+  _renderDetailTerContent(ter);
+}
+
+// ── v1.44.0-stable_beta: el Encargado de una asignación de Predicación toca
+// el ícono de Territorio para asignarse él mismo otro territorio, sin
+// depender del Administrador. Se llena el siguiente cupo libre (2º o 3º). ──
+function onDetailTerBadgeClick() {
+  const badge = document.getElementById('detail-ter-badge');
+  if (!badge.classList.contains('self-assignable')) return;
+  const panel = document.getElementById('detail-panel');
+  const a = assignments.find(x => x.id === panel._openAssignmentId);
+  if (!a) return;
+  const usedIds = [a.territory_id, a.territory_id_2, a.territory_id_3].filter(Boolean);
+  const available = territories.filter(t => !usedIds.includes(t.id)).sort((x, y) => (x.number||0) - (y.number||0));
+  const list = document.getElementById('self-assign-ter-list');
+  document.getElementById('self-assign-ter-error').style.display = 'none';
+  if (!available.length) {
+    list.innerHTML = '<div style="font-size:0.84rem;color:var(--text3)">No hay territorios disponibles para agregar.</div>';
+  } else {
+    list.innerHTML = available.map(t => `
+      <button type="button" onclick="confirmSelfAssignTerritory('${t.id}')" style="display:flex;align-items:center;gap:10px;padding:0.65rem 0.8rem;border:1px solid var(--border);border-radius:12px;background:var(--surface2);cursor:pointer;font-size:0.88rem;font-weight:600;color:var(--text)">
+        <span class="tab-badge" style="width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.74rem;font-weight:800;color:#fff;background:${getTerColor(t.number)}">${t.number}</span>
+        Territorio ${t.number}
+      </button>`).join('');
+  }
+  document.getElementById('self-assign-ter-modal').classList.add('open');
+}
+function closeSelfAssignTerModal() {
+  document.getElementById('self-assign-ter-modal').classList.remove('open');
+}
+async function confirmSelfAssignTerritory(territoryId) {
+  const panel = document.getElementById('detail-panel');
+  const a = assignments.find(x => x.id === panel._openAssignmentId);
+  if (!a) return;
+  const slot = !a.territory_id ? 'territory_id' : (!a.territory_id_2 ? 'territory_id_2' : (!a.territory_id_3 ? 'territory_id_3' : null));
+  if (!slot) {
+    showError('self-assign-ter-error', 'Ya tienes el máximo de 3 territorios en esta asignación.');
+    return;
+  }
+  const { error } = await sb.from('assignments').update({ [slot]: territoryId }).eq('id', a.id);
+  if (error) { showError('self-assign-ter-error', 'No se pudo asignar el territorio: ' + error.message); return; }
+  a[slot] = territoryId;
+  closeSelfAssignTerModal();
+  showToast('Territorio agregado a tu asignación', 'success');
+  viewAssignment(a.id);
+}
+
 function toggleSuggestNpForm() {
   const form = document.getElementById('suggest-np-form');
   const isOpen = form.classList.toggle('open');
@@ -14873,9 +15051,16 @@ function closeDetail() {
   document.getElementById('detail-ter-tabs').style.display = 'none';
   document.getElementById('detail-ter-tab-1').classList.add('active');
   document.getElementById('detail-ter-tab-2').classList.remove('active');
+  // v1.44.0-stable_beta: reset de la grilla de territorios de "Visita" y del
+  // ícono auto-asignable, para que no queden residuos de la asignación anterior.
+  const visitaGridEl = document.getElementById('detail-visita-ter-grid');
+  if (visitaGridEl) { visitaGridEl.style.display = 'none'; visitaGridEl.innerHTML = ''; visitaGridEl.classList.remove('grid-2col'); }
+  const terBadgeEl = document.getElementById('detail-ter-badge');
+  if (terBadgeEl) terBadgeEl.classList.remove('self-assignable');
   const panel = document.getElementById('detail-panel');
   panel._ter1 = null; panel._ter2 = null; panel._ter3 = null;
   panel._manz1 = null; panel._manz2 = null; panel._manz3 = null;
+  panel._visitaTers = null;
   document.getElementById('detail-overlay').classList.remove('open');
   document.getElementById('detail-overlay').classList.remove('sidebar-mode');
   document.body.classList.remove('h2h-sidebar-open');
@@ -15651,7 +15836,7 @@ function renderAdminAssignments() {
       ? `<div class="date-section"><div class="date-section-header-today"><span class="today-label">Hoy</span><span class="today-date">${dateLabel}</span></div>`
       : `<div class="date-section"><div class="date-section-header">${dateLabel}</div>`;
     grouped[date].forEach(a => {
-      html += a.type === 'especial' ? buildEspecialCard(a) : buildRegularCard(a, isToday);
+      html += (a.type === 'especial' || a.type === 'visita') ? buildEspecialCard(a) : buildRegularCard(a, isToday);
     });
     html += `</div>`;
   });
@@ -15900,6 +16085,9 @@ function openAssignmentModal(a) {
   _toggleAsManzanasWrap(2);
   _toggleAsManzanasWrap(3);
 
+  // ── Territorios de "Visita" (hasta 8) ──
+  _renderAsVisitaTerChecklist(Array.isArray(a?.visita_territorios) ? a.visita_territorios : []);
+
   // ── Grupo de Servicio field (visible only for Saturdays) ──
   const selGrupo = document.getElementById('as-grupo-select');
   selGrupo.innerHTML = '<option value="">Semana (todos los grupos)</option>' +
@@ -15932,11 +16120,49 @@ async function deleteAssignmentFromModal() {
 // Territorio, Casa, Conductor ni botón Llamar), por lo que oculta esos
 // campos y muestra en su lugar Título, Subtítulo, Descripción, Lugar y Foto.
 function asTypeChanged() {
-  const isEspecial = document.getElementById('as-type').value === 'especial';
-  document.getElementById('as-especial-fields').style.display = isEspecial ? '' : 'none';
-  document.getElementById('as-regular-fields').style.display = isEspecial ? 'none' : '';
-  document.getElementById('as-casa-wrap').style.display = isEspecial ? 'none' : '';
-  document.getElementById('as-conductor-wrap').style.display = isEspecial ? 'none' : '';
+  const asType = document.getElementById('as-type').value;
+  const isEspecial = asType === 'especial';
+  const isVisita = asType === 'visita';
+  const isEventoLike = isEspecial || isVisita; // ambos usan imagen + título + detalle
+  document.getElementById('as-especial-fields').style.display = isEventoLike ? '' : 'none';
+  document.getElementById('as-visita-ter-fields').style.display = isVisita ? '' : 'none';
+  document.getElementById('as-regular-fields').style.display = isEventoLike ? 'none' : '';
+  document.getElementById('as-casa-wrap').style.display = isEventoLike ? 'none' : '';
+  document.getElementById('as-conductor-wrap').style.display = isEventoLike ? 'none' : '';
+  if (isVisita) _renderAsVisitaTerChecklist();
+}
+
+// v1.44.0-stable_beta: dibuja el checklist de hasta 8 territorios para la
+// modalidad "Visita". Se limita la selección a 8 casillas: al llegar al
+// máximo, el resto se deshabilita hasta que se destilde alguna.
+function _renderAsVisitaTerChecklist(selectedIds) {
+  const wrap = document.getElementById('as-visita-ter-checklist');
+  if (!wrap) return;
+  const selected = new Set(selectedIds || wrap._selected || []);
+  wrap._selected = selected;
+  wrap.innerHTML = territories.map(t => {
+    const checked = selected.has(t.id);
+    return `<label style="display:flex;align-items:center;gap:8px;padding:0.5rem 0.6rem;border:1px solid var(--border);border-radius:10px;font-size:0.84rem;cursor:pointer;background:var(--surface2)">
+      <input type="checkbox" value="${t.id}" ${checked?'checked':''} onchange="_onAsVisitaTerToggle(this)">
+      <span class="tab-badge" style="width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:800;color:#fff;background:${getTerColor(t.number)}">${t.number}</span>
+      Territorio ${t.number}
+    </label>`;
+  }).join('');
+}
+function _onAsVisitaTerToggle(checkbox) {
+  const wrap = document.getElementById('as-visita-ter-checklist');
+  const selected = wrap._selected || new Set();
+  if (checkbox.checked) selected.add(checkbox.value); else selected.delete(checkbox.value);
+  wrap._selected = selected;
+  if (selected.size >= 8) {
+    wrap.querySelectorAll('input[type=checkbox]').forEach(cb => { if (!cb.checked) cb.disabled = true; });
+  } else {
+    wrap.querySelectorAll('input[type=checkbox]').forEach(cb => { cb.disabled = false; });
+  }
+}
+function _getAsVisitaTerSelection() {
+  const wrap = document.getElementById('as-visita-ter-checklist');
+  return wrap && wrap._selected ? Array.from(wrap._selected) : [];
 }
 
 let pendingEspecialBase64 = null;
@@ -16061,40 +16287,47 @@ async function saveAssignment() {
   const grupoId = document.getElementById('as-grupo-select').value || null;
   const asType = document.getElementById('as-type').value;
   const isEspecial = asType === 'especial';
+  const isVisita = asType === 'visita';
+  const isEventoLike = isEspecial || isVisita;
+  const visitaTerIds = isVisita ? _getAsVisitaTerSelection() : [];
   const payload = {
     date: document.getElementById('as-date').value,
     time: document.getElementById('as-time').value,
-    address: isEspecial ? '' : (casa?.direccion || ''),
-    house: isEspecial ? '' : (casa?.amo || ''),
-    conductor: isEspecial ? '' : (conductor ? `${conductor.nombre} ${conductor.apellido}` : ''),
-    conductor_id: isEspecial ? null : conductorId,
-    casa_id: isEspecial ? null : casaId,
+    address: isEventoLike ? '' : (casa?.direccion || ''),
+    house: isEventoLike ? '' : (casa?.amo || ''),
+    conductor: isEventoLike ? '' : (conductor ? `${conductor.nombre} ${conductor.apellido}` : ''),
+    conductor_id: isEventoLike ? null : conductorId,
+    casa_id: isEventoLike ? null : casaId,
     type: asType,
-    territory_id: isEspecial ? null : (document.getElementById('as-territory').value || null),
-    territory_id_2: isEspecial ? null : (document.getElementById('as-territory2').value || null),
-    territory_id_3: isEspecial ? null : (document.getElementById('as-territory3').value || null),
+    territory_id: isEventoLike ? null : (document.getElementById('as-territory').value || null),
+    territory_id_2: isEventoLike ? null : (document.getElementById('as-territory2').value || null),
+    territory_id_3: isEventoLike ? null : (document.getElementById('as-territory3').value || null),
+    // v1.44.0-stable_beta: "Visita" admite hasta 8 territorios, guardados
+    // aparte de territory_id/_2/_3 (que son exclusivos del resto de modalidades).
+    visita_territorios: isVisita ? visitaTerIds.slice(0, 8) : [],
     notes: document.getElementById('as-notes').value.trim(),
-    phone: isEspecial ? null : (conductor?.telefono || null),
-    grupo_id: isEspecial ? null : grupoId,
-    manzanas_asignadas: isEspecial ? [] : (document.getElementById('as-manzanas').value || '')
+    phone: isEventoLike ? null : (conductor?.telefono || null),
+    grupo_id: isEventoLike ? null : grupoId,
+    manzanas_asignadas: isEventoLike ? [] : (document.getElementById('as-manzanas').value || '')
       .split(',').map(s => s.trim().toUpperCase()).filter(Boolean),
-    manzanas_asignadas_2: isEspecial ? [] : (document.getElementById('as-manzanas2').value || '')
+    manzanas_asignadas_2: isEventoLike ? [] : (document.getElementById('as-manzanas2').value || '')
       .split(',').map(s => s.trim().toUpperCase()).filter(Boolean),
-    manzanas_asignadas_3: isEspecial ? [] : (document.getElementById('as-manzanas3').value || '')
+    manzanas_asignadas_3: isEventoLike ? [] : (document.getElementById('as-manzanas3').value || '')
       .split(',').map(s => s.trim().toUpperCase()).filter(Boolean),
-    especial_titulo: isEspecial ? document.getElementById('as-especial-titulo').value.trim() : null,
-    especial_subtitulo: isEspecial ? document.getElementById('as-especial-subtitulo').value.trim() : null,
-    especial_descripcion: isEspecial ? document.getElementById('as-especial-descripcion').value.trim() : null,
-    especial_lugar: isEspecial ? document.getElementById('as-especial-lugar').value.trim() : null,
-    especial_programa_url: isEspecial ? document.getElementById('as-especial-programa-url').value.trim() : null,
-    especial_foto: isEspecial ? (pendingEspecialBase64 || (editingAssignmentId ? undefined : null)) : null,
+    especial_titulo: isEventoLike ? document.getElementById('as-especial-titulo').value.trim() : null,
+    especial_subtitulo: isEventoLike ? document.getElementById('as-especial-subtitulo').value.trim() : null,
+    especial_descripcion: isEventoLike ? document.getElementById('as-especial-descripcion').value.trim() : null,
+    especial_lugar: isEventoLike ? document.getElementById('as-especial-lugar').value.trim() : null,
+    especial_programa_url: isEventoLike ? document.getElementById('as-especial-programa-url').value.trim() : null,
+    especial_foto: isEventoLike ? (pendingEspecialBase64 || (editingAssignmentId ? undefined : null)) : null,
   };
   if (payload.especial_foto === undefined) delete payload.especial_foto; // conserva la foto existente si no se cambió
   if (!payload.date || !payload.time) { showError('as-error','Fecha y hora son requeridos'); return; }
-  if (isEspecial && !payload.especial_titulo) { showError('as-error','El Título es requerido para la tarjeta Especial'); return; }
+  if (isEventoLike && !payload.especial_titulo) { showError('as-error', isVisita ? 'El Título es requerido para la Visita' : 'El Título es requerido para la tarjeta Evento'); return; }
+  if (isVisita && visitaTerIds.length === 0) { showError('as-error','Selecciona al menos un territorio para la Visita'); return; }
 
   // ── Day-availability conflict check ──
-  if (!isEspecial && casa && !isCasaAvailableOnDate(casa, payload.date)) {
+  if (!isEventoLike && casa && !isCasaAvailableOnDate(casa, payload.date)) {
     const dayKey = JS_DAY_TO_KEY[new Date(payload.date + 'T12:00:00').getDay()];
     const dayName = (DIAS_SEMANA.find(d => d.key === dayKey) || {}).full || dayKey;
     const diasDisp = parseCasaDias(casa);
@@ -16144,6 +16377,16 @@ async function saveAssignment() {
     }
     if (res.error && res.error.message && res.error.message.includes('manzanas_asignadas')) {
       const pl2 = { ...pl }; delete pl2.manzanas_asignadas; delete pl2.manzanas_asignadas_2; delete pl2.manzanas_asignadas_3;
+      if (editingAssignmentId) {
+        res = await sb.from('assignments').update(pl2).eq('id', editingAssignmentId);
+      } else {
+        res = await sb.from('assignments').insert(pl2);
+      }
+    }
+    // Compatibilidad: columna nueva de la modalidad "Visita" (hasta 8
+    // territorios) — si aún no existe en Supabase, se quita y se reintenta.
+    if (res.error && res.error.message && res.error.message.includes('visita_territorios')) {
+      const pl2 = { ...pl }; delete pl2.visita_territorios;
       if (editingAssignmentId) {
         res = await sb.from('assignments').update(pl2).eq('id', editingAssignmentId);
       } else {
@@ -19803,21 +20046,24 @@ async function viewTerritory(id) {
 
   // Badge — número del territorio en su círculo de color distintivo, debajo del título
   const badge = document.getElementById('detail-ter-badge');
-  badge.classList.remove('multi');
+  badge.classList.remove('multi', 'self-assignable');
   badge.textContent = t.number;
   badge.style.background = color;
   badge.style.display = 'flex';
 
-  // Limpia restos de la vista de un evento "Especial" (foto, descripción,
-  // lugar) si el usuario venía de ver uno antes de entrar a un Territorio —
-  // estos bloques comparten el mismo panel (#detail-panel) y de lo contrario
-  // quedaban visibles por encima del contenido del Territorio.
+  // Limpia restos de la vista de un evento "Evento"/"Visita" (foto, descripción,
+  // lugar, grilla de territorios) si el usuario venía de ver uno antes de
+  // entrar a un Territorio — estos bloques comparten el mismo panel
+  // (#detail-panel) y de lo contrario quedaban visibles por encima del
+  // contenido del Territorio.
   const espPhotoWrap = document.getElementById('detail-especial-photo-wrap');
   if (espPhotoWrap) espPhotoWrap.style.display = 'none';
   const espDescBlock = document.getElementById('detail-especial-desc-block');
   if (espDescBlock) espDescBlock.style.display = 'none';
   const espLugarBlock = document.getElementById('detail-especial-lugar-block');
   if (espLugarBlock) espLugarBlock.style.display = 'none';
+  const visitaGridEl = document.getElementById('detail-visita-ter-grid');
+  if (visitaGridEl) { visitaGridEl.style.display = 'none'; visitaGridEl.innerHTML = ''; }
 
   // Hide call/directions buttons — not relevant for a territory
   document.getElementById('detail-actions').style.display = 'none';
