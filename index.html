@@ -9152,7 +9152,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.43.0-stable_beta';
+const APP_VERSION = '1.43.1-stable_beta';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -10267,6 +10267,49 @@ async function debugPush() {
       }
     } else {
       log('Guardado en push_subscriptions ✓', true);
+    }
+
+    // v1.42.0-stable_beta: envía un push REAL de prueba al propio usuario y
+    // muestra la respuesta exacta de la Edge Function (enviados/fallidos).
+    // Esto es clave porque todo lo anterior solo valida el lado del
+    // navegador — un problema con las claves VAPID del servidor, una
+    // suscripción caducada, o el servicio de push del sistema operativo
+    // solo se detectan intentando un envío real.
+    if (currentUser && subObj) {
+      log('Enviando push de prueba…');
+      try {
+        const resp = await fetch('https://eaimwununtgoyxvryony.supabase.co/functions/v1/notify-users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+          body: JSON.stringify({
+            title: 'Prueba de Diagnóstico',
+            body: 'Si ves esta notificación, el push funciona de punta a punta ✓',
+            target_names: [getIdentityName()]
+          })
+        });
+        const respText = await resp.text();
+        let respJson = null;
+        try { respJson = JSON.parse(respText); } catch {}
+        if (!resp.ok) {
+          log('Edge Function respondió con error HTTP ' + resp.status + ': ' + respText, false);
+        } else if (respJson) {
+          log(`Respuesta del servidor: enviados=${respJson.sent}, fallidos=${respJson.failed}, total considerados=${respJson.total}`, respJson.sent > 0);
+          if (respJson.sent > 0) {
+            log('El servidor SÍ logró enviarlo. Si aun así no llega al teléfono en unos segundos, revisa las notificaciones del sistema operativo (permiso a nivel Android/iOS, modo No Molestar, ahorro de batería, o si es iPhone: que la app esté instalada con "Añadir a inicio").', false);
+          } else if (respJson.total === 0) {
+            log('⚠️ El servidor no encontró ninguna suscripción para tu nombre — revisa que "user_name" en push_subscriptions coincida exactamente con tu nombre de cuenta.', false);
+          } else if (respJson.failed > 0) {
+            log('⚠️ El servidor SÍ encontró tu suscripción pero el envío falló. Revisa los Logs de la Edge Function "notify-users" en el Dashboard de Supabase — ahí aparece el error exacto (statusCode) para cada intento. Un 401/403 casi siempre significa que VAPID_PUBLIC_KEY/VAPID_PRIVATE_KEY en los Secrets de Supabase no combinan entre sí o no combinan con la VAPID_PUBLIC_KEY del código.', false);
+            if (Array.isArray(respJson.errors)) {
+              respJson.errors.forEach((e) => log(`   → [${e.statusCode ?? '?'}] ${e.user_name}: ${e.message}`, false));
+            }
+          }
+        } else {
+          log('Respuesta del servidor no reconocida: ' + respText, false);
+        }
+      } catch (err) {
+        log('No se pudo contactar la Edge Function: ' + err.message, false);
+      }
     }
 
   } catch(e) {
