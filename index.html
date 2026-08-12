@@ -1555,6 +1555,50 @@
     font-size: 0.72rem; font-weight: 800; color: white;
   }
 
+  /* ── v1.44.5-sb: grilla inicial 2x2 de territorios para "Visita" con 4 o
+       más territorios. Cada tarjeta muestra un mini-mapa; al tocarla se abre
+       ese territorio (mapa completo + Live + No Pasar) y el resto de
+       territorios pasa a mostrarse arriba como selector (ver
+       .detail-visita-ter-grid), sin repetir el que ya está abierto. ── */
+  .detail-visita-picker-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    margin: 0 1.25rem 0.85rem;
+  }
+  .detail-visita-picker-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    display: flex; flex-direction: column;
+  }
+  .detail-visita-picker-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: var(--border-active); }
+  .detail-visita-picker-card:active { transform: scale(0.97); }
+  .detail-visita-picker-map {
+    width: 100%; aspect-ratio: 4/3;
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; position: relative;
+  }
+  .detail-visita-picker-map img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .detail-visita-picker-map-empty {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; opacity: 0.3;
+  }
+  .detail-visita-picker-map-empty svg { width: 24px; height: 24px; stroke: var(--text3); fill: none; stroke-width: 1.5; stroke-linecap: round; }
+  .detail-visita-picker-num-badge {
+    position: absolute; top: 7px; left: 7px;
+    width: 26px; height: 26px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.76rem; font-weight: 800; color: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .detail-visita-picker-label {
+    padding: 8px 10px; font-size: 0.82rem; font-weight: 700; color: var(--text);
+    text-align: center;
+  }
+
   /* Ícono de Territorio auto-asignable por el Encargado (v1.44.0-stable_beta):
      al ser tocable, se resalta con un anillo del color de acento para que el
      Encargado sepa que puede presionarlo para agregar otro territorio. */
@@ -7317,7 +7361,11 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         <span class="detail-ter-tab-label" id="detail-ter-tab-label-3">Territorio 3</span>
       </button>
     </div>
-    <!-- v1.44.0-stable_beta: grilla de territorios exclusiva de "Visita" (hasta 8) -->
+    <!-- v1.44.5-sb: grilla inicial 2x2 (con mini-mapas) para "Visita" con 4+
+         territorios; al elegir uno se abre su detalle y el resto pasa al
+         selector de abajo. Con 1 a 3 territorios no se usa (ver JS). -->
+    <div class="detail-visita-picker-grid" id="detail-visita-picker-grid" style="display:none"></div>
+    <!-- v1.44.0-stable_beta: grilla/selector de territorios exclusiva de "Visita" -->
     <div class="detail-visita-ter-grid" id="detail-visita-ter-grid" style="display:none"></div>
     <div class="detail-manzanas-card" id="detail-manzanas-line" style="display:none">
       <div class="detail-manzanas-title">Manzanas a Abarcar</div>
@@ -7442,8 +7490,9 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
           <div class="form-group2"><label class="form-label2">Título</label><input type="text" class="form-input" id="as-especial-titulo" placeholder="Ej: Asamblea de Circuito"></div>
           <div class="form-group2"><label class="form-label2">Subtítulo</label><input type="text" class="form-input" id="as-especial-subtitulo" placeholder="Ej: Con representante de la sucursal"></div>
         </div>
-        <div class="form-group2"><label class="form-label2">Descripción <span style="font-weight:400;color:var(--text3)">— opcional</span></label><textarea class="form-textarea" id="as-especial-descripcion" placeholder="Detalles del evento..."></textarea></div>
-        <div class="form-group2"><label class="form-label2">Lugar <span style="font-weight:400;color:var(--text3)">— opcional</span></label><input type="text" class="form-input" id="as-especial-lugar" placeholder="Ej: Salón de Asambleas, Av. Siempre Viva 123"></div>
+        <!-- v1.44.5-sb: Descripción y Lugar no aplican a "Visita" (solo a "Evento") -->
+        <div class="form-group2" id="as-especial-desc-wrap"><label class="form-label2">Descripción <span style="font-weight:400;color:var(--text3)">— opcional</span></label><textarea class="form-textarea" id="as-especial-descripcion" placeholder="Detalles del evento..."></textarea></div>
+        <div class="form-group2" id="as-especial-lugar-wrap"><label class="form-label2">Lugar <span style="font-weight:400;color:var(--text3)">— opcional</span></label><input type="text" class="form-input" id="as-especial-lugar" placeholder="Ej: Salón de Asambleas, Av. Siempre Viva 123"></div>
         <div class="form-group2"><label class="form-label2">Enlace del Programa <span style="font-weight:400;color:var(--text3)">— opcional, habilita el botón "Ver Programa"</span></label><input type="url" class="form-input" id="as-especial-programa-url" placeholder="Ej: https://..."></div>
         <div class="form-group2" style="margin-bottom:1.1rem">
           <label class="form-label2">Foto <span style="font-weight:400;color:var(--text3)">— se verá en la tarjeta y en el detalle</span></label>
@@ -9216,7 +9265,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.44.0-stable_beta';
+const APP_VERSION = '1.44.5-sb';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -14577,7 +14626,9 @@ async function viewAssignment(id) {
   const _houseLabel3 = casaHouseLabel(_casaTipo3, a.house);
   document.getElementById('detail-address').textContent = isEventoLike ? (a.especial_titulo || 'Evento') : (a.address || '—');
   document.getElementById('detail-house-label').textContent = isEventoLike ? (a.especial_subtitulo || '') : _houseLabel3;
-  document.getElementById('detail-conductor').textContent = isEventoLike ? '' : (a.conductor || '');
+  // v1.44.5-sb: "Visita" sí tiene Encargado de predicación para ese día
+  // (a diferencia de "Evento", que no tiene ninguno).
+  document.getElementById('detail-conductor').textContent = isEspecial ? '' : (a.conductor || '');
 
   // ── Clima de la asignación (Experimentos) ──
   resetAssignmentWeatherChip();
@@ -14593,14 +14644,14 @@ async function viewAssignment(id) {
   } else {
     espPhotoWrap.style.display = 'none';
   }
-  // ── Descripción y Lugar del evento ──
+  // ── Descripción y Lugar del evento (v1.44.5-sb: no aplica a "Visita") ──
   const espDescBlock = document.getElementById('detail-especial-desc-block');
-  if (isEventoLike && a.especial_descripcion) {
+  if (isEspecial && a.especial_descripcion) {
     document.getElementById('detail-especial-desc-value').textContent = a.especial_descripcion;
     espDescBlock.style.display = '';
   } else { espDescBlock.style.display = 'none'; }
   const espLugarBlock = document.getElementById('detail-especial-lugar-block');
-  if (isEventoLike && a.especial_lugar) {
+  if (isEspecial && a.especial_lugar) {
     document.getElementById('detail-especial-lugar-value').textContent = a.especial_lugar;
     espLugarBlock.style.display = '';
   } else { espLugarBlock.style.display = 'none'; }
@@ -14659,7 +14710,7 @@ async function viewAssignment(id) {
   const callBtn = document.getElementById('detail-call-btn');
   const mapBtn  = document.getElementById('detail-map-btn');
   const programaBtn = document.getElementById('detail-programa-btn');
-  if (isEventoLike) {
+  if (isEspecial) {
     // No hay Territorio, encargado ni Casa: sin botón "Llamar". El botón
     // "Cómo llegar" solo se muestra si se registró un Lugar, y "Ver Programa"
     // solo si se registró un enlace — ambos pueden convivir uno al lado del otro.
@@ -14680,6 +14731,24 @@ async function viewAssignment(id) {
       programaBtn.style.display = 'none';
     }
     actions.style.display = (a.especial_lugar || a.especial_programa_url) ? '' : 'none';
+  } else if (isVisita) {
+    // v1.44.5-sb: "Visita" sí tiene Encargado de predicación — se puede
+    // "Llamar" igual que en Presencial. No hay dirección propia de la
+    // asignación (el mapa que se ve es el del territorio elegido), por lo
+    // que no se muestra "Cómo llegar" ni "Ver Programa" aquí.
+    mapBtn.style.display = 'none';
+    programaBtn.style.display = 'none';
+    callBtn.style.display = '';
+    callBtn.textContent = 'Llamar';
+    if (a.phone) {
+      callBtn.onclick = () => window.location.href = 'tel:' + a.phone.replace(/\s/g,'');
+      callBtn.style.opacity = '1';
+    } else {
+      callBtn.onclick = null;
+      callBtn.style.opacity = '0.45';
+      callBtn.title = 'Sin teléfono registrado';
+    }
+    actions.style.display = '';
   } else {
     callBtn.style.display = '';
     mapBtn.style.display = '';
@@ -14740,26 +14809,42 @@ async function viewAssignment(id) {
   // así que se pintan de inmediato; el mapa en sí se carga en segundo plano ──
   const tabsBar = document.getElementById('detail-ter-tabs');
   const visitaGrid = document.getElementById('detail-visita-ter-grid');
+  const visitaPickerGrid = document.getElementById('detail-visita-picker-grid');
   const panel = document.getElementById('detail-panel');
   if (isVisita) {
-    // v1.44.0-stable_beta: "Visita" no usa los 3 tabs fijos, sino la grilla
-    // de hasta 8 territorios (1-3 en fila, 4-8 en grilla de 2 columnas).
+    // v1.44.5-sb: con 1 a 3 territorios, "Visita" se comporta igual que
+    // "Presencial" (fila de tabs, se abre el primero de inmediato). Con 4 u
+    // 8 territorios, en vez de abrir uno de entrada se muestra primero una
+    // grilla 2x2 con mini-mapas para elegir; al tocar uno, se abre su
+    // detalle (mapa, Live, No Pasar) y el resto queda arriba como selector
+    // (sin repetir el que ya está abierto).
     tabsBar.style.display = 'none';
     panel._visitaTers = visitaTers;
-    if (visitaTers.length) {
-      visitaGrid.classList.toggle('grid-2col', visitaTers.length > 3);
+    panel._visitaOpenIdx = null;
+    if (visitaTers.length >= 4) {
+      visitaGrid.style.display = 'none';
+      visitaGrid.innerHTML = '';
+      _renderVisitaPickerGrid(visitaTers);
+    } else if (visitaTers.length) {
+      visitaPickerGrid.style.display = 'none';
+      visitaPickerGrid.innerHTML = '';
+      visitaGrid.classList.remove('grid-2col');
       visitaGrid.innerHTML = visitaTers.map((t, i) => `
         <button class="detail-visita-ter-chip${i===0?' active':''}" data-idx="${i}" onclick="switchVisitaTerTab(${i})">
           <span class="tab-badge" style="background:${getTerColor(t.number)}">${t.number}</span>
           <span>${terLabel(t.number)}</span>
         </button>`).join('');
       visitaGrid.style.display = 'flex';
+      panel._visitaOpenIdx = 0;
     } else {
       visitaGrid.style.display = 'none';
+      visitaPickerGrid.style.display = 'none';
+      visitaPickerGrid.innerHTML = '';
     }
   } else if (isEspecial) {
     tabsBar.style.display = 'none';
     visitaGrid.style.display = 'none';
+    if (visitaPickerGrid) { visitaPickerGrid.style.display = 'none'; visitaPickerGrid.innerHTML = ''; }
   } else if (ter && ter2) {
     visitaGrid.style.display = 'none';
     // Show tabs bar
@@ -14792,6 +14877,7 @@ async function viewAssignment(id) {
   } else {
     tabsBar.style.display = 'none';
     visitaGrid.style.display = 'none';
+    if (visitaPickerGrid) { visitaPickerGrid.style.display = 'none'; visitaPickerGrid.innerHTML = ''; }
   }
   // v1.30.7-beta: "Manzanas a abarcar" es individual por territorio — se
   // guardan las 3 listas en el panel para poder mostrar la que corresponde
@@ -14804,10 +14890,11 @@ async function viewAssignment(id) {
   // Se muestran las del territorio activo (tab 1 por defecto).
   _renderDetailManzanas(panel._manz1);
 
-  // Territorio "activo" para el mapa y "No pasar": el primero de la lista en
-  // "Visita" (el usuario puede cambiarlo desde la grilla), o el único/1º
-  // territorio en el resto de modalidades. No aplica a "Evento".
-  const activeTer = isVisita ? (visitaTers[0] || null) : ter;
+  // Territorio "activo" para el mapa y "No pasar": en "Visita" es el que esté
+  // elegido en panel._visitaOpenIdx (null con 4+ territorios hasta que el
+  // usuario elige uno en la grilla 2x2), o el único/1º territorio en el
+  // resto de modalidades. No aplica a "Evento".
+  const activeTer = isVisita ? (panel._visitaOpenIdx != null ? visitaTers[panel._visitaOpenIdx] : null) : ter;
 
   // "No pasar" no depende del mapa, se pinta de inmediato (no aplica a "Evento")
   _renderDetailNoPasar(isEspecial ? null : activeTer);
@@ -14870,6 +14957,12 @@ async function viewAssignment(id) {
       _renderDetailTerContent(ter);
     } else {
       _applyDetailMapSrc(activeTer);
+    }
+    // v1.44.5-sb: si la grilla 2x2 de "Visita" sigue esperando selección,
+    // se vuelve a dibujar ahora que los mapas de los territorios (map_data)
+    // ya están disponibles, para que se vean los mini-mapas.
+    if (isVisita && panel._visitaOpenIdx == null && visitaTers.length >= 4) {
+      _renderVisitaPickerGrid(visitaTers);
     }
   })();
 
@@ -14940,17 +15033,68 @@ function switchDetailTerTab(tabNum) {
   _renderDetailManzanas(manzForTab);
 }
 
-// v1.44.0-stable_beta: alterna entre los hasta 8 territorios de una
-// asignación "Visita" desde la grilla (equivalente a switchDetailTerTab,
-// pero sin el límite de 3 pestañas fijas).
+// v1.44.5-sb: dibuja la grilla inicial 2x2 (con mini-mapas) que se muestra
+// para asignaciones "Visita" con 4 u 8 territorios, antes de que el usuario
+// elija cuál ver. Se apoya en el mismo t.map_data que usa el resto de la
+// app; si aún no se cargó (requiere red), se re-dibuja cuando esté listo.
+function _renderVisitaPickerGrid(ters) {
+  const grid = document.getElementById('detail-visita-picker-grid');
+  if (!grid) return;
+  grid.innerHTML = ters.map((t, i) => {
+    const mapHtml = t.map_data
+      ? `<img src="${t.map_data}" alt="Mapa ${terLabel(t.number)}" loading="lazy">`
+      : `<div class="detail-visita-picker-map-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg></div>`;
+    return `<div class="detail-visita-picker-card" data-idx="${i}" onclick="openVisitaTerFromGrid(${i})">
+      <div class="detail-visita-picker-map">
+        ${mapHtml}
+        <div class="detail-visita-picker-num-badge" style="background:${getTerColor(t.number)}">${t.number}</div>
+      </div>
+      <div class="detail-visita-picker-label">${terLabel(t.number)}</div>
+    </div>`;
+  }).join('');
+  grid.style.display = 'grid';
+}
+
+// v1.44.5-sb: se llama al tocar una tarjeta de la grilla 2x2 inicial. Abre
+// ese territorio (mapa, Live y No Pasar) y deja el resto de territorios
+// arriba como selector, sin repetir el que ya quedó abierto.
+function openVisitaTerFromGrid(idx) {
+  const panel = document.getElementById('detail-panel');
+  const ters = panel._visitaTers || [];
+  if (!ters[idx]) return;
+  document.getElementById('detail-visita-picker-grid').style.display = 'none';
+  switchVisitaTerTab(idx);
+}
+
+// v1.44.5-sb: alterna entre los hasta 8 territorios de una asignación
+// "Visita". El territorio elegido se abre (mapa/Live/No Pasar) y el
+// selector de arriba se redibuja mostrando solo el resto (el que ya está
+// abierto no se repite ahí), para aprovechar mejor el espacio con 4+
+// territorios.
 function switchVisitaTerTab(idx) {
   const panel = document.getElementById('detail-panel');
   const ters = panel._visitaTers || [];
-  const grid = document.getElementById('detail-visita-ter-grid');
-  grid.querySelectorAll('.detail-visita-ter-chip').forEach((chip, i) => chip.classList.toggle('active', i === idx));
   const ter = ters[idx];
   if (!ter) return;
+  panel._visitaOpenIdx = idx;
+  _renderVisitaChipSelector(ters, idx);
   _renderDetailTerContent(ter);
+}
+
+// v1.44.5-sb: dibuja el selector de arriba (fila de chips) con todos los
+// territorios de la Visita EXCEPTO el que está abierto actualmente.
+function _renderVisitaChipSelector(ters, openIdx) {
+  const grid = document.getElementById('detail-visita-ter-grid');
+  if (!grid) return;
+  const others = ters.map((t, i) => ({ t, i })).filter(o => o.i !== openIdx);
+  if (!others.length) { grid.style.display = 'none'; grid.innerHTML = ''; return; }
+  grid.classList.remove('grid-2col');
+  grid.innerHTML = others.map(o => `
+    <button class="detail-visita-ter-chip" data-idx="${o.i}" onclick="switchVisitaTerTab(${o.i})">
+      <span class="tab-badge" style="background:${getTerColor(o.t.number)}">${o.t.number}</span>
+      <span>${terLabel(o.t.number)}</span>
+    </button>`).join('');
+  grid.style.display = 'flex';
 }
 
 // ── v1.44.0-stable_beta: el Encargado de una asignación de Predicación toca
@@ -15055,6 +15199,9 @@ function closeDetail() {
   // ícono auto-asignable, para que no queden residuos de la asignación anterior.
   const visitaGridEl = document.getElementById('detail-visita-ter-grid');
   if (visitaGridEl) { visitaGridEl.style.display = 'none'; visitaGridEl.innerHTML = ''; visitaGridEl.classList.remove('grid-2col'); }
+  // v1.44.5-sb: reset de la grilla 2x2 inicial de "Visita" (4+ territorios)
+  const visitaPickerGridEl = document.getElementById('detail-visita-picker-grid');
+  if (visitaPickerGridEl) { visitaPickerGridEl.style.display = 'none'; visitaPickerGridEl.innerHTML = ''; }
   const terBadgeEl = document.getElementById('detail-ter-badge');
   if (terBadgeEl) terBadgeEl.classList.remove('self-assignable');
   const panel = document.getElementById('detail-panel');
@@ -16128,7 +16275,15 @@ function asTypeChanged() {
   document.getElementById('as-visita-ter-fields').style.display = isVisita ? '' : 'none';
   document.getElementById('as-regular-fields').style.display = isEventoLike ? 'none' : '';
   document.getElementById('as-casa-wrap').style.display = isEventoLike ? 'none' : '';
-  document.getElementById('as-conductor-wrap').style.display = isEventoLike ? 'none' : '';
+  // v1.44.5-sb: "Visita" sí tiene Encargado de predicación (a diferencia de
+  // "Evento", que no tiene ninguno) — solo se oculta para "Evento".
+  document.getElementById('as-conductor-wrap').style.display = isEspecial ? 'none' : '';
+  // v1.44.5-sb: Descripción y Lugar quedan fuera de "Visita" (no se
+  // consideran para esa modalidad); siguen disponibles para "Evento".
+  const descWrap = document.getElementById('as-especial-desc-wrap');
+  const lugarWrap = document.getElementById('as-especial-lugar-wrap');
+  if (descWrap) descWrap.style.display = isVisita ? 'none' : '';
+  if (lugarWrap) lugarWrap.style.display = isVisita ? 'none' : '';
   if (isVisita) _renderAsVisitaTerChecklist();
 }
 
@@ -16295,8 +16450,10 @@ async function saveAssignment() {
     time: document.getElementById('as-time').value,
     address: isEventoLike ? '' : (casa?.direccion || ''),
     house: isEventoLike ? '' : (casa?.amo || ''),
-    conductor: isEventoLike ? '' : (conductor ? `${conductor.nombre} ${conductor.apellido}` : ''),
-    conductor_id: isEventoLike ? null : conductorId,
+    // v1.44.5-sb: "Visita" sí guarda un Encargado de predicación para ese
+    // día (a diferencia de "Evento", que no tiene ninguno).
+    conductor: isEspecial ? '' : (conductor ? `${conductor.nombre} ${conductor.apellido}` : ''),
+    conductor_id: isEspecial ? null : conductorId,
     casa_id: isEventoLike ? null : casaId,
     type: asType,
     territory_id: isEventoLike ? null : (document.getElementById('as-territory').value || null),
@@ -16306,7 +16463,7 @@ async function saveAssignment() {
     // aparte de territory_id/_2/_3 (que son exclusivos del resto de modalidades).
     visita_territorios: isVisita ? visitaTerIds.slice(0, 8) : [],
     notes: document.getElementById('as-notes').value.trim(),
-    phone: isEventoLike ? null : (conductor?.telefono || null),
+    phone: isEspecial ? null : (conductor?.telefono || null),
     grupo_id: isEventoLike ? null : grupoId,
     manzanas_asignadas: isEventoLike ? [] : (document.getElementById('as-manzanas').value || '')
       .split(',').map(s => s.trim().toUpperCase()).filter(Boolean),
@@ -16316,8 +16473,9 @@ async function saveAssignment() {
       .split(',').map(s => s.trim().toUpperCase()).filter(Boolean),
     especial_titulo: isEventoLike ? document.getElementById('as-especial-titulo').value.trim() : null,
     especial_subtitulo: isEventoLike ? document.getElementById('as-especial-subtitulo').value.trim() : null,
-    especial_descripcion: isEventoLike ? document.getElementById('as-especial-descripcion').value.trim() : null,
-    especial_lugar: isEventoLike ? document.getElementById('as-especial-lugar').value.trim() : null,
+    // v1.44.5-sb: Descripción y Lugar no se consideran para "Visita", solo para "Evento".
+    especial_descripcion: isEspecial ? document.getElementById('as-especial-descripcion').value.trim() : null,
+    especial_lugar: isEspecial ? document.getElementById('as-especial-lugar').value.trim() : null,
     especial_programa_url: isEventoLike ? document.getElementById('as-especial-programa-url').value.trim() : null,
     especial_foto: isEventoLike ? (pendingEspecialBase64 || (editingAssignmentId ? undefined : null)) : null,
   };
