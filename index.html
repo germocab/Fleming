@@ -1042,6 +1042,11 @@
   .card-house {
     font-size: 0.8rem; color: var(--text3); font-weight: 400; margin-bottom: 8px;
   }
+  /* v1.44.7-sb: "Detalle" de la tarjeta "Visita", mostrado en formato subtítulo
+     debajo de la dirección/casa, igual que .card-house pero un poco más marcado. */
+  .card-visita-detalle {
+    font-size: 0.82rem; color: var(--text2); font-weight: 500; margin-top: -2px; margin-bottom: 8px; line-height: 1.3;
+  }
   .card-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   .card-conductor { font-size: 0.82rem; color: var(--text2); font-weight: 400; }
   .card-time-chip {
@@ -7487,8 +7492,8 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
       <!-- ── Campos exclusivos de la tarjeta "Especial" ── -->
       <div id="as-especial-fields" style="display:none">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-          <div class="form-group2"><label class="form-label2">Título</label><input type="text" class="form-input" id="as-especial-titulo" placeholder="Ej: Asamblea de Circuito"></div>
-          <div class="form-group2"><label class="form-label2">Subtítulo</label><input type="text" class="form-input" id="as-especial-subtitulo" placeholder="Ej: Con representante de la sucursal"></div>
+          <div class="form-group2"><label class="form-label2" id="as-especial-titulo-label">Título</label><input type="text" class="form-input" id="as-especial-titulo" placeholder="Ej: Asamblea de Circuito"></div>
+          <div class="form-group2" id="as-especial-subtitulo-wrap"><label class="form-label2">Subtítulo</label><input type="text" class="form-input" id="as-especial-subtitulo" placeholder="Ej: Con representante de la sucursal"></div>
         </div>
         <!-- v1.44.5-sb: Descripción y Lugar no aplican a "Visita" (solo a "Evento") -->
         <div class="form-group2" id="as-especial-desc-wrap"><label class="form-label2">Descripción <span style="font-weight:400;color:var(--text3)">— opcional</span></label><textarea class="form-textarea" id="as-especial-descripcion" placeholder="Detalles del evento..."></textarea></div>
@@ -9265,7 +9270,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.44.6-sb';
+const APP_VERSION = '1.44.7-sb';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -14248,6 +14253,39 @@ function renderSchedule() {
     </div>`;
   }
 
+  // v1.44.7-sb: tarjeta "Visita" — a diferencia de "Especial", sí muestra la
+  // dirección de la Casa asignada ("Casa de..."), el Detalle (antes
+  // "Título") como subtítulo, y los Territorios de la Visita, igual que
+  // pasa en las demás tarjetas de asignación de predicación.
+  function _buildVisitaCard(a) {
+    const timeStr = a.time ? a.time.substring(0,5) : '--:--';
+    const _cv = casas.find(c => c.id === a.casa_id);
+    const houseLabel = casaHouseLabel(_cv && _cv.tipo, a.house);
+    const visitaTers = (Array.isArray(a.visita_territorios) ? a.visita_territorios : [])
+      .map(tid => territories.find(t => t.id === tid)).filter(Boolean);
+    let rightBadge = '';
+    if (visitaTers.length > 1) {
+      rightBadge = `<div class="ter-badge-duo${visitaTers.length > 2 ? ' ter-badge-trio' : ''}">${visitaTers.slice(0,3).map(t => `<div class="ter-badge-sm" style="background:${getTerColor(t.number)}">${t.number}</div>`).join('')}</div>`;
+    } else if (visitaTers.length === 1) {
+      rightBadge = `<div class="ter-badge" style="background:${getTerColor(visitaTers[0].number)}">${visitaTers[0].number}</div>`;
+    }
+    return `<div class="assignment-card" onclick="viewAssignment('${a.id}')">
+      <div class="card-main">
+        <div class="card-address">${a.address || 'Sin dirección'}</div>
+        ${houseLabel ? `<div class="card-house">${houseLabel}</div>` : ''}
+        ${a.especial_titulo ? `<div class="card-visita-detalle">${a.especial_titulo}</div>` : ''}
+        <div class="card-meta">
+          <span class="card-time-chip">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ${timeStr}hrs
+          </span>
+          <span class="card-conductor">${a.conductor || 'Sin conductor'}</span>
+        </div>
+      </div>
+      ${rightBadge}
+    </div>`;
+  }
+
   // Helper: type chip
   function _buildTypeChip(a) {
     if (a.type === 'zoom') return `<span class="type-chip chip-zoom">Zoom</span>`;
@@ -14302,7 +14340,7 @@ function renderSchedule() {
     //    asignación normal de casa en casa para ese día. ──
     const especialItems = grouped[date].filter(x => x.type === 'especial' || x.type === 'visita');
     const regularItems  = grouped[date].filter(x => x.type !== 'especial' && x.type !== 'visita');
-    especialItems.forEach(a => { html += _buildEspecialCard(a); });
+    especialItems.forEach(a => { html += (a.type === 'visita' ? _buildVisitaCard(a) : _buildEspecialCard(a)); });
 
     if (!regularItems.length) {
       // nada más que renderizar este día
@@ -14733,11 +14771,20 @@ async function viewAssignment(id) {
     actions.style.display = (a.especial_lugar || a.especial_programa_url) ? '' : 'none';
   } else if (isVisita) {
     // v1.44.5-sb: "Visita" sí tiene Encargado de predicación — se puede
-    // "Llamar" igual que en Presencial. No hay dirección propia de la
-    // asignación (el mapa que se ve es el del territorio elegido), por lo
-    // que no se muestra "Cómo llegar" ni "Ver Programa" aquí.
-    mapBtn.style.display = 'none';
+    // "Llamar" igual que en Presencial.
+    // v1.44.7-sb: "Cómo llegar" también se muestra en "Visita" (usa la
+    // dirección de la Casa asignada, igual que en Presencial). No aplica
+    // "Ver Programa" aquí.
     programaBtn.style.display = 'none';
+    mapBtn.style.display = '';
+    mapBtn.textContent = 'Cómo llegar';
+    if (a.address) {
+      mapBtn.onclick = () => window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(a.address), '_blank');
+      mapBtn.style.opacity = '1';
+    } else {
+      mapBtn.onclick = null;
+      mapBtn.style.opacity = '0.45';
+    }
     callBtn.style.display = '';
     callBtn.textContent = 'Llamar';
     if (a.phone) {
@@ -15924,6 +15971,39 @@ function renderAdminAssignments() {
       </div>
     </div>`;
   }
+  // v1.44.7-sb: tarjeta "Visita" en el panel de administración — mismo
+  // criterio que en el Viewer: dirección + "Casa de..." + Detalle como
+  // subtítulo + Territorios de la Visita a la derecha.
+  function buildVisitaCard(a) {
+    const timeStr = a.time ? a.time.substring(0,5) : '--:--';
+    const _cv = casas.find(c => c.id === a.casa_id);
+    const houseLabel = casaHouseLabel(_cv && _cv.tipo, a.house);
+    const visitaTers = (Array.isArray(a.visita_territorios) ? a.visita_territorios : [])
+      .map(tid => territories.find(t => t.id === tid)).filter(Boolean);
+    let rightBadge = '';
+    if (visitaTers.length > 1) {
+      rightBadge = `<div class="ter-badge-duo${visitaTers.length > 2 ? ' ter-badge-trio' : ''}">${visitaTers.slice(0,3).map(t => `<div class="ter-badge-sm" style="background:${getTerColor(t.number)}">${t.number}</div>`).join('')}</div>`;
+    } else if (visitaTers.length === 1) {
+      rightBadge = `<div class="ter-badge" style="background:${getTerColor(visitaTers[0].number)}">${visitaTers[0].number}</div>`;
+    }
+    const c = cardAttrs(a.id);
+    return `<div class="assignment-card${c.selectedClass}" ${c.attrs}>
+      ${c.checkbox}
+      <div class="card-main">
+        <div class="card-address">${a.address || 'Sin dirección'}</div>
+        ${houseLabel ? `<div class="card-house">${houseLabel}</div>` : ''}
+        ${a.especial_titulo ? `<div class="card-visita-detalle">${a.especial_titulo}</div>` : ''}
+        <div class="card-meta">
+          <span class="card-time-chip">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ${timeStr}hrs
+          </span>
+          <span class="card-conductor">${a.conductor || 'Sin conductor'}</span>
+        </div>
+      </div>
+      ${rightBadge}
+    </div>`;
+  }
   function buildRegularCard(a, isToday) {
     const timeStr = a.time ? a.time.substring(0,5) : '--:--';
     const rightBadge = buildRightBadge(a);
@@ -15984,7 +16064,7 @@ function renderAdminAssignments() {
       ? `<div class="date-section"><div class="date-section-header-today"><span class="today-label">Hoy</span><span class="today-date">${dateLabel}</span></div>`
       : `<div class="date-section"><div class="date-section-header">${dateLabel}</div>`;
     grouped[date].forEach(a => {
-      html += (a.type === 'especial' || a.type === 'visita') ? buildEspecialCard(a) : buildRegularCard(a, isToday);
+      html += a.type === 'especial' ? buildEspecialCard(a) : (a.type === 'visita' ? buildVisitaCard(a) : buildRegularCard(a, isToday));
     });
     html += `</div>`;
   });
@@ -16290,6 +16370,14 @@ function asTypeChanged() {
   if (descWrap) descWrap.style.display = isVisita ? 'none' : '';
   if (lugarWrap) lugarWrap.style.display = isVisita ? 'none' : '';
   if (programaWrap) programaWrap.style.display = isVisita ? 'none' : '';
+  // v1.44.7-sb: en "Visita" el campo "Título" pasa a llamarse "Detalle" y
+  // "Subtítulo" deja de usarse (se oculta por completo).
+  const tituloLabel = document.getElementById('as-especial-titulo-label');
+  if (tituloLabel) tituloLabel.textContent = isVisita ? 'Detalle' : 'Título';
+  const tituloInput = document.getElementById('as-especial-titulo');
+  if (tituloInput) tituloInput.placeholder = isVisita ? 'Ej: Visita del superintendente de circuito' : 'Ej: Asamblea de Circuito';
+  const subtituloWrap = document.getElementById('as-especial-subtitulo-wrap');
+  if (subtituloWrap) subtituloWrap.style.display = isVisita ? 'none' : '';
   if (isVisita) _renderAsVisitaTerChecklist();
 }
 
@@ -16479,7 +16567,8 @@ async function saveAssignment() {
     manzanas_asignadas_3: isEventoLike ? [] : (document.getElementById('as-manzanas3').value || '')
       .split(',').map(s => s.trim().toUpperCase()).filter(Boolean),
     especial_titulo: isEventoLike ? document.getElementById('as-especial-titulo').value.trim() : null,
-    especial_subtitulo: isEventoLike ? document.getElementById('as-especial-subtitulo').value.trim() : null,
+    // v1.44.7-sb: el campo "Subtítulo" ya no se usa en "Visita" (solo en "Evento").
+    especial_subtitulo: isEspecial ? document.getElementById('as-especial-subtitulo').value.trim() : null,
     // v1.44.5-sb: Descripción y Lugar no se consideran para "Visita", solo para "Evento".
     especial_descripcion: isEspecial ? document.getElementById('as-especial-descripcion').value.trim() : null,
     especial_lugar: isEspecial ? document.getElementById('as-especial-lugar').value.trim() : null,
@@ -16489,7 +16578,7 @@ async function saveAssignment() {
   };
   if (payload.especial_foto === undefined) delete payload.especial_foto; // conserva la foto existente si no se cambió
   if (!payload.date || !payload.time) { showError('as-error','Fecha y hora son requeridos'); return; }
-  if (isEventoLike && !payload.especial_titulo) { showError('as-error', isVisita ? 'El Título es requerido para la Visita' : 'El Título es requerido para la tarjeta Evento'); return; }
+  if (isEventoLike && !payload.especial_titulo) { showError('as-error', isVisita ? 'El Detalle es requerido para la Visita' : 'El Título es requerido para la tarjeta Evento'); return; }
   if (isVisita && visitaTerIds.length === 0) { showError('as-error','Selecciona al menos un territorio para la Visita'); return; }
 
   // ── Day-availability conflict check ──
