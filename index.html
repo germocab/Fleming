@@ -1088,17 +1088,35 @@
   .ter-badge-icon svg { width: 24px; height: 24px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; }
 
   .ter-badge-duo {
-    display: flex; flex-direction: row; gap: 5px;
-    align-items: center; flex-shrink: 0;
+    display: flex; flex-direction: row; flex-wrap: wrap; gap: 5px;
+    align-items: center; justify-content: flex-end; flex-shrink: 0;
+    max-width: 100px; row-gap: 4px;
   }
   .ter-badge-duo .ter-badge-sm {
     width: 40px; height: 40px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     font-size: 0.85rem; font-weight: 800; color: white;
+    flex-shrink: 0;
   }
-  .ter-badge-duo.ter-badge-trio { gap: 3px; }
+  /* v1.45.1-sb: con 3+ territorios los badges se achican para caber más por
+     fila; el máximo visible lo decide renderVisitaTerBadges() según el ancho
+     de pantalla (visitaBadgeMaxVisible), y esta grilla permite que quepan
+     más badges por fila en pantallas anchas. */
+  .ter-badge-duo.ter-badge-trio { gap: 3px; max-width: 148px; }
   .ter-badge-duo.ter-badge-trio .ter-badge-sm {
     width: 32px; height: 32px; font-size: 0.72rem;
+  }
+  .ter-badge-duo .ter-badge-more {
+    background: var(--surface3); color: var(--text3);
+    font-size: 0.68rem; font-weight: 800;
+  }
+  @media (min-width: 640px) {
+    .ter-badge-duo { max-width: 160px; }
+    .ter-badge-duo.ter-badge-trio { max-width: 220px; }
+  }
+  @media (min-width: 900px) {
+    .ter-badge-duo { max-width: 200px; }
+    .ter-badge-duo.ter-badge-trio { max-width: 280px; }
   }
 
   .ter-color-swatch {
@@ -6632,13 +6650,8 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 
       <!-- Hospitalidad -->
       <div id="sub-content-hospitalidad" class="sub-page" style="display:none">
-        <div class="coming-soon-panel">
-          <div class="coming-soon-icon">
-            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-          </div>
-          <h3>Hospitalidad</h3>
-          <p>El calendario de hospitalidad estará disponible próximamente.</p>
-        </div>
+        <div id="admin-shortcut-hospitalidad" style="display:none"></div>
+        <div id="hosp-user-view"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Hospitalidad</div></div></div>
       </div>
 
       <!-- Responsabilidades -->
@@ -6713,6 +6726,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         <button class="admin-tab" data-tab="audiovideo" data-i18n="admin.tab.audiovideo" onclick="switchAdminTab('audiovideo')">Audio y Video</button>
         <button class="admin-tab" data-tab="acomodacion" data-i18n="admin.tab.acomodacion" onclick="switchAdminTab('acomodacion')">Acomodación</button>
         <button class="admin-tab" data-tab="aseo-salon" data-i18n="admin.tab.aseo-salon" onclick="switchAdminTab('aseo-salon')">Aseo Salón</button>
+        <button class="admin-tab" data-tab="hospitalidad" data-i18n="admin.tab.hospitalidad" onclick="switchAdminTab('hospitalidad')">Hospitalidad</button>
       </div>
       <div class="admin-tabs-row" data-section="fleming">
         <button class="admin-tab" data-tab="usuarios" data-i18n="admin.tab.usuarios" onclick="switchAdminTab('usuarios')">Usuarios</button>
@@ -6975,7 +6989,44 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
           <div id="admin-aseo-upcoming-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Aseo</div></div></div>
         </div>
       </div>
-      <!-- ── VMC Admin Section ── -->
+
+      <!-- ── Hospitalidad Admin Section ── -->
+      <div class="admin-section" id="admin-hospitalidad">
+        <div class="resp-intro">Elige una fecha próxima o selecciona otra</div>
+        <div class="resp-date-chips" id="hosp-date-chips"></div>
+
+        <div class="resp-custom-date-wrap" id="hosp-custom-date-wrap" style="display:none">
+          <div class="form-group2" style="margin-bottom:0">
+            <label class="form-label2">Selecciona el día (debe ser Jueves o Sábado)</label>
+            <input type="date" class="form-input" id="hosp-asignar-fecha" onchange="onHospFechaChange()">
+            <div class="auth-error" id="hosp-fecha-error"></div>
+          </div>
+        </div>
+
+        <div id="hosp-form-wrap" style="display:none">
+          <div class="resp-cargos-card">
+            <div class="resp-cargos-day-title" id="hosp-day-title">—</div>
+
+            <div class="resp-cat-block">
+              <div class="resp-cat-title" style="color:#a855f7">
+                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Grupo de Servicio a cargo
+              </div>
+              <div class="resp-cargo-row">
+                <span class="resp-cargo-name">Grupo</span>
+                <select class="resp-cargo-select" id="hosp-grupo-sel"></select>
+              </div>
+            </div>
+
+            <button class="btn-primary" onclick="saveHospAsignacion()" id="save-hosp-asig-btn">Guardar asignación</button>
+          </div>
+        </div>
+
+        <div style="margin-top:0.4rem">
+          <div class="resp-history-title">Historial de Hospitalidad</div>
+          <div id="admin-hosp-upcoming-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Hospitalidad</div></div></div>
+        </div>
+      </div>
+
       <div class="admin-section" id="admin-vmc">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
           <span style="flex:1;font-size:0.95rem;font-weight:700">Vida y Ministerio</span>
@@ -9155,7 +9206,34 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         <span>Abre una ventana emergente, ideal para una pantalla externa</span>
       </div>
     </button>
+    <button class="aseo-mode-opt" onclick="chooseAseoMode('compartir')">
+      <div class="aseo-mode-opt-icon">
+        <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.6" x2="15.4" y2="6.4"/><line x1="8.6" y1="13.4" x2="15.4" y2="17.6"/></svg>
+      </div>
+      <div class="aseo-mode-opt-text">
+        <strong>Compartir</strong>
+        <span>Genera una imagen para enviar por mensajería</span>
+      </div>
+    </button>
     <button class="aseo-mode-cancel" onclick="closeAseoModeChooser()">Cancelar</button>
+  </div>
+</div>
+
+<!-- Responsabilidades: modal para compartir la asignación de un día como imagen -->
+<div class="aseo-mode-overlay" id="resp-share-overlay" onclick="if(event.target===this) closeRespShareChooser()">
+  <div class="aseo-mode-card">
+    <div class="aseo-mode-title">Compartir Responsabilidades</div>
+    <div class="aseo-mode-sub">Genera una imagen con las asignaciones de este día para enviarla por mensajería.</div>
+    <button class="aseo-mode-opt" onclick="confirmRespShare()">
+      <div class="aseo-mode-opt-icon">
+        <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.6" x2="15.4" y2="6.4"/><line x1="8.6" y1="13.4" x2="15.4" y2="17.6"/></svg>
+      </div>
+      <div class="aseo-mode-opt-text">
+        <strong>Compartir</strong>
+        <span>Genera una imagen para enviar por mensajería</span>
+      </div>
+    </button>
+    <button class="aseo-mode-cancel" onclick="closeRespShareChooser()">Cancelar</button>
   </div>
 </div>
 
@@ -9275,7 +9353,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.45.0-sb';
+const APP_VERSION = '1.45.0.2-sb';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -9481,6 +9559,7 @@ const I18N = {
   'admin.tab.audiovideo':   { es: 'Audio y Video',           en: 'Audio & Video' },
   'admin.tab.acomodacion':  { es: 'Acomodación',             en: 'Ushering' },
   'admin.tab.aseo-salon':   { es: 'Aseo Salón',              en: 'Hall Cleaning' },
+  'admin.tab.hospitalidad': { es: 'Hospitalidad',            en: 'Hospitality' },
   'admin.tab.usuarios':     { es: 'Usuarios',                en: 'Users' },
   'admin.tab.notificaciones': { es: 'Notificaciones',        en: 'Notifications',     nl: 'Meldingen' },
   'admin.tab.reports':      { es: 'Reportes',                en: 'Reports' },
@@ -9919,6 +9998,34 @@ function getTerColorFromObj(t) {
   return (t && t.color) ? t.color : TER_COLORS[(t ? t.number : 0) % TER_COLORS.length];
 }
 function getTerColorClass(num) { return 'ter-color-' + (num % 10); }
+
+// v1.45.1-sb: cuántos territorios de una "Visita" se muestran como badges en
+// la tarjeta de asignación, según el ancho de pantalla disponible. Antes el
+// máximo era fijo en 3; ahora escala con el espacio (hasta los 8 posibles).
+function visitaBadgeMaxVisible() {
+  const w = window.innerWidth;
+  if (w < 420) return 3;
+  if (w < 640) return 4;
+  if (w < 900) return 6;
+  return 8;
+}
+
+// Construye el bloque de badges de territorios para una tarjeta "Visita".
+// Muestra hasta visitaBadgeMaxVisible() territorios (según el espacio de
+// pantalla) y, si sobran más, un chip "+N" con el resto.
+function renderVisitaTerBadges(visitaTers) {
+  if (!visitaTers.length) return '';
+  if (visitaTers.length === 1) {
+    return `<div class="ter-badge" style="background:${getTerColor(visitaTers[0].number)}">${visitaTers[0].number}</div>`;
+  }
+  const maxVisible = Math.max(2, visitaBadgeMaxVisible());
+  const shown = visitaTers.slice(0, maxVisible);
+  const rest = visitaTers.length - shown.length;
+  const sizeClass = shown.length > 2 ? ' ter-badge-trio' : '';
+  const badgesHtml = shown.map(t => `<div class="ter-badge-sm" style="background:${getTerColor(t.number)}">${t.number}</div>`).join('')
+    + (rest > 0 ? `<div class="ter-badge-sm ter-badge-more">+${rest}</div>` : '');
+  return `<div class="ter-badge-duo${sizeClass}">${badgesHtml}</div>`;
+}
 
 // ── v1.5.0-beta: Contraste adaptativo para títulos/íconos flotantes ─────────
 // Los "pills" con transparencia + blur (título de sección, botón Back
@@ -12068,7 +12175,7 @@ async function initVmcShareMode(weekId) {
         <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/></svg>
         Solo lectura · enlace compartido
       </div>
-      <div class="vmc-program-container">${vmcRenderWeekProgram(week)}</div>
+      <div class="vmc-program-container">${vmcRenderWeekProgram(week, true)}</div>
     </div>`;
 }
 
@@ -13694,6 +13801,7 @@ function switchSubTab(tabId) {
   if (tabId === 'carritos') cartLoadAllData();
   if (tabId === 'responsabilidades') renderRespUserView();
   if (tabId === 'aseo-salon') renderAseoUserView();
+  if (tabId === 'hospitalidad') renderHospUserView();
   if (tabId === 'vida-ministerio') loadAndRenderVmcUserView();
   if (tabId === 'fin-semana') loadAndRenderFsUserView();
   if (tabId === 'grupos') {
@@ -13779,6 +13887,7 @@ const VIEWER_TO_ADMIN_TAB = {
   'vida-ministerio':   'vmc',
   'fin-semana':        'fin-semana',
   'aseo-salon':        'aseo-salon',
+  'hospitalidad':      'hospitalidad',
   // v1.31.5-beta: el módulo "Responsabilidades" del Admin se dividió en
   // "Audio y Video" y "Acomodación". El Viewer sigue teniendo una sola
   // sub-sección "Responsabilidades", así que este atajo apunta por defecto
@@ -13795,6 +13904,7 @@ const VIEWER_SECTION_LABELS = {
   'vida-ministerio':   'Vida y Ministerio',
   'fin-semana':        'Reunión Pública',
   'aseo-salon':        'Aseo del Salón',
+  'hospitalidad':      'Hospitalidad',
   'responsabilidades': 'Responsabilidades',
 };
 // Permission key for admin module check
@@ -13806,6 +13916,7 @@ const VIEWER_PERM_KEY = {
   'vida-ministerio':   'vida_ministerio',
   'fin-semana':        'fin_semana',
   'aseo-salon':        'aseo_salon',
+  'hospitalidad':      'hospitalidad',
   // Caso especial: ver el manejo dedicado en updateAdminShortcuts(), ya que
   // "Responsabilidades" ahora depende de DOS módulos posibles (audiovideo /
   // acomodacion), no de uno solo.
@@ -13967,7 +14078,7 @@ function _openAdminPageOverlay(targetTab) {
 const ADMIN_TAB_SECTION = {
   assignments: 'predicacion', territories: 'predicacion', conductores: 'predicacion',
   casas: 'predicacion', grupos: 'predicacion', carritos: 'predicacion', reports: 'predicacion',
-  vmc: 'reuniones', 'fin-semana': 'reuniones', audiovideo: 'reuniones', acomodacion: 'reuniones', 'aseo-salon': 'reuniones',
+  vmc: 'reuniones', 'fin-semana': 'reuniones', audiovideo: 'reuniones', acomodacion: 'reuniones', 'aseo-salon': 'reuniones', hospitalidad: 'reuniones',
   usuarios: 'fleming', notificaciones: 'fleming', tips: 'fleming', monitor: 'fleming', legal: 'fleming',
 };
 
@@ -14028,6 +14139,7 @@ async function switchAdminTab(tab) {
     loadResponsabilidadesAdmin();
   }
   if (tab === 'aseo-salon') loadAseoSalonAdmin();
+  if (tab === 'hospitalidad') loadHospAdmin();
   if (tab === 'usuarios') {
     document.getElementById('users-panel-body').innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Usuarios</div></div>';
     Promise.all([loadUsers(), loadAdminTags()]).then(() => {
@@ -14065,7 +14177,7 @@ const ADMIN_TAB_PERM_KEY = {
   assignments: 'assignments', territories: 'territories', conductores: 'conductores',
   casas: 'casas', grupos: 'grupos', carritos: 'carritos', reports: 'territory_reports',
   vmc: 'vida_ministerio', 'fin-semana': 'fin_semana', audiovideo: 'audiovideo', acomodacion: 'acomodacion',
-  'aseo-salon': 'aseo_salon', usuarios: 'usuarios', notificaciones: 'notificaciones',
+  'aseo-salon': 'aseo_salon', hospitalidad: 'hospitalidad', usuarios: 'usuarios', notificaciones: 'notificaciones',
 };
 
 // ── Visibilidad de las Secciones (Predicación / Reuniones / Fleming App) ─────
@@ -14327,12 +14439,7 @@ function renderSchedule() {
     const houseLabel = casaHouseLabel(_cv && _cv.tipo, a.house);
     const visitaTers = (Array.isArray(a.visita_territorios) ? a.visita_territorios : [])
       .map(tid => territories.find(t => t.id === tid)).filter(Boolean);
-    let rightBadge = '';
-    if (visitaTers.length > 1) {
-      rightBadge = `<div class="ter-badge-duo${visitaTers.length > 2 ? ' ter-badge-trio' : ''}">${visitaTers.slice(0,3).map(t => `<div class="ter-badge-sm" style="background:${getTerColor(t.number)}">${t.number}</div>`).join('')}</div>`;
-    } else if (visitaTers.length === 1) {
-      rightBadge = `<div class="ter-badge" style="background:${getTerColor(visitaTers[0].number)}">${visitaTers[0].number}</div>`;
-    }
+    const rightBadge = renderVisitaTerBadges(visitaTers);
     return `<div class="assignment-card" onclick="viewAssignment('${a.id}')">
       <div class="card-main">
         <div class="card-address">${a.address || 'Sin dirección'}</div>
@@ -15904,6 +16011,7 @@ async function loadAdminData() {
   renderAdminGrupos();
   loadResponsabilidadesAdmin();
   loadAseoSalonAdmin();
+  loadHospAdmin();
   await applyAdminTabPermissions();
 }
 
@@ -16044,12 +16152,7 @@ function renderAdminAssignments() {
     const houseLabel = casaHouseLabel(_cv && _cv.tipo, a.house);
     const visitaTers = (Array.isArray(a.visita_territorios) ? a.visita_territorios : [])
       .map(tid => territories.find(t => t.id === tid)).filter(Boolean);
-    let rightBadge = '';
-    if (visitaTers.length > 1) {
-      rightBadge = `<div class="ter-badge-duo${visitaTers.length > 2 ? ' ter-badge-trio' : ''}">${visitaTers.slice(0,3).map(t => `<div class="ter-badge-sm" style="background:${getTerColor(t.number)}">${t.number}</div>`).join('')}</div>`;
-    } else if (visitaTers.length === 1) {
-      rightBadge = `<div class="ter-badge" style="background:${getTerColor(visitaTers[0].number)}">${visitaTers[0].number}</div>`;
-    }
+    const rightBadge = renderVisitaTerBadges(visitaTers);
     const c = cardAttrs(a.id);
     return `<div class="assignment-card${c.selectedClass}" ${c.attrs}>
       ${c.checkbox}
@@ -17878,8 +17981,15 @@ function renderAdminRespUpcoming() {
 // disponible) — así el encargado puede enviarla por WhatsApp/Telegram/etc.
 // sin necesidad de tomar una captura de pantalla manual (v1.21.0-beta).
 async function shareRespDayAsPng(dateStr) {
-  const allRows = [...responsabilidades, ...respHistorial];
-  const rows = allRows.filter(r => r.fecha === dateStr);
+  let rows = [...responsabilidades, ...respHistorial].filter(r => r.fecha === dateStr);
+  // Un usuario normal (no admin) no tiene poblados los arrays de admin: se
+  // consulta directo por esa fecha en vez de fallar (v1.45.0.2-sb).
+  if (!rows.length) {
+    try {
+      const { data } = await sb.from('responsabilidades').select('*').eq('fecha', dateStr);
+      rows = data || [];
+    } catch (e) { console.warn('shareRespDayAsPng fallback fetch:', e.message); }
+  }
   if (!rows.length) { showToast('No hay datos para compartir', 'error'); return; }
 
   showToast('Generando imagen…', '');
@@ -17968,7 +18078,7 @@ async function renderRespUserView() {
   el.innerHTML = dates.map(dateStr => {
     const cargosDia = rows.filter(r => r.fecha === dateStr);
     return `
-    <div class="profile-section" style="margin-bottom:1rem">
+    <div class="profile-section" style="margin-bottom:1rem;cursor:pointer" onclick="openRespShareChooser('${dateStr}')">
       <div class="profile-section-title">${respDiaLabel(dateStr)}</div>
       ${RESP_CARGOS.map(cargo => {
         const r = cargosDia.find(x => x.cargo === cargo);
@@ -17988,6 +18098,34 @@ async function renderRespUserView() {
       }).join('')}
     </div>`;
   }).join('');
+}
+
+// ── Compartir Responsabilidades de un día (v1.45.0.2-sb) ───────────────────
+// En Móvil no tiene sentido mostrar un chooser (no hay Full Screen/PopUp de
+// TV para Responsabilidades): el tap comparte directo, abriendo el share
+// sheet nativo del sistema. En Desktop se muestra una pequeña tarjeta de
+// confirmación antes de generar la imagen.
+let _respShareDate = null;
+
+function openRespShareChooser(dateStr) {
+  if (window.innerWidth < 640) {
+    shareRespDayAsPng(dateStr);
+    return;
+  }
+  _respShareDate = dateStr;
+  document.getElementById('resp-share-overlay').classList.add('open');
+}
+
+function closeRespShareChooser() {
+  document.getElementById('resp-share-overlay').classList.remove('open');
+  _respShareDate = null;
+}
+
+function confirmRespShare() {
+  const dateStr = _respShareDate;
+  closeRespShareChooser();
+  if (!dateStr) return;
+  shareRespDayAsPng(dateStr);
 }
 
 // ── Aseo del Salón ───────────────────────────────────────────────────────────
@@ -18290,14 +18428,252 @@ async function renderAseoUserView() {
   }).join('');
 }
 
+// ── Hospitalidad ─────────────────────────────────────────────────────────
+// v1.45.1-sb: panel de administración de Hospitalidad (readmitido bajo
+// Reuniones). Mismo patrón que Aseo del Salón, pero con un solo Grupo de
+// Servicio a cargo por fecha en lugar de dos.
+let hospAsig = [];
+let hospAsigHistorial = [];
+let hospAsigSelectedDate = null;
+
+async function loadHospAdmin() {
+  if (!grupos.length) await loadGrupos();
+  const [{ data: hData }, { data: histData }] = await Promise.all([
+    sb.from('hospitalidad_asignaciones').select('*').gte('fecha', todayStr()).order('fecha'),
+    sb.from('hospitalidad_asignaciones').select('*').lt('fecha', todayStr()).order('fecha', { ascending: false }),
+  ]);
+  hospAsig = hData || [];
+  hospAsigHistorial = histData || [];
+  renderHospDateChips();
+  renderAdminHospUpcoming();
+}
+
+function renderHospDateChips() {
+  const wrap = document.getElementById('hosp-date-chips');
+  if (!wrap) return;
+  const fechas = respProximasFechas(6);
+  const MES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const DIA = ['dom','lun','mar','mié','jue','vie','sáb'];
+  wrap.innerHTML = fechas.map(f => {
+    const d = new Date(f + 'T00:00:00');
+    const row = hospAsig.find(r => r.fecha === f);
+    const dot = row ? `<div class="resp-date-chip-dot complete"></div>` : '';
+    const isActive = hospAsigSelectedDate === f;
+    return `
+    <div class="resp-date-chip${isActive ? ' active' : ''}" onclick="selectHospDate('${f}')">
+      <div class="resp-date-chip-day">${DIA[d.getDay()]}</div>
+      <div class="resp-date-chip-num">${d.getDate()}</div>
+      <div class="resp-date-chip-month">${MES[d.getMonth()]}</div>
+      ${dot}
+    </div>`;
+  }).join('') + `
+    <div class="resp-date-chip-other" onclick="toggleHospCustomDate()">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Otra</span>
+    </div>`;
+}
+
+function toggleHospCustomDate() {
+  const wrap = document.getElementById('hosp-custom-date-wrap');
+  const willOpen = wrap.style.display === 'none';
+  wrap.style.display = willOpen ? '' : 'none';
+  if (willOpen) document.getElementById('hosp-asignar-fecha').focus();
+}
+
+function selectHospDate(dateStr) {
+  hospAsigSelectedDate = dateStr;
+  document.getElementById('hosp-custom-date-wrap').style.display = 'none';
+  document.getElementById('hosp-asignar-fecha').value = dateStr;
+  document.getElementById('hosp-fecha-error').style.display = 'none';
+  renderHospDateChips();
+  renderHospForm(dateStr);
+  document.getElementById('hosp-form-wrap').style.display = '';
+}
+
+function onHospFechaChange() {
+  const input = document.getElementById('hosp-asignar-fecha');
+  const errEl = document.getElementById('hosp-fecha-error');
+  const wrap = document.getElementById('hosp-form-wrap');
+  errEl.style.display = 'none';
+  wrap.style.display = 'none';
+  const val = input.value;
+  if (!val) return;
+  const d = new Date(val + 'T00:00:00');
+  const day = d.getDay();
+  if (day !== 4 && day !== 6) {
+    showError('hosp-fecha-error', 'Debes seleccionar un día Jueves o Sábado.');
+    return;
+  }
+  hospAsigSelectedDate = val;
+  renderHospDateChips();
+  renderHospForm(val);
+  wrap.style.display = '';
+}
+
+function renderHospForm(dateStr) {
+  const existing = hospAsig.find(r => r.fecha === dateStr) || hospAsigHistorial.find(r => r.fecha === dateStr);
+  document.getElementById('hosp-day-title').textContent = capitalizar(respDiaLabel(dateStr));
+
+  const gSel = document.getElementById('hosp-grupo-sel');
+  gSel.innerHTML = `<option value="">Sin asignar</option>` +
+    grupos.map(g => `<option value="${g.numero}">Grupo ${g.numero}</option>`).join('');
+  gSel.value = existing?.grupo_numero ?? '';
+}
+
+async function saveHospAsignacion() {
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  const dateStr = document.getElementById('hosp-asignar-fecha').value;
+  if (!dateStr) return;
+
+  const g = document.getElementById('hosp-grupo-sel').value;
+  const grupo_numero = g ? Number(g) : null;
+
+  const btn = document.getElementById('save-hosp-asig-btn');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+
+  const existing = hospAsig.find(r => r.fecha === dateStr);
+  let error;
+  if (existing) {
+    ({ error } = await sb.from('hospitalidad_asignaciones').update({ grupo_numero }).eq('id', existing.id));
+  } else {
+    ({ error } = await sb.from('hospitalidad_asignaciones').insert({ fecha: dateStr, grupo_numero }));
+  }
+
+  btn.disabled = false; btn.textContent = 'Guardar asignación';
+  if (error) { showToast('Error al guardar: ' + error.message, 'error'); return; }
+  showToast('Asignación guardada ✓', 'success');
+
+  // Notifica a todos los usuarios registrados en la plataforma que sean
+  // miembros del Grupo de Servicio recién asignado a Hospitalidad.
+  const grupoAsignado = grupos.find(g => g.numero === grupo_numero);
+  if (grupoAsignado) {
+    const targetNames = [...new Set(
+      (grupoAsignado.miembros || []).map(m => m.nombre.trim().toLowerCase())
+    )];
+    if (targetNames.length) {
+      const diaLargo = respDiaLabelLong(dateStr);
+      const tpl = renderTemplate('hospitalidad_asignado', { fecha: diaLargo, grupo: `Grupo ${grupoAsignado.numero}` });
+      const title = tpl.title;
+      const body = tpl.body;
+      try {
+        await sb.from('notifications').insert([{ title, body, target_names: targetNames, notif_category: 'hospitalidad' }]);
+        try {
+          await notifyUsersPush('hospitalidad', { title, body, target_names: targetNames });
+        } catch (err) {
+          console.warn('No se pudo enviar push (Edge Function no disponible):', err.message);
+        }
+      } catch (err) {
+        console.warn('No se pudieron guardar/enviar las notificaciones:', err.message);
+      }
+    }
+  }
+
+  const { data } = await sb.from('hospitalidad_asignaciones').select('*').gte('fecha', todayStr()).order('fecha');
+  hospAsig = data || [];
+  renderHospDateChips();
+  renderAdminHospUpcoming();
+}
+
+function hospGrupoLabel(row) {
+  if (!row.grupo_numero) return 'Sin grupo asignado';
+  return `Grupo ${row.grupo_numero}`;
+}
+
+function renderAdminHospUpcoming() {
+  const container = document.getElementById('admin-hosp-upcoming-list');
+  if (!container) return;
+  const upcoming = [...hospAsig].sort((a,b) => a.fecha.localeCompare(b.fecha));
+  const past = [...hospAsigHistorial].sort((a,b) => b.fecha.localeCompare(a.fecha));
+
+  if (!upcoming.length && !past.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><h4>Sin fechas de Hospitalidad registradas</h4><p>Selecciona un día Jueves o Sábado para empezar</p></div>`;
+    return;
+  }
+
+  const renderItem = (row, isPast) => `
+    <div class="resp-history-item" style="cursor:default;align-items:flex-start;flex-direction:column;gap:0.5rem">
+      <div style="display:flex;width:100%;align-items:center;gap:10px">
+        <div class="resp-history-item-main">
+          <div class="resp-history-item-title">${capitalizar(respDiaLabel(row.fecha))}</div>
+          <div class="resp-history-item-sub">${hospGrupoLabel(row)}${isPast ? ' · ya ocurrió' : ''}</div>
+        </div>
+        <div class="list-item-actions">
+          ${isPast ? '' : `<button class="btn-sm" onclick="editHospDate('${row.fecha}')">Editar</button>`}
+          <button class="btn-danger" onclick="deleteHospDate('${row.fecha}', ${isPast})"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+      </div>
+    </div>`;
+
+  container.innerHTML = upcoming.map(r => renderItem(r, false)).join('') + past.map(r => renderItem(r, true)).join('');
+}
+
+function editHospDate(dateStr) {
+  selectHospDate(dateStr);
+  document.getElementById('admin-hospitalidad').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+async function deleteHospDate(dateStr, isPast) {
+  if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
+  if (!confirm(`¿Eliminar la asignación de Hospitalidad del ${respDiaLabel(dateStr)}?`)) return;
+  const { error } = await sb.from('hospitalidad_asignaciones').delete().eq('fecha', dateStr);
+  if (error) { showToast('Error al eliminar','error'); return; }
+  showToast('Asignación eliminada','success');
+  if (isPast) {
+    const { data } = await sb.from('hospitalidad_asignaciones').select('*').lt('fecha', todayStr()).order('fecha', { ascending: false });
+    hospAsigHistorial = data || [];
+  } else {
+    const { data } = await sb.from('hospitalidad_asignaciones').select('*').gte('fecha', todayStr()).order('fecha');
+    hospAsig = data || [];
+    renderHospDateChips();
+  }
+  renderAdminHospUpcoming();
+}
+
+// Vista de solo lectura para usuarios normales (mismo patrón que Aseo del Salón).
+async function renderHospUserView() {
+  const el = document.getElementById('hosp-user-view');
+  if (!el) return;
+  el.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Hospitalidad</div></div>';
+  if (!grupos.length) await loadGrupos();
+  const { data } = await sb.from('hospitalidad_asignaciones').select('*').gte('fecha', todayStr()).order('fecha');
+  const rows = data || [];
+  if (!rows.length) {
+    el.innerHTML = `<div class="coming-soon-panel"><div class="coming-soon-icon"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><h3>Hospitalidad</h3><p>Aún no hay fechas de Hospitalidad asignadas para los próximos Jueves o Sábados.</p></div>`;
+    return;
+  }
+  const myNombre = currentUser ? getIdentityName().trim().toLowerCase() : undefined;
+  el.innerHTML = rows.map(row => {
+    const grupoAsignado = grupos.find(g => g.numero === row.grupo_numero);
+    const isMyGroup = myNombre && grupoAsignado && (grupoAsignado.miembros || []).some(m => m.nombre.trim().toLowerCase() === myNombre);
+    return `
+    <div class="profile-section" style="margin-bottom:1rem">
+      <div class="profile-section-title">${capitalizar(respDiaLabel(row.fecha))}</div>
+      <div class="profile-row" style="${isMyGroup ? 'background:var(--accent-light);border-radius:var(--radius-sm)' : ''}">
+        <div class="profile-row-icon" style="background:${isMyGroup?'var(--accent)':'var(--surface3)'};color:${isMyGroup?'#fff':'var(--text3)'}">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Grupo de Servicio a cargo</div>
+          <div class="profile-row-value" style="${isMyGroup?'font-weight:700':''}">${hospGrupoLabel(row)}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
 // ── Aseo del Salón: modo pantalla completa (proyección en TV) ──────────────
 // Solo se activa en pantallas anchas (escritorio). En móvil, el tap no hace nada.
 let _aseoChooserIdx = null;
 
 function openAseoModeChooser(idx) {
-  if (window.innerWidth < 640) return; // móvil: sin efecto
   const row = _aseoUserRows[idx];
   if (!row) return;
+  if (window.innerWidth < 640) {
+    // Móvil: no tiene sentido Full Screen/PopUp (son para proyectar en TV),
+    // así que el tap va directo a compartir como imagen.
+    shareAseoDayAsPng(idx);
+    return;
+  }
   _aseoChooserIdx = idx;
   document.getElementById('aseo-mode-overlay').classList.add('open');
 }
@@ -18313,6 +18689,66 @@ function chooseAseoMode(mode) {
   if (idx === null) return;
   if (mode === 'fullscreen') openAseoTvMode(idx);
   else if (mode === 'popup') openAseoPopupMode(idx);
+  else if (mode === 'compartir') shareAseoDayAsPng(idx);
+}
+
+// Genera una imagen PNG con el Aseo del Salón de un día (Jueves/Sábado) y abre
+// el share sheet nativo (o descarga el archivo si no hay share sheet
+// disponible) — mismo patrón que shareRespDayAsPng (v1.45.0.2-sb).
+async function shareAseoDayAsPng(idx) {
+  const row = _aseoUserRows[idx];
+  if (!row) { showToast('No hay datos para compartir', 'error'); return; }
+
+  showToast('Generando imagen…', '');
+  try {
+    await ensureHtml2Canvas();
+    const offscreen = document.getElementById('share-pdf-offscreen');
+
+    const gruposValue = (row.grupo1_numero || row.grupo2_numero) ? aseoGruposLabel(row) : 'Sin grupos asignados';
+    const encargadoValue = row.encargado_nombre || 'Sin asignar';
+
+    offscreen.innerHTML = `<div class="share-card" style="width:520px">
+      <div class="share-card-header" style="background:linear-gradient(135deg,#007AFF,#5856d6)">
+        <div class="share-card-eyebrow">Aseo del Salón</div>
+        <div class="share-card-title">${capitalizar(respDiaLabelLong(row.fecha))}</div>
+      </div>
+      <div class="share-card-body">
+        <div class="share-card-row">
+          <div style="flex:1">
+            <div class="share-card-row-label">Grupos asignados</div>
+            <div class="share-card-row-value">${gruposValue}</div>
+          </div>
+        </div>
+        <div class="share-card-row">
+          <div style="flex:1">
+            <div class="share-card-row-label">Encargado</div>
+            <div class="share-card-row-value">${encargadoValue}</div>
+          </div>
+        </div>
+      </div>
+      <div class="share-card-footer">Generado desde la app Fleming · ${APP_VERSION}</div>
+    </div>`;
+    const cardEl = offscreen.firstElementChild;
+
+    const canvas = await window.html2canvas(cardEl, { backgroundColor: '#ffffff', scale: 2.5, useCORS: true });
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    const filename = 'aseo-salon-' + row.fecha + '.png';
+    const file = new File([blob], filename, { type: 'image/png' });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: 'Aseo del Salón' });
+        return;
+      } catch (e) { /* el usuario canceló el share sheet, o falló: caemos a descarga */ }
+    }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+  } catch (e) {
+    console.error('shareAseoDayAsPng:', e);
+    showToast('No se pudo generar la imagen', 'error');
+  }
 }
 
 // Construye el bloque "día + grupos + encargado", reutilizado por Full Screen y PopUp.
@@ -23409,6 +23845,14 @@ const NOTIF_TEMPLATES_DEFAULT = [
     vars: ['fecha', 'grupos'],
   },
   {
+    id: 'hospitalidad_asignado',
+    label: 'Hospitalidad',
+    desc: 'Se envía a los miembros del grupo de servicio asignado a Hospitalidad para una fecha.',
+    title: 'Hospitalidad',
+    body: 'Tu grupo ({grupo}) fue asignado a Hospitalidad el {fecha}.',
+    vars: ['fecha', 'grupo'],
+  },
+  {
     id: 'nueva_asignacion_reunion',
     label: 'Nueva Asignación en Reunión',
     desc: 'Se envía cuando a alguien se le asigna una parte o rol en Vida y Ministerio o Pública.',
@@ -25355,19 +25799,23 @@ function vmcShortRange(w) {
   return `${sm} – ${em}`;
 }
 
-function vmcRenderWeekProgram(week) {
+function vmcRenderWeekProgram(week, isGuest = false) {
   const parts = Array.isArray(week.parts) ? week.parts : [];
-  const myName = currentUser ? getIdentityName() : '';
+  // En modo invitado (enlace compartido sin sesión) no existe un usuario con
+  // el cual comparar: myName debe quedar en null (no '') para que nunca
+  // "coincida" con partes cuyo assigned/assigned2 también estén vacíos, y la
+  // sección "Tus asignaciones esta semana" no debe mostrarse en absoluto.
+  const myName = (!isGuest && currentUser) ? getIdentityName() : null;
 
   // My assignments
-  const myParts = parts.filter(p => p.assigned === myName || p.assigned2 === myName);
+  const myParts = myName ? parts.filter(p => p.assigned === myName || p.assigned2 === myName) : [];
   const myMeta  = [];
-  if (week.presidente === myName)   myMeta.push('Presidente');
-  if (week.prayer_open === myName)  myMeta.push('Oración de apertura');
-  if (week.prayer_close === myName) myMeta.push('Oración de cierre');
+  if (myName && week.presidente === myName)   myMeta.push('Presidente');
+  if (myName && week.prayer_open === myName)  myMeta.push('Oración de apertura');
+  if (myName && week.prayer_close === myName) myMeta.push('Oración de cierre');
   const allMine = [...myMeta.map(m => ({ name: m })), ...myParts];
 
-  const myBlock = allMine.length ? `
+  const myBlock = (!isGuest && allMine.length) ? `
     <div class="vmc-my-assignments">
       <div class="vmc-my-assignments-title">
         <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;vertical-align:middle;margin-right:4px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
