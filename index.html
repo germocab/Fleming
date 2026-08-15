@@ -168,6 +168,11 @@
     display: flex; align-items: center; justify-content: center; height: 100vh;
     padding: 2rem; text-align: center; font-family: var(--font); color: var(--text2);
   }
+  .vmc-guest-page {
+    max-width: 640px; margin: 0 auto; min-height: 100vh;
+    padding: 1rem 1rem 3rem; box-sizing: border-box;
+    background: var(--bg); font-family: var(--font);
+  }
 
 
   #dev-version-pill {
@@ -9270,7 +9275,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.44.7-sb';
+const APP_VERSION = '1.45.0-sb';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -10158,6 +10163,13 @@ async function init() {
   // únicamente el detalle de esa asignación, en modo solo-lectura.
   const _sharedAssignmentId = new URLSearchParams(location.search).get('share');
   if (_sharedAssignmentId) { await initGuestShareMode(_sharedAssignmentId); return; }
+  // ── Enlace compartido de una semana VMC (?vmcshare=<id>) ───────────────────
+  // Si quien abre el link ya tiene sesión guardada, se restaura la sesión y se
+  // abre esa semana dentro de la plataforma normal. Si no tiene sesión, se
+  // muestra una versión de solo lectura con únicamente las asignaciones de esa
+  // semana (ver initVmcShareMode).
+  const _sharedVmcWeekId = new URLSearchParams(location.search).get('vmcshare');
+  if (_sharedVmcWeekId) { await initVmcShareMode(_sharedVmcWeekId); return; }
   migrateSemiAdminsToAdmin(); // El cargo SemiAdmin fue eliminado: se promueve a Admin.
   let saved = loadSession();
   // FIX (v1.40.0-stable-beta): si el localStorage fue borrado por el navegador
@@ -12006,6 +12018,58 @@ function showGuestShareError() {
     <h2 style="margin-bottom:0.5rem">Enlace no disponible</h2>
     <p>Esta asignación ya no existe o el enlace ha expirado.</p>
   </div></div>`;
+}
+
+// ── Enlace compartido de una semana VMC (?vmcshare=<id>) ────────────────────
+// Si hay una sesión guardada (localStorage o respaldo en IndexedDB), se
+// restaura y se entra a la plataforma normal mostrando directamente esa
+// semana en Vida y Ministerio. Si no hay sesión, se salta la pantalla de
+// acceso y se muestra una vista mínima y de solo lectura con únicamente las
+// asignaciones de esa semana (sin nav, sin otras secciones).
+async function initVmcShareMode(weekId) {
+  initTheme();
+
+  let saved = loadSession();
+  if (!saved) {
+    try { saved = await _loadSessionFromIDB(); } catch (e) { /* sin respaldo disponible */ }
+  }
+
+  if (saved) {
+    if (saved.role === 'semiadmin') saved.role = 'admin';
+    currentUser = saved; currentRole = saved.role;
+
+    const maintActive = await getMaintenanceMode();
+    if (maintActive && currentRole !== 'dev') {
+      applyMaintenanceModeUI(true);
+      startMaintenancePolling();
+      return;
+    }
+
+    await enterApp();
+    try { if (!vmcWeeks.length) await loadVmcWeeks(); } catch (e) { console.error('initVmcShareMode loadVmcWeeks:', e); }
+    if (!vmcWeeks.find(w => w.id === weekId)) { showToast('Esa semana ya no está disponible', 'error'); return; }
+    vmcSelectedWeekId = weekId;
+    inicioGoTo('reuniones', 'vida-ministerio');
+    return;
+  }
+
+  // Sin sesión: modo invitado de solo lectura, sin acceso al resto de la app.
+  window._guestShareMode = true;
+  applyLanguage(currentLang);
+
+  try { await loadVmcWeeks(); } catch (e) { console.error('initVmcShareMode loadVmcWeeks:', e); }
+  const week = vmcWeeks.find(w => w.id === weekId);
+  if (!week) { showGuestShareError(); return; }
+
+  document.body.classList.add('guest-share-mode');
+  document.body.innerHTML = `
+    <div class="vmc-guest-page">
+      <div class="guest-share-banner" style="margin:0 0 0.85rem">
+        <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/></svg>
+        Solo lectura · enlace compartido
+      </div>
+      <div class="vmc-program-container">${vmcRenderWeekProgram(week)}</div>
+    </div>`;
 }
 
 // ── Link de referencia: pantalla de bienvenida para ?ref=<token> ───────────
@@ -24681,6 +24745,10 @@ function renderAdminVmc() {
           <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;vertical-align:middle;margin-right:4px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           Editar
         </button>
+        <button class="btn-secondary" style="font-size:0.8rem;padding:0.45rem 0.9rem" onclick="vmcShareWeek('${w.id}')" title="Compartir esta semana">
+          <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;margin-right:4px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.6" x2="15.4" y2="6.4"/><line x1="8.6" y1="13.4" x2="15.4" y2="17.6"/></svg>
+          Compartir
+        </button>
         <div style="flex:1"></div>
         <button class="vmc-part-del-btn" onclick="deleteVmcWeek('${w.id}')" title="Eliminar semana">
           <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
@@ -25111,6 +25179,35 @@ async function deleteVmcWeek(id) {
   vmcWeeks = vmcWeeks.filter(w => w.id !== id);
   renderAdminVmc();
   renderVmcUserView();
+}
+
+// ── Compartir una semana VMC: genera un enlace que, si quien lo abre ya tiene
+//    sesión iniciada, abre esa semana dentro de la plataforma normal; si no
+//    tiene sesión, muestra una versión limitada y de solo lectura con
+//    únicamente las asignaciones de esa semana (ver initVmcShareMode). ──
+function vmcShareWeek(id) {
+  const week = vmcWeeks.find(w => w.id === id);
+  if (!week) { showToast('No se pudo generar el enlace', 'error'); return; }
+
+  const url = new URL(location.href);
+  url.search = ''; url.hash = '';
+  url.searchParams.set('vmcshare', id);
+  const shareUrl = url.toString();
+
+  const rango = vmcFormatRange(week);
+
+  if (navigator.share) {
+    navigator.share({ title: 'Vida y Ministerio Cristianos', text: rango, url: shareUrl })
+      .catch(() => { /* usuario canceló el share sheet */ });
+    return;
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(shareUrl)
+      .then(() => showToast('Enlace copiado al portapapeles', 'success'))
+      .catch(() => window.prompt('Copia este enlace para compartir:', shareUrl));
+    return;
+  }
+  window.prompt('Copia este enlace para compartir:', shareUrl);
 }
 
 // ── Notificaciones personales automáticas VMC ────────────────────────────────
