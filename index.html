@@ -1291,6 +1291,21 @@
  
   .detail-house-label { font-size: 0.86rem; color: var(--text3); font-weight: 500; margin-top: 2px; }
   .detail-house-label:empty { display: none; }
+  /* v1.45.1.2-sb: asignación opcional de Grupo de Servicio por territorio,
+     dentro del detalle de una asignación "Visita". */
+  .detail-visita-grupo-wrap {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px;
+    margin-top: 6px;
+  }
+  .detail-visita-grupo-label { font-size: 0.78rem; color: var(--text3); font-weight: 600; }
+  .detail-visita-grupo-select {
+    font-size: 0.82rem; font-weight: 700; color: var(--text);
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 3px 8px; cursor: pointer;
+  }
+  .detail-visita-grupo-static {
+    font-size: 0.82rem; font-weight: 700; color: var(--accent);
+  }
   .detail-conductor { font-size: 0.9rem; color: var(--accent); font-weight: 500; margin-top: 4px; }
 
   .detail-ter-badge { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800; color: white; flex-shrink: 0; }
@@ -5069,6 +5084,26 @@
     box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--sw);
     transform: scale(1.1);
   }
+
+  /* ── Perfil: selector de ícono del avatar (v1.45.2-sb) ── */
+  .avatar-icon-swatch {
+    width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--border);
+    background: var(--surface2); cursor: pointer; outline: none;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+    color: var(--text2); flex-shrink: 0; padding: 0;
+  }
+  .avatar-icon-swatch svg { width: 19px; height: 19px; }
+  .avatar-icon-swatch-inits { font-size: 0.78rem; font-weight: 800; }
+  .avatar-icon-swatch:hover { transform: scale(1.1); }
+  .avatar-icon-swatch.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-light);
+    color: var(--accent);
+    transform: scale(1.06);
+  }
+  /* Ícono ya dibujado dentro de un avatar (color de fondo + ícono) */
+  .avatar-glyph-icon { width: 55%; height: 55%; }
   @keyframes eggReveal {
     from { opacity:0; transform: translateY(-8px) scale(0.97); }
     to   { opacity:1; transform: translateY(0) scale(1); }
@@ -7367,6 +7402,12 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
       <div class="detail-info">
         <div class="detail-address" id="detail-address">—</div>
         <div class="detail-house-label" id="detail-house-label"></div>
+        <div class="detail-house-label" id="detail-visita-address" style="display:none"></div>
+        <div class="detail-visita-grupo-wrap" id="detail-visita-grupo-wrap" style="display:none">
+          <span class="detail-visita-grupo-label">Grupo de Servicio a cargo del territorio</span>
+          <select class="detail-visita-grupo-select" id="detail-visita-grupo-select" onchange="onVisitaTerGrupoChange(this.value)"></select>
+          <span class="detail-visita-grupo-static" id="detail-visita-grupo-static"></span>
+        </div>
         <div class="detail-conductor" id="detail-conductor">—</div>
         <div class="detail-time-chip" id="detail-time-chip">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -9730,6 +9771,8 @@ const I18N = {
   'profile.cargando':       { es: 'Cargando asignaciones',   en: 'Loading assignments' },
   'profile.coloravatar':    { es: 'Color del avatar',        en: 'Avatar color' },
   'profile.elegecolor':     { es: 'Elige un color de fondo para tus iniciales', en: 'Choose a background color for your initials' },
+  'profile.iconoavatar':    { es: 'Ícono del avatar',        en: 'Avatar icon' },
+  'profile.elegeicono':     { es: 'Opcional — reemplaza tus iniciales por un ícono', en: 'Optional — replace your initials with an icon' },
   'profile.cambiarcolor':   { es: 'Cambiar color',           en: 'Change color' },
   // ── Notificaciones ──
   'notif.title':            { es: 'Notificaciones',          en: 'Notifications',    nl: 'Meldingen' },
@@ -10823,8 +10866,8 @@ function _renderGrupoDetailMembers(g) {
 
 function _memberRowHtml(m) {
   const col    = getAvatarColorForName(m.nombre, memberColor(m.nombre));
-  const inits  = memberInitials(m.nombre);
-  const avatarHtml = `<div class="grupo-member-avatar-md" style="background:${col}">${inits}</div>`;
+  const glyph  = avatarGlyphHtml(m.nombre, _avatarIconCache[m.nombre] || null);
+  const avatarHtml = `<div class="grupo-member-avatar-md" style="background:${col}">${glyph}</div>`;
   const roleLabel = m.rol === 'superintendente'
     ? `<span class="grupo-member-role-label role-super">${t('grupos.rol.superintendente')}</span>`
     : m.rol === 'auxiliar'
@@ -11119,6 +11162,26 @@ function parseLabels(raw) {
   } catch { return {}; }
 }
 
+// ── Íconos de avatar (v1.45.2-sb) ───────────────────────────────────────────
+// Alternativa opcional a las iniciales: el usuario puede elegir uno de estos
+// 5 íconos predeterminados desde su Perfil, en lugar de sus iniciales. El
+// ícono se dibuja siempre sobre el color de fondo elegido (avatar_color).
+// Requiere la siguiente columna en Supabase:
+//   alter table platform_users add column if not exists avatar_icon text;
+const AVATAR_ICONS = {
+  estrella: '<path d="M12 2.5l2.97 6.19 6.83.86-5.02 4.72 1.34 6.78L12 17.98l-6.12 3.07 1.34-6.78-5.02-4.72 6.83-.86L12 2.5z"/>',
+  corazon: '<path d="M12 20.5s-7.36-4.6-10-9.1C.6 8.6 1.4 5.1 4.4 3.7c2.3-1.1 4.9-.3 6.4 1.7l1.2 1.6 1.2-1.6c1.5-2 4.1-2.8 6.4-1.7 3 1.4 3.8 4.9 2.4 7.7-2.64 4.5-10 9.1-10 9.1z"/>',
+  flor: '<g><circle cx="12" cy="12" r="2.3"/><ellipse cx="12" cy="5.8" rx="2.6" ry="3.6"/><ellipse cx="12" cy="18.2" rx="2.6" ry="3.6"/><ellipse cx="5.8" cy="12" rx="3.6" ry="2.6"/><ellipse cx="18.2" cy="12" rx="3.6" ry="2.6"/></g>',
+  futbol: '<g fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9.5" fill="currentColor" stroke="none"/><g fill="var(--su-fut-dark,#111)" stroke="none"><polygon points="12,7.3 15,9.5 13.9,13 10.1,13 9,9.5"/></g><path d="M12 2.5v4.8M4.4 7l3.6 2.6M4.4 17l4.7-3.4M19.6 7l-3.6 2.6M19.6 17l-4.7-3.4M9.3 21.3l.8-4.3M14.7 21.3l-.8-4.3"/></g>',
+  corona: '<path d="M3 8.5l4 3.2L12 5l5 6.7 4-3.2-1.6 9.8H4.6L3 8.5z"/><rect x="4.6" y="17.5" width="14.8" height="2.3" rx="0.8"/>',
+};
+function avatarGlyphHtml(name, iconKey) {
+  if (iconKey && AVATAR_ICONS[iconKey]) {
+    return `<svg viewBox="0 0 24 24" class="avatar-glyph-icon" fill="#fff">${AVATAR_ICONS[iconKey]}</svg>`;
+  }
+  return memberInitials ? memberInitials(name) : userInitials(name);
+}
+
 // Build the avatar HTML (iniciales) para uso en toda la app.
 // v1.42.0-stable_beta: las Fotos de Perfil fueron retiradas — siempre se
 // muestran las iniciales, con el color de fondo personalizado del usuario
@@ -11129,9 +11192,14 @@ function parseLabels(raw) {
 //   alter table platform_users add column if not exists avatar_color text;
 function buildAvatarHtml(name, size = 28, fontSize = '0.62rem', radius = '50%') {
   const col = getAvatarColorForName(name, memberColor(name));
-  const inits = memberInitials(name);
-  return `<div class="grupo-member-avatar" style="background:${col};width:${size}px;height:${size}px;font-size:${fontSize};border-radius:${radius};flex-shrink:0">${inits}</div>`;
+  const icon = _avatarIconCache[name] || null;
+  const glyph = avatarGlyphHtml(name, icon);
+  return `<div class="grupo-member-avatar" style="background:${col};width:${size}px;height:${size}px;font-size:${fontSize};border-radius:${radius};flex-shrink:0">${glyph}</div>`;
 }
+
+// Cache de name→ícono de avatar personalizado (v1.45.2-sb), mismo patrón que
+// _avatarColorCache.
+let _avatarIconCache = {}; // { [name]: 'estrella'|'corazon'|'flor'|'futbol'|'corona'|null }
 
 // Cache de name→color de avatar personalizado, para lookup rápido al
 // renderizar grupos, tarjetas de usuario, etc.
@@ -11141,9 +11209,13 @@ let _avatarCacheLoaded = false;
 async function loadAvatarCache() {
   if (_avatarCacheLoaded) return; // already fetched this session — los colores rara vez cambian mid-session
   try {
-    const { data } = await sb.from('platform_users').select('name, avatar_color');
+    const { data } = await sb.from('platform_users').select('name, avatar_color, avatar_icon');
     _avatarColorCache = {};
-    (data || []).forEach(u => { if (u.avatar_color) _avatarColorCache[u.name] = u.avatar_color; });
+    _avatarIconCache = {};
+    (data || []).forEach(u => {
+      if (u.avatar_color) _avatarColorCache[u.name] = u.avatar_color;
+      if (u.avatar_icon) _avatarIconCache[u.name] = u.avatar_icon;
+    });
     _avatarCacheLoaded = true;
   } catch(e) { /* silently ignore */ }
 }
@@ -11397,24 +11469,29 @@ async function renderProfilePage() {
 
   // Fetch fresh data for this user (avatar_color: color de fondo personalizado de las iniciales)
   const { data: me } = await sb.from('platform_users')
-    .select('avatar_color, labels, admin_tag_id').ilike('name', currentUser.name).single();
+    .select('avatar_color, avatar_icon, labels, admin_tag_id').ilike('name', currentUser.name).single();
   if (currentRole === 'admin' && me?.admin_tag_id) await loadAdminTags();
 
-  // Avatar big — v1.42.0-stable_beta: siempre iniciales, con color personalizable
+  // Avatar big — v1.42.0-stable_beta: iniciales por defecto, con color
+  // personalizable; v1.45.2-sb suma la opción de reemplazar las iniciales
+  // por uno de 5 íconos predeterminados.
   const bigAvatar = document.getElementById('profile-avatar-big');
   const col = me?.avatar_color || userColor(currentUser.name);
-  const inits = userInitials(currentUser.name);
+  const myIcon = me?.avatar_icon || null;
+  const glyph = avatarGlyphHtml(currentUser.name, myIcon);
   _ownAvatarColor = col; // mantiene sincronizado el color del Menú Opciones
+  _ownAvatarIcon = myIcon;
   bigAvatar.style.background = col;
   // Marco de color (Admin / Admin+AdminTag) — v1.20.0-beta
   bigAvatar.classList.remove('avatar-frame-admin', 'avatar-frame-admintag');
   const frame = avatarFrameFor(currentRole, me?.admin_tag_id);
   if (frame.cls) bigAvatar.classList.add(frame.cls);
   if (frame.style) bigAvatar.style.cssText += frame.style; else bigAvatar.style.removeProperty('--atag-frame-color');
-  bigAvatar.textContent = inits;
+  bigAvatar.innerHTML = glyph;
   const dropAvatar = document.getElementById('user-avatar');
-  if (dropAvatar) { dropAvatar.style.background = col; dropAvatar.textContent = inits; }
+  if (dropAvatar) { dropAvatar.style.background = col; dropAvatar.innerHTML = glyph; }
   updateAvatarColorPickerUI(col);
+  updateAvatarIconPickerUI(myIcon);
 
   // Name
   document.getElementById('profile-name-display').textContent = currentUser.name;
@@ -11841,6 +11918,7 @@ const AVATAR_BG_COLORS = ['#22c55e','#3b82f6','#a855f7','#f59e0b','#ef4444','#06
 
 function openAvatarColorSheet() {
   document.getElementById('profile-photo-overlay').classList.add('open');
+  updateAvatarIconPickerUI(_ownAvatarIcon || null);
 }
 function closeAvatarColorSheet() {
   document.getElementById('profile-photo-overlay').classList.remove('open');
@@ -11869,6 +11947,36 @@ async function setOwnAvatarColor(color) {
 function updateAvatarColorPickerUI(activeColor) {
   document.querySelectorAll('.avatar-color-swatch').forEach(el => {
     el.classList.toggle('active', el.dataset.color === activeColor);
+  });
+}
+
+// v1.45.2-sb: guarda el ícono elegido (o '' para volver a iniciales). Se
+// aplica de inmediato en el avatar grande de Perfil, el del Menú Opciones,
+// y queda disponible para el resto de la app (grupos, lista de usuarios,
+// etc.) vía _avatarIconCache.
+async function setOwnAvatarIcon(iconKey) {
+  if (!currentUser) return;
+  const value = iconKey || null;
+  const { error } = await sb.from('platform_users')
+    .update({ avatar_icon: value })
+    .ilike('name', currentUser.name);
+  if (error) { showToast('Error al guardar el ícono', 'error'); return; }
+
+  _avatarIconCache[currentUser.name] = value;
+  _ownAvatarIcon = value;
+  updateAvatarIconPickerUI(value);
+  const glyph = avatarGlyphHtml(currentUser.name, value);
+  const bigAvatar = document.getElementById('profile-avatar-big');
+  if (bigAvatar) bigAvatar.innerHTML = glyph;
+  applyOwnAvatarToDropdowns();
+  showToast(value ? 'Ícono actualizado ✓' : 'Iniciales restauradas ✓', 'success');
+  renderGruposView(); // refresca avatares en grupos
+  closeAvatarColorSheet();
+}
+
+function updateAvatarIconPickerUI(activeIcon) {
+  document.querySelectorAll('.avatar-icon-swatch').forEach(el => {
+    el.classList.toggle('active', (el.dataset.icon || '') === (activeIcon || ''));
   });
 }
 
@@ -12322,23 +12430,25 @@ function resetAuthScreenToNormal() {
 // ya no existen Fotos de Perfil: solo iniciales, con color de fondo
 // personalizable desde Perfil ────────────────────────────────────────────────
 let _ownAvatarColor; // undefined = aún no consultado, string = color hex activo
+let _ownAvatarIcon;  // undefined = aún no consultado, string|null = ícono elegido (v1.45.2-sb)
 async function loadOwnAvatarForDropdown() {
   if (!currentUser) return;
   try {
-    const { data } = await sb.from('platform_users').select('avatar_color').ilike('name', currentUser.name).single();
+    const { data } = await sb.from('platform_users').select('avatar_color, avatar_icon').ilike('name', currentUser.name).single();
     _ownAvatarColor = data?.avatar_color || userColor(currentUser.name);
-  } catch (e) { _ownAvatarColor = _ownAvatarColor || userColor(currentUser.name); }
+    _ownAvatarIcon = data?.avatar_icon || null;
+  } catch (e) { _ownAvatarColor = _ownAvatarColor || userColor(currentUser.name); _ownAvatarIcon = _ownAvatarIcon || null; }
   applyOwnAvatarToDropdowns();
 }
 function applyOwnAvatarToDropdowns() {
   if (!currentUser) return;
   const col   = _ownAvatarColor || userColor(currentUser.name);
-  const inits = userInitials(currentUser.name);
+  const glyph = avatarGlyphHtml(currentUser.name, _ownAvatarIcon || null);
   ['user-avatar', 'user-avatar-admin', 'user-avatar-navbtn', 'ms-footer-avatar'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.style.background = col;
-    el.textContent = inits;
+    el.innerHTML = glyph;
   });
 }
 
@@ -14808,6 +14918,9 @@ function closeOtrosGruposScreen() {
 async function viewAssignment(id) {
   const a = assignments.find(x => x.id === id);
   if (!a) return;
+  // v1.45.1.2-sb: el selector de Grupo de Servicio por territorio (solo
+  // admin/dev) necesita la lista de grupos cargada de antemano.
+  if (['dev', 'admin'].includes(currentRole) && !grupos.length) { try { await loadGrupos(); } catch {} }
   // La búsqueda de territorios en memoria no requiere red; el mapa (map_data,
   // que sí es pesado) se resuelve más abajo en segundo plano, sin bloquear
   // la apertura de la pantalla.
@@ -14835,6 +14948,17 @@ async function viewAssignment(id) {
   const _houseLabel3 = casaHouseLabel(_casaTipo3, a.house);
   document.getElementById('detail-address').textContent = isEventoLike ? (a.especial_titulo || 'Evento') : (a.address || '—');
   document.getElementById('detail-house-label').textContent = isEventoLike ? (a.especial_subtitulo || '') : _houseLabel3;
+  // v1.45.1.1-sb: en "Visita" el campo principal (detail-address) muestra el
+  // Detalle, no la dirección — así que se agrega una línea aparte debajo con
+  // la dirección real de la Casa asignada, para que no falte.
+  const visitaAddrEl = document.getElementById('detail-visita-address');
+  if (isVisita && a.address) {
+    visitaAddrEl.textContent = a.address;
+    visitaAddrEl.style.display = '';
+  } else {
+    visitaAddrEl.textContent = '';
+    visitaAddrEl.style.display = 'none';
+  }
   // v1.44.5-sb: "Visita" sí tiene Encargado de predicación para ese día
   // (a diferencia de "Evento", que no tiene ninguno).
   document.getElementById('detail-conductor').textContent = isEspecial ? '' : (a.conductor || '');
@@ -15038,6 +15162,7 @@ async function viewAssignment(id) {
     // (sin repetir el que ya está abierto).
     tabsBar.style.display = 'none';
     panel._visitaTers = visitaTers;
+    panel._visitaAssignment = a;
     panel._visitaOpenIdx = null;
     if (visitaTers.length >= 4) {
       visitaGrid.style.display = 'none';
@@ -15059,10 +15184,12 @@ async function viewAssignment(id) {
       visitaPickerGrid.style.display = 'none';
       visitaPickerGrid.innerHTML = '';
     }
+    renderDetailVisitaTerGrupo(a, panel._visitaOpenIdx != null ? visitaTers[panel._visitaOpenIdx] : null);
   } else if (isEspecial) {
     tabsBar.style.display = 'none';
     visitaGrid.style.display = 'none';
     if (visitaPickerGrid) { visitaPickerGrid.style.display = 'none'; visitaPickerGrid.innerHTML = ''; }
+    renderDetailVisitaTerGrupo(null, null);
   } else if (ter && ter2) {
     visitaGrid.style.display = 'none';
     // Show tabs bar
@@ -15092,10 +15219,12 @@ async function viewAssignment(id) {
     panel._ter1 = ter; panel._ter2 = ter2; panel._ter3 = ter3;
     // Activate tab 1 by default
     tab1.classList.add('active'); tab2.classList.remove('active'); tab3.classList.remove('active');
+    renderDetailVisitaTerGrupo(null, null);
   } else {
     tabsBar.style.display = 'none';
     visitaGrid.style.display = 'none';
     if (visitaPickerGrid) { visitaPickerGrid.style.display = 'none'; visitaPickerGrid.innerHTML = ''; }
+    renderDetailVisitaTerGrupo(null, null);
   }
   // v1.30.7-beta: "Manzanas a abarcar" es individual por territorio — se
   // guardan las 3 listas en el panel para poder mostrar la que corresponde
@@ -15298,6 +15427,57 @@ function switchVisitaTerTab(idx) {
   panel._visitaOpenIdx = idx;
   _renderVisitaChipSelector(ters, idx);
   _renderDetailTerContent(ter);
+  renderDetailVisitaTerGrupo(panel._visitaAssignment, ter);
+}
+
+// v1.45.1.2-sb: asignación opcional de Grupo de Servicio por territorio,
+// dentro del detalle de una asignación "Visita". Cada uno de los hasta 8
+// territorios puede (opcionalmente) tener un Grupo de Servicio a cargo,
+// independiente entre sí. Se guarda en assignments.visita_territorios_grupos
+// como { [territory_id]: grupo_numero }.
+function renderDetailVisitaTerGrupo(a, ter) {
+  const wrap = document.getElementById('detail-visita-grupo-wrap');
+  const sel = document.getElementById('detail-visita-grupo-select');
+  const staticEl = document.getElementById('detail-visita-grupo-static');
+  if (!wrap || !sel || !staticEl) return;
+  if (!a || !ter) { wrap.style.display = 'none'; return; }
+  const map = (a.visita_territorios_grupos && typeof a.visita_territorios_grupos === 'object') ? a.visita_territorios_grupos : {};
+  const current = map[ter.id] != null ? String(map[ter.id]) : '';
+  const isAdmin = ['dev', 'admin'].includes(currentRole);
+  if (isAdmin) {
+    sel.innerHTML = `<option value="">Sin asignar</option>` + grupos.map(g => `<option value="${g.numero}">Grupo ${g.numero}</option>`).join('');
+    sel.value = current;
+    sel.style.display = '';
+    staticEl.style.display = 'none';
+    wrap.style.display = '';
+  } else {
+    sel.style.display = 'none';
+    if (current) {
+      staticEl.textContent = `Grupo ${current}`;
+      staticEl.style.display = '';
+      wrap.style.display = '';
+    } else {
+      staticEl.style.display = 'none';
+      wrap.style.display = 'none';
+    }
+  }
+}
+
+async function onVisitaTerGrupoChange(value) {
+  const panel = document.getElementById('detail-panel');
+  const a = panel._visitaAssignment || assignments.find(x => x.id === panel._openAssignmentId);
+  const ter = (panel._visitaTers || [])[panel._visitaOpenIdx];
+  if (!a || !ter) return;
+  const map = { ...((a.visita_territorios_grupos && typeof a.visita_territorios_grupos === 'object') ? a.visita_territorios_grupos : {}) };
+  if (value) map[ter.id] = Number(value); else delete map[ter.id];
+
+  const { error } = await sb.from('assignments').update({ visita_territorios_grupos: map }).eq('id', a.id);
+  if (error) { showToast('No se pudo guardar el Grupo de Servicio: ' + error.message, 'error'); return; }
+  a.visita_territorios_grupos = map;
+  const localA = assignments.find(x => x.id === a.id);
+  if (localA) localA.visita_territorios_grupos = map;
+  showToast(value ? 'Grupo asignado al territorio ✓' : 'Territorio sin grupo asignado', 'success');
+  renderDetailVisitaTerGrupo(a, ter);
 }
 
 // v1.44.5-sb: dibuja el selector de arriba (fila de chips) con todos los
@@ -15409,6 +15589,8 @@ function closeDetail() {
   document.getElementById('detail-time-chip').style.display = '';
   document.getElementById('detail-address').style.fontSize = '';
   document.getElementById('detail-house-label').textContent = '';
+  document.getElementById('detail-visita-address').style.display = 'none';
+  document.getElementById('detail-visita-grupo-wrap').style.display = 'none';
   document.getElementById('detail-actions').style.display = '';
   // Reset territory tabs
   document.getElementById('detail-ter-tabs').style.display = 'none';
@@ -19767,7 +19949,7 @@ async function openUserProfilePage(uid) {
   await loadAdminTags(); // catálogo de AdminTags (solo se consulta una vez por sesión)
 
   const col = u.avatar_color || userColor(u.name);
-  const inits = userInitials(u.name);
+  const inits = avatarGlyphHtml(u.name, u.avatar_icon || null);
   const isDev = currentRole === 'dev';
   const isCurrentUser = currentUser && u.name === currentUser.name;
   const canEdit = (!isCurrentUser && canChangeRole(u.role)) || (isDev && isCurrentUser);
@@ -20312,7 +20494,7 @@ function _userMatchesFilter(u) {
 
 function _userCardHTML(u) {
     const col = u.avatar_color || userColor(u.name);
-    const inits = userInitials(u.name);
+    const inits = avatarGlyphHtml(u.name, u.avatar_icon || null);
     const roleBadgeCls = u.role === 'dev' ? 'role-badge-dev' : u.role === 'admin' ? 'role-badge-admin' : u.role === 'pending' ? 'role-badge-viewer' : 'role-badge-viewer';
     const roleLabel = ROLE_LABELS[u.role] || u.role;
     const uLabels = parseLabels(u.labels);
@@ -20797,6 +20979,8 @@ async function viewTerritory(id) {
   const addressEl = document.getElementById('detail-address');
   addressEl.textContent = '';
   document.getElementById('detail-house-label').textContent = '';
+  document.getElementById('detail-visita-address').style.display = 'none';
+  document.getElementById('detail-visita-grupo-wrap').style.display = 'none';
   document.getElementById('detail-conductor').textContent = '';
 
   // Badge — número del territorio en su círculo de color distintivo, debajo del título
@@ -26508,6 +26692,32 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
       <button class="avatar-color-swatch" data-color="#f97316" style="--sw:#f97316" onclick="setOwnAvatarColor('#f97316')" title="Naranja"></button>
       <button class="avatar-color-swatch" data-color="#64748b" style="--sw:#64748b" onclick="setOwnAvatarColor('#64748b')" title="Gris"></button>
       <button class="avatar-color-swatch" data-color="#84cc16" style="--sw:#84cc16" onclick="setOwnAvatarColor('#84cc16')" title="Lima"></button>
+    </div>
+
+    <!-- v1.45.2-sb: ícono del avatar (opcional, reemplaza a las iniciales) -->
+    <div class="np-action-header" style="padding-top:0">
+      <div class="np-action-addr" style="font-size:0.9rem" data-i18n="profile.iconoavatar">Ícono del avatar</div>
+      <div class="np-action-sub" data-i18n="profile.elegeicono">Opcional — reemplaza tus iniciales por un ícono</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;padding:0.5rem 1.25rem 1.25rem;justify-items:center">
+      <button class="avatar-icon-swatch" data-icon="" onclick="setOwnAvatarIcon('')" title="Iniciales (predeterminado)">
+        <span class="avatar-icon-swatch-inits">Aa</span>
+      </button>
+      <button class="avatar-icon-swatch" data-icon="estrella" onclick="setOwnAvatarIcon('estrella')" title="Estrella">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.97 6.19 6.83.86-5.02 4.72 1.34 6.78L12 17.98l-6.12 3.07 1.34-6.78-5.02-4.72 6.83-.86L12 2.5z"/></svg>
+      </button>
+      <button class="avatar-icon-swatch" data-icon="corazon" onclick="setOwnAvatarIcon('corazon')" title="Corazón">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5s-7.36-4.6-10-9.1C.6 8.6 1.4 5.1 4.4 3.7c2.3-1.1 4.9-.3 6.4 1.7l1.2 1.6 1.2-1.6c1.5-2 4.1-2.8 6.4-1.7 3 1.4 3.8 4.9 2.4 7.7-2.64 4.5-10 9.1-10 9.1z"/></svg>
+      </button>
+      <button class="avatar-icon-swatch" data-icon="flor" onclick="setOwnAvatarIcon('flor')" title="Flor">
+        <svg viewBox="0 0 24 24" fill="currentColor"><g><circle cx="12" cy="12" r="2.3"/><ellipse cx="12" cy="5.8" rx="2.6" ry="3.6"/><ellipse cx="12" cy="18.2" rx="2.6" ry="3.6"/><ellipse cx="5.8" cy="12" rx="3.6" ry="2.6"/><ellipse cx="18.2" cy="12" rx="3.6" ry="2.6"/></g></svg>
+      </button>
+      <button class="avatar-icon-swatch" data-icon="futbol" onclick="setOwnAvatarIcon('futbol')" title="Fútbol">
+        <svg viewBox="0 0 24 24" fill="currentColor"><g fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9.5" fill="currentColor" stroke="none"/><g fill="var(--su-fut-dark,#111)" stroke="none"><polygon points="12,7.3 15,9.5 13.9,13 10.1,13 9,9.5"/></g><path d="M12 2.5v4.8M4.4 7l3.6 2.6M4.4 17l4.7-3.4M19.6 7l-3.6 2.6M19.6 17l-4.7-3.4M9.3 21.3l.8-4.3M14.7 21.3l-.8-4.3"/></g></svg>
+      </button>
+      <button class="avatar-icon-swatch" data-icon="corona" onclick="setOwnAvatarIcon('corona')" title="Corona">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 8.5l4 3.2L12 5l5 6.7 4-3.2-1.6 9.8H4.6L3 8.5z"/><rect x="4.6" y="17.5" width="14.8" height="2.3" rx="0.8"/></svg>
+      </button>
     </div>
     <button class="np-action-btn-cancel" onclick="closeAvatarColorSheet()" data-i18n="btn.cancelar">Cancelar</button>
   </div>
