@@ -1649,6 +1649,14 @@
   .detail-ter-badge.self-assignable:active { transform: scale(0.92); }
 
   .no-pasar-section { padding: 0 1.25rem 1.25rem; }
+  /* v1.45.5-sb: toggle "Una por una" / "Pegar varias" del formulario admin
+     de Direcciones "No Pasar". */
+  .np-mode-btn {
+    padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text2); font-size: 0.8rem; font-weight: 600;
+    cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .np-mode-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
   .no-pasar-title {
     font-size: 0.875rem; font-weight: 700;
     margin-bottom: 0.6rem; color: var(--text);
@@ -2862,7 +2870,7 @@
     width: 16px; height: 16px; stroke: var(--text3); fill: none; stroke-width: 2; stroke-linecap: round; pointer-events: none;
   }
   .notif-search-input {
-    width: 100%; padding: 0.65rem 1rem 0.65rem 2.4rem;
+    width: 100%; padding: 0.65rem 46px 0.65rem 2.4rem;
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 50px; font-family: var(--font);
     font-size: 0.9rem; color: var(--text); outline: none;
@@ -2871,7 +2879,22 @@
   .notif-search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
   .notif-search-input::placeholder { color: var(--text3); }
 
-  
+  /* v1.45.4-sb: botón de filtros de Categoría, al extremo derecho de la barra
+     de búsqueda (mismo patrón visual que la barra de "Carritos"). Al tocarlo
+     se despliega un panel colapsable debajo con los chips de categoría. */
+  .notif-search-filter-btn {
+    position: absolute; right: 10px; top: calc(50% - 0.425rem); transform: translateY(-50%);
+    background: var(--surface3); border: none; cursor: pointer;
+    color: var(--text3); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    transition: color 0.18s, background 0.18s;
+  }
+  .notif-search-filter-btn:hover, .notif-search-filter-btn.active { color: var(--accent); background: var(--accent-light); }
+  .notif-filter-menu {
+    max-height: 0; opacity: 0; overflow: hidden; transform: translateY(-6px);
+    transition: max-height 0.35s ease, opacity 0.25s ease, transform 0.3s ease;
+  }
+  .notif-filter-menu.notif-filter-open { max-height: 300px; opacity: 1; transform: translateY(0); }
+
   .notif-filter-chips {
     display: flex; gap: 6px; flex-wrap: nowrap; overflow-x: auto;
     padding-bottom: 0.85rem; scrollbar-width: none;
@@ -4325,6 +4348,13 @@
   }
   #page-grupo.grupo-scrolled .pill-header-title {
     opacity: 1; transform: translate(-50%, -50%);
+  }
+
+  /* v1.45.3-sb: selector de día de reunión (Vida y Ministerio / Reunión Pública) */
+  .meeting-day-select {
+    font: inherit; font-size: 0.82rem; font-weight: 600; color: var(--text);
+    background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-xs);
+    padding: 6px 10px; cursor: pointer;
   }
 
   .grupo-detail-hero {
@@ -6419,8 +6449,13 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
       <div class="notif-search-wrap">
         <svg class="notif-search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" class="notif-search-input" data-i18n-ph="notif.buscar" placeholder="Buscar notificaciones…" autocomplete="off" oninput="notifSearchInput(this.value,'desktop')">
+        <button type="button" onclick="notifToggleFilterMenu('desktop')" class="notif-search-filter-btn" id="notif-filter-btn-desktop" aria-label="Abrir filtros de categoría" aria-expanded="false" aria-controls="notif-filter-menu-desktop">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="10" cy="6" r="2"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="14" cy="12" r="2"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="8" cy="18" r="2"/></svg>
+        </button>
       </div>
-      <div class="notif-filter-chips" id="notif-filter-chips-desktop"></div>
+      <div class="notif-filter-menu" id="notif-filter-menu-desktop">
+        <div class="notif-filter-chips" id="notif-filter-chips-desktop"></div>
+      </div>
     </div>
     <div id="notifications-list-desktop">
       <div class="loader-wrap"><div class="loader"></div><div class="loader-caption" data-i18n="notif.cargando">Cargando Notificaciones</div></div>
@@ -7067,6 +7102,12 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
           <span style="flex:1;font-size:0.95rem;font-weight:700">Vida y Ministerio</span>
           <button class="btn-secondary" onclick="openVmcWeekModal(null)">+ Nueva semana</button>
         </div>
+        <!-- v1.45.3-sb: día de la semana en que se realiza esta reunión, usado
+             por Responsabilidades, Hospitalidad y Aseo del Salón. -->
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:1.1rem">
+          <span style="font-size:0.82rem;color:var(--text3)">Día de reunión</span>
+          <span id="meeting-day-select-vmc-wrap"></span>
+        </div>
         <div id="admin-vmc-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando VMC</div></div></div>
       </div>
 
@@ -7075,6 +7116,12 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
           <span style="flex:1;font-size:0.95rem;font-weight:700">Reunión Pública</span>
           <button class="btn-secondary" onclick="openFsWeekModal(null)">+ Nueva semana</button>
+        </div>
+        <!-- v1.45.3-sb: día de la semana en que se realiza esta reunión, usado
+             por Responsabilidades, Hospitalidad y Aseo del Salón. -->
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:1.1rem">
+          <span style="font-size:0.82rem;color:var(--text3)">Día de reunión</span>
+          <span id="meeting-day-select-fs-wrap"></span>
         </div>
         <div id="admin-fs-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Servicio de Campo</div></div></div>
       </div>
@@ -7820,8 +7867,19 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
       </div>
       <div style="margin-bottom:1.1rem">
         <div class="form-label2" style="margin-bottom:8px">Direcciones "No Pasar"</div>
+        <!-- v1.45.5-sb: dos formas de añadir Direcciones "No Pasar" — una por
+             una (como antes) o pegando varias de una vez en un solo cuadro
+             de texto (el sistema separa por líneas/espaciado). -->
+        <div class="np-mode-toggle" style="display:flex;gap:6px;margin-bottom:10px">
+          <button type="button" class="np-mode-btn active" id="np-mode-individual-btn" onclick="setNoPasarMode('individual')">Una por una</button>
+          <button type="button" class="np-mode-btn" id="np-mode-bulk-btn" onclick="setNoPasarMode('bulk')">Pegar varias</button>
+        </div>
         <div id="no-pasar-inputs"></div>
-        <button class="btn-sm" style="margin-top:6px" onclick="addNoPasarInput()">+ Agregar dirección</button>
+        <button class="btn-sm" style="margin-top:6px" id="np-add-btn" onclick="addNoPasarInput()">+ Agregar dirección</button>
+        <div id="no-pasar-bulk-wrap" style="display:none">
+          <textarea id="no-pasar-bulk-textarea" class="form-input" rows="8" style="resize:vertical;font-family:inherit;line-height:1.5;padding:10px" placeholder="Pega aquí las direcciones, una por línea. Ej:&#10;Nueva Bilbao 8998&#10;Los Aromos 245&#10;Av. Siempre Viva 742"></textarea>
+          <div style="font-size:0.74rem;color:var(--text3);margin-top:6px">Cada línea se guardará como una dirección "No Pasar" distinta.</div>
+        </div>
       </div>
       <div style="display:flex;gap:10px;margin-top:1.1rem;justify-content:flex-end">
         <button class="btn-secondary" onclick="closeTerritoryEditModal()">Cancelar</button>
@@ -9394,7 +9452,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.45.0.2-sb';
+const APP_VERSION = '1.45.5-sb';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -10815,6 +10873,45 @@ function closeGrupoDetailPage() {
   document.body.style.overflow = '';
   _currentGrupoId = null;
 }
+
+// ── Swipe entre Grupos (v1.45.3-sb) ─────────────────────────────────────────
+// Deslizar hacia la izquierda/derecha dentro del detalle de un Grupo de
+// servicio navega al siguiente/anterior grupo (según el orden de `grupos`,
+// ya ordenado por número) sin salir a la lista de Grupos.
+function _grupoSwipeNavigate(direction) {
+  if (!_currentGrupoId || !grupos.length) return;
+  const idx = grupos.findIndex(g => g.id === _currentGrupoId);
+  if (idx === -1) return;
+  const nextIdx = idx + direction;
+  if (nextIdx < 0 || nextIdx >= grupos.length) return; // ya está en el primer/último grupo
+  openGrupoDetailPage(grupos[nextIdx].id);
+}
+
+(function initGrupoSwipeNav() {
+  const page = document.getElementById('page-grupo');
+  if (!page) return;
+  let touchStartX = 0, touchStartY = 0, touchActive = false;
+  const SWIPE_THRESHOLD = 60;   // px mínimos horizontales para considerar swipe
+  const SWIPE_MAX_VERTICAL = 60; // tolerancia vertical, para no interferir con el scroll
+
+  page.addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1) return;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    touchActive = true;
+  }, { passive: true });
+
+  page.addEventListener('touchend', (e) => {
+    if (!touchActive) return;
+    touchActive = false;
+    const touch = e.changedTouches[0];
+    const dx = touch.clientX - touchStartX;
+    const dy = touch.clientY - touchStartY;
+    if (Math.abs(dx) < SWIPE_THRESHOLD || Math.abs(dy) > SWIPE_MAX_VERTICAL) return;
+    // dx > 0: dedo se movió a la derecha → grupo anterior. dx < 0 → grupo siguiente.
+    _grupoSwipeNavigate(dx > 0 ? -1 : 1);
+  }, { passive: true });
+})();
 
 function getApellido(nombreCompleto) {
   const parts = (nombreCompleto || '').trim().split(/\s+/);
@@ -12452,6 +12549,49 @@ function applyOwnAvatarToDropdowns() {
   });
 }
 
+// ── Días de reunión configurables (v1.45.3-sb) ──────────────────────────────
+// Antes, Vida y Ministerio siempre caía en Jueves (4) y Reunión Pública en
+// Sábado (6), hardcodeado. Ahora el día de cada reunión se guarda en
+// platform_config (`meeting_day_vmc` / `meeting_day_fs`, 0=Dom..6=Sáb) y se
+// puede cambiar desde un menú desplegable. Responsabilidades, Hospitalidad y
+// Aseo del Salón usan estos valores para saber qué días son válidos.
+let MEETING_DAY_VMC = 4; // jueves (default histórico)
+let MEETING_DAY_FS  = 6; // sábado (default histórico)
+
+async function loadMeetingDaysConfig() {
+  try {
+    const { data } = await sb.from('platform_config').select('key,value').in('key', ['meeting_day_vmc','meeting_day_fs']);
+    (data || []).forEach(r => {
+      if (r.key === 'meeting_day_vmc' && r.value !== '' && r.value != null) MEETING_DAY_VMC = parseInt(r.value, 10);
+      if (r.key === 'meeting_day_fs'  && r.value !== '' && r.value != null) MEETING_DAY_FS  = parseInt(r.value, 10);
+    });
+  } catch (e) { /* si falla, se mantienen los defaults (jueves/sábado) */ }
+}
+
+async function setMeetingDay(which, dayNum) {
+  const key = which === 'vmc' ? 'meeting_day_vmc' : 'meeting_day_fs';
+  const val = String(dayNum);
+  const { data: ex } = await sb.from('platform_config').select('key').eq('key', key);
+  let err;
+  if (ex && ex.length) { ({ error: err } = await sb.from('platform_config').update({ value: val }).eq('key', key)); }
+  else { ({ error: err } = await sb.from('platform_config').insert({ key, value: val })); }
+  if (err) { showToast('No se pudo guardar el día de reunión', 'error'); return; }
+  if (which === 'vmc') MEETING_DAY_VMC = dayNum; else MEETING_DAY_FS = dayNum;
+  showToast('Día de reunión actualizado', 'success');
+  // Refresca las vistas que dependen de estos días, si están cargadas.
+  try { if (typeof renderRespDateChips === 'function' && document.getElementById('resp-date-chips')) renderRespDateChips(); } catch {}
+  try { if (typeof renderAseoDateChips === 'function' && document.getElementById('aseo-date-chips')) renderAseoDateChips(); } catch {}
+  try { if (typeof renderHospDateChips === 'function' && document.getElementById('hosp-date-chips')) renderHospDateChips(); } catch {}
+}
+
+const MEETING_DAY_LABELS_ES = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+function meetingDaySelectHtml(which) {
+  const current = which === 'vmc' ? MEETING_DAY_VMC : MEETING_DAY_FS;
+  const opts = MEETING_DAY_LABELS_ES.map((label, i) =>
+    `<option value="${i}" ${i === current ? 'selected' : ''}>${label}</option>`).join('');
+  return `<select class="meeting-day-select" id="meeting-day-select-${which}" onchange="setMeetingDay('${which}', parseInt(this.value,10))">${opts}</select>`;
+}
+
 async function enterApp() {
   document.getElementById('auth-screen').style.display = 'none';
 
@@ -12486,6 +12626,8 @@ async function enterApp() {
   if (!legalOk) return;
 
   document.getElementById('auth-pending-screen').style.display = 'none';
+
+  loadMeetingDaysConfig(); // en segundo plano, no bloquea el resto del arranque
 
   const app = document.getElementById('app');
   app.style.display = 'flex'; app.style.flexDirection = 'column';
@@ -14270,8 +14412,16 @@ async function switchAdminTab(tab) {
       renderUsersPanel();
     });
   }
-  if (tab === 'vmc') { loadVmcWeeks().then(() => renderAdminVmc()); }
-  if (tab === 'fin-semana') { loadFsWeeks().then(() => renderAdminFs()); }
+  if (tab === 'vmc') {
+    loadVmcWeeks().then(() => renderAdminVmc());
+    const wrap = document.getElementById('meeting-day-select-vmc-wrap');
+    if (wrap) wrap.innerHTML = meetingDaySelectHtml('vmc');
+  }
+  if (tab === 'fin-semana') {
+    loadFsWeeks().then(() => renderAdminFs());
+    const wrap = document.getElementById('meeting-day-select-fs-wrap');
+    if (wrap) wrap.innerHTML = meetingDaySelectHtml('fs');
+  }
   if (tab === 'notificaciones') { renderNotifAdminTemplates(); renderNotifAdminCategories(); loadNotifLevels().then(renderNotifAdminLevels); }
   if (tab === 'tips') { renderAdminTipsList(); }
   if (tab === 'monitor') { switchMonitorTab(_monitorActiveTab || 'np'); loadMaintenanceModeUI(); }
@@ -14946,14 +15096,20 @@ async function viewAssignment(id) {
   document.getElementById('detail-time').textContent = (a.time ? a.time.substring(0,5) : '--:--') + 'hrs';
     const _casaTipo3 = a.casa_id ? (casas.find(c=>c.id===a.casa_id)?.tipo || 'casa') : 'casa';
   const _houseLabel3 = casaHouseLabel(_casaTipo3, a.house);
-  document.getElementById('detail-address').textContent = isEventoLike ? (a.especial_titulo || 'Evento') : (a.address || '—');
-  document.getElementById('detail-house-label').textContent = isEventoLike ? (a.especial_subtitulo || '') : _houseLabel3;
-  // v1.45.1.1-sb: en "Visita" el campo principal (detail-address) muestra el
-  // Detalle, no la dirección — así que se agrega una línea aparte debajo con
-  // la dirección real de la Casa asignada, para que no falte.
+  // v1.45.5-sb: en "Visita" se invirtió cuál campo se ve como principal
+  // (grande/destacado, estilo "Casa") y cuál como subtítulo (chico, estilo
+  // "Detalle"): ahora la dirección real ocupa el campo principal, y el
+  // Detalle (título) pasa a la línea secundaria de abajo.
+  document.getElementById('detail-address').textContent = isVisita
+    ? (a.address || '—')
+    : (isEventoLike ? (a.especial_titulo || 'Evento') : (a.address || '—'));
+  document.getElementById('detail-house-label').textContent = isVisita ? '' : (isEventoLike ? (a.especial_subtitulo || '') : _houseLabel3);
+  // v1.45.1.1-sb: en "Visita" el campo secundario (detail-visita-address)
+  // muestra ahora el Detalle (título), ya que la dirección real pasó a ser
+  // el campo principal de arriba.
   const visitaAddrEl = document.getElementById('detail-visita-address');
-  if (isVisita && a.address) {
-    visitaAddrEl.textContent = a.address;
+  if (isVisita && a.especial_titulo) {
+    visitaAddrEl.textContent = a.especial_titulo;
     visitaAddrEl.style.display = '';
   } else {
     visitaAddrEl.textContent = '';
@@ -15392,10 +15548,12 @@ function _renderVisitaPickerGrid(ters) {
     const mapHtml = mapSrc
       ? `<img src="${mapSrc}" alt="Mapa ${terLabel(t.number)}" loading="lazy">`
       : `<div class="detail-visita-picker-map-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg></div>`;
+    // v1.45.5-sb: las tarjetas de territorio dentro del detalle de "Visita"
+    // ya no muestran el indicador colorido con el número (esquina superior
+    // izquierda) — se removió del picker de esta pantalla.
     return `<div class="detail-visita-picker-card" data-idx="${i}" onclick="openVisitaTerFromGrid(${i})">
       <div class="detail-visita-picker-map">
         ${mapHtml}
-        <div class="detail-visita-picker-num-badge" style="background:${getTerColor(t.number)}">${t.number}</div>
       </div>
       <div class="detail-visita-picker-label">${terLabel(t.number)}</div>
     </div>`;
@@ -15955,7 +16113,7 @@ function _liveUpdateNotifPanelBanner() {
           + '</div>'
           + '<button onclick="stopLiveMode()" style="background:rgba(255,59,48,0.08);border:none;font-family:var(--font);font-size:0.75rem;font-weight:700;color:var(--red);cursor:pointer;padding:3px 8px;border-radius:6px">Detener</button>'
           + '</div>';
-        var firstChild = wrap.querySelector('.notif-filter-chips') ? wrap.querySelector('.notif-filter-chips').parentElement : wrap.firstElementChild;
+        var firstChild = wrap.querySelector('.notif-search-wrap') ? wrap.querySelector('.notif-search-wrap').parentElement : wrap.firstElementChild;
         wrap.insertBefore(banner, firstChild);
       }
       var streetEl = document.getElementById('live-panel-banner-street-' + target);
@@ -17595,6 +17753,14 @@ async function openTerritoryModal(t) {
       else addNoPasarInput(e, ''); // backwards compat with old string entries
     });
   } else { addNoPasarInput(); }
+  // v1.45.5-sb: siempre se abre el modal en modo "Una por una".
+  document.getElementById('no-pasar-bulk-textarea').value = '';
+  document.getElementById('no-pasar-inputs').style.display = '';
+  document.getElementById('np-add-btn').style.display = '';
+  document.getElementById('no-pasar-bulk-wrap').style.display = 'none';
+  noPasarMode = 'individual';
+  document.getElementById('np-mode-individual-btn').classList.add('active');
+  document.getElementById('np-mode-bulk-btn').classList.remove('active');
   // ── Color picker ──
   const PICKER_COLORS = ['#64748b','#22c55e','#3b82f6','#a855f7','#f59e0b','#ef4444','#06b6d4','#ec4899','#84cc16','#f97316','#0ea5e9','#d946ef','#10b981','#f43f5e','#8b5cf6'];
   const savedColor = t?.color || TER_COLORS[(t?.number || 0) % TER_COLORS.length];
@@ -17692,6 +17858,37 @@ function removeDarkMapImage() {
   document.getElementById('ter-map-dark-remove-btn').style.display = 'none';
   document.getElementById('ter-map-file-dark').value = '';
 }
+// v1.45.5-sb: alterna entre el modo "Una por una" (inputs individuales) y
+// "Pegar varias" (un solo textarea grande, donde cada línea es una
+// dirección). Al cambiar de modo, se traspasa lo ya escrito de un lado al
+// otro para no perder datos.
+let noPasarMode = 'individual';
+function setNoPasarMode(mode) {
+  if (mode === noPasarMode) return;
+  if (mode === 'bulk') {
+    const npWraps = document.querySelectorAll('#no-pasar-inputs [id^="np-wrap-"]');
+    const lines = Array.from(npWraps).map(wrap => {
+      const n = wrap.id.replace('np-wrap-','');
+      return (document.getElementById('np-addr-'+n)?.value || '').trim();
+    }).filter(Boolean);
+    document.getElementById('no-pasar-bulk-textarea').value = lines.join('\n');
+    document.getElementById('no-pasar-inputs').style.display = 'none';
+    document.getElementById('np-add-btn').style.display = 'none';
+    document.getElementById('no-pasar-bulk-wrap').style.display = 'block';
+  } else {
+    const raw = document.getElementById('no-pasar-bulk-textarea').value || '';
+    const addrs = raw.split('\n').map(s => s.trim()).filter(Boolean);
+    noPasarCount = 0;
+    document.getElementById('no-pasar-inputs').innerHTML = '';
+    if (addrs.length) addrs.forEach(a => addNoPasarInput(a)); else addNoPasarInput();
+    document.getElementById('no-pasar-inputs').style.display = '';
+    document.getElementById('np-add-btn').style.display = '';
+    document.getElementById('no-pasar-bulk-wrap').style.display = 'none';
+  }
+  noPasarMode = mode;
+  document.getElementById('np-mode-individual-btn').classList.toggle('active', mode === 'individual');
+  document.getElementById('np-mode-bulk-btn').classList.toggle('active', mode === 'bulk');
+}
 function addNoPasarInput(addr = '', date = '', desc = '') {
   noPasarCount++;
   const n = noPasarCount;
@@ -17710,15 +17907,23 @@ async function saveTerritory() {
   if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   const number = parseInt(document.getElementById('ter-num').value);
   if (!number) { showError('ter-error','El número de territorio es requerido'); return; }
-  // Collect no_pasar as array of {addr, date, desc} objects
-  const npWraps = document.querySelectorAll('#no-pasar-inputs [id^="np-wrap-"]');
-  const no_pasar = Array.from(npWraps).map(wrap => {
-    const n = wrap.id.replace('np-wrap-','');
-    const addr = (document.getElementById('np-addr-'+n)?.value || '').trim();
-    const date = (document.getElementById('np-date-'+n)?.value || '').trim();
-    const desc = (document.getElementById('np-desc-'+n)?.value || '').trim();
-    return addr ? { addr, date, desc } : null;
-  }).filter(Boolean);
+  // Collect no_pasar as array of {addr, date, desc} objects. v1.45.5-sb: si
+  // el modo activo es "Pegar varias", se toman las direcciones del textarea
+  // (una por línea, sin fecha ni descripción) en vez de los inputs.
+  let no_pasar;
+  if (noPasarMode === 'bulk') {
+    const raw = document.getElementById('no-pasar-bulk-textarea').value || '';
+    no_pasar = raw.split('\n').map(s => s.trim()).filter(Boolean).map(addr => ({ addr, date: '', desc: '' }));
+  } else {
+    const npWraps = document.querySelectorAll('#no-pasar-inputs [id^="np-wrap-"]');
+    no_pasar = Array.from(npWraps).map(wrap => {
+      const n = wrap.id.replace('np-wrap-','');
+      const addr = (document.getElementById('np-addr-'+n)?.value || '').trim();
+      const date = (document.getElementById('np-date-'+n)?.value || '').trim();
+      const desc = (document.getElementById('np-desc-'+n)?.value || '').trim();
+      return addr ? { addr, date, desc } : null;
+    }).filter(Boolean);
+  }
   const btn = document.getElementById('save-ter-btn');
   btn.disabled = true; btn.textContent = 'Guardando...';
   const color = document.getElementById('ter-color-value').value || null;
@@ -17931,13 +18136,15 @@ function respCargoCategoria(cargo) {
   return cargo;
 }
 
-// Genera las próximas N fechas válidas (Jueves o Sábado) a partir de hoy.
+// Genera las próximas N fechas válidas (día de Vida y Ministerio o día de
+// Reunión Pública, configurables — ver MEETING_DAY_VMC/MEETING_DAY_FS) a
+// partir de hoy.
 function respProximasFechas(n) {
   const fechas = [];
   const d = new Date(todayStr() + 'T00:00:00');
   for (let i = 0; i < 60 && fechas.length < n; i++) {
     const day = d.getDay();
-    if (day === 4 || day === 6) {
+    if (day === MEETING_DAY_VMC || day === MEETING_DAY_FS) {
       const f = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
       fechas.push(f);
     }
@@ -18001,8 +18208,8 @@ function onRespAsignarFechaChange() {
   if (!val) return;
   const d = new Date(val + 'T00:00:00');
   const day = d.getDay(); // 0=Dom..6=Sáb, 4=Jueves
-  if (day !== 4 && day !== 6) {
-    showError('resp-fecha-error', 'Debes seleccionar un día Jueves o Sábado.');
+  if (day !== MEETING_DAY_VMC && day !== MEETING_DAY_FS) {
+    showError('resp-fecha-error', `Debes seleccionar un día ${MEETING_DAY_LABELS_ES[MEETING_DAY_VMC]} o ${MEETING_DAY_LABELS_ES[MEETING_DAY_FS]}.`);
     return;
   }
   respSelectedDate = val;
@@ -18383,8 +18590,8 @@ function onAseoFechaChange() {
   if (!val) return;
   const d = new Date(val + 'T00:00:00');
   const day = d.getDay();
-  if (day !== 4 && day !== 6) {
-    showError('aseo-fecha-error', 'Debes seleccionar un día Jueves o Sábado.');
+  if (day !== MEETING_DAY_VMC && day !== MEETING_DAY_FS) {
+    showError('aseo-fecha-error', `Debes seleccionar un día ${MEETING_DAY_LABELS_ES[MEETING_DAY_VMC]} o ${MEETING_DAY_LABELS_ES[MEETING_DAY_FS]}.`);
     return;
   }
   aseoSelectedDate = val;
@@ -18682,8 +18889,8 @@ function onHospFechaChange() {
   if (!val) return;
   const d = new Date(val + 'T00:00:00');
   const day = d.getDay();
-  if (day !== 4 && day !== 6) {
-    showError('hosp-fecha-error', 'Debes seleccionar un día Jueves o Sábado.');
+  if (day !== MEETING_DAY_VMC && day !== MEETING_DAY_FS) {
+    showError('hosp-fecha-error', `Debes seleccionar un día ${MEETING_DAY_LABELS_ES[MEETING_DAY_VMC]} o ${MEETING_DAY_LABELS_ES[MEETING_DAY_FS]}.`);
     return;
   }
   hospAsigSelectedDate = val;
@@ -24737,6 +24944,17 @@ function notifToggleFilterChip(key) {
   _renderNotifAllTargets();
 }
 
+// v1.45.4-sb: abre/cierra el panel colapsable de filtros de Categoría, que
+// ahora vive colgando del botón al extremo derecho de la barra de búsqueda
+// (mismo patrón que el botón de filtros de "Carritos").
+function notifToggleFilterMenu(target) {
+  const menu = document.getElementById(target === 'desktop' ? 'notif-filter-menu-desktop' : 'notif-filter-menu-mobile');
+  const btn = document.getElementById(target === 'desktop' ? 'notif-filter-btn-desktop' : 'notif-filter-btn-mobile');
+  if (!menu) return;
+  const abrir = menu.classList.toggle('notif-filter-open');
+  if (btn) { btn.setAttribute('aria-expanded', abrir ? 'true' : 'false'); btn.classList.toggle('active', abrir); }
+}
+
 function notifSearchInput(value, target) {
   _notifSearchQuery = value;
   _renderNotifTarget(target);
@@ -24908,7 +25126,7 @@ function _renderNotifTarget(t) {
     listEl.innerHTML = data.map(n => {
       const isNew = n.created_at > lastSeen;
       const dateStr = new Date(n.created_at).toLocaleDateString('es-CL', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-      return `<div id="notif-d-${n.id}" onclick="openNotifDetail('${n.id}', event)" style="padding:0.75rem 1rem;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:5px;${isNew?'background:var(--accent-light);':''}position:relative;cursor:pointer">
+      return `<div id="notif-d-${n.id}" style="padding:0.75rem 1rem;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:5px;${isNew?'background:var(--accent-light);':''}position:relative">
         <div style="display:flex;align-items:center;gap:8px;padding-right:24px">
           ${(() => { const _dGrp = NOTIF_GROUPS[getNotifGroupKey(n)]; const _dInner = _dGrp.icon.replace(/<svg[^>]*>/, '').replace('</svg>', ''); return `<div style="width:28px;height:28px;border-radius:8px;background:${_dGrp.bg};color:${_dGrp.color};display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round">${_dInner}</svg></div>`; })()}
           <span style="font-size:0.85rem;font-weight:700;color:var(--text)">${n.title}</span>
@@ -24934,7 +25152,7 @@ function _renderNotifTarget(t) {
       const _mGrpKey = getNotifGroupKey(n);
       const _mGrp = NOTIF_GROUPS[_mGrpKey];
       const _mGrpIconInner = _mGrp.icon.replace(/<svg[^>]*>/, '').replace('</svg>', '');
-      return `<div class="notif-card${isNew?' is-new':''}" id="notif-m-${n.id}" onclick="openNotifDetail('${n.id}', event)" style="cursor:pointer">
+      return `<div class="notif-card${isNew?' is-new':''}" id="notif-m-${n.id}">
         <div class="notif-card-header">
           <div class="notif-card-icon-badge" style="width:36px;height:36px;border-radius:10px;background:${_mGrp.bg};color:${_mGrp.color};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:2px">
             <svg viewBox="0 0 24 24" style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round">${_mGrpIconInner}</svg>
@@ -24960,6 +25178,10 @@ function _renderNotifTarget(t) {
 }
 
 // ── Detalle de Notificación (v1.21.0-beta) ──────────────────────────────────
+// v1.45.4-sb: las tarjetas del Panel de Notificaciones ya no abren este
+// detalle en pantalla completa al seleccionarlas (se quitó el onclick de las
+// tarjetas). Las funciones y la pantalla "page-notif-detail" quedan aquí sin
+// usarse, por si se decide reactivar esta vista más adelante.
 let _notifDetailCurrentId = null;
 function openNotifDetail(id, ev) {
   if (ev && ev.target && ev.target.closest('.notif-delete-btn')) return;
@@ -26951,8 +27173,13 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
     <div class="notif-search-wrap">
       <svg class="notif-search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input type="text" class="notif-search-input" data-i18n-ph="notif.buscar" placeholder="Buscar notificaciones…" autocomplete="off" oninput="notifSearchInput(this.value,'mobile')">
+      <button type="button" onclick="notifToggleFilterMenu('mobile')" class="notif-search-filter-btn" id="notif-filter-btn-mobile" aria-label="Abrir filtros de categoría" aria-expanded="false" aria-controls="notif-filter-menu-mobile">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="10" cy="6" r="2"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="14" cy="12" r="2"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="8" cy="18" r="2"/></svg>
+      </button>
     </div>
-    <div class="notif-filter-chips" id="notif-filter-chips-mobile"></div>
+    <div class="notif-filter-menu" id="notif-filter-menu-mobile">
+      <div class="notif-filter-chips" id="notif-filter-chips-mobile"></div>
+    </div>
   </div>
   <div style="flex:1;overflow-y:auto;padding:0 1rem 1rem;max-width:640px;width:100%;margin:0 auto" id="notifications-list-mobile">
     <div class="loader-wrap"><div class="loader"></div><div class="loader-caption" data-i18n="notif.cargando">Cargando Notificaciones</div></div>
@@ -28923,6 +29150,17 @@ async function reportarTerritorioDesdeAsignacion(assignmentId) {
     const { data: created, error } = await sb.from('territory_report_forms').insert(payload).select().single();
     if (error) { showToast('Error al crear el formulario' + (error.message ? ': ' + error.message : ''), 'error'); console.error(error); return; }
     formRow = created;
+  }
+
+  // v1.45.4-sb: si ya existe un reporte enviado para esta asignación, se le pregunta
+  // al encargado si desea corregirlo. Si acepta, se elimina el/los reporte(s) previo(s)
+  // de este formulario para que pueda volver a completarlo desde cero (sobre-escritura).
+  const { data: existingSubs } = await sb.from('territory_report_submissions').select('id').eq('form_id', formRow.id);
+  if (existingSubs && existingSubs.length) {
+    const wantsOverwrite = confirm('Ya enviaste el reporte de esta asignación. ¿Deseas corregirlo? Se sobrescribirá el reporte anterior.');
+    if (!wantsOverwrite) return;
+    const { error: delErr } = await sb.from('territory_report_submissions').delete().eq('form_id', formRow.id);
+    if (delErr) { showToast('No se pudo preparar la corrección del reporte' + (delErr.message ? ': ' + delErr.message : ''), 'error'); console.error(delErr); return; }
   }
 
   closeDetail();
