@@ -9452,7 +9452,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.45.5-sb';
+const APP_VERSION = '1.45.6-sb';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -15543,7 +15543,24 @@ function switchDetailTerTab(tabNum) {
 function _renderVisitaPickerGrid(ters) {
   const grid = document.getElementById('detail-visita-picker-grid');
   if (!grid) return;
+  const panel = document.getElementById('detail-panel');
+  const grupoMap = (panel._visitaAssignment && panel._visitaAssignment.visita_territorios_grupos && typeof panel._visitaAssignment.visita_territorios_grupos === 'object')
+    ? panel._visitaAssignment.visita_territorios_grupos : {};
   grid.innerHTML = ters.map((t, i) => {
+    // v1.45.6-sb: si este territorio tiene un Grupo de Servicio asignado
+    // (visita_territorios_grupos), se muestra con la misma tarjeta que usa
+    // la Sub-sección "Grupos" (círculo con el número del grupo), en vez del
+    // mini-mapa, para que sea evidente a qué grupo le corresponde. Sigue
+    // abriendo el detalle del territorio al tocarla.
+    const grupoNumero = grupoMap[t.id] != null ? String(grupoMap[t.id]) : '';
+    if (grupoNumero) {
+      const color = grupoColorFor(grupoNumero);
+      return `<button class="grupo-btn" style="--grupo-color:${color}" data-idx="${i}" onclick="openVisitaTerFromGrid(${i})">
+        <div class="grupo-btn-eyebrow">Territorio para el</div>
+        <div class="grupo-btn-icon">${grupoNumero}</div>
+        <div class="grupo-btn-label">Grupo ${grupoNumero}</div>
+      </button>`;
+    }
     const mapSrc = getActiveTerMapSrc(t);
     const mapHtml = mapSrc
       ? `<img src="${mapSrc}" alt="Mapa ${terLabel(t.number)}" loading="lazy">`
