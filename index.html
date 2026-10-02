@@ -9452,7 +9452,31 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // v1.33.5.2-beta) — el botón "Administrar" vuelve a mostrarse siempre como
 // lápiz en la esquina superior derecha y a llevar a la pantalla de Admin,
 // como antes. El código del Modo Edición queda sin usar por ahora.
-const APP_VERSION = '1.45.6-sb';
+// v1.47.0: (1) Vida y Ministerio ya no usa la "Canción de apertura" (se quita
+// del formulario, de la vista y del guardado). (2) Importación automática del
+// programa semanal desde JW.ORG (wol.jw.org): lectura bíblica, partes con su
+// título y minutos, y canciones intermedia y de cierre. El admin solo elige
+// las fechas y asigna a las personas.
+// v1.47.0.1-beta: se restaura la "Canción de apertura" (también se importa
+// desde JW.ORG) y se elimina el rol "Oración de apertura" de Vida y Ministerio.
+// v1.47.5-beta: nueva "Sala B" en Seamos Mejores Maestros. Cada parte de esa
+// sección puede tener, además de su asignado/ayudante de la sala principal,
+// un asignado/ayudante de la Sala B (campos assigned_b / assigned2_b dentro
+// del JSON `parts`; no requiere cambios en la base de datos).
+// v1.47.5.1-beta: la parte "Lectura de la Biblia" (Tesoros de la Biblia)
+// también tiene Sala B (un solo asignado, sin ayudante).
+// v1.47.6-beta: la Sala B pasa a ser su propia sección ("Seamos Mejores
+// Maestros — Sala B") en vez de campos dentro de cada parte. Tiene un
+// "Encargado de la Sala B" y sus propias partes (incluida la Lectura de la
+// Biblia). Se guarda dentro del JSON `parts` con section:'maestros_b' (el
+// encargado es una entrada con header:true), sin cambios en la base de datos.
+// Los datos de 1.47.5 (assigned_b / assigned2_b) se migran solos al abrirse.
+// v1.47.0-beta: arreglo de la importación desde JW.ORG ("signal is aborted
+// without reason"): las vías de conexión ahora se prueban EN PARALELO (gana
+// la primera que responde) en vez de una por una, hay más servicios de relevo
+// (incluido uno que entrega Markdown, también soportado), tiempo de espera
+// más generoso y caché por sesión.
+const APP_VERSION = '1.47.0-beta';
 // v1.36.0-beta: (1) Links de referencia ahora tienen 2 tipos — Único uso
 // (sin límite de tiempo, se desactiva tras el primer uso) y Con límite de
 // tiempo (reutilizable hasta que vence, o hasta que el Admin lo termina
@@ -11872,20 +11896,20 @@ async function renderInicio() {
   // ── Vida y Ministerio: partes y roles de cabecera en semanas vigentes ──
   try {
     const { data } = await sb.from('vmc_weeks')
-      .select('id,date_start,date_end,parts,presidente,prayer_open,prayer_close')
+      .select('id,date_start,date_end,parts,presidente,prayer_close')
       .gte('date_end', today).order('date_start');
     const items = [];
     for (const w of (data || [])) {
       const rango = vmcFormatRange(w);
-      const parts = Array.isArray(w.parts) ? w.parts : [];
+      const parts = vmcNormalizeParts(w.parts);
       for (const p of parts) {
         const a1 = (p.assigned || '').trim().toLowerCase();
         const a2 = (p.assigned2 || '').trim().toLowerCase();
-        if (a1 === myName || a2 === myName) items.push({ label: p.name || 'Parte', sub: rango, sortKey: _inicioSortKey(w.date_start, null), onClick: () => inicioGoTo('reuniones', 'vida-ministerio') });
+        if (a1 === myName || a2 === myName) items.push({ label: vmcPartLabel(p) || 'Parte', sub: rango, sortKey: _inicioSortKey(w.date_start, null), onClick: () => inicioGoTo('reuniones', 'vida-ministerio') });
+
       }
       const roles = [
         { field: 'presidente',   label: 'Presidente' },
-        { field: 'prayer_open',  label: 'Oración de apertura' },
         { field: 'prayer_close', label: 'Oración de cierre' },
       ];
       for (const rol of roles) {
@@ -25648,7 +25672,6 @@ async function openVmcWeekModal(id) {
 
   // Pre-poblar botones de selección de persona
   vmcRestorePersonBtn('vmc-meta-presidente',  week?.presidente   || '', 'Seleccionar…');
-  vmcRestorePersonBtn('vmc-meta-prayer-open', week?.prayer_open  || '', 'Seleccionar…');
   vmcRestorePersonBtn('vmc-meta-prayer-close',week?.prayer_close || '', 'Seleccionar…');
 
   // Render part rows per section
@@ -25699,6 +25722,12 @@ function vmcDefaultParts(section) {
     { section:'maestros', name:'Empiece conversaciones', mins:4, assigned:'', assigned2:'' },
     { section:'maestros', name:'Haga revisitas', mins:4, assigned:'', assigned2:'' },
   ];
+  if (section === 'maestros_b') return [
+    { section:'maestros_b', name:'Lectura de la Biblia', mins:4, assigned:'', assigned2:'' },
+    { section:'maestros_b', name:'Empiece conversaciones', mins:4, assigned:'', assigned2:'' },
+    { section:'maestros_b', name:'Empiece conversaciones', mins:4, assigned:'', assigned2:'' },
+    { section:'maestros_b', name:'Haga revisitas', mins:4, assigned:'', assigned2:'' },
+  ];
   if (section === 'vida') return [
     { section:'vida', name:'Discurso', mins:15, assigned:'', assigned2:'' },
     { section:'vida', name:'Estudio bíblico de la congregación', mins:30, assigned:'', assigned2:'' },
@@ -25706,16 +25735,40 @@ function vmcDefaultParts(section) {
   return [];
 }
 
-function vmcRenderAllSections(parts) {
+function vmcRenderAllSections(rawParts) {
   vmcPartCounter = 0;
-  ['tesoros','maestros','vida'].forEach(section => {
+  const parts = vmcNormalizeParts(rawParts);
+  // Encargado de la Sala B (entrada especial header:true)
+  const lead = parts.find(p => p.section === 'maestros_b' && p.header);
+  vmcRestorePersonBtn('vmc-salab-lead', lead?.assigned || '', 'Seleccionar…');
+  ['tesoros','maestros','maestros_b','vida'].forEach(section => {
     const sectionParts = parts.length
-      ? parts.filter(p => p.section === section)
+      ? parts.filter(p => p.section === section && !p.header)
       : vmcDefaultParts(section);
     const container = document.getElementById(`vmc-parts-${section}`);
     container.innerHTML = '';
     sectionParts.forEach(p => vmcAppendPartRow(section, p));
   });
+}
+
+// Nombre para mostrar de una parte (las de Sala B llevan el sufijo)
+function vmcPartLabel(p) {
+  return (p && p.section === 'maestros_b' && !p.header) ? p.name + ' (Sala B)' : (p ? p.name : '');
+}
+
+// Migra datos de 1.47.5 (assigned_b / assigned2_b dentro de cada parte) a
+// partes propias de la sección 'maestros_b'. Devuelve un arreglo nuevo.
+function vmcNormalizeParts(rawParts) {
+  const parts = Array.isArray(rawParts) ? rawParts : [];
+  const out = [], extra = [];
+  parts.forEach(p => {
+    const { assigned_b, assigned2_b, ...rest } = p;
+    out.push(rest);
+    if (assigned_b || assigned2_b) {
+      extra.push({ ...rest, section: 'maestros_b', assigned: assigned_b || '', assigned2: assigned2_b || '' });
+    }
+  });
+  return out.concat(extra);
 }
 
 function vmcAyudanteLabel(partName) {
@@ -25961,6 +26014,323 @@ function vmcShowAutocomplete() {}
 function vmcPickUser() {}
 function vmcHideDropdown() {}
 
+// ══════════════════════════════════════════════════════════════════
+//  VMC — Importación automática desde JW.ORG (v1.47.0)
+//  Fuente: wol.jw.org (Biblioteca en línea, Guía de actividades).
+//  Solo se leen datos públicos del programa (títulos, minutos, lectura,
+//  canciones). Las asignaciones de personas NUNCA se tocan.
+// ══════════════════════════════════════════════════════════════════
+
+const VMC_WOL_BASE = 'https://wol.jw.org';
+const VMC_WOL_LANG = 'es/wol';      // idioma español
+const VMC_WOL_RES  = 'r4/lp-s';     // recurso español
+
+// Semana ISO (lunes = inicio) → { year, week }
+function vmcIsoWeek(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00Z');
+  const day = (d.getUTCDay() + 6) % 7;            // lunes = 0
+  d.setUTCDate(d.getUTCDate() - day + 3);          // jueves de esa semana
+  const year = d.getUTCFullYear();
+  const firstThu = new Date(Date.UTC(year, 0, 4));
+  const week = 1 + Math.round(((d - firstThu) / 86400000 - 3 + ((firstThu.getUTCDay() + 6) % 7)) / 7);
+  return { year, week };
+}
+
+// ── Descarga de páginas de WOL ──────────────────────────────────────────────
+// WOL no siempre permite que un navegador lo lea directamente (CORS), así que
+// se prueban varias vías en dos etapas, cada una en PARALELO (gana la primera
+// que responda con contenido válido):
+//   Etapa 1: directo + Edge Function propia "wol_proxy" (si está desplegada).
+//   Etapa 2: varios servicios públicos de relevo (si uno cae, otro responde).
+const _vmcWolCache = new Map();
+
+function vmcLooksLikeWol(text) {
+  return !!text && text.length > 200 &&
+    /vida y ministerio|tesoros de la biblia|biblioteca en l[ií]nea|nuestra vida cristiana/i.test(text);
+}
+
+async function vmcRaceSources(list, timeoutMs, errors) {
+  const ctrls = [];
+  const tasks = list.map(async src => {
+    const ctrl = new AbortController();
+    ctrls.push(ctrl);
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+    try {
+      const resp = await src.run(ctrl.signal);
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const text = await resp.text();
+      if (!vmcLooksLikeWol(text)) throw new Error('respuesta no válida');
+      return text;
+    } catch (e) {
+      errors.push(`${src.name}: ${e.name === 'AbortError' ? 'sin respuesta a tiempo' : (e.message || 'error')}`);
+      throw e;
+    } finally { clearTimeout(timer); }
+  });
+  try {
+    const text = await Promise.any(tasks);
+    ctrls.forEach(c => { try { c.abort(); } catch {} });   // cancela las demás
+    return text;
+  } catch { return null; }
+}
+
+async function vmcFetchWolHtml(url) {
+  if (_vmcWolCache.has(url)) return _vmcWolCache.get(url);
+  const enc = encodeURIComponent(url);
+  const errors = [];
+
+  const stage1 = [
+    { name: 'directo', run: sig => fetch(url, { signal: sig }) },
+    { name: 'servidor propio', run: sig => fetch(`${SUPABASE_URL}/functions/v1/wol_proxy?url=${enc}`,
+        { signal: sig, headers: { 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY } }) },
+  ];
+  const stage2 = [
+    { name: 'corsproxy.io',  run: sig => fetch(`https://corsproxy.io/?url=${enc}`, { signal: sig }) },
+    { name: 'allorigins',    run: sig => fetch(`https://api.allorigins.win/raw?url=${enc}`, { signal: sig }) },
+    { name: 'allorigins-json', run: async sig => {
+        const r = await fetch(`https://api.allorigins.win/get?url=${enc}`, { signal: sig });
+        if (!r.ok) return r;
+        const j = await r.json();
+        return new Response(j.contents || '', { status: 200 });
+      } },
+    { name: 'codetabs',      run: sig => fetch(`https://api.codetabs.com/v1/proxy?quest=${enc}`, { signal: sig }) },
+    { name: 'jina',          run: sig => fetch(`https://r.jina.ai/${url}`, { signal: sig }) },
+    { name: 'thingproxy',    run: sig => fetch(`https://thingproxy.freeboard.io/fetch/${url}`, { signal: sig }) },
+  ];
+
+  let text = await vmcRaceSources(stage1, 8000, errors);
+  if (!text) text = await vmcRaceSources(stage2, 25000, errors);
+  if (!text) {
+    console.warn('Importación VMC — fallaron todas las vías:', errors);
+    throw new Error('ninguna vía de conexión respondió');
+  }
+  _vmcWolCache.set(url, text);
+  return text;
+}
+
+// ── Lectura del contenido (HTML o Markdown) ─────────────────────────────────
+function vmcCleanText(el) {
+  return (el.textContent || '').replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+// Lista ordenada de {tag, text} (H1/H2/H3/P) a partir de HTML…
+function vmcElementsFromHtml(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const root = doc.querySelector('#article') || doc.querySelector('article') || doc.body;
+  return [...root.querySelectorAll('h1,h2,h3,p')]
+    .map(el => ({ tag: el.tagName, text: vmcCleanText(el) }))
+    .filter(e => e.text);
+}
+
+// …o a partir de Markdown (respuesta de algunos servicios de relevo)
+function vmcElementsFromMarkdown(md) {
+  const out = [];
+  md.split('\n').forEach(raw => {
+    let l = raw.trim();
+    if (!l) return;
+    const hm = l.match(/^(#{1,6})\s*(.*)$/);
+    let tag = 'P';
+    if (hm) { tag = hm[1].length <= 3 ? 'H' + hm[1].length : 'P'; l = hm[2]; }
+    l = l.replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+         .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+         .replace(/\\([|*_#\[\]()])/g, '$1')
+         .replace(/^[-*]\s+/, '')
+         .replace(/\*+/g, '')
+         .replace(/\s+/g, ' ').trim();
+    if (l) out.push({ tag, text: l });
+  });
+  return out;
+}
+
+function vmcIsHtml(text) { return /<(!doctype|html|head|body|h[1-6]|p|div|ul|li|a)[\s>]/i.test(text.slice(0, 3000)); }
+
+function vmcParseWolWeek(text) {
+  const els = vmcIsHtml(text) ? vmcElementsFromHtml(text) : vmcElementsFromMarkdown(text);
+
+  let section = null, reading = '', song_open = '', song_mid = '', song_close = '';
+  const parts = [];
+  let cur = null;           // parte que espera sus minutos / descripción
+  let seenH1 = false;
+
+  const secOf = t => {
+    const u = t.toUpperCase();
+    if (u.includes('TESOROS')) return 'tesoros';
+    if (u.includes('MAESTROS')) return 'maestros';
+    if (u.includes('VIDA CRISTIANA')) return 'vida';
+    return null;
+  };
+
+  for (const { tag, text: t } of els) {
+    if (tag === 'H1') { seenH1 = true; continue; }
+    if (tag === 'H2') {
+      const sec = secOf(t);
+      if (sec) { section = sec; cur = null; }
+      else if (!reading && !section && seenH1) {
+        // Lectura semanal: "JEREMÍAS 40, 41" (mayúsculas) → "Jeremías 40, 41"
+        reading = t.toLowerCase().replace(/,(?=\S)/g, ', ').replace(/(^|\s)(\p{L})/gu, (m, a, b) => a + b.toUpperCase());
+      }
+      continue;
+    }
+    if (tag === 'H3') {
+      // Palabras de conclusión | Canción N y oración
+      if (/palabras de conclusi/i.test(t)) {
+        const m = t.match(/Canci[oó]n\s+(\d+)/i);
+        if (m) song_close = m[1];
+        cur = null; continue;
+      }
+      // Canción suelta: antes de las secciones = apertura; en Vida Cristiana = intermedia
+      const songOnly = t.match(/^Canci[oó]n\s+(\d+)/i);
+      if (songOnly) {
+        if (!section && !song_open) song_open = songOnly[1];
+        else if (section === 'vida' && !song_mid) song_mid = songOnly[1];
+        continue;     // sin cerrar `cur`: los minutos pueden venir después
+      }
+      // Parte numerada: "3. Lectura de la Biblia"
+      const pm = t.match(/^(\d+)\.\s*(.+)$/);
+      if (pm && section) {
+        const dup = parts.find(x => x._n === pm[1]);
+        if (dup) { cur = dup; continue; }
+        cur = { section, name: pm[2].replace(/^[«"“]|[»"”]$/g, '').trim(), mins: 0, assigned: '', assigned2: '', note: '', link: '', link_text: '', _n: pm[1], _gotMins: false };
+        parts.push(cur);
+      }
+      continue;
+    }
+    if (tag === 'P' && cur && !cur._gotMins) {
+      const mm = t.match(/^\(\s*(\d+)\s*mins?\.?\s*\)\s*(.*)$/i);
+      if (mm) {
+        cur.mins = parseInt(mm[1], 10);
+        cur._gotMins = true;
+        let extra = mm[2].trim();
+        if (extra.length > 220) extra = '';       // descripciones largas: no se importan
+        cur.note = extra;
+      }
+    }
+  }
+  parts.forEach(p => { delete p._n; delete p._gotMins; });
+  return { reading, song_open, song_mid, song_close, parts };
+}
+
+// Enlace a la Guía de actividades dentro de la página "Reuniones" de la semana
+function vmcFindWeekDocUrl(text) {
+  const abs = h => h.startsWith('http') ? h : VMC_WOL_BASE + h;
+  if (vmcIsHtml(text)) {
+    const doc = new DOMParser().parseFromString(text, 'text/html');
+    const links = [...doc.querySelectorAll('a[href*="/wol/d/"]')];
+    const a = links.find(x => !/atalaya/i.test(x.textContent) && !/atalaya/i.test(x.closest('li,div')?.textContent || '')) || links[0];
+    return a ? abs(a.getAttribute('href')) : null;
+  }
+  const re = /\]\((https?:\/\/wol\.jw\.org)?(\/[a-z]{2}\/wol\/d\/[^)\s]+)\)/;
+  const lines = text.split('\n');
+  for (const l of lines) { const m = l.match(re); if (m && !/atalaya/i.test(l)) return VMC_WOL_BASE + m[2]; }
+  for (const l of lines) { const m = l.match(re); if (m) return VMC_WOL_BASE + m[2]; }
+  return null;
+}
+
+// Busca la página de la semana en WOL y devuelve los datos ya parseados.
+async function vmcLoadWolWeek(dateStart) {
+  const { year, week } = vmcIsoWeek(dateStart);
+  const meetingsUrl = `${VMC_WOL_BASE}/${VMC_WOL_LANG}/meetings/${VMC_WOL_RES}/${year}/${week}`;
+  const page1 = await vmcFetchWolHtml(meetingsUrl);
+
+  // ¿La propia página ya trae el programa?
+  let data = vmcParseWolWeek(page1);
+  if (data.parts.length >= 4) return data;
+
+  // Si no, seguir el enlace de "Vida y Ministerio" hacia la Guía de actividades
+  const url2 = vmcFindWeekDocUrl(page1);
+  if (!url2) throw new Error('no hay programa publicado para esa semana');
+  const page2 = await vmcFetchWolHtml(url2);
+  data = vmcParseWolWeek(page2);
+  if (data.parts.length < 4) throw new Error('no se pudo leer el programa de esa semana');
+  return data;
+}
+
+function vmcSetImportStatus(msg, kind) {
+  const el = document.getElementById('vmc-import-status');
+  if (!el) return;
+  el.style.display = msg ? 'block' : 'none';
+  el.style.color = kind === 'error' ? 'var(--red, #ff3b30)' : kind === 'ok' ? 'var(--green, #34c759)' : 'var(--text3)';
+  el.textContent = msg || '';
+}
+
+// Toma las asignaciones actuales del formulario, por sección y posición
+function vmcSnapshotAssignments() {
+  const snap = { tesoros: [], maestros: [], maestros_b: [], vida: [] };
+  document.querySelectorAll('.vmc-part-row').forEach(row => {
+    const hid = row.querySelectorAll('input[type="hidden"]');
+    snap[row.dataset.section]?.push({ assigned: hid[0]?.value || '', assigned2: hid[1]?.value || '' });
+  });
+  return snap;
+}
+
+let vmcImportBusy = false;
+async function vmcImportFromJw(manual) {
+  if (vmcImportBusy) return;
+  const ds = document.getElementById('vmc-date-start').value;
+  if (!ds) { if (manual) showToast('Primero elige la fecha de inicio de la semana', 'error'); return; }
+  const btn = document.getElementById('vmc-import-btn');
+  vmcImportBusy = true;
+  if (btn) { btn.disabled = true; }
+  vmcSetImportStatus('Buscando el programa en JW.ORG…', 'info');
+  try {
+    const data = await vmcLoadWolWeek(ds);
+
+    const snap = vmcSnapshotAssignments();   // conserva a quién ya estaba asignado
+    const counters = { tesoros: 0, maestros: 0, vida: 0 };
+    const merged = data.parts.map(p => {
+      const old = snap[p.section]?.[counters[p.section]++] || {};
+      return { ...p, assigned: old.assigned || '', assigned2: old.assigned2 || '' };
+    });
+    // Sala B: copia de la Lectura de la Biblia + las partes de Maestros, sin asignar
+    // (se conservan las asignaciones que ya existieran en esa sala, por posición)
+    const mirror = merged.filter(p => p.section === 'maestros' || (p.section === 'tesoros' && /lectura\s+de\s+la\s+biblia/i.test(p.name)));
+    let bi = 0;
+    mirror.forEach(p => {
+      const old = snap.maestros_b[bi++] || {};
+      merged.push({ ...p, section: 'maestros_b', assigned: old.assigned || '', assigned2: old.assigned2 || '' });
+    });
+    // Conservar al Encargado de la Sala B ya elegido
+    const leadVal = document.getElementById('vmc-salab-lead')?.value || '';
+    if (leadVal) merged.push({ section: 'maestros_b', header: true, name: 'Encargado de la Sala B', mins: 0, assigned: leadVal, assigned2: '' });
+
+    if (data.reading) document.getElementById('vmc-reading').value = data.reading;
+    document.getElementById('vmc-meta-song-open').value  = data.song_open  || '';
+    document.getElementById('vmc-meta-song-mid').value   = data.song_mid   || '';
+    document.getElementById('vmc-meta-song-close').value = data.song_close || '';
+
+    // Fecha final: domingo de esa semana, si está vacía
+    const de = document.getElementById('vmc-date-end');
+    if (!de.value) {
+      const d = new Date(ds + 'T00:00:00'); d.setDate(d.getDate() + 6);
+      de.value = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    }
+
+    vmcRenderAllSections(merged);
+    vmcSetImportStatus(`Programa importado (${merged.length} partes). Solo falta asignar a las personas.`, 'ok');
+    if (manual) showToast('Programa importado de JW.ORG ✓', 'success');
+  } catch (err) {
+    console.warn('Importación VMC falló:', err);
+    vmcSetImportStatus('No se pudo importar automáticamente (' + (err.message || 'error') + '). Intenta de nuevo en un momento, o llena la semana a mano. Si sigue fallando, despliega la función wol_proxy en Supabase.', 'error');
+    if (manual) showToast('No se pudo importar desde JW.ORG', 'error');
+  } finally {
+    vmcImportBusy = false;
+    if (btn) btn.disabled = false;
+  }
+}
+
+// Al elegir la fecha en una semana NUEVA, importa solo (sin pisar nada que ya se haya llenado)
+function vmcOnStartDateChange() {
+  const ds = document.getElementById('vmc-date-start').value;
+  if (!ds) return;
+  // Autocompletar fecha final = +6 días
+  const d = new Date(ds + 'T00:00:00'); d.setDate(d.getDate() + 6);
+  document.getElementById('vmc-date-end').value =
+    d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  if (vmcEditingId) return;                       // editando: solo con el botón
+  const anyAssigned = !!document.getElementById('vmc-salab-lead')?.value || Object.values(vmcSnapshotAssignments()).flat().some(a => a.assigned || a.assigned2);
+  if (anyAssigned) return;                        // ya hay trabajo hecho: no pisar
+  vmcImportFromJw(false);
+}
+
 // ── Collect form data ─────────────────────────────────────────────────────────
 
 function vmcCollectParts() {
@@ -25984,6 +26354,8 @@ function vmcCollectParts() {
     if (link && !/^https?:\/\//i.test(link)) link = 'https://' + link;
     if (name) parts.push({ section, name, mins, assigned, assigned2, note, link, link_text });
   });
+  const lead = document.getElementById('vmc-salab-lead')?.value.trim() || '';
+  if (lead) parts.push({ section: 'maestros_b', header: true, name: 'Encargado de la Sala B', mins: 0, assigned: lead, assigned2: '', note: '', link: '', link_text: '' });
   return parts;
 }
 
@@ -26001,7 +26373,6 @@ async function saveVmcWeek() {
     reading:       document.getElementById('vmc-reading').value.trim(),
     presidente:    document.getElementById('vmc-meta-presidente').value.trim(),
     song_open:     document.getElementById('vmc-meta-song-open').value.trim(),
-    prayer_open:   document.getElementById('vmc-meta-prayer-open').value.trim(),
     song_mid:      document.getElementById('vmc-meta-song-mid').value.trim(),
     song_close:    document.getElementById('vmc-meta-song-close').value.trim(),
     prayer_close:  document.getElementById('vmc-meta-prayer-close').value.trim(),
@@ -26089,12 +26460,11 @@ function vmcBuildAssignmentMap(week) {
     map[key].push(role);
   };
   add(week.presidente,   'Presidente');
-  add(week.prayer_open,  'Oración de apertura');
   add(week.prayer_close, 'Oración de cierre');
   const parts = Array.isArray(week.parts) ? week.parts : [];
   parts.forEach(p => {
-    add(p.assigned,  p.name);
-    add(p.assigned2, p.name);
+    add(p.assigned,  vmcPartLabel(p));
+    add(p.assigned2, vmcPartLabel(p));
   });
   return map;
 }
@@ -26116,7 +26486,7 @@ async function vmcNotifyNewAssignments(newWeek, prevWeek, range) {
   const EDGE_URL = PUSH_EDGE_URL;
 
   for (const { name, roles } of toNotify) {
-    const isRole = (r) => ['Presidente','Oración de apertura','Oración de cierre'].includes(r);
+    const isRole = (r) => ['Presidente','Oración de cierre','Encargado de la Sala B'].includes(r);
     const formatRole = (r) => isRole(r) ? `el rol de "${r}"` : `la parte "${r}"`;
     const rolesText = roles.map(formatRole).join(' y ');
     const tpl = renderTemplate('nueva_asignacion_reunion', { roles: rolesText, rango: range });
@@ -26223,7 +26593,7 @@ function vmcShortRange(w) {
 }
 
 function vmcRenderWeekProgram(week, isGuest = false) {
-  const parts = Array.isArray(week.parts) ? week.parts : [];
+  const parts = vmcNormalizeParts(week.parts);
   // En modo invitado (enlace compartido sin sesión) no existe un usuario con
   // el cual comparar: myName debe quedar en null (no '') para que nunca
   // "coincida" con partes cuyo assigned/assigned2 también estén vacíos, y la
@@ -26234,7 +26604,6 @@ function vmcRenderWeekProgram(week, isGuest = false) {
   const myParts = myName ? parts.filter(p => p.assigned === myName || p.assigned2 === myName) : [];
   const myMeta  = [];
   if (myName && week.presidente === myName)   myMeta.push('Presidente');
-  if (myName && week.prayer_open === myName)  myMeta.push('Oración de apertura');
   if (myName && week.prayer_close === myName) myMeta.push('Oración de cierre');
   const allMine = [...myMeta.map(m => ({ name: m })), ...myParts];
 
@@ -26244,17 +26613,26 @@ function vmcRenderWeekProgram(week, isGuest = false) {
         <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;vertical-align:middle;margin-right:4px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         Tus asignaciones esta semana
       </div>
-      ${allMine.map(p => `<div class="vmc-my-item"><span class="vmc-my-item-dot"></span>${p.name}${p.mins ? ` <span style="color:var(--text3);font-size:0.75rem">(${p.mins} min)</span>` : ''}</div>`).join('')}
+      ${allMine.map(p => `<div class="vmc-my-item"><span class="vmc-my-item-dot"></span>${vmcPartLabel(p)}${p.mins ? ` <span style="color:var(--text3);font-size:0.75rem">(${p.mins} min)</span>` : ''}</div>`).join('')}
     </div>` : '';
 
   // Section renderer
-  function sectionHtml(label, cls, sectionId, sectionParts, songBefore) {
-    if (!sectionParts.length) return '';
+  function sectionHtml(label, cls, sectionId, sectionParts, songBefore, leadName) {
+    if (!sectionParts.length && !leadName) return '';
+    const leadMine = !!leadName && leadName === myName;
+    const leadHtml = leadName ? `<div class="vmc-user-part-card${leadMine ? ' is-mine' : ''}">
+          <div class="vmc-part-time-badge"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <div class="vmc-part-body">
+            <div class="vmc-part-name-display">Encargado de la Sala B</div>
+            <div class="vmc-part-assigned-display${leadMine ? ' mine-label' : ''}">${leadMine ? '<svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;vertical-align:-1px;margin-right:3px"><polyline points="20 6 9 17 4 12"/></svg>' : ''}${leadName}</div>
+          </div>
+        </div>` : '';
     const songRow = songBefore
       ? `<div class="vmc-song-row"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Canción ${songBefore}</div>`
       : '';
     return `${songRow}<div class="vmc-user-section">
       <div class="vmc-user-section-header vmc-user-section-header-${sectionId}">${label}</div>
+      ${leadHtml}
       ${sectionParts.map(p => {
         const isMine = p.assigned === myName || p.assigned2 === myName;
         const assignText = [p.assigned, p.assigned2].filter(Boolean).join(' & ') || '—';
@@ -26277,10 +26655,14 @@ function vmcRenderWeekProgram(week, isGuest = false) {
   }
 
   const tes = parts.filter(p => p.section === 'tesoros');
+  const salaBLead = parts.find(p => p.section === 'maestros_b' && p.header)?.assigned || '';
+  const salaB = parts.filter(p => p.section === 'maestros_b' && !p.header);
+  // La Sala B solo se muestra si alguien está asignado (o hay encargado)
+  const showSalaB = !!salaBLead || salaB.some(p => p.assigned || p.assigned2);
   const mae = parts.filter(p => p.section === 'maestros');
   const vid = parts.filter(p => p.section === 'vida');
 
-  const openRow = week.presidente || week.prayer_open || week.song_open
+  const openRow = week.presidente || week.song_open
     ? `<div class="vmc-user-section">
         <div class="vmc-user-section-header" style="background:var(--surface2);color:var(--text2)">Apertura</div>
         ${week.song_open ? `<div class="vmc-song-row"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Canción ${week.song_open} y oración</div>` : ''}
@@ -26308,6 +26690,7 @@ function vmcRenderWeekProgram(week, isGuest = false) {
     ${openRow}
     ${sectionHtml('Tesoros de la Biblia','','tesoros', tes, null)}
     ${sectionHtml('Seamos Mejores Maestros','','maestros', mae, null)}
+    ${showSalaB ? sectionHtml('Seamos Mejores Maestros — Sala B','','maestros', salaB, null, salaBLead) : ''}
     ${week.song_mid && vid.length ? `<div class="vmc-song-row"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Canción ${week.song_mid}</div>` : ''}
     ${sectionHtml('Nuestra Vida Cristiana','','vida', vid, null)}
     ${closeRow}`;
@@ -27279,7 +27662,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
       <div style="display:flex;gap:8px;margin-bottom:1rem;align-items:center;flex-wrap:wrap">
         <div style="flex:1;min-width:140px">
           <div class="form-label" style="margin-bottom:4px">Semana del</div>
-          <input type="date" class="form-input" id="vmc-date-start" style="padding:0.55rem 0.75rem;font-size:0.85rem">
+          <input type="date" class="form-input" id="vmc-date-start" style="padding:0.55rem 0.75rem;font-size:0.85rem" onchange="vmcOnStartDateChange()">
         </div>
         <div style="flex:1;min-width:140px">
           <div class="form-label" style="margin-bottom:4px">al</div>
@@ -27291,6 +27674,15 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
       <div style="margin-bottom:1rem">
         <div class="form-label" style="margin-bottom:4px">Lectura bíblica de la semana</div>
         <input type="text" class="form-input" id="vmc-reading" placeholder="Ej: Jeremías 9, 10" style="font-size:0.85rem;padding:0.55rem 0.75rem">
+      </div>
+
+      <!-- v1.47.0: importación automática desde JW.ORG -->
+      <div style="margin-bottom:1rem">
+        <button type="button" class="btn-secondary" id="vmc-import-btn" onclick="vmcImportFromJw(true)" style="width:100%;font-size:0.82rem;padding:0.55rem 0.9rem">
+          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;margin-right:5px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Importar programa desde JW.ORG
+        </button>
+        <div id="vmc-import-status" style="font-size:0.74rem;color:var(--text3);margin-top:5px;line-height:1.4;display:none"></div>
       </div>
 
       <!-- Meta rows: Presidente, Canción apertura, Oración apertura, Canción cierre, Oración cierre -->
@@ -27310,14 +27702,6 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
         <div class="vmc-meta-row">
           <span class="vmc-meta-label">Canción apertura</span>
           <input type="text" class="vmc-meta-val-input" id="vmc-meta-song-open" placeholder="Ej: 5">
-        </div>
-        <div class="vmc-meta-row">
-          <span class="vmc-meta-label">Oración apertura</span>
-          <div class="vmc-assign-wrap" style="flex:1">
-            <input type="hidden" id="vmc-meta-prayer-open">
-            <button type="button" class="vmc-person-btn" data-placeholder="Seleccionar…"
-              onclick="vmcPpOpen(document.getElementById('vmc-meta-prayer-open'),this,'Oración de apertura')">Seleccionar…</button>
-          </div>
         </div>
         <div class="vmc-meta-row">
           <span class="vmc-meta-label">Canción intermedia</span>
@@ -27358,6 +27742,27 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
         </div>
         <div id="vmc-parts-maestros"></div>
         <button class="vmc-add-part-btn" onclick="vmcAddPart('maestros')">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Agregar parte
+        </button>
+      </div>
+
+      <!-- SEAMOS MEJORES MAESTROS — SALA B -->
+      <div class="vmc-section-block">
+        <div class="vmc-section-header vmc-section-header-maestros">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Seamos Mejores Maestros — Sala B
+        </div>
+        <div class="vmc-meta-row">
+          <span class="vmc-meta-label">Encargado</span>
+          <div class="vmc-assign-wrap" style="flex:1">
+            <input type="hidden" id="vmc-salab-lead">
+            <button type="button" class="vmc-person-btn" data-placeholder="Seleccionar…"
+              onclick="vmcPpOpen(document.getElementById('vmc-salab-lead'),this,'Encargado de la Sala B')">Seleccionar…</button>
+          </div>
+        </div>
+        <div id="vmc-parts-maestros_b"></div>
+        <button class="vmc-add-part-btn" onclick="vmcAddPart('maestros_b')">
           <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Agregar parte
         </button>
