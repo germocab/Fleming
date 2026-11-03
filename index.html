@@ -16,15 +16,19 @@
 (function(){
   function sync(){
     try {
-      var c = getComputedStyle(document.body || document.documentElement).backgroundColor;
-      if (!c || c === 'rgba(0, 0, 0, 0)' || c === 'transparent') c = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
-      if (!c) return;
+      /* v1.53.0-beta: se lee la variable --bg (valor final, sin la transición de 0.3s del <body>), que es el fondo plano de
+         la plataforma en Claro/Oscuro. Antes se leía el color animado del body y podía quedar a medio camino o desfasado. */
+      var c = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+      if (!c || c.indexOf('var(') === 0) c = getComputedStyle(document.body || document.documentElement).backgroundColor;
+      if (!c || c === 'rgba(0, 0, 0, 0)' || c === 'transparent') return;
       document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){ m.setAttribute('content', c); });
     } catch(e) {}
   }
   document.addEventListener('DOMContentLoaded', function(){
     sync();
-    new MutationObserver(sync).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme','style','class'] });
+    new MutationObserver(function(){ sync(); setTimeout(sync, 350); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme','style','class'] });
+    try { new MutationObserver(function(){ sync(); }).observe(document.head, { childList: true, subtree: true, characterData: true }); } catch(e) {}
+    window.addEventListener('focus', sync); document.addEventListener('visibilitychange', sync);
     if (window.matchMedia) { try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', sync); } catch(e) {} }
   });
 })();
@@ -322,7 +326,7 @@
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { font-size: 16px; overflow-x: clip; max-width: 100vw; }
+  html { font-size: 16px; overflow-x: clip; max-width: 100vw; background: var(--bg); } /* v1.53.0-beta: fondo plano bajo la barra del sistema */
   body {
     font-family: var(--font);
     background: var(--bg);
@@ -668,6 +672,12 @@
   html.navbar-avatar-mode #nav-options-dots-btn { display: none !important; }
   html.navbar-avatar-mode .nav-avatar-btn { display: flex; }
   #options-dropdown-notif-item { display: none; }
+  /* v1.53.0-beta: en UI Classic y pantallas pequeñas, "Administrar" sale de la barra superior y vive en Más Opciones. */
+  #options-dropdown-admin-item { display: none; }
+  @media (max-width: 639px) {
+    html:not(.inicio-mode) #nav-admin-btn { display: none !important; }
+    html:not(.inicio-mode) #options-dropdown-admin-item.has-admin { display: flex; }
+  }
 
   .dropdown-item {
     display: flex; align-items: center; gap: 10px;
@@ -2667,6 +2677,7 @@
     transform: scale(var(--aseo-tv-scale));
     transform-origin: center top;
     transition: transform 0.2s ease;
+    position: relative; z-index: 1;
   }
   .aseo-tv-title {
     font-size: clamp(3.1rem, 1.8vw, 1.6rem);
@@ -2682,29 +2693,30 @@
     gap: clamp(1.5rem, 3vw, 3.25rem);
   }
   .aseo-tv-block {
-    flex: 1 1 380px; max-width: 620px;
+    flex: 1 1 460px; max-width: 760px;
     background: var(--surface2); border: 1px solid var(--border-active);
-    border-radius: 36px; padding: clamp(2.5rem, 4.5vh, 4rem) clamp(2rem, 3.5vw, 3.5rem);
-    display: flex; flex-direction: column; align-items: center; gap: 1.1rem;
+    border-radius: 40px; padding: clamp(3rem, 6vh, 5rem) clamp(2rem, 3.5vw, 3.5rem);
+    display: flex; flex-direction: column; align-items: center; gap: 1.4rem;
     box-shadow: var(--shadow-lg);
   }
   .aseo-tv-block-icon {
-    width: clamp(70px, 7.5vw, 100px); height: clamp(70px, 7.5vw, 100px);
+    width: clamp(84px, 9vw, 124px); height: clamp(84px, 9vw, 124px);
     border-radius: 50%; background: var(--surface3); color: var(--text3);
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   }
   .aseo-tv-block.is-encargado .aseo-tv-block-icon { background: var(--accent); color: #fff; }
   .aseo-tv-block-icon svg { width: 46%; height: 46%; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .aseo-tv-block-label {
-    font-size: clamp(1.1rem, 1.4vw, 1.4rem); font-weight: 700;
+    font-size: clamp(1.3rem, 1.8vw, 1.8rem); font-weight: 700;
     color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em;
   }
   .aseo-tv-block-value {
-    font-size: clamp(2.2rem, 4.2vw, 3.8rem); font-weight: 800;
-    line-height: 1.15; word-break: break-word;
+    font-size: clamp(3.2rem, 7vw, 6.5rem); font-weight: 800;
+    line-height: 1.1; word-break: break-word;
   }
-  .aseo-tv-block-value.is-empty { font-weight: 500; font-style: italic; color: var(--text3); font-size: clamp(1.5rem, 2.6vw, 2.2rem); }
+  .aseo-tv-block-value.is-empty { font-weight: 500; font-style: italic; color: var(--text3); font-size: clamp(1.8rem, 3vw, 2.6rem); }
   .aseo-tv-close {
+    z-index: 30; /* v1.53.0-beta: por encima de la tarjeta (que tiene transform y tapaba los botones) */
     position: fixed; top: clamp(1.25rem, 2.5vw, 2.25rem); right: clamp(1.25rem, 2.5vw, 2.25rem);
     width: clamp(48px, 4vw, 60px); height: clamp(48px, 4vw, 60px); border-radius: 50%;
     background: var(--surface2); border: 1px solid var(--border-active);
@@ -2716,6 +2728,7 @@
   .aseo-tv-close svg { width: 44%; height: 44%; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; }
 
   .aseo-tv-more-wrap {
+    z-index: 30; /* v1.53.0-beta: antes quedaba debajo de la tarjeta escalada y los botones del menú no recibían clics */
     position: fixed; top: clamp(1.25rem, 2.5vw, 2.25rem); right: calc(clamp(48px, 4vw, 60px) + clamp(1.25rem, 2.5vw, 2.25rem) + 0.75rem);
   }
   .aseo-tv-more-btn {
@@ -2733,7 +2746,7 @@
     background: var(--surface); border: 1px solid var(--border-active);
     border-radius: 16px; padding: 0.6rem;
     min-width: 240px; box-shadow: var(--shadow-lg);
-    display: none; z-index: 10;
+    display: none; z-index: 40; opacity: 1;
   }
   .aseo-tv-more-menu.open { display: block; animation: menuMorphIn 0.32s var(--ease-fluid-snappy); }
   .aseo-tv-more-section-label {
@@ -4387,6 +4400,10 @@
     padding: 6px 10px; cursor: pointer;
   }
 
+  @keyframes grupoSlideFromRight { from { opacity: 0; transform: translateX(42px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes grupoSlideFromLeft  { from { opacity: 0; transform: translateX(-42px); } to { opacity: 1; transform: translateX(0); } }
+  .grupo-slide-from-right { animation: grupoSlideFromRight 0.28s var(--ease-fluid-soft) both; }
+  .grupo-slide-from-left  { animation: grupoSlideFromLeft  0.28s var(--ease-fluid-soft) both; }
   .grupo-detail-hero {
     display: flex; flex-direction: column; align-items: center;
     padding: 1.5rem 1.25rem 1.25rem; text-align: center;
@@ -7247,6 +7264,10 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
             <span data-i18n="notif.title">Notificaciones</span>
             <span id="notif-badge-menu" style="display:none;width:8px;height:8px;border-radius:50%;background:var(--red);margin-left:auto;flex-shrink:0"></span>
           </button>
+          <button class="dropdown-item" id="options-dropdown-admin-item" onclick="closeOptionsMenu();goAdminShortcut(this.dataset.adminTab)">
+            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Administrar
+          </button>
           <button class="dropdown-item appearance-trigger" id="appearance-trigger-main" onclick="toggleAppearanceSubmenu('main')">
             <svg class="sub-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
             Apariencia
@@ -9206,7 +9227,7 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
           <div class="profile-row-label" data-i18n="settings.version">Versión de la plataforma</div>
           <div class="profile-row-value" id="pref-version-value">—</div>
         </div>
-        <span class="pref-alpha-badge" id="pref-alpha-badge">BETA</span>
+        <span class="pref-alpha-badge" id="pref-alpha-badge">ALPHA</span>
         <!-- Hold progress ring -->
         <svg id="ver-hold-ring" viewBox="0 0 36 36" style="position:absolute;right:12px;width:28px;height:28px;opacity:0;transition:opacity 0.2s;pointer-events:none">
           <circle cx="18" cy="18" r="15" fill="none" stroke="var(--surface3)" stroke-width="3"/>
@@ -10323,7 +10344,12 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
 // (3) Reunión Pública: nuevo apartado "Conferencias salientes" (conferenciante, tema, congregación de destino y fecha). Se crea desde
 // "+ Nueva semana" con el toggle Reunión Local / Conferencia Saliente; el conferenciante recibe una notificación. Requiere la tabla
 // fs_outgoing_talks (ver supabase_conferencias_salientes.sql).
-const APP_VERSION = '1.52.0';
+// v1.53.0-beta: (1) Aseo del Salón: Full Screen toma el tema (claro/oscuro) de la plataforma, el menú Más opciones vuelve a ser
+// utilizable, el PopUp recupera sus colores/tamaño/ícono y los bloques de Grupos asignados y Encargado son mucho más grandes.
+// (2) Detalle de Grupo de Servicio: el swipe izquierda/derecha entre grupos ahora funciona (con animación). (3) La barra del
+// sistema/WebApp toma el color plano del fondo de la plataforma (Claro/Oscuro). (4) UI Classic en móvil: "Administrar" pasa al
+// menú Más Opciones.
+const APP_VERSION = '1.53.0-beta';
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -12804,32 +12830,53 @@ function _grupoSwipeNavigate(direction) {
   const nextIdx = idx + direction;
   if (nextIdx < 0 || nextIdx >= grupos.length) return; // ya está en el primer/último grupo
   openGrupoDetailPage(grupos[nextIdx].id);
+  // v1.53.0-beta: animación de deslizamiento (siguiente entra por la derecha, anterior por la izquierda)
+  const page = document.getElementById('page-grupo');
+  const targets = page ? page.querySelectorAll('.grupo-detail-hero, .grupo-detail-body') : [];
+  const cls = direction > 0 ? 'grupo-slide-from-right' : 'grupo-slide-from-left';
+  targets.forEach(el => { el.classList.remove('grupo-slide-from-right', 'grupo-slide-from-left'); void el.offsetWidth; el.classList.add(cls); });
 }
 
+// v1.53.0-beta: antes este bloque buscaba #page-grupo al cargar el script, pero ese elemento se define más abajo en el HTML,
+// así que getElementById devolvía null y el swipe nunca se activaba. Ahora los listeners viven en document y se filtran
+// por "el detalle de Grupo está abierto".
 (function initGrupoSwipeNav() {
-  const page = document.getElementById('page-grupo');
-  if (!page) return;
-  let touchStartX = 0, touchStartY = 0, touchActive = false;
-  const SWIPE_THRESHOLD = 60;   // px mínimos horizontales para considerar swipe
-  const SWIPE_MAX_VERTICAL = 60; // tolerancia vertical, para no interferir con el scroll
+  let startX = 0, startY = 0, active = false;
+  const SWIPE_THRESHOLD = 60;    // px mínimos horizontales para considerar swipe
+  const SWIPE_MAX_VERTICAL = 80; // tolerancia vertical, para no interferir con el scroll
+  const BLOCK = 'input, textarea, select, [data-no-swipe], .full-map-lightbox, .img-lightbox, .modal-overlay.open';
 
-  page.addEventListener('touchstart', (e) => {
-    if (e.touches.length !== 1) return;
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-    touchActive = true;
+  function grupoOpen() { const pg = document.getElementById('page-grupo'); return !!pg && pg.classList.contains('open'); }
+
+  document.addEventListener('touchstart', (e) => {
+    active = false;
+    if (!grupoOpen() || e.touches.length !== 1) return;
+    const pg = document.getElementById('page-grupo');
+    if (!pg.contains(e.target) || e.target.closest(BLOCK)) return;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    active = true;
   }, { passive: true });
 
-  page.addEventListener('touchend', (e) => {
-    if (!touchActive) return;
-    touchActive = false;
-    const touch = e.changedTouches[0];
-    const dx = touch.clientX - touchStartX;
-    const dy = touch.clientY - touchStartY;
-    if (Math.abs(dx) < SWIPE_THRESHOLD || Math.abs(dy) > SWIPE_MAX_VERTICAL) return;
-    // dx > 0: dedo se movió a la derecha → grupo anterior. dx < 0 → grupo siguiente.
+  document.addEventListener('touchend', (e) => {
+    if (!active) return;
+    active = false;
+    if (!grupoOpen()) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - startX, dy = t.clientY - startY;
+    if (Math.abs(dx) < SWIPE_THRESHOLD || Math.abs(dy) > SWIPE_MAX_VERTICAL || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    // dedo a la izquierda (dx < 0) → grupo siguiente; a la derecha (dx > 0) → grupo anterior.
     _grupoSwipeNavigate(dx > 0 ? -1 : 1);
   }, { passive: true });
+
+  // Desktop: flechas del teclado.
+  document.addEventListener('keydown', (e) => {
+    if (!grupoOpen() || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable]')) return;
+    if (document.querySelector('.full-map-lightbox.open')) return;
+    if (e.key === 'ArrowLeft') _grupoSwipeNavigate(-1);
+    else if (e.key === 'ArrowRight') _grupoSwipeNavigate(1);
+  });
 })();
 
 function getApellido(nombreCompleto) {
@@ -16468,7 +16515,8 @@ async function updateAdminShortcuts() {
     if (el) { el.style.display = 'none'; el.innerHTML = ''; }
   });
   if (!btn) return;
-  const hideBtn = () => { btn.style.display = 'none'; delete btn.dataset.adminTab; };
+  const adminItem = document.getElementById('options-dropdown-admin-item');
+  const hideBtn = () => { btn.style.display = 'none'; delete btn.dataset.adminTab; if (adminItem) { adminItem.classList.remove('has-admin'); delete adminItem.dataset.adminTab; } };
 
   const simplified = typeof isSimplifiedModeActive === 'function' && isSimplifiedModeActive();
   const sub = currentSubTab;
@@ -16504,6 +16552,7 @@ async function updateAdminShortcuts() {
 
   btn.dataset.adminTab = adminTab;
   btn.style.display = '';
+  if (adminItem) { adminItem.dataset.adminTab = adminTab; adminItem.classList.add('has-admin'); }
 }
 
 async function goAdminShortcut(adminTab) {
@@ -21467,10 +21516,18 @@ function buildAseoTvCardHTML(row) {
   `;
 }
 
+// v1.53.0-beta: ¿la plataforma está actualmente en Modo Oscuro? (respeta Claro / Oscuro / Automático)
+function aseoGlobalIsDark() {
+  const theme = document.documentElement.getAttribute('data-theme') || 'auto';
+  return theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+}
+
 function openAseoTvMode(idx) {
   const row = _aseoUserRows[idx];
   if (!row) return;
   _aseoCurrentIdx = idx;
+  // v1.53.0-beta: el Full Screen arrancaba siempre en oscuro; ahora parte con el tema de la plataforma.
+  _aseoTvLocalTheme = aseoGlobalIsDark() ? 'dark' : 'light';
 
   document.getElementById('aseo-tv-card').innerHTML = buildAseoTvCardHTML(row);
 
@@ -21611,11 +21668,7 @@ async function openAseoPopupMode(idx) {
   if (!win) { showToast('El navegador bloqueó la ventana emergente. Permite ventanas emergentes para usar este modo.', 'error'); return; }
   window._aseoPopupWin = win;
 
-  const isDarkGlobal = (() => {
-    const theme = document.documentElement.getAttribute('data-theme') || 'auto';
-    return theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-  })();
-  _aseoTvLocalTheme = isDarkGlobal ? 'dark' : 'light';
+  _aseoTvLocalTheme = aseoGlobalIsDark() ? 'dark' : 'light';
 
   const scale = ASEO_TV_SCALE_STEPS[_aseoTvScaleIdx];
 
@@ -21694,27 +21747,27 @@ async function openAseoPopupMode(idx) {
 function getAseoPopupCSS() {
   const rootVars = getComputedStyle(document.documentElement);
   const varsToCopy = ['--bg','--surface','--surface2','--surface3','--text','--text2','--text3','--border','--border-active','--accent','--accent-light','--shadow-lg','--font'];
-  const rootCss = `:root[data-theme] { ${varsToCopy.map(v => `${v}: ${rootVars.getPropertyValue(v) || ''};`).join(' ')} }`;
+  const rootCss = `:root { ${varsToCopy.map(v => `${v}: ${rootVars.getPropertyValue(v) || ''};`).join(' ')} }`;
   return `
     ${rootCss}
     * { box-sizing: border-box; }
     body { margin: 0; font-family: var(--font, -apple-system, sans-serif); background: var(--bg); }
     .aseo-tv-overlay { display:flex; min-height:100vh; align-items:center; justify-content:center; padding:3vh 4vw; background: var(--bg); color: var(--text); }
-    .aseo-tv-card { width:100%; max-width:1480px; margin:auto; display:flex; flex-direction:column; align-items:center; text-align:center; gap:clamp(2.5rem,6vh,4.5rem); transform-origin:center top; transition:transform 0.2s ease; }
+    .aseo-tv-card { width:100%; max-width:1480px; margin:auto; display:flex; flex-direction:column; align-items:center; text-align:center; gap:clamp(2rem,5vh,4rem); transform:scale(var(--aseo-tv-scale,1)); transform-origin:center top; transition:transform 0.2s ease; position:relative; z-index:1; }
     .aseo-tv-title { font-size:clamp(1.1rem,1.8vw,1.6rem); font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:0.06em; }
     .aseo-tv-day { font-size:clamp(2.6rem,6vw,4.5rem); font-weight:800; letter-spacing:-0.02em; line-height:1.05; }
     .aseo-tv-grid { width:100%; display:flex; flex-wrap:wrap; justify-content:center; gap:clamp(1.5rem,3vw,3.25rem); }
-    .aseo-tv-block { flex:1 1 320px; max-width:560px; background:var(--surface2); border:1px solid var(--border-active); border-radius:32px; padding:clamp(2rem,4vh,3rem) clamp(1.5rem,3vw,2.5rem); display:flex; flex-direction:column; align-items:center; gap:1rem; box-shadow:var(--shadow-lg); }
-    .aseo-tv-block-icon { width:clamp(56px,6vw,80px); height:clamp(56px,6vw,80px); border-radius:50%; background:var(--surface3); color:var(--text3); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .aseo-tv-block { flex:1 1 400px; max-width:720px; background:var(--surface2); border:1px solid var(--border-active); border-radius:36px; padding:clamp(2.5rem,5vh,4rem) clamp(1.5rem,3vw,2.5rem); display:flex; flex-direction:column; align-items:center; gap:1.2rem; box-shadow:var(--shadow-lg); }
+    .aseo-tv-block-icon { width:clamp(72px,8vw,110px); height:clamp(72px,8vw,110px); border-radius:50%; background:var(--surface3); color:var(--text3); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
     .aseo-tv-block.is-encargado .aseo-tv-block-icon { background:var(--accent); color:#fff; }
     .aseo-tv-block-icon svg { width:46%; height:46%; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
-    .aseo-tv-block-label { font-size:clamp(0.95rem,1.2vw,1.2rem); font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:0.07em; }
-    .aseo-tv-block-value { font-size:clamp(1.8rem,3.4vw,3rem); font-weight:800; line-height:1.15; word-break:break-word; }
+    .aseo-tv-block-label { font-size:clamp(1.15rem,1.7vw,1.6rem); font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:0.07em; }
+    .aseo-tv-block-value { font-size:clamp(3rem,6.2vw,5.8rem); font-weight:800; line-height:1.1; word-break:break-word; }
     .aseo-tv-block-value.is-empty { font-weight:500; font-style:italic; color:var(--text3); font-size:clamp(1.2rem,2vw,1.7rem); }
-    .aseo-tv-more-wrap { position:fixed; top:1.25rem; right:1.25rem; }
+    .aseo-tv-more-wrap { position:fixed; top:1.25rem; right:1.25rem; z-index:30; }
     .aseo-tv-more-btn { width:48px; height:48px; border-radius:50%; background:var(--surface2); border:1px solid var(--border-active); box-shadow:var(--shadow-lg); cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--text); }
     .aseo-tv-more-btn svg { width:42%; height:42%; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
-    .aseo-tv-more-menu { position:absolute; top:calc(100% + 10px); right:0; background:var(--surface); border:1px solid var(--border-active); border-radius:16px; padding:0.6rem; min-width:230px; box-shadow:var(--shadow-lg); display:none; }
+    .aseo-tv-more-menu { position:absolute; top:calc(100% + 10px); right:0; background:var(--surface); border:1px solid var(--border-active); border-radius:16px; padding:0.6rem; min-width:240px; box-shadow:var(--shadow-lg); display:none; z-index:40; }
     .aseo-tv-more-menu.open { display:block; }
     .aseo-tv-more-section-label { font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--text3); padding:0.4rem 0.6rem 0.3rem; }
     .aseo-tv-more-scale-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:0.35rem 0.6rem 0.55rem; }
@@ -21724,6 +21777,10 @@ function getAseoPopupCSS() {
     .aseo-tv-more-divider { height:1px; background:var(--border); margin:4px 0; }
     .aseo-tv-more-item { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:0.6rem 0.6rem; border-radius:10px; font-size:0.875rem; font-weight:500; color:var(--text2); cursor:pointer; width:100%; }
     .aseo-tv-more-item:hover { background:var(--surface2); }
+    .aseo-tv-more-item span { display:flex; align-items:center; gap:10px; }
+    .aseo-tv-more-item svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+    .aseo-tv-more-item:hover { background:rgba(128,128,128,0.16); }
+    .aseo-tv-more-scale-btn:hover { background:rgba(128,128,128,0.16); }
     .aseo-tv-overlay[data-local-theme="light"] { background:#f4f5f7; color:#0b0c0f; }
     .aseo-tv-overlay[data-local-theme="light"] .aseo-tv-block { background:#ffffff; border-color:#e3e5ea; }
     .aseo-tv-overlay[data-local-theme="light"] .aseo-tv-block-icon { background:#eceef2; color:#6b7280; }
