@@ -9,8 +9,26 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
 <link rel="manifest" href="site.webmanifest">
-<meta name="theme-color" content="#007AFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<script>
+/* v1.51.0-alpha: la barra bajo la barra de estado toma siempre el color de fondo de la app (sin azul). */
+(function(){
+  function sync(){
+    try {
+      var c = getComputedStyle(document.body || document.documentElement).backgroundColor;
+      if (!c || c === 'rgba(0, 0, 0, 0)' || c === 'transparent') c = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+      if (!c) return;
+      document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){ m.setAttribute('content', c); });
+    } catch(e) {}
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    sync();
+    new MutationObserver(sync).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme','style','class'] });
+    if (window.matchMedia) { try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', sync); } catch(e) {} }
+  });
+})();
+</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Fleming">
@@ -595,6 +613,7 @@
   }
   .nav-icon-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .nav-icon-btn:hover { background: var(--surface2); }
+  /* v1.51.0.9-alpha: botón circular "Administrar": mismo estilo que Más Opciones (.nav-icon-btn) */
 
   
   .main-segment { transform: scale(var(--navbar-btn-scale, 1)); transform-origin: center; }
@@ -2790,6 +2809,17 @@
   .toast { padding: 0.65rem 1.1rem; background: var(--surface3); border: 1px solid var(--border-active); border-radius: 30px; font-size: 0.84rem; font-weight: 600; color: var(--text); box-shadow: var(--shadow); animation: toastIn 0.25s cubic-bezier(0.16,1,0.3,1); white-space: nowrap; }
   .toast.success { color: var(--green); background: var(--green-light); border-color: rgba(52,199,89,0.3); }
   .toast.error { color: var(--red); background: rgba(255,59,48,0.08); border-color: rgba(255,59,48,0.25); }
+  /* v1.51.0.11-alpha: el saludo al iniciar sesión baja desde la parte superior, en color sólido neutro
+     (blanco en modo claro, negro en modo oscuro) en vez de verde. */
+  .toast-wrap-top { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 0.75rem); left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; max-width: calc(100vw - 1.5rem); }
+  .toast.greeting { background: #ffffff; color: #000000; border: 1px solid rgba(0,0,0,0.12); box-shadow: 0 6px 24px rgba(0,0,0,0.18); animation: toastInTop 0.35s cubic-bezier(0.16,1,0.3,1); overflow: hidden; text-overflow: ellipsis; }
+  .toast.greeting.leaving { animation: toastOutTop 0.25s ease-in forwards; }
+  :root[data-theme="dark"] .toast.greeting { background: #000000; color: #ffffff; border-color: rgba(255,255,255,0.22); box-shadow: 0 6px 24px rgba(0,0,0,0.6); }
+  @media (prefers-color-scheme: dark) {
+    :root[data-theme="auto"] .toast.greeting { background: #000000; color: #ffffff; border-color: rgba(255,255,255,0.22); box-shadow: 0 6px 24px rgba(0,0,0,0.6); }
+  }
+  @keyframes toastInTop { from{opacity:0;transform:translateY(-24px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes toastOutTop { from{opacity:1;transform:translateY(0)} to{opacity:0;transform:translateY(-24px)} }
   @keyframes toastIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 
   .coming-soon-panel {
@@ -6095,7 +6125,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 .ms-footer-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .ms-footer-name { font-family: var(--font); font-size: 0.9rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-  /* ── Voz (v1.50.0-beta) ── */
+  /* ── Voz (v1.57.0-beta) ── */
   .voz-hint{font-size:.76rem;color:var(--text3);margin:4px 0 8px}
   .voz-kind{display:inline-block;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--accent);margin-bottom:4px}
   .voz-examples{font-size:.82rem;color:var(--text2);line-height:1.7}
@@ -6106,12 +6136,16 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
   .home-voz-btn svg,.voz-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   html.voz-avail .home-voz-btn{display:flex;animation:vozPop .34s var(--ease-ultra,ease)}
   html.voz-open .home-bn-icon,html.voz-open .home-bn-pill{transition:opacity .22s ease}
-  html.voz-avail .home-bn-btn{padding:9px 12px}
-  /* v1.58.0-beta: botón Home de la NavBar (activo = blanco con ícono oscuro) */
+  html.inicio-mode .home-bn-btn{padding:9px 12px}
+  /* v1.51.0-alpha: sin permiso de Voz, el botón de Voz se reemplaza por "Más Opciones" */
+  html:not(.voz-avail) .home-more-btn{display:flex}
+  html.voz-avail .home-more-btn{display:none}
+  /* v1.50.0-beta: botón Home de la NavBar (activo = blanco con ícono oscuro) */
   .home-bn-icon{flex-shrink:0;width:48px;height:48px;padding:0;border-radius:50%;border:1px solid var(--border);background:var(--nav-bg);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow-lg);backdrop-filter:blur(var(--ui-blur,34px)) saturate(180%);-webkit-backdrop-filter:blur(var(--ui-blur,34px)) saturate(180%);-webkit-tap-highlight-color:transparent;transition:transform .15s,background .22s,color .22s}
   .home-bn-icon:active{transform:scale(.92)}
   .home-bn-icon svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-  .home-bn-icon.active{background:var(--text);color:var(--bg);border-color:transparent}
+  /* v1.51.0-alpha: activo = azul, igual que Predicación/Reuniones */
+  .home-bn-icon.active{background:var(--accent);color:#fff;border-color:transparent;box-shadow:0 2px 12px rgba(0,122,255,0.35)}
   html.voz-open .home-bn-icon{opacity:0;pointer-events:none}
   @keyframes vozPop{from{opacity:0;transform:scale(.5)}}
   html.voz-open .home-bn-pill{opacity:0;transform:scale(.9);pointer-events:none}
@@ -6143,6 +6177,11 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
   .voz-prev .assignment-card{margin:0;cursor:default;background:var(--surface2);box-shadow:none}
   .voz-prev .assignment-card:hover,.voz-prev .assignment-card:active{transform:none;box-shadow:none}
   .voz-prev+.voz-prev{margin-top:12px}
+  .voz-gm{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px;padding:9px 12px;border-radius:16px;background:var(--surface2);border:1px solid var(--border);font-size:.84rem;font-weight:600;color:var(--text)}
+  .voz-gm span:first-child{min-width:0;overflow-wrap:anywhere}
+  .voz-gm .r{flex-shrink:0;font-size:.68rem;font-weight:700;letter-spacing:.03em;padding:3px 9px;border-radius:999px;background:var(--surface3);color:var(--text2)}
+  .voz-gm .r.s{background:var(--accent);color:#fff}
+  .voz-gm .r.a{background:var(--green-light);color:var(--green)}
   .voz-mp{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:10px 14px}
   .voz-diff{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.86rem;padding:3px 0}
   .voz-diff b{color:var(--text2);min-width:92px}.voz-diff s{color:var(--text3)}.voz-diff em{font-style:normal;font-weight:700;color:var(--green)}
@@ -6178,9 +6217,11 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
   html.inicio-mode.home-greeting .app-header-shell .topnav { align-items: flex-start; padding-top: 0.85rem; padding-bottom: 0.45rem; }
   html.inicio-mode.home-greeting .nav-icons { align-self: flex-start; }
   html.inicio-mode.home-tab-inicio .home-only { display: flex !important; }
-  /* v1.58.0-beta: en Predicación/Reuniones (con Inicio activo) no se ve la foto de perfil: vuelve el botón de tres puntos */
+  /* v1.50.0-beta: en Predicación/Reuniones (con Inicio activo) no se ve la foto de perfil: vuelve el botón de tres puntos */
   html.inicio-mode:not(.home-tab-inicio) .nav-avatar-btn { display: none !important; }
   html.inicio-mode:not(.home-tab-inicio) #nav-options-dots-btn { display: flex !important; }
+  /* v1.51.0-alpha: Notificaciones solo se muestra en Inicio; en Predicación/Reuniones se oculta */
+  html.inicio-mode:not(.home-tab-inicio) #nav-bell-wrap { display: none !important; }
   html.inicio-mode .main-content { padding-bottom: 6.5rem; }
   html.inicio-mode .home-bottom-nav {
     display: flex; align-items: center; gap: 10px; position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(14px + env(safe-area-inset-bottom, 0px));
@@ -6195,6 +6236,9 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 }
 .home-bn-btn.active { background: var(--accent); color: #fff; box-shadow: 0 2px 12px rgba(0,122,255,0.35); }
 #home-content { padding: 0.25rem 0 1rem; }
+.home-custom-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin: 0.4rem 0 0.4rem; padding: 0.85rem 1.1rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--accent); font-family: var(--font); font-size: 0.9rem; font-weight: 700; cursor: pointer; box-shadow: var(--shadow); transition: transform 0.15s; -webkit-tap-highlight-color: transparent; }
+.home-custom-btn:active { transform: scale(0.98); }
+.home-custom-btn svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
 .home-section { margin-bottom: 1.6rem; }
 .home-section-title { font-size: 1.02rem; font-weight: 800; color: var(--text); margin: 0 0 0.7rem 0.1rem; letter-spacing: -0.01em; }
 .home-card-list { display: flex; flex-direction: column; gap: 10px; }
@@ -6331,7 +6375,12 @@ const HOME_SECTIONS = {
 };
 const HOME_DEFAULT_LAYOUT = ['hoy', 'vmc', 'fs', 'resp'];
 
-function isInicioExpEnabled() { return localStorage.getItem('fleming_inicio_exp') === 'true'; }
+// v1.52.0: UI Classic vuelve a ser la vista por defecto. Inicio (Para ti, Mis asignaciones, Texto Diario, NavBar inferior)
+// se activa desde Configuración → Preferencias → "Activar Inicio". Clave nueva (fleming_inicio_enabled) para que todos
+// partan con UI Classic, sin importar lo que tuvieran guardado en 'fleming_ui_classic'.
+function isInicioPrefOn() { try { return localStorage.getItem('fleming_inicio_enabled') === 'true'; } catch { return false; } }
+function isUiClassic() { return !isInicioPrefOn(); }
+function isInicioExpEnabled() { return isInicioPrefOn(); }
 function isInicioActive() {
   return isInicioExpEnabled() && window.innerWidth < 640 &&
     !(typeof isModoSencilloActive === 'function' && isModoSencilloActive());
@@ -6339,21 +6388,20 @@ function isInicioActive() {
 function updateHomeExpToggleUI() {
   const t = document.getElementById('home-exp-toggle'), th = document.getElementById('home-exp-thumb');
   if (!t || !th) return;
-  const on = isInicioExpEnabled();
+  const on = isInicioPrefOn();
   t.style.background = on ? 'var(--accent)' : 'var(--surface3)';
   th.style.left = on ? '21px' : '3px';
 }
 function toggleInicioExpPref() {
-  const next = !isInicioExpEnabled();
-  if (next && typeof isModoSencilloActive === 'function' && isModoSencilloActive()) {
-    showToast('UI Beta no está disponible mientras el Modo Sencillo está activo.', 'error');
+  const nextOn = !isInicioPrefOn();
+  if (nextOn && typeof isModoSencilloActive === 'function' && isModoSencilloActive()) {
+    showToast('Inicio no está disponible mientras el Modo Sencillo está activo.', 'error');
     return;
   }
-  localStorage.setItem('fleming_inicio_exp', next ? 'true' : 'false');
+  localStorage.setItem('fleming_inicio_enabled', nextOn ? 'true' : 'false');
   updateHomeExpToggleUI();
   applyInicioUI();
-  if (next && window.innerWidth >= 640) showToast('UI Beta activada. Solo se ve en un teléfono móvil.', 'success');
-  else showToast(next ? 'UI Beta activada' : 'UI Beta desactivada', next ? 'success' : '');
+  showToast(nextOn ? 'Inicio activado' : 'Inicio desactivado (UI Classic)', nextOn ? 'success' : '');
 }
 
 // Aplica/retira el modo Inicio (clase en <html>, título y barra inferior).
@@ -6389,7 +6437,7 @@ function applyInicioChrome() {
   }
   document.documentElement.classList.toggle('home-greeting', active && currentMainTab === 'inicio');
     document.documentElement.classList.toggle('home-tab-inicio', active && currentMainTab === 'inicio');
-  // v1.58.0-beta: Voz está en la NavBar de las 3 secciones, solo para quien tenga acceso.
+  // v1.50.0-beta: Voz está en la NavBar de las 3 secciones, solo para quien tenga acceso.
   document.documentElement.classList.toggle('voz-avail', active && _vozAllowed());
   document.querySelectorAll('#home-bottom-nav [data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === currentMainTab));
 }
@@ -6528,7 +6576,7 @@ async function renderHome() {
   // v1.52.1-beta: tarjetas que el usuario quitó (mantener presionado) no se muestran.
   para.forEach(c => { c.pkey = _homeParaKey(c); });
   const _hid = _homeHiddenLoad();
-  const paraShown = para.filter(c => !_hid[c.pkey]);
+  const paraShown = para.filter(c => !_hid[c.pkey]).slice(0, 3); // v1.51.0-alpha: máximo 3 tarjetas
   let html = (textoTop ? '<div class="home-section" id="home-texto"></div>' : '') + _homeSection('Para tí', paraShown.length
     ? '<div class="home-card-list" id="home-para-list">' + paraShown.map(_homeCard).join('') + '</div>'
     : '<div class="home-empty" id="home-para-list">Estás al día. Aquí verás tus recordatorios y novedades.</div>');
@@ -6549,6 +6597,8 @@ async function renderHome() {
     if (!cards.length) { html += _homeSection(HOME_SECTIONS[k].title, '<div class="home-empty">Nada por ahora.</div>'); return; }
     html += _homeSection(HOME_SECTIONS[k].title, '<div class="home-card-list">' + cards.map(_homeCard).join('') + '</div>');
   });
+  // v1.51.0.7-alpha: "Personalizar Inicio" vive al final de Inicio (ya no está en el menú Más Opciones).
+  html += '<button type="button" class="home-custom-btn" onclick="openHomeCustomize()"><svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="10" y2="18"/><circle cx="18" cy="16" r="3"/></svg>Personalizar Inicio</button>';
   wrap.innerHTML = html;
   wrap.dataset.ready = '1';
   if (layout.includes('hoy')) renderHomeHoy();
@@ -7073,13 +7123,15 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
 <div id="app">
   <!-- NavBar inferior (Experimento "Inicio", v1.50.0-sb): solo móvil -->
   <nav class="home-bottom-nav" id="home-bottom-nav">
-    <!-- v1.58.0-beta: NUEVA NavBar — [Home] [Predicación | Reuniones] [Voz] -->
+    <!-- v1.50.0-beta: NUEVA NavBar — [Home] [Predicación | Reuniones] [Voz] -->
     <button class="home-bn-icon" id="home-bn-home" data-tab="inicio" onclick="homeNavGo('inicio')" aria-label="Inicio" title="Inicio"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
     <div class="home-bn-pill" id="home-bn-pill">
       <button class="home-bn-btn" data-tab="predicacion" onclick="homeNavGo('predicacion')">Predicación</button>
       <button class="home-bn-btn" data-tab="reuniones" onclick="homeNavGo('reuniones')">Reuniones</button>
     </div>
-    <!-- v1.58.0-beta: Voz — visible en toda la NavBar, solo para quienes tengan acceso (Administración → FlemingApp → Voz) -->
+    <!-- v1.50.0-beta: Voz — visible en toda la NavBar, solo para quienes tengan acceso (Administración → FlemingApp → Voz) -->
+    <!-- v1.51.0-alpha: si el usuario no puede usar Voz, aparece "Más Opciones" en su lugar -->
+    <button class="home-voz-btn home-more-btn" id="home-more-btn" onclick="event.stopPropagation();toggleOptionsMenu()" aria-label="Más Opciones" title="Más Opciones"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.2" fill="currentColor" stroke="none"/></svg></button>
     <button class="home-voz-btn" id="home-voz-btn" onclick="vozOpen()" aria-label="Voz" title="Voz"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg></button>
   </nav>
   <!-- Personalizar Inicio -->
@@ -7170,6 +7222,10 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
   </div>
 </div>
       
+      <!-- v1.51.0.9-alpha: "Administrar" ahora es un botón circular junto a "Más Opciones" (solo en Sub-secciones con acceso de edición) -->
+        <button class="nav-icon-btn nav-admin-btn" id="nav-admin-btn" style="display:none" title="Administrar" aria-label="Administrar" onclick="goAdminShortcut(this.dataset.adminTab)">
+          <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
       <div class="options-wrap">
         <button class="nav-icon-btn" id="nav-options-dots-btn" title="Opciones" onclick="toggleOptionsMenu()">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.2" fill="currentColor" stroke="none"/></svg>
@@ -7214,10 +7270,6 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
             </button>
           </div>
           <div class="dropdown-divider"></div>
-          <button class="dropdown-item home-only" id="options-dropdown-home-item" onclick="openHomeCustomize();closeOptionsMenu()">
-            <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="10" y2="18"/><circle cx="18" cy="16" r="3"/></svg>
-            Personalizar Inicio
-          </button>
           <button class="dropdown-item" id="admin-dropdown-btn" onclick="showPage('admin');closeOptionsMenu()" style="display:none">
             <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             Administración
@@ -7837,6 +7889,11 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
           <span id="meeting-day-select-fs-wrap"></span>
         </div>
         <div id="admin-fs-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Servicio de Campo</div></div></div>
+        <!-- v1.52.0: Conferencias salientes -->
+        <div style="display:flex;align-items:center;margin:1.6rem 0 0.8rem">
+          <span style="flex:1;font-size:0.95rem;font-weight:700">Conferencias salientes</span>
+        </div>
+        <div id="admin-fs-out-list"></div>
       </div>
 
       <div class="admin-section" id="admin-usuarios">
@@ -8016,7 +8073,7 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
         <div id="admin-tips-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Tips</div></div></div>
       </div>
 
-      <!-- ── Voz (v1.50.0-beta) — Administración → FlemingApp → Voz: define quién puede usarla (solo DEV) ── -->
+      <!-- ── Voz (v1.57.0-beta) — Administración → FlemingApp → Voz: define quién puede usarla (solo DEV) ── -->
       <div class="admin-section" id="admin-voz">
         <div style="display:flex;align-items:center;margin-bottom:.4rem"><span style="flex:1;font-size:.95rem;font-weight:700">Voz</span><span class="voz-kind">Beta</span></div>
         <div class="voz-hint">Voz es un botón circular junto a la NavBar, disponible solo en Inicio. Interpreta lo que dices por reglas (no es IA), te muestra cómo quedaría el cambio y solo guarda cuando le dices que sí.</div>
@@ -9094,7 +9151,7 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
         </div>
         <div class="profile-row-content">
           <div class="profile-row-label" data-i18n="settings.experimentos">Experimentos</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.experimentos.desc">Color de acento, animaciones y blur</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.experimentos.desc">Transparencia y blur</div>
         </div>
         <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
@@ -9267,6 +9324,50 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
       <!-- v1.36.7-beta: el toggle "Mostrar ícono en vez de tu foto de perfil"
            se movió a Experimentos (ver page-pref-experimentos). -->
     </div>
+    <!-- v1.51.0.15-alpha: Color de acento (antes en Experimentos). -->
+    <div class="profile-section" id="pref-accent-restricted">
+      <div id="pref-accent-section">
+        <div style="padding:0.75rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
+          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase" data-i18n="exp.coloracento">Color de acento</span>
+        </div>
+        <div style="padding:0.4rem 1rem 1rem;display:flex;gap:14px;align-items:center">
+          <button class="accent-swatch" id="accent-sw-blue"   onclick="setAccentColor('blue')"   style="--sw:#007AFF" title="Sky"></button>
+          <button class="accent-swatch" id="accent-sw-green"  onclick="setAccentColor('green')"  style="--sw:#30c97a" title="Forest"></button>
+          <button class="accent-swatch" id="accent-sw-pink"   onclick="setAccentColor('pink')"   style="--sw:#e040a0" title="Ribbon"></button>
+          <button class="accent-swatch" id="accent-sw-yellow" onclick="setAccentColor('yellow')" style="--sw:#f5a623" title="Desert"></button>
+          <button class="accent-swatch" id="accent-sw-purple" onclick="setAccentColor('purple')" style="--sw:#a855f7" title="Lavender"></button>
+        </div>
+        <!-- Vista previa en vivo (v1.42.0-stable_beta): usa var(--accent) /
+             var(--accent-light) directamente, igual que el resto de la
+             plataforma, así que refleja el color elegido al instante. Muestra
+             una versión reducida de la pantalla de Inicio (Predicación de
+             Casa en Casa) para que se aprecie el color aplicado a botones,
+             íconos y elementos activos. ── -->
+        <div style="padding:0 1rem 1rem">
+          <div style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.5rem" data-i18n="exp.vistaprevia">Vista previa</div>
+          <div style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--bg)">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0.85rem;background:var(--nav-bg);border-bottom:1px solid var(--border)">
+              <span style="font-size:0.82rem;font-weight:700;color:var(--text)">Inicio</span>
+              <span style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--accent);color:#fff;font-size:0.65rem;font-weight:800">1</span>
+            </div>
+            <div style="padding:0.75rem 0.85rem">
+              <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--text3);margin-bottom:0.5rem">Casa en Casa</div>
+              <div style="display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm,10px);padding:0.65rem 0.75rem;box-shadow:var(--shadow)">
+                <div style="flex-shrink:0;width:34px;height:34px;border-radius:10px;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center">
+                  <svg viewBox="0 0 24 24" style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-weight:700;font-size:0.82rem;color:var(--text)">Asignación de predicación</div>
+                  <div style="font-size:0.72rem;color:var(--text3);margin-top:1px">Hoy • 15:30</div>
+                </div>
+                <button style="flex-shrink:0;border:none;border-radius:20px;background:var(--accent);color:#fff;font-family:var(--font);font-size:0.68rem;font-weight:700;padding:5px 11px;cursor:default">Ver</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- Tamaño de la interfaz: debajo de Apariencia -->
     <div class="profile-section">
       <div class="profile-section-title" data-i18n="pref.uisize">Tamaño de la interfaz</div>
@@ -9330,6 +9431,24 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
         </div>
       </div>
       <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.modosencillo.help">Pensado para quienes tienen dificultad para usar la versión por defecto. Notificaciones y Live siguen activas, accesibles desde el menú.</div>
+    </div>
+
+    <!-- v1.52.0: Inicio (opcional). UI Classic es la vista por defecto; aquí se activa Inicio y la NavBar inferior. -->
+    <div class="profile-section">
+      <div class="profile-section-title">Inicio</div>
+      <div class="profile-row" style="cursor:pointer" onclick="toggleInicioExpPref()">
+        <div class="profile-row-icon" style="background:var(--accent-light);color:var(--accent)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Activar Inicio</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Muestra la pantalla de Inicio (Para ti, Mis asignaciones, Texto Diario y Predicación del día) y la barra de navegación inferior (Home, Predicación, Reuniones y Voz).</div>
+        </div>
+        <div id="home-exp-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="home-exp-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
+      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">Por defecto se usa UI Classic. Inicio solo está disponible en teléfonos móviles; en computador y tablet siempre se usa el diseño clásico.</div>
     </div>
 
     <!-- Vista de Contenido (ajuste de presentación en Tablet/Escritorio) -->
@@ -9514,30 +9633,17 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
         </div>
         <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="exp.restricted.title">Blur y color de acento</div>
+          <div class="profile-row-label" data-i18n="exp.restricted.title">Transparencia y blur</div>
           <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.restricted.desc">No están disponibles mientras la Versión Simplificada está activa</div>
         </div>
       </div>
     </div>
     <div class="profile-section" id="exp-appearance-restricted">
-      <!-- Toggle: transparencias / blur (ahora vive en Experimentos, ON por defecto) -->
-      <div class="profile-row" style="cursor:pointer" onclick="toggleTransparencyPref()">
-        <div class="profile-row-icon" style="background:var(--ter-3-bg);color:var(--ter-3)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" opacity="0.5"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="exp.blur.title">Activa el efecto blur</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.blur.desc">Muestra los paneles y encabezados con transparencia y desenfoque</div>
-        </div>
-        <div id="pref-transparency-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="pref-transparency-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
-      </div>
       <!-- v1.29.10-beta: dos sliders independientes de 7 niveles — uno controla
            la Transparencia (opacidad de paneles/encabezados) y el otro el
            Blur/Frosted (intensidad del desenfoque). Comparten los mismos
            nombres de nivel, pero cada uno controla una variable distinta. -->
-      <div id="pref-blur-level-wrap" style="border-top:1px solid var(--border);padding:0.85rem 1rem 1rem">
+      <div id="pref-blur-level-wrap" style="padding:0.85rem 1rem 1rem">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem">
           <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase" data-i18n="exp.transparencia">Transparencia</span>
           <span id="pref-transparency-level-label" style="font-size:0.78rem;font-weight:700;color:var(--accent)">Clásico</span>
@@ -9585,79 +9691,6 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
         </div>
         <div style="padding:0.55rem 0.1rem 0;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.vistaprevia.desc">Así se verán los encabezados y paneles flotantes de la plataforma con estos niveles.</div>
       </div>
-      <!-- Accent color -->
-      <div id="pref-accent-section" style="border-top:1px solid var(--border)">
-        <div style="padding:0.75rem 1rem 0.2rem;display:flex;align-items:center;gap:7px">
-          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <span style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase" data-i18n="exp.coloracento">Color de acento</span>
-        </div>
-        <div style="padding:0.4rem 1rem 1rem;display:flex;gap:14px;align-items:center">
-          <button class="accent-swatch" id="accent-sw-blue"   onclick="setAccentColor('blue')"   style="--sw:#007AFF" title="Sky"></button>
-          <button class="accent-swatch" id="accent-sw-green"  onclick="setAccentColor('green')"  style="--sw:#30c97a" title="Forest"></button>
-          <button class="accent-swatch" id="accent-sw-pink"   onclick="setAccentColor('pink')"   style="--sw:#e040a0" title="Ribbon"></button>
-          <button class="accent-swatch" id="accent-sw-yellow" onclick="setAccentColor('yellow')" style="--sw:#f5a623" title="Desert"></button>
-          <button class="accent-swatch" id="accent-sw-purple" onclick="setAccentColor('purple')" style="--sw:#a855f7" title="Lavender"></button>
-        </div>
-        <!-- Vista previa en vivo (v1.42.0-stable_beta): usa var(--accent) /
-             var(--accent-light) directamente, igual que el resto de la
-             plataforma, así que refleja el color elegido al instante. Muestra
-             una versión reducida de la pantalla de Inicio (Predicación de
-             Casa en Casa) para que se aprecie el color aplicado a botones,
-             íconos y elementos activos. ── -->
-        <div style="padding:0 1rem 1rem">
-          <div style="font-size:0.72rem;font-weight:600;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.5rem" data-i18n="exp.vistaprevia">Vista previa</div>
-          <div style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--bg)">
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0.85rem;background:var(--nav-bg);border-bottom:1px solid var(--border)">
-              <span style="font-size:0.82rem;font-weight:700;color:var(--text)">Inicio</span>
-              <span style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--accent);color:#fff;font-size:0.65rem;font-weight:800">1</span>
-            </div>
-            <div style="padding:0.75rem 0.85rem">
-              <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--text3);margin-bottom:0.5rem">Casa en Casa</div>
-              <div style="display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm,10px);padding:0.65rem 0.75rem;box-shadow:var(--shadow)">
-                <div style="flex-shrink:0;width:34px;height:34px;border-radius:10px;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center">
-                  <svg viewBox="0 0 24 24" style="width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                </div>
-                <div style="flex:1;min-width:0">
-                  <div style="font-weight:700;font-size:0.82rem;color:var(--text)">Asignación de predicación</div>
-                  <div style="font-size:0.72rem;color:var(--text3);margin-top:1px">Hoy • 15:30</div>
-                </div>
-                <button style="flex-shrink:0;border:none;border-radius:20px;background:var(--accent);color:#fff;font-family:var(--font);font-size:0.68rem;font-weight:700;padding:5px 11px;cursor:default">Ver</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="profile-row" style="cursor:pointer;border-top:1px solid var(--border)" onclick="toggleAccentBgPref()">
-          <div class="profile-row-icon" style="background:var(--ter-3-bg);color:var(--ter-3)">
-            <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2v20M2 12h20" opacity="0.4"/><circle cx="12" cy="12" r="9"/></svg>
-          </div>
-          <div class="profile-row-content">
-            <div class="profile-row-label" data-i18n="exp.fondoacento.title">Ajusta el color de fondo</div>
-            <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.fondoacento.desc">El fondo de la plataforma toma el tono del color de acento.</div>
-          </div>
-          <div id="accent-bg-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-            <div id="accent-bg-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Inicio (Experimento, v1.50.0-sb): pantalla de inicio personalizable + NavBar inferior.
-         Exclusivo de teléfonos móviles. -->
-    <div class="profile-section">
-      <div class="profile-section-title">UI Beta</div>
-      <div class="profile-row" style="cursor:pointer" onclick="toggleInicioExpPref()">
-        <div class="profile-row-icon" style="background:var(--accent-light);color:var(--accent)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label">Activar UI Beta</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Una pantalla de Inicio personalizable con tus recordatorios y asignaciones, y una nueva barra de navegación inferior (Home, Predicación, Reuniones y Voz).</div>
-        </div>
-        <div id="home-exp-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="home-exp-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
-      </div>
-      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">Función experimental (UI Beta), disponible solo en teléfonos móviles. Al activarla, el menú Más opciones suma "Personalizar Inicio" (solo en Inicio). No está disponible junto al Modo Sencillo.</div>
     </div>
 
   </div>
@@ -10262,24 +10295,43 @@ function homeResetLayout() { setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT
 // asignaciones de predicación, y presidente, oración final, orador, lector y partes de Vida y Ministerio /
 // Reunión Pública. Muestra el antes → después, pide confirmación, verifica lo guardado y permite deshacer.
 // (2) Solo el DEV lo ve por defecto; el DEV decide qué Admins lo tienen (módulo "Asistente de Voz").
-// v1.50.0-beta: (1) "Voz" pasa a la parte inferior de Inicio: botón circular junto a la NavBar (solo en Inicio;
+// v1.57.0-beta: (1) "Voz" pasa a la parte inferior de Inicio: botón circular junto a la NavBar (solo en Inicio;
 // Predicación y Reuniones muestran solo Inicio y las otras dos secciones). Al presionarlo se agranda, la NavBar
 // se reemplaza por dos botones (X y micrófono) y Voz escucha de inmediato. (2) Interfaz mínima: tu comando, la
 // respuesta y un preview del cambio (tarjeta de asignación); se acepta o rechaza hablando ("sí, confirmo" / "no").
 // (3) Comandos nuevos: agregar territorios ("agrega el territorio 5 y 6 al miércoles") y comandos compuestos
 // ("cambia al encargado del viernes a las 6 de la tarde por Ramón, y asígnale el territorio 22"). (4) Quién puede
 // usar Voz se define en Administración → FlemingApp → Voz.
-// v1.50.0-beta: Voz junta todo lo que dices en una misma frase (espera una breve pausa de silencio) en vez de crear
+// v1.51.0.7-alpha: (1) Voz ahora responde consultas sobre los Grupos de Servicio: "¿De qué grupo de servicio es Nancy
+// Manriquez?", "¿Cuántas personas hay en el Grupo 8?", "¿Quién es el Auxiliar del Grupo 4?". (2) "Personalizar Inicio" ya
+// no está en el menú "Más Opciones": ahora es un botón alargado de bordes redondeados al final de Inicio.
+// v1.51.0.9-alpha: (1) El botón "Administrar" que aparecía sobre las secciones con acceso de edición ahora es un botón
+// circular con ícono, al lado de "Más Opciones", en el lugar que antes ocupaba Notificaciones en Predicación y
+// Reuniones (ahora solo Inicio tiene Notificaciones). (2) Solo se ve dentro de la Sub-sección a la que el Administrador
+// tiene acceso de edición; no aparece en Inicio ni en Predicación/Reuniones en general (el DEV lo ve en todas).
+// v1.51.0.10-alpha: (1) La interfaz con Inicio (antes "UI Beta") pasa a ser la predeterminada: Inicio está disponible desde el
+// principio en teléfonos móviles. (2) El diseño anterior (sin Inicio) se recupera en Configuración → Experimentos → "UI Classic".
+// v1.57.1-beta: Voz junta todo lo que dices en una misma frase (espera una breve pausa de silencio) en vez de crear
 // un cuadro y una respuesta por cada trozo; así se genera un solo preview por comando.
-const APP_VERSION = '1.58.0-beta';
+// v1.51.0.11-alpha: El mensaje que saluda al usuario al iniciar sesión ahora sale desde la parte superior de la pantalla
+// y ya no es verde: es de color sólido neutro (blanco en modo claro, negro en modo oscuro).
+// v1.51.0.15-alpha: (1) "Color de Acento" y "UI Classic" pasan de Experimentos a Preferencias. (2) Se retira el toggle "Activa el
+// efecto blur": ahora solo están los sliders de Transparencia y Blur / Frosted. (3) Se retira el toggle "Ajustar el fondo al color
+// de acento".
+// v1.52.0: (1) UI Classic vuelve a ser la vista por defecto de la aplicación. (2) Inicio (Para ti, Mis asignaciones, Texto Diario,
+// Predicación del día y la NavBar inferior) pasa a ser opcional: se activa desde Configuración → Preferencias → "Activar Inicio".
+// (3) Reunión Pública: nuevo apartado "Conferencias salientes" (conferenciante, tema, congregación de destino y fecha). Se crea desde
+// "+ Nueva semana" con el toggle Reunión Local / Conferencia Saliente; el conferenciante recibe una notificación. Requiere la tabla
+// fs_outgoing_talks (ver supabase_conferencias_salientes.sql).
+const APP_VERSION = '1.52.0';
 // ═════════════════════════════════════════════════════════════════════════
-// v1.58.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
+// v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
 // siempre propone una salida (completa datos, pregunta lo que falta o sugiere alternativas). (2) Perfiles con Personajes
 // Bíblicos: ya no desaparecen al salir y volver a entrar. (3) "Personalizar Inicio" solo aparece en Inicio. (4) Preferencias →
 // Animaciones: Ultra Fluida y Fluidas intercambian posición. (5) NUEVA NavBar: botón Home, Predicación / Reuniones y botón Voz
 // (solo con acceso). (6) Sin foto de perfil en Predicación/Reuniones cuando Inicio está activo. (7) "Inicio" → "UI Beta".
-// Voz (v1.50.0-beta) — botón junto a la NavBar de Inicio (desde v1.55.0-beta: Asistente de Voz)
+// Voz (v1.57.0-beta) — botón junto a la NavBar de Inicio (desde v1.55.0-beta: Asistente de Voz)
 // Motor por reglas (NO es IA): normaliza el texto, detecta la intención con
 // patrones, resuelve fechas/horas/nombres y propone cambios para revisarlos
 // antes de aplicarlos. Solo DEV (o Admins con el módulo "voz" activado).
@@ -10314,7 +10366,7 @@ function vozNorm(s) {
   t = t.replace(/\b(treinta|cuarenta|cincuenta) y (uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve)\b/g, (m, a, b) => VOZ_NUM[a] + VOZ_NUM[b]);
   t = t.replace(/\b(la|las) una\b/g, '$1 1');
   t = t.replace(/\b[a-z]+\b/g, w => Object.prototype.hasOwnProperty.call(VOZ_NUM, w) ? String(VOZ_NUM[w]) : w);
-  // v1.58.0-beta: sinónimos y abreviaturas habituales
+  // v1.50.0-beta: sinónimos y abreviaturas habituales
   t = t.replace(/\bterrenos?\b/g, m => m.replace('terreno', 'territorio')).replace(/\bgrupos? (?:de servicio |de predicacion |de campo )?(?:numero |nro |n |no )?(\d+)/g, 'grupo $1')
     .replace(/\b(lun|mie|jue|vie|sab|dom)\b/g, m => ({ lun: 'lunes', mie: 'miercoles', jue: 'jueves', vie: 'viernes', sab: 'sabado', dom: 'domingo' }[m]));
   return t;
@@ -10435,7 +10487,7 @@ function vozFindAsg(d, fromT, grupoN) {
   let list = D.asg.filter(a => !['evento', 'especial'].includes(a.type));
   if (d.explicit) list = list.filter(a => a.date === d.date);
   else {
-    // v1.50.0-beta: si dijo solo el día de la semana, se toma el más próximo.
+    // v1.57.0-beta: si dijo solo el día de la semana, se toma el más próximo.
     list = list.filter(a => a.date >= d.date && vozDow(a.date) === d.weekday);
     if (list.length) { const first = list[0].date; list = list.filter(a => a.date === first); }
   }
@@ -10447,7 +10499,7 @@ function vozFindAsg(d, fromT, grupoN) {
   return { list: list.slice(0, 8) };
 }
 
-// ── Predicación (v1.50.0-beta): motor multi-operación ──────────────────
+// ── Predicación (v1.57.0-beta): motor multi-operación ──────────────────
 // Una frase puede traer varias operaciones sobre la MISMA asignación:
 // "cambia al encargado del viernes a las 6 de la tarde por Ramón, y asígnale el territorio 22".
 const VOZ_TP = '(\\d{1,2}(?::\\d{2})?(?:\\s+y\\s+(?:media|cuarto|\\d{1,2})|\\s+menos\\s+(?:cuarto|\\d{1,2}))?(?:\\s*(?:am|pm|(?:de|por|en) la (?:manana|tarde|noche|madrugada)))?|mediodia)';
@@ -10683,7 +10735,7 @@ function vozParse(raw) {
   const t0 = vozNorm(raw);
   const chunks = t0.split(/\b(?:ademas|tambien|luego|despues|y ahora|y tambien)\b/).map(s => s.trim()).filter(s => s.length > 3);
   return chunks.map(t => {
-    // v1.58.0-beta: crear asignaciones nuevas; y si una orden de "asignar" no encuentra una salida existente, se crea.
+    // v1.50.0-beta: crear asignaciones nuevas; y si una orden de "asignar" no encuentra una salida existente, se crea.
     let r = vozIsCreate(t) ? vozCreate(t) : null;
     if (!r) r = (/\b(oracion|presidente|presidencia|lector|orador|conferencista|discurso|atalaya|entre semana|vida y ministerio|fin de semana|parte|ayudante|sala b|tema|titulo)\b/.test(t) ? vozMeeting(t) : null) || vozPreach(t) || vozMeeting(t);
     if (r && r.err && r.nf && VOZ_ASSIGN_V.test(t) && !VOZ_EDIT_V.test(t)) { const cx = vozCreateCtx(t); if ((cx.date || cx.time) && (cx.nums || cx.grupo)) r = vozCreateBuild(cx); }
@@ -10693,7 +10745,7 @@ function vozParse(raw) {
   });
 }
 
-// ═══ Voz (v1.58.0-beta): crear asignaciones, grupos de servicio y rescate de frases dudosas ═══
+// ═══ Voz (v1.50.0-beta): crear asignaciones, grupos de servicio y rescate de frases dudosas ═══
 // Crear: "Crea una asignación de predicación para el lunes a las 10, asigna el Territorio 17"
 //        "Asigna el Territorio 20 al Grupo 7 este sábado a las 10"
 // Si falta o no se reconoce algún dato (día, hora, lugar, territorio, encargado, grupo) se propone una
@@ -10862,6 +10914,97 @@ function vozRescue(t, res) {
   }
   return { err: msg, sugg: sug.slice(0, 5), unk: res.unk, nf: res.nf };
 }
+// ═══ Voz (v1.51.0.7-alpha): consultas sobre Grupos de Servicio ═══════════════════
+// «¿De qué grupo de servicio es Nancy Manriquez?» · «¿Cuántas personas hay en el Grupo 8?» · «¿Quién es el Auxiliar del Grupo 4?»
+// Solo lectura: responde al instante, sin preview ni confirmación (usa los datos de Grupos de Servicio de la plataforma).
+const vozPl = (n, one, many) => n + ' ' + (n === 1 ? one : many);
+const vozJoinNames = a => a.length < 2 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' y ' + a[a.length - 1];
+const vozMemRank = m => m.rol === 'superintendente' ? 0 : m.rol === 'auxiliar' ? 1 : m.precursor ? 2 : 3;
+function vozMemTag(m) {
+  if (m.rol === 'superintendente') return { t: 'Superintendente', c: 's' };
+  if (m.rol === 'auxiliar') return { t: 'Auxiliar', c: 'a' };
+  if (m.precursor) return { t: 'Precursor', c: '' };
+  return null;
+}
+function vozMemRows(list, withGroup) {
+  const D = VOZ.data;
+  return list.map(m => {
+    const tag = vozMemTag(m), g = withGroup && D.gru.find(x => x.id === m.grupo_id);
+    return '<div class="voz-gm"><span>' + vozEsc(m.nombre) + (g ? ' · Grupo ' + vozEsc(g.numero) : '') + '</span>' + (tag ? '<span class="r ' + tag.c + '">' + tag.t + '</span>' : '') + '</div>';
+  }).join('');
+}
+function vozMemSort(list) { return list.slice().sort((a, b) => vozMemRank(a) - vozMemRank(b) || String(a.nombre).localeCompare(String(b.nombre), 'es')); }
+function vozGrupoQuery(t) {
+  const D = VOZ.data; if (!D || !D.mie) return null;
+  t = t.replace(/\b(por favor|porfa|gracias)\b/g, ' ').replace(/\s+/g, ' ').trim();
+  if (VOZ_CREATE_V.test(t) || VOZ_EDIT_V.test(t) || VOZ_ASSIGN_V.test(t)) return null;
+  const NOT_NAME = /\b(lunes|martes|miercoles|jueves|viernes|sabado|domingo|hoy|manana|semana|territorios?|asignacion|salida|reunion|hora)\b/;
+
+  // 1) ¿De qué grupo es <persona>?
+  let nm = null, m;
+  if ((m = t.match(/\bque grupo(?: de servicio)?\s+(?:es|esta|pertenece|va|sale|queda|participa|sirve|predica|tiene)\s+(.+)$/))) nm = m[1];
+  else if ((m = t.match(/^(?:y |dime |sabes )?(.+?)\s+(?:de|en|a) que grupo(?: de servicio)?(?: es| esta| pertenece| va)?$/))) nm = m[1];
+  else if ((m = t.match(/^(?:cual es|dime|dame|quiero saber|sabes|me dices)\b.*?\bgrupo(?: de servicio)? (?:de|del|de la) ((?!\d).+)$/))) nm = m[1];
+  if (nm) {
+    nm = nm.replace(/^(?:el|la|los|las)\s+(?:hermano|hermana|hno|hna)\s+/, '').trim();
+    if (!nm || NOT_NAME.test(nm) || /\bgrupo\b/.test(nm)) return null;
+    const hits = vozPeople(nm, D.mie, x => x.nombre);
+    if (!hits.length) {
+      const seen = new Set(), near = vozNear(nm, D.mie, x => x.nombre, 6).filter(x => { const k = vozNorm(x.p.nombre); if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 3);
+      return { err: near.length ? 'No encontré a «' + nm + '» en los Grupos de Servicio, pero hay nombres parecidos. ¿Cuál es?' : 'No encontré a «' + nm + '» en ningún Grupo de Servicio.',
+        sugg: near.map(x => ({ label: '¿Quisiste decir ' + x.p.nombre + '?', cmd: 'de que grupo es ' + vozNorm(x.p.nombre) })), soft: !near.length };
+    }
+    const byName = new Map();
+    hits.forEach(h => { const k = vozNorm(h.p.nombre); if (!byName.has(k)) byName.set(k, []); byName.get(k).push(h.p); });
+    const people = [...byName.values()];
+    const gtxt = rows => { const ns = [...new Set(rows.map(r => { const g = D.gru.find(x => x.id === r.grupo_id); return g ? g.numero : null; }).filter(x => x != null))]; return ns.length ? (ns.length === 1 ? 'del Grupo ' + ns[0] : 'de los Grupos ' + vozJoinNames(ns)) : null; };
+    if (people.length === 1) {
+      const rows = people[0], g = gtxt(rows), tag = vozMemTag(rows[0]);
+      if (!g) return { say: rows[0].nombre + ' no tiene un Grupo de Servicio asignado.', html: '' };
+      return { say: rows[0].nombre + ' es ' + g + (tag ? ' (' + tag.t + ')' : '') + '.', html: '<div class="voz-prev">' + vozMemRows(rows, true) + '</div>' };
+    }
+    return { say: 'Encontré ' + people.length + ' personas con ese nombre:', html: '<div class="voz-prev">' + vozMemRows(people.map(r => r[0]), true) + '</div>' };
+  }
+
+  // 2) Consultas sobre un grupo concreto (cuántos / quién es el Auxiliar / quiénes son)
+  const gm = t.match(/\bgrupo (\d+)\b/); if (!gm) return null;
+  const num = parseInt(gm[1], 10);
+  const isCount = /\b(cuantos|cuantas|cantidad)\b/.test(t);
+  const roleM = t.match(/\b(superintendente|encargado|auxiliar|ayudante|precursor|precursores|precursora|precursoras)\b/);
+  const interrog = /\b(quien|quienes|cual|cuales)\b|^(dime|dame|muestrame|muestra|lista|listame)\b/.test(t);
+  const isList = interrog && /\b(integrantes|miembros|personas|hermanos|publicadores|integran|forman|componen|conforman|son|estan|hay)\b/.test(t);
+  if (!isCount && !(interrog && (roleM || isList))) return null;
+  const g = D.gru.find(x => Number(x.numero) === num);
+  if (!g) return { err: 'No existe el grupo ' + num + '.' };
+  const mem = vozMemSort(D.mie.filter(x => x.grupo_id === g.id)), tit = 'Grupo ' + g.numero;
+
+  if (isCount) {
+    if (!mem.length) return { say: 'El ' + tit + ' no tiene personas registradas.', html: '' };
+    const sup = mem.filter(x => x.rol === 'superintendente').length, aux = mem.filter(x => x.rol === 'auxiliar').length, pre = mem.filter(x => x.rol !== 'superintendente' && x.rol !== 'auxiliar' && x.precursor).length;
+    const cap = [sup && vozPl(sup, 'Superintendente', 'Superintendentes'), aux && vozPl(aux, 'Auxiliar', 'Auxiliares'), pre && vozPl(pre, 'Precursor', 'Precursores')].filter(Boolean).join(' · ');
+    return { say: 'El ' + tit + ' tiene ' + vozPl(mem.length, 'persona', 'personas') + '.', html: '<div class="voz-prev">' + (cap ? '<div class="voz-cap">' + vozEsc(cap) + '</div>' : '') + vozMemRows(mem) + '</div>' };
+  }
+  if (roleM) {
+    const r = roleM[1], isSup = /^(superintendente|encargado)$/.test(r), isAux = /^(auxiliar|ayudante)$/.test(r);
+    const sel = mem.filter(x => isSup ? x.rol === 'superintendente' : isAux ? x.rol === 'auxiliar' : (x.precursor && x.rol !== 'superintendente' && x.rol !== 'auxiliar'));
+    const one = isSup ? 'Superintendente' : isAux ? 'Auxiliar' : 'Precursor', many = isSup ? 'Superintendentes' : isAux ? 'Auxiliares' : 'Precursores';
+    if (!sel.length) return { say: 'El ' + tit + ' no tiene ' + (isSup || isAux ? one : 'Precursores') + ' asignado' + (sel.length === 1 || isSup || isAux ? '' : 's') + '.', html: '' };
+    const names = sel.map(x => x.nombre);
+    return { say: (sel.length === 1 ? 'El ' + one + ' del ' + tit + ' es ' + names[0] + '.' : 'Los ' + many + ' del ' + tit + ' son ' + vozJoinNames(names) + '.'), html: '<div class="voz-prev">' + vozMemRows(sel) + '</div>' };
+  }
+  if (!mem.length) return { say: 'El ' + tit + ' no tiene personas registradas.', html: '' };
+  return { say: 'Estas son las ' + mem.length + ' personas del ' + tit + ':', html: '<div class="voz-prev">' + vozMemRows(mem) + '</div>' };
+}
+function vozGrupoAnswer(q, n) {
+  const pending = !!(VOZ.items.length || VOZ.picks.length);
+  if (q.err) {
+    const res = q.sugg !== undefined ? q : vozRescue(n, q);
+    if (pending) return vozSay(res.err, '', res.soft ? '' : 'err');
+    vozSayErr(res); vozNext(); return;
+  }
+  if (!pending) { VOZ.state = 'idle'; VOZ.ask = null; VOZ.sugg = []; }
+  vozSay(q.say, q.html || '');
+}
 function vozSayErr(e) {
   if (e.sugg && e.sugg.length) {
     VOZ._ss = VOZ._ss || {}; const id = ++VOZ.n; VOZ._ss[id] = e.sugg; VOZ.sugg = e.sugg;
@@ -10883,7 +11026,7 @@ function vozOrd(n, len) {
   return null;
 }
 
-// ═══ Voz (v1.50.0-beta): interfaz mínima junto a la NavBar de Inicio ═════════════
+// ═══ Voz (v1.57.0-beta): interfaz mínima junto a la NavBar de Inicio ═════════════
 Object.assign(VOZ, { open: false, state: 'idle', items: [], picks: [], ask: null, loading: null, loadErr: null, manual: false, quiet: 0, liveEl: null, thinkEl: null, chain: Promise.resolve() });
 const vozById = id => document.getElementById(id);
 const VOZ_SR = () => window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -10894,10 +11037,10 @@ const vozYesNo = n => VOZ_NO.test(n) ? 'no' : (VOZ_YES.test(n) ? 'yes' : null);
 async function vozLoad() {
   const today = vozISO(new Date());
   const q = (t, f) => sb.from(t).select(f || '*');
-  const [a, t, g, c, v, f, p, h] = await Promise.all([
+  const [a, t, g, c, v, f, p, h, mm] = await Promise.all([
     q('assignments').gte('date', vozAdd(today, -1)).order('date').order('time'), q('territories', 'id,number,color'), q('grupos', 'id,numero'),
-    q('conductores'), q('vmc_weeks').order('date_start'), q('fs_weeks').order('date_start'), q('vmc_people'), q('casas').order('direccion')]);
-  VOZ.data = { asg: a.data || [], ter: t.data || [], gru: g.data || [], con: c.data || [], vmc: v.data || [], fs: f.data || [], ppl: p.data || [], casas: h.data || [] };
+    q('conductores'), q('vmc_weeks').order('date_start'), q('fs_weeks').order('date_start'), q('vmc_people'), q('casas').order('direccion'), q('grupo_miembros').order('nombre')]);
+  VOZ.data = { asg: a.data || [], ter: t.data || [], gru: g.data || [], con: c.data || [], vmc: v.data || [], fs: f.data || [], ppl: p.data || [], casas: h.data || [], mie: mm.data || [] };
 }
 async function vozOnOpen() { if (currentRole === 'dev') vozLoadAccess(); }
 
@@ -10941,7 +11084,7 @@ function vozOpen() {
   requestAnimationFrame(() => layer.classList.add('show'));
   VOZ.loadErr = null;
   VOZ.loading = vozLoad().catch(e => { VOZ.loadErr = e; });
-  vozSay(SR ? 'Te escucho. Dime qué quieres cambiar.' : 'Este navegador no soporta dictado por voz. Escribe tu comando.', '<div class="voz-ex">“Crea una asignación para el lunes a las 10, Territorio 17”<br>“Asigna el Territorio 20 al Grupo 7 este sábado a las 10”<br>“Cambia el territorio del jueves al 12”</div>', 'hint');
+  vozSay(SR ? 'Te escucho. Dime qué quieres cambiar o consultar.' : 'Este navegador no soporta dictado por voz. Escribe tu comando.', '<div class="voz-ex">“Crea una asignación para el lunes a las 10, Territorio 17”<br>“Asigna el Territorio 20 al Grupo 7 este sábado a las 10”<br>“Cambia el territorio del jueves al 12”<br>“¿Quién es el Auxiliar del Grupo 4?”</div>', 'hint');
   if (SR) vozListen(); else setTimeout(() => { const i = vozById('voz-text'); if (i) i.focus(); }, 350);
   try { trackEvent('voz_open', {}); } catch (e) {}
 }
@@ -10969,7 +11112,7 @@ function vozListen() {
   const r = new SR(); r.lang = 'es-CL'; r.interimResults = true; r.continuous = true; VOZ.rec = r;
   r.onstart = () => { VOZ.on = true; vozMicUi(); };
   r.onresult = e => {
-    // v1.50.1-beta: todo lo dicho se junta en UNA sola frase; se procesa tras una pausa de silencio.
+    // v1.57.1-beta: todo lo dicho se junta en UNA sola frase; se procesa tras una pausa de silencio.
     let im = '';
     for (let i = e.resultIndex; i < e.results.length; i++) {
       const tr = e.results[i][0].transcript.trim();
@@ -11012,7 +11155,7 @@ async function vozHandle(text) {
   if (VOZ.loading) { vozThink(true); await VOZ.loading; VOZ.loading = null; vozThink(false); }
   if (VOZ.loadErr || !VOZ.data) { vozSay('No pude cargar los datos de la plataforma. Revisa tu conexión y vuelve a abrir Voz.', '', 'err'); return; }
   let st = VOZ.state; const yn = vozYesNo(n), long = n.split(' ').length > 4;
-  // v1.58.0-beta: Voz preguntó «¿para cuándo la creo?» → lo que diga ahora completa la asignación nueva
+  // v1.50.0-beta: Voz preguntó «¿para cuándo la creo?» → lo que diga ahora completa la asignación nueva
   if (VOZ.createAsk) {
     VOZ.createAsk = false;
     if (!/^(no|cancela|cancelar|olvidalo|nada)$/.test(n)) { const cx = vozCreateCtx(n); if (vozCtxHas(cx)) return vozPropose([{ id: ++VOZ.n, text: n, res: vozCreateBuild(cx), sel: 0, inc: true }]); }
@@ -11031,6 +11174,8 @@ async function vozHandle(text) {
     return vozSay('¿Deshago el último cambio? Dime sí o no.');
   }
   if (/\b(deshacer|deshaz|deshago|revertir|revierte)\b/.test(n)) return vozAskUndo();
+  // v1.51.0.7-alpha: consultas sobre Grupos de Servicio (solo lectura; no tocan lo que esté pendiente de confirmar)
+  { let gq = null; try { gq = vozGrupoQuery(n); } catch (e) { console.warn('Voz (grupos):', e); } if (gq) return vozGrupoAnswer(gq, n); }
   if (st === 'confirm') {
     // Corregir lo que se está por crear: «mejor a las 11», «que sea el sábado», «con el hermano Pedro», «en la casa de López»…
     const cr = VOZ.items.find(i => i.o.create);
@@ -11489,7 +11634,7 @@ const I18N = {
   'settings.notificaciones':    { es: 'Notificaciones',           en: 'Notifications', nl: 'Meldingen' },
   'settings.notificaciones.desc': { es: 'Avisos de la plataforma', en: 'Platform alerts', nl: 'Platformmeldingen' },
   'settings.experimentos':      { es: 'Experimentos',             en: 'Experiments', nl: 'Experimenten' },
-  'settings.experimentos.desc': { es: 'Color de acento, animaciones y blur', en: 'Accent color, animations and blur', nl: 'Accentkleur, animaties en blur' },
+  'settings.experimentos.desc': { es: 'Transparencia y blur', en: 'Transparency and blur', nl: 'Transparantie en blur' },
   'settings.ayuda':             { es: 'Ayuda',                    en: 'Help',   nl: 'Help' },
   'settings.ayuda.desc':        { es: 'Tutoriales y Tips', en: 'Tutorials and Tips', nl: 'Tutorials en Tips' },
   'settings.tutoriales':        { es: 'Tutoriales',               en: 'Tutorials', nl: 'Tutorials' },
@@ -11543,10 +11688,8 @@ const I18N = {
   'func.live':             { es: 'Función Live',            en: 'Live Feature', nl: 'Live-functie' },
   'func.live.desc':        { es: 'Detección de calles y avisos de No Pasar en tiempo real', en: 'Real-time street detection and Do-Not-Pass alerts', nl: 'Realtime straatdetectie en Niet-Bezoeken-meldingen' },
   // ── Experimentos ──
-  'exp.restricted.title':  { es: 'Blur, color de acento y animaciones', en: 'Blur, accent color and animations', nl: 'Blur, accentkleur en animaties' },
+  'exp.restricted.title':  { es: 'Transparencia y blur', en: 'Transparency and blur', nl: 'Transparantie en blur' },
   'exp.restricted.desc':   { es: 'No están disponibles mientras la Versión Simplificada está activa', en: 'Not available while Simplified Mode is active', nl: 'Niet beschikbaar terwijl de Vereenvoudigde Versie actief is' },
-  'exp.blur.title':        { es: 'Activa el efecto blur',   en: 'Enable blur effect', nl: 'Blur-effect inschakelen' },
-  'exp.blur.desc':         { es: 'Muestra los paneles y encabezados con transparencia y desenfoque', en: 'Shows panels and headers with transparency and blur', nl: 'Toont panelen en koppen met transparantie en blur' },
   'exp.intensidad':        { es: 'Intensidad',              en: 'Intensity', nl: 'Intensiteit' },
   'exp.transparencia':     { es: 'Transparencia',           en: 'Transparency', nl: 'Transparantie' },
   'exp.blurfrosted':       { es: 'Blur / Frosted',          en: 'Blur / Frosted', nl: 'Blur / Frosted' },
@@ -11560,8 +11703,6 @@ const I18N = {
   'exp.vistaprevia':       { es: 'Vista previa',            en: 'Preview', nl: 'Voorbeeld' },
   'exp.vistaprevia.desc':  { es: 'Así se verán los encabezados y paneles flotantes de la plataforma con este nivel.', en: 'This is how the platform\u2019s headers and floating panels will look with this level.', nl: 'Zo zien de koppen en zwevende panelen van het platform eruit met dit niveau.' },
   'exp.coloracento':       { es: 'Color de acento',         en: 'Accent color', nl: 'Accentkleur' },
-  'exp.fondoacento.title': { es: 'Ajustar el fondo al color de acento', en: 'Match background to accent color', nl: 'Achtergrond aanpassen aan accentkleur' },
-  'exp.fondoacento.desc':  { es: 'El fondo de la plataforma toma un tono derivado del color de acento elegido', en: 'The platform background takes on a tone derived from the chosen accent color', nl: 'De achtergrond van het platform krijgt een tint afgeleid van de gekozen accentkleur' },
   'exp.layout':            { es: 'Layout',                  en: 'Layout', nl: 'Lay-out' },
   'exp.simplificada.section':{ es: 'Versión Simplificada', en: 'Simplified Mode', nl: 'Vereenvoudigde versie' },
   'exp.simplificada.title':{ es: 'Versión Simplificada',    en: 'Simplified Mode', nl: 'Vereenvoudigde versie' },
@@ -11626,7 +11767,6 @@ const I18N = {
   'notifcat.grupo':              { es: 'Grupo de Servicio',           en: 'Service Group',            nl: 'Dienstgroep' },
   'notifcat.live':                { es: 'Notificaciones Live',          en: 'Live Notifications',       nl: 'Live-meldingen' },
   'notifcat.carritos':          { es: 'Carritos',                     en: 'Carts',                     nl: 'Karretjes' },
-  'notifcat.mapas-actualizacion': { es: 'Actualización de Mapas',     en: 'Map Updates',               nl: 'Kaartupdates' },
   'notifcat.vida-ministerio':   { es: 'Vida y Ministerio',           en: 'Christian Life and Ministry', nl: 'Leven en Bediening' },
   'notifcat.fin-semana':        { es: 'Pública',                     en: 'Public Meeting',            nl: 'Openbare vergadering' },
   'notifcat.aseo':               { es: 'Aseo del Salón',               en: 'Hall Cleaning',             nl: 'Schoonmaak van de Zaal' },
@@ -13055,7 +13195,7 @@ function avatarGlyphHtml(name, iconKey) {
   // v1.51.0-beta: si el usuario eligió un Personaje Bíblico, se muestra su imagen (cuadrada,
   // recortada al círculo por el contenedor) en lugar de ícono o iniciales.
   let charUrl = _avatarCharCache[name];
-  if (!charUrl && name) { const lk = String(name).trim().toLowerCase(); const k = Object.keys(_avatarCharCache).find(x => String(x).trim().toLowerCase() === lk); if (k) charUrl = _avatarCharCache[k]; } // v1.58.0-beta: tolera diferencias de mayúsculas
+  if (!charUrl && name) { const lk = String(name).trim().toLowerCase(); const k = Object.keys(_avatarCharCache).find(x => String(x).trim().toLowerCase() === lk); if (k) charUrl = _avatarCharCache[k]; } // v1.50.0-beta: tolera diferencias de mayúsculas
   if (charUrl) return `<img class="avatar-char-img" src="${escapeHtml(charUrl)}" alt="" draggable="false">`;
   if (iconKey && AVATAR_ICONS[iconKey]) {
     return `<svg viewBox="0 0 24 24" class="avatar-glyph-icon" fill="#fff">${AVATAR_ICONS[iconKey]}</svg>`;
@@ -13782,6 +13922,21 @@ async function collectInicioSections(opts) {
         items: items.slice(0, 5),
       });
     }
+    // v1.52.0: conferencias salientes del usuario (próximas)
+    try {
+      const { data: outs } = await sb.from('fs_outgoing_talks').select('*').gte('talk_date', today).order('talk_date');
+      const mine = (outs || []).filter(t => (t.speaker_name || '').trim().toLowerCase() === myName);
+      if (mine.length) {
+        let sec = sections.find(x => x.key === 'fs');
+        if (!sec) {
+          sec = { key: 'fs', title: 'Reunión Pública', color: '#34c759', bg: 'rgba(52,199,89,0.12)',
+            icon: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>', items: [] };
+          sections.push(sec);
+        }
+        for (const t of mine) sec.items.push({ label: 'Conferencia saliente: ' + t.talk_title, sub: t.destination_cong + ' · ' + fsFormatOutDate(t.talk_date), sortKey: _inicioSortKey(t.talk_date, null), weekStart: t.talk_date, onClick: () => inicioGoTo('reuniones', 'fin-semana') });
+        sec.items = sec.items.slice(0, 5);
+      }
+    } catch (e) { /* tabla aún no creada */ }
   } catch (e) { console.warn('Inicio (FS):', e); }
 
   // ── Responsabilidades: próximos cargos (Audio/Video, Micrófonos, Plataforma, Acomodadores, etc.) ──
@@ -14632,7 +14787,7 @@ let _ownAvatarIcon;  // undefined = aún no consultado, string|null = ícono ele
 async function loadOwnAvatarForDropdown() {
   if (!currentUser) return;
   try {
-    // v1.58.0-beta: también se carga el Personaje Bíblico elegido; antes solo se cargaba al visitar Grupos
+    // v1.50.0-beta: también se carga el Personaje Bíblico elegido; antes solo se cargaba al visitar Grupos
     // y por eso el perfil volvía a mostrar iniciales al salir y volver a entrar.
     let res = await sb.from('platform_users').select('avatar_color, avatar_icon, avatar_character').ilike('name', currentUser.name).single();
     if (res.error) res = await sb.from('platform_users').select('avatar_color, avatar_icon').ilike('name', currentUser.name).single();
@@ -14853,7 +15008,7 @@ async function enterApp() {
   const taskEl = document.getElementById('dropdown-task');
   if (taskEl) taskEl.style.display = 'none';
 
-  showToast(`¡Hola, ${currentUser.name}!`, 'success');
+  showToast(`¡Hola, ${currentUser.name}!`, 'greeting');
   startNotifPolling();
   scheduleMidnightRefresh();
   await subscribeToPush();
@@ -16090,6 +16245,7 @@ function switchMainTab(tab, btn) {
     renderSubTabs(tab); // SUB_TABS.inicio no existe → limpia el slider de sub-secciones
     showPage('inicio');
     renderHome();
+    updateAdminShortcuts(); // v1.51.0.9-alpha: Inicio no muestra el botón Administrar
   } else {
     const reunTabs = ['vida-ministerio','fin-semana','aseo-salon','hospitalidad','responsabilidades'];
     currentSubTab = currentSubTab && reunTabs.includes(currentSubTab) ? currentSubTab : 'vida-ministerio';
@@ -16300,57 +16456,54 @@ const VIEWER_PERM_KEY = {
   'responsabilidades': null,
 };
 
+// v1.51.0.9-alpha: el botón "Administrar" ya no es un banner sobre cada Sub-sección: es un botón circular
+// (#nav-admin-btn) en la NavBar superior, junto a "Más Opciones". Solo se muestra dentro de una Sub-sección
+// (Predicación / Reuniones) a la que el Administrador tiene acceso de edición; no aparece en Inicio ni en
+// Predicación/Reuniones "en general". El DEV lo ve en todas las Sub-secciones.
 async function updateAdminShortcuts() {
+  const btn = document.getElementById('nav-admin-btn');
+  // Los antiguos banners por Sub-sección quedan siempre vacíos y ocultos.
+  Object.keys(VIEWER_TO_ADMIN_TAB).forEach(sub => {
+    const el = document.getElementById('admin-shortcut-' + sub);
+    if (el) { el.style.display = 'none'; el.innerHTML = ''; }
+  });
+  if (!btn) return;
+  const hideBtn = () => { btn.style.display = 'none'; delete btn.dataset.adminTab; };
+
   const simplified = typeof isSimplifiedModeActive === 'function' && isSimplifiedModeActive();
-  if (!currentUser || !['dev','admin'].includes(currentRole) || simplified) {
-    // Hide all banners for viewers
-    Object.keys(VIEWER_TO_ADMIN_TAB).forEach(sub => {
-      const el = document.getElementById('admin-shortcut-' + sub);
-      if (el) el.style.display = 'none';
-    });
+  const sub = currentSubTab;
+  if (!currentUser || !['dev','admin'].includes(currentRole) || simplified
+      || currentMainTab === 'inicio' || !VIEWER_TO_ADMIN_TAB[sub]) {
+    hideBtn();
     return;
   }
 
-  // El DEV siempre ve todos los atajos. Para un Admin, cada atajo solo debe
-  // aparecer si el DEV le habilitó el módulo correspondiente — de lo
-  // contrario ni siquiera se pinta el botón "Administrar" (ver fix de
-  // seguridad v1.20.5-beta: antes se mostraba para cualquier Admin sin
-  // verificar el módulo específico, permitiendo entrar por un instante a
-  // secciones no autorizadas).
+  // El DEV siempre tiene acceso. Para un Admin el botón solo aparece si el DEV le habilitó el módulo
+  // correspondiente (fix de seguridad v1.20.5-beta).
   let perms = null;
   if (currentRole === 'admin') {
     await refreshCurrentUserPermsCache();
     perms = _currentUserPermsCache;
+    // Si mientras se resolvían los permisos el usuario cambió de Sub-sección, esta llamada ya es obsoleta.
+    if (sub !== currentSubTab) return;
   }
 
-  Object.keys(VIEWER_TO_ADMIN_TAB).forEach(sub => {
-    const el = document.getElementById('admin-shortcut-' + sub);
-    if (!el) return;
+  let adminTab = VIEWER_TO_ADMIN_TAB[sub];
+  const permKey = VIEWER_PERM_KEY[sub];
+  let allowed;
+  if (sub === 'responsabilidades') {
+    // Depende de cualquiera de los dos módulos (Audio y Video / Acomodación); el botón lleva al primero habilitado.
+    const hasAV = currentRole === 'dev' || canAccessModule(perms, 'audiovideo');
+    const hasAcom = currentRole === 'dev' || canAccessModule(perms, 'acomodacion');
+    allowed = hasAV || hasAcom;
+    adminTab = hasAV ? 'audiovideo' : 'acomodacion';
+  } else {
+    allowed = currentRole === 'dev' || !permKey || canAccessModule(perms, permKey);
+  }
+  if (!allowed) { hideBtn(); return; }
 
-    let adminTab = VIEWER_TO_ADMIN_TAB[sub];
-    const permKey = VIEWER_PERM_KEY[sub];
-    let allowed;
-    if (sub === 'responsabilidades') {
-      // Depende de cualquiera de los dos módulos nuevos; el atajo lleva al
-      // primero que el Admin tenga habilitado.
-      const hasAV = currentRole === 'dev' || canAccessModule(perms, 'audiovideo');
-      const hasAcom = currentRole === 'dev' || canAccessModule(perms, 'acomodacion');
-      allowed = hasAV || hasAcom;
-      adminTab = hasAV ? 'audiovideo' : 'acomodacion';
-    } else {
-      allowed = currentRole === 'dev' || !permKey || canAccessModule(perms, permKey);
-    }
-    if (!allowed) { el.style.display = 'none'; el.innerHTML = ''; return; }
-
-    el.style.display = '';
-    el.innerHTML = `
-      <div class="admin-shortcut-wrap">
-        <button class="admin-shortcut-btn" onclick="goAdminShortcut('${adminTab}')">
-          <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          Administrar
-        </button>
-      </div>`;
-  });
+  btn.dataset.adminTab = adminTab;
+  btn.style.display = '';
 }
 
 async function goAdminShortcut(adminTab) {
@@ -18834,7 +18987,7 @@ async function openManzanaPicker(n) {
   if (!svg) {
     wrap.innerHTML = '<div style="font-size:0.8rem;color:var(--text3)">No se pudo leer el SVG de este territorio.</div>';
   } else {
-    svg.removeAttribute('width'); svg.removeAttribute('height');
+    trepNormalizeSvgSize(svg);
     svg.style.width = '100%'; svg.style.maxHeight = '360px'; svg.style.cursor = 'pointer';
     const matched = trepMatchManzanaElements(svg, _manzanaPickerAllLetters);
     // Normaliza letra -> letra "real" (con mayúsculas tal como viene del territorio)
@@ -19812,9 +19965,19 @@ async function saveWeekBuilder() {
   renderAdminAssignments();
 }
 
+let _terOrig = null; // valores de mapas/SVG tal como están en la base al abrir el modal
 async function openTerritoryModal(t) {
   if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   await ensureTerritoryMapsLoaded();
+  // v1.51.0-alpha: la fila en memoria no trae svg_data/manzanas (y puede no traer los mapas);
+  // se leen completas desde la base para no sobrescribirlas con null al guardar.
+  _terOrig = null;
+  if (t && t.id) {
+    try {
+      const { data: full, error: fullErr } = await sb.from('territories').select('id, map_data, map_data_dark, svg_data, manzanas').eq('id', t.id).single();
+      if (!fullErr && full) { t = { ...t, ...full }; _terOrig = { map_data: full.map_data || null, map_data_dark: full.map_data_dark || null, svg_data: full.svg_data || null }; }
+    } catch (e) { console.warn('openTerritoryModal (fila completa):', e); }
+  }
   editingTerritoryId = t ? t.id : null;
   document.getElementById('ter-modal-title').textContent = t ? 'Editar Territorio' : 'Nuevo Territorio';
   document.getElementById('ter-num').value = t?.number || '';
@@ -20051,7 +20214,21 @@ async function saveTerritory() {
   btn.disabled = true; btn.textContent = 'Guardando...';
   const color = document.getElementById('ter-color-value').value || null;
   const manzanas = (document.getElementById('ter-manzanas').value || '').split(',').map(s => s.trim()).filter(Boolean);
-  const payload = { number, color, no_pasar, map_data: pendingMapBase64 || null, map_data_dark: pendingMapDarkBase64 !== undefined ? pendingMapDarkBase64 : null, svg_data: pendingSvgData || null, manzanas };
+  const payload = { number, color, no_pasar, manzanas };
+  const _nMap = pendingMapBase64 || null, _nDark = pendingMapDarkBase64 || null, _nSvg = pendingSvgData || null;
+  if (editingTerritoryId && _terOrig) {
+    // v1.51.0-alpha: solo se tocan las columnas que el usuario cambió (subir SVG ya no borra los mapas Claro/Oscuro).
+    if (_nMap !== _terOrig.map_data) payload.map_data = _nMap;
+    if (_nDark !== _terOrig.map_data_dark) payload.map_data_dark = _nDark;
+    if (_nSvg !== _terOrig.svg_data) payload.svg_data = _nSvg;
+  } else if (editingTerritoryId) {
+    // No se pudo leer la fila original: nunca se envían mapas vacíos por accidente.
+    if (_nMap) payload.map_data = _nMap;
+    if (_nDark) payload.map_data_dark = _nDark;
+    if (_nSvg) payload.svg_data = _nSvg;
+  } else {
+    payload.map_data = _nMap; payload.map_data_dark = _nDark; payload.svg_data = _nSvg;
+  }
   let error, savedRow;
   if (editingTerritoryId) { ({ data: savedRow, error } = await sb.from('territories').update(payload).eq('id',editingTerritoryId).select('id, number, color, no_pasar').single()); }
   else { ({ data: savedRow, error } = await sb.from('territories').insert(payload).select('id, number, color, no_pasar').single()); }
@@ -20063,7 +20240,8 @@ async function saveTerritory() {
   // we already have the saved row's light columns (savedRow) and the map data
   // we just uploaded (pendingMapBase64 / pendingMapDarkBase64), so no extra
   // network round-trip is needed to keep the admin grid showing the new map.
-  const fullRow = { ...savedRow, map_data: pendingMapBase64 || null, map_data_dark: pendingMapDarkBase64 !== undefined ? pendingMapDarkBase64 : null };
+  const fullRow = { ...savedRow, map_data: _nMap, map_data_dark: _nDark, svg_data: _nSvg, manzanas };
+  delete _territorySvgInfoCache[fullRow.id]; // el selector de manzanas debe ver el SVG nuevo
   const idx = territories.findIndex(t => t.id === fullRow.id);
   if (idx >= 0) territories[idx] = fullRow; else territories.push(fullRow);
   territories.sort((a,b) => a.number - b.number);
@@ -23399,6 +23577,21 @@ function escapeHtml(str) {
   return String(str ?? '').replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
 }
 function showToast(msg, type='') {
+  // v1.51.0.11-alpha: type 'greeting' (saludo de inicio de sesión) sale desde arriba, en color neutro.
+  if (type === 'greeting') {
+    let topWrap = document.getElementById('toast-wrap-top');
+    if (!topWrap) {
+      topWrap = document.createElement('div');
+      topWrap.className = 'toast-wrap-top'; topWrap.id = 'toast-wrap-top';
+      document.body.appendChild(topWrap);
+    }
+    const g = document.createElement('div');
+    g.className = 'toast greeting'; g.textContent = msg;
+    topWrap.appendChild(g);
+    setTimeout(() => g.classList.add('leaving'), 2950);
+    setTimeout(() => g.remove(), 3200);
+    return;
+  }
   const wrap = document.getElementById('toast-wrap');
   const t = document.createElement('div');
   t.className = 'toast ' + type; t.textContent = msg;
@@ -23560,8 +23753,8 @@ function openPrefScreen(name) {
   if (name === 'funciones') { updateH2HViewModeUI(); if (typeof updateLiveAlwaysOnToggleUI === 'function') updateLiveAlwaysOnToggleUI(); if (typeof updatePinFeatureToggleUI === 'function') updatePinFeatureToggleUI(); }
   if (name === 'notificaciones') renderPrefNotifList();
   if (name === 'ayuda') renderAyudaTipsList();
-  if (name === 'preferencias') { updateAnimationsEnabledToggleUI(); updateWeatherToggleUI(); if (typeof updateModoSencilloToggleUI === 'function') updateModoSencilloToggleUI(); }
-  if (name === 'experimentos') { updateAccentSwatchesUI(); updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateAccentBgToggleUI(); updateNavbarBtnSizeUI(); if (typeof updateHomeExpToggleUI === 'function') updateHomeExpToggleUI(); }
+  if (name === 'preferencias') { updateAnimationsEnabledToggleUI(); updateWeatherToggleUI(); if (typeof updateModoSencilloToggleUI === 'function') updateModoSencilloToggleUI(); updateAccentSwatchesUI(); if (typeof updateHomeExpToggleUI === 'function') updateHomeExpToggleUI(); }
+  if (name === 'experimentos') { updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateNavbarBtnSizeUI(); }
   if (name === 'legal-terms') renderPrefLegalTerms();
   if (name === 'legal-privacy') renderPrefLegalPrivacy();
   if (name === 'version') {
@@ -23700,9 +23893,10 @@ function isGroupMinicardsEnabled() {
 // nivel (Mínimo…Extremo) pero cada uno controla una variable distinta.
 const TRANSPARENCY_ALPHA_LEVELS = [0.86, 0.70, 0.58, 0.50, 0.34, 0.20, 0.10];
 const BLUR_PX_LEVELS = [10, 18, 26, 34, 46, 60, 76];
-function isTransparencyEnabled() {
-  return localStorage.getItem('fleming_transparency') !== 'false'; // default true
-}
+// v1.51.0.15-alpha: el toggle "Activa el efecto blur" fue retirado; la transparencia/blur siempre está activa y se
+// regula solo con los sliders de Transparencia y Blur / Frosted.
+function isTransparencyEnabled() { return true; }
+try { localStorage.removeItem('fleming_transparency'); } catch {} // limpia la preferencia antigua
 function getTransparencyLevel() {
   const v = parseInt(localStorage.getItem('fleming_transparency_level') || '4', 10);
   return Math.min(7, Math.max(1, isNaN(v) ? 4 : v));
@@ -23765,15 +23959,6 @@ function updateNavbarBtnSizeUI() {
   if (label) label.textContent = pct + '%';
 }
 function updateTransparencyToggleUI() {
-  const enabled = isTransparencyEnabled();
-  const toggle = document.getElementById('pref-transparency-toggle');
-  const thumb  = document.getElementById('pref-transparency-thumb');
-  if (toggle && thumb) {
-    toggle.style.background = enabled ? 'var(--accent)' : 'var(--surface3)';
-    thumb.style.left = enabled ? '21px' : '3px';
-  }
-  const sliderWrap = document.getElementById('pref-blur-level-wrap');
-  if (sliderWrap) sliderWrap.style.display = enabled ? '' : 'none';
   const labels = [t('exp.blur.nivel.1'), t('exp.blur.nivel.2'), t('exp.blur.nivel.3'), t('exp.blur.nivel.4'), t('exp.blur.nivel.5'), t('exp.blur.nivel.6'), t('exp.blur.nivel.7')];
 
   const transparencySlider = document.getElementById('pref-transparency-level-slider');
@@ -23795,12 +23980,6 @@ function updateTransparencyToggleUI() {
   }
   const blurLabel = document.getElementById('pref-blur-level-label');
   if (blurLabel) blurLabel.textContent = labels[blurLevel - 1];
-}
-function toggleTransparencyPref() {
-  const current = isTransparencyEnabled();
-  localStorage.setItem('fleming_transparency', current ? 'false' : 'true');
-  applyTransparencyPref();
-  updateTransparencyToggleUI();
 }
 
 // ── Tamaño de la Interfaz: 3 niveles (Pequeño, Normal, Grande) ──────────────
@@ -24087,9 +24266,6 @@ function triggerEggUnlock() {
   if (alreadyUnlocked) {
     // Toggle off — let them relive the surprise next time
     localStorage.removeItem('fleming_egg_unlocked');
-    localStorage.removeItem('fleming_accent');
-    localStorage.removeItem('fleming_accent_bg');
-    applyAccentColor('blue');
     localStorage.removeItem('fleming_navbar_options_avatar');
     applyNavbarAvatarUI();
     updateExperimentosNavVisibility();
@@ -24234,12 +24410,12 @@ function applyAccentColor(name) {
 }
 
 function initAccentColor() {
+  try { localStorage.removeItem('fleming_accent_bg'); } catch {} // v1.51.0.15-alpha: preferencia retirada
   const saved = localStorage.getItem('fleming_accent') || 'blue';
   applyAccentColor(saved);
   if (localStorage.getItem('fleming_egg_unlocked') === '1') {
     revealAccentSection();
   }
-  updateAccentBgToggleUI();
   updateExperimentosNavVisibility();
 }
 
@@ -24250,25 +24426,9 @@ function updateAccentSwatchesUI() {
   });
 }
 
-// ── Toggle: "Ajustar el fondo al color de acento" ───────────────────────────
-function isAccentBgSelected() {
-  return localStorage.getItem('fleming_accent_bg') === 'true';
-}
-function toggleAccentBgPref() {
-  const next = !isAccentBgSelected();
-  localStorage.setItem('fleming_accent_bg', next ? 'true' : 'false');
-  updateAccentBgToggleUI();
-  applyAccentColor(localStorage.getItem('fleming_accent') || 'blue');
-  showToast(next ? 'Fondo ajustado al color de acento' : 'Fondo restaurado al valor por defecto', next ? 'success' : '');
-}
-function updateAccentBgToggleUI() {
-  const toggle = document.getElementById('accent-bg-toggle');
-  const thumb  = document.getElementById('accent-bg-thumb');
-  if (!toggle || !thumb) return;
-  const on = isAccentBgSelected();
-  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
-  thumb.style.left = on ? '21px' : '3px';
-}
+// v1.51.0.15-alpha: el toggle "Ajustar el fondo al color de acento" fue retirado. El fondo ya no se tiñe con el
+// acento (siempre usa el valor por defecto). Se conserva isAccentBgSelected() para applyAccentColor().
+function isAccentBgSelected() { return false; }
 
 // ── Animaciones (función oficial, antes en Experimentos): fluidas por defecto ──
 // v1.33.0-beta: se agrega el modo "ultra" (Ultra Fluida), junto a "fluid" y
@@ -25508,13 +25668,7 @@ async function handleFullMapUpload(event) {
     await updateFullMapUI(dataUri);
     showToast('Mapa completo guardado ✓', 'success');
 
-    // Notifica a quienes tengan activo el Toggle "Actualización de Mapas".
-    await sb.from('notifications').insert({
-      title: 'Mapa de la congregación actualizado',
-      body: 'Se subió una nueva versión del mapa completo de la congregación (PDF).',
-      notif_category: 'mapas-actualizacion',
-    });
-    await notifyUsersPush('mapas-actualizacion', { title: 'Mapa de la congregación actualizado', body: 'Hay una nueva versión disponible para descargar.' });
+    // v1.51.0-alpha: ya no se envía notificación al subir el mapa (categoría eliminada).
   };
   reader.onerror = () => {
     showToast('No se pudo leer el archivo', 'error');
@@ -25789,12 +25943,6 @@ const NOTIF_GROUPS = {
     bg: 'rgba(243,97,0,0.12)',
     icon: '<svg viewBox="0 0 24 24"><circle cx="8" cy="19" r="1.8"/><circle cx="17" cy="19" r="1.8"/><path d="M2 3h2l2.4 12.2a2 2 0 0 0 2 1.8h7.2a2 2 0 0 0 2-1.6L20 8H6"/></svg>',
   },
-  mapas: {
-    label: 'notifcat.mapas-actualizacion',
-    color: '#5856d6',
-    bg: 'rgba(88,86,214,0.12)',
-    icon: '<svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>',
-  },
   tips: {
     label: 'notif.group.tips',
     color: '#ffcc00',
@@ -25823,7 +25971,7 @@ const NOTIF_LEVEL_INFO = {
 // Nivel por defecto de cada categoría antes de cualquier personalización.
 const NOTIF_LEVEL_DEFAULTS = {
   'casa': 'normal', 'grupo': 'normal', 'live': 'top', 'carritos': 'normal',
-  'mapas-actualizacion': 'silencio', 'vida-ministerio': 'top', 'fin-semana': 'top',
+  'vida-ministerio': 'top', 'fin-semana': 'top',
   'aseo': 'normal', 'hospitalidad': 'normal', 'responsabilidades': 'top',
   'sistema': 'top', 'solicitud-cuenta': 'top', 'reporte-territorio': 'normal',
   'tips': 'normal',
@@ -25911,7 +26059,6 @@ const NOTIF_CATEGORIES = [
   { id: 'grupo',             label: 'notifcat.grupo', mandatory: false, group: 'grupos',   section: 'predicacion' },
   { id: 'live',              label: 'notifcat.live', mandatory: false, group: 'live',     section: 'predicacion' },
   { id: 'carritos',          label: 'notifcat.carritos', mandatory: false, group: 'carritos', section: 'predicacion' },
-  { id: 'mapas-actualizacion', label: 'notifcat.mapas-actualizacion', mandatory: false, group: 'mapas', section: 'predicacion' },
   { id: 'vida-ministerio',   label: 'notifcat.vida-ministerio', mandatory: true,  group: 'reuniones', section: 'reuniones' },
   { id: 'fin-semana',        label: 'notifcat.fin-semana', mandatory: true,  group: 'reuniones', section: 'reuniones' },
   { id: 'aseo',              label: 'notifcat.aseo', mandatory: false, group: 'reuniones', section: 'reuniones' },
@@ -26200,8 +26347,8 @@ async function resetCategoryLabelFromUI(catId) {
 
 function defaultNotifPrefs() {
   const prefs = {};
-  // v1.21.0-beta: "Actualización de Mapas" viene desactivada por defecto.
-  NOTIF_CATEGORIES.forEach(c => { prefs[c.id] = c.id !== 'mapas-actualizacion'; });
+  // v1.51.0-alpha: se eliminó la categoría "Actualización de Mapas"; todas las demás vienen activadas.
+  NOTIF_CATEGORIES.forEach(c => { prefs[c.id] = true; });
   return prefs;
 }
 // Las prefs viven en platform_users.notif_prefs (jsonb) y se cachean en
@@ -26354,6 +26501,14 @@ const NOTIF_TEMPLATES_DEFAULT = [
     title: 'Nueva asignación en reunión',
     body: 'Se te ha asignado {roles} para la semana del {rango}. Revisa los detalles.',
     vars: ['roles', 'rango'],
+  },
+  {
+    id: 'conferencia_saliente_asignada',
+    label: 'Conferencia Saliente Asignada',
+    desc: 'Se envía al conferenciante cuando se le asigna (o se modifica) una conferencia saliente.',
+    title: 'Conferencia saliente asignada',
+    body: 'Se te asignó la conferencia "{tema}" en {congregacion} el {fecha}.',
+    vars: ['tema', 'congregacion', 'fecha'],
   },
   {
     id: 'casa_asignada',
@@ -26585,11 +26740,13 @@ function applySimplifiedModeUI() {
   const tutorialH2HRow = document.getElementById('pref-tutorial-h2h-row');
   if (tutorialH2HRow) tutorialH2HRow.style.display = active ? 'none' : '';
 
-  // Experimentos: ocultar blur / color de acento / animaciones
+  // Experimentos (transparencia / blur) y Preferencias (color de acento): ocultar en Simplificada
   const expBlock  = document.getElementById('exp-appearance-restricted');
   const expNotice = document.getElementById('exp-appearance-restricted-notice');
+  const accBlock  = document.getElementById('pref-accent-restricted');
   if (expBlock)  expBlock.style.display  = active ? 'none' : '';
   if (expNotice) expNotice.style.display = active ? '' : 'none';
+  if (accBlock)  accBlock.style.display  = active ? 'none' : '';
 
   // Notificaciones: cortar el polling y ocultar el badge
   if (active) {
@@ -28773,6 +28930,9 @@ function vmcRenderWeekProgram(week, isGuest = false) {
 
 let fsWeeks = [];          // cache of all weeks from Supabase
 let fsEditingId = null;    // null = new week, else id of week being edited
+let fsOutTalks = [];       // v1.52.0: conferencias salientes (tabla fs_outgoing_talks)
+let fsOutEditingId = null; // null = nueva, else id de la conferencia saliente en edición
+let fsMode = 'local';      // 'local' | 'out' (toggle del modal)
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -28806,9 +28966,72 @@ async function loadFsWeeks() {
   const { data, error } = await sb.from('fs_weeks').select('*').order('date_start', { ascending: false });
   if (error) { showToast('Error cargando semanas de Pública', 'error'); return; }
   fsWeeks = data || [];
+  await loadFsOutTalks();
+}
+
+// v1.52.0: conferencias salientes. Si la tabla aún no existe, la app sigue funcionando sin ellas.
+async function loadFsOutTalks() {
+  try {
+    const { data, error } = await sb.from('fs_outgoing_talks').select('*').order('talk_date', { ascending: true });
+    if (error) { console.warn('fs_outgoing_talks:', error.message); fsOutTalks = []; return; }
+    fsOutTalks = data || [];
+  } catch (e) { fsOutTalks = []; }
+}
+
+function fsFormatOutDate(d) {
+  if (!d) return '';
+  return new Date(d + 'T00:00:00').toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+function fsEsc(v) { return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function renderAdminFsOut() {
+  const c = document.getElementById('admin-fs-out-list');
+  if (!c) return;
+  if (!fsOutTalks.length) {
+    c.innerHTML = `<div class="vmc-empty"><p>No hay conferencias salientes.<br>Usa "+ Nueva semana" y activa "Conferencia Saliente".</p></div>`;
+    return;
+  }
+  const today = new Date().toISOString().slice(0, 10);
+  const list = [...fsOutTalks].sort((a, b) => b.talk_date.localeCompare(a.talk_date));
+  c.innerHTML = list.map(t => {
+    const past = t.talk_date < today;
+    return `<div class="vmc-week-card">
+      <div class="vmc-week-card-header">
+        <div class="vmc-week-range">${fsEsc(fsFormatOutDate(t.talk_date))}</div>
+        <span class="vmc-week-badge ${past ? 'vmc-week-badge-past' : 'vmc-week-badge-upcoming'}">${past ? 'Pasada' : 'Próxima'}</span>
+      </div>
+      <div style="font-size:0.78rem;color:var(--accent);font-weight:600;margin-top:4px">${fsEsc(t.speaker_name)}${t.talk_title ? ' — ' + fsEsc(t.talk_title) : ''}</div>
+      <div style="font-size:0.78rem;color:var(--text3);margin-top:2px">Destino: ${fsEsc(t.destination_cong)}</div>
+      <div class="vmc-week-actions">
+        <button class="btn-secondary" style="font-size:0.8rem;padding:0.45rem 0.9rem" onclick="openFsWeekModal(null,'${t.id}')">Editar</button>
+        <div style="flex:1"></div>
+        <button class="vmc-part-del-btn" onclick="deleteFsOutTalk('${t.id}')" title="Eliminar conferencia">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function fsSetMode(mode) {
+  fsMode = mode === 'out' ? 'out' : 'local';
+  const isOut = fsMode === 'out';
+  document.getElementById('fs-local-form').style.display = isOut ? 'none' : '';
+  document.getElementById('fs-out-form').style.display   = isOut ? '' : 'none';
+  const on  = 'background:var(--accent);color:#fff;';
+  const off = 'background:transparent;color:var(--text2, inherit);';
+  const base = 'flex:1;border:none;border-radius:9px;padding:0.5rem 0.4rem;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:inherit;';
+  document.getElementById('fs-mode-local').style.cssText = base + (isOut ? off : on);
+  document.getElementById('fs-mode-out').style.cssText   = base + (isOut ? on : off);
+  const editing = fsEditingId || fsOutEditingId;
+  const ttl = document.getElementById('fs-modal-title');
+  if (ttl) ttl.textContent = isOut
+    ? (fsOutEditingId ? 'Editar conferencia saliente' : 'Nueva conferencia saliente')
+    : (fsEditingId ? 'Editar semana — Reunión Pública' : 'Nueva semana — Reunión Pública');
 }
 
 function renderAdminFs() {
+  renderAdminFsOut();
   const container = document.getElementById('admin-fs-list');
   if (!container) return;
 
@@ -28853,8 +29076,9 @@ function renderAdminFs() {
 
 // ── Modal open / close ────────────────────────────────────────────────────────
 
-async function openFsWeekModal(id) {
+async function openFsWeekModal(id, outId) {
   fsEditingId = id || null;
+  fsOutEditingId = outId || null;
   const overlay = document.getElementById('fs-modal-overlay');
   overlay.classList.add('open');
 
@@ -28874,16 +29098,88 @@ async function openFsWeekModal(id) {
 
   vmcRestorePersonBtn('fs-presidente',         week?.presidente         || '', 'Seleccionar…');
   vmcRestorePersonBtn('fs-watchtower-reader',  week?.watchtower_reader || '', 'Seleccionar…');
+
+  // v1.52.0: campos de conferencia saliente + toggle
+  const out = outId ? fsOutTalks.find(t => t.id === outId) : null;
+  document.getElementById('fs-out-date').value  = out?.talk_date        || '';
+  document.getElementById('fs-out-title').value = out?.talk_title       || '';
+  document.getElementById('fs-out-cong').value  = out?.destination_cong || '';
+  vmcRestorePersonBtn('fs-out-speaker', out?.speaker_name || '', 'Seleccionar…');
+  // El toggle solo se puede cambiar al crear; al editar queda fijo en el tipo que se edita.
+  document.getElementById('fs-mode-toggle').style.display = (id || outId) ? 'none' : 'flex';
+  fsSetMode(outId ? 'out' : 'local');
 }
 
 function closeFsWeekModal() {
   document.getElementById('fs-modal-overlay').classList.remove('open');
   fsEditingId = null;
+  fsOutEditingId = null;
 }
 
 // ── Save week ─────────────────────────────────────────────────────────────────
 
+async function saveFsOutTalk() {
+  const btn = document.getElementById('fs-save-btn');
+  const talk_date        = document.getElementById('fs-out-date').value;
+  const speaker_name     = document.getElementById('fs-out-speaker').value.trim();
+  const talk_title       = document.getElementById('fs-out-title').value.trim();
+  const destination_cong = document.getElementById('fs-out-cong').value.trim();
+  if (!talk_date)        { showToast('Ingresa la fecha de la conferencia', 'error'); return; }
+  if (!speaker_name)     { showToast('Selecciona al conferenciante', 'error'); return; }
+  if (!talk_title)       { showToast('Ingresa el nombre de la conferencia', 'error'); return; }
+  if (!destination_cong) { showToast('Ingresa la congregación de destino', 'error'); return; }
+
+  const payload = { talk_date, speaker_name, talk_title, destination_cong };
+  const prev = fsOutEditingId ? fsOutTalks.find(t => t.id === fsOutEditingId) : null;
+
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  let error;
+  if (fsOutEditingId) ({ error } = await sb.from('fs_outgoing_talks').update(payload).eq('id', fsOutEditingId));
+  else                ({ error } = await sb.from('fs_outgoing_talks').insert(payload));
+  btn.disabled = false; btn.textContent = 'Guardar';
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+
+  showToast(fsOutEditingId ? 'Conferencia actualizada ✓' : 'Conferencia saliente creada ✓', 'success');
+  closeFsWeekModal();
+  await loadFsOutTalks();
+  renderAdminFsOut();
+  renderFsUserView();
+
+  // Notifica al conferenciante si es nueva o si cambió el conferenciante, la fecha, el tema o el destino.
+  try {
+    const changed = !prev || prev.speaker_name !== speaker_name || prev.talk_date !== talk_date
+      || prev.talk_title !== talk_title || prev.destination_cong !== destination_cong;
+    if (changed) await fsNotifyOutgoingSpeaker(payload);
+  } catch (err) {
+    console.warn('No se pudo notificar la conferencia saliente:', err.message);
+  }
+}
+
+async function fsNotifyOutgoingSpeaker(t) {
+  const tpl = renderTemplate('conferencia_saliente_asignada', {
+    tema: t.talk_title, congregacion: t.destination_cong, fecha: fsFormatOutDate(t.talk_date),
+  });
+  const target = [t.speaker_name.trim().toLowerCase()];
+  try {
+    await sb.from('notifications').insert({ title: tpl.title, body: tpl.body, target_names: target, notif_category: 'fin-semana' });
+  } catch (err) { console.warn('Error guardando notificación de conferencia saliente:', err.message); }
+  try {
+    await notifyUsersPush('fin-semana', { title: tpl.title, body: tpl.body, target_names: target });
+  } catch (err) { console.warn('Push no disponible para conferencia saliente:', err.message); }
+}
+
+async function deleteFsOutTalk(id) {
+  if (!confirm('¿Eliminar esta conferencia saliente?')) return;
+  const { error } = await sb.from('fs_outgoing_talks').delete().eq('id', id);
+  if (error) { showToast('Error al eliminar', 'error'); return; }
+  showToast('Conferencia eliminada', 'success');
+  fsOutTalks = fsOutTalks.filter(t => t.id !== id);
+  renderAdminFsOut();
+  renderFsUserView();
+}
+
 async function saveFsWeek() {
+  if (fsMode === 'out') return saveFsOutTalk();
   const btn = document.getElementById('fs-save-btn');
   const dateStart = document.getElementById('fs-date-start').value;
   const dateEnd   = document.getElementById('fs-date-end').value;
@@ -29014,7 +29310,7 @@ function renderFsUserView() {
     container.innerHTML = `<div class="vmc-empty">
       <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       <p>Aún no hay programa cargado.</p>
-    </div>`;
+    </div>` + fsRenderOutgoingSection();
     return;
   }
 
@@ -29046,7 +29342,33 @@ function renderFsUserView() {
       </div>
       <div class="vmc-cal-popover" id="fs-cal-popover"></div>
     </div>
-    <div class="vmc-program-container" id="fs-program-container">${programHtml}</div>`;
+    <div class="vmc-program-container" id="fs-program-container">${programHtml}</div>
+    ${fsRenderOutgoingSection()}`;
+}
+
+// v1.52.0: Conferencias salientes próximas (hoy en adelante), debajo del programa.
+function fsRenderOutgoingSection() {
+  const today = new Date().toISOString().slice(0, 10);
+  const myName = currentUser ? getIdentityName() : '';
+  const upcoming = fsOutTalks.filter(t => t.talk_date >= today).sort((a, b) => a.talk_date.localeCompare(b.talk_date));
+  if (!upcoming.length) return '';
+  const icon = '<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>';
+  const cards = upcoming.map(t => {
+    const mine = !!myName && (t.speaker_name || '').trim().toLowerCase() === myName.trim().toLowerCase();
+    return `<div class="vmc-user-part-card${mine ? ' is-mine' : ''}">
+      <div class="vmc-part-time-badge">${icon}</div>
+      <div class="vmc-part-body">
+        <div class="vmc-part-name-display">${fsEsc(t.talk_title)}</div>
+        <div class="vmc-part-assigned-display${mine ? ' mine-label' : ''}">${fsEsc(t.speaker_name)}</div>
+        <div class="vmc-part-note-display">${fsEsc(fsFormatOutDate(t.talk_date))}</div>
+        <div class="vmc-part-note-display">Congregación de destino: ${fsEsc(t.destination_cong)}</div>
+      </div>
+    </div>`;
+  }).join('');
+  return `<div class="vmc-user-section" style="margin-top:1rem">
+    <div class="vmc-user-section-header" style="background:rgba(52,199,89,0.12);color:#34c759">Conferencias salientes</div>
+    ${cards}
+  </div>`;
 }
 
 function fsStepWeek(dir) {
@@ -29875,6 +30197,43 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
     </div>
     <div class="vmc-modal-body" id="fs-modal-body">
 
+      <!-- v1.52.0: Toggle Reunión Local / Conferencia Saliente (solo al crear; al editar queda fijo) -->
+      <div id="fs-mode-toggle" style="display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--bg3, rgba(120,120,128,0.14));margin-bottom:1rem">
+        <button type="button" id="fs-mode-local" onclick="fsSetMode('local')" style="flex:1;border:none;border-radius:9px;padding:0.5rem 0.4rem;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:inherit">Reunión Local</button>
+        <button type="button" id="fs-mode-out" onclick="fsSetMode('out')" style="flex:1;border:none;border-radius:9px;padding:0.5rem 0.4rem;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:inherit">Conferencia Saliente</button>
+      </div>
+
+      <!-- Conferencia saliente -->
+      <div id="fs-out-form" style="display:none">
+        <div class="vmc-section-block">
+          <div class="vmc-section-header" style="background:rgba(52,199,89,0.1);color:#34c759;border-bottom:1px solid rgba(52,199,89,0.25)">
+            <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+            Conferencia saliente
+          </div>
+          <div class="vmc-meta-row">
+            <span class="vmc-meta-label">Fecha</span>
+            <input type="date" class="vmc-meta-val-input" id="fs-out-date" style="font-size:0.85rem">
+          </div>
+          <div class="vmc-meta-row">
+            <span class="vmc-meta-label">Conferenciante</span>
+            <div class="vmc-assign-wrap" style="flex:1">
+              <input type="hidden" id="fs-out-speaker">
+              <button type="button" class="vmc-person-btn" data-placeholder="Seleccionar…"
+                onclick="vmcPpOpen(document.getElementById('fs-out-speaker'),this,'Conferenciante')">Seleccionar…</button>
+            </div>
+          </div>
+          <div class="vmc-meta-row">
+            <span class="vmc-meta-label">Nombre de la conferencia</span>
+            <input type="text" class="vmc-meta-val-input" id="fs-out-title" placeholder="Ej: ¿Cómo puede ayudarnos la Biblia?" autocomplete="off">
+          </div>
+          <div class="vmc-meta-row" style="border-bottom:none">
+            <span class="vmc-meta-label">Congregación de destino</span>
+            <input type="text" class="vmc-meta-val-input" id="fs-out-cong" placeholder="Ej: Congregación Las Rosas" autocomplete="off">
+          </div>
+        </div>
+      </div>
+
+      <div id="fs-local-form">
       <!-- Rango de fechas -->
       <div style="display:flex;gap:8px;margin-bottom:1rem;align-items:center;flex-wrap:wrap">
         <div style="flex:1;min-width:140px">
@@ -29929,6 +30288,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
           </div>
         </div>
       </div>
+      </div><!-- /#fs-local-form -->
     </div><!-- /.vmc-modal-body -->
 
     <div class="vmc-modal-footer">
@@ -31206,7 +31566,7 @@ function trepBuildPreviewSvg(svgData, allManzanas, doneManzanas, allDone, maxHei
     const doc = parser.parseFromString(svgData, 'image/svg+xml');
     const svg = doc.querySelector('svg');
     if (!svg) return '';
-    svg.removeAttribute('width'); svg.removeAttribute('height');
+    trepNormalizeSvgSize(svg);
     svg.style.width = '100%'; svg.style.maxHeight = (maxHeight || '150px'); svg.style.pointerEvents = 'none';
     const manzanaSet = new Set((allManzanas||[]).map(m => m.toLowerCase()));
     const matched = new Map();
@@ -31246,7 +31606,49 @@ function trepBuildPreviewBars(allManzanas, doneManzanas, allDone) {
   }).join('');
   return `<div class="trep-bar-map">${bars}</div>`;
 }
+// v1.51.0-alpha: si el SVG no trae viewBox, se crea a partir de width/height antes de quitarlos
+// (si no, el mapa se renderiza en 0px y "no se ve").
+function trepNormalizeSvgSize(svg) {
+  if (!svg) return;
+  if (!svg.getAttribute('viewBox')) {
+    const w = parseFloat(svg.getAttribute('width')), h = parseFloat(svg.getAttribute('height'));
+    if (w > 0 && h > 0) svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+    else { try { const bb = svg.getBBox(); if (bb && bb.width > 0) svg.setAttribute('viewBox', [bb.x, bb.y, bb.width, bb.height].join(' ')); } catch (e) {} }
+  }
+  svg.removeAttribute('width'); svg.removeAttribute('height');
+  if (!svg.getAttribute('preserveAspectRatio')) svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+}
+// Normaliza ids: "Manzana A", "mz-a", "A_1_" -> "a"
+function _trepNormId(raw) {
+  let v = String(raw || '').trim().toLowerCase();
+  v = v.replace(/^(manzana|mz|mza|block|bloque)[\s_\-]*/, '');
+  v = v.replace(/_x[0-9a-f]+_/g, '_');
+  return v;
+}
 function trepMatchManzanaElements(svg, manzanas) {
+  const m0 = new Map();
+  const set = new Set(manzanas.map(m => String(m).trim().toLowerCase()));
+  const labelOf = (el) => el.getAttribute('id') || el.getAttribute('data-name') || el.getAttribute('inkscape:label') || '';
+  // 1) coincidencia exacta (grupo primero)
+  svg.querySelectorAll('g[id], g[data-name], g[inkscape\\:label]').forEach(g => {
+    const k = _trepNormId(labelOf(g));
+    if (set.has(k) && !m0.has(k)) m0.set(k, g);
+  });
+  // 2) cualquier otro elemento con id exacto
+  svg.querySelectorAll('path, polygon, rect, polyline, circle, ellipse').forEach(el => {
+    const k = _trepNormId(labelOf(el));
+    if (set.has(k) && !m0.has(k)) m0.set(k, el);
+  });
+  // 3) prefijos: "a_2", "a-1", "a_1_"
+  if (m0.size < set.size) {
+    svg.querySelectorAll('g[id], path[id], polygon[id], rect[id]').forEach(el => {
+      const k = _trepNormId(el.getAttribute('id'));
+      set.forEach(ml => { if (!m0.has(ml) && (k.startsWith(ml + '_') || k.startsWith(ml + '-'))) m0.set(ml, el); });
+    });
+  }
+  return m0;
+}
+function _trepMatchManzanaElementsLegacy(svg, manzanas) {
   const manzanaSet = new Set(manzanas.map(m => m.toLowerCase()));
   const matched = new Map();
   svg.querySelectorAll('g[id]').forEach(g => {
@@ -31755,7 +32157,7 @@ function trepPubRenderMap(t) {
   const doc = parser.parseFromString(t.svg_data, 'image/svg+xml');
   const svg = doc.querySelector('svg');
   if (!svg) { container.innerHTML = ''; return; }
-  svg.removeAttribute('width'); svg.removeAttribute('height');
+  trepNormalizeSvgSize(svg);
   svg.style.width = '100%'; svg.style.maxHeight = '260px';
   // Refuerzo inline: algunos WebView de Android ignoran el CSS externo la
   // primera vez que el SVG se pinta, así que se fija también aquí.
@@ -32591,7 +32993,7 @@ function shareCasaEnCasaAssignment() {
 <div class="ct-form-overlay" id="cartFormOverlay" role="dialog" aria-modal="true">
   <div class="ct-form-sheet" id="cartFormSheet"></div>
 </div>
-<!-- Voz (v1.50.0-beta): los dos botones inferiores reemplazan momentáneamente a la NavBar -->
+<!-- Voz (v1.57.0-beta): los dos botones inferiores reemplazan momentáneamente a la NavBar -->
 <div id="voz-layer" role="dialog" aria-label="Voz">
   <div class="voz-backdrop"></div>
   <div class="voz-stream" id="voz-stream" aria-live="polite"></div>
