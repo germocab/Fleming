@@ -3444,6 +3444,8 @@
   .vmc-cal-empty-msg { text-align: center; font-size: 0.78rem; color: var(--text3); padding: 0.5rem 0 0.15rem; }
 
   .vmc-program-container { padding: 0 1rem 5rem; }
+  /* v1.60.0-beta: en Reuniones, las tarjetas del programa usan el mismo ancho que "Conferencias salientes" */
+  #vmc-program-container, #fs-program-container { padding-left: 0; padding-right: 0; }
   .vmc-program-header {
     margin-bottom: 1.1rem;
   }
@@ -7823,6 +7825,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
           <div id="resp-asignar-cargos-wrap" style="display:none">
             <div class="resp-cargos-card">
               <div class="resp-cargos-day-title" id="resp-cargos-day-title">—</div>
+              <div class="auth-error" id="resp-conflict-error" style="margin-bottom:0.75rem"></div>
               <div id="resp-asignar-cargos-list"></div>
               <button class="btn-primary" style="margin-top:1.1rem" onclick="saveResponsabilidadesAsignacion()" id="save-resp-btn">Guardar asignación</button>
             </div>
@@ -10474,7 +10477,9 @@ async function devSetUserIdRecovery(rowId, on) {
 // (3) Visitantes con Inicio (móvil): "Más opciones" junto a la NavBar, el menú se abre desde abajo y el botón de arriba a la derecha abre el perfil. Administradores/DEV: Voz ocupa ese lugar.
 // (4) El botón "Administración" ahora es solo para el usuario DEV; los administradores usan "Administrar" en las secciones que tienen permitidas.
 // v1.55.91-beta: corrige los botones − y + de "Tarjetas en Para tí" en Personalizar Inicio.
-const APP_VERSION = '1.55.91-beta';
+// v1.60.0-beta: Reuniones (Vida y Ministerio y Reunión Pública): las tarjetas del programa ahora tienen el mismo ancho que las de "Conferencias salientes".
+// v1.60.1-beta: Audio y Video y Acomodación: un hermano ya asignado en un módulo no puede asignarse en el otro el mismo día; la plataforma avisa que debe usarse a otro hermano e indica qué responsabilidad tiene.
+const APP_VERSION = '1.60.1-beta';
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -20759,6 +20764,7 @@ function renderRespCargosForm(dateStr) {
   const hermanoOptions = `<option value="">Sin asignar</option>` +
     hermanos.map(h => `<option value="${h.nombre}">${h.nombre}</option>`).join('');
   document.getElementById('resp-cargos-day-title').textContent = capitalizar(respDiaLabel(dateStr));
+  const _cErr = document.getElementById('resp-conflict-error'); if (_cErr) _cErr.style.display = 'none';
 
   // v1.31.5-beta: solo se pintan las categorías del módulo activo
   // (Audio y Video / Acomodación) — cada uno gestiona sus propios cargos.
@@ -20772,7 +20778,7 @@ function renderRespCargosForm(dateStr) {
       <div class="resp-cargo-row">
         <div class="resp-cargo-icon" style="background:${cat.color}22;color:${cat.color}"><svg viewBox="0 0 24 24">${cat.icon}</svg></div>
         <span class="resp-cargo-name">${cargo}</span>
-        <select class="resp-cargo-select" data-cargo="${cargo}">${found?.hermano ? opts : hermanoOptions}</select>
+        <select class="resp-cargo-select" data-cargo="${cargo}" data-prev="${(found?.hermano||'').replace(/"/g,'&quot;')}" onchange="onRespCargoSelectChange(this)">${found?.hermano ? opts : hermanoOptions}</select>
       </div>`;
     }).join('');
     return `
@@ -20785,6 +20791,33 @@ function renderRespCargosForm(dateStr) {
 
 function capitalizar(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
+// v1.60.1-beta: un hermano no puede tener responsabilidades de Audio y Video y de Acomodación el mismo día.
+// Devuelve la fila (con su cargo) del OTRO módulo en la que ya está asignado ese hermano, o null.
+function respConflictoOtroModulo(rows, dateStr, hermanoName) {
+  if (!hermanoName) return null;
+  const nombre = hermanoName.trim().toLowerCase();
+  const propios = RESP_CARGOS_BY_MODULO[respActiveModulo] || [];
+  return rows.find(r => r.fecha === dateStr && r.hermano && r.hermano.trim().toLowerCase() === nombre && !propios.includes(r.cargo)) || null;
+}
+function respConflictoMensaje(hermanoName, cargoOtro) {
+  return `${hermanoName} ya está asignado como "${cargoOtro}" ese día. Debes utilizar a otro hermano.`;
+}
+// Al elegir un hermano en un cargo: si ya tiene otra responsabilidad ese día, se avisa y se revierte la selección.
+function onRespCargoSelectChange(sel) {
+  const errEl = document.getElementById('resp-conflict-error');
+  const dateStr = document.getElementById('resp-asignar-fecha').value || respSelectedDate;
+  const conflicto = respConflictoOtroModulo(responsabilidades, dateStr, sel.value);
+  if (conflicto) {
+    const msg = respConflictoMensaje(sel.value, conflicto.cargo);
+    sel.value = sel.dataset.prev || '';
+    if (errEl) { errEl.style.display = 'block'; errEl.textContent = msg; }
+    showToast('Ese hermano ya tiene otra responsabilidad', 'error');
+    return;
+  }
+  sel.dataset.prev = sel.value;
+  if (errEl) errEl.style.display = 'none';
+}
+
 async function saveResponsabilidadesAsignacion() {
   if (!['dev','admin'].includes(currentRole)) { showToast('Sin permisos.','error'); return; }
   const dateStr = document.getElementById('resp-asignar-fecha').value;
@@ -20792,6 +20825,27 @@ async function saveResponsabilidadesAsignacion() {
   const existing = responsabilidades.filter(r => r.fecha === dateStr);
   const btn = document.getElementById('save-resp-btn');
   btn.disabled = true; btn.textContent = 'Guardando...';
+
+  // v1.60.1-beta: se revisan los conflictos con datos frescos (otro admin pudo asignar recién) antes de guardar nada.
+  const errEl = document.getElementById('resp-conflict-error');
+  try {
+    const { data: fresh } = await sb.from('responsabilidades').select('*').eq('fecha', dateStr);
+    const freshRows = fresh || existing;
+    for (const sel of document.querySelectorAll('#resp-asignar-cargos-list .resp-cargo-select')) {
+      const prevRow = freshRows.find(r => r.cargo === sel.dataset.cargo);
+      if (!sel.value || (prevRow && prevRow.hermano === sel.value)) continue; // sin cambio: no se revalida
+      const conflicto = respConflictoOtroModulo(freshRows, dateStr, sel.value);
+      if (conflicto) {
+        if (errEl) { errEl.style.display = 'block'; errEl.textContent = respConflictoMensaje(sel.value, conflicto.cargo); }
+        showToast('Ese hermano ya tiene otra responsabilidad', 'error');
+        sel.value = prevRow?.hermano || '';
+        sel.dataset.prev = sel.value;
+        btn.disabled = false; btn.textContent = 'Guardar asignación';
+        return;
+      }
+    }
+  } catch (e) { console.warn('Validación de conflictos:', e.message); }
+  if (errEl) errEl.style.display = 'none';
 
   // v1.31.5-beta: solo se guardan los cargos que están efectivamente
   // renderizados en el formulario (los del módulo activo), leyéndolos por su
