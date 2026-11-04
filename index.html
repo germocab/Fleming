@@ -4864,92 +4864,6 @@
   .profile-row-value { font-size: 0.9rem; font-weight: 600; color: var(--text); }
   .profile-row-empty { font-size: 0.88rem; color: var(--text3); font-style: italic; }
 
-  /* ── v1.60.5-beta: Easter egg — Credencial 3D de "Mi responsabilidad" ─────────────
-     Pantalla completa con degradé del color de la responsabilidad y un lanyard con
-     física (cuerda + credencial rígida). Solo se abre desde Mi Perfil o Para tí. */
-  .rb-page {
-    display: none; position: fixed; inset: 0; z-index: 280; overflow: hidden;
-    background: linear-gradient(180deg, var(--rb-top, #7a00b8) 0%, var(--rb-mid, #430070) 55%, var(--rb-bot, #1a0033) 100%);
-    animation: fadeIn 0.26s var(--ease-fluid-soft);
-    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: none;
-  }
-  .rb-page.open { display: block; }
-  .rb-topbar { position: relative; z-index: 6; padding-top: calc(0.85rem + env(safe-area-inset-top, 0px)); }
-  .rb-page .pill-back-btn {
-    background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.28); color: #fff;
-    box-shadow: none; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  }
-  .rb-page .pill-header-title {
-    background: var(--rb-pill, rgba(0,0,0,0.4)); border-color: rgba(255,255,255,0.2); color: #fff;
-    box-shadow: none; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-    top: calc(50% + env(safe-area-inset-top, 0px) / 2);
-  }
-  .rb-stage { position: absolute; inset: 0; z-index: 1; overflow: hidden; perspective: 1100px; perspective-origin: 50% 38%; }
-  .rb-strap-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
-  .rb-strap-svg path { fill: none; stroke-linejoin: round; stroke-linecap: butt; }
-  .rb-shadow, .rb-card, .rb-clip { position: absolute; left: 0; top: 0; will-change: transform; }
-  .rb-shadow {
-    left: calc(var(--rb-w, 260px) / -2); width: var(--rb-w, 260px); height: var(--rb-h, 410px);
-    border-radius: calc(var(--rb-w, 260px) * 0.085); background: rgba(0,0,0,0.5);
-    filter: blur(20px); opacity: 0.55; transform-origin: 50% 0; pointer-events: none;
-  }
-  .rb-card {
-    left: calc(var(--rb-w, 260px) / -2); width: var(--rb-w, 260px); height: var(--rb-h, 410px);
-    transform-origin: 50% 0; transform-style: preserve-3d; cursor: grab; touch-action: none; z-index: 3;
-  }
-  .rb-card.rb-grabbing { cursor: grabbing; }
-  .rb-layer { position: absolute; inset: 0; border-radius: calc(var(--rb-w, 260px) * 0.085); background: var(--rb-edge, #2a0048); }
-  .rb-face {
-    position: absolute; inset: 0; overflow: hidden;
-    border-radius: calc(var(--rb-w, 260px) * 0.085);
-    -webkit-backface-visibility: hidden; backface-visibility: hidden;
-    box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.24);
-  }
-  .rb-front {
-    transform: translateZ(3px);
-    background: linear-gradient(165deg, var(--rb-card-hi, #b04cf0) 0%, var(--rb-card, #a855f7) 42%, var(--rb-card-lo, #7a2fc0) 100%);
-    color: var(--rb-text, #fff);
-    display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-    padding: 56px 8% calc(var(--rb-w, 260px) * 0.09); text-align: center;
-  }
-  .rb-back {
-    transform: rotateY(180deg) translateZ(3px);
-    background: radial-gradient(circle at 50% 38%, var(--rb-card-hi, #b04cf0) 0%, var(--rb-card, #a855f7) 55%, var(--rb-card-lo, #7a2fc0) 100%);
-    display: flex; align-items: center; justify-content: center;
-  }
-  .rb-back img {
-    width: 52%; aspect-ratio: 1; object-fit: cover; border-radius: 22%;
-    box-shadow: 0 10px 26px rgba(0,0,0,0.35), 0 0 0 1.5px rgba(255,255,255,0.28); pointer-events: none;
-  }
-  .rb-slot {
-    position: absolute; top: 20px; left: 50%; width: 56px; height: 12px; margin-left: -28px; border-radius: 99px;
-    background: rgba(0,0,0,0.38); box-shadow: inset 0 2px 3px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.22);
-  }
-  .rb-icon {
-    width: calc(var(--rb-w, 260px) * 0.34); height: calc(var(--rb-w, 260px) * 0.34); border-radius: 50%;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    background: var(--rb-on, rgba(255,255,255,0.2)); box-shadow: inset 0 0 0 1.5px var(--rb-on2, rgba(255,255,255,0.3));
-  }
-  .rb-icon svg { width: 54%; height: 54%; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-  .rb-info { width: 100%; display: flex; flex-direction: column; align-items: center; }
-  .rb-name { font-size: calc(var(--rb-w, 260px) * var(--rb-name-k, 0.1)); font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; text-wrap: balance; overflow-wrap: anywhere; }
-  .rb-divider { width: 34%; height: 2px; border-radius: 2px; background: var(--rb-on2, rgba(255,255,255,0.3)); margin: calc(var(--rb-w, 260px) * 0.055) 0; }
-  .rb-role-lbl { font-size: calc(var(--rb-w, 260px) * 0.04); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.72; }
-  .rb-role { font-size: calc(var(--rb-w, 260px) * 0.07); font-weight: 800; line-height: 1.15; margin-top: 4px; text-wrap: balance; }
-  .rb-date { font-size: calc(var(--rb-w, 260px) * 0.045); font-weight: 600; opacity: 0.78; margin-top: calc(var(--rb-w, 260px) * 0.025); }
-  .rb-sheen, .rb-shade { position: absolute; inset: 0; pointer-events: none; }
-  .rb-sheen { background: linear-gradient(115deg, transparent calc(var(--rb-sx, 50%) - 22%), rgba(255,255,255,0.3) var(--rb-sx, 50%), transparent calc(var(--rb-sx, 50%) + 22%)); }
-  .rb-shade { background: #000; opacity: var(--rb-shade, 0); }
-  .rb-clip { width: 44px; height: 70px; left: -22px; top: -14px; transform-origin: 22px 14px; pointer-events: none; z-index: 4; }
-  .rb-clip svg { display: block; width: 100%; height: 100%; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.35)); }
-  .rb-hint {
-    position: absolute; left: 50%; bottom: calc(1.4rem + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
-    z-index: 6; padding: 0.45rem 0.95rem; border-radius: 99px; font-size: 0.78rem; font-weight: 600; white-space: nowrap;
-    color: rgba(255,255,255,0.85); background: rgba(0,0,0,0.28); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-    pointer-events: none; animation: rbHintFade 0.7s ease 5s forwards;
-  }
-  @keyframes rbHintFade { to { opacity: 0; } }
-  @media (prefers-reduced-motion: reduce) { .rb-hint { animation-duration: 0.01s; } }
 
   /* ── Preferencias page (y sub-pantallas: Idioma, Apariencia, Funciones y
      Notificaciones, Experimentos) ──────────────────────────────────────────── */
@@ -6127,6 +6041,14 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 .home-custom-ico svg { width: 18px; height: 18px; }
 .home-card-title { font-size: 0.9rem; font-weight: 700; color: var(--text); line-height: 1.3; }
 .home-card-sub { font-size: 0.85rem; color: var(--text2); margin-top: 2px; line-height: 1.3; }
+.home-count { flex-shrink: 0; text-align: center; min-width: 48px; padding: 6px 9px; border-radius: 12px; background: var(--ter-4-bg); color: var(--ter-4); }
+.home-count b { display: block; font-size: 1.2rem; font-weight: 800; line-height: 1; letter-spacing: -0.02em; }
+.home-count span { display: block; margin-top: 2px; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+.home-count.is-today b { font-size: 0.85rem; }
+.evento-count { position: absolute; top: 10px; right: 10px; z-index: 2; text-align: center; min-width: 46px; padding: 6px 9px; border-radius: 14px; color: #fff; background: rgba(0,0,0,0.38); -webkit-backdrop-filter: blur(10px) saturate(1.4); backdrop-filter: blur(10px) saturate(1.4); border: 1px solid rgba(255,255,255,0.22); }
+.evento-count b { display: block; font-size: 1.2rem; font-weight: 800; line-height: 1; }
+.evento-count span { display: block; margin-top: 2px; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.9; }
+.evento-count.is-today b { font-size: 0.85rem; }
 .home-card-meta { font-size: 0.68rem; color: var(--text3); margin-top: 3px; font-weight: 500; }
 /* v1.54.5-beta: la tarjeta de recordatorio de reporte ya no lleva borde rojo; se ve como las demás. */
 .home-empty { text-align: center; color: var(--text3); font-size: 0.85rem; line-height: 1.45; padding: 1.1rem 1rem; border: 1px dashed var(--border); border-radius: 16px; }
@@ -6167,6 +6089,32 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 .home-card-texto { padding: 1.2rem 1.2rem; }
 .home-card-texto .home-card-title { font-size: 1.2rem; font-weight: 800; line-height: 1.4; letter-spacing: -0.015em; }
 .home-card-texto .home-card-meta { font-size: 0.72rem; margin-top: 10px; }
+/* ── v1.61.0-beta: "Para tí" modular (tarjeta propia con mosaicos cuadrados/rectangulares) ── */
+.pt-card { background: var(--surface); border: 1px solid var(--border); border-radius: 28px; padding: 1.15rem 1rem 1rem; box-shadow: var(--shadow); }
+.pt-head { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text); margin: 0.1rem 0.3rem 0.85rem; }
+.pt-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.pt-tile { position: relative; min-width: 0; overflow: hidden; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; cursor: pointer; transition: transform 0.15s, background 0.15s; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.pt-tile:active { transform: scale(0.97); }
+.pt-tile.lp-press { transform: scale(0.96); transition: transform 0.5s; }
+.pt-txt { min-width: 0; }
+.pt-title { font-size: 0.8rem; font-weight: 700; line-height: 1.25; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.pt-sub { font-size: 0.7rem; font-weight: 500; line-height: 1.3; color: var(--text3); margin-top: 3px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.pt-meta { font-size: 0.66rem; font-weight: 500; color: var(--text3); margin-top: 2px; opacity: 0.85; }
+.pt-sq { aspect-ratio: 1 / 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 8px; text-align: center; padding: 0.85rem 0.65rem 0.9rem; }
+.pt-sq .pt-txt { width: 100%; }
+.pt-sq .pt-big { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
+.pt-rect, .pt-wide { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; padding: 0.8rem 0.95rem; }
+.pt-rect .pt-txt, .pt-wide .pt-txt { flex: 1; }
+.pt-rect .pt-title, .pt-wide .pt-title { font-size: 0.9rem; }
+.pt-rect .pt-sub, .pt-wide .pt-sub { font-size: 0.78rem; }
+.pt-wide .pt-big { order: -1; flex-shrink: 0; }
+.pt-ico { width: 40px; height: 40px; border-radius: 12px; }
+.pt-bigcirc, .pt-bigsq { width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.14); }
+.pt-bigcirc { border-radius: 50%; font-size: 1.75rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+.pt-bigsq { border-radius: 17px; }
+.pt-bigsq svg { width: 28px; height: 28px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pt-rel { flex-shrink: 0; font-size: 0.68rem; font-weight: 700; padding: 4px 10px; border-radius: 99px; background: var(--accent-light); color: var(--accent); white-space: nowrap; }
+.pt-empty { text-align: center; color: var(--text3); font-size: 0.85rem; line-height: 1.45; padding: 1.1rem 1rem; border: 1px dashed var(--border); border-radius: 18px; }
 .home-confirm-overlay { position: fixed; inset: 0; z-index: 3000; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; padding: 1.5rem; animation: fadeIn 0.18s; }
 .home-confirm { width: 100%; max-width: 340px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 1.3rem 1.2rem 1.1rem; box-shadow: 0 20px 60px rgba(0,0,0,0.35); text-align: center; }
 .home-confirm-t { font-size: 1.05rem; font-weight: 800; color: var(--text); }
@@ -6211,8 +6159,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 // ══════════════════════════════════════════════════════════════════════════
 //  Inicio (Experimento, v1.50.0-sb) — exclusivo de teléfonos móviles
 //  Pantalla de inicio personalizable + NavBar inferior (Inicio / Predicación /
-//  Reuniones). "Para tí" siempre va arriba y no se puede mover ni quitar; el
-//  resto de apartados se agregan, quitan y reordenan desde Más opciones →
+//  Reuniones). Todos los apartados (incluido "Para tí", desde v1.61.0) se agregan, quitan y reordenan desde Más opciones →
 //  "Personalizar Inicio". La configuración se guarda por usuario en este
 //  dispositivo (localStorage).
 // ══════════════════════════════════════════════════════════════════════════
@@ -6246,8 +6193,10 @@ const HOME_SECTIONS = {
   resp:     { title: 'Mis Responsabilidades', icon: 'users', col: 'purple' },
   tips:     { title: 'Tips', icon: 'bulb', col: 'yellow' },
   texto:    { title: 'Texto Diario', icon: 'book', col: 'orange' },
+  para:     { title: 'Para tí', icon: 'star', col: 'blue' }, // v1.61.0-beta: ya no es fijo; se puede reubicar o quitar
+  eventos:  { title: 'Eventos', icon: 'cal', col: 'purple' }, // v1.60.8-beta: Eventos programados en Casa en Casa
 };
-const HOME_DEFAULT_LAYOUT = ['hoy', 'resp', 'texto']; // v1.55.90-beta: Predicación de hoy, Mis responsabilidades y Texto Diario
+const HOME_DEFAULT_LAYOUT = ['texto', 'para', 'hoy', 'eventos', 'resp']; // v1.61.0-beta: Texto Diario, Para tí, Predicación de hoy, Eventos y Mis responsabilidades
 
 // v1.52.0: UI Classic vuelve a ser la vista por defecto. Inicio (Para ti, Mis asignaciones, Texto Diario, NavBar inferior)
 // se activa desde Configuración → Preferencias → "Activar Inicio". Clave nueva (fleming_inicio_enabled) para que todos
@@ -6333,17 +6282,31 @@ function _homeLayoutKey() { return 'fleming_home_layout:' + ((typeof currentUser
 function getHomeLayout() {
   try {
     const raw = JSON.parse(localStorage.getItem(_homeLayoutKey()));
-    if (Array.isArray(raw)) return raw.filter((k, i) => HOME_SECTIONS[k] && raw.indexOf(k) === i);
+    if (Array.isArray(raw)) {
+      let l = raw.filter((k, i) => HOME_SECTIONS[k] && raw.indexOf(k) === i);
+      // v1.61.0-beta: migración única — "Para tí" pasa a ser un apartado más; se conserva donde el usuario lo veía (arriba, o debajo de Texto Diario si lo tenía arriba).
+      const mk = _homeLayoutKey() + ':para161';
+      if (!localStorage.getItem(mk)) {
+        localStorage.setItem(mk, '1');
+        if (!l.includes('para')) {
+          const tk = _homeLayoutKey() + ':textotop';
+          if (localStorage.getItem(tk) === '1') { l = l.filter(k => k !== 'texto'); l.unshift('texto', 'para'); } else l.unshift('para');
+          saveHomeLayout(l);
+        }
+        localStorage.removeItem(_homeLayoutKey() + ':textotop');
+      }
+      return l;
+    }
   } catch {}
   return HOME_DEFAULT_LAYOUT.slice();
 }
-// v1.55.90-beta: cantidad de tarjetas en "Para tí" (mínimo 2, máximo 5; por defecto 3), elegible en Personalizar Inicio.
-const HOME_PARA_MIN = 2, HOME_PARA_MAX = 5, HOME_PARA_DEFAULT = 3;
+// v1.55.90-beta: cantidad de tarjetas en "Para tí" (v1.61.0-beta: de 1 a 4; por defecto 3), elegible en Personalizar Inicio.
+const HOME_PARA_MIN = 1, HOME_PARA_MAX = 4, HOME_PARA_DEFAULT = 3; // v1.61.0-beta: mínimo 1, máximo 4
 function _homeParaKey() { return 'fleming_home_paracount:' + ((typeof currentUser !== 'undefined' && currentUser && currentUser.name) || '').trim().toLowerCase(); }
 var _homeParaMem = null; // respaldo en memoria si el almacenamiento del navegador no está disponible
 function getHomeParaCount() {
   if (_homeParaMem != null) return _homeParaMem;
-  try { const n = parseInt(localStorage.getItem(_homeParaKey()), 10); if (n >= HOME_PARA_MIN && n <= HOME_PARA_MAX) return n; } catch (e) {}
+  try { const n = parseInt(localStorage.getItem(_homeParaKey()), 10); if (n >= HOME_PARA_MIN) return Math.min(n, HOME_PARA_MAX); } catch (e) {}
   return HOME_PARA_DEFAULT;
 }
 function setHomeParaCount(n) {
@@ -6382,6 +6345,15 @@ function _homeRelDay(ymd) {
 // ── Render ──
 let _homeActions = [], _homeSeq = 0, _homeParaKeys = [];
 function homeAct(i) { const f = _homeActions[i]; if (typeof f === 'function') f(); }
+// v1.60.8.5-beta: contador de días que faltan para un evento (Hoy / 1 día / N días).
+function _homeCountParts(ymd) {
+  const n = Math.max(0, _homeDiffDays(ymd));
+  return n === 0 ? { big: 'Hoy', small: '', today: true } : { big: String(n), small: n === 1 ? 'día' : 'días', today: false };
+}
+function _homeCountHtml(ymd, cls) {
+  const c = _homeCountParts(ymd);
+  return '<div class="' + cls + (c.today ? ' is-today' : '') + '" title="' + (c.today ? 'Es hoy' : 'Faltan ' + c.big + ' ' + c.small) + '"><b>' + c.big + '</b>' + (c.small ? '<span>' + c.small + '</span>' : '') + '</div>';
+}
 function _homeCard(c) {
   const idx = _homeActions.push(c.onClick || null) - 1;
   const pk = c.pkey ? ' data-pk="' + (_homeParaKeys.push(c.pkey) - 1) + '"' : '';
@@ -6389,10 +6361,61 @@ function _homeCard(c) {
     (c.icon ? _homeIcoBox(c.icon, c.col, '', c.img) : '') +
     '<div class="home-card-body"><div class="home-card-title">' + escapeHtml(c.title || '') + '</div>' +
     (c.sub ? '<div class="home-card-sub">' + escapeHtml(c.sub) + '</div>' : '') +
-    (c.meta ? '<div class="home-card-meta">' + escapeHtml(c.meta) + '</div>' : '') + '</div></div>';
+    (c.meta ? '<div class="home-card-meta">' + escapeHtml(c.meta) + '</div>' : '') + '</div>' +
+    (c.countDate ? _homeCountHtml(c.countDate, 'home-count') : '') + '</div>';
 }
 function _homeSection(title, cardsHtml) {
   return '<div class="home-section">' + (title ? '<div class="home-section-title">' + escapeHtml(title) + '</div>' : '') + cardsHtml + '</div>';
+}
+
+// ── v1.61.0-beta: "Para tí" modular ──────────────────────────────────────────
+// Vive dentro de su propia tarjeta. Muestra de 1 a 4 mosaicos (cuadrados o rectangulares según la cantidad de
+// información), ordenados por fecha y hora (lo más próximo primero). Dos cuadrados seguidos comparten fila;
+// un cuadrado que quedaría solo en su fila se estira a todo el ancho para no dejar huecos.
+let _homeParaAll = [];
+function _homeTime12(t) {
+  const m = /^(\d{1,2}):(\d{2})/.exec(t || ''); if (!m) return '';
+  let h = +m[1]; const ap = h >= 12 ? 'pm' : 'am'; h = h % 12 || 12;
+  return h + ':' + m[2] + ap;
+}
+function _ptRel(ymd) {
+  const n = _homeDiffDays(ymd);
+  return n === 0 ? 'Hoy' : n === 1 ? 'Mañana' : (n > 1 && n < 7) ? 'En ' + n + ' días' : '';
+}
+function _ptBigNum(n, col) {
+  const c = _HC[col] || _HC.blue, t = String(n);
+  return '<div class="pt-bigcirc" style="background:' + c[0] + (t.length > 2 ? ';font-size:1.25rem' : '') + '">' + escapeHtml(t) + '</div>';
+}
+function _ptBigIcon(svgInner, color) {
+  return '<div class="pt-bigsq" style="background:' + color + '"><svg viewBox="0 0 24 24">' + (svgInner || '') + '</svg></div>';
+}
+function _ptModes(list) {
+  for (let i = 0; i < list.length; i++) {
+    const t = list[i], nx = list[i + 1];
+    if (t.big && nx && nx.big) { t.mode = 'sq'; nx.mode = 'sq'; i++; }
+    else t.mode = t.big ? 'wide' : 'rect';
+  }
+}
+function _ptTile(c) {
+  const idx = _homeActions.push(c.onClick || null) - 1;
+  const pk = c.pkey ? ' data-pk="' + (_homeParaKeys.push(c.pkey) - 1) + '"' : '';
+  const oc = c.onClick ? ' onclick="homeAct(' + idx + ')"' : '';
+  const txt = '<div class="pt-txt"><div class="pt-title">' + escapeHtml(c.title || '') + '</div>' +
+    (c.sub ? '<div class="pt-sub">' + escapeHtml(c.sub) + '</div>' : '') +
+    (c.meta ? '<div class="pt-meta">' + escapeHtml(c.meta) + '</div>' : '') + '</div>';
+  if (c.mode === 'sq' || c.mode === 'wide') return '<div class="pt-tile pt-' + c.mode + '"' + pk + oc + '>' + txt + '<div class="pt-big">' + c.big + '</div></div>';
+  const right = c.countDate ? _homeCountHtml(c.countDate, 'home-count') : (c.rel ? '<div class="pt-rel">' + escapeHtml(c.rel) + '</div>' : '');
+  return '<div class="pt-tile pt-rect"' + pk + oc + '>' + _homeIcoBox(c.icon, c.col, 'pt-ico', c.img) + txt + right + '</div>';
+}
+function _homeParaRender() {
+  const el = document.getElementById('home-para');
+  if (!el) return;
+  const hid = _homeHiddenLoad();
+  const shown = _homeParaAll.filter(c => !hid[c.pkey]).slice(0, getHomeParaCount());
+  _ptModes(shown);
+  el.innerHTML = '<div class="pt-card"><div class="pt-head">Para tí</div>' + (shown.length
+    ? '<div class="pt-grid">' + shown.map(_ptTile).join('') + '</div>'
+    : '<div class="pt-empty">Estás al día. Aquí verás tus recordatorios y novedades.</div>') + '</div>';
 }
 
 async function renderHome() {
@@ -6401,7 +6424,6 @@ async function renderHome() {
   const seq = ++_homeSeq;
   _homeActions = []; _homeParaKeys = [];
   const layout = getHomeLayout();
-  const textoTop = isHomeTextoTop();
   if (!wrap.dataset.ready) wrap.innerHTML = '<div class="loader-wrap"><div class="loader"></div></div>';
 
   // v1.51.0-beta: "Para tí" también muestra próximas asignaciones de Casa en Casa, Turnos, Aseo y Responsabilidades.
@@ -6411,35 +6433,52 @@ async function renderHome() {
   try { tips = await loadTips(); } catch {}
   if (seq !== _homeSeq) return;
   const sec = (k) => sections.find(x => x.key === k);
+  const HORIZON = 14 * 86400000; // v1.61.0-beta: ventana de 14 días para asignaciones
 
-  // ── Para tí: recordatorios + próximas partes de reunión + novedades ──
+  // ── Para tí: mosaicos con lo imprescindible, ordenados por fecha y hora ──
   const para = [];
-  (sec('recordatorios')?.items || []).forEach(it => para.push({
-    reminder: true, icon: 'doc', col: 'blue', title: 'Recuerda realizar tu reporte de territorio',
-    sub: it.ter ? 'Territorio ' + it.ter : it.label, meta: it.dateRaw ? _homeShortDate(it.dateRaw) : '', onClick: it.onClick }));
-  const meet = [];
+  (sec('recordatorios')?.items || []).forEach(it => {
+    const t = it.dateRaw ? new Date(String(it.dateRaw).slice(0, 10) + 'T00:00:00').getTime() : 0;
+    para.push({ ts: isFinite(t) ? t : 0, icon: 'doc', col: 'blue', title: 'Recuerda realizar tu reporte de territorio',
+      sub: it.ter ? 'Territorio ' + it.ter : it.label, meta: it.dateRaw ? _homeShortDate(it.dateRaw) : '', onClick: it.onClick });
+  });
   [['vmc', typeof MEETING_DAY_VMC !== 'undefined' ? MEETING_DAY_VMC : 4, 'Asignación para la reunión', 'book', 'blue'],
    ['fs',  typeof MEETING_DAY_FS  !== 'undefined' ? MEETING_DAY_FS  : 6, 'Asignación para la reunión pública', 'cal', 'green']].forEach(([k, dow, ttl, ic, cl]) => {
     (sec(k)?.items || []).forEach(it => {
       const md = _homeMeetingDate(it.weekStart, dow);
       if (!md) return;
       const n = _homeDiffDays(md);
-      if (n >= 0 && n <= 7) meet.push({ date: md, icon: ic, col: cl, title: ttl, sub: it.label, meta: _homeRelDay(md), onClick: it.onClick });
+      if (n >= 0 && n <= 14) para.push({ ts: new Date(md + 'T00:00:00').getTime(), icon: ic, col: cl, title: ttl, sub: it.label, meta: _homeShortDate(md), rel: _ptRel(md), onClick: it.onClick });
     });
   });
-  // v1.51.0-beta: Próximas asignaciones (7 días) de todas las categorías, en orden cronológico.
-  meet.forEach(m => { m.ts = new Date(m.date + 'T00:00:00').getTime(); });
-  const _nowMs = Date.now();
-  [['casa', 'sun', 'blue', ''], ['carritos', 'cart', 'teal', 'Turno: '], ['aseo', 'house', 'orange', ''], ['resp', 'users', 'purple', '']].forEach(([k, ic, cl, pre]) => {
+  // Próximas asignaciones (14 días) de todas las categorías.
+  const _nowMs = Date.now(), _day0 = new Date(); _day0.setHours(0, 0, 0, 0);
+  [['casa', 'sun', 'blue'], ['carritos', 'cart', 'teal'], ['aseo', 'house', 'orange'], ['resp', 'users', 'purple']].forEach(([k, ic, cl]) => {
     (sec(k)?.items || []).forEach(it => {
       const sk = it.sortKey;
-      if (sk == null || !isFinite(sk) || sk < _nowMs - 3600000 || sk > _nowMs + 7 * 86400000) return;
-      meet.push({ ts: sk, icon: ic, col: cl, title: pre + it.label, sub: it.sub,
-        meta: [_homeRelDay(_homeYmd(new Date(sk))), it.partner].filter(Boolean).join(' • '), onClick: it.onClick });
+      const lower = (k === 'carritos' || (k === 'casa' && it.timeRaw)) ? _nowMs - 3600000 : _day0.getTime();
+      if (sk == null || !isFinite(sk) || sk < lower || sk > _nowMs + HORIZON) return;
+      const ymd = _homeYmd(new Date(sk));
+      const c = { ts: sk, icon: ic, col: cl, rel: _ptRel(ymd), onClick: it.onClick };
+      if (k === 'casa') {
+        const tm = _homeTime12(it.timeRaw);
+        Object.assign(c, { title: 'Asignación de Predicación', sub: _homeShortDate(ymd) + (tm ? ' a las ' + tm : '') });
+      } else if (k === 'carritos') {
+        Object.assign(c, { title: 'Turno: ' + it.label, sub: it.sub, meta: it.partner || '' });
+      } else if (k === 'aseo') {
+        const enc = !!it.encargado, g = it.grupo;
+        Object.assign(c, {
+          title: enc ? 'Encargado del aseo del salón' : 'Aseo del salón de tu grupo',
+          sub: (!enc && g != null ? 'Grupo ' + g + ' · ' : '') + _homeShortDate(ymd),
+          big: (!enc && g != null) ? _ptBigNum(g, 'orange') : _ptBigIcon(_HI.house, _HC.orange[0]) });
+      } else {
+        const st = getCargoStyle(it.cargo || it.label);
+        Object.assign(c, { title: it.cargo || it.label, sub: _homeShortDate(ymd), big: _ptBigIcon(st.icon, st.color) });
+      }
+      para.push(c);
     });
   });
-  meet.sort((a, b) => a.ts - b.ts).slice(0, 6).forEach(m => para.push(m));
-  // v1.51.0-beta: Nuevos No Pasar (últimos 7 días) y Evento próximo (14 días).
+  // Nuevos No Pasar (últimos 7 días).
   try {
     const { data: terRows } = await sb.from('territories').select('id, number, no_pasar');
     const since = Date.now() - 7 * 86400000;
@@ -6449,37 +6488,40 @@ async function renderHome() {
       const fresh = entries.filter(e => e.date && /^\d{4}-\d{2}-\d{2}/.test(e.date) && new Date(e.date.slice(0, 10) + 'T00:00:00').getTime() >= since);
       if (fresh.length) freshTers.push({ tr, fresh, last: fresh.map(e => e.date.slice(0, 10)).sort().pop() });
     });
-    freshTers.sort((a, b) => b.last.localeCompare(a.last)).slice(0, 2).forEach(({ tr, fresh, last }) => para.push({
-      icon: 'ban', col: 'red', title: 'Nuevo No Pasar',
+    freshTers.sort((a, b) => b.last.localeCompare(a.last)).slice(0, 2).forEach(({ tr, fresh, last }, i) => para.push({
+      ts: _nowMs + HORIZON + 86400000 + i, icon: 'ban', col: 'red', title: 'Nuevo No Pasar',
       sub: (typeof terLabel === 'function' ? terLabel(tr.number) : 'Territorio ' + tr.number) + ': ' + fresh[0].addr + (fresh.length > 1 ? ' (+' + (fresh.length - 1) + ' más)' : ''),
       meta: _homeShortDate(last), onClick: () => inicioGoTo('predicacion', 'territorios') }));
   } catch (e) { console.warn('Inicio (nuevos No Pasar):', e); }
+  // v1.60.8.5-beta: Eventos próximos desde 1 semana antes, con contador de días. (Visitas: hasta 14 días.)
   try {
     const { data: evs } = await sb.from('assignments').select('id,date,time,type,especial_titulo')
-      .in('type', ['especial', 'visita']).gte('date', _homeYmd(new Date())).order('date').order('time').limit(3);
-    (evs || []).filter(ev => _homeDiffDays(ev.date) <= 14).slice(0, 1).forEach(ev => para.push({
-      icon: 'cal', col: 'purple', title: ev.type === 'visita' ? 'Visita próxima' : 'Evento próximo',
+      .in('type', ['especial', 'visita']).gte('date', _homeYmd(new Date())).order('date').order('time').limit(20);
+    const _evGo = (ev) => () => inicioGoTo('predicacion', 'casa', () => { try { viewAssignment(ev.id); } catch (e) {} });
+    const _evSel = (evs || []).filter(ev => ev.type === 'especial' ? _homeDiffDays(ev.date) <= 7 : false)
+      .concat((evs || []).filter(ev => ev.type === 'visita' && _homeDiffDays(ev.date) <= 14).slice(0, 1));
+    _evSel.forEach(ev => para.push({
+      ts: _inicioSortKey(ev.date, ev.time), icon: 'cal', col: 'purple', title: ev.type === 'visita' ? 'Visita próxima' : 'Evento próximo',
       sub: ev.especial_titulo || (ev.type === 'visita' ? 'Visita' : 'Evento'),
       meta: _homeRelDay(ev.date) + (ev.time ? ' • ' + ev.time.substring(0, 5) + ' hrs' : ''),
-      onClick: () => inicioGoTo('predicacion', 'casa', () => { try { viewAssignment(ev.id); } catch (e) {} }) }));
+      countDate: ev.date, onClick: _evGo(ev) }));
   } catch (e) { console.warn('Inicio (evento próximo):', e); }
   if (seq !== _homeSeq) return;
   const recentTips = (tips || []).filter(tp => tp.created_at && (Date.now() - new Date(tp.created_at).getTime()) < 14 * 86400000).slice(0, 2);
-  recentTips.forEach(tp => para.push({ icon: 'bulb', col: 'yellow', img: tp.image_url || '', title: 'Novedad: nuevo Tip', sub: tp.title || '', meta: 'Toca para leerlo', onClick: () => openTipDetailModal(tp.id) }));
+  recentTips.forEach((tp, i) => para.push({ ts: _nowMs + HORIZON + 2 * 86400000 + i, icon: 'bulb', col: 'yellow', img: tp.image_url || '', title: 'Novedad: nuevo Tip', sub: tp.title || '', meta: 'Toca para leerlo', onClick: () => openTipDetailModal(tp.id) }));
 
-  // v1.52.1-beta: tarjetas que el usuario quitó (mantener presionado) no se muestran.
-  para.forEach(c => { c.pkey = _homeParaKey(c); });
-  const _hid = _homeHiddenLoad();
-  const paraShown = para.filter(c => !_hid[c.pkey]).slice(0, getHomeParaCount()); // v1.55.90-beta: de 2 a 5 tarjetas (elegible)
-  // v1.55.90-beta: un usuario nuevo no ve nada en "Para tí" hasta que empiece a usar la app (la sección aparece sola cuando hay tarjetas).
-  let html = (textoTop ? '<div class="home-section" id="home-texto"></div>' : '') + (paraShown.length
-    ? _homeSection('Para tí', '<div class="home-card-list" id="home-para-list">' + paraShown.map(_homeCard).join('') + '</div>')
-    : '');
+  // Orden cronológico (lo más próximo primero) y clave para poder quitar tarjetas (mantener presionado).
+  para.forEach(c => { if (!isFinite(c.ts)) c.ts = Infinity; c.pkey = _homeParaKey(c); });
+  para.sort((a, b) => (a.ts === b.ts ? 0 : a.ts < b.ts ? -1 : 1));
+  _homeParaAll = para;
 
   // ── Apartados elegidos, en el orden elegido ──
+  let html = '';
   layout.forEach(k => {
+    if (k === 'para') { if (_homeParaAll.length) html += '<div class="home-section" id="home-para"></div>'; return; } // v1.61.0-beta
     if (k === 'hoy') { html += '<div class="home-section" id="home-hoy"></div>'; return; }
-    if (k === 'texto') { if (!textoTop) html += '<div class="home-section" id="home-texto"></div>'; return; }
+    if (k === 'eventos') { html += '<div class="home-section" id="home-eventos"></div>'; return; } // v1.60.8-beta
+    if (k === 'texto') { html += '<div class="home-section" id="home-texto"></div>'; return; }
     let cards = [];
     if (k === 'carritos') cards = (sec('carritos')?.items || []).map(it => ({ title: it.label, sub: it.sub, meta: it.partner, onClick: it.onClick }));
     else if (k === 'vmc' || k === 'fs') {
@@ -6496,8 +6538,51 @@ async function renderHome() {
   html += '<button type="button" class="home-custom-btn" onclick="openHomeCustomize()"><svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="10" y2="18"/><circle cx="18" cy="16" r="3"/></svg>Personalizar Inicio</button>';
   wrap.innerHTML = html;
   wrap.dataset.ready = '1';
+  if (document.getElementById('home-para')) _homeParaRender();
   if (layout.includes('hoy')) renderHomeHoy();
-  if (textoTop || layout.includes('texto')) renderHomeTexto();
+  if (layout.includes('eventos')) renderHomeEventos(); // v1.60.8-beta
+  if (layout.includes('texto')) renderHomeTexto();
+}
+
+// ── Eventos (v1.60.8-beta) ──────────────────────────────────────────────────
+// Muestra los Eventos programados (tipo "Evento" creado en Casa en Casa), agrupados por fecha y con
+// las mismas tarjetas (.assignment-card-especial) que se usan en Casa en Casa. Al tocar una tarjeta
+// se abre el detalle del evento, igual que en Casa en Casa.
+function _homeEventoCard(a) {
+  const timeStr = a.time ? a.time.substring(0, 5) : '--:--';
+  const bg = a.especial_foto ? 'style="background-image:url(\'' + a.especial_foto + '\')"' : '';
+  return '<div class="assignment-card-especial" ' + bg + ' onclick="viewAssignment(\'' + a.id + '\')">' +
+    _homeCountHtml(a.date, 'evento-count') +
+    '<div class="especial-card-body">' +
+    '<div class="especial-card-title">' + escapeHtml(a.especial_titulo || 'Evento especial') + '</div>' +
+    (a.especial_subtitulo ? '<div class="especial-card-subtitle">' + escapeHtml(a.especial_subtitulo) + '</div>' : '') +
+    '<div class="especial-card-time"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' + timeStr + 'hrs</div>' +
+    '</div></div>';
+}
+async function renderHomeEventos() {
+  const el = document.getElementById('home-eventos');
+  if (!el) return;
+  try { if (!assignments.length) await loadSchedule(); } catch (e) {}
+  const el2 = document.getElementById('home-eventos');
+  if (!el2) return;
+  const today = _homeYmd(new Date());
+  const evs = (assignments || []).filter(a => a.type === 'especial' && a.date >= today)
+    .sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
+  let h = '<div class="home-section-title">Eventos</div>';
+  if (!evs.length) { el2.innerHTML = h + '<div class="home-empty">No hay eventos programados.</div>'; return; }
+  const byDate = {};
+  evs.forEach(a => { (byDate[a.date] = byDate[a.date] || []).push(a); });
+  Object.keys(byDate).sort().forEach(date => {
+    const n = _homeDiffDays(date);
+    const label = fmtCasaLongDate(new Date(date + 'T00:00:00'));
+    if (n === 0 || n === 1) {
+      h += '<div class="date-section"><div class="date-section-header-today"><span class="today-label">' + t(n === 0 ? 'casa.hoy' : 'casa.manana') + '</span><span class="today-date">' + label + '</span></div>';
+    } else {
+      h += '<div class="date-section"><div class="date-section-header">' + label + '</div>';
+    }
+    h += byDate[date].map(_homeEventoCard).join('') + '</div>';
+  });
+  el2.innerHTML = h;
 }
 
 async function renderHomeHoy() {
@@ -6603,9 +6688,9 @@ function _homeParaKey(c) { return (c.title || '') + '|' + (c.sub || '') + '|' + 
 function homeRestoreHidden() { _homeHiddenSave({}); showToast('Tarjetas restauradas ✓', 'success'); renderHomeCustomize(); }
 function homeParaAskHide(i) {
   const key = _homeParaKeys[i];
-  const card = document.querySelector('#home-content .home-card[data-pk="' + i + '"]');
+  const card = document.querySelector('#home-content .pt-tile[data-pk="' + i + '"]');
   if (!key || !card) return;
-  const ttl = (card.querySelector('.home-card-title') || {}).textContent || 'esta tarjeta';
+  const ttl = (card.querySelector('.pt-title') || {}).textContent || 'esta tarjeta';
   document.getElementById('home-confirm-overlay')?.remove();
   const ov = document.createElement('div');
   ov.id = 'home-confirm-overlay'; ov.className = 'home-confirm-overlay';
@@ -6619,11 +6704,7 @@ function homeParaAskHide(i) {
     if (a === 'yes') {
       const h = _homeHiddenLoad(); h[key] = Date.now(); _homeHiddenSave(h);
       ov.remove();
-      const list = card.parentElement;
-      card.remove();
-      if (list && !list.querySelector('.home-card')) {
-        list.outerHTML = '<div class="home-empty" id="home-para-list">Estás al día. Aquí verás tus recordatorios y novedades.</div>';
-      }
+      _homeParaRender(); // v1.61.0-beta: reacomoda los mosaicos (entra el siguiente en fecha, si hay)
       showToast('Tarjeta quitada', '');
     }
   });
@@ -6631,7 +6712,7 @@ function homeParaAskHide(i) {
 }
 (function homeLongPressInit() {
   let timer = null, sx = 0, sy = 0, card = null, suppress = false;
-  const sel = '#home-content .home-card[data-pk]';
+  const sel = '#home-content .pt-tile[data-pk]';
   const clear = () => { if (timer) { clearTimeout(timer); timer = null; } if (card) { card.classList.remove('lp-press'); card = null; } };
   document.addEventListener('touchstart', e => {
     const c = e.target.closest && e.target.closest(sel);
@@ -6657,11 +6738,6 @@ function homeParaAskHide(i) {
   document.addEventListener('contextmenu', e => { if (e.target.closest && e.target.closest(sel)) e.preventDefault(); });
 })();
 
-// ── v1.52.1-beta: "Texto Diario" es el único apartado que puede ir arriba de "Para tí" ──
-function _homeTextoTopKey() { return _homeLayoutKey() + ':textotop'; }
-function isHomeTextoTop() { try { return localStorage.getItem(_homeTextoTopKey()) === '1'; } catch (e) { return false; } }
-function setHomeTextoTop(v) { try { if (v) localStorage.setItem(_homeTextoTopKey(), '1'); else localStorage.removeItem(_homeTextoTopKey()); } catch (e) {} }
-
 // ── Personalizar Inicio ──
 const _HOME_ICON = {
   minus: '<line x1="5" y1="12" x2="19" y2="12"/>', up: '<polyline points="18 15 12 9 6 15"/>', down: '<polyline points="6 9 12 15 18 9"/>',
@@ -6686,26 +6762,20 @@ function renderHomeCustomize() {
   const body = document.getElementById('home-custom-body');
   if (!body) return;
   const layout = getHomeLayout();
-  const top = isHomeTextoTop();
-  const avail = Object.keys(HOME_SECTIONS).filter(k => !layout.includes(k) && !(k === 'texto' && top));
-  let h = '<div class="home-custom-h">Fijo</div>';
-  if (top) {
-    h += '<div class="home-custom-row">' + _homeIcoBox(HOME_SECTIONS.texto.icon, HOME_SECTIONS.texto.col, 'home-custom-ico') + '<div class="home-custom-name">Texto Diario<div class="home-custom-note">Arriba de "Para tí"</div></div>' +
-      _homeIco('up', '', '', true) + _homeIco('down', '', 'homeTextoDown()') + _homeIco('x', 'del', 'homeTextoRemove()') + '</div>';
-  }
-  h += '<div class="home-custom-row locked">' + _homeIcoBox('star', 'blue', 'home-custom-ico') + '<div class="home-custom-name">Para tí<div class="home-custom-note">Se puede quitar tarjeta por tarjeta (mantén presionada)</div></div>' + _homeIco('lock', '', '', true) + '</div>';
-  h += '<div class="home-custom-row locked"><div class="home-custom-name">Tarjetas en "Para tí"<div class="home-custom-note">Entre ' + HOME_PARA_MIN + ' y ' + HOME_PARA_MAX + '</div></div>' +
-    '<div style="display:flex;align-items:center;gap:12px;flex-shrink:0">' +
-    _homeIco('minus', '', 'homeParaStep(-1)', getHomeParaCount() <= HOME_PARA_MIN) +
-    '<span style="min-width:1.2em;text-align:center;font-weight:800;color:var(--text)">' + getHomeParaCount() + '</span>' +
-    _homeIco('plus', '', 'homeParaStep(1)', getHomeParaCount() >= HOME_PARA_MAX) + '</div></div>';
-  h += '<div class="home-custom-h">Tus apartados</div>';
+  const avail = Object.keys(HOME_SECTIONS).filter(k => !layout.includes(k));
+  let h = '<div class="home-custom-h">Tus apartados</div>';
   if (!layout.length) h += '<div class="home-empty">No tienes apartados. Agrega alguno abajo.</div>';
   layout.forEach((k, i) => {
-    const upDisabled = i === 0 && k !== 'texto';
     h += '<div class="home-custom-row">' + _homeIcoBox(HOME_SECTIONS[k].icon, HOME_SECTIONS[k].col, 'home-custom-ico') + '<div class="home-custom-name">' + escapeHtml(HOME_SECTIONS[k].title) +
-      (k === 'texto' && i === 0 ? '<div class="home-custom-note">Toca ↑ para ponerlo arriba de "Para tí"</div>' : '') + '</div>' +
-      _homeIco('up', '', "homeMove('" + k + "',-1)", upDisabled) + _homeIco('down', '', "homeMove('" + k + "',1)", i === layout.length - 1) + _homeIco('x', 'del', "homeRemove('" + k + "')") + '</div>';
+      (k === 'para' ? '<div class="home-custom-note">Se puede quitar tarjeta por tarjeta (mantén presionada)</div>' : '') + '</div>' +
+      _homeIco('up', '', "homeMove('" + k + "',-1)", i === 0) + _homeIco('down', '', "homeMove('" + k + "',1)", i === layout.length - 1) + _homeIco('x', 'del', "homeRemove('" + k + "')") + '</div>';
+    if (k === 'para') {
+      h += '<div class="home-custom-row locked"><div class="home-custom-name">Tarjetas en "Para tí"<div class="home-custom-note">Entre ' + HOME_PARA_MIN + ' y ' + HOME_PARA_MAX + '</div></div>' +
+        '<div style="display:flex;align-items:center;gap:12px;flex-shrink:0">' +
+        _homeIco('minus', '', 'homeParaStep(-1)', getHomeParaCount() <= HOME_PARA_MIN) +
+        '<span style="min-width:1.2em;text-align:center;font-weight:800;color:var(--text)">' + getHomeParaCount() + '</span>' +
+        _homeIco('plus', '', 'homeParaStep(1)', getHomeParaCount() >= HOME_PARA_MAX) + '</div></div>';
+    }
   });
   if (avail.length) {
     h += '<div class="home-custom-h">Agregar</div>';
@@ -6719,16 +6789,13 @@ function renderHomeCustomize() {
 function homeMove(k, dir) {
   const l = getHomeLayout(), i = l.indexOf(k), j = i + dir;
   if (i < 0) return;
-  if (k === 'texto' && i === 0 && dir < 0) { l.shift(); saveHomeLayout(l); setHomeTextoTop(true); renderHomeCustomize(); return; }
   if (j < 0 || j >= l.length) return;
   [l[i], l[j]] = [l[j], l[i]];
   saveHomeLayout(l); renderHomeCustomize();
 }
-function homeTextoDown() { const l = getHomeLayout().filter(x => x !== 'texto'); l.unshift('texto'); saveHomeLayout(l); setHomeTextoTop(false); renderHomeCustomize(); }
-function homeTextoRemove() { setHomeTextoTop(false); renderHomeCustomize(); }
 function homeRemove(k) { saveHomeLayout(getHomeLayout().filter(x => x !== k)); renderHomeCustomize(); }
 function homeAdd(k) { const l = getHomeLayout(); if (!l.includes(k)) l.push(k); saveHomeLayout(l); renderHomeCustomize(); }
-function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(_homeParaKey()); } catch (e) {} setHomeTextoTop(false); saveHomeLayout(HOME_DEFAULT_LAYOUT.slice()); renderHomeCustomize(); }
+function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(_homeParaKey()); } catch (e) {} saveHomeLayout(HOME_DEFAULT_LAYOUT.slice()); renderHomeCustomize(); }
 </script>
 
 </head>
@@ -9101,57 +9168,6 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
 </div>
 
 <!-- ── Sub-pantalla: Versión ── -->
-<!-- ── v1.60.5-beta: Credencial 3D "Mi responsabilidad" (Easter egg; solo desde Mi Perfil / Para tí) ── -->
-<div id="page-resp-badge" class="rb-page" aria-hidden="true">
-  <nav class="subpage-topbar rb-topbar">
-    <button class="pill-back-btn" onclick="closeRespBadge()" aria-label="Volver">
-      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-    </button>
-    <span class="pill-header-title" data-i18n="badge.title">Mi responsabilidad</span>
-  </nav>
-  <div class="rb-stage" id="rb-stage">
-    <svg class="rb-strap-svg" id="rb-strap-svg" aria-hidden="true">
-      <path id="rb-strap-edge" style="stroke:var(--rb-strap-edge,#2a0048);stroke-width:27"/>
-      <path id="rb-strap-main" style="stroke:var(--rb-strap,#a855f7);stroke-width:22"/>
-      <path id="rb-strap-hl" style="stroke:var(--rb-strap-hl,#d8b4fe);stroke-width:5;opacity:0.4"/>
-    </svg>
-    <div class="rb-shadow" id="rb-shadow"></div>
-    <div class="rb-card" id="rb-card">
-      <div class="rb-layer" style="transform:translateZ(-2.5px)"></div>
-      <div class="rb-layer" style="transform:translateZ(-1.25px)"></div>
-      <div class="rb-layer" style="transform:translateZ(0)"></div>
-      <div class="rb-layer" style="transform:translateZ(1.25px)"></div>
-      <div class="rb-layer" style="transform:translateZ(2.5px)"></div>
-      <div class="rb-face rb-front">
-        <div class="rb-slot"></div>
-        <div class="rb-icon"><svg viewBox="0 0 24 24" id="rb-icon-svg"></svg></div>
-        <div class="rb-info">
-          <div class="rb-name" id="rb-name"></div>
-          <div class="rb-divider"></div>
-          <div class="rb-role-lbl" data-i18n="badge.role">Responsabilidad</div>
-          <div class="rb-role" id="rb-role"></div>
-          <div class="rb-date" id="rb-date"></div>
-        </div>
-        <div class="rb-sheen"></div><div class="rb-shade"></div>
-      </div>
-      <div class="rb-face rb-back">
-        <div class="rb-slot"></div>
-        <img src="icons/apple-touch-icon.png" alt="FlemingApp" draggable="false">
-        <div class="rb-sheen"></div><div class="rb-shade"></div>
-      </div>
-    </div>
-    <div class="rb-clip" id="rb-clip">
-      <svg viewBox="-22 -14 44 70" aria-hidden="true">
-        <defs><linearGradient id="rbMetal" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#eceef2"/><stop offset="0.45" stop-color="#9aa0ab"/><stop offset="1" stop-color="#dcdfe5"/></linearGradient></defs>
-        <circle cx="0" cy="26" r="9" fill="none" stroke="url(#rbMetal)" stroke-width="3.6"/>
-        <rect x="-14" y="-12" width="28" height="24" rx="7" fill="url(#rbMetal)" stroke="rgba(0,0,0,0.28)" stroke-width="1"/>
-        <rect x="-8" y="-6" width="16" height="4" rx="2" fill="rgba(0,0,0,0.3)"/>
-      </svg>
-    </div>
-  </div>
-  <div class="rb-hint" id="rb-hint" data-i18n="badge.hint">Arrastra para mover · Toca para voltear</div>
-</div>
-
 <div id="page-pref-version" class="pref-subpage">
   <nav class="subpage-topbar">
     <button class="pill-back-btn" onclick="closePrefScreen()" title="Configuración" data-i18n-title="settings.title">
@@ -10342,7 +10358,10 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.60.2-beta: se quita "Subir semana" (Programación Semanal / Week Builder) del Panel de Administración de Predicación de Casa en Casa.
 // v1.60.5-beta: Easter egg — al tocar una tarjeta de responsabilidad en Mi Perfil o Para tí se abre una pantalla con el degradé del color del cargo y una credencial 3D (lanyard) con tu nombre, ícono y responsabilidad; se puede mover y voltear (atrás: logo de FlemingApp).
 // v1.60.7-beta: en eventos especiales/visitas con imagen (Casa en Casa), la imagen se extiende hacia arriba por debajo del encabezado (volver, fecha, editar) para que se vea el efecto frost.
-const APP_VERSION = '1.60.7-beta';
+// v1.60.8-beta: nuevo apartado "Eventos" en Inicio: muestra los Eventos programados (creados en Casa en Casa) con las mismas tarjetas de Casa en Casa; se agrega/quita/ordena desde Personalizar Inicio (por defecto va debajo de Predicación Hoy).
+// v1.60.8.5-beta: "Para tí" muestra Eventos próximos desde 1 semana antes del día del evento; las tarjetas de evento (Para tí y apartado Eventos) llevan un contador de días que faltan (Hoy / 1 día / N días).
+// v1.61.0-beta: (1) Se quita el Easter egg de la credencial 3D de "Mi responsabilidad" (Mi Perfil / Para tí); la tarjeta de responsabilidad vuelve a abrir la sub-sección Responsabilidades. (2) "Para tí" ya no está fijo arriba: es un apartado más de Inicio que se puede reubicar o quitar en Personalizar Inicio (se conserva su posición actual al actualizar). (3) Nuevo diseño de "Para tí": vive en su propia tarjeta y es modular, con mosaicos cuadrados o rectangulares según la cantidad de información; muestra solo lo vital (aseo del grupo, responsabilidades, asignaciones, reuniones, eventos, recordatorios) ordenado por fecha y hora, de 1 a 4 mosaicos.
+const APP_VERSION = '1.61.0-beta';
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -11681,9 +11700,6 @@ const I18N = {
   'report.enviar':          { es: 'Enviar',                   en: 'Send',              nl: 'Versturen' },
   'settings.acercade':          { es: 'Acerca de',                en: 'About',   nl: 'Over' },
   'settings.version':           { es: 'Versión de la plataforma', en: 'Platform version', nl: 'Platformversie' },
-  'badge.title':                { es: 'Mi responsabilidad', en: 'My responsibility', nl: 'Mijn verantwoordelijkheid' },
-  'badge.role':                 { es: 'Responsabilidad', en: 'Responsibility', nl: 'Verantwoordelijkheid' },
-  'badge.hint':                 { es: 'Arrastra para mover · Toca para voltear', en: 'Drag to move · Tap to flip', nl: 'Sleep om te bewegen · Tik om te draaien' },
   'settings.actualizar':        { es: 'Actualizar',               en: 'Update',  nl: 'Bijwerken' },
   'settings.buscaractualizaciones': { es: 'Buscar actualizaciones', en: 'Check for updates', nl: 'Controleren op updates' },
   'offline.banner':      { es: 'Sin conexión', en: 'Offline', nl: 'Offline' },
@@ -13797,6 +13813,7 @@ async function collectInicioSections(opts) {
         items: mine.slice(0, 5).map(a => ({
           label: 'Asignación de predicación',
           sub: `${fmtInicioDate(a.date)}${a.time ? ' • ' + a.time : ''}`,
+          dateRaw: a.date, timeRaw: a.time || '',
           sortKey: _inicioSortKey(a.date, a.time),
           onClick: () => inicioGoTo('predicacion', 'casa'),
         })),
@@ -13903,6 +13920,8 @@ async function collectInicioSections(opts) {
         items: mine.slice(0, 5).map(r => ({
           label: _namesMatch(r.encargado_nombre, getIdentityName()) ? 'Encargado del aseo' : 'Tu grupo de servicio limpia el salón',
           byGroup: (myGroupNum != null && (r.grupo1_numero === myGroupNum || r.grupo2_numero === myGroupNum)),
+          encargado: _namesMatch(r.encargado_nombre, getIdentityName()),
+          grupo: myGroupNum, dateRaw: r.fecha,
           sub: fmtInicioDate(r.fecha),
           sortKey: _inicioSortKey(r.fecha, null),
           onClick: () => inicioGoTo('reuniones', 'aseo-salon'),
@@ -13995,7 +14014,8 @@ async function collectInicioSections(opts) {
           label: r.cargo || 'Responsabilidad',
           sub: typeof respDiaLabel === 'function' ? respDiaLabel(r.fecha) : fmtInicioDate(r.fecha),
           sortKey: _inicioSortKey(r.fecha, null),
-          onClick: () => openRespBadge(r.cargo || 'Responsabilidad', r.fecha), // v1.60.5-beta: Credencial 3D (no abre la sub-sección Responsabilidades)
+          cargo: r.cargo || 'Responsabilidad', dateRaw: r.fecha,
+          onClick: () => inicioGoTo('reuniones', 'responsabilidades'), // v1.61.0-beta: se quitó el Easter egg de la credencial 3D
         })),
       });
     }
@@ -14062,215 +14082,6 @@ function _inicioCardClick(key, idx) {
   const sec = (window._inicioSections || []).find(s => s.key === key);
   const it = sec && sec.items[idx];
   if (it && typeof it.onClick === 'function') it.onClick();
-}
-
-// ══════════════════════════════════════════════════════════════════════════
-// v1.60.5-beta: Easter egg — Credencial 3D de "Mi responsabilidad".
-// Se abre al tocar una tarjeta de responsabilidad (Encargado de Audio y Video, Micrófono, Plataforma,
-// Acomodador…) desde "Mi Perfil" o "Para tí" en Inicio; NO desde la sub-sección "Responsabilidades".
-// Física: cuerda de 8 segmentos + credencial rígida (3 puntos) con integración de Verlet.
-// Toque = voltear la credencial; arrastre = moverla (la cuerda la hace oscilar al soltarla).
-// ══════════════════════════════════════════════════════════════════════════
-const RB = { open: false, raf: 0, lastT: 0, acc: 0, pts: [], cons: [], N: 8, iC: 8, iM: 9, iB: 10,
-  W: 0, H: 0, w: 260, h: 410, ropeLen: 200, ax: 0, ay: -40, drag: null,
-  psi: 0, psiT: 0, psiV: 0, sway: 0, prevOverflow: '', bound: false };
-
-function rbHex(h) { h = h.replace('#', ''); if (h.length === 3) h = h.split('').map(c => c + c).join(''); return [0, 2, 4].map(i => parseInt(h.substr(i, 2), 16)); }
-function rbMix(hex, other, t) { const a = rbHex(hex), b = rbHex(other); return '#' + a.map((v, i) => Math.round(v + (b[i] - v) * t).toString(16).padStart(2, '0')).join(''); }
-function rbLum(hex) { const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; const [r, g, b] = rbHex(hex); return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); }
-
-function openRespBadge(cargo, fecha) {
-  const page = document.getElementById('page-resp-badge');
-  if (!page || !cargo) return;
-  const st = getCargoStyle(cargo);
-  const base = /^#[0-9a-f]{6}$/i.test(st.color) ? st.color : '#7c3aed';
-  const darkText = (1.05 / (rbLum(base) + 0.05)) < 3; // blanco sobre el color con contraste < 3:1 → texto oscuro
-  const ps = page.style;
-  ps.setProperty('--rb-top', rbMix(base, '#000000', 0.12));
-  ps.setProperty('--rb-mid', rbMix(base, '#000000', 0.55));
-  ps.setProperty('--rb-bot', rbMix(base, '#000000', 0.87));
-  ps.setProperty('--rb-pill', rbMix(base, '#000000', 0.78) + 'e6');
-  ps.setProperty('--rb-card-hi', rbMix(base, '#ffffff', 0.16));
-  ps.setProperty('--rb-card', base);
-  ps.setProperty('--rb-card-lo', rbMix(base, '#000000', 0.26));
-  ps.setProperty('--rb-edge', rbMix(base, '#000000', 0.42));
-  ps.setProperty('--rb-strap', rbMix(base, '#000000', 0.1));
-  ps.setProperty('--rb-strap-edge', rbMix(base, '#000000', 0.48));
-  ps.setProperty('--rb-strap-hl', rbMix(base, '#ffffff', 0.4));
-  ps.setProperty('--rb-text', darkText ? '#141414' : '#ffffff');
-  ps.setProperty('--rb-on', darkText ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.2)');
-  ps.setProperty('--rb-on2', darkText ? 'rgba(0,0,0,0.22)' : 'rgba(255,255,255,0.32)');
-
-  const nombre = ((typeof getIdentityName === 'function' ? getIdentityName() : '') || (currentUser && currentUser.name) || '').trim();
-  ps.setProperty('--rb-name-k', nombre.length > 26 ? '0.078' : nombre.length > 18 ? '0.09' : '0.1');
-  document.getElementById('rb-name').textContent = nombre;
-  document.getElementById('rb-role').textContent = cargo;
-  document.getElementById('rb-date').textContent = fecha && typeof respDiaLabel === 'function' ? capitalizar(respDiaLabel(fecha)) : '';
-  document.getElementById('rb-icon-svg').innerHTML = st.icon;
-  page.removeAttribute('aria-hidden');
-
-  const hint = document.getElementById('rb-hint');
-  if (hint) { hint.style.animation = 'none'; void hint.offsetWidth; hint.style.animation = ''; }
-
-  RB.prevOverflow = document.body.style.overflow;
-  document.body.style.overflow = 'hidden';
-  page.classList.add('open');
-  RB.open = true;
-  if (typeof pushHistoryLayer === 'function') pushHistoryLayer();
-  rbBind();
-  rbLayout(true);
-  RB.acc = 0; RB.lastT = performance.now();
-  if (!RB.raf) RB.raf = requestAnimationFrame(rbLoop);
-}
-
-function closeRespBadge() {
-  const page = document.getElementById('page-resp-badge');
-  if (!page) return;
-  RB.open = false; RB.drag = null;
-  if (RB.raf) { cancelAnimationFrame(RB.raf); RB.raf = 0; }
-  page.classList.remove('open');
-  page.setAttribute('aria-hidden', 'true');
-  document.body.style.overflow = RB.prevOverflow || (document.getElementById('page-profile')?.classList.contains('open') ? 'hidden' : '');
-}
-
-// Acomoda el tamaño de la credencial a la pantalla y reinicia la cuerda.
-function rbLayout(swing) {
-  const page = document.getElementById('page-resp-badge');
-  const stage = document.getElementById('rb-stage');
-  const bar = page.querySelector('.rb-topbar');
-  const W = stage.clientWidth, H = stage.clientHeight;
-  const topB = bar ? bar.getBoundingClientRect().bottom : 70;
-  const availH = Math.max(200, H - topB - 64);
-  let w = Math.min(300, W * 0.76, (availH * 0.86) / 1.58);
-  w = Math.max(w, 150);
-  const h = w * 1.58;
-  const clipY = topB + Math.max(60, (availH - h) / 2);
-  RB.W = W; RB.H = H; RB.w = w; RB.h = h;
-  RB.ax = W / 2; RB.ay = -40;
-  RB.ropeLen = Math.max(120, clipY - RB.ay);
-  stage.style.setProperty('--rb-w', w + 'px');
-  stage.style.setProperty('--rb-h', h + 'px');
-
-  const N = RB.N, seg = RB.ropeLen / N;
-  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const phi = (swing && !reduce) ? (Math.random() < 0.5 ? -0.3 : 0.3) : 0; // empieza ladeada y se balancea al entrar
-  const dx = Math.sin(phi), dy = Math.cos(phi);
-  const at = (dist, wgt) => ({ x: RB.ax + dx * dist, y: RB.ay + dy * dist, px: RB.ax + dx * dist, py: RB.ay + dy * dist, w: wgt });
-  const P = [];
-  for (let i = 0; i <= N; i++) P.push(at(seg * i, i === 0 ? 0 : 1));
-  P[N].w = 0.6;
-  P.push(at(RB.ropeLen + h / 2, 0.2)); // M: centro de la credencial
-  P.push(at(RB.ropeLen + h, 0.2));     // B: borde inferior
-  RB.pts = P;
-  RB.iC = N; RB.iM = N + 1; RB.iB = N + 2;
-  RB.cons = [];
-  for (let i = 0; i < N; i++) RB.cons.push({ a: i, b: i + 1, r: seg });
-  RB.cons.push({ a: RB.iC, b: RB.iM, r: h / 2 }, { a: RB.iM, b: RB.iB, r: h / 2 }, { a: RB.iC, b: RB.iB, r: h });
-  RB.psi = 0; RB.psiT = 0; RB.psiV = 0; RB.sway = 0;
-  rbRender();
-}
-
-function rbStep(h) {
-  const P = RB.pts, g = 2600, h2 = h * h, d = RB.drag, iM = RB.iM;
-  if (d) { // la credencial sigue al dedo, sin estirar la cuerda
-    let tx = Math.max(RB.W * 0.1, Math.min(RB.W * 0.9, d.tx)), ty = Math.max(RB.H * 0.15, Math.min(RB.H * 0.88, d.ty));
-    const dx = tx - RB.ax, dy = ty - RB.ay, dist = Math.hypot(dx, dy), R = (RB.ropeLen + RB.h / 2) * 0.97;
-    if (dist > R) { tx = RB.ax + dx / dist * R; ty = RB.ay + dy / dist * R; }
-    const m = P[iM];
-    m.px = m.x; m.py = m.y;
-    m.x += (tx - m.x) * 0.35; m.y += (ty - m.y) * 0.35;
-  }
-  for (let i = 1; i < P.length; i++) {
-    if (d && i === iM) continue;
-    const p = P[i], dm = i >= RB.iC ? 0.9968 : 0.9984;
-    const vx = (p.x - p.px) * dm, vy = (p.y - p.py) * dm;
-    p.px = p.x; p.py = p.y;
-    p.x += vx; p.y += vy + g * h2;
-  }
-  for (let it = 0; it < 12; it++) {
-    for (const c of RB.cons) {
-      const a = P[c.a], b = P[c.b];
-      const wa = (d && c.a === iM) ? 0 : a.w, wb = (d && c.b === iM) ? 0 : b.w, ws = wa + wb;
-      if (!ws) continue;
-      const dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx, dy) || 0.0001;
-      const k = (dist - c.r) / dist / ws;
-      a.x += dx * k * wa; a.y += dy * k * wa;
-      b.x -= dx * k * wb; b.y -= dy * k * wb;
-    }
-  }
-}
-
-function rbLoop(t) {
-  if (!RB.open) { RB.raf = 0; return; }
-  RB.raf = requestAnimationFrame(rbLoop);
-  let dt = (t - RB.lastT) / 1000; RB.lastT = t;
-  if (!(dt > 0)) dt = 1 / 60;
-  if (dt > 0.05) dt = 0.05;
-  const hs = 1 / 120; RB.acc += dt; let n = 0;
-  while (RB.acc >= hs && n < 10) { rbStep(hs); RB.acc -= hs; n++; }
-  if (n === 10) RB.acc = 0;
-  // giro (volteo) con resorte amortiguado
-  RB.psiV += (75 * (RB.psiT - RB.psi) - 10.5 * RB.psiV) * dt;
-  RB.psi += RB.psiV * dt;
-  if (Math.abs(RB.psi) > 60 * Math.PI) { const s = Math.round(RB.psi / (2 * Math.PI)) * 2 * Math.PI; RB.psi -= s; RB.psiT -= s; }
-  // leve torsión según la velocidad horizontal
-  const m = RB.pts[RB.iM], vx = (m.x - m.px) * 120;
-  const sw = Math.max(-0.5, Math.min(0.5, vx * 0.0004));
-  RB.sway += (sw - RB.sway) * 0.1;
-  rbRender();
-}
-
-function rbRender() {
-  const P = RB.pts; if (!P.length) return;
-  const C = P[RB.iC], B = P[RB.iB];
-  const theta = Math.atan2(-(B.x - C.x), (B.y - C.y));
-  const psi = RB.psi + RB.sway;
-  const cs = Math.cos(psi);
-  const card = document.getElementById('rb-card');
-  card.style.transform = `translate3d(${C.x.toFixed(2)}px,${C.y.toFixed(2)}px,0) rotate(${theta.toFixed(4)}rad) rotateY(${psi.toFixed(4)}rad)`;
-  card.style.setProperty('--rb-sx', (50 + Math.sin(psi) * 70 + theta * 60).toFixed(1) + '%');
-  card.style.setProperty('--rb-shade', (0.4 * (1 - Math.abs(cs))).toFixed(3));
-  const sh = document.getElementById('rb-shadow');
-  sh.style.transform = `translate3d(${(C.x + 10).toFixed(2)}px,${(C.y + 26).toFixed(2)}px,0) rotate(${theta.toFixed(4)}rad) scaleX(${Math.max(0.1, Math.abs(cs)).toFixed(3)})`;
-  document.getElementById('rb-clip').style.transform = `translate3d(${C.x.toFixed(2)}px,${C.y.toFixed(2)}px,0) rotate(${theta.toFixed(4)}rad)`;
-  // correa: curva suave por los puntos de la cuerda
-  const N = RB.N;
-  let d = `M${P[0].x.toFixed(1)} ${P[0].y.toFixed(1)}`;
-  for (let i = 1; i < N; i++) d += ` Q${P[i].x.toFixed(1)} ${P[i].y.toFixed(1)} ${((P[i].x + P[i + 1].x) / 2).toFixed(1)} ${((P[i].y + P[i + 1].y) / 2).toFixed(1)}`;
-  d += ` L${P[N].x.toFixed(1)} ${P[N].y.toFixed(1)}`;
-  ['rb-strap-edge', 'rb-strap-main', 'rb-strap-hl'].forEach(id => document.getElementById(id).setAttribute('d', d));
-}
-
-// Gestos: arrastrar mueve la credencial; un toque corto la voltea.
-function rbBind() {
-  if (RB.bound) return;
-  RB.bound = true;
-  const card = document.getElementById('rb-card'), stage = document.getElementById('rb-stage');
-  const pos = e => { const r = stage.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
-  card.addEventListener('pointerdown', e => {
-    if (!RB.open || RB.drag) return;
-    e.preventDefault();
-    const [x, y] = pos(e), m = RB.pts[RB.iM];
-    RB.drag = { id: e.pointerId, offX: x - m.x, offY: y - m.y, tx: m.x, ty: m.y, sx: x, sy: y, t: performance.now(), moved: 0 };
-    card.classList.add('rb-grabbing');
-    try { card.setPointerCapture(e.pointerId); } catch (_) {}
-  });
-  card.addEventListener('pointermove', e => {
-    const d = RB.drag; if (!d || e.pointerId !== d.id) return;
-    const [x, y] = pos(e);
-    d.tx = x - d.offX; d.ty = y - d.offY;
-    d.moved = Math.max(d.moved, Math.hypot(x - d.sx, y - d.sy));
-  });
-  const end = e => {
-    const d = RB.drag; if (!d || e.pointerId !== d.id) return;
-    if (e.type === 'pointerup' && d.moved < 8 && performance.now() - d.t < 450) RB.psiT += Math.PI;
-    RB.drag = null;
-    card.classList.remove('rb-grabbing');
-    try { card.releasePointerCapture(e.pointerId); } catch (_) {}
-  };
-  card.addEventListener('pointerup', end);
-  card.addEventListener('pointercancel', end);
-  window.addEventListener('resize', () => { if (RB.open) rbLayout(false); });
 }
 
 // ── Color de fondo del avatar de iniciales (v1.42.0-stable_beta) ────────────
@@ -25371,10 +25182,6 @@ function _closeTopLayer() {
     if (typeof closeGrupoPage === 'function') closeGrupoPage();
     else document.getElementById('page-grupo').classList.remove('open');
     return;
-  }
-  // Credencial 3D de Mi responsabilidad (v1.60.5-beta)
-  if (document.getElementById('page-resp-badge')?.classList.contains('open')) {
-    closeRespBadge(); return;
   }
   // Avatar color overlay
   if (document.getElementById('page-avatar-edit')?.classList.contains('open')) {
