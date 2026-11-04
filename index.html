@@ -5033,6 +5033,54 @@
   .pref-theme-opt:hover { border-color: var(--border-active); }
   .pref-theme-opt.active { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
 
+
+  /* v1.62-beta: selector de interfaz (UI Classic / Sencillo / con Inicio) */
+  .uim-row { display: flex; gap: 8px; padding: 0.9rem 1rem 0.6rem; }
+  .uim-opt {
+    flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 0.6rem 0.4rem 0.7rem; border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border); background: var(--surface2);
+    color: var(--text2); font-family: var(--font); cursor: pointer; transition: all 0.15s;
+    position: relative;
+  }
+  .uim-opt:hover { border-color: var(--border-active); }
+  .uim-opt.active { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .uim-opt.active::after {
+    content: ''; position: absolute; top: 6px; right: 6px; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='5 12 10 17 19 7'/%3E%3C/svg%3E") center/11px no-repeat;
+  }
+  .uim-name { font-size: 0.76rem; font-weight: 700; margin-top: 4px; text-align: center; line-height: 1.15; }
+  .uim-desc { font-size: 0.64rem; font-weight: 500; color: var(--text3); text-align: center; line-height: 1.2; }
+  .uim-opt.active .uim-desc { color: var(--accent); opacity: 0.85; }
+  .uim-mock {
+    width: 100%; max-width: 76px; aspect-ratio: 9 / 16; border-radius: 10px;
+    border: 1.5px solid var(--border); background: var(--surface);
+    padding: 5px; display: flex; flex-direction: column; gap: 4px; position: relative; overflow: hidden;
+  }
+  .uim-opt.active .uim-mock { border-color: var(--accent); }
+  .uim-bar { height: 7px; border-radius: 3px; background: var(--surface3); flex-shrink: 0; }
+  .uim-bar-ms { display: flex; justify-content: space-between; align-items: center; background: none; height: 9px; }
+  .uim-bar-ms b { width: 18px; height: 5px; border-radius: 3px; background: var(--text3); opacity: 0.6; }
+  .uim-bar-ms em { width: 9px; height: 7px; border-radius: 2px; background: var(--accent); opacity: 0.8; }
+  .uim-bar-home { background: none; height: 9px; }
+  .uim-bar-home b { display: block; width: 26px; height: 5px; border-radius: 3px; background: var(--text3); opacity: 0.6; }
+  .uim-tabs { display: flex; gap: 3px; flex-shrink: 0; }
+  .uim-tabs i { flex: 1; height: 5px; border-radius: 3px; background: var(--surface3); }
+  .uim-tabs i.on { background: var(--accent); }
+  .uim-card { height: 16px; border-radius: 4px; background: var(--surface3); flex-shrink: 0; }
+  .uim-card.s { height: 11px; opacity: 0.7; }
+  .uim-big { height: 19px; border-radius: 6px; background: var(--accent); opacity: 0.22; flex-shrink: 0; }
+  .uim-opt.active .uim-big { opacity: 0.38; }
+  .uim-hero { height: 22px; border-radius: 5px; background: var(--accent); opacity: 0.3; flex-shrink: 0; }
+  .uim-grid { display: flex; gap: 3px; flex-shrink: 0; }
+  .uim-grid i { flex: 1; height: 15px; border-radius: 4px; background: var(--surface3); }
+  .uim-nav {
+    position: absolute; left: 4px; right: 4px; bottom: 4px; height: 11px; border-radius: 6px;
+    background: var(--surface3); display: flex; justify-content: space-around; align-items: center;
+  }
+  .uim-nav i { width: 5px; height: 5px; border-radius: 50%; background: var(--text3); opacity: 0.55; }
+  .uim-nav i.on { background: var(--accent); opacity: 1; }
+
   .pref-notif-row {
     display: flex; align-items: center; gap: 12px;
     padding: 0.8rem 1rem; border-top: 1px solid var(--border);
@@ -6208,7 +6256,33 @@ function isInicioActive() {
   return isInicioExpEnabled() && window.innerWidth < 640 &&
     !(typeof isModoSencilloActive === 'function' && isModoSencilloActive());
 }
+
+// ── v1.62-beta: selector de interfaz (UI Classic / UI Sencillo / UI con Inicio) ──
+function getUiMode() {
+  if (typeof isModoSencilloEnabled === 'function' && isModoSencilloEnabled()) return 'sencillo';
+  if (isInicioPrefOn()) return 'inicio';
+  return 'classic';
+}
+function updateUiModeUI() {
+  const cur = getUiMode();
+  ['classic', 'sencillo', 'inicio'].forEach(m => {
+    const el = document.getElementById('pref-uim-' + m);
+    if (el) el.classList.toggle('active', m === cur);
+  });
+}
+function setUiMode(mode) {
+  if (mode === getUiMode()) return;
+  try {
+    localStorage.setItem('fleming_modo_sencillo', mode === 'sencillo' ? 'true' : 'false');
+    localStorage.setItem('fleming_inicio_enabled', mode === 'inicio' ? 'true' : 'false');
+  } catch {}
+  if (typeof applyModoSencilloUI === 'function') applyModoSencilloUI(); else applyInicioUI();
+  updateUiModeUI();
+  const names = { classic: 'UI Classic activado', sencillo: 'UI Sencillo activado', inicio: 'UI con Inicio activado' };
+  showToast(names[mode], mode === 'classic' ? '' : 'success');
+}
 function updateHomeExpToggleUI() {
+  updateUiModeUI();
   const t = document.getElementById('home-exp-toggle'), th = document.getElementById('home-exp-thumb');
   if (!t || !th) return;
   const on = isInicioPrefOn();
@@ -9326,43 +9400,27 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
       <div style="padding:0.55rem 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="pref.animaciones.desc">Usa transiciones fluidas en toda la plataforma. Prueba "Ultra Fluida" para animaciones aún más vivas y notorias, o elige "Reducidas" si eres sensible al movimiento.</div>
     </div>
 
-    <!-- Modo Sencillo (v1.32.7-beta; desde v1.50.0-sb vive en Preferencias, ya no es experimental). Reemplaza toda la
-         navegación por defecto por un encabezado mínimo + un menú overlay de
-         pantalla completa con botones grandes, para quienes tienen
-         dificultad para usar la interfaz por defecto. -->
+    <!-- v1.62-beta: selector de interfaz (UI Classic / UI Sencillo / UI con Inicio). Reemplaza los toggles separados de Modo Sencillo e Inicio. -->
     <div class="profile-section">
-      <div class="profile-section-title" data-i18n="exp.modosencillo.section">Modo Sencillo</div>
-      <div class="profile-row" style="cursor:pointer" onclick="toggleModoSencilloPref()">
-        <div class="profile-row-icon" style="background:var(--ter-1-bg);color:var(--ter-1)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="3" width="18" height="18" rx="4"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="14" x2="16" y2="14"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="exp.modosencillo.title">Activar Modo Sencillo</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.modosencillo.desc">Simplifica la interfaz: reemplaza la navegación por un menú de pantalla completa con botones grandes.</div>
-        </div>
-        <div id="modo-sencillo-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="modo-sencillo-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
+      <div class="profile-section-title">Interfaz</div>
+      <div class="uim-row" id="pref-ui-mode-row">
+        <button class="uim-opt" id="pref-uim-classic" onclick="setUiMode('classic')">
+          <div class="uim-mock"><div class="uim-bar"></div><div class="uim-tabs"><i class="on"></i><i></i></div><div class="uim-card"></div><div class="uim-card s"></div><div class="uim-card s"></div></div>
+          <span class="uim-name">UI Classic</span>
+          <span class="uim-desc">Barra superior con secciones</span>
+        </button>
+        <button class="uim-opt" id="pref-uim-sencillo" onclick="setUiMode('sencillo')">
+          <div class="uim-mock"><div class="uim-bar uim-bar-ms"><b></b><em></em></div><div class="uim-big"></div><div class="uim-big"></div><div class="uim-big"></div></div>
+          <span class="uim-name">UI Sencillo</span>
+          <span class="uim-desc">Menú y botones grandes</span>
+        </button>
+        <button class="uim-opt" id="pref-uim-inicio" onclick="setUiMode('inicio')">
+          <div class="uim-mock"><div class="uim-bar uim-bar-home"><b></b></div><div class="uim-hero"></div><div class="uim-grid"><i></i><i></i></div><div class="uim-card s"></div><div class="uim-nav"><i class="on"></i><i></i><i></i><i></i></div></div>
+          <span class="uim-name">UI con Inicio</span>
+          <span class="uim-desc">Pantalla de Inicio y barra inferior</span>
+        </button>
       </div>
-      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.modosencillo.help">Pensado para quienes tienen dificultad para usar la versión por defecto. Notificaciones y Live siguen activas, accesibles desde el menú.</div>
-    </div>
-
-    <!-- v1.52.0: Inicio (opcional). UI Classic es la vista por defecto; aquí se activa Inicio y la NavBar inferior. -->
-    <div class="profile-section">
-      <div class="profile-section-title">Inicio</div>
-      <div class="profile-row" style="cursor:pointer" onclick="toggleInicioExpPref()">
-        <div class="profile-row-icon" style="background:var(--accent-light);color:var(--accent)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label">Activar Inicio</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Muestra la pantalla de Inicio (Para ti, Mis asignaciones, Texto Diario y Predicación del día) y la barra de navegación inferior (Home, Predicación, Reuniones y Voz).</div>
-        </div>
-        <div id="home-exp-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="home-exp-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
-      </div>
-      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">Por defecto se usa UI Classic. Inicio solo está disponible en teléfonos móviles; en computador y tablet siempre se usa el diseño clásico.</div>
+      <div style="padding:0.1rem 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">UI Classic es la vista por defecto. UI Sencillo reemplaza la navegación por un menú de pantalla completa con botones grandes. UI con Inicio muestra Para tí, Texto Diario y Predicación del día con una barra de navegación inferior; solo está disponible en teléfonos móviles (en tablet y computador se usa el diseño clásico).</div>
     </div>
 
     <!-- Vista de Contenido (ajuste de presentación en Tablet/Escritorio) -->
@@ -10026,7 +10084,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
 <div class="aseo-mode-overlay" id="resp-share-overlay" onclick="if(event.target===this) closeRespShareChooser()">
   <div class="aseo-mode-card">
     <div class="aseo-mode-title">Compartir Responsabilidades</div>
-    <div class="aseo-mode-sub">Genera una imagen con las asignaciones de este día para enviarla por mensajería.</div>
+    <div class="aseo-mode-sub">¿Quieres generar una imagen con las asignaciones de este día para compartirla?</div>
     <button class="aseo-mode-opt" onclick="confirmRespShare()">
       <div class="aseo-mode-opt-icon">
         <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.6" x2="15.4" y2="6.4"/><line x1="8.6" y1="13.4" x2="15.4" y2="17.6"/></svg>
@@ -10361,7 +10419,8 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.60.8-beta: nuevo apartado "Eventos" en Inicio: muestra los Eventos programados (creados en Casa en Casa) con las mismas tarjetas de Casa en Casa; se agrega/quita/ordena desde Personalizar Inicio (por defecto va debajo de Predicación Hoy).
 // v1.60.8.5-beta: "Para tí" muestra Eventos próximos desde 1 semana antes del día del evento; las tarjetas de evento (Para tí y apartado Eventos) llevan un contador de días que faltan (Hoy / 1 día / N días).
 // v1.61.0-beta: (1) Se quita el Easter egg de la credencial 3D de "Mi responsabilidad" (Mi Perfil / Para tí); la tarjeta de responsabilidad vuelve a abrir la sub-sección Responsabilidades. (2) "Para tí" ya no está fijo arriba: es un apartado más de Inicio que se puede reubicar o quitar en Personalizar Inicio (se conserva su posición actual al actualizar). (3) Nuevo diseño de "Para tí": vive en su propia tarjeta y es modular, con mosaicos cuadrados o rectangulares según la cantidad de información; muestra solo lo vital (aseo del grupo, responsabilidades, asignaciones, reuniones, eventos, recordatorios) ordenado por fecha y hora, de 1 a 4 mosaicos.
-const APP_VERSION = '1.61.0-beta';
+// v1.62-beta: (1) Tocar un arreglo de Responsabilidades ya no genera la imagen para compartir automáticamente: ahora aparece un popup de confirmación (evita toques accidentales). (2) Reunión Pública: se quita el espacio excesivo entre el programa y "Conferencias salientes". (3) Preferencias: nuevo selector visual de interfaz con 3 recuadros (UI Classic, UI Sencillo y UI con Inicio) que reemplaza los toggles separados de Modo Sencillo e Inicio.
+const APP_VERSION = '1.62-beta';
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -20526,10 +20585,7 @@ async function renderRespUserView() {
 let _respShareDate = null;
 
 function openRespShareChooser(dateStr) {
-  if (window.innerWidth < 640) {
-    shareRespDayAsPng(dateStr);
-    return;
-  }
+  // v1.62-beta: ya no se comparte directo en móvil; siempre se pide confirmación (evita toques accidentales).
   _respShareDate = dateStr;
   document.getElementById('resp-share-overlay').classList.add('open');
 }
@@ -26807,6 +26863,7 @@ function toggleModoSencilloPref() {
   showToast(next ? 'Modo Sencillo activado' : 'Modo Sencillo desactivado', next ? 'success' : '');
 }
 function updateModoSencilloToggleUI() {
+  if (typeof updateUiModeUI === 'function') updateUiModeUI();
   const toggle = document.getElementById('modo-sencillo-toggle');
   const thumb  = document.getElementById('modo-sencillo-thumb');
   if (!toggle || !thumb) return;
@@ -29111,8 +29168,7 @@ function renderFsUserView() {
       </div>
       <div class="vmc-cal-popover" id="fs-cal-popover"></div>
     </div>
-    <div class="vmc-program-container" id="fs-program-container">${programHtml}</div>
-    ${fsRenderOutgoingSection()}`;
+    <div class="vmc-program-container" id="fs-program-container">${programHtml}${fsRenderOutgoingSection()}</div>`;
 }
 
 // v1.52.0: Conferencias salientes próximas (hoy en adelante), debajo del programa.
@@ -29134,7 +29190,7 @@ function fsRenderOutgoingSection() {
       </div>
     </div>`;
   }).join('');
-  return `<div class="vmc-user-section" style="margin-top:1rem">
+  return `<div class="vmc-user-section" style="margin-top:0">
     <div class="vmc-user-section-header" style="background:rgba(52,199,89,0.12);color:#34c759">Conferencias salientes</div>
     ${cards}
   </div>`;
