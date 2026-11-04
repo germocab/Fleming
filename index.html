@@ -2738,6 +2738,9 @@
 
 
 
+  .vmc-guide-button { width:100%; display:flex; align-items:center; justify-content:center; gap:9px; margin-top:1rem; padding:13px 16px; border:1px solid var(--border); border-radius:14px; background:var(--surface); color:var(--accent); font:inherit; font-size:.88rem; font-weight:700; cursor:pointer; transition:background .18s,transform .15s; }
+  .vmc-guide-button:active { transform:scale(.98); background:var(--accent-light); }
+  .vmc-guide-button svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
   .vmc-week-card {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 1rem 1.1rem;
@@ -3631,6 +3634,20 @@
     background: var(--surface3); flex-shrink: 0;
   }
 
+  .territory-np-search-wrap { margin:0 0 1rem; }
+  .territory-np-search { display:flex; align-items:center; gap:10px; padding:0 14px; min-height:46px; border-radius:14px; border:1px solid var(--border); background:var(--surface); box-shadow:var(--shadow); }
+  .territory-np-search svg { width:18px; height:18px; flex:0 0 18px; stroke:var(--text3); fill:none; stroke-width:2; stroke-linecap:round; }
+  .territory-np-search input { flex:1; min-width:0; border:0; outline:0; background:transparent; color:var(--text); font:inherit; font-size:.88rem; }
+  .territory-np-search input::placeholder { color:var(--text3); }
+  .territory-np-search-count { padding:8px 3px; color:var(--text3); font-size:.75rem; font-weight:700; }
+  .territory-np-search-empty { padding:1.25rem; text-align:center; color:var(--text3); font-size:.85rem; }
+  .territory-np-result { width:100%; display:flex; align-items:center; gap:11px; text-align:left; padding:11px 12px; margin-bottom:7px; border:1px solid var(--border); border-radius:13px; background:var(--surface); color:var(--text); cursor:pointer; font:inherit; }
+  .territory-np-result-icon { width:34px; height:34px; flex:0 0 34px; display:flex; align-items:center; justify-content:center; border-radius:10px; background:var(--accent-light); color:var(--accent); }
+  .territory-np-result-icon svg { width:17px; height:17px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+  .territory-np-result-body { min-width:0; flex:1; display:flex; flex-direction:column; gap:3px; }
+  .territory-np-result-body strong { font-size:.87rem; font-weight:700; overflow-wrap:anywhere; }
+  .territory-np-result-body small { font-size:.73rem; color:var(--text3); overflow-wrap:anywhere; }
+  .territory-np-result-chevron { width:15px; height:15px; stroke:var(--text3); fill:none; stroke-width:2.5; flex:0 0 15px; }
   .ter-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -4274,6 +4291,8 @@
   .grupo-hosp-date { font-size: 0.88rem; font-weight: 600; color: var(--text); }
   .grupo-hosp-who  { font-size: 0.8rem; color: var(--text3); }
   .grupo-hosp-actions { display: flex; gap: 0.75rem; padding: 0.75rem 1rem; }
+  .service-group-badges { flex: 0 0 42px; width:42px; display:flex; align-items:center; justify-content:center; gap:4px; }
+  .service-group-number { width:34px; height:34px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; flex:0 0 34px; background:var(--accent); color:#fff; font-size:.82rem; font-weight:800; font-variant-numeric:tabular-nums; }
 
   /* Admin map upload in grupo detail (only for super/aux/admin) */
   .grupo-upload-btn {
@@ -6152,10 +6171,10 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 .home-card.lp-press { transform: scale(0.97); transition: transform 0.5s; }
 /* v1.63-beta: nuevo diseño del Texto Diario; solo el texto bíblico va en tipografía Serif */
 .home-card-texto { position: relative; overflow: hidden; display: block; padding: 1.35rem 1.25rem 1rem; background: linear-gradient(155deg, var(--accent-light) 0%, var(--surface) 72%); }
-.home-card-texto::before { content: '\201C'; position: absolute; top: -0.35rem; left: 0.7rem; font-family: Georgia, 'Times New Roman', serif; font-size: 6rem; line-height: 1; color: var(--accent); opacity: 0.16; pointer-events: none; }
+.home-card-texto::before { display: none; content: none; }
 .home-card-texto .home-card-body { position: relative; }
 .home-card-texto .home-card-title { font-size: 1.05rem; font-weight: 700; line-height: 1.4; letter-spacing: -0.01em; padding-top: 0.35rem; }
-.home-card-texto.is-verse .home-card-title { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, 'Times New Roman', serif; font-size: 1.2rem; font-weight: 500; line-height: 1.55; letter-spacing: 0; }
+.home-card-texto.is-verse .home-card-title { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, 'Times New Roman', serif; font-size: 1.2rem; font-weight: 700; line-height: 1.55; letter-spacing: 0; }
 .home-card-texto .home-card-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 0.7rem; font-weight: 600; color: var(--accent); }
 .home-card-texto .home-card-meta::after { content: '\203A'; font-size: 1.1rem; line-height: 1; margin-left: 8px; }
 /* ── v1.61.0-beta: "Para tí" modular (tarjeta propia con mosaicos cuadrados/rectangulares) ── */
@@ -6365,7 +6384,7 @@ function applyInicioChrome() {
   // v1.50.0-beta: Voz está en la NavBar de las 3 secciones, solo para quien tenga acceso.
   document.documentElement.classList.toggle('voz-avail', active && _vozAllowed());
   // v1.55.90-beta: Visitante con Inicio activo (móvil) → "Más opciones" abajo junto a la NavBar; arriba solo queda el perfil.
-  const isViewerInicio = active && !!currentUser && currentRole !== 'dev' && currentRole !== 'admin';
+  const isViewerInicio = active && !!currentUser && !_vozAllowed();
   document.documentElement.classList.toggle('inicio-viewer', isViewerInicio);
   if (!isViewerInicio) _optionsMenuRestoreHome();
   document.querySelectorAll('#home-bottom-nav [data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === currentMainTab));
@@ -6672,18 +6691,16 @@ async function renderHomeEventos() {
     .sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
   let h = '<div class="home-section-title">Eventos</div>';
   if (!evs.length) { el2.innerHTML = h + '<div class="home-empty">No hay eventos programados.</div>'; return; }
-  const byDate = {};
-  evs.forEach(a => { (byDate[a.date] = byDate[a.date] || []).push(a); });
-  Object.keys(byDate).sort().forEach(date => {
-    const n = _homeDiffDays(date);
-    const label = fmtCasaLongDate(new Date(date + 'T00:00:00'));
-    if (n === 0 || n === 1) {
-      h += '<div class="date-section"><div class="date-section-header-today"><span class="today-label">' + t(n === 0 ? 'casa.hoy' : 'casa.manana') + '</span><span class="today-date">' + label + '</span></div>';
-    } else {
-      h += '<div class="date-section"><div class="date-section-header">' + label + '</div>';
-    }
-    h += byDate[date].map(_homeEventoCard).join('') + '</div>';
-  });
+  // v1.65: Inicio muestra únicamente el evento futuro más cercano.
+  const nearest = evs[0];
+  const n = _homeDiffDays(nearest.date);
+  const label = fmtCasaLongDate(new Date(nearest.date + 'T00:00:00'));
+  if (n === 0 || n === 1) {
+    h += '<div class="date-section"><div class="date-section-header-today"><span class="today-label">' + t(n === 0 ? 'casa.hoy' : 'casa.manana') + '</span><span class="today-date">' + label + '</span></div>';
+  } else {
+    h += '<div class="date-section"><div class="date-section-header">' + label + '</div>';
+  }
+  h += _homeEventoCard(nearest) + '</div>';
   el2.innerHTML = h;
 }
 
@@ -9496,6 +9513,21 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
         </div>
       </div>
     </div>
+    <!-- v1.65: control global de Voz, solo para administradores con permiso Voz. -->
+    <div class="profile-section" id="pref-voz-section" style="display:none">
+      <div class="profile-section-title">Asistente</div>
+      <div class="profile-row" style="cursor:pointer" onclick="toggleVozFeaturePref()">
+        <div class="profile-row-icon" style="background:var(--accent-light);color:var(--accent)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Voz</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Permite usar el asistente de Voz en la plataforma</div>
+        </div>
+        <div id="voz-feature-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer"><div id="voz-feature-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div></div>
+      </div>
+    </div>
+
     <!-- Clima en asignaciones: movida desde Preferencias (v1.29.10-beta) -->
     <div class="profile-section">
       <div class="profile-section-title" data-i18n="exp.clima.section">Clima</div>
@@ -10445,8 +10477,9 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.60.8.5-beta: "Para tí" muestra Eventos próximos desde 1 semana antes del día del evento; las tarjetas de evento (Para tí y apartado Eventos) llevan un contador de días que faltan (Hoy / 1 día / N días).
 // v1.61.0-beta: (1) Se quita el Easter egg de la credencial 3D de "Mi responsabilidad" (Mi Perfil / Para tí); la tarjeta de responsabilidad vuelve a abrir la sub-sección Responsabilidades. (2) "Para tí" ya no está fijo arriba: es un apartado más de Inicio que se puede reubicar o quitar en Personalizar Inicio (se conserva su posición actual al actualizar). (3) Nuevo diseño de "Para tí": vive en su propia tarjeta y es modular, con mosaicos cuadrados o rectangulares según la cantidad de información; muestra solo lo vital (aseo del grupo, responsabilidades, asignaciones, reuniones, eventos, recordatorios) ordenado por fecha y hora, de 1 a 4 mosaicos.
 // v1.62.0-beta: (1) Tocar un arreglo de Responsabilidades ya no genera la imagen para compartir automáticamente: ahora aparece un popup de confirmación (evita toques accidentales). (2) Reunión Pública: se quita el espacio excesivo entre el programa y "Conferencias salientes". (3) Preferencias: nuevo selector visual de interfaz con 3 recuadros (UI Classic, UI Sencillo y UI con Inicio) que reemplaza los toggles separados de Modo Sencillo e Inicio.
+// v1.65: (1) Hospitalidad y Aseo muestran el número del grupo en un círculo de acento. (2) Búsqueda global de Direcciones No Pasar por calle o numeración. (3) Texto Diario sin comillas y con Serif más pesada. (4) Inicio muestra solo el evento más cercano. (5) Botón a la Guía de Actividades al final del programa de Vida y Ministerio. (6) Control global de Voz para administradores autorizados; Más Opciones ocupa su lugar en UI Nuevo cuando Voz está desactivada.
 // v1.63-beta: (1) Preferencias → Interfaz: los 3 recuadros pasan a llamarse Sencillo, Clásico (por defecto, al centro) y Nuevo; el texto explicativo muestra solo el de la opción elegida. (2) Vista de Contenido: nuevos diseños para PopUp y Lateral y el título ya no lleva "(Tablet / Escritorio)". (3) Inicio: nuevo diseño de la tarjeta de Texto Diario, con el texto bíblico en tipografía Serif. (4) El botón "Personalizar Inicio" es más pequeño y discreto.
-const APP_VERSION = '1.63-beta';
+const APP_VERSION = '1.65';
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -10464,13 +10497,51 @@ const VOZ_DIAS = ['domingo','lunes','martes','miercoles','jueves','viernes','sab
 const VOZ_MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const VOZ_NUM = {cero:0,uno:1,dos:2,tres:3,cuatro:4,cinco:5,seis:6,siete:7,ocho:8,nueve:9,diez:10,once:11,doce:12,trece:13,catorce:14,quince:15,dieciseis:16,diecisiete:17,dieciocho:18,diecinueve:19,veinte:20,veintiuno:21,veintidos:22,veintitres:23,veinticuatro:24,veinticinco:25,veintiseis:26,veintisiete:27,veintiocho:28,veintinueve:29,treinta:30,cuarenta:40,cincuenta:50};
 
+let _vozFeatureEnabled = true; // default compatible con instalaciones previas
+let _vozFeatureLoaded = false;
+async function loadVozFeatureConfig() {
+  try {
+    const { data } = await sb.from('platform_config').select('value').eq('key','voz_enabled').maybeSingle();
+    if (data && data.value != null) _vozFeatureEnabled = String(data.value).toLowerCase() !== 'false';
+    _vozFeatureLoaded = true;
+  } catch (e) { console.warn('No se pudo cargar la configuración de Voz:', e.message); }
+  vozApplyTabVisibility();
+  updateVozFeatureToggleUI();
+}
+function updateVozFeatureToggleUI() {
+  const section = document.getElementById('pref-voz-section');
+  const allowed = currentRole === 'admin' && !!(_currentUserPermsCache && _currentUserPermsCache.voz === true);
+  if (section) section.style.display = allowed ? '' : 'none';
+  const toggle = document.getElementById('voz-feature-toggle');
+  const thumb = document.getElementById('voz-feature-thumb');
+  if (toggle) toggle.style.background = _vozFeatureEnabled ? 'var(--accent)' : 'var(--surface3)';
+  if (thumb) thumb.style.left = _vozFeatureEnabled ? '21px' : '3px';
+}
+async function toggleVozFeaturePref() {
+  if (currentRole !== 'admin' || !(_currentUserPermsCache && _currentUserPermsCache.voz === true)) return;
+  const next = !_vozFeatureEnabled;
+  const value = String(next);
+  const { data: existing } = await sb.from('platform_config').select('key').eq('key','voz_enabled');
+  let error;
+  if (existing && existing.length) ({ error } = await sb.from('platform_config').update({ value }).eq('key','voz_enabled'));
+  else ({ error } = await sb.from('platform_config').insert({ key:'voz_enabled', value }));
+  if (error) { showToast('No se pudo actualizar Voz: ' + error.message, 'error'); return; }
+  _vozFeatureEnabled = next;
+  _vozFeatureLoaded = true;
+  updateVozFeatureToggleUI();
+  vozApplyTabVisibility();
+  showToast(next ? 'Voz activada' : 'Voz desactivada', 'success');
+}
+
 function canUseVoz() {
+  if (!_vozFeatureEnabled) return false;
   if (currentRole === 'dev') return true;
   return currentRole === 'admin' && !!(_currentUserPermsCache && _currentUserPermsCache.voz === true);
 }
 function vozApplyTabVisibility() {
   const t = document.getElementById('admin-tab-voz');
-  if (t) t.style.display = currentRole === 'dev' ? '' : 'none';
+  if (t) t.style.display = currentRole === 'dev' && _vozFeatureEnabled ? '' : 'none';
+  try { updateVozFeatureToggleUI(); } catch (e) {}
   try { applyInicioChrome(); } catch (e) {}
 }
 
@@ -20907,9 +20978,7 @@ async function renderAseoUserView() {
     <div class="profile-section aseo-card" style="margin-bottom:1rem" onclick="openAseoModeChooser(${idx})">
       <div class="profile-section-title">${capitalizar(respDiaLabel(row.fecha))}</div>
       <div class="profile-row">
-        <div class="profile-row-icon" style="background:var(--surface3);color:var(--text3)">
-          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        </div>
+        <div class="service-group-badges">${[row.grupo1_numero,row.grupo2_numero].filter(Boolean).map(n => `<span class="service-group-number" aria-label="Grupo ${n}">${n}</span>`).join('')}</div>
         <div class="profile-row-content">
           <div class="profile-row-label">Grupos asignados</div>
           <div class="profile-row-value">${aseoGruposLabel(row)}</div>
@@ -21149,9 +21218,7 @@ async function renderHospUserView() {
     <div class="profile-section" style="margin-bottom:1rem">
       <div class="profile-section-title">${capitalizar(respDiaLabel(row.fecha))}</div>
       <div class="profile-row" style="${isMyGroup ? 'background:var(--accent-light);border-radius:var(--radius-sm)' : ''}">
-        <div class="profile-row-icon" style="background:${isMyGroup?'var(--accent)':'var(--surface3)'};color:${isMyGroup?'#fff':'var(--text3)'}">
-          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        </div>
+        <div class="service-group-badges">${row.grupo_numero ? `<span class="service-group-number" aria-label="Grupo ${row.grupo_numero}">${row.grupo_numero}</span>` : ''}</div>
         <div class="profile-row-content">
           <div class="profile-row-label">Grupo de Servicio a cargo</div>
           <div class="profile-row-value" style="${isMyGroup?'font-weight:700':''}">${hospGrupoLabel(row)}</div>
@@ -23007,8 +23074,9 @@ async function getUserPermissions() {
 let _permsCacheTime = 0;
 const PERMS_CACHE_TTL_MS = 60000; // evita re-consultar Supabase cada vez que se abre un detalle (p.ej. tarjetas de Asignaciones)
 async function refreshCurrentUserPermsCache(force) {
-  if (currentRole === 'dev') { _currentUserPermsCache = { usuarios: true, admin_tags: true, notificaciones: true }; return; }
-  if (currentRole !== 'admin') { _currentUserPermsCache = null; return; }
+  if (!_vozFeatureLoaded) await loadVozFeatureConfig();
+  if (currentRole === 'dev') { _currentUserPermsCache = { usuarios: true, admin_tags: true, notificaciones: true }; vozApplyTabVisibility(); return; }
+  if (currentRole !== 'admin') { _currentUserPermsCache = null; vozApplyTabVisibility(); return; }
   if (!force && _currentUserPermsCache && (Date.now() - _permsCacheTime) < PERMS_CACHE_TTL_MS) return; // caché reciente, sin round-trip
   try {
     const { data } = await sb.from('platform_users').select('permissions').ilike('name', currentUser.name).single();
@@ -23287,7 +23355,15 @@ async function renderTerritoryView() {
     await ensureTerritoryMapsLoaded();
     _checkDownloadedTerritoriesForUpdates();
   }
-  container.innerHTML = `<div class="ter-grid" style="padding-top:0.25rem">` + territories.map(t => {
+  container.innerHTML = `
+    <div class="territory-np-search-wrap">
+      <div class="territory-np-search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        <input id="territory-np-search" type="search" placeholder="Buscar Dirección No Pasar por calle o número…" autocomplete="off" oninput="searchTerritoryNoPasar(this.value)">
+      </div>
+      <div id="territory-np-search-results" aria-live="polite"></div>
+    </div>
+    <div id="territory-map-grid" class="ter-grid" style="padding-top:0.25rem">` + territories.map(t => {
     let mapSrc = getActiveTerMapSrc(t);
     if (!mapSrc && !isAppOnline()) {
       const dl = getDownloadedTerritory(t.id);
@@ -23302,7 +23378,52 @@ async function renderTerritoryView() {
         <div class="ter-grid-num">${terLabel(t.number)}</div>
       </div>
     </div>`;
-  }).join('') + `</div>`;
+  }).join('') + `</div></div>`;
+}
+
+
+// v1.65: búsqueda global de Direcciones No Pasar en todos los territorios.
+function _terSearchNorm(value) {
+  return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+}
+function searchTerritoryNoPasar(query) {
+  const resultsEl = document.getElementById('territory-np-search-results');
+  const gridEl = document.getElementById('territory-map-grid');
+  if (!resultsEl || !gridEl) return;
+  const q = _terSearchNorm(query);
+  if (!q) { resultsEl.innerHTML = ''; gridEl.style.display = ''; return; }
+  gridEl.style.display = 'none';
+  const matches = [];
+  (territories || []).forEach(t => {
+    let entries = []; try { entries = parseNoPasar(t.no_pasar); } catch (e) {}
+    entries.forEach((entry, index) => {
+      const addr = String(entry.addr || '');
+      if (_terSearchNorm(addr).includes(q)) matches.push({ territory:t, entry, index });
+    });
+  });
+  if (!matches.length) {
+    resultsEl.innerHTML = '<div class="territory-np-search-empty">No se encontraron Direcciones No Pasar.</div>';
+    return;
+  }
+  resultsEl.innerHTML = '<div class="territory-np-search-count">' + matches.length + (matches.length === 1 ? ' dirección encontrada' : ' direcciones encontradas') + '</div>' +
+    matches.map((m, i) => `<button type="button" class="territory-np-result" onclick="openTerritoryNpSearchResult('${String(m.territory.id).replace(/'/g, "\\'")}',${m.index})">
+      <span class="territory-np-result-icon"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V21H3z"/><path d="M9 21v-7h6v7"/></svg></span>
+      <span class="territory-np-result-body"><strong>${escapeHtml(m.entry.addr)}</strong><small>${escapeHtml(terLabel(m.territory.number))}${m.entry.desc ? ' · ' + escapeHtml(m.entry.desc) : ''}</small></span>
+      <svg class="territory-np-result-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+    </button>`).join('');
+}
+async function openTerritoryNpSearchResult(territoryId, entryIndex) {
+  await viewTerritory(territoryId);
+  const t = territories.find(x => x.id === territoryId);
+  const entry = t ? parseNoPasar(t.no_pasar)[entryIndex] : null;
+  if (!entry) return;
+  const items = [...document.querySelectorAll('#detail-no-pasar-list .no-pasar-item')];
+  const target = items.find(el => _terSearchNorm(el.querySelector('.no-pasar-item-addr')?.textContent) === _terSearchNorm(entry.addr));
+  if (target) {
+    target.scrollIntoView({ behavior:'smooth', block:'center' });
+    target.style.outline = '2px solid var(--accent)';
+    setTimeout(() => { target.style.outline = ''; }, 2200);
+  }
 }
 
 async function viewTerritory(id) {
@@ -23608,7 +23729,7 @@ function openPrefScreen(name) {
   if (name === 'experimentos' && localStorage.getItem('fleming_egg_unlocked') !== '1') return;
   document.getElementById('page-pref-' + name)?.classList.add('open');
   trackEvent('settings_open', { screen: name });
-  if (name === 'funciones') { updateH2HViewModeUI(); if (typeof updateLiveAlwaysOnToggleUI === 'function') updateLiveAlwaysOnToggleUI(); if (typeof updatePinFeatureToggleUI === 'function') updatePinFeatureToggleUI(); }
+  if (name === 'funciones') { updateH2HViewModeUI(); if (typeof updateLiveAlwaysOnToggleUI === 'function') updateLiveAlwaysOnToggleUI(); if (typeof updatePinFeatureToggleUI === 'function') updatePinFeatureToggleUI(); if (typeof updateVozFeatureToggleUI === 'function') updateVozFeatureToggleUI(); }
   if (name === 'notificaciones') renderPrefNotifList();
   if (name === 'ayuda') renderAyudaTipsList();
   if (name === 'preferencias') { updateAnimationsEnabledToggleUI(); updateWeatherToggleUI(); if (typeof updateModoSencilloToggleUI === 'function') updateModoSencilloToggleUI(); updateAccentSwatchesUI(); if (typeof updateHomeExpToggleUI === 'function') updateHomeExpToggleUI(); }
@@ -27648,6 +27769,17 @@ function vmcWeekStatus(w) {
   return 'current';
 }
 
+
+function vmcOpenActivityGuide(dateStart) {
+  try {
+    const { year, week } = vmcIsoWeek(dateStart);
+    const url = `${VMC_WOL_BASE}/${VMC_WOL_LANG}/meetings/${VMC_WOL_RES}/${year}/${week}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  } catch (e) {
+    showToast('No se pudo abrir la Guía de Actividades.', 'error');
+  }
+}
+
 function vmcFormatRange(w) {
   const opts = { day: 'numeric', month: 'long' };
   const s = new Date(w.date_start + 'T00:00:00').toLocaleDateString('es-CL', opts);
@@ -28766,7 +28898,11 @@ function vmcRenderWeekProgram(week, isGuest = false) {
     ${showSalaB ? sectionHtml('Seamos Mejores Maestros — Sala B','','maestros', salaB, null, salaBLead) : ''}
     ${week.song_mid && vid.length ? `<div class="vmc-song-row"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Canción ${week.song_mid}</div>` : ''}
     ${sectionHtml('Nuestra Vida Cristiana','','vida', vid, null)}
-    ${closeRow}`;
+    ${closeRow}
+    <button type="button" class="vmc-guide-button" onclick="vmcOpenActivityGuide('${week.date_start}')">
+      <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Ir a la Guía de Actividades
+    </button>`;
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
