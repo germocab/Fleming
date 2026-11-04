@@ -4291,8 +4291,12 @@
   .grupo-hosp-date { font-size: 0.88rem; font-weight: 600; color: var(--text); }
   .grupo-hosp-who  { font-size: 0.8rem; color: var(--text3); }
   .grupo-hosp-actions { display: flex; gap: 0.75rem; padding: 0.75rem 1rem; }
-  .service-group-badges { flex: 0 0 42px; width:42px; display:flex; align-items:center; justify-content:center; gap:4px; }
-  .service-group-number { width:34px; height:34px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; flex:0 0 34px; background:var(--accent); color:#fff; font-size:.82rem; font-weight:800; font-variant-numeric:tabular-nums; }
+  /* Indicadores compactos: dos grupos deben respirar sin comprimir el texto. */
+  .service-group-badges { flex:0 0 auto; width:auto; min-width:0; display:flex; align-items:center; justify-content:flex-start; gap:7px; padding:0 8px 0 2px; }
+  .service-group-number { width:30px; height:30px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; flex:0 0 30px; background:var(--accent); color:#fff; font-size:.78rem; font-weight:800; font-variant-numeric:tabular-nums; box-shadow:0 1px 3px rgba(0,0,0,.12); }
+  .aseo-card .profile-row { gap:10px; min-height:54px; }
+  .aseo-card .profile-row .profile-row-content { min-width:0; }
+  .aseo-card .profile-row .profile-row-value { overflow-wrap:anywhere; }
 
   /* Admin map upload in grupo detail (only for super/aux/admin) */
   .grupo-upload-btn {
@@ -5262,25 +5266,24 @@
 /* ---------- SEARCH & FILTER ---------- */
 /* Mismo tratamiento visual que la barra de búsqueda de "Grupos"; la única
    diferencia funcional es el botón de filtros a la derecha. */
-#sub-content-carritos .ct-search-wrapper, #admin-carritos .ct-search-wrapper { padding: 0 20px 12px; max-width: 680px; margin: 0 auto; }
-#sub-content-carritos .ct-search-inner, #admin-carritos .ct-search-inner { position: relative; display: flex; align-items: center; }
+#sub-content-carritos .ct-search-wrapper, #admin-carritos .ct-search-wrapper { padding:0 20px 12px; max-width:680px; margin:0 auto; }
+#sub-content-carritos .ct-search-inner, #admin-carritos .ct-search-inner { position:relative; display:flex; align-items:center; gap:10px; min-height:46px; padding:0 10px 0 14px; border-radius:14px; border:1px solid var(--border); background:var(--surface); box-shadow:var(--shadow); transition:border-color .18s ease,box-shadow .18s ease; }
+#sub-content-carritos .ct-search-inner:focus-within, #admin-carritos .ct-search-inner:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-light); }
 #sub-content-carritos .ct-search-icon, #admin-carritos .ct-search-icon {
-  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
-  width: 16px; height: 16px; stroke: var(--text-light); fill: none;
-  stroke-width: 2; stroke-linecap: round; pointer-events: none;
+  position:static; width:18px; height:18px; flex:0 0 18px; stroke:var(--text3); fill:none;
+  stroke-width:2; stroke-linecap:round; pointer-events:none;
 }
 #sub-content-carritos .ct-search-inner input, #admin-carritos .ct-search-inner input {
-  width: 100%; padding: 0.65rem 46px 0.65rem 2.4rem; border-radius: 50px;
-  border: 1px solid var(--border-color); background: var(--bg-ct-screen); color: var(--text-main);
-  outline: none; font-size: 0.9rem; font-family: inherit;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  flex:1; min-width:0; width:100%; padding:0!important; border:0!important; border-radius:0!important;
+  background:transparent!important; color:var(--text)!important; box-shadow:none!important;
+  outline:none; font-size:.88rem; font-family:inherit;
 }
 #sub-content-carritos .ct-search-inner input:focus, #admin-carritos .ct-search-inner input:focus { border-color: var(--ct-accent); box-shadow: 0 0 0 3px var(--ct-accent-light); }
 #sub-content-carritos .ct-search-inner input::placeholder, #admin-carritos .ct-search-inner input::placeholder { color: var(--text-light); }
 #sub-content-carritos .ct-search-filter-btn, #admin-carritos .ct-search-filter-btn {
-  position: absolute; right: 10px; background: var(--surface3); border: none; cursor: pointer;
-  color: var(--text-gray); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  transition: color var(--transition-fast), background var(--transition-fast);
+  position:static; flex:0 0 30px; width:30px; height:30px; background:var(--surface3); border:0; cursor:pointer;
+  color:var(--text2); border-radius:50%; display:flex; align-items:center; justify-content:center;
+  transition:color var(--transition-fast),background var(--transition-fast);
 }
 #sub-content-carritos .ct-search-filter-btn:hover, #admin-carritos .ct-search-filter-btn:hover { color: var(--ct-accent); background: var(--ct-accent-light); }
 #sub-content-carritos #cartFilterMenu, #admin-carritos #cartFilterMenu { max-height: 0; opacity: 0; overflow: hidden; transform: translateY(-6px); transition: max-height 0.35s ease, opacity 0.25s ease, transform 0.3s ease; }
@@ -6068,6 +6071,22 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
   #voz-layer.txt .voz-textrow{display:flex}
   .voz-textrow input{flex:1;min-width:0;height:44px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:0 16px;font:inherit;font-size:16px}
   .voz-textrow button{width:44px;height:44px;border-radius:50%;border:none;background:var(--text);color:var(--bg);font-size:1.1rem;font-weight:800;cursor:pointer}
+
+  /* v1.68 — buscador de Grupos con el mismo lenguaje visual que Territorios. */
+  .grupos-search-wrap { position:relative; display:flex; align-items:center; gap:10px; min-height:46px; margin:0 0 1rem; padding:0 14px; border-radius:14px; border:1px solid var(--border); background:var(--surface); box-shadow:var(--shadow); transition:border-color .18s ease,box-shadow .18s ease; }
+  .grupos-search-wrap:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-light); }
+  .grupos-search-wrap .grupos-search-icon { position:static; width:18px; height:18px; flex:0 0 18px; stroke:var(--text3); fill:none; stroke-width:2; }
+  .grupos-search-wrap .grupos-search-input { flex:1; min-width:0; width:100%; padding:0!important; border:0!important; border-radius:0!important; background:transparent!important; box-shadow:none!important; color:var(--text); font:inherit; font-size:.88rem; outline:0; }
+  .grupos-search-wrap .grupos-search-clear { position:static; transform:none; flex:0 0 28px; width:28px; height:28px; border:0; border-radius:50%; background:var(--surface3); color:var(--text2); }
+  .grupos-search-wrap .grupos-search-clear.visible { display:flex; }
+
+.assignment-archive-action{position:absolute;top:8px;right:8px;z-index:5;width:30px;height:30px;border:1px solid var(--border);border-radius:10px;background:color-mix(in srgb,var(--surface) 88%,transparent);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.assignment-archive-action svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.assignment-card,.assignment-card-today,.assignment-card-especial{position:relative}
+.archived-assignment-row{display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:9px}
+.archived-assignment-row .archived-main{flex:1;min-width:0}.archived-assignment-row strong{display:block;font-size:.9rem;color:var(--text)}.archived-assignment-row small{display:block;color:var(--text2);margin-top:3px;font-size:.78rem}
+.archived-assignment-row button{border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:10px;padding:8px 11px;font:inherit;font-size:.78rem;font-weight:650;cursor:pointer}
+
 </style>
 
 <style id="home-css">
@@ -6135,8 +6154,8 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 .home-card-meta { font-size: 0.68rem; color: var(--text3); margin-top: 3px; font-weight: 500; }
 /* v1.54.5-beta: la tarjeta de recordatorio de reporte ya no lleva borde rojo; se ve como las demás. */
 .home-empty { text-align: center; color: var(--text3); font-size: 0.85rem; line-height: 1.45; padding: 1.1rem 1rem; border: 1px dashed var(--border); border-radius: 16px; }
-.home-custom-overlay { position: fixed; inset: 0; z-index: 250; background: var(--bg); flex-direction: column; overflow: hidden; }
-.home-custom-top { padding-top: calc(0.85rem + env(safe-area-inset-top, 0px)); border-bottom: 1px solid var(--border); position: relative; }
+.home-custom-overlay { position: fixed; inset: 0; z-index: 250; background: transparent; backdrop-filter: blur(24px) saturate(1.35); -webkit-backdrop-filter: blur(24px) saturate(1.35); flex-direction: column; overflow: hidden; }
+.home-custom-top { padding-top: calc(0.85rem + env(safe-area-inset-top, 0px)); border-bottom: 1px solid var(--border); position: relative; background: color-mix(in srgb, var(--bg) 52%, transparent); backdrop-filter: blur(22px) saturate(1.35); -webkit-backdrop-filter: blur(22px) saturate(1.35); }
 .home-custom-body { flex: 1; overflow-y: auto; padding: 1rem 1rem 3rem; }
 .home-custom-h { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); margin: 1.1rem 0.2rem 0.5rem; }
 .home-custom-row { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 0.65rem 0.8rem; margin-bottom: 8px; }
@@ -6282,7 +6301,7 @@ const HOME_SECTIONS = {
   tips:     { title: 'Tips', icon: 'bulb', col: 'yellow' },
   texto:    { title: 'Texto Diario', icon: 'book', col: 'orange' },
   para:     { title: 'Para tí', icon: 'star', col: 'blue' }, // v1.61.0-beta: ya no es fijo; se puede reubicar o quitar
-  eventos:  { title: 'Eventos', icon: 'cal', col: 'purple' }, // v1.60.8-beta: Eventos programados en Casa en Casa
+  eventos:  { title: 'Próximos Eventos', icon: 'cal', col: 'purple' }, // v1.60.8-beta: Eventos programados en Casa en Casa
 };
 const HOME_DEFAULT_LAYOUT = ['texto', 'para', 'hoy', 'eventos', 'resp']; // v1.61.0-beta: Texto Diario, Para tí, Predicación de hoy, Eventos y Mis responsabilidades
 
@@ -6691,7 +6710,7 @@ async function renderHomeEventos() {
     .sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
   let h = '<div class="home-section-title">Eventos</div>';
   if (!evs.length) { el2.innerHTML = h + '<div class="home-empty">No hay eventos programados.</div>'; return; }
-  // v1.65: Inicio muestra únicamente el evento futuro más cercano.
+  // v1.68: Inicio muestra únicamente el evento futuro más cercano.
   const nearest = evs[0];
   const n = _homeDiffDays(nearest.date);
   const label = fmtCasaLongDate(new Date(nearest.date + 'T00:00:00'));
@@ -7670,8 +7689,9 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
       </div>
       <div class="admin-section active" id="admin-assignments">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
-          <span style="flex:1;font-size:0.95rem;font-weight:700">Todas las asignaciones</span>
+          <span style="flex:1;font-size:0.95rem;font-weight:700">Asignaciones activas</span>
           <button class="btn-secondary" onclick="openAssignmentModal()">+ Nueva</button>
+          <button class="btn-secondary" id="admin-assign-archived-btn" onclick="showArchivedAssignments()" style="display:none">Archivados</button>
           <button class="dev-csv-btn dev-only-el" style="display:none" onclick="openDevCsvModal('asignaciones')" title="Subir CSV (solo DEV)"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>CSV</button>
         </div>
         <!-- v1.28.1-beta: barra del modo selección (móvil) — se activa con mantener presionada una tarjeta -->
@@ -7684,6 +7704,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
           </div>
         </div>
         <div id="admin-assignments-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Asignaciones</div></div></div>
+        <div id="admin-assignments-archived" style="display:none"></div>
       </div>
       <div class="admin-section" id="admin-territories">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
@@ -8144,6 +8165,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
               <button type="button" class="rte-btn" title="Cuerpo" onclick="rteExec('tip-body','formatBlock','P')" style="padding:0.35rem 0.6rem;border-radius:7px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:0.78rem">Cuerpo</button>
               <button type="button" class="rte-btn" title="Negrita" onclick="rteExec('tip-body','bold')" style="padding:0.35rem 0.65rem;border-radius:7px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:0.78rem;font-weight:800">N</button>
               <button type="button" class="rte-btn" title="Itálica" onclick="rteExec('tip-body','italic')" style="padding:0.35rem 0.65rem;border-radius:7px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:0.78rem;font-style:italic">I</button>
+              <button type="button" class="rte-btn" title="Insertar enlace" onclick="tipInsertLink()" style="padding:0.35rem 0.65rem;border-radius:7px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:0.78rem">Enlace</button>
               <button type="button" class="rte-btn" title="Subrayado" onclick="rteExec('tip-body','underline')" style="padding:0.35rem 0.65rem;border-radius:7px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:0.78rem;text-decoration:underline">S</button>
             </div>
             <div class="form-textarea" id="tip-body" contenteditable="true" data-placeholder="Escribe el contenido del Tip…" style="min-height:120px;max-height:340px;overflow-y:auto;line-height:1.5" oninput="_rteEnforceLimit('tip-body','tip-body-count',2000)"></div>
@@ -9513,7 +9535,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
         </div>
       </div>
     </div>
-    <!-- v1.65: control global de Voz, solo para administradores con permiso Voz. -->
+    <!-- v1.68: control global de Voz, solo para administradores con permiso Voz. -->
     <div class="profile-section" id="pref-voz-section" style="display:none">
       <div class="profile-section-title">Asistente</div>
       <div class="profile-row" style="cursor:pointer" onclick="toggleVozFeaturePref()">
@@ -9881,6 +9903,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
         .tip-detail-rich h3 { font-size: calc(1.05rem * var(--tip-font-scale,1)); font-weight: 800; margin: 0.9rem 0 0.4rem; }
         .tip-detail-rich h3:first-child { margin-top: 0; }
         .tip-detail-rich p { margin: 0.4rem 0; }
+        .tip-detail-rich a { color: var(--accent) !important; -webkit-text-fill-color: var(--accent); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; pointer-events: auto; }
       </style>
     </div>
   </div>
@@ -10477,9 +10500,10 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.60.8.5-beta: "Para tí" muestra Eventos próximos desde 1 semana antes del día del evento; las tarjetas de evento (Para tí y apartado Eventos) llevan un contador de días que faltan (Hoy / 1 día / N días).
 // v1.61.0-beta: (1) Se quita el Easter egg de la credencial 3D de "Mi responsabilidad" (Mi Perfil / Para tí); la tarjeta de responsabilidad vuelve a abrir la sub-sección Responsabilidades. (2) "Para tí" ya no está fijo arriba: es un apartado más de Inicio que se puede reubicar o quitar en Personalizar Inicio (se conserva su posición actual al actualizar). (3) Nuevo diseño de "Para tí": vive en su propia tarjeta y es modular, con mosaicos cuadrados o rectangulares según la cantidad de información; muestra solo lo vital (aseo del grupo, responsabilidades, asignaciones, reuniones, eventos, recordatorios) ordenado por fecha y hora, de 1 a 4 mosaicos.
 // v1.62.0-beta: (1) Tocar un arreglo de Responsabilidades ya no genera la imagen para compartir automáticamente: ahora aparece un popup de confirmación (evita toques accidentales). (2) Reunión Pública: se quita el espacio excesivo entre el programa y "Conferencias salientes". (3) Preferencias: nuevo selector visual de interfaz con 3 recuadros (UI Classic, UI Sencillo y UI con Inicio) que reemplaza los toggles separados de Modo Sencillo e Inicio.
-// v1.65: (1) Hospitalidad y Aseo muestran el número del grupo en un círculo de acento. (2) Búsqueda global de Direcciones No Pasar por calle o numeración. (3) Texto Diario sin comillas y con Serif más pesada. (4) Inicio muestra solo el evento más cercano. (5) Botón a la Guía de Actividades al final del programa de Vida y Ministerio. (6) Control global de Voz para administradores autorizados; Más Opciones ocupa su lugar en UI Nuevo cuando Voz está desactivada.
+// v1.68: (1) Hospitalidad y Aseo muestran el número del grupo en un círculo de acento. (2) Búsqueda global de Direcciones No Pasar por calle o numeración. (3) Texto Diario sin comillas y con Serif más pesada. (4) Inicio muestra solo el evento más cercano. (5) Botón a la Guía de Actividades al final del programa de Vida y Ministerio. (6) Control global de Voz para administradores autorizados; Más Opciones ocupa su lugar en UI Nuevo cuando Voz está desactivada.
 // v1.63-beta: (1) Preferencias → Interfaz: los 3 recuadros pasan a llamarse Sencillo, Clásico (por defecto, al centro) y Nuevo; el texto explicativo muestra solo el de la opción elegida. (2) Vista de Contenido: nuevos diseños para PopUp y Lateral y el título ya no lleva "(Tablet / Escritorio)". (3) Inicio: nuevo diseño de la tarjeta de Texto Diario, con el texto bíblico en tipografía Serif. (4) El botón "Personalizar Inicio" es más pequeño y discreto.
-const APP_VERSION = '1.65';
+// v1.68: pulido de badges Aseo, buscadores unificados, confirmación al compartir y acciones superiores en Casa en casa.
+const APP_VERSION = '1.68.10';
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -16917,6 +16941,7 @@ async function switchAdminTab(tab) {
   // Mantiene sincronizado el selector de sección de arriba con el tab que quedó activo.
   const section = ADMIN_TAB_SECTION[tab];
   if (section) switchAdminSection(section, true);
+  if (tab === 'assignments') { hideArchivedAssignments(); }
   if (tab === 'audiovideo' || tab === 'acomodacion') {
     // Reubica el bloque compartido (Hermanos/Asignar) dentro de la pestaña
     // recién activada y fija qué cargos corresponden a este módulo.
@@ -17105,7 +17130,8 @@ async function loadSchedule() {
       .order('date').order('time');
     if (aErr) { console.error('loadSchedule assignments error:', aErr.message); }
 
-    assignments = aData || [];
+    await loadArchivedAssignmentIds();
+    assignments = (aData || []).filter(a => !_archivedAssignmentIds.includes(a.id));
     const { data: tData } = await sb.from('territories').select('id, number, color, no_pasar').order('number');
     territories = tData || [];
     _territoryMapsLoaded = false; // territories array was replaced — map images need re-merging on next use
@@ -17144,7 +17170,7 @@ function _loadScheduleFromOfflineCache() {
     document.getElementById('schedule-content').innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><h4>${t('casa.sinasignaciones')}</h4><p>${t('offline.cargando')}</p></div>`;
     return;
   }
-  assignments  = cached.data.assignments || [];
+  assignments  = (cached.data.assignments || []).filter(a => !_archivedAssignmentIds.includes(a.id));
   territories  = cached.data.territories || [];
   conductores  = cached.data.conductores || [];
   casas        = cached.data.casas || [];
@@ -17832,11 +17858,9 @@ async function viewAssignment(id) {
     document.getElementById('detail-admin-fab-mobile'),
     document.getElementById('detail-admin-fab-desktop'),
   ];
-  if (currentRole === 'dev') {
-    adminFabs.forEach(btn => { if (btn) { btn.style.display = 'flex'; btn.onclick = () => goToAdminAssignment(a.id); } });
-  } else {
-    adminFabs.forEach(btn => { if (btn) { btn.style.display = 'none'; btn.onclick = null; } });
-  }
+  const initialCanManage = currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, 'assignments'));
+  detailConfigureAssignmentActions(a, initialCanManage, !isEventoLike);
+  if (currentRole !== 'admin' && currentRole !== 'dev') detailConfigureAssignmentActions(a, false, !isEventoLike);
 
   // ── Botón "Reportar Territorio" — visible solo para el encargado de ESTA asignación ──
   const reportActionsWrap = document.getElementById('detail-report-actions');
@@ -18024,11 +18048,7 @@ async function viewAssignment(id) {
       await refreshCurrentUserPermsCache();
       if (panel._openAssignmentId !== id) return;
       const canManageAssignments = canAccessModule(_currentUserPermsCache, 'assignments');
-      if (canManageAssignments) {
-        adminFabs.forEach(btn => { if (btn) { btn.style.display = 'flex'; btn.onclick = () => goToAdminAssignment(a.id); } });
-      } else {
-        adminFabs.forEach(btn => { if (btn) { btn.style.display = 'none'; btn.onclick = null; } });
-      }
+      detailConfigureAssignmentActions(a, canManageAssignments, !isEventoLike);
     })();
   }
 }
@@ -18309,6 +18329,7 @@ async function submitSuggestNp() {
 
 
 function closeDetail() {
+  if (typeof detailCloseMoreMenu === 'function') detailCloseMoreMenu();
   // En modo invitado (enlace compartido) no hay nada detrás que mostrar,
   // así que no se permite cerrar el detalle.
   if (window._guestShareMode) return;
@@ -18979,9 +19000,82 @@ async function adminAssignDeleteSelected() {
   renderAdminAssignments();
 }
 
+// v1.68.10 — Archivado de asignaciones de predicación.
+let _archivedAssignmentIds = [];
+let _archivedIdsLoaded = false;
+function _canManagePredArchive() {
+  return currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, ADMIN_TAB_PERM_KEY.assignments));
+}
+async function loadArchivedAssignmentIds(force) {
+  if (_archivedIdsLoaded && !force) return _archivedAssignmentIds;
+  try {
+    const { data, error } = await sb.from('platform_config').select('value').eq('key','predicacion_archived_assignment_ids').maybeSingle();
+    if (error) throw error;
+    const raw = data && data.value;
+    _archivedAssignmentIds = Array.isArray(raw) ? raw : (typeof raw === 'string' ? JSON.parse(raw || '[]') : []);
+    if (!Array.isArray(_archivedAssignmentIds)) _archivedAssignmentIds = [];
+  } catch (e) { console.warn('No se pudo cargar Archivados:', e.message); _archivedAssignmentIds = []; }
+  _archivedIdsLoaded = true;
+  return _archivedAssignmentIds;
+}
+async function saveArchivedAssignmentIds() {
+  const value = JSON.stringify([...new Set(_archivedAssignmentIds)]);
+  const { data: existing, error: readErr } = await sb.from('platform_config').select('key').eq('key','predicacion_archived_assignment_ids');
+  if (readErr) throw readErr;
+  let error;
+  if (existing && existing.length) ({ error } = await sb.from('platform_config').update({ value }).eq('key','predicacion_archived_assignment_ids'));
+  else ({ error } = await sb.from('platform_config').insert({ key:'predicacion_archived_assignment_ids', value }));
+  if (error) throw error;
+}
+async function archiveAssignment(id) {
+  if (!_canManagePredArchive()) return showToast('No tienes permisos para archivar asignaciones.','error');
+  if (!confirm('¿Archivar esta asignación? Dejará de aparecer para los demás usuarios y podrás recuperarla desde Archivados.')) return;
+  try {
+    await loadArchivedAssignmentIds(true);
+    if (!_archivedAssignmentIds.includes(id)) _archivedAssignmentIds.push(id);
+    await saveArchivedAssignmentIds();
+    assignments = assignments.filter(a => a.id !== id);
+    showToast('Asignación archivada','success');
+    renderAdminAssignments();
+  } catch(e) { showToast('No se pudo archivar: '+(e.message||e),'error'); }
+}
+async function showArchivedAssignments() {
+  if (!_canManagePredArchive()) return showToast('No tienes permisos para ver Archivados.','error');
+  const active = document.getElementById('admin-assignments-list'), archived = document.getElementById('admin-assignments-archived');
+  if (!active || !archived) return;
+  active.style.display = 'none'; archived.style.display = 'block';
+  archived.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando archivados</div></div>';
+  try {
+    await loadArchivedAssignmentIds(true);
+    if (!_archivedAssignmentIds.length) { archived.innerHTML = '<div class="empty-state"><h4>No hay asignaciones archivadas</h4><p>Las asignaciones que archives aparecerán aquí.</p></div>'; return; }
+    const { data, error } = await sb.from('assignments').select('*').in('id', _archivedAssignmentIds).order('date',{ascending:false}).order('time');
+    if (error) throw error;
+    const rows = data || [];
+    const label = a => a.type === 'especial' ? (a.especial_titulo || 'Evento') : a.type === 'telefono' ? 'Telefónica' : a.type === 'cartas' ? 'Cartas' : a.type === 'zoom' ? 'Zoom' : a.type === 'visita' ? 'Visita' : 'Casa en casa';
+    archived.innerHTML = '<div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem"><button class="btn-secondary" onclick="hideArchivedAssignments()">← Volver</button><strong style="font-size:.92rem">Asignaciones archivadas</strong></div>' + (rows.length ? rows.map(a => `<div class="archived-assignment-row"><div class="archived-main"><strong>${escapeHtml(label(a))}</strong><small>${escapeHtml(a.date||'')} · ${escapeHtml((a.time||'').slice(0,5))} · ${escapeHtml(a.address||a.conductor||'')}</small></div><button onclick="restoreArchivedAssignment('${a.id}')">Restaurar</button></div>`).join('') : '<div class="empty-state"><h4>No hay asignaciones archivadas</h4></div>');
+  } catch(e) { archived.innerHTML = '<div class="empty-state"><h4>No se pudieron cargar los archivados</h4><p>'+escapeHtml(e.message||'')+'</p></div>'; }
+}
+function hideArchivedAssignments() {
+  const active=document.getElementById('admin-assignments-list'), archived=document.getElementById('admin-assignments-archived');
+  if(active) active.style.display=''; if(archived) archived.style.display='none';
+}
+async function restoreArchivedAssignment(id) {
+  if (!_canManagePredArchive()) return;
+  try {
+    await loadArchivedAssignmentIds(true);
+    _archivedAssignmentIds = _archivedAssignmentIds.filter(x => x !== id);
+    await saveArchivedAssignmentIds();
+    await loadSchedule();
+    await showArchivedAssignments();
+    renderAdminAssignments();
+    showToast('Asignación restaurada','success');
+  } catch(e) { showToast('No se pudo restaurar: '+(e.message||e),'error'); }
+}
+
 function renderAdminAssignments() {
   const container = document.getElementById('admin-assignments-list');
   const selectBar = document.getElementById('admin-assign-select-bar');
+  const archiveBtn = document.getElementById('admin-assign-archived-btn'); if (archiveBtn) archiveBtn.style.display = _canManagePredArchive() ? '' : 'none';
   container.classList.toggle('admin-select-mode', adminAssignSelectMode);
   if (selectBar) {
     selectBar.classList.toggle('open', adminAssignSelectMode);
@@ -18999,12 +19093,13 @@ function renderAdminAssignments() {
 
   // v1.28.1-beta: atributos comunes de mantener-presionado + toggle de tap,
   // usados en ambos tipos de tarjeta (regular y especial).
-  function cardAttrs(id) {
+  function cardAttrs(id, type) {
     const selected = adminAssignSelected.has(id) ? ' admin-selected' : '';
     return {
       selectedClass: selected,
       attrs: `data-assignment-id="${id}" onclick="adminAssignCardClick('${id}')" ontouchstart="adminAssignPressStart('${id}')" ontouchend="adminAssignPressEnd()" ontouchmove="adminAssignPressCancel()" ontouchcancel="adminAssignPressCancel()" onmousedown="adminAssignPressStart('${id}')" onmouseup="adminAssignPressEnd()" onmouseleave="adminAssignPressCancel()"`,
       checkbox: `<div class="admin-select-checkbox"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>`,
+      archive: _canManagePredArchive() ? `<button type="button" class="assignment-archive-action" title="Archivar asignación" onclick="event.stopPropagation();archiveAssignment('${id}')"><svg viewBox="0 0 24 24"><path d="M3 4h18v4H3z"/><path d="M5 8v12h14V8"/><path d="M9 12h6"/></svg></button>` : '',
     };
   }
 
@@ -19029,9 +19124,9 @@ function renderAdminAssignments() {
   function buildEspecialCard(a) {
     const timeStr = a.time ? a.time.substring(0,5) : '--:--';
     const bg = a.especial_foto ? `style="background-image:url('${a.especial_foto}')"` : '';
-    const c = cardAttrs(a.id);
+    const c = cardAttrs(a.id, a.type);
     return `<div class="assignment-card-especial${c.selectedClass}" ${bg} ${c.attrs}>
-      ${c.checkbox}
+      ${c.checkbox}${c.archive}
       <div class="especial-card-body">
         <div class="especial-card-title">${a.especial_titulo || 'Evento especial'}</div>
         ${a.especial_subtitulo ? `<div class="especial-card-subtitle">${a.especial_subtitulo}</div>` : ''}
@@ -19052,9 +19147,9 @@ function renderAdminAssignments() {
     const visitaTers = (Array.isArray(a.visita_territorios) ? a.visita_territorios : [])
       .map(tid => territories.find(t => t.id === tid)).filter(Boolean);
     const rightBadge = renderVisitaTerBadges(visitaTers);
-    const c = cardAttrs(a.id);
+    const c = cardAttrs(a.id, a.type);
     return `<div class="assignment-card${c.selectedClass}" ${c.attrs}>
-      ${c.checkbox}
+      ${c.checkbox}${c.archive}
       <div class="card-main">
         <div class="card-address">${a.address || 'Sin dirección'}</div>
         ${houseLabel ? `<div class="card-house">${houseLabel}</div>` : ''}
@@ -19076,10 +19171,10 @@ function renderAdminAssignments() {
     const typeChip = buildTypeChip(a);
     const _c = casas.find(c => c.id === a.casa_id);
     const houseLabel = casaHouseLabel(_c && _c.tipo, a.house);
-    const c = cardAttrs(a.id);
+    const c = cardAttrs(a.id, a.type);
     if (isToday) {
       return `<div class="assignment-card-today${c.selectedClass}" ${c.attrs}>
-        ${c.checkbox}
+        ${c.checkbox}${c.archive}
         <div class="today-card-info">
           <div class="today-card-address">${a.address||'Sin dirección'}${houseLabel?`<br><span class="today-card-house">${houseLabel}</span>`:''}</div>
           <div class="today-card-meta">
@@ -19095,7 +19190,7 @@ function renderAdminAssignments() {
       </div>`;
     }
     return `<div class="assignment-card${c.selectedClass}" ${c.attrs}>
-      ${c.checkbox}
+      ${c.checkbox}${c.archive}
       <div class="card-main">
         <div class="card-address">${a.address||'Sin dirección'}${houseLabel?`<br><span class="card-house">${houseLabel}</span>`:''}</div>
         <div class="card-meta">
@@ -21238,7 +21333,7 @@ function openAseoModeChooser(idx) {
   if (window.innerWidth < 640) {
     // Móvil: no tiene sentido Full Screen/PopUp (son para proyectar en TV),
     // así que el tap va directo a compartir como imagen.
-    shareAseoDayAsPng(idx);
+    confirmAseoShare(idx);
     return;
   }
   _aseoChooserIdx = idx;
@@ -21256,12 +21351,37 @@ function chooseAseoMode(mode) {
   if (idx === null) return;
   if (mode === 'fullscreen') openAseoTvMode(idx);
   else if (mode === 'popup') openAseoPopupMode(idx);
-  else if (mode === 'compartir') shareAseoDayAsPng(idx);
+  else if (mode === 'compartir') confirmAseoShare(idx);
+}
+
+// Confirmación explícita para evitar que un toque accidental descargue/comparta la imagen.
+function confirmAseoShare(idx) {
+  const row = _aseoUserRows[idx];
+  if (!row) return;
+  let modal = document.getElementById('aseo-share-confirm');
+  if (!modal) {
+    modal = document.createElement('div'); modal.id='aseo-share-confirm'; modal.className='aseo-mode-overlay';
+    modal.innerHTML = `<div class="aseo-mode-card" role="dialog" aria-modal="true" aria-labelledby="aseo-share-confirm-title">
+      <div class="aseo-mode-title" id="aseo-share-confirm-title">¿Compartir asignación?</div>
+      <div class="aseo-mode-sub">Se generará una imagen del Aseo del Salón y se abrirá el menú para compartirla o descargarla.</div>
+      <button class="aseo-mode-opt" type="button" onclick="aseoShareConfirmAccept()"><span class="aseo-mode-opt-icon"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg></span><span class="aseo-mode-opt-text"><strong>Continuar</strong><span>Generar imagen y compartir</span></span></button>
+      <button class="aseo-mode-cancel" type="button" onclick="aseoShareConfirmCancel()">Cancelar</button>
+    </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', e => { if (e.target === modal) aseoShareConfirmCancel(); });
+  }
+  modal.dataset.index = String(idx); modal.classList.add('open');
+}
+function aseoShareConfirmCancel() { document.getElementById('aseo-share-confirm')?.classList.remove('open'); }
+function aseoShareConfirmAccept() {
+  const modal = document.getElementById('aseo-share-confirm');
+  const idx = Number(modal?.dataset.index);
+  aseoShareConfirmCancel();
+  if (Number.isInteger(idx)) shareAseoDayAsPng(idx);
 }
 
 // Genera una imagen PNG con el Aseo del Salón de un día (Jueves/Sábado) y abre
-// el share sheet nativo (o descarga el archivo si no hay share sheet
-// disponible) — mismo patrón que shareRespDayAsPng (v1.45.0.2-sb).
+// el share sheet nativo (o descarga el archivo si no hay share sheet disponible).
 async function shareAseoDayAsPng(idx) {
   const row = _aseoUserRows[idx];
   if (!row) { showToast('No hay datos para compartir', 'error'); return; }
@@ -23382,7 +23502,7 @@ async function renderTerritoryView() {
 }
 
 
-// v1.65: búsqueda global de Direcciones No Pasar en todos los territorios.
+// v1.68: búsqueda global de Direcciones No Pasar en todos los territorios.
 function _terSearchNorm(value) {
   return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 }
@@ -24953,7 +25073,16 @@ function openTipDetailModal(tipId) {
   document.getElementById('tip-detail-title').textContent = tip.title || '';
   const img = document.getElementById('tip-detail-image');
   if (tip.image_url) { img.src = tip.image_url; img.style.display = 'block'; } else { img.style.display = 'none'; }
-  document.getElementById('tip-detail-body').innerHTML = tip.body || '';
+  const tipBodyEl = document.getElementById('tip-detail-body');
+  tipBodyEl.innerHTML = tip.body || '';
+  // Los enlaces de Tips se abren de forma segura, sin permitir que la página
+  // enlazada controle la ventana de FlemingApp.
+  tipBodyEl.querySelectorAll('a[href]').forEach(a => {
+    const href = (a.getAttribute('href') || '').trim();
+    if (/^https?:\/\//i.test(href) || /^mailto:/i.test(href)) {
+      a.setAttribute('target', '_blank'); a.setAttribute('rel', 'noopener noreferrer');
+    } else { a.removeAttribute('href'); a.style.pointerEvents = 'none'; }
+  });
   document.getElementById('tip-detail-scroll').scrollTop = 0;
   applyTipFontScale();
   document.getElementById('page-tip-detail').style.display = 'flex';
@@ -26099,6 +26228,19 @@ document.addEventListener('change', (e) => {
 // tal cual en `body`; solo se muestra completo en la pantalla de detalle de
 // la Notificación. El "Preview" (texto plano, corto) es lo que se ve en el
 // Panel y en la notificación Push del teléfono.
+function tipInsertLink() {
+  const editor = document.getElementById('tip-body'); if (!editor) return;
+  editor.focus();
+  const url = prompt('Pega el enlace (https://…)'); if (!url) return;
+  const clean = url.trim();
+  if (!/^https?:\/\//i.test(clean)) { showToast('El enlace debe comenzar con https:// o http://', 'error'); return; }
+  const selection = window.getSelection();
+  if (!selection || !selection.rangeCount || !editor.contains(selection.anchorNode)) {
+    showToast('Selecciona primero el texto que llevará el enlace.', 'info'); return;
+  }
+  document.execCommand('createLink', false, clean);
+  editor.querySelectorAll('a[href]').forEach(a => { a.setAttribute('target','_blank'); a.setAttribute('rel','noopener noreferrer'); });
+}
 function rteExec(editorId, command, value) {
   const el = document.getElementById(editorId);
   if (!el) return;
@@ -32934,18 +33076,47 @@ function shareCasaEnCasaAssignment() {
   window.prompt('Copia este enlace para compartir:', shareUrl);
 }
 
-// Inserta el botón "Compartir" al final absoluto del panel de detalle (después
-// de No Pasar y cualquier otro contenido), respetando los mismos márgenes
-// horizontales que el resto de las secciones del panel.
-(function injectShareButtonInDetail() {
-  const panel = document.getElementById('detail-panel');
-  if (!panel || panel.querySelector('.detail-share-wrap')) return;
-  const wrap = document.createElement('div');
-  wrap.className = 'detail-share-wrap';
-  wrap.innerHTML = `<button class="detail-share-btn" onclick="shareCasaEnCasaAssignment()">
-    <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg> Compartir
-  </button>`;
-  panel.appendChild(wrap);
+// Menú contextual de acciones para la ficha de Casa en casa.
+function detailOpenMoreMenu() {
+  const menu=document.getElementById('detail-assignment-more-menu');
+  if (menu) menu.classList.toggle('open');
+}
+function detailCloseMoreMenu() { document.getElementById('detail-assignment-more-menu')?.classList.remove('open'); }
+function detailMoreAction(action) {
+  const id=document.getElementById('detail-panel')?._openAssignmentId;
+  detailCloseMoreMenu();
+  if (action==='share') shareCasaEnCasaAssignment();
+  else if (action==='edit' && id) goToAdminAssignment(id);
+}
+function detailConfigureAssignmentActions(a, canManage, isCasaEnCasa=true) {
+  const isAssignment = !!a && isCasaEnCasa && !['evento','visita','especial'].includes(String(a.type||'').toLowerCase());
+  const panel=document.getElementById('detail-panel');
+  let menu=document.getElementById('detail-assignment-more-menu');
+  if (!menu && panel) {
+    menu=document.createElement('div'); menu.id='detail-assignment-more-menu'; menu.className='detail-assignment-more-menu';
+    menu.innerHTML=`<button type="button" onclick="detailMoreAction('edit')"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>Editar asignación</button><button type="button" onclick="detailMoreAction('share')"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>Compartir</button>`;
+    panel.appendChild(menu);
+  }
+  ['detail-admin-fab-ter','detail-admin-fab-mobile','detail-admin-fab-desktop'].forEach(id=>{
+    const btn=document.getElementById(id); if(!btn) return;
+    btn.style.display=isAssignment?'flex':'none';
+    btn.classList.remove('saving');
+    if (canManage) {
+      btn.innerHTML='<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>';
+      btn.title='Más Opciones'; btn.setAttribute('aria-label','Más Opciones'); btn.onclick=detailOpenMoreMenu;
+    } else {
+      btn.innerHTML='<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>';
+      btn.title='Compartir'; btn.setAttribute('aria-label','Compartir'); btn.onclick=shareCasaEnCasaAssignment;
+    }
+  });
+  if (menu) menu.style.display=isAssignment && canManage?'':'none';
+  const oldShare=document.querySelector('.detail-share-wrap'); if(oldShare) oldShare.remove();
+}
+(function injectAssignmentMoreMenuStyles(){
+  if(document.getElementById('detail-assignment-more-style')) return;
+  const style=document.createElement('style'); style.id='detail-assignment-more-style';
+  style.textContent=`.detail-assignment-more-menu{display:none;position:absolute;z-index:120;right:16px;top:64px;min-width:210px;padding:6px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-lg)}.detail-assignment-more-menu.open{display:block;animation:menuMorphIn .2s var(--ease-fluid-soft)}.detail-assignment-more-menu button{display:flex;align-items:center;gap:10px;width:100%;padding:11px 12px;border:0;border-radius:9px;background:transparent;color:var(--text);font:600 .86rem var(--font);text-align:left;cursor:pointer}.detail-assignment-more-menu button:hover{background:var(--surface2)}.detail-assignment-more-menu svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:0 0 17px}`;
+  document.head.appendChild(style);
 })();
 </script>
 
