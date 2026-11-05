@@ -5092,6 +5092,23 @@
 
   /* v1.62.0-beta: selector de interfaz (UI Classic / Sencillo / con Inicio) */
   .uim-row { display: flex; gap: 8px; padding: 0.9rem 1rem 0.6rem; }
+  /* v1.71: tutorial guiado de la interfaz Nueva */
+  #inicio-tour { position: fixed; inset: 0; z-index: 6000; }
+  #inicio-tour.no-target { background: rgba(0,0,0,0.62); }
+  #inicio-tour .tour-hole { position: fixed; border-radius: 18px; box-shadow: 0 0 0 9999px rgba(0,0,0,0.62); outline: 2px solid rgba(255,255,255,0.75); pointer-events: none; transition: left .3s var(--ease-fluid), top .3s var(--ease-fluid), width .3s var(--ease-fluid), height .3s var(--ease-fluid); }
+  #inicio-tour .tour-card { position: fixed; width: min(340px, calc(100vw - 24px)); background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 22px; box-shadow: var(--shadow-lg); padding: 1.1rem 1.15rem 1rem; animation: fadeIn 0.25s; }
+  #inicio-tour .tour-dots { display: flex; gap: 5px; margin-bottom: 0.7rem; }
+  #inicio-tour .tour-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--surface3); }
+  #inicio-tour .tour-dots i.on { width: 18px; border-radius: 99px; background: var(--accent); }
+  #inicio-tour .tour-title { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.01em; }
+  #inicio-tour .tour-text { font-size: 0.86rem; line-height: 1.45; color: var(--text2); margin-top: 6px; }
+  #inicio-tour .tour-actions { display: flex; align-items: center; gap: 8px; margin-top: 1rem; }
+  #inicio-tour .tour-actions .sp { flex: 1; }
+  #inicio-tour .tour-btn { border: none; border-radius: 99px; padding: 0.55rem 1rem; font-family: var(--font); font-size: 0.82rem; font-weight: 700; cursor: pointer; background: var(--surface3); color: var(--text2); }
+  #inicio-tour .tour-btn.primary { background: var(--accent); color: #fff; }
+  #inicio-tour .tour-btn.ghost { background: none; color: var(--text3); padding-left: 0.2rem; padding-right: 0.2rem; }
+  #inicio-tour .tour-extra { margin-top: 0.8rem; width: 100%; border: 1px dashed var(--border-active); background: none; color: var(--accent); border-radius: 12px; padding: 0.55rem; font-family: var(--font); font-size: 0.8rem; font-weight: 700; cursor: pointer; }
+  .uim-tour-link { display: none; margin: 0 1rem 0.9rem; padding: 0.5rem 0.9rem; border: none; border-radius: 99px; background: var(--accent-light); color: var(--accent); font-family: var(--font); font-size: 0.78rem; font-weight: 700; cursor: pointer; }
   .uim-opt {
     flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px;
     padding: 0.6rem 0.4rem 0.7rem; border-radius: var(--radius-sm);
@@ -6426,8 +6443,10 @@ function updateUiModeUI() {
     const el = document.getElementById('pref-uim-' + m);
     if (el) el.classList.toggle('active', m === cur);
   });
+  const tl = document.getElementById('pref-tour-btn');
+  if (tl) tl.style.display = cur === 'inicio' ? 'inline-block' : 'none';
 }
-function setUiMode(mode) {
+function setUiMode(mode, opts) {
   if (mode === getUiMode()) return;
   try {
     localStorage.setItem('fleming_modo_sencillo', mode === 'sencillo' ? 'true' : 'false');
@@ -6436,8 +6455,164 @@ function setUiMode(mode) {
   if (typeof applyModoSencilloUI === 'function') applyModoSencilloUI(); else applyInicioUI();
   updateUiModeUI();
   const names = { classic: 'Interfaz Clásica activada', sencillo: 'Interfaz Sencilla activada', inicio: 'Interfaz Nueva activada' };
-  showToast(names[mode], mode === 'classic' ? '' : 'success');
+  if (!(opts && opts.remote)) showToast(names[mode], mode === 'classic' ? '' : 'success'); // v1.71: el cambio a distancia es silencioso
 }
+
+// ── v1.71: tutorial guiado de la interfaz Nueva (Inicio) ─────────────────────
+// Se muestra una sola vez, la primera vez que alguien activa la interfaz Nueva (también si el DEV se la activa a distancia).
+// Quien ya usaba Inicio antes de esta versión no lo ve automáticamente (puede abrirlo desde Preferencias → Interfaz).
+const INICIO_TOUR_KEY = 'fleming_inicio_tour_done';
+try { if (localStorage.getItem(INICIO_TOUR_KEY) === null && localStorage.getItem('fleming_inicio_enabled') === 'true') localStorage.setItem(INICIO_TOUR_KEY, '1'); } catch {}
+const INICIO_TOUR_STEPS = [
+  { title: '¡Bienvenido a la interfaz Nueva!', text: 'Te mostramos en 3 pasos cómo funciona: las tarjetas, cómo personalizarla y cómo volver a la versión Clásica.' },
+  { sel: ['#home-content .pt-tile', '#home-content .ms-card', '#home-content .rs-card', '#home-content .home-card', '#home-content .tp-card'],
+    title: 'Usa las tarjetas', text: 'Toca una tarjeta para abrir su detalle (asignaciones, turnos, tips…). En “Para tí”, mantén presionada una tarjeta para quitarla de la lista.' },
+  { sel: ['.home-custom-btn'], title: 'Personaliza tu Inicio', text: 'Con este botón eliges qué apartados ver, en qué orden y cuántas tarjetas mostrar en “Para tí”.' },
+  { sel: ['#nav-avatar-btn', '#nav-options-dots-btn'], title: 'Vuelve a la versión Clásica cuando quieras',
+    text: 'Toca tu foto (o los tres puntos) → Configuración → Preferencias → Interfaz, y elige “Clásico”. Para volver a la Nueva, el mismo camino.',
+    extra: { label: 'Abrir Preferencias ahora', fn: () => { _tourFinish(true); try { openPreferencias(); setTimeout(() => openPrefScreen('preferencias'), 120); } catch (e) {} } } },
+];
+let _tour = null;
+function _tourVisibleEl(sels) {
+  for (const sel of (sels || [])) {
+    const el = document.querySelector(sel);
+    if (!el) continue;
+    const r = el.getBoundingClientRect();
+    if (r.width > 0 && r.height > 0) return el;
+  }
+  return null;
+}
+async function _tourEnsureHome() {
+  try { if (document.getElementById('page-preferencias')?.classList.contains('open')) closePreferencias(); } catch (e) {}
+  try {
+    if (currentMainTab !== 'inicio') { const b = document.querySelector('.main-seg-btn[data-tab="inicio"]'); if (b) switchMainTab('inicio', b); }
+  } catch (e) {}
+  for (let i = 0; i < 40; i++) {
+    const w = document.getElementById('home-content');
+    if (w && w.dataset.ready && document.querySelector('.home-custom-btn')) break;
+    await new Promise(r => setTimeout(r, 100));
+  }
+}
+function startInicioTour(force) {
+  if (_tour) return;
+  try { if (!force && localStorage.getItem(INICIO_TOUR_KEY) === '1') return; } catch {}
+  if (!isInicioActive()) { if (force) showToast('El tutorial está disponible con la interfaz Nueva en teléfonos móviles.', 'error'); return; }
+  const ov = document.createElement('div');
+  ov.id = 'inicio-tour';
+  ov.innerHTML = '<div class="tour-hole" style="display:none"></div><div class="tour-card"></div>';
+  document.body.appendChild(ov);
+  _tour = { i: 0, ov, busy: false };
+  window.addEventListener('resize', _tourPos);
+  _tourRender();
+}
+function _tourFinish(done) {
+  if (!_tour) return;
+  window.removeEventListener('resize', _tourPos);
+  _tour.ov.remove(); _tour = null;
+  if (done) { try { localStorage.setItem(INICIO_TOUR_KEY, '1'); } catch {} }
+}
+async function _tourGo(n) {
+  if (!_tour || _tour.busy) return;
+  if (n >= INICIO_TOUR_STEPS.length) { _tourFinish(true); return; }
+  n = Math.max(0, n);
+  _tour.busy = true;
+  if (n >= 1) await _tourEnsureHome();
+  if (!_tour) return;
+  _tour.i = n; _tour.busy = false;
+  _tourRender();
+}
+function _tourRender() {
+  if (!_tour) return;
+  const st = INICIO_TOUR_STEPS[_tour.i], last = _tour.i === INICIO_TOUR_STEPS.length - 1;
+  const card = _tour.ov.querySelector('.tour-card');
+  card.innerHTML =
+    '<div class="tour-dots">' + INICIO_TOUR_STEPS.map((_, k) => '<i class="' + (k === _tour.i ? 'on' : '') + '"></i>').join('') + '</div>' +
+    '<div class="tour-title">' + escapeHtml(st.title) + '</div><div class="tour-text">' + escapeHtml(st.text) + '</div>' +
+    (st.extra ? '<button type="button" class="tour-extra" id="tour-extra-btn">' + escapeHtml(st.extra.label) + '</button>' : '') +
+    '<div class="tour-actions">' + (last ? '' : '<button type="button" class="tour-btn ghost" id="tour-skip">Omitir</button>') + '<span class="sp"></span>' +
+    (_tour.i > 0 ? '<button type="button" class="tour-btn" id="tour-prev">Atrás</button>' : '') +
+    '<button type="button" class="tour-btn primary" id="tour-next">' + (last ? 'Listo' : (_tour.i === 0 ? 'Comenzar' : 'Siguiente')) + '</button></div>';
+  const g = id => card.querySelector('#' + id);
+  g('tour-next').onclick = () => _tourGo(_tour.i + 1);
+  if (g('tour-prev')) g('tour-prev').onclick = () => _tourGo(_tour.i - 1);
+  if (g('tour-skip')) g('tour-skip').onclick = () => _tourFinish(true);
+  if (g('tour-extra-btn')) g('tour-extra-btn').onclick = () => st.extra.fn();
+  const el = _tourVisibleEl(st.sel);
+  if (el) { try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {} }
+  _tourPos();
+  if (el) setTimeout(_tourPos, 380);
+}
+function _tourPos() {
+  if (!_tour) return;
+  const st = INICIO_TOUR_STEPS[_tour.i];
+  const hole = _tour.ov.querySelector('.tour-hole'), card = _tour.ov.querySelector('.tour-card');
+  const el = _tourVisibleEl(st.sel);
+  const vw = window.innerWidth, vh = window.innerHeight, cw = card.offsetWidth, ch = card.offsetHeight;
+  if (!el) {
+    _tour.ov.classList.add('no-target'); hole.style.display = 'none';
+    card.style.left = Math.max(12, (vw - cw) / 2) + 'px'; card.style.top = Math.max(12, (vh - ch) / 2) + 'px';
+    return;
+  }
+  _tour.ov.classList.remove('no-target');
+  const r = el.getBoundingClientRect(), pad = 6;
+  hole.style.display = '';
+  hole.style.left = (r.left - pad) + 'px'; hole.style.top = (r.top - pad) + 'px';
+  hole.style.width = (r.width + pad * 2) + 'px'; hole.style.height = (r.height + pad * 2) + 'px';
+  const below = vh - r.bottom - pad;
+  const top = below >= ch + 16 ? r.bottom + pad + 12 : Math.max(12, r.top - pad - ch - 12);
+  card.style.top = Math.min(top, vh - ch - 12) + 'px';
+  card.style.left = Math.min(Math.max(12, r.left + r.width / 2 - cw / 2), vw - cw - 12) + 'px';
+}
+// Espera a que Inicio esté listo (si hace falta) y lanza el tutorial la primera vez que se activa la interfaz Nueva.
+function maybeStartInicioTour() {
+  try { if (localStorage.getItem(INICIO_TOUR_KEY) === '1') return; } catch {}
+  if (_tour) return;
+  setTimeout(() => { try { startInicioTour(false); } catch (e) { console.warn('Tutorial Inicio:', e); } }, 450);
+}
+
+// ── v1.71: cambio de interfaz a distancia (DEV) ──────────────────────────────
+// Requiere en Supabase:
+//   alter table platform_users add column if not exists ui_mode_remote text;
+//   alter table platform_users add column if not exists ui_mode_remote_at timestamptz;
+// El DEV guarda el modo y la fecha; cada dispositivo aplica el cambio una sola vez (si la fecha es más nueva que la ya aplicada),
+// así la persona puede volver a cambiarla después sin que se le imponga de nuevo.
+const UI_REMOTE_AT_KEY = 'fleming_ui_remote_at';
+let _uiRemoteBusy = false, _uiRemoteTimer = null;
+async function applyRemoteUiMode() {
+  if (_uiRemoteBusy || typeof currentUser === 'undefined' || !currentUser || !currentUser.name) return;
+  _uiRemoteBusy = true;
+  try {
+    const { data, error } = await sb.from('platform_users').select('ui_mode_remote, ui_mode_remote_at').ilike('name', currentUser.name).maybeSingle();
+    if (error || !data || !data.ui_mode_remote || !data.ui_mode_remote_at) return;
+    const at = new Date(data.ui_mode_remote_at).getTime();
+    const seen = parseInt(localStorage.getItem(UI_REMOTE_AT_KEY) || '0', 10) || 0;
+    if (!isFinite(at) || at <= seen) return;
+    localStorage.setItem(UI_REMOTE_AT_KEY, String(at));
+    if (!['classic', 'sencillo', 'inicio'].includes(data.ui_mode_remote)) return;
+    if (data.ui_mode_remote !== getUiMode()) setUiMode(data.ui_mode_remote, { remote: true });
+  } catch (e) { /* columnas aún no creadas: se ignora */ }
+  finally { _uiRemoteBusy = false; }
+}
+function startRemoteUiWatcher() {
+  setTimeout(applyRemoteUiMode, 1200);
+  if (_uiRemoteTimer) return;
+  _uiRemoteTimer = setInterval(applyRemoteUiMode, 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) applyRemoteUiMode(); });
+}
+let _uprofUiBusy = false;
+async function devSetUserUiMode(userId, mode) {
+  if (currentRole !== 'dev' || _uprofUiBusy) return;
+  _uprofUiBusy = true;
+  const { error } = await sb.from('platform_users').update({ ui_mode_remote: mode, ui_mode_remote_at: new Date().toISOString() }).eq('id', userId);
+  _uprofUiBusy = false;
+  if (error) { showToast('No se pudo cambiar la interfaz. Falta crear las columnas "ui_mode_remote" y "ui_mode_remote_at" en Supabase.', 'error'); return; }
+  const u = (typeof activeUsers !== 'undefined' && Array.isArray(activeUsers)) ? activeUsers.find(x => x.id === userId) : null;
+  if (u) u.ui_mode_remote = mode;
+  ['classic', 'sencillo', 'inicio'].forEach(m => document.getElementById('uprof-uim-' + m)?.classList.toggle('active', m === mode));
+  const names = { classic: 'Clásica', sencillo: 'Sencilla', inicio: 'Nueva' };
+  showToast('Interfaz ' + names[mode] + ' enviada. Se aplicará en el dispositivo del usuario en cuanto lo tenga abierto.', 'success');
+}
+
 function updateHomeExpToggleUI() {
   updateUiModeUI();
   const t = document.getElementById('home-exp-toggle'), th = document.getElementById('home-exp-thumb');
@@ -6472,6 +6647,7 @@ function applyInicioUI(fromInit) {
       if (btn) switchMainTab('inicio', btn);
     }
   }
+  if (active && !_homeWasActive && !fromInit) maybeStartInicioTour(); // v1.71: tutorial la primera vez
   _homeWasActive = active;
   applyInicioChrome();
 }
@@ -9642,6 +9818,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
         </button>
       </div>
       <div id="pref-uim-help" style="padding:0.1rem 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4"></div>
+      <button type="button" class="uim-tour-link" id="pref-tour-btn" onclick="startInicioTour(true)">Ver el tutorial de la interfaz Nueva</button>
     </div>
 
     <!-- Vista de Contenido (ajuste de presentación en Tablet/Escritorio) -->
@@ -10665,7 +10842,7 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.69.0: (1) Detalle de asignación de Casa en casa: Más Opciones para todos (Asignar nuevo territorio, Clima, Compartir; Editar solo con permiso); el número de Territorio ya no es un botón. (2) Presionar la Sub-sección ya abierta ya no hace nada.
 // v1.69.1: (1) Más Opciones de la asignación: toggle para activar/desactivar Live por completo. (2) Asignaciones de Predicación por Grupo de Servicio: "Mi grupo", su tarjeta y el botón "Otros Grupos" van dentro de su propio contenedor.
 // v1.70: (1) Recuadro Live rediseñado (solo texto, botón Pausa/Play grande). (2) "Direcciones No Pasar" pasa arriba del recuadro Live, con espacio bajo el mapa y del tamaño de la dirección. (3) "Reportar Territorio" más redondeado. (4) El pill de Clima abre The Weather Channel (con confirmación).
-const APP_VERSION = '1.70.5';
+const APP_VERSION = '1.71';
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -15398,6 +15575,7 @@ async function enterApp() {
   if (typeof applyNavbarAvatarUI === 'function') applyNavbarAvatarUI();
 
   if (typeof applyInicioUI === 'function') applyInicioUI(true);
+  if (typeof startRemoteUiWatcher === 'function') startRemoteUiWatcher(); // v1.71: cambio de interfaz a distancia
 
   // Restore sub-page visibility
   if (currentMainTab === 'inicio') {
@@ -22892,6 +23070,17 @@ async function openUserProfilePage(uid) {
       <button class="btn-primary" style="width:100%;padding:0.85rem;border-radius:12px;font-weight:700" onclick="openInviteModal()">Invitar</button>
     </div>` : '';
 
+  const _rm = u.ui_mode_remote || '';
+  const uiModeDevSection = (isDev && !isCurrentUser && u.role !== 'dev') ? `
+    <div class="uprofile-section">
+      <div class="uprofile-section-title">Interfaz del usuario</div>
+      <div style="padding:0.5rem 1rem 0.2rem;font-size:0.75rem;color:var(--text3);line-height:1.4">Cambia a distancia la interfaz de esta persona. Se aplica en su dispositivo la próxima vez que abra la plataforma (o en un minuto si ya la tiene abierta) y ella podrá volver a cambiarla después.</div>
+      <div class="uim-row" style="padding:0.5rem 1rem 0.9rem">
+        <button class="uim-opt${_rm === 'sencillo' ? ' active' : ''}" id="uprof-uim-sencillo" onclick="devSetUserUiMode('${u.id}','sencillo')"><span class="uim-name">Sencillo</span></button>
+        <button class="uim-opt${_rm === 'classic' ? ' active' : ''}" id="uprof-uim-classic" onclick="devSetUserUiMode('${u.id}','classic')"><span class="uim-name">Clásico</span></button>
+        <button class="uim-opt${_rm === 'inicio' ? ' active' : ''}" id="uprof-uim-inicio" onclick="devSetUserUiMode('${u.id}','inicio')"><span class="uim-name">Nuevo</span></button>
+      </div>
+    </div>` : '';
   const userIdDevSection = (isDev && u.role !== 'dev') ? `
     <div class="uprofile-section">
       <div class="uprofile-section-title">UserID</div>
@@ -22920,6 +23109,7 @@ async function openUserProfilePage(uid) {
     </div>
     ${(labelChipsFull || adminTagChipHTML) ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.1rem">${labelChipsFull}${adminTagChipHTML}</div>` : ''}
     ${userIdDevSection}
+    ${uiModeDevSection}
     ${editSection}
     ${dangerSection}
     ${inviteSection}
@@ -24862,10 +25052,22 @@ function _scrollFabHide() {
 // ══════════════════════════════════════════════════════════════════════════
 const TUTORIAL_SEEN_KEY = 'fleming_tutorial_seen';
 const TUTORIAL_STEPS = [
+  // mode: 'classic' | 'inicio' → el paso solo aparece en esa interfaz (sin mode, aparece en ambas).
+  // optional: true → si el elemento no está visible en ese momento, el paso se omite.
   {
-    selector: '#main-segment',
+    mode: 'classic', selector: '#main-segment',
     title: { es: 'Secciones principales', en: 'Main sections' },
     text: { es: 'Con esta barra cambias entre las dos grandes áreas de la plataforma: Predicación y Reuniones.', en: 'Use this bar to switch between the platform\'s two main areas: Preaching and Meetings.' }
+  },
+  {
+    mode: 'inicio', selector: '#home-bn-pill',
+    title: { es: 'Secciones principales', en: 'Main sections' },
+    text: { es: 'Con la barra inferior cambias entre las dos grandes áreas de la plataforma: Predicación y Reuniones.', en: 'Use the bottom bar to switch between the platform\'s two main areas: Preaching and Meetings.' }
+  },
+  {
+    mode: 'inicio', selector: '#home-bn-home', optional: true,
+    title: { es: 'Botón Inicio', en: 'Home button' },
+    text: { es: 'Este botón te lleva de vuelta a tu pantalla de Inicio, con tus tarjetas, el Texto Diario y lo que tienes pendiente.', en: 'This button takes you back to your Home screen, with your cards, the Daily Text and what you have coming up.' }
   },
   {
     selector: '#sub-tabs-wrap',
@@ -24880,14 +25082,19 @@ const TUTORIAL_STEPS = [
     waitFor: true
   },
   {
-    selector: '.options-wrap .nav-icon-btn[title="Notificaciones"]',
+    selector: '.options-wrap .nav-icon-btn[title="Notificaciones"]', optional: true,
     title: { es: 'Panel de Notificaciones', en: 'Notifications panel' },
     text: { es: 'Desde la campanita revisas los avisos de nuevas asignaciones, cambios de última hora y recordatorios importantes.', en: 'From the bell icon you can check alerts for new assignments, last-minute changes and important reminders.' }
   },
   {
-    selector: '.options-wrap .nav-icon-btn[title="Opciones"]',
+    mode: 'classic', selector: '.options-wrap .nav-icon-btn[title="Opciones"]',
     title: { es: 'Menú de Opciones', en: 'Options menu' },
     text: { es: 'Aquí accedes a tu perfil, la apariencia de la plataforma y la Configuración', en: 'Here you can access your profile, the platform\'s appearance and Settings' }
+  },
+  {
+    mode: 'inicio', selector: '#home-more-btn, #nav-options-dots-btn, #nav-avatar-btn',
+    title: { es: 'Más Opciones', en: 'More options' },
+    text: { es: 'Aquí accedes a tu perfil, la apariencia de la plataforma y la Configuración, donde también puedes volver a la interfaz Clásica.', en: 'Here you can access your profile, the platform\'s appearance and Settings, where you can also go back to the Classic interface.' }
   },
 ];
 
@@ -24955,6 +25162,38 @@ const TUTORIAL_STEPS_VMC = [
 let _tutorialIndex = 0;
 let _tutorialResizeHandler = null;
 let _activeTutorialSteps = TUTORIAL_STEPS;
+// v1.71: el tutorial se adapta a la interfaz activa (Clásica con barra superior / Nueva con Inicio y NavBar inferior).
+function _tutSteps() {
+  const mode = (typeof isInicioActive === 'function' && isInicioActive()) ? 'inicio' : 'classic';
+  return _activeTutorialSteps.filter(st => !st.mode || st.mode === mode);
+}
+// Visible de verdad: se mide el rectángulo (los elementos fijos, como la NavBar inferior, tienen offsetParent null).
+function _tutVisible(el) {
+  if (!el) return false;
+  const r = el.getBoundingClientRect();
+  if (r.width <= 0 || r.height <= 0) return false;
+  const cs = getComputedStyle(el);
+  return cs.visibility !== 'hidden' && cs.display !== 'none' && cs.opacity !== '0';
+}
+function _tutFind(selector) {
+  if (!selector) return null;
+  return Array.from(document.querySelectorAll(selector)).find(_tutVisible) || null;
+}
+// Si el elemento queda tapado por la barra superior o la NavBar inferior, se desplaza hasta dejarlo a la vista.
+function _tutEnsureVisible(el) {
+  if (!el) return;
+  let fixed = false;
+  for (let n = el; n && n !== document.body; n = n.parentElement) { if (getComputedStyle(n).position === 'fixed') { fixed = true; break; } }
+  if (fixed) return;
+  const nav = document.getElementById('home-bottom-nav');
+  const navTop = (nav && _tutVisible(nav)) ? nav.getBoundingClientRect().top : window.innerHeight;
+  const topSafe = (document.querySelector('.app-header-shell')?.getBoundingClientRect().bottom || 0) + 8;
+  const r = el.getBoundingClientRect();
+  if (r.top < topSafe || r.bottom > navTop - 8) {
+    try { el.scrollIntoView({ block: 'center', behavior: 'auto' }); } catch (e) {}
+  }
+}
+let _tutDelta = 1;
 
 function shouldAutoShowTutorial() {
   try { return !(typeof isSimplifiedModeActive === 'function' && isSimplifiedModeActive()) && !localStorage.getItem(TUTORIAL_SEEN_KEY); } catch { return false; }
@@ -25102,6 +25341,7 @@ function tutorialBackgroundClick(e) {
 }
 
 function endTutorial() {
+  _tutDelta = 1;
   const overlay = document.getElementById('tutorial-overlay');
   if (overlay) overlay.classList.remove('active');
   if (_tutorialResizeHandler) {
@@ -25116,7 +25356,8 @@ function endTutorial() {
 function tutorialGo(delta) {
   const next = _tutorialIndex + delta;
   if (next < 0) return;
-  if (next >= _activeTutorialSteps.length) { endTutorial(); return; }
+  _tutDelta = delta < 0 ? -1 : 1;
+  if (next >= _tutSteps().length) { endTutorial(); return; }
   renderTutorialStep(next);
 }
 
@@ -25126,8 +25367,8 @@ function tutorialGo(delta) {
 function _waitForTutorialTarget(selector, attempts = 8) {
   return new Promise(resolve => {
     const tryFind = (n) => {
-      const el = document.querySelector(selector);
-      if (el && el.offsetParent !== null) { resolve(el); return; }
+      const el = _tutFind(selector);
+      if (el) { resolve(el); return; }
       if (n <= 0) { resolve(null); return; }
       setTimeout(() => tryFind(n - 1), 140);
     };
@@ -25137,22 +25378,42 @@ function _waitForTutorialTarget(selector, attempts = 8) {
 
 async function renderTutorialStep(i, isReflow) {
   if (!document.getElementById('tutorial-overlay')?.classList.contains('active')) return;
+  const steps = _tutSteps();
   _tutorialIndex = i;
-  const step = _activeTutorialSteps[i];
+  const step = steps[i];
+  if (!step) { endTutorial(); return; }
   const spot = document.getElementById('tutorial-spot');
   const card = document.getElementById('tutorial-card');
 
   let target = null;
   if (step.selector) {
-    target = document.querySelector(step.selector);
-    if ((!target || target.offsetParent === null) && step.waitFor && !isReflow) {
-      target = await _waitForTutorialTarget(step.selector);
-    }
-    if (target && target.offsetParent === null) target = null;
+    target = _tutFind(step.selector);
+    if (!target && step.waitFor && !isReflow) target = await _waitForTutorialTarget(step.selector);
     // Si es la reflow (resize/scroll) puede que el índice ya haya cambiado mientras esperábamos.
     if (_tutorialIndex !== i) return;
+    // Paso opcional sin elemento visible: se omite en la dirección en que se navegaba.
+    if (!target && step.optional && !isReflow) {
+      const nx = i + _tutDelta;
+      if (nx >= steps.length) { endTutorial(); return; }
+      if (nx >= 0) { renderTutorialStep(nx); return; }
+    }
+    if (target && !isReflow) _tutEnsureVisible(target);
   }
 
+  // Primero el contenido (para medir el alto real de la tarjeta) y después la posición.
+  document.getElementById('tutorial-card-title').textContent = step.title[currentLang] || step.title.es;
+  document.getElementById('tutorial-card-text').textContent = step.text[currentLang] || step.text.es;
+  document.getElementById('tutorial-step-counter').textContent = `${i + 1} / ${steps.length}`;
+  document.getElementById('tutorial-prev-btn').style.visibility = i === 0 ? 'hidden' : 'visible';
+  document.getElementById('tutorial-next-btn').textContent = i === steps.length - 1
+    ? (currentLang === 'en' ? 'Got it' : 'Entendido')
+    : (currentLang === 'en' ? 'Next' : 'Siguiente');
+  const dotsWrap = document.getElementById('tutorial-dots');
+  dotsWrap.innerHTML = steps.map((_, idx) =>
+    `<div class="tutorial-dot${idx === i ? ' active' : ''}"></div>`).join('');
+
+  const vw = window.innerWidth, vh = window.innerHeight, M = 16;
+  const cardWidth = card.offsetWidth || 320, cardH = card.offsetHeight || 180;
   if (target) {
     const r = target.getBoundingClientRect();
     const pad = 8;
@@ -25162,37 +25423,21 @@ async function renderTutorialStep(i, isReflow) {
     spot.style.width = (r.width + pad * 2) + 'px';
     spot.style.height = (r.height + pad * 2) + 'px';
 
-    const cardWidth = card.offsetWidth || 320;
-    const spaceBelow = window.innerHeight - r.bottom;
-    const spaceAbove = r.top;
+    const spaceBelow = vh - (r.bottom + pad), spaceAbove = r.top - pad;
     let top;
-    if (spaceBelow > 200 || spaceBelow >= spaceAbove) {
-      top = Math.min(r.bottom + 16, window.innerHeight - 20);
-    } else {
-      top = Math.max(16, r.top - 16 - (card.offsetHeight || 160));
-    }
+    if (spaceBelow >= cardH + M + 8) top = r.bottom + pad + M;          // cabe debajo
+    else if (spaceAbove >= cardH + M + 8) top = r.top - pad - M - cardH; // cabe encima (p. ej. NavBar inferior)
+    else top = spaceBelow >= spaceAbove ? vh - cardH - M : M;            // si no cabe, se pega al borde con más espacio
+    top = Math.max(M, Math.min(top, vh - cardH - M));
     let left = r.left + r.width / 2 - cardWidth / 2;
-    left = Math.max(16, Math.min(left, window.innerWidth - cardWidth - 16));
+    left = Math.max(M, Math.min(left, vw - cardWidth - M));
     card.style.top = top + 'px';
     card.style.left = left + 'px';
   } else {
     spot.classList.remove('has-target');
-    const cardWidth = card.offsetWidth || 320;
-    card.style.top = (window.innerHeight / 2 - (card.offsetHeight || 160) / 2) + 'px';
-    card.style.left = (window.innerWidth / 2 - cardWidth / 2) + 'px';
+    card.style.top = Math.max(M, vh / 2 - cardH / 2) + 'px';
+    card.style.left = Math.max(M, vw / 2 - cardWidth / 2) + 'px';
   }
-
-  document.getElementById('tutorial-card-title').textContent = step.title[currentLang] || step.title.es;
-  document.getElementById('tutorial-card-text').textContent = step.text[currentLang] || step.text.es;
-  document.getElementById('tutorial-step-counter').textContent = `${i + 1} / ${_activeTutorialSteps.length}`;
-  document.getElementById('tutorial-prev-btn').style.visibility = i === 0 ? 'hidden' : 'visible';
-  document.getElementById('tutorial-next-btn').textContent = i === _activeTutorialSteps.length - 1
-    ? (currentLang === 'en' ? 'Got it' : 'Entendido')
-    : (currentLang === 'en' ? 'Next' : 'Siguiente');
-
-  const dotsWrap = document.getElementById('tutorial-dots');
-  dotsWrap.innerHTML = _activeTutorialSteps.map((_, idx) =>
-    `<div class="tutorial-dot${idx === i ? ' active' : ''}"></div>`).join('');
 }
 
 function initScrollTopFab() {
