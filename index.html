@@ -558,8 +558,10 @@
     background: var(--accent);
     border-radius: 22px;
     box-shadow: 0 2px 12px color-mix(in srgb, var(--accent) 40%, transparent);
-    transition: transform 0.32s cubic-bezier(0.65, 0, 0.35, 1), width 0.32s cubic-bezier(0.65, 0, 0.35, 1);
+    --ease-quick: cubic-bezier(0.34, 1.35, 0.5, 1);
+    transition: transform 0.6s var(--ease-quick), width 0.6s var(--ease-quick);
     will-change: transform, width;
+    transform-origin: center;
     z-index: 0;
     pointer-events: none;
   }
@@ -572,7 +574,7 @@
     box-shadow: none;
   }
   [data-animations="ultra"] .main-seg-thumb {
-    transition: transform 0.42s var(--ease-ultra), width 0.42s var(--ease-ultra) !important;
+    transition: transform 0.6s var(--ease-quick), width 0.6s var(--ease-quick) !important;
   }
   .main-seg-btn {
     padding: 9px 24px;
@@ -582,6 +584,10 @@
     cursor: pointer; transition: all 0.22s; white-space: nowrap;
     position: relative; z-index: 1;
   }
+  @supports (transition-timing-function: linear(0, 1)) { .main-seg-thumb { --ease-quick: linear(0, 0.0371, 0.1315, 0.2603, 0.4046, 0.5499, 0.6857, 0.8051, 0.9044, 0.9823, 1.0393, 1.0774, 1.0993, 1.1079, 1.1066, 1.0981, 1.0851, 1.0698, 1.0539, 1.0388, 1.0252, 1.0137, 1.0044, 0.9975, 0.9928, 0.9898, 0.9885, 0.9883, 0.989, 0.9903, 0.9919, 0.9936, 0.9953, 0.9968, 0.9981, 0.9992, 1); } }
+  .main-seg-thumb.seg-moving { animation: segThumbStretch 0.5s cubic-bezier(0.3, 0, 0.2, 1); }
+  @keyframes segThumbStretch { 0% { scale: 1 1; } 30% { scale: 1.07 0.9; } 100% { scale: 1 1; } }
+  .main-seg-btn { transition: color 0.3s ease, padding 0.25s ease, font-size 0.25s ease, background 0.22s; }
   .main-seg-btn.active {
     background: var(--accent); color: #fff;
     box-shadow: 0 2px 12px color-mix(in srgb, var(--accent) 40%, transparent);
@@ -8435,7 +8441,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
           <span id="detail-weather-temp">—°</span>
         </div>
       </div>
-      <div class="detail-ter-badge" id="detail-ter-badge" style="display:none" onclick="onDetailTerBadgeClick()" title="Presiona para agregar otro territorio"></div>
+      <div class="detail-ter-badge" id="detail-ter-badge" style="display:none"></div>
       <button class="detail-edit-add-fab" id="detail-edit-add-fab" title="Editar más detalles">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </button>
@@ -10528,7 +10534,9 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.63-beta: (1) Preferencias → Interfaz: los 3 recuadros pasan a llamarse Sencillo, Clásico (por defecto, al centro) y Nuevo; el texto explicativo muestra solo el de la opción elegida. (2) Vista de Contenido: nuevos diseños para PopUp y Lateral y el título ya no lleva "(Tablet / Escritorio)". (3) Inicio: nuevo diseño de la tarjeta de Texto Diario, con el texto bíblico en tipografía Serif. (4) El botón "Personalizar Inicio" es más pequeño y discreto.
 // v1.68: pulido de badges Aseo, buscadores unificados, confirmación al compartir y acciones superiores en Casa en casa.
 // v1.68.50: (1) Personalizar Inicio con fondo sólido y Back/Título translúcidos. (2) "Para tí" con tarjetas modulares (cuadradas y rectangulares) que aprovechan el espacio. (3) Se retiran los apartados de asignaciones VMC/Reunión Pública y Aseo (ahora viven en "Para tí"). (4) Tag Precursor junto al de Superintendente/Auxiliar en el detalle del Grupo.
-const APP_VERSION = '1.68.50';
+// v1.68.51: el thumb del toggle Predicación/Reuniones se desliza con un resorte tipo "Quick" (Figma) y se estira levemente al moverse.
+// v1.69.0: (1) Detalle de asignación de Casa en casa: Más Opciones para todos (Asignar nuevo territorio, Clima, Compartir; Editar solo con permiso); el número de Territorio ya no es un botón. (2) Presionar la Sub-sección ya abierta ya no hace nada.
+const APP_VERSION = '1.69.0';
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -16481,10 +16489,8 @@ function renderSubTabs(mainTab) {
 // para mostrarlas todas. Función experimental: debe activarse primero en
 // Configuración → Experimentos.
 function handleSubTabClick(ev, tabId) {
-  if (tabId === currentSubTab && isMobile() && isSubnavMenuEnabled()) {
-    const tabs = (SUB_TABS[currentMainTab] || []).filter(t => t.id !== 'carritos' || carritosVisibleForCurrentUser());
-    if (tabs.length > 1) { openSubnavMenu(); return; }
-  }
+  // v1.69.0: presionar la Sub-sección que ya está abierta no hace nada (ya no abre el panel de Sub-secciones).
+  if (tabId === currentSubTab) return;
   switchSubTab(tabId);
 }
 function isSubnavMenuEnabled() {
@@ -16599,6 +16605,8 @@ function updateMainSegThumb(instant) {
     thumb.offsetHeight;
     thumb.style.transition = '';
   } else {
+    thumb.classList.remove('seg-moving'); thumb.offsetHeight; thumb.classList.add('seg-moving');
+    clearTimeout(thumb._stretchT); thumb._stretchT = setTimeout(() => thumb.classList.remove('seg-moving'), 520);
     thumb.style.width = btnRect.width + 'px';
     thumb.style.transform = `translateX(${offsetX}px)`;
   }
@@ -17805,7 +17813,7 @@ async function viewAssignment(id) {
       badge.style.background = getTerColor(ter.number);
       badge.style.display = 'flex';
     }
-    badge.classList.toggle('self-assignable', _esEncargadoParaTerIcon && _multiTers.length < 3);
+    badge.classList.remove('self-assignable'); // v1.69.0: "Asignar nuevo territorio" vive en Más Opciones
   } else if (a.type !== 'presencial') {
     badge.style.display = 'none';
     badge.classList.remove('self-assignable');
@@ -18293,9 +18301,8 @@ function _renderVisitaChipSelector(ters, openIdx) {
 // ── v1.44.0-stable_beta: el Encargado de una asignación de Predicación toca
 // el ícono de Territorio para asignarse él mismo otro territorio, sin
 // depender del Administrador. Se llena el siguiente cupo libre (2º o 3º). ──
-function onDetailTerBadgeClick() {
-  const badge = document.getElementById('detail-ter-badge');
-  if (!badge.classList.contains('self-assignable')) return;
+function detailAssignNewTerritory() {
+  // v1.69.0: se abre desde Más Opciones (antes: tocando el número de Territorio).
   const panel = document.getElementById('detail-panel');
   const a = assignments.find(x => x.id === panel._openAssignmentId);
   if (!a) return;
@@ -33145,14 +33152,53 @@ function shareCasaEnCasaAssignment() {
 // Menú contextual de acciones para la ficha de Casa en casa.
 function detailOpenMoreMenu() {
   const menu=document.getElementById('detail-assignment-more-menu');
-  if (menu) menu.classList.toggle('open');
+  if (!menu) return;
+  if (!menu.classList.contains('open')) detailRenderMoreMenu();
+  menu.classList.toggle('open');
 }
 function detailCloseMoreMenu() { document.getElementById('detail-assignment-more-menu')?.classList.remove('open'); }
+const _DAM_ICON = {
+  edit: '<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>',
+  ter: '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><line x1="12" y1="6.5" x2="12" y2="11.5"/><line x1="9.5" y1="9" x2="14.5" y2="9"/></svg>',
+  weather: '<svg viewBox="0 0 24 24"><path d="M17.5 19H8a5 5 0 1 1 1.35-9.8A6 6 0 0 1 21 11.5 4.5 4.5 0 0 1 17.5 19z"/></svg>',
+  share: '<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>'
+};
+// v1.69.0: el menú se arma según quién mira: Editar y Asignar nuevo territorio (Administradores de Predicación; esto último
+// también el Encargado de la asignación), Clima y Compartir para cualquiera (incluidos Visitantes).
+function detailRenderMoreMenu() {
+  const menu=document.getElementById('detail-assignment-more-menu'); if (!menu) return;
+  const c=menu._ctx||{};
+  const on=(typeof isWeatherPrefEnabled==='function') && isWeatherPrefEnabled();
+  let h='';
+  if (c.canManage) h+=`<button type="button" onclick="detailMoreAction('edit')">${_DAM_ICON.edit}Editar asignación</button>`;
+  if (c.canAddTer) h+=`<button type="button" onclick="detailMoreAction('newter')">${_DAM_ICON.ter}Asignar nuevo territorio</button>`;
+  h+=`<button type="button" class="dam-toggle-row" role="switch" aria-checked="${on}" onclick="detailMoreAction('weather')">${_DAM_ICON.weather}<span class="dam-label">Clima</span><span class="dam-switch${on?' on':''}"><span class="dam-thumb"></span></span></button>`;
+  h+=`<button type="button" onclick="detailMoreAction('share')">${_DAM_ICON.share}Compartir</button>`;
+  menu.innerHTML=h;
+}
 function detailMoreAction(action) {
-  const id=document.getElementById('detail-panel')?._openAssignmentId;
+  const panel=document.getElementById('detail-panel');
+  const id=panel?._openAssignmentId;
+  if (action==='weather') {
+    // Alterna el Clima y actualiza el menú sin cerrarlo.
+    const next=!isWeatherPrefEnabled();
+    localStorage.setItem('fleming_weather_enabled', next?'true':'false');
+    try { updateWeatherToggleUI(); } catch {}
+    if (next) {
+      const a=assignments.find(x=>x.id===id);
+      if (a) loadAssignmentWeather(a);
+      showToast('Clima activado','success');
+    } else {
+      resetAssignmentWeatherChip();
+      showToast('Clima desactivado','');
+    }
+    detailRenderMoreMenu();
+    return;
+  }
   detailCloseMoreMenu();
   if (action==='share') shareCasaEnCasaAssignment();
   else if (action==='edit' && id) goToAdminAssignment(id);
+  else if (action==='newter' && id) detailAssignNewTerritory();
 }
 function detailConfigureAssignmentActions(a, canManage, isCasaEnCasa=true) {
   const isAssignment = !!a && isCasaEnCasa && !['evento','visita','especial'].includes(String(a.type||'').toLowerCase());
@@ -33160,28 +33206,32 @@ function detailConfigureAssignmentActions(a, canManage, isCasaEnCasa=true) {
   let menu=document.getElementById('detail-assignment-more-menu');
   if (!menu && panel) {
     menu=document.createElement('div'); menu.id='detail-assignment-more-menu'; menu.className='detail-assignment-more-menu';
-    menu.innerHTML=`<button type="button" onclick="detailMoreAction('edit')"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>Editar asignación</button><button type="button" onclick="detailMoreAction('share')"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>Compartir</button>`;
     panel.appendChild(menu);
+  }
+  const esEncargado = isAssignment && !!currentUser && _namesMatch(getIdentityName(), a.conductor);
+  const usedTers = a ? [a.territory_id, a.territory_id_2, a.territory_id_3].filter(Boolean).length : 0;
+  if (menu) {
+    menu._ctx = { canManage: !!canManage && isAssignment, canAddTer: isAssignment && (!!canManage || esEncargado) && usedTers < 3 };
+    menu.style.display = isAssignment ? '' : 'none';
+    if (menu.classList.contains('open')) detailRenderMoreMenu();
   }
   ['detail-admin-fab-ter','detail-admin-fab-mobile','detail-admin-fab-desktop'].forEach(id=>{
     const btn=document.getElementById(id); if(!btn) return;
     btn.style.display=isAssignment?'flex':'none';
     btn.classList.remove('saving');
-    if (canManage) {
-      btn.innerHTML='<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>';
-      btn.title='Más Opciones'; btn.setAttribute('aria-label','Más Opciones'); btn.onclick=detailOpenMoreMenu;
-    } else {
-      btn.innerHTML='<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>';
-      btn.title='Compartir'; btn.setAttribute('aria-label','Compartir'); btn.onclick=shareCasaEnCasaAssignment;
-    }
+    btn.innerHTML='<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>';
+    btn.title='Más Opciones'; btn.setAttribute('aria-label','Más Opciones'); btn.onclick=detailOpenMoreMenu;
   });
-  if (menu) menu.style.display=isAssignment && canManage?'':'none';
   const oldShare=document.querySelector('.detail-share-wrap'); if(oldShare) oldShare.remove();
 }
+document.addEventListener('click', (e) => {
+  const m=document.getElementById('detail-assignment-more-menu');
+  if (m && m.classList.contains('open') && !m.contains(e.target) && !e.target.closest('.detail-admin-fab')) detailCloseMoreMenu();
+});
 (function injectAssignmentMoreMenuStyles(){
   if(document.getElementById('detail-assignment-more-style')) return;
   const style=document.createElement('style'); style.id='detail-assignment-more-style';
-  style.textContent=`.detail-assignment-more-menu{display:none;position:absolute;z-index:120;right:16px;top:64px;min-width:210px;padding:6px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-lg)}.detail-assignment-more-menu.open{display:block;animation:menuMorphIn .2s var(--ease-fluid-soft)}.detail-assignment-more-menu button{display:flex;align-items:center;gap:10px;width:100%;padding:11px 12px;border:0;border-radius:9px;background:transparent;color:var(--text);font:600 .86rem var(--font);text-align:left;cursor:pointer}.detail-assignment-more-menu button:hover{background:var(--surface2)}.detail-assignment-more-menu svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:0 0 17px}`;
+  style.textContent=`.detail-assignment-more-menu{display:none;position:absolute;z-index:120;right:16px;top:64px;min-width:210px;padding:6px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-lg)}.detail-assignment-more-menu.open{display:block;animation:menuMorphIn .2s var(--ease-fluid-soft)}.detail-assignment-more-menu button{display:flex;align-items:center;gap:10px;width:100%;padding:11px 12px;border:0;border-radius:9px;background:transparent;color:var(--text);font:600 .86rem var(--font);text-align:left;cursor:pointer}.detail-assignment-more-menu button:hover{background:var(--surface2)}.detail-assignment-more-menu .dam-label{flex:1}.dam-switch{position:relative;width:38px;height:22px;border-radius:99px;background:var(--surface3);flex:0 0 38px;transition:background .2s}.dam-switch.on{background:var(--accent)}.dam-thumb{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s var(--ease-fluid-soft)}.dam-switch.on .dam-thumb{transform:translateX(16px)}.detail-assignment-more-menu .dam-toggle-row svg{flex:0 0 17px}.detail-assignment-more-menu svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:0 0 17px}`;
   document.head.appendChild(style);
 })();
 </script>
