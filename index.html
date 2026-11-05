@@ -2711,10 +2711,10 @@
   }
   .notif-search-filter-btn:hover, .notif-search-filter-btn.active { color: var(--accent); background: var(--accent-light); }
   .notif-filter-menu {
-    max-height: 0; opacity: 0; overflow: hidden; transform: translateY(-6px);
-    transition: max-height 0.35s ease, opacity 0.25s ease, transform 0.3s ease;
+    max-height: 0; opacity: 0; overflow: hidden; transform: translateY(-6px); visibility: hidden;
+    transition: max-height 0.35s ease, opacity 0.25s ease, transform 0.3s ease, visibility 0s linear 0.35s;
   }
-  .notif-filter-menu.notif-filter-open { max-height: 300px; opacity: 1; transform: translateY(0); }
+  .notif-filter-menu.notif-filter-open { max-height: 300px; opacity: 1; transform: translateY(0); visibility: visible; transition-delay: 0s; }
 
   .notif-filter-chips {
     display: flex; gap: 6px; flex-wrap: nowrap; overflow-x: auto;
@@ -3308,7 +3308,6 @@
     padding: 0.45rem 0; border-bottom: 1px solid var(--border); font-size: 0.84rem;
   }
   .vmc-my-item:last-child { border-bottom: none; padding-bottom: 0; }
-  .vmc-my-item-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
 
   .vmc-empty {
     text-align: center; padding: 3rem 1rem;
@@ -5328,31 +5327,34 @@
    minmax(120px,1fr), tarjetas con eyebrow + contenido alineado abajo) para
    que ambas sub-secciones se vean coherentes entre sí. */
 #sub-content-carritos .ct-grid-2x2, #admin-carritos .ct-grid-2x2 {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 12px; padding: 0.25rem 0 1rem;
 }
 #sub-content-carritos .ct-location-card, #admin-carritos .ct-location-card {
-  display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start;
-  gap: 0; padding: 1.1rem 1.1rem 1rem;
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-color);
+  /* v1.70.2: mismos botones que "Grupos de Servicio" (eyebrow arriba, nombre abajo, sin punto de color) */
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end;
+  gap: 0; padding: 1rem 1rem 0.85rem;
+  background-color: var(--surface2);
+  border: 1px solid var(--border);
   border-radius: 20px;
   cursor: pointer;
   text-align: left; width: 100%; position: relative; overflow: hidden;
-  min-height: 124px;
-  transition: transform var(--transition), background-color var(--transition), border-color var(--transition), box-shadow var(--transition);
+  min-height: 110px;
+  transition: transform 0.15s, box-shadow 0.15s, background-color 0.15s;
 }
-#sub-content-carritos .ct-location-card:hover, #admin-carritos .ct-location-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); background-color: var(--bg-card-hover); }
+#sub-content-carritos .ct-location-eyebrow, #admin-carritos .ct-location-eyebrow {
+  font-size: 0.65rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: auto;
+}
+#sub-content-carritos .ct-location-card:hover, #admin-carritos .ct-location-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); background-color: var(--surface); }
 #sub-content-carritos .ct-location-card:active, #admin-carritos .ct-location-card:active { transform: scale(0.97); }
 #sub-content-carritos .ct-location-name-row, #admin-carritos .ct-location-name-row {
   display: flex; align-items: flex-start; gap: 8px; min-width: 0;
 }
-#sub-content-carritos .ct-status-dot, #admin-carritos .ct-status-dot { width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.18); }
 /* El nombre del punto ahora es lo primero que se ve en la tarjeta (ya no hay
    "PUNTO" arriba), así que se le da todo el espacio disponible y se permite
    que use hasta 3 líneas en vez de cortarse con "…" en una sola línea. */
 #sub-content-carritos .ct-location-card h2, #admin-carritos .ct-location-card h2 {
-  margin: 0; font-size: 1.05rem; font-weight: 800; line-height: 1.28; color: var(--text-main);
+  margin: 0.5rem 0 0; font-size: 1rem; font-weight: 800; line-height: 1.25; letter-spacing: -0.01em; color: var(--text-main);
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;
 }
 
@@ -5364,12 +5366,24 @@
 
 /* ---------- MY SHIFT CARD ---------- */
 #sub-content-carritos .ct-my-shift-card, #admin-carritos .ct-my-shift-card {
-  background: var(--bg-card); border: 1.5px solid var(--border-color); border-radius: 18px;
-  padding: 16px 18px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 6px;
-  cursor: pointer; transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  /* v1.70.2: estilo de tarjeta dinámica (como "Texto Diario" / "Para tí") */
+  background: linear-gradient(155deg, var(--accent-light) 0%, var(--surface) 72%);
+  border: 1px solid var(--border); border-radius: 24px; box-shadow: var(--shadow);
+  padding: 1rem 1.1rem 0.9rem; margin-bottom: 12px; display: flex; flex-direction: column; gap: 0;
+  cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
 }
-#sub-content-carritos .ct-my-shift-card:hover, #admin-carritos .ct-my-shift-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+#sub-content-carritos .ct-my-shift-card:hover, #admin-carritos .ct-my-shift-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-lg); }
 #sub-content-carritos .ct-my-shift-card:active, #admin-carritos .ct-my-shift-card:active { transform: scale(0.98); }
+.ct-ms-top { display: flex; align-items: center; gap: 12px; }
+.ct-ms-day { flex: 0 0 52px; height: 52px; border-radius: 17px; display: flex; align-items: center; justify-content: center; font-size: 0.82rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; background: var(--ms-color, var(--accent)); box-shadow: 0 4px 12px rgba(0,0,0,0.14); }
+.ct-ms-main { flex: 1; min-width: 0; }
+.ct-ms-point { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.01em; line-height: 1.25; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ct-ms-meta { display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 0.78rem; font-weight: 600; color: var(--text3); }
+.ct-ms-time { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 99px; background: var(--accent-light); color: var(--accent); font-size: 0.7rem; font-weight: 700; white-space: nowrap; }
+.ct-ms-chev { flex-shrink: 0; font-size: 1.4rem; line-height: 1; color: var(--text3); }
+.ct-ms-people { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; padding-top: 11px; border-top: 1px solid var(--border); }
+.ct-ms-person { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 4px; border-radius: 99px; background: var(--surface3); font-size: 0.75rem; font-weight: 600; color: var(--text2); max-width: 100%; }
+.ct-ms-av { width: 20px; height: 20px; border-radius: 50%; background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 0.62rem; font-weight: 800; color: var(--text2); flex-shrink: 0; }
 
 /* ---------- LOGISTICS BOXES ---------- */
 #sub-content-carritos .ct-logistics-box, #admin-carritos .ct-logistics-box {
@@ -6099,6 +6113,19 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
   .grupos-search-wrap .grupos-search-input { flex:1; min-width:0; width:100%; padding:0!important; border:0!important; border-radius:0!important; background:transparent!important; box-shadow:none!important; color:var(--text); font:inherit; font-size:.88rem; outline:0; }
   .grupos-search-wrap .grupos-search-clear { position:static; transform:none; flex:0 0 28px; width:28px; height:28px; border:0; border-radius:50%; background:var(--surface3); color:var(--text2); }
   .grupos-search-wrap .grupos-search-clear.visible { display:flex; }
+
+  /* v1.70.1 — la barra de búsqueda de Notificaciones sigue los mismos lineamientos que el resto de buscadores de la
+     plataforma (Grupos, Carritos, Territorios): contenedor 46px, radio 14px, sombra y anillo de foco. Conserva el botón de filtros.
+     Se acota con .notif-sb para no alterar el buscador de Usuarios, que reutiliza las clases base. */
+  .notif-search-wrap.notif-sb { position:relative; display:flex; align-items:center; gap:10px; min-height:46px; margin:0 0 0.85rem; padding:0 10px 0 14px; border-radius:14px; border:1px solid var(--border); background:var(--surface); box-shadow:var(--shadow); transition:border-color .18s ease,box-shadow .18s ease; }
+  .notif-search-wrap.notif-sb:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-light); }
+  .notif-search-wrap.notif-sb .notif-search-icon { position:static; transform:none; width:18px; height:18px; flex:0 0 18px; stroke:var(--text3); fill:none; stroke-width:2; stroke-linecap:round; pointer-events:none; }
+  .notif-search-wrap.notif-sb .notif-search-input { flex:1; min-width:0; width:100%; padding:0!important; border:0!important; border-radius:0!important; background:transparent!important; box-shadow:none!important; color:var(--text); font:inherit; font-size:.88rem; outline:0; }
+  .notif-search-wrap.notif-sb .notif-search-input::placeholder { color:var(--text3); }
+  .notif-search-wrap.notif-sb .notif-search-filter-btn { position:static; transform:none; flex:0 0 30px; width:30px; height:30px; background:var(--surface3); color:var(--text2); }
+  .notif-search-wrap.notif-sb .notif-search-filter-btn:hover, .notif-search-wrap.notif-sb .notif-search-filter-btn.active { color:var(--accent); background:var(--accent-light); }
+  /* v1.70.2: el botón queda resaltado mientras haya categorías filtradas, aunque el panel esté cerrado */
+  .notif-search-wrap.notif-sb .notif-search-filter-btn.has-filters { color:#fff; background:var(--accent); }
 
 .assignment-archive-action{position:absolute;top:8px;right:8px;z-index:5;width:30px;height:30px;border:1px solid var(--border);border-radius:10px;background:color-mix(in srgb,var(--surface) 88%,transparent);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .assignment-archive-action svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -7351,7 +7378,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
       </button>
     </div>
     <div style="padding:0.6rem 1rem 0;border-bottom:1px solid var(--border)">
-      <div class="notif-search-wrap">
+      <div class="notif-search-wrap notif-sb">
         <svg class="notif-search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" class="notif-search-input" data-i18n-ph="notif.buscar" placeholder="Buscar notificaciones…" autocomplete="off" oninput="notifSearchInput(this.value,'desktop')">
         <button type="button" onclick="notifToggleFilterMenu('desktop')" class="notif-search-filter-btn" id="notif-filter-btn-desktop" aria-label="Abrir filtros de categoría" aria-expanded="false" aria-controls="notif-filter-menu-desktop">
@@ -10542,7 +10569,7 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.69.0: (1) Detalle de asignación de Casa en casa: Más Opciones para todos (Asignar nuevo territorio, Clima, Compartir; Editar solo con permiso); el número de Territorio ya no es un botón. (2) Presionar la Sub-sección ya abierta ya no hace nada.
 // v1.69.1: (1) Más Opciones de la asignación: toggle para activar/desactivar Live por completo. (2) Asignaciones de Predicación por Grupo de Servicio: "Mi grupo", su tarjeta y el botón "Otros Grupos" van dentro de su propio contenedor.
 // v1.70: (1) Recuadro Live rediseñado (solo texto, botón Pausa/Play grande). (2) "Direcciones No Pasar" pasa arriba del recuadro Live, con espacio bajo el mapa y del tamaño de la dirección. (3) "Reportar Territorio" más redondeado. (4) El pill de Clima abre The Weather Channel (con confirmación).
-const APP_VERSION = '1.70';
+const APP_VERSION = '1.70.2';
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -27429,6 +27456,20 @@ function notifFilterChipsHTML() {
   }).join('');
 }
 
+// v1.70.2: repinta los chips conservando el desplazamiento horizontal (antes volvían al inicio con cada toque)
+// y marca el botón de filtros cuando hay categorías activas.
+function _notifPaintChips(el) {
+  if (!el) return;
+  const left = el.scrollLeft;
+  el.innerHTML = notifFilterChipsHTML();
+  el.scrollLeft = left;
+  const on = _notifActiveGroups.size > 0;
+  ['notif-filter-btn-desktop','notif-filter-btn-mobile'].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) b.classList.toggle('has-filters', on);
+  });
+}
+
 function notifToggleFilterChip(key) {
   if (_notifActiveGroups.has(key)) _notifActiveGroups.delete(key);
   else _notifActiveGroups.add(key);
@@ -27456,7 +27497,7 @@ function notifSearchInput(value, target) {
 function _renderNotifAllTargets() {
   ['desktop','mobile'].forEach(t => {
     const chipsEl = document.getElementById(t === 'desktop' ? 'notif-filter-chips-desktop' : 'notif-filter-chips-mobile');
-    if (chipsEl) chipsEl.innerHTML = notifFilterChipsHTML();
+    if (chipsEl) _notifPaintChips(chipsEl);
     _renderNotifTarget(t);
   });
 }
@@ -27479,7 +27520,7 @@ async function loadNotifications(target) {
 
   targets.forEach(t => {
     const chipsEl = document.getElementById(t === 'desktop' ? 'notif-filter-chips-desktop' : 'notif-filter-chips-mobile');
-    if (chipsEl) chipsEl.innerHTML = notifFilterChipsHTML();
+    if (chipsEl) _notifPaintChips(chipsEl);
     _renderNotifTarget(t);
   });
 }
@@ -29074,7 +29115,7 @@ function vmcRenderWeekProgram(week, isGuest = false) {
         <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;vertical-align:middle;margin-right:4px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         Tus asignaciones esta semana
       </div>
-      ${allMine.map(p => `<div class="vmc-my-item"><span class="vmc-my-item-dot"></span>${vmcPartLabel(p)}${p.mins ? ` <span style="color:var(--text3);font-size:0.75rem">(${p.mins} min)</span>` : ''}</div>`).join('')}
+      ${allMine.map(p => `<div class="vmc-my-item">${vmcPartLabel(p)}${p.mins ? ` <span style="color:var(--text3);font-size:0.75rem">(${p.mins} min)</span>` : ''}</div>`).join('')}
     </div>` : '';
 
   // Section renderer
@@ -29785,7 +29826,7 @@ function fsRenderWeekProgram(week) {
         <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;vertical-align:middle;margin-right:4px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         Tus asignaciones esta semana
       </div>
-      ${myMeta.map(m => `<div class="vmc-my-item"><span class="vmc-my-item-dot"></span>${m}</div>`).join('')}
+      ${myMeta.map(m => `<div class="vmc-my-item">${m}</div>`).join('')}
     </div>` : '';
 
   function roleCard(label, value, iconSvg) {
@@ -30206,7 +30247,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
     </div>
   </nav>
   <div style="padding:0.85rem 1rem 0;max-width:640px;width:100%;margin:0 auto">
-    <div class="notif-search-wrap">
+    <div class="notif-search-wrap notif-sb">
       <svg class="notif-search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input type="text" class="notif-search-input" data-i18n-ph="notif.buscar" placeholder="Buscar notificaciones…" autocomplete="off" oninput="notifSearchInput(this.value,'mobile')">
       <button type="button" onclick="notifToggleFilterMenu('mobile')" class="notif-search-filter-btn" id="notif-filter-btn-mobile" aria-label="Abrir filtros de categoría" aria-expanded="false" aria-controls="notif-filter-menu-mobile">
@@ -30714,17 +30755,20 @@ function cartRenderHome() {
     home.innerHTML += `<div class="ct-section-title">Mis Turnos</div>`;
     myShifts.forEach(s => {
       const color = s.tipo.includes('TD') ? (s.estado === 'reservado' ? '#e08600' : 'var(--primary-green)') : (s.tipo.startsWith('M') ? 'var(--primary-ct-orange)' : 'var(--primary-blue)');
+      const dia3 = String(s.dia || '').substring(0, 3);
+      const people = String(s.nombres || '').split(/[,&\n\/]+/).map(x => x.trim()).filter(Boolean);
+      const peopleHtml = people.map(n => `<span class="ct-ms-person"><span class="ct-ms-av">${n.charAt(0).toUpperCase()}</span>${n}</span>`).join('');
       home.innerHTML += `
         <div class="ct-my-shift-card" onclick="cartOpenTurnDetail('${s.id}')">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <div style="width:12px; height:12px; border-radius:50%; background:${color};"></div>
-            <span style="font-weight:800; font-size:1.1rem;">${s.punto}</span>
+          <div class="ct-ms-top">
+            <div class="ct-ms-day" style="--ms-color:${color}">${dia3}</div>
+            <div class="ct-ms-main">
+              <div class="ct-ms-point">${s.punto}</div>
+              <div class="ct-ms-meta"><span>${s.dia}</span><span class="ct-ms-time">${s.hora}</span></div>
+            </div>
+            <span class="ct-ms-chev">&#8250;</span>
           </div>
-          <div style="color:var(--text-gray); font-size:0.9rem; font-weight:600; padding-left:22px;">${s.dia} • ${s.hora}</div>
-          <div style="background:var(--bg-ct-screen); border-radius:12px; padding:10px; margin-top:4px; font-size:0.85rem; border:1px solid var(--border-color);">
-            <span style="color:var(--text-gray); font-weight:bold; display:block; margin-bottom:2px; font-size:0.7rem; text-transform:uppercase;">Turno de:</span>
-            <span style="font-weight:700;">${s.nombres}</span>
-          </div>
+          ${peopleHtml ? `<div class="ct-ms-people">${peopleHtml}</div>` : ''}
         </div>`;
     });
   }
@@ -30736,8 +30780,8 @@ function cartRenderHome() {
   } else {
     grid.innerHTML = cartPUNTOS.map(p => `
       <button class="ct-location-card" onclick="cartSelectPoint('${p.id}')">
+        <div class="ct-location-eyebrow">Punto</div>
         <div class="ct-location-name-row">
-          <span class="ct-status-dot" style="background:${p.color}"></span>
           <h2>${p.nombre}</h2>
         </div>
       </button>`).join('');
