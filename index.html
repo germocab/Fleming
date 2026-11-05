@@ -1326,7 +1326,8 @@
     background: var(--surface3); padding: 3px 10px; border-radius: 20px;
     margin-top: 8px; margin-left: 6px;
   }
-  .detail-weather-chip.visible { display: inline-flex; }
+  .detail-weather-chip.visible { display: inline-flex; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 0.12s, opacity 0.15s; }
+  .detail-weather-chip.visible:active { transform: scale(0.95); opacity: 0.85; }
   .detail-weather-chip svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
   .detail-weather-chip.weather-sun    { color: #b8860b; background: rgba(245,166,35,0.14); }
   .detail-weather-chip.weather-cloud  { color: var(--text2); background: var(--surface3); }
@@ -1698,7 +1699,7 @@
   .detail-ter-badge.self-assignable { cursor: pointer; transition: transform 0.12s, box-shadow 0.15s; box-shadow: 0 0 0 3px var(--accent-light); }
   .detail-ter-badge.self-assignable:active { transform: scale(0.92); }
 
-  .no-pasar-section { padding: 0 1.25rem 1.25rem; }
+  .no-pasar-section { padding: 1.1rem 1.25rem 1.25rem; }
   /* v1.45.5-sb: toggle "Una por una" / "Pegar varias" del formulario admin
      de Direcciones "No Pasar". */
   .np-mode-btn {
@@ -1708,8 +1709,8 @@
   }
   .np-mode-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
   .no-pasar-title {
-    font-size: 0.875rem; font-weight: 700;
-    margin-bottom: 0.6rem; color: var(--text);
+    font-size: 1.1rem; font-weight: 700; line-height: 1.3;
+    margin-bottom: 0.75rem; color: var(--text);
   }
   .no-pasar-item {
     display: flex; flex-direction: column; align-items: stretch;
@@ -1986,8 +1987,8 @@
 
   .live-street-banner {
     display: none; align-items: center; gap: 10px;
-    margin: 0 1.25rem 0.75rem;
-    padding: 0.65rem 0.9rem 0.65rem 0.65rem;
+    margin: 0 0 0.75rem;
+    padding: 0.6rem 0.65rem 0.6rem 1.1rem;
     background: rgba(52,199,89,0.1);
     border: 1px solid rgba(52,199,89,0.28);
     border-radius: 999px;
@@ -2002,18 +2003,18 @@
   .live-street-icon svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
   .live-street-info { flex: 1; min-width: 0; }
   .live-street-label { font-size: 0.68rem; font-weight: 700; color: var(--green); letter-spacing: 0.06em; text-transform: uppercase; }
-  .live-street-name  { font-size: 0.88rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .live-street-name  { font-size: 1rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .live-street-sub   { font-size: 0.7rem; color: var(--text3); margin-top: 1px; }
   .live-pause-btn {
-    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+    width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
     border: none; cursor: pointer; padding: 0;
-    background: rgba(52,199,89,0.18); color: var(--green);
+    background: var(--green); color: #fff;
     transition: background 0.15s, color 0.15s, opacity 0.15s;
   }
   .live-pause-btn:hover { opacity: 0.85; }
   .live-pause-btn:active { transform: scale(0.94); }
-  .live-pause-btn svg { width: 13px; height: 13px; fill: currentColor; stroke: none; }
+  .live-pause-btn svg { width: 24px; height: 24px; fill: currentColor; stroke: none; }
   
   .live-host-banner {
     display: none; align-items: center; gap: 10px;
@@ -2036,7 +2037,7 @@
   .live-host-name  { font-size: 0.88rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .live-host-sub   { font-size: 0.7rem; color: var(--text3); margin-top: 1px; }
   .live-street-banner.paused {
-    padding: 0.45rem 0.75rem;
+    padding: 0.5rem 0.65rem 0.5rem 1.1rem;
     background: var(--surface2);
     border-color: var(--border);
   }
@@ -2047,7 +2048,7 @@
   .live-street-banner.paused .live-street-icon svg { width: 12px; height: 12px; }
   .live-street-banner.paused .live-street-label { color: var(--text3); }
   .live-street-banner.paused .live-street-sub { display: none; }
-  .live-street-banner.paused .live-pause-btn { background: var(--accent-light); color: var(--accent); }
+  .live-street-banner.paused .live-pause-btn { background: var(--accent); color: #fff; }
 
   .no-pasar-item.live-match {
     background: rgba(52,199,89,0.1) !important;
@@ -2077,7 +2078,7 @@
   }
   .live-locating-wrap {
     display: none; align-items: center; gap: 8px;
-    margin: 0 1.25rem 0.75rem;
+    margin: 0 0 0.75rem;
     padding: 0.6rem 0.9rem;
     background: var(--surface2); border: 1px solid var(--border);
     border-radius: 999px; font-size: 0.82rem; color: var(--text3); font-weight: 500;
@@ -8458,7 +8459,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
       <button class="detail-btn-secondary" id="detail-programa-btn" style="display:none">Ver Programa</button>
     </div>
     <div class="detail-actions" id="detail-report-actions" style="display:none">
-      <button class="admin-shortcut-btn" id="detail-report-btn" style="width:100%;justify-content:center;border-radius:12px;padding:0.65rem">
+      <button class="admin-shortcut-btn" id="detail-report-btn" style="width:100%;justify-content:center;border-radius:999px;padding:0.7rem 1rem">
         <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         Reportar Territorio
       </button>
@@ -8535,6 +8536,8 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
         <span id="live-btn-label">Live</span>
       </button>
     </div>
+    <div class="no-pasar-section" id="detail-no-pasar-section" style="display:none">
+      <div class="no-pasar-title">Direcciones No Pasar</div>
     <!-- Live Mode: localizando... -->
     <div class="live-locating-wrap" id="live-locating-wrap">
       <div class="live-locating-spinner"></div>
@@ -8542,9 +8545,6 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
     </div>
     <!-- Live Mode: banner de calle detectada -->
     <div class="live-street-banner" id="live-street-banner">
-      <div class="live-street-icon">
-        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      </div>
       <div class="live-street-info">
         <div class="live-street-label">Estás en</div>
         <div class="live-street-name" id="live-street-name">—</div>
@@ -8556,8 +8556,6 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
       </button>
     </div>
 
-    <div class="no-pasar-section" id="detail-no-pasar-section" style="display:none">
-      <div class="no-pasar-title">Direcciones No Pasar</div>
       <div id="detail-no-pasar-list"></div>
       <button class="suggest-np-btn" id="suggest-np-btn" onclick="toggleSuggestNpForm()">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -10543,7 +10541,8 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.68.51: el thumb del toggle Predicación/Reuniones se desliza con un resorte tipo "Quick" (Figma) y se estira levemente al moverse.
 // v1.69.0: (1) Detalle de asignación de Casa en casa: Más Opciones para todos (Asignar nuevo territorio, Clima, Compartir; Editar solo con permiso); el número de Territorio ya no es un botón. (2) Presionar la Sub-sección ya abierta ya no hace nada.
 // v1.69.1: (1) Más Opciones de la asignación: toggle para activar/desactivar Live por completo. (2) Asignaciones de Predicación por Grupo de Servicio: "Mi grupo", su tarjeta y el botón "Otros Grupos" van dentro de su propio contenedor.
-const APP_VERSION = '1.69.1';
+// v1.70: (1) Recuadro Live rediseñado (solo texto, botón Pausa/Play grande). (2) "Direcciones No Pasar" pasa arriba del recuadro Live, con espacio bajo el mapa y del tamaño de la dirección. (3) "Reportar Territorio" más redondeado. (4) El pill de Clima abre The Weather Channel (con confirmación).
+const APP_VERSION = '1.70';
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -27021,9 +27020,39 @@ function updateWeatherToggleUI() {
   thumb.style.left = on ? '21px' : '3px';
 }
 
+// v1.70: tocar el pill de Clima pregunta y abre The Weather Channel en la ubicación de la asignación.
+function openWeatherChannelConfirm() {
+  const chip = document.getElementById('detail-weather-chip');
+  const lat = chip && chip.dataset.lat, lon = chip && chip.dataset.lon;
+  if (!lat || !lon) return;
+  let modal = document.getElementById('weather-go-confirm');
+  if (!modal) {
+    modal = document.createElement('div'); modal.id = 'weather-go-confirm'; modal.className = 'aseo-mode-overlay';
+    modal.innerHTML = `<div class="aseo-mode-card" role="dialog" aria-modal="true" aria-labelledby="weather-go-title">
+      <div class="aseo-mode-title" id="weather-go-title">¿Quieres dirigirte al Clima?</div>
+      <div class="aseo-mode-sub">Se abrirá The Weather Channel con el pronóstico de esta ubicación.</div>
+      <button class="aseo-mode-opt" type="button" onclick="weatherGoConfirmAccept()"><span class="aseo-mode-opt-icon"><svg viewBox="0 0 24 24"><path d="M17.5 19H8a5 5 0 1 1 1.35-9.8A6 6 0 0 1 21 11.5 4.5 4.5 0 0 1 17.5 19z"/></svg></span><span class="aseo-mode-opt-text"><strong>Ir al Clima</strong></span></button>
+      <button class="aseo-mode-cancel" type="button" onclick="weatherGoConfirmCancel()">Cancelar</button>
+    </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', e => { if (e.target === modal) weatherGoConfirmCancel(); });
+  }
+  modal.dataset.lat = lat; modal.dataset.lon = lon;
+  modal.classList.add('open');
+}
+function weatherGoConfirmCancel() { document.getElementById('weather-go-confirm')?.classList.remove('open'); }
+function weatherGoConfirmAccept() {
+  const m = document.getElementById('weather-go-confirm');
+  const lat = m?.dataset.lat, lon = m?.dataset.lon;
+  weatherGoConfirmCancel();
+  if (lat && lon) window.open('https://weather.com/weather/today/l/' + encodeURIComponent(lat + ',' + lon), '_blank', 'noopener');
+}
+document.addEventListener('click', (e) => { const c = e.target.closest && e.target.closest('#detail-weather-chip.visible'); if (c) openWeatherChannelConfirm(); });
+
 function resetAssignmentWeatherChip() {
   const chip = document.getElementById('detail-weather-chip');
   if (!chip) return;
+  delete chip.dataset.lat; delete chip.dataset.lon;
   chip.classList.remove('visible', 'weather-sun', 'weather-cloud', 'weather-rain');
   chip.dataset.reqId = '';
 }
@@ -27090,6 +27119,7 @@ async function loadAssignmentWeather(a) {
     const code = codes[idx];
     if (temp === undefined || code === undefined || chip.dataset.reqId !== reqId) return;
 
+    chip.dataset.lat = String(coords.lat); chip.dataset.lon = String(coords.lon);
     const type = _weatherCodeToType(code);
     document.getElementById('detail-weather-icon').innerHTML = WEATHER_ICONS[type];
     document.getElementById('detail-weather-temp').textContent = Math.round(temp) + '°';
