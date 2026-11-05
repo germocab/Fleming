@@ -5092,7 +5092,7 @@
 
   /* v1.62.0-beta: selector de interfaz (UI Classic / Sencillo / con Inicio) */
   .uim-row { display: flex; gap: 8px; padding: 0.9rem 1rem 0.6rem; }
-  /* v1.71: tutorial guiado de la interfaz Nueva */
+  /* v1.71: tutorial guiado de la interfaz Nueva (v1.71.5: también desde Ayuda → Tutoriales) */
   #inicio-tour { position: fixed; inset: 0; z-index: 6000; }
   #inicio-tour.no-target { background: rgba(0,0,0,0.62); }
   #inicio-tour .tour-hole { position: fixed; border-radius: 18px; box-shadow: 0 0 0 9999px rgba(0,0,0,0.62); outline: 2px solid rgba(255,255,255,0.75); pointer-events: none; transition: left .3s var(--ease-fluid), top .3s var(--ease-fluid), width .3s var(--ease-fluid), height .3s var(--ease-fluid); }
@@ -6445,6 +6445,17 @@ function updateUiModeUI() {
   });
   const tl = document.getElementById('pref-tour-btn');
   if (tl) tl.style.display = cur === 'inicio' ? 'inline-block' : 'none';
+  updateInicioTutorialRow();
+}
+// v1.71.5: "Tutorial de la pantalla de Inicio" en Ayuda solo para quien usa la interfaz Nueva
+function updateInicioTutorialRow() {
+  const row = document.getElementById('pref-tutorial-inicio-row');
+  if (row) row.style.display = (typeof isInicioActive === 'function' && isInicioActive()) ? '' : 'none';
+}
+function openInicioTutorialFromHelp() {
+  if (!isInicioActive()) return;
+  try { closePreferencias(); } catch (e) {}
+  setTimeout(() => startInicioTour(true), 300);
 }
 function setUiMode(mode, opts) {
   if (mode === getUiMode()) return;
@@ -6460,9 +6471,8 @@ function setUiMode(mode, opts) {
 
 // ── v1.71: tutorial guiado de la interfaz Nueva (Inicio) ─────────────────────
 // Se muestra una sola vez, la primera vez que alguien activa la interfaz Nueva (también si el DEV se la activa a distancia).
-// Quien ya usaba Inicio antes de esta versión no lo ve automáticamente (puede abrirlo desde Preferencias → Interfaz).
+// v1.71.5: también lo ve, una sola vez, quien ya usaba Inicio y entra a la plataforma; se puede repetir desde Ayuda → Tutoriales y Tips.
 const INICIO_TOUR_KEY = 'fleming_inicio_tour_done';
-try { if (localStorage.getItem(INICIO_TOUR_KEY) === null && localStorage.getItem('fleming_inicio_enabled') === 'true') localStorage.setItem(INICIO_TOUR_KEY, '1'); } catch {}
 const INICIO_TOUR_STEPS = [
   { title: '¡Bienvenido a la interfaz Nueva!', text: 'Te mostramos en 3 pasos cómo funciona: las tarjetas, cómo personalizarla y cómo volver a la versión Clásica.' },
   { sel: ['#home-content .pt-tile', '#home-content .ms-card', '#home-content .rs-card', '#home-content .home-card', '#home-content .tp-card'],
@@ -6567,7 +6577,7 @@ function _tourPos() {
 function maybeStartInicioTour() {
   try { if (localStorage.getItem(INICIO_TOUR_KEY) === '1') return; } catch {}
   if (_tour) return;
-  setTimeout(() => { try { startInicioTour(false); } catch (e) { console.warn('Tutorial Inicio:', e); } }, 450);
+  setTimeout(() => { try { if (document.getElementById('tutorial-overlay')?.classList.contains('active')) return; startInicioTour(false); } catch (e) { console.warn('Tutorial Inicio:', e); } }, 450);
 }
 
 // ── v1.71: cambio de interfaz a distancia (DEV) ──────────────────────────────
@@ -10102,6 +10112,16 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
         </div>
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
+      <div class="profile-row" id="pref-tutorial-inicio-row" style="cursor:pointer;display:none" onclick="openInicioTutorialFromHelp()">
+        <div class="profile-row-icon" style="background:var(--accent-light);color:var(--accent)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="settings.tutorial.inicio">Tutorial de la pantalla de Inicio</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.tutorial.inicio.desc">Repasa las tarjetas, cómo personalizar Inicio y cómo volver a la interfaz Clásica</div>
+        </div>
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
       <div class="profile-row" id="pref-tutorial-h2h-row" style="cursor:pointer" onclick="startH2HTutorial()">
         <div class="profile-row-icon" style="background:var(--ter-1-bg);color:var(--ter-1)">
           <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -10842,7 +10862,7 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.69.0: (1) Detalle de asignación de Casa en casa: Más Opciones para todos (Asignar nuevo territorio, Clima, Compartir; Editar solo con permiso); el número de Territorio ya no es un botón. (2) Presionar la Sub-sección ya abierta ya no hace nada.
 // v1.69.1: (1) Más Opciones de la asignación: toggle para activar/desactivar Live por completo. (2) Asignaciones de Predicación por Grupo de Servicio: "Mi grupo", su tarjeta y el botón "Otros Grupos" van dentro de su propio contenedor.
 // v1.70: (1) Recuadro Live rediseñado (solo texto, botón Pausa/Play grande). (2) "Direcciones No Pasar" pasa arriba del recuadro Live, con espacio bajo el mapa y del tamaño de la dirección. (3) "Reportar Territorio" más redondeado. (4) El pill de Clima abre The Weather Channel (con confirmación).
-const APP_VERSION = '1.71';
+const APP_VERSION = '1.71.5';
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -12202,6 +12222,8 @@ const I18N = {
   'settings.tips.vacio':         { es: 'Todavía no hay Tips publicados', en: 'No Tips published yet', nl: 'Er zijn nog geen Tips gepubliceerd' },
   'settings.tutorial':          { es: 'Ver tutorial',             en: 'View tutorial', nl: 'Tutorial bekijken' },
   'settings.tutorial.desc':     { es: 'Repasa cómo funcionan las secciones y funciones principales', en: 'Review how the main sections and features work', nl: 'Bekijk hoe de belangrijkste secties en functies werken' },
+  'settings.tutorial.inicio':   { es: 'Tutorial de la pantalla de Inicio', en: 'Home screen tutorial', nl: 'Tutorial van het Startscherm' },
+  'settings.tutorial.inicio.desc': { es: 'Repasa las tarjetas, cómo personalizar Inicio y cómo volver a la interfaz Clásica', en: 'Review the cards, how to customize Home and how to go back to the Classic interface', nl: 'Bekijk de kaarten, hoe je Start aanpast en hoe je terugkeert naar de Klassieke interface' },
   'settings.tutorial.h2h':      { es: 'Ver tutorial de Asignaciones', en: 'View Assignments tutorial', nl: 'Tutorial Toewijzingen bekijken' },
   'settings.tutorial.h2h.desc': { es: 'Repasa la pantalla de detalle de una asignación de casa en casa', en: 'Review the detail screen of a door-to-door assignment', nl: 'Bekijk het detailscherm van een huis-aan-huis toewijzing' },
   'settings.tutorial.vmc':      { es: 'Ver tutorial de Vida y Ministerio', en: 'View Life and Ministry tutorial', nl: 'Tutorial Leven en Bediening bekijken' },
@@ -15628,6 +15650,9 @@ async function enterApp() {
   // navbar, etc.) ya esté montada antes de resaltar cualquier elemento.
   if (typeof shouldAutoShowTutorial === 'function' && shouldAutoShowTutorial()) {
     setTimeout(() => { try { startTutorial(); } catch {} }, 900);
+  } else if (typeof isInicioActive === 'function' && isInicioActive()) {
+    // v1.71.5: tutorial de Inicio la primera vez que se entra a la plataforma con la interfaz Nueva
+    setTimeout(() => { try { maybeStartInicioTour(); } catch {} }, 1100);
   }
 }
   
@@ -24287,7 +24312,7 @@ function openPrefScreen(name) {
   trackEvent('settings_open', { screen: name });
   if (name === 'funciones') { updateH2HViewModeUI(); if (typeof updateLiveAlwaysOnToggleUI === 'function') updateLiveAlwaysOnToggleUI(); if (typeof updatePinFeatureToggleUI === 'function') updatePinFeatureToggleUI(); if (typeof updateVozFeatureToggleUI === 'function') updateVozFeatureToggleUI(); }
   if (name === 'notificaciones') renderPrefNotifList();
-  if (name === 'ayuda') renderAyudaTipsList();
+  if (name === 'ayuda') { renderAyudaTipsList(); updateInicioTutorialRow(); }
   if (name === 'preferencias') { updateAnimationsEnabledToggleUI(); updateWeatherToggleUI(); if (typeof updateModoSencilloToggleUI === 'function') updateModoSencilloToggleUI(); updateAccentSwatchesUI(); if (typeof updateHomeExpToggleUI === 'function') updateHomeExpToggleUI(); }
   if (name === 'experimentos') { updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateNavbarBtnSizeUI(); }
   if (name === 'legal-terms') renderPrefLegalTerms();
