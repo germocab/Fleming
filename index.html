@@ -6165,7 +6165,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
   /* v1.68 — buscador de Grupos con el mismo lenguaje visual que Territorios. */
   .grupos-search-wrap { position:relative; display:flex; align-items:center; gap:10px; min-height:46px; margin:0 0 1rem; padding:0 14px; border-radius:14px; border:1px solid var(--border); background:var(--surface); box-shadow:var(--shadow); transition:border-color .18s ease,box-shadow .18s ease; }
   .grupos-search-wrap:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-light); }
-  .grupos-search-wrap .grupos-search-icon { position:static; width:18px; height:18px; flex:0 0 18px; stroke:var(--text3); fill:none; stroke-width:2; }
+  .grupos-search-wrap .grupos-search-icon { position:static; transform:none; align-self:center; width:18px; height:18px; flex:0 0 18px; stroke:var(--text3); fill:none; stroke-width:2; }
   .grupos-search-wrap .grupos-search-input { flex:1; min-width:0; width:100%; padding:0!important; border:0!important; border-radius:0!important; background:transparent!important; box-shadow:none!important; color:var(--text); font:inherit; font-size:.88rem; outline:0; }
   .grupos-search-wrap .grupos-search-clear { position:static; transform:none; flex:0 0 28px; width:28px; height:28px; border:0; border-radius:50%; background:var(--surface3); color:var(--text2); }
   .grupos-search-wrap .grupos-search-clear.visible { display:flex; }
@@ -6241,6 +6241,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 #home-content { padding: 0.25rem 0 1rem; }
 /* v1.74.0 — Inicio en escritorio: panel lateral que reduce el espacio del contenido principal. */
 .desktop-home-toggle { display:none; }
+@media (min-width:640px) { .desktop-home-toggle, .home-desktop-sidebar { display:none !important; } }
 .desktop-home-toggle svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
 .home-desktop-sidebar { display:none; }
 .home-desktop-sidebar-head { display:flex; align-items:center; justify-content:space-between; padding:12px 16px 10px; font-size:1.08rem; color:var(--text); min-height:52px; }
@@ -6263,6 +6264,11 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 .pt-tile.pt-size-large { grid-column:1 / -1; min-height:158px; padding:1.1rem 1.15rem; }
 .pt-tile.pt-size-large .pt-title { font-size:1rem; }
 .pt-tile.pt-size-large .pt-sub { font-size:.84rem; }
+.home-board-preview { margin:0 0 16px; padding:12px; border:1px solid var(--border); border-radius:16px; background:var(--surface2); }
+.home-board-preview-title { margin:0 0 9px; color:var(--text2); font-size:.76rem; font-weight:750; letter-spacing:.02em; text-transform:uppercase; }
+.home-board-preview .pt-card { box-shadow:none; border:1px solid var(--border); }
+.home-board-preview .pt-tile { cursor:default; }
+.home-board-preview .pt-tile { cursor:default; }
 .home-board-setting-row { display:flex; align-items:center; gap:12px; padding:12px; margin-bottom:9px; background:var(--surface); border:1px solid var(--border); border-radius:15px; }
 .home-board-setting-row .home-board-setting-copy { flex:1; min-width:0; font-size:.86rem; font-weight:650; color:var(--text); }
 .home-board-setting-row small { display:block; margin-top:3px; color:var(--text3); font-size:.72rem; font-weight:500; }
@@ -6483,12 +6489,11 @@ const HOME_SECTIONS = {
   carritos: { title: 'Mis Turnos', i18n: 'home.myShifts', icon: 'cart', col: 'teal' },
   resp:     { title: 'Mis Responsabilidades', i18n: 'home.myResponsibilities', icon: 'users', col: 'purple' },
   tips:     { title: 'Tips', i18n: 'home.tips', icon: 'bulb', col: 'yellow' },
-  texto:    { title: 'Texto Diario', i18n: 'home.dailyText', icon: 'book', col: 'orange' },
   para:     { title: 'Para tí', i18n: 'home.forYou', icon: 'star', col: 'blue' },
   eventos:  { title: 'Próximos Eventos', i18n: 'home.upcomingEvents', icon: 'cal', col: 'purple' },
 };
 function _homeSectionTitle(k) { const sec = HOME_SECTIONS[k]; return sec ? _homeLang(sec.i18n || '') || sec.title : ''; }
-const HOME_DEFAULT_LAYOUT = ['texto', 'para', 'hoy', 'eventos', 'resp']; // v1.61.0-beta: Texto Diario, Para tí, Predicación de hoy, Eventos y Mis responsabilidades
+const HOME_DEFAULT_LAYOUT = ['para', 'hoy', 'eventos', 'resp']; // v1.74.10: Para ti, Predicación de hoy, Eventos y Mis responsabilidades
 
 // v1.52.0: UI Classic vuelve a ser la vista por defecto. Inicio (Para ti, Mis asignaciones, Texto Diario, NavBar inferior)
 // se activa desde Configuración → Preferencias → "Activar Inicio". Clave nueva (fleming_inicio_enabled) para que todos
@@ -6510,7 +6515,7 @@ function getUiMode() {
 const UI_MODE_HELP = {
   classic: 'La vista por defecto: barra superior con las secciones de siempre.',
   sencillo: 'Menú de pantalla completa con botones grandes, ideal si te cuesta usar la interfaz por defecto.',
-  inicio: 'Inicio con Para ti, Texto Diario y Predicación del día. En móviles aparece como pantalla principal y en escritorio como panel lateral.'
+  inicio: 'Inicio con Para ti y Predicación del día. Está disponible únicamente en teléfonos móviles.'
 };
 function updateUiModeUI() {
   const cur = getUiMode();
@@ -6551,7 +6556,7 @@ function setUiMode(mode, opts) {
 // v1.71.5: también lo ve, una sola vez, quien ya usaba Inicio y entra a la plataforma; se puede repetir desde Ayuda → Tutoriales y Tips.
 const INICIO_TOUR_KEY = 'fleming_inicio_tour_done';
 const INICIO_TOUR_STEPS = [
-  { title: '¡Bienvenido a la interfaz Nueva!', text: 'Te mostramos en 3 pasos cómo funciona: las tarjetas, cómo personalizarla y cómo volver a la versión Clásica.' },
+  { title: 'Bienvenido a la pantalla de Inicio', text: 'En Inicio verás todo lo que necesitas saber de forma rápida, como tus asignaciones, eventos, turnos y la predicación del día. Puedes personalizar Inicio todo lo que quieras.' },
   { sel: ['#home-content .pt-tile', '#home-content .ms-card', '#home-content .rs-card', '#home-content .home-card', '#home-content .tp-card'],
     title: 'Usa las tarjetas', text: 'Toca una tarjeta para abrir su detalle (asignaciones, turnos, tips…). En “Para tí”, mantén presionada una tarjeta para quitarla de la lista.' },
   { sel: ['.home-custom-btn'], title: 'Personaliza tu Inicio', text: 'Con este botón eliges qué apartados ver, en qué orden y cuántas tarjetas mostrar en “Para tí”.' },
@@ -6765,7 +6770,7 @@ function applyInicioUI(fromInit) {
 }
 let _homeWasActive = false;
 
-function _homeDesktopEnabled() { return window.innerWidth >= 640 && isInicioPrefOn() && !(typeof isModoSencilloActive === 'function' && isModoSencilloActive()); }
+function _homeDesktopEnabled() { return false; } // v1.74.10: Inicio solo está disponible en teléfonos móviles.
 function _homeDesktopMoveContent() {
   const content = document.getElementById('home-content'), host = document.getElementById('home-desktop-host'), page = document.getElementById('page-inicio');
   if (!content || !host || !page) return;
@@ -7035,7 +7040,7 @@ function _homeParaRender() {
   const el = document.getElementById('home-para');
   if (!el) return;
   const hid = _homeHiddenLoad();
-  const shown = _homeParaAll.filter(c => !hid[c.pkey] && (!c.dailyText || new Date().getHours() < 12)).slice(0, getHomeParaCount());
+  const shown = _homeParaAll.filter(c => !hid[c.pkey]).slice(0, getHomeParaCount());
   _ptModes(shown);
   const sizes = _homeParaSizesLoad();
   shown.forEach(c => { const sz = sizes[c.pkey]; if (sz) c.mode = sz === 'small' ? 'sq' : sz === 'large' ? 'wide' : 'rect'; c.userSize = sz || 'auto'; });
@@ -7135,46 +7140,19 @@ async function renderHome() {
   } catch (e) { console.warn('Inicio (evento próximo):', e); }
   if (seq !== _homeSeq) return;
   const recentTips = (tips || []).filter(tp => tp.created_at && (Date.now() - new Date(tp.created_at).getTime()) < 14 * 86400000).slice(0, 2);
-  // v1.73.0: el Texto Diario vive en "Para ti" durante la mañana y desaparece
-  // al llegar las 12:00 (hora local del dispositivo). Se carga usando la misma
-  // fuente/caché que la tarjeta histórica de Texto Diario.
-  const _homeNow = new Date();
-  if (_homeNow.getHours() < 12) {
-    try {
-      const _dailyYmd = _homeYmd(_homeNow);
-      const _daily = await _homeLoadTextoDiario(_dailyYmd);
-      if (seq !== _homeSeq) return;
-      const _dailyUrl = 'https://www.jw.org/finder?srcid=jwlshare&alias=daily-text&date=' + _dailyYmd.replace(/-/g, '') + '&wtlocale=S';
-      para.push({
-        ts: _nowMs - 1, icon: 'book', col: 'blue', full: true, dailyText: true,
-        title: _homeLang('home.dailyText'), sub: _daily.scripture,
-        meta: _homeLongDate(_dailyYmd) + ' · ' + _homeLang('home.openInJwLibrary'),
-        onClick: () => window.open(_dailyUrl, '_blank', 'noopener')
-      });
-    } catch (e) { console.warn('Texto Diario en Para ti:', e); }
-  }
+  // v1.74.10: Texto Diario ya no forma parte de Inicio ni del tablero Para ti.
   recentTips.forEach((tp, i) => para.push({ ts: _nowMs + HORIZON + 2 * 86400000 + i, icon: 'bulb', col: 'yellow', img: tp.image_url || '', title: _homeLang('home.newTip'), sub: tp.title || '', meta: _homeLang('home.tapToRead'), onClick: () => openTipDetailModal(tp.id) }));
 
   // Orden cronológico (lo más próximo primero) y clave para poder quitar tarjetas (mantener presionado).
   para.forEach(c => { if (!isFinite(c.ts)) c.ts = Infinity; c.pkey = _homeParaKey(c); });
   para.sort((a, b) => (a.ts === b.ts ? 0 : a.ts < b.ts ? -1 : 1));
   _homeParaAll = para;
-  // Retira el mosaico automáticamente al mediodía aunque Inicio permanezca abierto.
-  if (_homeDailyHideTimer) clearTimeout(_homeDailyHideTimer);
-  if (_homeNow.getHours() < 12) {
-    const _noon = new Date(_homeNow); _noon.setHours(12, 0, 0, 0);
-    _homeDailyHideTimer = setTimeout(() => {
-      if (document.getElementById('home-para')) _homeParaRender();
-    }, Math.max(0, _noon.getTime() - Date.now() + 50));
-  }
-
   // ── Apartados elegidos, en el orden elegido ──
   let html = '';
   layout.forEach(k => {
     if (k === 'para') { if (_homeParaAll.length) html += '<div class="home-section" id="home-para"></div>'; return; } // v1.61.0-beta
     if (k === 'hoy') { html += '<div class="home-section" id="home-hoy"></div>'; return; }
     if (k === 'eventos') { html += '<div class="home-section" id="home-eventos"></div>'; return; } // v1.60.8-beta
-    if (k === 'texto') { return; } // v1.73.0: Texto Diario se integra en Para ti.
     let cards = [];
     if (k === 'carritos' && (sec('carritos')?.items || []).length) {
       html += _homeSection(_homeSectionTitle(k), '<div class="home-card-list">' + sec('carritos').items.map(it => msCardHtml({ punto: it.label, dia: it.dia, hora: it.hora, nombres: it.nombres, onclick: 'homeAct(' + (_homeActions.push(it.onClick || null) - 1) + ')' })).join('') + '</div>');
@@ -7201,7 +7179,6 @@ async function renderHome() {
   if (document.getElementById('home-para')) _homeParaRender();
   if (layout.includes('hoy')) renderHomeHoy();
   if (layout.includes('eventos')) renderHomeEventos(); // v1.60.8-beta
-  if (layout.includes('texto')) renderHomeTexto();
 }
 
 // ── Eventos (v1.60.8-beta) ──────────────────────────────────────────────────
@@ -7442,7 +7419,7 @@ function _homeParaSizesKey() { return 'fleming_home_parasizes:' + ((typeof curre
 function _homeParaSizesLoad() { try { return JSON.parse(localStorage.getItem(_homeParaSizesKey())) || {}; } catch (e) { return {}; } }
 function _homeParaSizesSave(o) { try { localStorage.setItem(_homeParaSizesKey(), JSON.stringify(o)); } catch (e) {} }
 function homeParaSetSize(key, size) { const o = _homeParaSizesLoad(); if (size === 'auto') delete o[key]; else o[key] = size; _homeParaSizesSave(o); _homeParaRender(); renderHomeBoardCustomize(); }
-function homeParaSetSizeByIndex(index, size) { const c = _homeParaAll.filter(x => !_homeHiddenLoad()[x.pkey] && (!x.dailyText || new Date().getHours() < 12))[index]; if (c) homeParaSetSize(c.pkey, size); }
+function homeParaSetSizeByIndex(index, size) { const c = _homeParaAll.filter(x => !_homeHiddenLoad()[x.pkey])[index]; if (c) homeParaSetSize(c.pkey, size); }
 function homeParaSetCount(delta) { setHomeParaCount(getHomeParaCount() + delta); _homeParaRender(); renderHomeBoardCustomize(); }
 function openHomeBoardMenu(ev) {
   if (ev) ev.stopPropagation();
@@ -7470,9 +7447,14 @@ async function openHomeBoardCustomize() {
 function closeHomeBoardCustomize() { document.getElementById('home-board-custom-overlay')?.classList.remove('open'); document.body.style.overflow = ''; if (currentMainTab === 'inicio' || document.documentElement.classList.contains('home-desktop-open')) renderHome(); }
 function renderHomeBoardCustomize() {
   const body = document.getElementById('home-board-custom-body'); if (!body) return;
-  const hidden = _homeHiddenLoad(), shown = _homeParaAll.filter(c => !hidden[c.pkey] && (!c.dailyText || new Date().getHours() < 12));
+  const hidden = _homeHiddenLoad(), shown = _homeParaAll.filter(c => !hidden[c.pkey]);
   const sizes = _homeParaSizesLoad();
   let h = '<p style="color:var(--text2);font-size:.84rem;line-height:1.45;margin:0 2px 16px">' + _homeLang('home.customizeHint') + '</p>';
+  // Live preview: it is rebuilt whenever a size or card-count control changes.
+  const previewCards = shown.slice(0, getHomeParaCount()).map(c => ({ ...c }));
+  _ptModes(previewCards);
+  previewCards.forEach(c => { const sz = sizes[c.pkey]; if (sz) c.mode = sz === 'small' ? 'sq' : sz === 'large' ? 'wide' : 'rect'; c.userSize = sz || 'auto'; });
+  h += '<div class="home-board-preview"><div class="home-board-preview-title">' + _homeLang('home.preview') + '</div><div class="pt-card"><div class="pt-head"><span>' + _homeLang('home.forYou') + '</span></div>' + (previewCards.length ? '<div class="pt-grid">' + previewCards.map(c => _ptTile({ ...c, onClick: null, pkey: null })).join('') + '</div>' : '<div class="pt-empty">' + _homeLang('home.allCaughtUp') + '</div>') + '</div></div>';
   h += '<div class="home-board-count-control"><strong>' + _homeLang('home.cardCount') + '</strong><div class="count-actions">' + _homeIco('minus', '', 'homeParaSetCount(-1)', getHomeParaCount() <= HOME_PARA_MIN) + '<b>' + getHomeParaCount() + '</b>' + _homeIco('plus', '', 'homeParaSetCount(1)', getHomeParaCount() >= HOME_PARA_MAX) + '</div></div>';
   shown.slice(0, getHomeParaCount()).forEach((c, i) => {
     const label = c.title || (_homeLang('home.card') + ' ' + (i + 1));
@@ -11138,7 +11120,8 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.74.0: Personalizar Para ti con cantidad y tamaño por tarjeta; Inicio disponible en escritorio como panel lateral para la Interfaz Nueva.
 // v1.74.5: Inicio traducido a inglés y neerlandés; vista lateral desde Más Opciones en escritorio; personalización visual del tamaño de tarjetas.
 // v1.74.7: opción para eliminar el tablero Para ti y estrella morada para precursores regulares/especiales.
-const APP_VERSION = '1.74.7'; // v1.74.7
+// v1.74.10: Inicio solo en móviles; se retira Texto Diario de Inicio/Para ti; vista previa del tablero; tutorial y buscador de Grupos ajustados.
+const APP_VERSION = '1.74.10'; // v1.74.10
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -12426,6 +12409,7 @@ const I18N = {
   'home.medium': { es: 'Mediana', en: 'Medium', nl: 'Middel' },
   'home.large': { es: 'Grande', en: 'Large', nl: 'Groot' },
   'home.card': { es: 'Tarjeta', en: 'Card', nl: 'Kaart' },
+  'home.preview': { es: 'Vista previa del tablero', en: 'Board preview', nl: 'Voorbeeld van het bord' },
   'home.customizeHint': { es: 'Elige cuántas tarjetas mostrar y ajusta el tamaño de cada una.', en: 'Choose how many cards to show and adjust each card’s size.', nl: 'Kies hoeveel kaarten je wilt tonen en pas het formaat van elke kaart aan.' },
   'home.greeting': { es: 'Hola', en: 'Hello', nl: 'Hallo' },
   'home.preachingToday': { es: 'Predicación Hoy', en: 'Preaching Today', nl: 'Prediking vandaag' },
