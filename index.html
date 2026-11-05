@@ -11121,7 +11121,8 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.74.7: opción para eliminar el tablero Para ti y estrella morada para precursores regulares/especiales.
 // v1.74.10: Inicio solo en móviles; se retira Texto Diario de Inicio/Para ti; vista previa del tablero; tutorial y buscador de Grupos ajustados.
 // v1.75.1: Vida y Ministerio — nuevo botón "Ver responsabilidades para este día" bajo "Ir a la Guía de Actividades"; lleva a la sub-sección Responsabilidades y muestra el día de la reunión de esa semana.
-const APP_VERSION = '1.75.1'; // v1.75.1 — botón a Responsabilidades en Vida y Ministerio (base: v1.75 — English UI across the platform)
+// v1.75.2: el botón Back del sistema ahora retrocede una pantalla por vez (cierra tutoriales, Voz, menús, modales y páginas); desde Predicación o Reuniones vuelve a Inicio, y en Inicio o con UI Classic cierra la plataforma.
+const APP_VERSION = '1.75.2'; // v1.75.2 — botón Back del sistema (base: v1.75.1 botón a Responsabilidades)
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -14618,7 +14619,7 @@ function applyPwaShortcut() {
     // Limpia el parámetro de la URL para que no se repita al recargar.
     params.delete('shortcut');
     const clean = location.pathname + (params.toString() ? '?' + params.toString() : '');
-    window.history.replaceState({}, '', clean);
+    window.history.replaceState(window.history.state || {}, '', clean);
   } catch {}
 }
 
@@ -26401,150 +26402,224 @@ function closeAdminPage() {
   closeAdminOptionsMenu();
 }
 
-// ── Historia del navegador / Botón retroceder del SO ─────────────────────────
-// Mantiene un estado de historial "vacío" en el tope, de modo que al presionar
-// el botón de retroceder del sistema operativo se dispara popstate en lugar de
-// cerrar la WebApp. Cada capa (panel admin, perfil de usuario, preferencias, etc.)
-// apila su propio estado con pushHistoryLayer(); popstate cierra la capa activa.
+// ── Historia del navegador / Botón Back del sistema (v1.75.2) ────────────────
+// El botón Back del sistema (Android, gesto, navegador) lleva siempre UNA pantalla atrás:
+//   1) cierra lo que esté por encima (tutorial, Voz, menús, modales, páginas completas), de
+//      a una capa por vez y en el orden visual real (z-index);
+//   2) si no queda ninguna capa y se usa la interfaz con Inicio, desde Predicación o Reuniones
+//      vuelve a Inicio;
+//   3) en Inicio, o con UI Classic (sin Inicio), cierra la plataforma.
+// Técnica: la pila se mantiene siempre como [BASE, TRAP]. Al presionar Back se cae en BASE y
+// salta popstate; si Back se consumió, se vuelve a apilar TRAP; si no, se deja salir.
 
-const _HIST_BASE  = { layer: 'base' };
-const _HIST_LAYER = { layer: 'overlay' };
+const _HIST_BASE = { layer: 'base' };
+const _HIST_TRAP = { layer: 'trap' };
+let _backExiting = false;
 
 function _histInit() {
-  // Reemplaza el estado actual con BASE para que siempre haya al menos uno.
-  history.replaceState(_HIST_BASE, '');
+  try {
+    // Recarga sobre la trampa: la pila ya está armada, no se duplica.
+    if (history.state && history.state.layer === 'trap') return;
+    history.replaceState(_HIST_BASE, '');
+    history.pushState(_HIST_TRAP, '');
+  } catch (e) {}
 }
 
-function pushHistoryLayer() {
-  // Apila un estado encima del base; el botón retroceder volverá al base.
-  history.pushState(_HIST_LAYER, '');
+// Legado (v1.75.1 y anteriores): ya no se apila una entrada por capa abierta.
+function pushHistoryLayer() {}
+
+// Menús, tutoriales y Voz: se cierran antes que cualquier pantalla.
+function _backCloseTransient() {
+  const g = id => document.getElementById(id);
+  const call = (name, ...args) => { try { if (typeof window[name] === 'function') { window[name](...args); return true; } } catch (e) {} return false; };
+
+  // Tutorial de Inicio: igual que tocar fuera de la tarjeta (pregunta si se quiere salir).
+  if (typeof _tour !== 'undefined' && _tour) { call('_tourAskExit'); return true; }
+  // Tutoriales de las demás secciones.
+  if (g('tutorial-overlay')?.classList.contains('active')) {
+    const msg = currentLang === 'en'
+      ? 'Do you want to skip the tutorial? You can view it later in Settings.'
+      : '¿Quieres saltar el tutorial? Podrás verlo más tarde en Configuración.';
+    if (confirm(msg)) call('skipTutorial');
+    return true;
+  }
+  // Voz.
+  if (typeof VOZ !== 'undefined' && VOZ && VOZ.open) { call('vozClose'); return true; }
+  if (g('egg-unlock-overlay')?.classList.contains('active')) { call('closeEggUnlock'); return true; }
+
+  // Menús desplegables abiertos.
+  const menus = [
+    ['options-dropdown', 'closeOptionsMenu'],
+    ['options-dropdown-admin', 'closeAdminOptionsMenu'],
+    ['home-board-menu', 'closeHomeBoardMenu'],
+    ['dev-pill-menu', 'closeDevPillMenu'],
+    ['subnav-menu-overlay', 'closeSubnavMenu'],
+    ['detail-assignment-more-menu', 'detailCloseMoreMenu'],
+    ['ctd-more-menu', null],
+    ['aseo-tv-more-menu', null],
+    ['simp-options-dropdown', 'simplifiedCloseOptions']
+  ];
+  for (const [id, fn] of menus) {
+    const el = g(id);
+    if (el && el.classList.contains('open') && !el.classList.contains('closing')) {
+      if (!(fn && call(fn))) el.classList.remove('open');
+      return true;
+    }
+  }
+
+  // Modo Sencillo: submenú → lista de secciones → cerrado.
+  if (typeof _simpMenuOpen !== 'undefined' && _simpMenuOpen) {
+    if (typeof _simpMenuLevel !== 'undefined' && _simpMenuLevel) call('simplifiedBackToMain');
+    else call('simplifiedCloseMenu');
+    return true;
+  }
+  return false;
 }
 
-// Detecta qué capa está visible y la cierra, sin salir de la app.
-function _closeTopLayer() {
-  // Orden de prioridad: la más "interna" primero.
+// Pantallas, páginas y modales abiertos, ordenados de arriba hacia abajo (orden visual real).
+function _backOpenLayers() {
+  const out = [];
+  const seen = new Set();
+  const g = id => document.getElementById(id);
+  const add = (el, close, cls, bonus) => {
+    if (!el || seen.has(el)) return;
+    seen.add(el);
+    out.push({ el, close, cls, bonus: bonus || 0 });
+  };
+  const closer = (name, el, cls) => () => {
+    if (typeof window[name] === 'function') window[name]();
+    else if (cls) el.classList.remove(cls);
+  };
 
-  // Popups / pickers VMC
-  if (document.getElementById('vmc-pp-overlay')?.classList.contains('open')) {
-    document.getElementById('vmc-pp-overlay').classList.remove('open'); return;
+  // [id, clase que indica "abierto", función de cierre, bonus de apilado]
+  const byClass = [
+    ['vmc-pp-overlay', 'open', null, 0],
+    ['vmc-modal-overlay', 'open', 'closeVmcWeekModal', 0],
+    ['fs-modal-overlay', 'open', 'closeFsWeekModal', 0],
+    ['hosp-modal', 'open', 'closeHospModal', 0],
+    ['aseo-mode-overlay', 'open', 'closeAseoModeChooser', 0],
+    ['resp-share-overlay', 'open', 'closeRespShareChooser', 0],
+    ['share-pdf-modal', 'open', 'closeSharePdfModal', 0],
+    ['aseo-tv-overlay', 'open', 'closeAseoTvMode', 0],
+    ['np-action-overlay', 'open', 'closeNpActionSheet', 0],
+    ['cart-invite-menu-overlay', 'open', 'closeCartInviteMenu', 0],
+    ['cart-invite-picker-overlay', 'open', 'closeCartInvitePicker', 0],
+    ['img-lightbox', 'open', 'closeLightbox', 0],
+    ['full-map-lightbox', 'open', 'closeFullMap', 0],
+    ['home-custom-overlay', 'open', 'closeHomeCustomize', 0],
+    ['home-board-custom-overlay', 'open', 'closeHomeBoardCustomize', 0],
+    ['detail-overlay', 'open', 'closeDetail', 0],
+    ['detail-ct-screen', 'ct-active', 'cartGoBack', 0],
+    ['cartTurnDetailScreen', 'ct-turn-active', 'cartCloseTurnDetail', 0.5],
+    ['page-preferencias', 'open', 'closePreferencias', 0],
+    ['page-avatar-edit', 'open', 'closeAvatarColorSheet', 0.5],
+    ['page-member-perfil', 'open', 'closeMemberPerfil', 0],
+    ['page-user-profile', 'open', 'closeUserProfilePage', 0],
+    ['page-grupo', 'open', 'closeGrupoDetailPage', 0],
+    ['page-otros-grupos', 'open', 'closeOtrosGruposScreen', 0],
+    ['page-profile', 'open', 'closeProfilePage', 0],
+    ['page-admin', 'active', 'closeAdminPage', 0]
+  ];
+  byClass.forEach(([id, cls, fn, bonus]) => {
+    const el = g(id);
+    if (!el || !el.classList.contains(cls)) return;
+    // En modo invitado (enlace compartido) el detalle no se puede cerrar: Back sale de la plataforma.
+    if (id === 'detail-overlay' && window._guestShareMode) return;
+    add(el, closer(fn, el, cls), cls, bonus);
+  });
+
+  // Modales genéricos (formularios de Administración, etc.).
+  document.querySelectorAll('.modal-overlay.open').forEach(el => add(el, () => el.classList.remove('open'), 'open', 0));
+
+  // Formularios de No Pasar.
+  const npForms = document.querySelectorAll('.np-sugerir-form.open, .np-correccion-form.open, .np-correccion-sub-form.open, .suggest-np-form.open');
+  if (npForms.length) {
+    add(npForms[0], () => document.querySelectorAll('.np-sugerir-form, .np-correccion-form, .np-correccion-sub-form, .suggest-np-form').forEach(f => f.classList.remove('open')), 'open', 0.5);
   }
-  // Modal VMC semana
-  if (document.getElementById('vmc-modal-overlay')?.classList.contains('open')) {
-    if (typeof closeVmcWeekModal === 'function') closeVmcWeekModal(); return;
+
+  // Subpantallas de Configuración: vuelven a su pantalla de origen (Legal o Configuración).
+  if (typeof PREF_SCREENS !== 'undefined') {
+    PREF_SCREENS.forEach(name => {
+      const el = g('page-pref-' + name);
+      if (!el || !el.classList.contains('open')) return;
+      const toLegal = name === 'legal-terms' || name === 'legal-privacy';
+      add(el, closer(toLegal ? 'closePrefScreenToLegal' : 'closePrefScreenToConfig', el, 'open'), 'open', 0.5);
+    });
   }
-  // Modal selección de modo (Full Screen / PopUp) del Aseo
-  if (document.getElementById('aseo-mode-overlay')?.classList.contains('open')) {
-    closeAseoModeChooser(); return;
+
+  // Páginas que se muestran con style.display.
+  const byDisplay = [
+    ['page-notif-detail', 'closeNotifDetail', 0.5],
+    ['page-notifications', 'closeNotificationsPage', 0],
+    ['page-tip-detail', 'closeTipDetailModal', 0]
+  ];
+  byDisplay.forEach(([id, fn, bonus]) => {
+    const el = g(id);
+    if (!el) return;
+    if (el.style.display && el.style.display !== 'none') {
+      add(el, () => { if (typeof window[fn] === 'function') window[fn](); else el.style.display = 'none'; }, null, bonus);
+    }
+  });
+
+  const z = el => { const v = parseInt(getComputedStyle(el).zIndex, 10); return isNaN(v) ? 0 : v; };
+  out.sort((a, b) => {
+    const za = z(a.el) + a.bonus, zb = z(b.el) + b.bonus;
+    if (za !== zb) return zb - za;
+    // Mismo z-index: queda encima el que está más abajo en el documento.
+    return (a.el.compareDocumentPosition(b.el) & Node.DOCUMENT_POSITION_FOLLOWING) ? 1 : -1;
+  });
+  return out;
+}
+
+function _backCloseTopLayer() {
+  const layers = _backOpenLayers();
+  if (!layers.length) return false;
+  const top = layers[0];
+  try { top.close(); } catch (e) { console.warn('Back: error al cerrar capa', e); }
+  // Si la función de cierre no logró cerrarla, se fuerza para que Back nunca quede "muerto".
+  try { if (top.cls && top.el.classList.contains(top.cls)) top.el.classList.remove(top.cls); } catch (e) {}
+  return true;
+}
+
+// ¿Back se consumió dentro de la plataforma? (true) o hay que salir (false)
+function _backHandle() {
+  if (_backCloseTransient()) return true;
+  if (_backCloseTopLayer()) return true;
+  // Interfaz con Inicio: desde una sección principal se vuelve a Inicio.
+  if (typeof isInicioActive === 'function' && isInicioActive() &&
+      typeof currentMainTab !== 'undefined' && currentMainTab && currentMainTab !== 'inicio') {
+    const btn = document.querySelector('.main-seg-btn[data-tab="inicio"]');
+    if (btn) { switchMainTab('inicio', btn); return true; }
   }
-  // Menú "más opciones" dentro del Full Screen de Aseo
-  if (document.getElementById('aseo-tv-more-menu')?.classList.contains('open')) {
-    document.getElementById('aseo-tv-more-menu').classList.remove('open'); return;
-  }
-  // Overlay aseo TV
-  if (document.getElementById('aseo-tv-overlay')?.classList.contains('open')) {
-    document.getElementById('aseo-tv-overlay').classList.remove('open'); return;
-  }
-  // Modal responsabilidades
-  if (document.querySelector('.modal-overlay.open')) {
-    document.querySelector('.modal-overlay.open').classList.remove('open'); return;
-  }
-  // Lightboxes
-  if (document.querySelector('.img-lightbox.open')) {
-    document.querySelector('.img-lightbox.open').classList.remove('open'); return;
-  }
-  if (document.querySelector('.full-map-lightbox.open')) {
-    closeFullMap(); return;
-  }
-  // Detail overlay (asignaciones)
-  if (document.getElementById('detail-overlay')?.classList.contains('open')) {
-    document.getElementById('detail-overlay').classList.remove('open'); return;
-  }
-  // NP forms
-  if (document.querySelector('.np-sugerir-form.open, .np-correccion-form.open, .np-correccion-sub-form.open, .suggest-np-form.open, .np-action-overlay.open')) {
-    document.querySelectorAll('.np-sugerir-form, .np-correccion-form, .np-correccion-sub-form, .suggest-np-form, .np-action-overlay').forEach(el => el.classList.remove('open')); return;
-  }
-  // Grupo page
-  if (document.getElementById('page-grupo')?.classList.contains('open')) {
-    if (typeof closeGrupoPage === 'function') closeGrupoPage();
-    else document.getElementById('page-grupo').classList.remove('open');
-    return;
-  }
-  // Avatar color overlay
-  if (document.getElementById('page-avatar-edit')?.classList.contains('open')) {
-    if (typeof closeAvatarColorSheet === 'function') closeAvatarColorSheet();
-    else document.getElementById('page-avatar-edit').classList.remove('open');
-    return;
-  }
-  // User profile page
-  if (document.getElementById('page-user-profile')?.classList.contains('open')) {
-    if (typeof closeUserProfilePage === 'function') closeUserProfilePage(); return;
-  }
-  // Perfil de miembro de Grupo de Servicio (solo lectura)
-  if (document.getElementById('page-member-perfil')?.classList.contains('open')) {
-    if (typeof closeMemberPerfil === 'function') closeMemberPerfil(); return;
-  }
-  // Detalle de Tip en pantalla completa (v1.22.6-beta)
-  if (document.getElementById('page-tip-detail')?.style.display === 'flex') {
-    closeTipDetailModal(); return;
-  }
-  // Preferencias
-  if (document.getElementById('page-preferencias')?.classList.contains('open')) {
-    if (typeof closePreferencias === 'function') closePreferencias(); return;
-  }
-  // My profile page
-  if (document.getElementById('page-profile')?.classList.contains('open')) {
-    if (typeof closeProfilePage === 'function') closeProfilePage(); return;
-  }
-  // Admin page (la más externa)
-  if (document.getElementById('page-admin')?.classList.contains('active')) {
-    closeAdminPage(); return;
-  }
-  // Si no hay nada abierto, simplemente re-empujamos el estado base
-  // para que el siguiente retroceso tampoco cierre la app.
-  history.pushState(_HIST_LAYER, '');
+  // UI Classic, Inicio o sin nada más que cerrar: se sale de la plataforma.
+  return false;
+}
+
+function _backExit() {
+  _backExiting = true;
+  try { history.back(); } catch (e) {}
+  // Si el navegador no tiene a dónde volver (pestaña sin historial), la plataforma sigue
+  // abierta: se vuelve a armar la trampa para que Back siga funcionando.
+  setTimeout(() => {
+    if (!_backExiting) return;
+    _backExiting = false;
+    try { history.pushState(_HIST_TRAP, ''); } catch (e) {}
+  }, 450);
 }
 
 window.addEventListener('popstate', (e) => {
-  // Siempre reponemos el estado base en el tope para que el siguiente
-  // retroceso también sea interceptado.
-  history.pushState(_HIST_LAYER, '');
-  _closeTopLayer();
+  if (_backExiting) return;
+  // Llegar a la trampa (p. ej. con "adelante") no es un Back: no se hace nada.
+  if (e.state && e.state.layer === 'trap') return;
+  if (_backHandle()) {
+    try { history.pushState(_HIST_TRAP, ''); } catch (err) {}
+  } else {
+    _backExit();
+  }
 });
 
-// ── Instrumentar funciones de apertura para apilar historial ─────────────────
-// Envuelve las funciones de apertura de capas para llamar pushHistoryLayer()
-// automáticamente cada vez que se abre una nueva capa.
-(function _instrumentOpeners() {
-  const _orig = {};
-
-  function wrap(name, fn) {
-    if (typeof window[name] !== 'function') return;
-    _orig[name] = window[name];
-    window[name] = function(...args) {
-      const result = _orig[name].apply(this, args);
-      pushHistoryLayer();
-      return result;
-    };
-  }
-
-  // Se ejecuta después del parseado completo del DOM.
-  document.addEventListener('DOMContentLoaded', () => {
-    [
-      'showPage',       // admin page overlay
-      'openProfilePage',
-      'openPreferencias',
-      'openUserProfilePage',
-    ].forEach(name => wrap(name, window[name]));
-
-    // VMC modales (pueden definirse después de DOMContentLoaded)
-    setTimeout(() => {
-      ['openVmcWeekModal','vmcPpOpen'].forEach(name => wrap(name, window[name]));
-    }, 500);
-
-    // Inicializa la historia base.
-    _histInit();
-  });
-})();
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _histInit);
+else _histInit();
 
 function syncAdminDropdown() {
   const initials = currentUser ? currentUser.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase() : '?';
