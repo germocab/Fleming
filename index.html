@@ -219,7 +219,7 @@
     transform: translateY(-50%);
     width: fit-content;
   }
-  #dev-version-pill:hover { background: rgba(0,122,255,0.2); box-shadow: 0 2px 8px rgba(0,122,255,0.18); }
+  #dev-version-pill:hover { background: color-mix(in srgb, var(--accent) 20%, transparent); box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 18%, transparent); }
   #dev-version-pill svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; flex-shrink: 0; }
   #dev-version-pill .dev-pill-dot {
     width: 6px; height: 6px; border-radius: 50%;
@@ -557,7 +557,7 @@
     height: calc(100% - 8px);
     background: var(--accent);
     border-radius: 22px;
-    box-shadow: 0 2px 12px rgba(0,122,255,0.4);
+    box-shadow: 0 2px 12px color-mix(in srgb, var(--accent) 40%, transparent);
     transition: transform 0.32s cubic-bezier(0.65, 0, 0.35, 1), width 0.32s cubic-bezier(0.65, 0, 0.35, 1);
     will-change: transform, width;
     z-index: 0;
@@ -584,7 +584,7 @@
   }
   .main-seg-btn.active {
     background: var(--accent); color: #fff;
-    box-shadow: 0 2px 12px rgba(0,122,255,0.4);
+    box-shadow: 0 2px 12px color-mix(in srgb, var(--accent) 40%, transparent);
   }
   .main-seg-btn-icon {
     padding: 9px 14px;
@@ -2718,7 +2718,7 @@
     user-select: none;
   }
   .notif-filter-chip svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
-  .notif-filter-chip.active { color: #fff; background: var(--accent); box-shadow: 0 2px 8px rgba(0,122,255,0.3); }
+  .notif-filter-chip.active { color: #fff; background: var(--accent); box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 30%, transparent); }
 
   .notif-empty-filtered { text-align: center; padding: 2rem 1rem; color: var(--text3); font-size: 0.85rem; }
 
@@ -3755,7 +3755,7 @@
     border: none; border-radius: 20px;
     font-family: var(--font); font-size: 0.84rem; font-weight: 600;
     cursor: pointer; transition: opacity 0.18s, transform 0.1s;
-    box-shadow: 0 2px 10px rgba(0,122,255,0.35);
+    box-shadow: 0 2px 10px color-mix(in srgb, var(--accent) 35%, transparent);
     flex-shrink: 0;
   }
   .btn-map-full:hover { opacity: 0.88; }
@@ -4199,7 +4199,7 @@
     background: var(--accent); color: #fff;
     display: flex; align-items: center; justify-content: center;
     font-size: 2rem; font-weight: 800;
-    box-shadow: 0 8px 28px rgba(0,122,255,0.4);
+    box-shadow: 0 8px 28px color-mix(in srgb, var(--accent) 40%, transparent);
     margin-bottom: 0.75rem;
   }
   .grupo-detail-title { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; }
@@ -4243,6 +4243,13 @@
   .role-super { background: var(--accent-light); color: var(--accent); }
   .role-aux   { background: var(--green-light);  color: var(--green); }
   .role-prec  { background: rgba(168,85,247,0.12); color: #a855f7; }
+  .grupo-member-tags { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .has-prec-extra .grupo-member-name-full { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .has-prec-extra .grupo-member-info { overflow: hidden; }
+  .prec-star { display: none; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: rgba(168,85,247,0.14); color: #a855f7; flex-shrink: 0; }
+  .prec-star svg { width: 13px; height: 13px; fill: currentColor; stroke: currentColor; stroke-width: 1.5; stroke-linejoin: round; }
+  .has-prec-extra.prec-compact .prec-full { display: none; }
+  .has-prec-extra.prec-compact .prec-star { display: inline-flex; }
 
   .grupo-map-wrap {
     margin: 0.75rem 1rem; border-radius: var(--radius-sm);
@@ -4493,7 +4500,7 @@
     color: var(--text1); font-family: var(--font); font-size: 0.875rem;
     outline: none; transition: border-color 0.2s, box-shadow 0.2s;
   }
-  .admin-grupo-quickadd:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,122,255,0.12); }
+  .admin-grupo-quickadd:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent); }
   .admin-grupo-quickadd::placeholder { color: var(--text3); }
   .admin-miembro-row {
     display: flex; align-items: center; gap: 8px;
@@ -5752,7 +5759,7 @@
 .tutorial-btn-skip:hover { color: var(--text2); }
 .tutorial-btn-prev { background: var(--surface3); color: var(--text2); }
 .tutorial-btn-prev:hover { background: var(--surface2); }
-.tutorial-btn-next { background: var(--accent); color: #fff; box-shadow: 0 2px 10px rgba(0,122,255,0.35); }
+.tutorial-btn-next { background: var(--accent); color: #fff; box-shadow: 0 2px 10px color-mix(in srgb, var(--accent) 35%, transparent); }
 .tutorial-btn-next:hover { filter: brightness(1.08); }
 @media (max-width: 639px) {
   #tutorial-card { width: calc(100vw - 2rem); }
@@ -6016,7 +6023,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
   .home-bn-icon:active{transform:scale(.92)}
   .home-bn-icon svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   /* v1.51.0-alpha: activo = azul, igual que Predicación/Reuniones */
-  .home-bn-icon.active{background:var(--accent);color:#fff;border-color:transparent;box-shadow:0 2px 12px rgba(0,122,255,0.35)}
+  .home-bn-icon.active{background:var(--accent);color:#fff;border-color:transparent;box-shadow:0 2px 12px color-mix(in srgb, var(--accent) 35%, transparent)}
   html.voz-open .home-bn-icon{opacity:0;pointer-events:none}
   @keyframes vozPop{from{opacity:0;transform:scale(.5)}}
   html.voz-open .home-bn-pill{opacity:0;transform:scale(.9);pointer-events:none}
@@ -6124,7 +6131,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
   font-size: 0.84rem; font-weight: 600; padding: 9px 16px; border-radius: 999px; cursor: pointer;
   transition: background 0.22s, color 0.22s; white-space: nowrap;
 }
-.home-bn-btn.active { background: var(--accent); color: #fff; box-shadow: 0 2px 12px rgba(0,122,255,0.35); }
+.home-bn-btn.active { background: var(--accent); color: #fff; box-shadow: 0 2px 12px color-mix(in srgb, var(--accent) 35%, transparent); }
 #home-content { padding: 0.25rem 0 1rem; }
 .home-custom-btn { display: flex; align-items: center; justify-content: center; gap: 6px; width: fit-content; margin: 0.7rem auto 0.4rem; padding: 0.42rem 0.85rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); font-family: var(--font); font-size: 0.76rem; font-weight: 600; cursor: pointer; box-shadow: none; transition: transform 0.15s; -webkit-tap-highlight-color: transparent; }
 .home-custom-btn:active { transform: scale(0.98); }
@@ -6154,9 +6161,10 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 .home-card-meta { font-size: 0.68rem; color: var(--text3); margin-top: 3px; font-weight: 500; }
 /* v1.54.5-beta: la tarjeta de recordatorio de reporte ya no lleva borde rojo; se ve como las demás. */
 .home-empty { text-align: center; color: var(--text3); font-size: 0.85rem; line-height: 1.45; padding: 1.1rem 1rem; border: 1px dashed var(--border); border-radius: 16px; }
-.home-custom-overlay { position: fixed; inset: 0; z-index: 250; background: transparent; backdrop-filter: blur(24px) saturate(1.35); -webkit-backdrop-filter: blur(24px) saturate(1.35); flex-direction: column; overflow: hidden; }
-.home-custom-top { padding-top: calc(0.85rem + env(safe-area-inset-top, 0px)); border-bottom: 1px solid var(--border); position: relative; background: color-mix(in srgb, var(--bg) 52%, transparent); backdrop-filter: blur(22px) saturate(1.35); -webkit-backdrop-filter: blur(22px) saturate(1.35); }
-.home-custom-body { flex: 1; overflow-y: auto; padding: 1rem 1rem 3rem; }
+.home-custom-overlay { position: fixed; inset: 0; z-index: 250; background: var(--bg); flex-direction: column; overflow: hidden; }
+.home-custom-top { position: absolute; top: 0; left: 0; right: 0; z-index: 5; padding-top: calc(0.85rem + env(safe-area-inset-top, 0px)); background: transparent; border: none; pointer-events: none; }
+.home-custom-top .pill-back-btn { pointer-events: auto; }
+.home-custom-body { flex: 1; height: 100%; overflow-y: auto; padding: calc(4.6rem + env(safe-area-inset-top, 0px)) 1rem 3rem; }
 .home-custom-h { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); margin: 1.1rem 0.2rem 0.5rem; }
 .home-custom-row { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 0.65rem 0.8rem; margin-bottom: 8px; }
 .home-custom-row.locked { opacity: 0.8; }
@@ -6210,6 +6218,9 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 .pt-sq { aspect-ratio: 1 / 1; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 8px; text-align: center; padding: 0.85rem 0.65rem 0.9rem; }
 .pt-sq .pt-txt { width: 100%; }
 .pt-sq .pt-big { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
+.pt-sqi { align-items: stretch; text-align: left; justify-content: space-between; gap: 10px; padding: 0.8rem 0.8rem 0.85rem; }
+.pt-sqtop { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
+.pt-sqi .pt-sub { -webkit-line-clamp: 2; }
 .pt-rect, .pt-wide { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; padding: 0.8rem 0.95rem; }
 .pt-rect .pt-txt, .pt-wide .pt-txt { flex: 1; }
 .pt-rect .pt-title, .pt-wide .pt-title { font-size: 0.9rem; }
@@ -6294,9 +6305,6 @@ function _homeIcoBox(icon, col, extra, img) {
 const HOME_SECTIONS = {
   hoy:      { title: 'Predicación Hoy', icon: 'sun', col: 'blue' },
   carritos: { title: 'Mis Turnos', icon: 'cart', col: 'teal' },
-  vmc:      { title: 'Mis asignaciones en reunión Vida y Ministerio', icon: 'book', col: 'blue' },
-  fs:       { title: 'Mis asignaciones en reunión pública', icon: 'cal', col: 'green' },
-  aseo:     { title: 'Aseo del Salón para mi grupo', icon: 'house', col: 'orange' },
   resp:     { title: 'Mis Responsabilidades', icon: 'users', col: 'purple' },
   tips:     { title: 'Tips', icon: 'bulb', col: 'yellow' },
   texto:    { title: 'Texto Diario', icon: 'book', col: 'orange' },
@@ -6529,12 +6537,25 @@ function _ptBigNum(n, col) {
 function _ptBigIcon(svgInner, color) {
   return '<div class="pt-bigsq" style="background:' + color + '"><svg viewBox="0 0 24 24">' + (svgInner || '') + '</svg></div>';
 }
+// v1.68.50: cada mosaico es cuadrado (1 columna) o rectangular (2 columnas). Los de poca información (o con número/ícono grande)
+// son cuadrados; los largos, rectangulares. Los cuadrados se emparejan (adelantando el siguiente cuadrado si hace falta) para no dejar
+// huecos; un cuadrado que quedaría solo en su fila pasa a rectangular y ocupa todo el ancho.
+function _ptCompact(t) {
+  if (t.big) return true;
+  const tl = (t.title || '').length, n = tl + (t.sub || '').length + (t.meta || '').length;
+  return tl <= 30 && n <= 62;
+}
 function _ptModes(list) {
-  for (let i = 0; i < list.length; i++) {
-    const t = list[i], nx = list[i + 1];
-    if (t.big && nx && nx.big) { t.mode = 'sq'; nx.mode = 'sq'; i++; }
-    else t.mode = t.big ? 'wide' : 'rect';
+  list.forEach(t => { t.mode = _ptCompact(t) ? 'sq' : 'rect'; });
+  const rest = list.slice(), out = [];
+  while (rest.length) {
+    const t = rest.shift();
+    if (t.mode === 'rect') { out.push(t); continue; }
+    const j = rest.findIndex(x => x.mode === 'sq');
+    if (j === -1) { t.mode = t.big ? 'wide' : 'rect'; out.push(t); continue; }
+    out.push(t, rest.splice(j, 1)[0]);
   }
+  list.splice(0, list.length, ...out);
 }
 function _ptTile(c) {
   const idx = _homeActions.push(c.onClick || null) - 1;
@@ -6543,7 +6564,11 @@ function _ptTile(c) {
   const txt = '<div class="pt-txt"><div class="pt-title">' + escapeHtml(c.title || '') + '</div>' +
     (c.sub ? '<div class="pt-sub">' + escapeHtml(c.sub) + '</div>' : '') +
     (c.meta ? '<div class="pt-meta">' + escapeHtml(c.meta) + '</div>' : '') + '</div>';
-  if (c.mode === 'sq' || c.mode === 'wide') return '<div class="pt-tile pt-' + c.mode + '"' + pk + oc + '>' + txt + '<div class="pt-big">' + c.big + '</div></div>';
+  if ((c.mode === 'sq' || c.mode === 'wide') && c.big) return '<div class="pt-tile pt-' + c.mode + '"' + pk + oc + '>' + txt + '<div class="pt-big">' + c.big + '</div></div>';
+  if (c.mode === 'sq') {
+    const r = c.countDate ? _homeCountHtml(c.countDate, 'home-count') : (c.rel ? '<div class="pt-rel">' + escapeHtml(c.rel) + '</div>' : '');
+    return '<div class="pt-tile pt-sq pt-sqi"' + pk + oc + '><div class="pt-sqtop">' + _homeIcoBox(c.icon, c.col, 'pt-ico', c.img) + r + '</div>' + txt + '</div>';
+  }
   const right = c.countDate ? _homeCountHtml(c.countDate, 'home-count') : (c.rel ? '<div class="pt-rel">' + escapeHtml(c.rel) + '</div>' : '');
   return '<div class="pt-tile pt-rect"' + pk + oc + '>' + _homeIcoBox(c.icon, c.col, 'pt-ico', c.img) + txt + right + '</div>';
 }
@@ -6664,11 +6689,6 @@ async function renderHome() {
     if (k === 'texto') { html += '<div class="home-section" id="home-texto"></div>'; return; }
     let cards = [];
     if (k === 'carritos') cards = (sec('carritos')?.items || []).map(it => ({ title: it.label, sub: it.sub, meta: it.partner, onClick: it.onClick }));
-    else if (k === 'vmc' || k === 'fs') {
-      const dow = k === 'vmc' ? (typeof MEETING_DAY_VMC !== 'undefined' ? MEETING_DAY_VMC : 4) : (typeof MEETING_DAY_FS !== 'undefined' ? MEETING_DAY_FS : 6);
-      cards = (sec(k)?.items || []).map(it => { const md = _homeMeetingDate(it.weekStart, dow); return { title: it.label, sub: 'Semana ' + (it.sub || ''), meta: md ? _homeLongDate(md) : '', onClick: it.onClick }; });
-    }
-    else if (k === 'aseo') cards = (sec('aseo')?.items || []).filter(it => it.byGroup).map(it => ({ title: 'Tu grupo de servicio limpia el salón', sub: it.sub, onClick: it.onClick }));
     else if (k === 'resp') cards = (sec('resp')?.items || []).map(it => ({ title: it.label, sub: it.sub, onClick: it.onClick }));
     else if (k === 'tips') cards = (tips || []).slice(0, 5).map(tp => ({ title: tp.title || 'Tip', onClick: () => openTipDetailModal(tp.id) }));
     if (!cards.length) { html += _homeSection(HOME_SECTIONS[k].title, '<div class="home-empty">Nada por ahora.</div>'); return; }
@@ -7390,6 +7410,10 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
           <button class="dropdown-item" id="admin-dropdown-btn" onclick="showPage('admin');closeOptionsMenu()" style="display:none">
             <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             Administración
+          </button>
+          <button class="dropdown-item" id="options-dropdown-reload-item" onclick="closeOptionsMenu();reloadCurrentContent()">
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            <span data-i18n="menu.reload">Recargar</span>
           </button>
           <button class="dropdown-item" style="position:relative" onclick="openPreferencias();closeOptionsMenu()">
             <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -9204,7 +9228,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
         </div>
         <div class="profile-row-content">
           <div class="profile-row-label" data-i18n="settings.preferencias">Preferencias</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.preferencias.desc">Idioma, tema, mapas, transparencia y NavBar</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.preferencias.desc">Idiomas y apariencia</div>
         </div>
         <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
@@ -9214,7 +9238,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
         </div>
         <div class="profile-row-content">
           <div class="profile-row-label" data-i18n="settings.funciones">Funciones especiales</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.funciones.desc">Live, Clima y PIN de acceso</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="settings.funciones.desc">Live, Clima y PIN</div>
         </div>
         <svg class="profile-row-chevron" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2.5;stroke-linecap:round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
@@ -10503,7 +10527,8 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.68: (1) Hospitalidad y Aseo muestran el número del grupo en un círculo de acento. (2) Búsqueda global de Direcciones No Pasar por calle o numeración. (3) Texto Diario sin comillas y con Serif más pesada. (4) Inicio muestra solo el evento más cercano. (5) Botón a la Guía de Actividades al final del programa de Vida y Ministerio. (6) Control global de Voz para administradores autorizados; Más Opciones ocupa su lugar en UI Nuevo cuando Voz está desactivada.
 // v1.63-beta: (1) Preferencias → Interfaz: los 3 recuadros pasan a llamarse Sencillo, Clásico (por defecto, al centro) y Nuevo; el texto explicativo muestra solo el de la opción elegida. (2) Vista de Contenido: nuevos diseños para PopUp y Lateral y el título ya no lleva "(Tablet / Escritorio)". (3) Inicio: nuevo diseño de la tarjeta de Texto Diario, con el texto bíblico en tipografía Serif. (4) El botón "Personalizar Inicio" es más pequeño y discreto.
 // v1.68: pulido de badges Aseo, buscadores unificados, confirmación al compartir y acciones superiores en Casa en casa.
-const APP_VERSION = '1.68.10';
+// v1.68.50: (1) Personalizar Inicio con fondo sólido y Back/Título translúcidos. (2) "Para tí" con tarjetas modulares (cuadradas y rectangulares) que aprovechan el espacio. (3) Se retiran los apartados de asignaciones VMC/Reunión Pública y Aseo (ahora viven en "Para tí"). (4) Tag Precursor junto al de Superintendente/Auxiliar en el detalle del Grupo.
+const APP_VERSION = '1.68.50';
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -11846,9 +11871,9 @@ const I18N = {
   // ── Configuración (menú principal) ──
   'settings.title':             { es: 'Configuración',            en: 'Settings',    nl: 'Instellingen' },
   'settings.preferencias':      { es: 'Preferencias',             en: 'Preferences', nl: 'Voorkeuren' },
-  'settings.preferencias.desc': { es: 'Idioma, tema, mapas, transparencia y NavBar', en: 'Language, theme, maps, transparency and NavBar', nl: 'Taal, thema, kaarten, transparantie en NavBar' },
+  'settings.preferencias.desc': { es: 'Idiomas y apariencia', en: 'Languages and appearance', nl: 'Talen en uiterlijk' },
   'settings.funciones':         { es: 'Funciones especiales',     en: 'Special Features', nl: 'Speciale functies' },
-  'settings.funciones.desc':    { es: 'Live y Clima', en: 'Live and Weather', nl: 'Live en weer' },
+  'settings.funciones.desc':    { es: 'Live, Clima y PIN', en: 'Live, Weather and PIN', nl: 'Live, weer en PIN' },
   'settings.notificaciones':    { es: 'Notificaciones',           en: 'Notifications', nl: 'Meldingen' },
   'settings.notificaciones.desc': { es: 'Avisos de la plataforma', en: 'Platform alerts', nl: 'Platformmeldingen' },
   'settings.experimentos':      { es: 'Experimentos',             en: 'Experiments', nl: 'Experimenten' },
@@ -11971,6 +11996,7 @@ const I18N = {
   'profile.elegeicono':     { es: 'Elige que mostrar en tu perfil', en: 'Choose what you want to show in your profile' },
   'profile.cambiarcolor':   { es: 'Cambiar color',           en: 'Change color' },
   // ── Notificaciones ──
+  'menu.reload':            { es: 'Recargar', en: 'Reload', nl: 'Herladen' },
   'notif.title':            { es: 'Notificaciones',          en: 'Notifications',    nl: 'Meldingen' },
   'notif.buscar':           { es: 'Buscar notificaciones…',  en: 'Search notifications…', nl: 'Meldingen zoeken…' },
   'notif.cargando':         { es: 'Cargando Notificaciones', en: 'Loading Notifications', nl: 'Meldingen laden' },
@@ -13117,7 +13143,22 @@ function _renderGrupoDetailMembers(g) {
   } else {
     document.getElementById('grupo-detail-members-section').style.display = 'none';
   }
+  _scheduleFitPrecTags();
 }
+// Si el nombre no cabe junto a los dos tags, el tag Precursor pasa a ser una estrella.
+function _fitPrecTags() {
+  document.querySelectorAll('.grupo-member-row-full.has-prec-extra').forEach(row => {
+    const nm = row.querySelector('.grupo-member-name-full');
+    if (!nm || !row.offsetWidth) return;
+    row.classList.remove('prec-compact');
+    if (nm.scrollWidth > nm.clientWidth + 1) row.classList.add('prec-compact');
+  });
+}
+function _scheduleFitPrecTags() {
+  requestAnimationFrame(_fitPrecTags);
+  setTimeout(_fitPrecTags, 120); setTimeout(_fitPrecTags, 450);
+}
+window.addEventListener('resize', _fitPrecTags);
 
 function _memberRowHtml(m) {
   const col    = getAvatarColorForName(m.nombre, memberColor(m.nombre));
@@ -13128,12 +13169,17 @@ function _memberRowHtml(m) {
     : m.rol === 'auxiliar'
       ? `<span class="grupo-member-role-label role-aux">${t('grupos.rol.auxiliar')}</span>`
       : m.precursor ? `<span class="grupo-member-role-label role-prec">${t('grupos.precursor')}</span>` : '';
-  return `<div class="grupo-member-row-full" style="cursor:pointer" onclick="openMemberPerfil('${(m.nombre || '').replace(/'/g, "\\'")}', ${!!m.precursor}, '${m.rol || ''}')">
+  // v1.68.50: Superintendente/Auxiliar que además son Precursor Regular llevan también el tag Precursor (o una estrella si no hay espacio).
+  const leaderPrec = (m.rol === 'superintendente' || m.rol === 'auxiliar') && m.precursor;
+  const precExtra = leaderPrec
+    ? `<span class="grupo-member-role-label role-prec prec-full">${t('grupos.precursor')}</span><span class="prec-star" title="${t('grupos.precursor')}" aria-label="${t('grupos.precursor')}"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span>`
+    : '';
+  return `<div class="grupo-member-row-full${leaderPrec ? ' has-prec-extra' : ''}" style="cursor:pointer" onclick="openMemberPerfil('${(m.nombre || '').replace(/'/g, "\\'")}', ${!!m.precursor}, '${m.rol || ''}')">
     ${avatarHtml}
     <div class="grupo-member-info">
       <div class="grupo-member-name-full">${m.nombre}</div>
     </div>
-    ${roleLabel}
+    <div class="grupo-member-tags">${roleLabel}${precExtra}</div>
   </div>`;
 }
 
@@ -23750,6 +23796,26 @@ function toggleOptionsMenu() {
     dd.classList.add('from-bottom');
   } else { _optionsMenuRestoreHome(); }
   dd.classList.toggle('open');
+}
+function reloadCurrentContent() {
+  // v1.68.12: recarga el contenido de la vista actual (sin recargar la página del navegador).
+  try { trackEvent('reload_content', { tab: currentMainTab, sub: currentSubTab }); } catch {}
+  const adminOpen = document.getElementById('page-admin')?.classList.contains('active');
+  try {
+    if (adminOpen) {
+      if (typeof loadAdminData === 'function') loadAdminData();
+    } else if (currentMainTab === 'inicio' && typeof renderHome === 'function') {
+      if (typeof loadSchedule === 'function') { Promise.resolve(loadSchedule()).catch(() => {}).then(() => renderHome()); }
+      else renderHome();
+    } else {
+      if (typeof loadSchedule === 'function') loadSchedule();
+      switchSubTab(currentSubTab);
+    }
+    showToast('Contenido recargado', '');
+  } catch (e) {
+    console.error('reloadCurrentContent', e);
+    showToast('No se pudo recargar el contenido', 'error');
+  }
 }
 function closeOptionsMenu() {
   document.getElementById('options-dropdown').classList.remove('open');
