@@ -5093,7 +5093,7 @@
   /* v1.62.0-beta: selector de interfaz (UI Classic / Sencillo / con Inicio) */
   .uim-row { display: flex; gap: 8px; padding: 0.9rem 1rem 0.6rem; }
   /* v1.71: tutorial guiado de la interfaz Nueva (v1.71.5: también desde Ayuda → Tutoriales) */
-  #inicio-tour { position: fixed; inset: 0; z-index: 6000; }
+  #inicio-tour { position: fixed; inset: 0; z-index: 6000; touch-action: none; overscroll-behavior: contain; }
   #inicio-tour.no-target { background: rgba(0,0,0,0.62); }
   #inicio-tour .tour-hole { position: fixed; border-radius: 18px; box-shadow: 0 0 0 9999px rgba(0,0,0,0.62); outline: 2px solid rgba(255,255,255,0.75); pointer-events: none; transition: left .3s var(--ease-fluid), top .3s var(--ease-fluid), width .3s var(--ease-fluid), height .3s var(--ease-fluid); }
   #inicio-tour .tour-card { position: fixed; width: min(340px, calc(100vw - 24px)); background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 22px; box-shadow: var(--shadow-lg); padding: 1.1rem 1.15rem 1rem; animation: fadeIn 0.25s; }
@@ -5784,47 +5784,40 @@
 #tutorial-overlay {
   position: fixed; inset: 0; z-index: 9999;
   display: none; background: transparent;
+  touch-action: none; overscroll-behavior: contain;
 }
 #tutorial-overlay.active { display: block; }
+#tutorial-overlay.no-target { background: rgba(0,0,0,0.62); }
+/* v1.71.6: mismo diseño que el tutorial de Inicio (recorte con borde blanco, tarjeta redondeada, puntos alargados y botones en píldora) */
 #tutorial-spot {
   position: fixed; border-radius: 18px; pointer-events: none;
-  box-shadow: 0 0 0 5px rgba(255,255,255,0.85), 0 0 0 9999px rgba(10,12,18,0.62);
-  transition: top 0.32s cubic-bezier(0.4,0,0.2,1), left 0.32s cubic-bezier(0.4,0,0.2,1),
-              width 0.32s cubic-bezier(0.4,0,0.2,1), height 0.32s cubic-bezier(0.4,0,0.2,1),
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.62); outline: 2px solid rgba(255,255,255,0.75);
+  transition: top 0.3s var(--ease-fluid), left 0.3s var(--ease-fluid),
+              width 0.3s var(--ease-fluid), height 0.3s var(--ease-fluid),
               opacity 0.2s ease;
   opacity: 0;
 }
 #tutorial-spot.has-target { opacity: 1; }
 #tutorial-card {
-  position: fixed; z-index: 2; width: 320px; max-width: calc(100vw - 2rem);
-  background: var(--surface); border-radius: 20px; padding: 1.25rem 1.35rem 1.1rem;
-  box-shadow: var(--shadow-lg); border: 1px solid var(--border);
-  transition: top 0.32s cubic-bezier(0.4,0,0.2,1), left 0.32s cubic-bezier(0.4,0,0.2,1);
+  position: fixed; z-index: 2; width: min(340px, calc(100vw - 24px));
+  background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 22px;
+  box-shadow: var(--shadow-lg); padding: 1.1rem 1.15rem 1rem;
+  transition: top 0.3s var(--ease-fluid), left 0.3s var(--ease-fluid);
 }
-#tutorial-card-eyebrow {
-  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
-  color: var(--accent); margin-bottom: 0.3rem;
-}
-#tutorial-card-title { font-size: 1.05rem; font-weight: 800; color: var(--text); margin-bottom: 0.45rem; letter-spacing: -0.01em; }
-#tutorial-card-text { font-size: 0.87rem; color: var(--text2); line-height: 1.5; margin-bottom: 1rem; }
-.tutorial-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
-.tutorial-dots { display: flex; gap: 5px; }
-.tutorial-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--surface3); transition: background 0.2s, transform 0.2s; }
-.tutorial-dot.active { background: var(--accent); transform: scale(1.25); }
-.tutorial-btn-row { display: flex; align-items: center; gap: 8px; }
+.tutorial-dots { display: flex; gap: 5px; margin-bottom: 0.7rem; }
+.tutorial-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--surface3); }
+.tutorial-dot.active { width: 18px; border-radius: 99px; background: var(--accent); }
+#tutorial-card-title { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.01em; color: var(--text); }
+#tutorial-card-text { font-size: 0.86rem; line-height: 1.45; color: var(--text2); margin-top: 6px; }
+.tutorial-card-footer { display: flex; align-items: center; gap: 8px; margin-top: 1rem; }
+.tutorial-card-footer .sp { flex: 1; }
 .tutorial-btn {
-  border: none; border-radius: 12px; font-family: var(--font); font-weight: 700;
-  font-size: 0.82rem; cursor: pointer; padding: 8px 16px; transition: all 0.15s;
+  border: none; border-radius: 99px; padding: 0.55rem 1rem; font-family: var(--font);
+  font-size: 0.82rem; font-weight: 700; cursor: pointer; background: var(--surface3); color: var(--text2);
 }
-.tutorial-btn-skip { background: transparent; color: var(--text3); padding: 8px 6px; }
-.tutorial-btn-skip:hover { color: var(--text2); }
+.tutorial-btn-skip { background: none; color: var(--text3); padding-left: 0.2rem; padding-right: 0.2rem; }
 .tutorial-btn-prev { background: var(--surface3); color: var(--text2); }
-.tutorial-btn-prev:hover { background: var(--surface2); }
-.tutorial-btn-next { background: var(--accent); color: #fff; box-shadow: 0 2px 10px color-mix(in srgb, var(--accent) 35%, transparent); }
-.tutorial-btn-next:hover { filter: brightness(1.08); }
-@media (max-width: 639px) {
-  #tutorial-card { width: calc(100vw - 2rem); }
-}
+.tutorial-btn-next { background: var(--accent); color: #fff; }
 
 /* ══════════════════════════ Versión Simplificada ══════════════════════════
    Header alternativo, solo móvil: título "Fleming" (izquierda, clickeable →
@@ -6487,8 +6480,7 @@ function _tourVisibleEl(sels) {
   for (const sel of (sels || [])) {
     const el = document.querySelector(sel);
     if (!el) continue;
-    const r = el.getBoundingClientRect();
-    if (r.width > 0 && r.height > 0) return el;
+    if (typeof _tutVisible === 'function' ? _tutVisible(el) : el.getBoundingClientRect().width > 0) return el;
   }
   return null;
 }
@@ -6510,14 +6502,21 @@ function startInicioTour(force) {
   const ov = document.createElement('div');
   ov.id = 'inicio-tour';
   ov.innerHTML = '<div class="tour-hole" style="display:none"></div><div class="tour-card"></div>';
+  // v1.71.6: tocar fuera de la tarjeta pregunta si se quiere salir (igual que en los demás tutoriales), así nunca se queda uno atrapado.
+  ov.addEventListener('click', e => { if (e.target === ov || e.target.classList.contains('tour-hole')) _tourAskExit(); });
   document.body.appendChild(ov);
   _tour = { i: 0, ov, busy: false };
   window.addEventListener('resize', _tourPos);
+  window.addEventListener('scroll', _tourPos, { passive: true, capture: true });
   _tourRender();
+}
+function _tourAskExit() {
+  if (confirm(currentLang === 'en' ? 'Do you want to skip the tutorial? You can view it later in Settings.' : '¿Quieres saltar el tutorial? Podrás verlo más tarde en Configuración.')) _tourFinish(true);
 }
 function _tourFinish(done) {
   if (!_tour) return;
   window.removeEventListener('resize', _tourPos);
+  window.removeEventListener('scroll', _tourPos, { passive: true, capture: true });
   _tour.ov.remove(); _tour = null;
   if (done) { try { localStorage.setItem(INICIO_TOUR_KEY, '1'); } catch {} }
 }
@@ -6526,7 +6525,7 @@ async function _tourGo(n) {
   if (n >= INICIO_TOUR_STEPS.length) { _tourFinish(true); return; }
   n = Math.max(0, n);
   _tour.busy = true;
-  if (n >= 1) await _tourEnsureHome();
+  try { if (n >= 1) await _tourEnsureHome(); } catch (e) { console.warn('Tutorial Inicio:', e); }
   if (!_tour) return;
   _tour.i = n; _tour.busy = false;
   _tourRender();
@@ -6534,44 +6533,63 @@ async function _tourGo(n) {
 function _tourRender() {
   if (!_tour) return;
   const st = INICIO_TOUR_STEPS[_tour.i], last = _tour.i === INICIO_TOUR_STEPS.length - 1;
+  const en = currentLang === 'en';
   const card = _tour.ov.querySelector('.tour-card');
   card.innerHTML =
     '<div class="tour-dots">' + INICIO_TOUR_STEPS.map((_, k) => '<i class="' + (k === _tour.i ? 'on' : '') + '"></i>').join('') + '</div>' +
     '<div class="tour-title">' + escapeHtml(st.title) + '</div><div class="tour-text">' + escapeHtml(st.text) + '</div>' +
     (st.extra ? '<button type="button" class="tour-extra" id="tour-extra-btn">' + escapeHtml(st.extra.label) + '</button>' : '') +
-    '<div class="tour-actions">' + (last ? '' : '<button type="button" class="tour-btn ghost" id="tour-skip">Omitir</button>') + '<span class="sp"></span>' +
-    (_tour.i > 0 ? '<button type="button" class="tour-btn" id="tour-prev">Atrás</button>' : '') +
-    '<button type="button" class="tour-btn primary" id="tour-next">' + (last ? 'Listo' : (_tour.i === 0 ? 'Comenzar' : 'Siguiente')) + '</button></div>';
+    '<div class="tour-actions">' + (last ? '' : '<button type="button" class="tour-btn ghost" id="tour-skip">' + (en ? 'Skip' : 'Omitir') + '</button>') + '<span class="sp"></span>' +
+    (_tour.i > 0 ? '<button type="button" class="tour-btn" id="tour-prev">' + (en ? 'Back' : 'Atrás') + '</button>' : '') +
+    '<button type="button" class="tour-btn primary" id="tour-next">' + (last ? (en ? 'Done' : 'Listo') : (_tour.i === 0 ? (en ? 'Start' : 'Comenzar') : (en ? 'Next' : 'Siguiente'))) + '</button></div>';
   const g = id => card.querySelector('#' + id);
   g('tour-next').onclick = () => _tourGo(_tour.i + 1);
   if (g('tour-prev')) g('tour-prev').onclick = () => _tourGo(_tour.i - 1);
   if (g('tour-skip')) g('tour-skip').onclick = () => _tourFinish(true);
   if (g('tour-extra-btn')) g('tour-extra-btn').onclick = () => st.extra.fn();
+  // El desplazamiento es inmediato (no animado) para medir la posición real; la barra superior se mueve con la página, así que se vuelve arriba.
   const el = _tourVisibleEl(st.sel);
-  if (el) { try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {} }
+  if (el) {
+    try {
+      if (el.closest('.app-header-shell')) { window.scrollTo(0, 0); (document.scrollingElement || document.documentElement).scrollTop = 0; }
+      else if (typeof _tutEnsureVisible === 'function') _tutEnsureVisible(el);
+      else el.scrollIntoView({ block: 'center', behavior: 'auto' });
+    } catch (e) {}
+  }
   _tourPos();
-  if (el) setTimeout(_tourPos, 380);
+  // Se vuelve a medir unos instantes por si la página aún se acomoda (imágenes, barra inferior, animaciones).
+  const t0 = performance.now(), idx = _tour.i;
+  const tick = () => { if (!_tour || _tour.i !== idx) return; _tourPos(); if (performance.now() - t0 < 700) requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
 }
 function _tourPos() {
   if (!_tour) return;
   const st = INICIO_TOUR_STEPS[_tour.i];
   const hole = _tour.ov.querySelector('.tour-hole'), card = _tour.ov.querySelector('.tour-card');
+  if (!hole || !card) return;
   const el = _tourVisibleEl(st.sel);
-  const vw = window.innerWidth, vh = window.innerHeight, cw = card.offsetWidth, ch = card.offsetHeight;
-  if (!el) {
+  const vw = window.innerWidth, vh = window.innerHeight, cw = card.offsetWidth, ch = card.offsetHeight, M = 12, gap = 12;
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(v, Math.max(lo, hi)));
+  const center = () => {
     _tour.ov.classList.add('no-target'); hole.style.display = 'none';
-    card.style.left = Math.max(12, (vw - cw) / 2) + 'px'; card.style.top = Math.max(12, (vh - ch) / 2) + 'px';
-    return;
-  }
-  _tour.ov.classList.remove('no-target');
+    card.style.left = clamp((vw - cw) / 2, M, vw - cw - M) + 'px'; card.style.top = clamp((vh - ch) / 2, M, vh - ch - M) + 'px';
+  };
+  if (!el) { center(); return; }
   const r = el.getBoundingClientRect(), pad = 6;
+  // Si el elemento quedó fuera de la pantalla no se resalta: la tarjeta se centra y siempre se puede avanzar o salir.
+  if (r.bottom <= 0 || r.top >= vh || r.right <= 0 || r.left >= vw) { center(); return; }
+  _tour.ov.classList.remove('no-target');
   hole.style.display = '';
   hole.style.left = (r.left - pad) + 'px'; hole.style.top = (r.top - pad) + 'px';
   hole.style.width = (r.width + pad * 2) + 'px'; hole.style.height = (r.height + pad * 2) + 'px';
-  const below = vh - r.bottom - pad;
-  const top = below >= ch + 16 ? r.bottom + pad + 12 : Math.max(12, r.top - pad - ch - 12);
-  card.style.top = Math.min(top, vh - ch - 12) + 'px';
-  card.style.left = Math.min(Math.max(12, r.left + r.width / 2 - cw / 2), vw - cw - 12) + 'px';
+  // La tarjeta va debajo del elemento si cabe; si no, encima; si no cabe en ningún lado, en el borde con más espacio. Nunca fuera de pantalla.
+  const spaceBelow = vh - (r.bottom + pad) - M, spaceAbove = (r.top - pad) - M;
+  let top;
+  if (spaceBelow >= ch + gap) top = r.bottom + pad + gap;
+  else if (spaceAbove >= ch + gap) top = r.top - pad - gap - ch;
+  else top = spaceBelow >= spaceAbove ? vh - ch - M : M;
+  card.style.top = clamp(top, M, vh - ch - M) + 'px';
+  card.style.left = clamp(r.left + r.width / 2 - cw / 2, M, vw - cw - M) + 'px';
 }
 // Espera a que Inicio esté listo (si hace falta) y lanza el tutorial la primera vez que se activa la interfaz Nueva.
 function maybeStartInicioTour() {
@@ -10862,7 +10880,7 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.69.0: (1) Detalle de asignación de Casa en casa: Más Opciones para todos (Asignar nuevo territorio, Clima, Compartir; Editar solo con permiso); el número de Territorio ya no es un botón. (2) Presionar la Sub-sección ya abierta ya no hace nada.
 // v1.69.1: (1) Más Opciones de la asignación: toggle para activar/desactivar Live por completo. (2) Asignaciones de Predicación por Grupo de Servicio: "Mi grupo", su tarjeta y el botón "Otros Grupos" van dentro de su propio contenedor.
 // v1.70: (1) Recuadro Live rediseñado (solo texto, botón Pausa/Play grande). (2) "Direcciones No Pasar" pasa arriba del recuadro Live, con espacio bajo el mapa y del tamaño de la dirección. (3) "Reportar Territorio" más redondeado. (4) El pill de Clima abre The Weather Channel (con confirmación).
-const APP_VERSION = '1.71.5';
+const APP_VERSION = '1.71.6';
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -25409,6 +25427,7 @@ async function renderTutorialStep(i, isReflow) {
   if (!step) { endTutorial(); return; }
   const spot = document.getElementById('tutorial-spot');
   const card = document.getElementById('tutorial-card');
+  const overlayEl = document.getElementById('tutorial-overlay');
 
   let target = null;
   if (step.selector) {
@@ -25428,21 +25447,27 @@ async function renderTutorialStep(i, isReflow) {
   // Primero el contenido (para medir el alto real de la tarjeta) y después la posición.
   document.getElementById('tutorial-card-title').textContent = step.title[currentLang] || step.title.es;
   document.getElementById('tutorial-card-text').textContent = step.text[currentLang] || step.text.es;
-  document.getElementById('tutorial-step-counter').textContent = `${i + 1} / ${steps.length}`;
-  document.getElementById('tutorial-prev-btn').style.visibility = i === 0 ? 'hidden' : 'visible';
-  document.getElementById('tutorial-next-btn').textContent = i === steps.length - 1
-    ? (currentLang === 'en' ? 'Got it' : 'Entendido')
+  const isLast = i === steps.length - 1;
+  document.getElementById('tutorial-prev-btn').style.display = i === 0 ? 'none' : '';
+  document.getElementById('tutorial-next-btn').textContent = isLast
+    ? (currentLang === 'en' ? 'Done' : 'Listo')
     : (currentLang === 'en' ? 'Next' : 'Siguiente');
+  const skipBtn = document.getElementById('tutorial-skip-btn');
+  if (skipBtn) { skipBtn.textContent = currentLang === 'en' ? 'Skip' : 'Omitir'; skipBtn.style.display = isLast ? 'none' : ''; }
+  document.getElementById('tutorial-prev-btn').textContent = currentLang === 'en' ? 'Back' : 'Atrás';
   const dotsWrap = document.getElementById('tutorial-dots');
   dotsWrap.innerHTML = steps.map((_, idx) =>
-    `<div class="tutorial-dot${idx === i ? ' active' : ''}"></div>`).join('');
+    `<i class="tutorial-dot${idx === i ? ' active' : ''}"></i>`).join('');
 
   const vw = window.innerWidth, vh = window.innerHeight, M = 16;
   const cardWidth = card.offsetWidth || 320, cardH = card.offsetHeight || 180;
+  // v1.71.6: si el elemento quedó fuera de pantalla no se resalta y la tarjeta se centra (nunca queda fuera de la vista)
+  if (target) { const _r0 = target.getBoundingClientRect(); if (_r0.bottom <= 0 || _r0.top >= vh || _r0.right <= 0 || _r0.left >= vw) target = null; }
   if (target) {
     const r = target.getBoundingClientRect();
     const pad = 8;
     spot.classList.add('has-target');
+    overlayEl.classList.remove('no-target');
     spot.style.top = (r.top - pad) + 'px';
     spot.style.left = (r.left - pad) + 'px';
     spot.style.width = (r.width + pad * 2) + 'px';
@@ -25460,6 +25485,7 @@ async function renderTutorialStep(i, isReflow) {
     card.style.left = left + 'px';
   } else {
     spot.classList.remove('has-target');
+    overlayEl.classList.add('no-target');
     card.style.top = Math.max(M, vh / 2 - cardH / 2) + 'px';
     card.style.left = Math.max(M, vw / 2 - cardWidth / 2) + 'px';
   }
@@ -31037,16 +31063,14 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
 <div id="tutorial-overlay" onclick="tutorialBackgroundClick(event)">
   <div id="tutorial-spot"></div>
   <div id="tutorial-card">
-    <div id="tutorial-card-eyebrow">Tutorial · <span id="tutorial-step-counter">1 / 6</span></div>
+    <div class="tutorial-dots" id="tutorial-dots"></div>
     <div id="tutorial-card-title">Título</div>
     <div id="tutorial-card-text">Descripción</div>
     <div class="tutorial-card-footer">
-      <div class="tutorial-dots" id="tutorial-dots"></div>
-      <div class="tutorial-btn-row">
-        <button class="tutorial-btn tutorial-btn-skip" onclick="skipTutorial()">Saltar</button>
-        <button class="tutorial-btn tutorial-btn-prev" id="tutorial-prev-btn" onclick="tutorialGo(-1)">Atrás</button>
-        <button class="tutorial-btn tutorial-btn-next" id="tutorial-next-btn" onclick="tutorialGo(1)">Siguiente</button>
-      </div>
+      <button type="button" class="tutorial-btn tutorial-btn-skip" id="tutorial-skip-btn" onclick="skipTutorial()">Omitir</button>
+      <span class="sp"></span>
+      <button type="button" class="tutorial-btn tutorial-btn-prev" id="tutorial-prev-btn" onclick="tutorialGo(-1)">Atrás</button>
+      <button type="button" class="tutorial-btn tutorial-btn-next" id="tutorial-next-btn" onclick="tutorialGo(1)">Siguiente</button>
     </div>
   </div>
 </div>
