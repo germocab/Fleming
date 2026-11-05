@@ -1049,8 +1049,18 @@
 
   .detail-especial-photo-wrap {
     width: 100%; border-radius: 18px; overflow: hidden; margin-bottom: 0.9rem;
-    max-height: 220px;
+    max-height: 220px; position: relative;
   }
+  /* v1.70.5: cuenta regresiva (días, horas, minutos) al pie de la imagen del Evento */
+  .detail-especial-countdown { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 2.6rem 1rem 0.9rem; color: #fff;
+    background: linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.38) 55%, rgba(0,0,0,0) 100%); }
+  .dec-label { font-size: 0.62rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.85; margin-bottom: 7px; }
+  .dec-grid { display: flex; gap: 8px; }
+  .dec-seg { flex: 1; text-align: center; padding: 7px 4px 6px; border-radius: 14px; background: rgba(255,255,255,0.16); border: 1px solid rgba(255,255,255,0.24); -webkit-backdrop-filter: blur(12px) saturate(1.4); backdrop-filter: blur(12px) saturate(1.4); }
+  .dec-seg b { display: block; font-size: 1.5rem; font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .dec-seg span { display: block; margin-top: 2px; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.85; }
+  .detail-especial-photo-wrap.no-photo { max-height: none; height: auto; background: linear-gradient(155deg, var(--accent), #5856d6); }
+  .detail-especial-photo-wrap.no-photo .detail-especial-countdown { position: static; background: none; padding: 1.1rem 1rem 1rem; }
   .detail-especial-photo-wrap img { width: 100%; height: 100%; max-height: 220px; object-fit: cover; display: block; }
   .detail-especial-block {
     margin: 0 1.25rem 0.85rem; padding: 1rem 1.1rem;
@@ -2670,17 +2680,21 @@
   .notif-pill svg { width: 10px; height: 10px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
 
   
+  /* v1.70.5: mismo tamaño y tratamiento que el botón Back (.pill-back-btn), conservando el color rojo */
   .notif-clear-icon-btn {
     display: flex; align-items: center; justify-content: center;
-    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
-    background: rgba(255,59,48,0.1); border: none; color: var(--red);
-    cursor: pointer; transition: background 0.15s, transform 0.15s;
+    width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+    background: var(--nav-bg);
+    backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%);
+    border: 1px solid var(--border); box-shadow: var(--shadow); color: var(--red);
+    cursor: pointer; transition: opacity 0.2s, transform 0.15s;
   }
-  .notif-clear-icon-btn:hover { background: rgba(255,59,48,0.18); }
+  .notif-clear-icon-btn:hover { opacity: 0.75; }
   .notif-clear-icon-btn:active { transform: scale(0.92); }
   .notif-clear-icon-btn svg {
-    width: 15px; height: 15px; stroke: currentColor; fill: none;
-    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    width: 19px; height: 19px; stroke: currentColor; fill: none;
+    stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
   }
   .notif-search-wrap {
     position: relative; padding: 0 0 0.85rem;
@@ -5365,25 +5379,28 @@
 }
 
 /* ---------- MY SHIFT CARD ---------- */
-#sub-content-carritos .ct-my-shift-card, #admin-carritos .ct-my-shift-card {
-  /* v1.70.2: estilo de tarjeta dinámica (como "Texto Diario" / "Para tí") */
+/* v1.70.5: título de "Mis Turnos" con el mismo tamaño/formato que "Hoy" de Casa en Casa */
+.ms-title { font-size: 1.15rem; font-weight: 700; color: var(--text); letter-spacing: -0.01em; margin: 6px 0 0.85rem; }
+/* Tarjeta de turno (Carritos e Inicio): estilo de tarjeta dinámica, como "Texto Diario" / "Para tí" */
+.ms-card {
   background: linear-gradient(155deg, var(--accent-light) 0%, var(--surface) 72%);
   border: 1px solid var(--border); border-radius: 24px; box-shadow: var(--shadow);
-  padding: 1rem 1.1rem 0.9rem; margin-bottom: 12px; display: flex; flex-direction: column; gap: 0;
+  padding: 1rem 1.1rem 0.9rem; margin-bottom: 12px; display: flex; flex-direction: column;
   cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
 }
-#sub-content-carritos .ct-my-shift-card:hover, #admin-carritos .ct-my-shift-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-lg); }
-#sub-content-carritos .ct-my-shift-card:active, #admin-carritos .ct-my-shift-card:active { transform: scale(0.98); }
-.ct-ms-top { display: flex; align-items: center; gap: 12px; }
-.ct-ms-day { flex: 0 0 52px; height: 52px; border-radius: 17px; display: flex; align-items: center; justify-content: center; font-size: 0.82rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; background: var(--ms-color, var(--accent)); box-shadow: 0 4px 12px rgba(0,0,0,0.14); }
-.ct-ms-main { flex: 1; min-width: 0; }
-.ct-ms-point { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.01em; line-height: 1.25; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ct-ms-meta { display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 0.78rem; font-weight: 600; color: var(--text3); }
-.ct-ms-time { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 99px; background: var(--accent-light); color: var(--accent); font-size: 0.7rem; font-weight: 700; white-space: nowrap; }
-.ct-ms-chev { flex-shrink: 0; font-size: 1.4rem; line-height: 1; color: var(--text3); }
-.ct-ms-people { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; padding-top: 11px; border-top: 1px solid var(--border); }
-.ct-ms-person { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 4px; border-radius: 99px; background: var(--surface3); font-size: 0.75rem; font-weight: 600; color: var(--text2); max-width: 100%; }
-.ct-ms-av { width: 20px; height: 20px; border-radius: 50%; background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 0.62rem; font-weight: 800; color: var(--text2); flex-shrink: 0; }
+.home-card-list .ms-card { margin-bottom: 0; }
+.ms-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+.ms-card:active { transform: scale(0.98); }
+.ms-top { display: flex; align-items: center; gap: 12px; }
+.ms-main { flex: 1; min-width: 0; }
+.ms-point { font-size: 1.08rem; font-weight: 800; letter-spacing: -0.01em; line-height: 1.25; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ms-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 5px; font-size: 0.8rem; font-weight: 600; color: var(--text3); }
+.ms-time { display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 99px; background: var(--accent-light); color: var(--accent); font-size: 0.7rem; font-weight: 700; white-space: nowrap; }
+.ms-chev { flex-shrink: 0; font-size: 1.4rem; line-height: 1; color: var(--text3); }
+.ms-people { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; padding-top: 11px; border-top: 1px solid var(--border); }
+.ms-person { display: inline-flex; align-items: center; gap: 6px; padding: 3px 11px 3px 3px; border-radius: 99px; background: var(--surface3); font-size: 0.76rem; font-weight: 600; color: var(--text2); max-width: 100%; }
+.ms-person .grupo-member-avatar { overflow: hidden; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.ms-pname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ---------- LOGISTICS BOXES ---------- */
 #sub-content-carritos .ct-logistics-box, #admin-carritos .ct-logistics-box {
@@ -6194,6 +6211,32 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 .home-count b { display: block; font-size: 1.2rem; font-weight: 800; line-height: 1; letter-spacing: -0.02em; }
 .home-count span { display: block; margin-top: 2px; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
 .home-count.is-today b { font-size: 0.85rem; }
+/* v1.70.5: "Mis responsabilidades" — tarjetas con el color de su categoría */
+.rs-card { --rs-c: var(--accent); display: flex; align-items: center; gap: 13px; padding: 0.85rem 0.95rem; border-radius: 22px; cursor: pointer; box-shadow: var(--shadow);
+  background: linear-gradient(155deg, color-mix(in srgb, var(--rs-c) 16%, var(--surface)) 0%, var(--surface) 75%);
+  border: 1px solid color-mix(in srgb, var(--rs-c) 22%, var(--border)); transition: transform 0.15s, box-shadow 0.15s; }
+.rs-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+.rs-card:active { transform: scale(0.98); }
+.rs-ico { flex: 0 0 46px; width: 46px; height: 46px; border-radius: 15px; display: flex; align-items: center; justify-content: center; color: #fff; background: var(--rs-c); box-shadow: 0 4px 12px color-mix(in srgb, var(--rs-c) 35%, transparent); }
+.rs-ico svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.rs-body { flex: 1; min-width: 0; }
+.rs-title { font-size: 0.95rem; font-weight: 800; letter-spacing: -0.01em; color: var(--text); line-height: 1.25; }
+.rs-sub { font-size: 0.78rem; font-weight: 500; color: var(--text3); margin-top: 3px; text-transform: capitalize; }
+.rs-rel { flex-shrink: 0; font-size: 0.68rem; font-weight: 700; padding: 4px 10px; border-radius: 99px; background: color-mix(in srgb, var(--rs-c) 16%, transparent); color: var(--rs-c); white-space: nowrap; }
+.rs-chev { flex-shrink: 0; font-size: 1.4rem; line-height: 1; color: var(--text3); }
+/* "Tips": carrusel horizontal de tarjetas con imagen */
+.tp-row { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 0 0 0.5rem; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.tp-row::-webkit-scrollbar { display: none; }
+.tp-card { position: relative; flex: 0 0 78%; max-width: 300px; aspect-ratio: 16 / 10; border-radius: 24px; overflow: hidden; scroll-snap-align: start; cursor: pointer; box-shadow: var(--shadow); background: linear-gradient(145deg, #ffb340, #ff7a00); transition: transform 0.15s; }
+.tp-row.single .tp-card { flex-basis: 100%; max-width: none; }
+.tp-card:active { transform: scale(0.97); }
+.tp-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.tp-ph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.5); }
+.tp-ph svg { width: 56px; height: 56px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.tp-shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.12) 55%, rgba(0,0,0,0) 100%); }
+.tp-body { position: absolute; left: 0; right: 0; bottom: 0; padding: 0.9rem 1rem; color: #fff; }
+.tp-chip { display: inline-block; font-size: 0.6rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 9px; border-radius: 99px; background: rgba(255,255,255,0.22); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.28); }
+.tp-title { margin-top: 7px; font-size: 1rem; font-weight: 800; line-height: 1.25; letter-spacing: -0.01em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .evento-count { position: absolute; top: 10px; right: 10px; z-index: 2; text-align: center; min-width: 46px; padding: 6px 9px; border-radius: 14px; color: #fff; background: rgba(0,0,0,0.38); -webkit-backdrop-filter: blur(10px) saturate(1.4); backdrop-filter: blur(10px) saturate(1.4); border: 1px solid rgba(255,255,255,0.22); }
 .evento-count b { display: block; font-size: 1.2rem; font-weight: 800; line-height: 1; }
 .evento-count span { display: block; margin-top: 2px; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.9; }
@@ -6552,6 +6595,38 @@ function _homeCard(c) {
     (c.meta ? '<div class="home-card-meta">' + escapeHtml(c.meta) + '</div>' : '') + '</div>' +
     (c.countDate ? _homeCountHtml(c.countDate, 'home-count') : '') + '</div>';
 }
+// v1.70.5: tarjeta de turno compartida entre Inicio y Carritos > Mis Turnos. Los participantes muestran su avatar de perfil.
+function _msResolveName(n) {
+  const low = String(n).trim().toLowerCase();
+  const keys = [].concat(Object.keys(_avatarColorCache || {}), Object.keys(_avatarIconCache || {}), Object.keys(_avatarCharIdCache || {}));
+  return keys.find(k => String(k).trim().toLowerCase() === low) || n;
+}
+function msCardHtml(o) {
+  const people = String(o.nombres || '').split(/[,\/&+\n]+/).map(x => x.trim()).filter(Boolean);
+  const ph = people.map(n => '<span class="ms-person">' + buildAvatarHtml(_msResolveName(n), 22, '0.58rem') + '<span class="ms-pname">' + escapeHtml(n) + '</span></span>').join('');
+  return '<div class="ms-card" onclick="' + o.onclick + '"><div class="ms-top"><div class="ms-main">' +
+    '<div class="ms-point">' + escapeHtml(o.punto || '') + '</div>' +
+    '<div class="ms-meta"><span>' + escapeHtml(o.dia || '') + '</span>' + (o.hora ? '<span class="ms-time">' + escapeHtml(o.hora) + '</span>' : '') + '</div></div>' +
+    '<span class="ms-chev">&#8250;</span></div>' + (ph ? '<div class="ms-people">' + ph + '</div>' : '') + '</div>';
+}
+function _homeRespCard(it) {
+  const st = getCargoStyle(it.cargo || it.label);
+  const idx = _homeActions.push(it.onClick || null) - 1;
+  const rel = it.dateRaw ? _ptRel(String(it.dateRaw).slice(0, 10)) : '';
+  return '<div class="rs-card" style="--rs-c:' + st.color + '" onclick="homeAct(' + idx + ')"><div class="rs-ico"><svg viewBox="0 0 24 24">' + st.icon + '</svg></div>' +
+    '<div class="rs-body"><div class="rs-title">' + escapeHtml(it.label || '') + '</div><div class="rs-sub">' + escapeHtml(it.sub || '') + '</div></div>' +
+    (rel ? '<span class="rs-rel">' + escapeHtml(rel) + '</span>' : '') + '<span class="rs-chev">&#8250;</span></div>';
+}
+function _homeTipsCarousel(tips) {
+  const list = (tips || []).slice(0, 5);
+  const cards = list.map(tp => {
+    const idx = _homeActions.push(() => openTipDetailModal(tp.id)) - 1;
+    const img = tp.image_url ? '<img src="' + escapeHtml(tp.image_url) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '';
+    return '<div class="tp-card" onclick="homeAct(' + idx + ')">' + (img || '<div class="tp-ph"><svg viewBox="0 0 24 24">' + (_HI.bulb || '') + '</svg></div>') +
+      '<div class="tp-shade"></div><div class="tp-body"><span class="tp-chip">Tip</span><div class="tp-title">' + escapeHtml(tp.title || 'Tip') + '</div></div></div>';
+  }).join('');
+  return '<div class="tp-row' + (list.length === 1 ? ' single' : '') + '">' + cards + '</div>';
+}
 function _homeSection(title, cardsHtml) {
   return '<div class="home-section">' + (title ? '<div class="home-section-title">' + escapeHtml(title) + '</div>' : '') + cardsHtml + '</div>';
 }
@@ -6636,6 +6711,7 @@ async function renderHome() {
   let sections = [], tips = [];
   try { sections = await collectInicioSections({ only: need }); } catch (e) { console.warn('Inicio:', e); }
   try { tips = await loadTips(); } catch {}
+  try { await loadAvatarCache(); } catch {} // v1.70.5: avatares de perfil para los participantes de turnos
   if (seq !== _homeSeq) return;
   const sec = (k) => sections.find(x => x.key === k);
   const HORIZON = 14 * 86400000; // v1.61.0-beta: ventana de 14 días para asignaciones
@@ -6728,6 +6804,18 @@ async function renderHome() {
     if (k === 'eventos') { html += '<div class="home-section" id="home-eventos"></div>'; return; } // v1.60.8-beta
     if (k === 'texto') { html += '<div class="home-section" id="home-texto"></div>'; return; }
     let cards = [];
+    if (k === 'carritos' && (sec('carritos')?.items || []).length) {
+      html += _homeSection(HOME_SECTIONS[k].title, '<div class="home-card-list">' + sec('carritos').items.map(it => msCardHtml({ punto: it.label, dia: it.dia, hora: it.hora, nombres: it.nombres, onclick: 'homeAct(' + (_homeActions.push(it.onClick || null) - 1) + ')' })).join('') + '</div>');
+      return;
+    }
+    if (k === 'resp' && (sec('resp')?.items || []).length) {
+      html += _homeSection(HOME_SECTIONS[k].title, '<div class="home-card-list">' + sec('resp').items.map(_homeRespCard).join('') + '</div>');
+      return;
+    }
+    if (k === 'tips' && (tips || []).length) {
+      html += _homeSection(HOME_SECTIONS[k].title, _homeTipsCarousel(tips));
+      return;
+    }
     if (k === 'carritos') cards = (sec('carritos')?.items || []).map(it => ({ title: it.label, sub: it.sub, meta: it.partner, onClick: it.onClick }));
     else if (k === 'resp') cards = (sec('resp')?.items || []).map(it => ({ title: it.label, sub: it.sub, onClick: it.onClick }));
     else if (k === 'tips') cards = (tips || []).slice(0, 5).map(tp => ({ title: tp.title || 'Tip', onClick: () => openTipDetailModal(tp.id) }));
@@ -8454,6 +8542,14 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
     </div>
     <div class="detail-especial-photo-wrap" id="detail-especial-photo-wrap" style="display:none">
       <img id="detail-especial-photo" alt="">
+      <div class="detail-especial-countdown" id="detail-especial-countdown" style="display:none">
+        <div class="dec-label">Faltan para el evento</div>
+        <div class="dec-grid">
+          <div class="dec-seg"><b data-u="d">0</b><span>Días</span></div>
+          <div class="dec-seg"><b data-u="h">0</b><span>Horas</span></div>
+          <div class="dec-seg"><b data-u="m">0</b><span>Minutos</span></div>
+        </div>
+      </div>
     </div>
     <div class="detail-main-row">
       <div class="detail-info">
@@ -10569,7 +10665,7 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.69.0: (1) Detalle de asignación de Casa en casa: Más Opciones para todos (Asignar nuevo territorio, Clima, Compartir; Editar solo con permiso); el número de Territorio ya no es un botón. (2) Presionar la Sub-sección ya abierta ya no hace nada.
 // v1.69.1: (1) Más Opciones de la asignación: toggle para activar/desactivar Live por completo. (2) Asignaciones de Predicación por Grupo de Servicio: "Mi grupo", su tarjeta y el botón "Otros Grupos" van dentro de su propio contenedor.
 // v1.70: (1) Recuadro Live rediseñado (solo texto, botón Pausa/Play grande). (2) "Direcciones No Pasar" pasa arriba del recuadro Live, con espacio bajo el mapa y del tamaño de la dirección. (3) "Reportar Territorio" más redondeado. (4) El pill de Clima abre The Weather Channel (con confirmación).
-const APP_VERSION = '1.70.2';
+const APP_VERSION = '1.70.5';
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -14163,6 +14259,7 @@ async function collectInicioSections(opts) {
             sub: `${t.dia || ''}${t.hora ? ' • ' + t.hora : ''}`,
             partner: others.length ? 'Con ' + others.join(' y ') : 'Sin compañero por ahora',
             turnoId: t.id,
+            dia: t.dia || '', hora: t.hora || '', nombres: t.nombres || '', // v1.70.5: para la tarjeta de turno de Inicio
             sortKey: _inicioNextWeekdaySortKey(t.dia, t.hora),
             onClick: () => inicioOpenCartTurno(t.id),
           };
@@ -17728,6 +17825,35 @@ function closeOtrosGruposScreen() {
   document.body.style.overflow = '';
 }
 
+// v1.70.5: cuenta regresiva del detalle de un Evento (días, horas y minutos).
+let _evCdTimer = null;
+function _evTargetMs(a) {
+  if (!a || !a.date) return NaN;
+  const t = (a.time ? String(a.time).substring(0, 5) : '00:00');
+  return new Date(a.date + 'T' + t + ':00').getTime();
+}
+function _evCountdownStop() {
+  if (_evCdTimer) { clearInterval(_evCdTimer); _evCdTimer = null; }
+  const el = document.getElementById('detail-especial-countdown');
+  if (el) el.style.display = 'none';
+}
+function _evCountdownStart(target) {
+  const el = document.getElementById('detail-especial-countdown');
+  if (!el) return;
+  const tick = () => {
+    const wrap = document.getElementById('detail-especial-photo-wrap');
+    if (!wrap || wrap.style.display === 'none') { _evCountdownStop(); return; }
+    const ms = target - Date.now();
+    if (ms <= 0) { _evCountdownStop(); if (wrap.classList.contains('no-photo')) wrap.style.display = 'none'; return; }
+    const mins = Math.floor(ms / 60000);
+    el.querySelector('[data-u="d"]').textContent = Math.floor(mins / 1440);
+    el.querySelector('[data-u="h"]').textContent = Math.floor((mins % 1440) / 60);
+    el.querySelector('[data-u="m"]').textContent = mins % 60;
+    el.style.display = '';
+  };
+  tick();
+  _evCdTimer = setInterval(tick, 5000);
+}
 async function viewAssignment(id) {
   const a = assignments.find(x => x.id === id);
   if (!a) return;
@@ -17790,12 +17916,22 @@ async function viewAssignment(id) {
 
   // ── Foto de la tarjeta "Evento" / "Visita" ──
   const espPhotoWrap = document.getElementById('detail-especial-photo-wrap');
+  const _espImg = document.getElementById('detail-especial-photo');
+  _evCountdownStop();
+  const _evTarget = isEspecial ? _evTargetMs(a) : NaN;
+  const _evShowCd = isFinite(_evTarget) && _evTarget > Date.now();
   if (isEventoLike && a.especial_foto) {
-    document.getElementById('detail-especial-photo').src = a.especial_foto;
+    _espImg.src = a.especial_foto; _espImg.style.display = '';
+    espPhotoWrap.classList.remove('no-photo');
+    espPhotoWrap.style.display = '';
+  } else if (_evShowCd) {
+    _espImg.style.display = 'none';
+    espPhotoWrap.classList.add('no-photo');
     espPhotoWrap.style.display = '';
   } else {
     espPhotoWrap.style.display = 'none';
   }
+  if (_evShowCd) _evCountdownStart(_evTarget);
   document.getElementById('detail-panel')?.classList.toggle('has-hero', !!(isEventoLike && a.especial_foto)); // v1.60.7-beta
   // ── Descripción y Lugar del evento (v1.44.5-sb: no aplica a "Visita") ──
   const espDescBlock = document.getElementById('detail-especial-desc-block');
@@ -30744,32 +30880,23 @@ async function cartLoadAllData(force) {
 }
 
 // ---------- INICIO ----------
+let _cartAvTried = false;
 function cartRenderHome() {
   const home = document.getElementById('cartLocationsList');
   if (!home) return;
+  // v1.70.5: los participantes muestran su avatar de perfil; se cargan una vez y se repinta.
+  if (!_cartAvTried && typeof _avatarCacheLoaded !== 'undefined' && !_avatarCacheLoaded) {
+    _cartAvTried = true;
+    loadAvatarCache().then(() => cartRenderHome()).catch(() => {});
+  }
   home.innerHTML = '';
 
   const myName = cartUserName().toLowerCase();
   const myShifts = myName ? cartTURNOS.filter(d => (d.nombres || '').toLowerCase().includes(myName)) : [];
   if (myShifts.length > 0) {
-    home.innerHTML += `<div class="ct-section-title">Mis Turnos</div>`;
+    home.innerHTML += `<div class="ms-title">Mis Turnos</div>`;
     myShifts.forEach(s => {
-      const color = s.tipo.includes('TD') ? (s.estado === 'reservado' ? '#e08600' : 'var(--primary-green)') : (s.tipo.startsWith('M') ? 'var(--primary-ct-orange)' : 'var(--primary-blue)');
-      const dia3 = String(s.dia || '').substring(0, 3);
-      const people = String(s.nombres || '').split(/[,&\n\/]+/).map(x => x.trim()).filter(Boolean);
-      const peopleHtml = people.map(n => `<span class="ct-ms-person"><span class="ct-ms-av">${n.charAt(0).toUpperCase()}</span>${n}</span>`).join('');
-      home.innerHTML += `
-        <div class="ct-my-shift-card" onclick="cartOpenTurnDetail('${s.id}')">
-          <div class="ct-ms-top">
-            <div class="ct-ms-day" style="--ms-color:${color}">${dia3}</div>
-            <div class="ct-ms-main">
-              <div class="ct-ms-point">${s.punto}</div>
-              <div class="ct-ms-meta"><span>${s.dia}</span><span class="ct-ms-time">${s.hora}</span></div>
-            </div>
-            <span class="ct-ms-chev">&#8250;</span>
-          </div>
-          ${peopleHtml ? `<div class="ct-ms-people">${peopleHtml}</div>` : ''}
-        </div>`;
+      home.innerHTML += msCardHtml({ punto: s.punto, dia: s.dia, hora: s.hora, nombres: s.nombres, onclick: `cartOpenTurnDetail('${s.id}')` });
     });
   }
 
