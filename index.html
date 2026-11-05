@@ -6222,7 +6222,7 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 }
 @media (min-width:640px) {
   html.inicio-pref-on .desktop-home-toggle { display:flex; }
-  html.inicio-pref-on .home-desktop-sidebar.open { display:block; position:fixed; z-index:95; top:calc(var(--home-sidebar-top, 94px)); bottom:14px; left:14px; width: min(360px, 31vw); overflow-y:auto; border:1px solid var(--border); border-radius:22px; background:var(--bg); box-shadow:var(--shadow-lg); padding:4px 10px 14px; }
+  html.inicio-pref-on .home-desktop-sidebar.open { display:block; position:fixed; z-index:110; top:0; bottom:0; left:0; width:min(360px, 31vw); overflow-y:auto; border:0; border-right:1px solid var(--border); border-radius:0; background:var(--bg); box-shadow:var(--shadow-lg); padding:12px 10px 18px; }
   html.inicio-pref-on.home-desktop-open #main-content-shell { width:calc(100% - min(360px, 31vw) - 38px); max-width:none; margin-left:calc(min(360px, 31vw) + 38px); margin-right:0; }
   html.inicio-pref-on.home-desktop-open .app-header-shell { margin-left:calc(min(360px, 31vw) + 28px); }
   html.inicio-pref-on.home-desktop-open .app-header-shell.shell-compact { margin-left:calc(min(360px, 31vw) + 22px); }
@@ -6241,12 +6241,16 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 .desktop-home-toggle { display:none; }
 .desktop-home-toggle svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
 .home-desktop-sidebar { display:none; }
-.home-desktop-sidebar-head { display:flex; align-items:center; justify-content:space-between; padding:14px 16px 10px; font-size:1.08rem; color:var(--text); }
+.home-desktop-sidebar-head { display:flex; align-items:center; justify-content:space-between; padding:12px 16px 10px; font-size:1.08rem; color:var(--text); min-height:52px; }
+.home-desktop-sidebar-head strong { font-size:1rem; line-height:1.25; font-weight:700; }
+.home-desktop-sidebar-head strong .home-side-greeting-name { color:var(--text); }
 .home-desktop-sidebar-head button { border:0; background:var(--surface3); color:var(--text2); border-radius:50%; width:30px; height:30px; font-size:1.25rem; cursor:pointer; }
-.home-board-menu { display:none; position:fixed; inset:0; z-index:10060; align-items:flex-end; justify-content:center; padding:14px; background:rgba(0,0,0,.28); backdrop-filter:blur(5px); -webkit-backdrop-filter:blur(5px); }
-.home-board-menu.open { display:flex; }
-.home-board-menu-sheet { width:min(100%,420px); padding:10px; border:1px solid var(--border); border-radius:22px; background:var(--surface); box-shadow:var(--shadow-lg); }
-.home-board-menu-sheet button { display:block; width:100%; border:0; border-radius:14px; padding:15px 12px; background:var(--surface2); color:var(--text); font:inherit; font-weight:700; text-align:center; cursor:pointer; }
+.home-board-menu { display:none; position:fixed; inset:0; z-index:12060; background:transparent; }
+.home-board-menu.open { display:block; }
+.home-board-menu-sheet { position:absolute; width:min(260px,calc(100vw - 24px)); padding:6px; border:1px solid var(--border); border-radius:14px; background:var(--surface); box-shadow:var(--shadow-lg); transform-origin:top left; animation:menuMorphIn .2s var(--ease-fluid-soft); }
+.home-board-menu-sheet button { display:flex; align-items:center; gap:10px; width:100%; border:0; border-radius:9px; padding:11px 12px; background:transparent; color:var(--text); font:600 .86rem var(--font); text-align:left; cursor:pointer; }
+.home-board-menu-sheet button:hover { background:var(--surface2); }
+.home-board-menu-sheet button svg { width:17px; height:17px; flex:0 0 17px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
 .home-board-custom-overlay.open { display:flex; }
 .pt-head { display:flex; align-items:center; justify-content:space-between; gap:8px; }
 .pt-head-action { border:0; background:var(--surface3); color:var(--text2); width:30px; height:30px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; }
@@ -6260,6 +6264,19 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 .home-board-setting-row .home-board-setting-copy { flex:1; min-width:0; font-size:.86rem; font-weight:650; color:var(--text); }
 .home-board-setting-row small { display:block; margin-top:3px; color:var(--text3); font-size:.72rem; font-weight:500; }
 .home-board-setting-row select { max-width:140px; padding:9px 10px; border-radius:11px; border:1px solid var(--border); background:var(--surface2); color:var(--text); font:inherit; font-size:.8rem; }
+.home-board-setting-row-visual { align-items:flex-start; flex-direction:column; gap:10px; }
+.home-board-setting-row-visual .home-board-setting-copy { width:100%; }
+.home-size-choices { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; width:100%; }
+.home-size-choice { min-width:0; min-height:68px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:8px 4px; border:1px solid var(--border); border-radius:12px; background:var(--surface2); color:var(--text2); font:600 .7rem var(--font); cursor:pointer; transition:background .18s,border-color .18s,transform .15s,color .18s; }
+.home-size-choice:active { transform:scale(.96); }
+.home-size-choice.active { border-color:var(--accent); background:var(--accent-light); color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent); }
+.home-size-preview { width:34px; height:22px; display:flex; align-items:center; justify-content:center; border:1.5px solid currentColor; border-radius:5px; opacity:.9; }
+.home-size-preview i { display:block; width:45%; height:4px; border-radius:3px; background:currentColor; }
+.home-size-preview.auto { width:38px; height:22px; }
+.home-size-preview.small { width:20px; height:20px; }
+.home-size-preview.medium { width:38px; height:17px; }
+.home-size-preview.large { width:42px; height:25px; }
+@media(max-width:420px) { .home-size-choices { gap:5px; } .home-size-choice { font-size:.64rem; padding:7px 2px; } }
 .home-board-count-control { display:flex; align-items:center; justify-content:space-between; padding:14px; border-radius:16px; background:var(--surface); border:1px solid var(--border); margin-bottom:18px; }
 .home-board-count-control strong { font-size:.9rem; }
 .home-board-count-control .count-actions { display:flex; align-items:center; gap:12px; }
@@ -6459,14 +6476,15 @@ function _homeIcoBox(icon, col, extra, img) {
     (img ? '<img src="' + escapeHtml(img) + '" alt="" loading="lazy" onerror="this.outerHTML=\'<svg viewBox=&quot;0 0 24 24&quot;>' + (_HI[icon] || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;') + '</svg>\'">' : '<svg viewBox="0 0 24 24">' + (_HI[icon] || '') + '</svg>') + '</div>';
 }
 const HOME_SECTIONS = {
-  hoy:      { title: 'Predicación Hoy', icon: 'sun', col: 'blue' },
-  carritos: { title: 'Mis Turnos', icon: 'cart', col: 'teal' },
-  resp:     { title: 'Mis Responsabilidades', icon: 'users', col: 'purple' },
-  tips:     { title: 'Tips', icon: 'bulb', col: 'yellow' },
-  texto:    { title: 'Texto Diario', icon: 'book', col: 'orange' },
-  para:     { title: 'Para tí', icon: 'star', col: 'blue' }, // v1.61.0-beta: ya no es fijo; se puede reubicar o quitar
-  eventos:  { title: 'Próximos Eventos', icon: 'cal', col: 'purple' }, // v1.60.8-beta: Eventos programados en Casa en Casa
+  hoy:      { title: 'Predicación Hoy', i18n: 'home.preachingToday', icon: 'sun', col: 'blue' },
+  carritos: { title: 'Mis Turnos', i18n: 'home.myShifts', icon: 'cart', col: 'teal' },
+  resp:     { title: 'Mis Responsabilidades', i18n: 'home.myResponsibilities', icon: 'users', col: 'purple' },
+  tips:     { title: 'Tips', i18n: 'home.tips', icon: 'bulb', col: 'yellow' },
+  texto:    { title: 'Texto Diario', i18n: 'home.dailyText', icon: 'book', col: 'orange' },
+  para:     { title: 'Para tí', i18n: 'home.forYou', icon: 'star', col: 'blue' },
+  eventos:  { title: 'Próximos Eventos', i18n: 'home.upcomingEvents', icon: 'cal', col: 'purple' },
 };
+function _homeSectionTitle(k) { const sec = HOME_SECTIONS[k]; return sec ? _homeLang(sec.i18n || '') || sec.title : ''; }
 const HOME_DEFAULT_LAYOUT = ['texto', 'para', 'hoy', 'eventos', 'resp']; // v1.61.0-beta: Texto Diario, Para tí, Predicación de hoy, Eventos y Mis responsabilidades
 
 // v1.52.0: UI Classic vuelve a ser la vista por defecto. Inicio (Para ti, Mis asignaciones, Texto Diario, NavBar inferior)
@@ -6751,6 +6769,25 @@ function _homeDesktopMoveContent() {
   if (window.innerWidth >= 640) { if (content.parentElement !== host) host.appendChild(content); }
   else if (content.parentElement !== page) page.appendChild(content);
 }
+function updateDesktopHomeGreeting() {
+  const el = document.getElementById('home-desktop-greeting');
+  if (!el) return;
+  const first = ((currentUser && currentUser.name) || '').trim().split(/\s+/)[0] || '';
+  el.textContent = _homeLang('home.greeting') + (first ? ', ' + first : '');
+}
+function syncDesktopHomeNavState(open) {
+  const house = document.getElementById('desktop-home-toggle');
+  const pred = document.querySelector('.main-seg-btn[data-tab="predicacion"]');
+  const reun = document.querySelector('.main-seg-btn[data-tab="reuniones"]');
+  if (open) {
+    house?.classList.add('active'); pred?.classList.remove('active'); reun?.classList.remove('active');
+  } else {
+    house?.classList.remove('active');
+    pred?.classList.toggle('active', currentMainTab === 'predicacion');
+    reun?.classList.toggle('active', currentMainTab === 'reuniones');
+  }
+  if (typeof updateMainSegThumb === 'function') updateMainSegThumb(true);
+}
 function toggleDesktopHome() {
   if (!_homeDesktopEnabled()) return;
   _homeDesktopMoveContent();
@@ -6758,9 +6795,15 @@ function toggleDesktopHome() {
   const open = !root.classList.contains('home-desktop-open');
   root.classList.toggle('home-desktop-open', open); sidebar?.classList.toggle('open', open);
   document.getElementById('desktop-home-toggle')?.classList.toggle('active', open);
-  if (open) { renderHome(); const top = document.getElementById('app-header-shell')?.getBoundingClientRect().bottom || 90; root.style.setProperty('--home-sidebar-top', (top + 12) + 'px'); }
+  syncDesktopHomeNavState(open);
+  if (open) { updateDesktopHomeGreeting(); renderHome(); }
 }
-function closeDesktopHome() { document.documentElement.classList.remove('home-desktop-open'); document.getElementById('home-desktop-sidebar')?.classList.remove('open'); document.getElementById('desktop-home-toggle')?.classList.remove('active'); }
+function closeDesktopHome() {
+  document.documentElement.classList.remove('home-desktop-open');
+  document.getElementById('home-desktop-sidebar')?.classList.remove('open');
+  document.getElementById('desktop-home-toggle')?.classList.remove('active');
+  syncDesktopHomeNavState(false);
+}
 function syncDesktopHomeAvailability() {
   const root = document.documentElement, btn = document.getElementById('desktop-home-toggle');
   root.classList.toggle('inicio-pref-on', _homeDesktopEnabled());
@@ -6783,6 +6826,7 @@ function applyInicioChrome() {
       titleEl.textContent = currentMainTab === 'reuniones' ? t('nav.reuniones') : t('nav.predicacion');
     }
   }
+  if (document.documentElement.classList.contains('home-desktop-open')) updateDesktopHomeGreeting();
   document.documentElement.classList.toggle('home-greeting', active && currentMainTab === 'inicio');
     document.documentElement.classList.toggle('home-tab-inicio', active && currentMainTab === 'inicio');
   // v1.50.0-beta: Voz está en la NavBar de las 3 secciones, solo para quien tenga acceso.
@@ -6858,14 +6902,14 @@ function _homeDiffDays(ymd) {
   const a = new Date(_homeYmd(new Date()) + 'T00:00:00'), b = new Date(ymd + 'T00:00:00');
   return Math.round((b - a) / 86400000);
 }
-function _homeLongDate(ymd) { const d = new Date(ymd + 'T00:00:00'); return _HOME_DAYS[d.getDay()] + ' ' + d.getDate() + ' de ' + _HOME_MONTHS[d.getMonth()]; }
-function _homeShortDate(ymd) { const d = new Date(ymd + 'T00:00:00'); const m = _HOME_MONTHS[d.getMonth()]; return d.getDate() + ' de ' + m.charAt(0).toUpperCase() + m.slice(1); }
+function _homeLongDate(ymd) { return fmtCasaLongDate(new Date(ymd + 'T00:00:00')); }
+function _homeShortDate(ymd) { const d = new Date(ymd + 'T00:00:00'); return currentLang === 'es' ? d.getDate() + ' de ' + MON_ES_LONG[d.getMonth()] : currentLang === 'nl' ? d.getDate() + ' ' + MON_NL_LONG[d.getMonth()] : MON_EN_LONG[d.getMonth()] + ' ' + d.getDate(); }
 function _homeRelDay(ymd) {
   const n = _homeDiffDays(ymd);
-  if (n === 0) return 'Hoy';
-  if (n === 1) return 'Mañana';
-  if (n > 1 && n < 7) return 'Este ' + _HOME_DAYS[new Date(ymd + 'T00:00:00').getDay()];
-  return 'El ' + _homeLongDate(ymd);
+  if (n === 0) return _homeLang('home.today');
+  if (n === 1) return _homeLang('home.tomorrow');
+  if (n > 1 && n < 7) return currentLang === 'en' ? 'This ' + DAY_EN_LONG[new Date(ymd + 'T00:00:00').getDay()] : currentLang === 'nl' ? 'Deze ' + DAY_NL_LONG[new Date(ymd + 'T00:00:00').getDay()] : 'Este ' + _HOME_DAYS[new Date(ymd + 'T00:00:00').getDay()];
+  return (currentLang === 'en' ? '' : currentLang === 'nl' ? '' : 'El ') + _homeLongDate(ymd);
 }
 
 // ── Render ──
@@ -6874,11 +6918,11 @@ function homeAct(i) { const f = _homeActions[i]; if (typeof f === 'function') f(
 // v1.60.8.5-beta: contador de días que faltan para un evento (Hoy / 1 día / N días).
 function _homeCountParts(ymd) {
   const n = Math.max(0, _homeDiffDays(ymd));
-  return n === 0 ? { big: 'Hoy', small: '', today: true } : { big: String(n), small: n === 1 ? 'día' : 'días', today: false };
+  return n === 0 ? { big: _homeLang('home.today'), small: '', today: true } : { big: String(n), small: n === 1 ? _homeLang('home.day') : _homeLang('home.days'), today: false };
 }
 function _homeCountHtml(ymd, cls) {
   const c = _homeCountParts(ymd);
-  return '<div class="' + cls + (c.today ? ' is-today' : '') + '" title="' + (c.today ? 'Es hoy' : 'Faltan ' + c.big + ' ' + c.small) + '"><b>' + c.big + '</b>' + (c.small ? '<span>' + c.small + '</span>' : '') + '</div>';
+  return '<div class="' + cls + (c.today ? ' is-today' : '') + '" title="' + (c.today ? _homeLang('home.today') : _homeLang('home.remaining') + ' ' + c.big + ' ' + c.small) + '"><b>' + c.big + '</b>' + (c.small ? '<span>' + c.small + '</span>' : '') + '</div>';
 }
 function _homeCard(c) {
   const idx = _homeActions.push(c.onClick || null) - 1;
@@ -6939,7 +6983,7 @@ function _homeTime12(t) {
 }
 function _ptRel(ymd) {
   const n = _homeDiffDays(ymd);
-  return n === 0 ? 'Hoy' : n === 1 ? 'Mañana' : (n > 1 && n < 7) ? 'En ' + n + ' días' : '';
+  return n === 0 ? _homeLang('home.today') : n === 1 ? _homeLang('home.tomorrow') : (n > 1 && n < 7) ? (currentLang === 'en' ? 'In ' : currentLang === 'nl' ? 'Over ' : 'En ') + n + ' ' + _homeLang('home.days') : '';
 }
 function _ptBigNum(n, col) {
   const c = _HC[col] || _HC.blue, t = String(n);
@@ -6994,7 +7038,7 @@ function _homeParaRender() {
   shown.forEach(c => { const sz = sizes[c.pkey]; if (sz) c.mode = sz === 'small' ? 'sq' : sz === 'large' ? 'wide' : 'rect'; c.userSize = sz || 'auto'; });
   el.innerHTML = '<div class="pt-card"><div class="pt-head"><span onclick="openHomeBoardMenu(event)" style="cursor:pointer">' + _homeLang('home.forYou') + '</span><button class="pt-head-action" type="button" onclick="openHomeBoardMenu(event)" aria-label="' + _homeLang('home.customizeBoard') + '" title="' + _homeLang('home.customizeBoard') + '"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button></div>' + (shown.length
     ? '<div class="pt-grid">' + shown.map(_ptTile).join('') + '</div>'
-    : '<div class="pt-empty">Estás al día. Aquí verás tus recordatorios y novedades.</div>') + '</div>';
+    : '<div class="pt-empty">' + _homeLang('home.allCaughtUp') + '</div>') + '</div>';
 }
 
 async function renderHome() {
@@ -7019,11 +7063,11 @@ async function renderHome() {
   const para = [];
   (sec('recordatorios')?.items || []).forEach(it => {
     const t = it.dateRaw ? new Date(String(it.dateRaw).slice(0, 10) + 'T00:00:00').getTime() : 0;
-    para.push({ ts: isFinite(t) ? t : 0, icon: 'doc', col: 'blue', title: 'Recuerda realizar tu reporte de territorio',
+    para.push({ ts: isFinite(t) ? t : 0, icon: 'doc', col: 'blue', title: _homeLang('home.rememberReport'),
       sub: it.ter ? 'Territorio ' + it.ter : it.label, meta: it.dateRaw ? _homeShortDate(it.dateRaw) : '', onClick: it.onClick });
   });
-  [['vmc', typeof MEETING_DAY_VMC !== 'undefined' ? MEETING_DAY_VMC : 4, 'Asignación para la reunión', 'book', 'blue'],
-   ['fs',  typeof MEETING_DAY_FS  !== 'undefined' ? MEETING_DAY_FS  : 6, 'Asignación para la reunión pública', 'cal', 'green']].forEach(([k, dow, ttl, ic, cl]) => {
+  [['vmc', typeof MEETING_DAY_VMC !== 'undefined' ? MEETING_DAY_VMC : 4, _homeLang('home.meetingAssignment'), 'book', 'blue'],
+   ['fs',  typeof MEETING_DAY_FS  !== 'undefined' ? MEETING_DAY_FS  : 6, _homeLang('home.publicMeetingAssignment'), 'cal', 'green']].forEach(([k, dow, ttl, ic, cl]) => {
     (sec(k)?.items || []).forEach(it => {
       const md = _homeMeetingDate(it.weekStart, dow);
       if (!md) return;
@@ -7042,14 +7086,14 @@ async function renderHome() {
       const c = { ts: sk, icon: ic, col: cl, rel: _ptRel(ymd), onClick: it.onClick };
       if (k === 'casa') {
         const tm = _homeTime12(it.timeRaw);
-        Object.assign(c, { title: 'Asignación de Predicación', sub: _homeShortDate(ymd) + (tm ? ' a las ' + tm : '') });
+        Object.assign(c, { title: _homeLang('home.preachingAssignment'), sub: _homeShortDate(ymd) + (tm ? (currentLang === 'en' ? ' at ' : currentLang === 'nl' ? ' om ' : ' a las ') + tm : '') });
       } else if (k === 'carritos') {
         Object.assign(c, { title: 'Turno: ' + it.label, sub: it.sub, meta: it.partner || '' });
       } else if (k === 'aseo') {
         const enc = !!it.encargado, g = it.grupo;
         Object.assign(c, {
-          title: enc ? 'Encargado del aseo del salón' : 'Aseo del salón de tu grupo',
-          sub: (!enc && g != null ? 'Grupo ' + g + ' · ' : '') + _homeShortDate(ymd),
+          title: enc ? _homeLang('home.hallCleaningLead') : _homeLang('home.groupHallCleaning'),
+          sub: (!enc && g != null ? _homeLang('home.group') + ' ' + g + ' · ' : '') + _homeShortDate(ymd),
           big: (!enc && g != null) ? _ptBigNum(g, 'orange') : _ptBigIcon(_HI.house, _HC.orange[0]) });
       } else {
         const st = getCargoStyle(it.cargo || it.label);
@@ -7069,8 +7113,8 @@ async function renderHome() {
       if (fresh.length) freshTers.push({ tr, fresh, last: fresh.map(e => e.date.slice(0, 10)).sort().pop() });
     });
     freshTers.sort((a, b) => b.last.localeCompare(a.last)).slice(0, 2).forEach(({ tr, fresh, last }, i) => para.push({
-      ts: _nowMs + HORIZON + 86400000 + i, icon: 'ban', col: 'red', title: 'Nuevo No Pasar',
-      sub: (typeof terLabel === 'function' ? terLabel(tr.number) : 'Territorio ' + tr.number) + ': ' + fresh[0].addr + (fresh.length > 1 ? ' (+' + (fresh.length - 1) + ' más)' : ''),
+      ts: _nowMs + HORIZON + 86400000 + i, icon: 'ban', col: 'red', title: _homeLang('home.newDoNotCall'),
+      sub: (typeof terLabel === 'function' ? terLabel(tr.number) : _homeLang('home.territory') + ' ' + tr.number) + ': ' + fresh[0].addr + (fresh.length > 1 ? ' (+' + (fresh.length - 1) + ' más)' : ''),
       meta: _homeShortDate(last), onClick: () => inicioGoTo('predicacion', 'territorios') }));
   } catch (e) { console.warn('Inicio (nuevos No Pasar):', e); }
   // v1.60.8.5-beta: Eventos próximos desde 1 semana antes, con contador de días. (Visitas: hasta 14 días.)
@@ -7081,8 +7125,8 @@ async function renderHome() {
     const _evSel = (evs || []).filter(ev => ev.type === 'especial' ? _homeDiffDays(ev.date) <= 7 : false)
       .concat((evs || []).filter(ev => ev.type === 'visita' && _homeDiffDays(ev.date) <= 14).slice(0, 1));
     _evSel.forEach(ev => para.push({
-      ts: _inicioSortKey(ev.date, ev.time), icon: 'cal', col: 'purple', title: ev.type === 'visita' ? 'Visita próxima' : 'Evento próximo',
-      sub: ev.especial_titulo || (ev.type === 'visita' ? 'Visita' : 'Evento'),
+      ts: _inicioSortKey(ev.date, ev.time), icon: 'cal', col: 'purple', title: ev.type === 'visita' ? _homeLang('home.upcomingVisit') : _homeLang('home.upcomingEvent'),
+      sub: ev.especial_titulo || (ev.type === 'visita' ? _homeLang('home.visit') : _homeLang('home.event')),
       meta: _homeRelDay(ev.date) + (ev.time ? ' • ' + ev.time.substring(0, 5) + ' hrs' : ''),
       countDate: ev.date, onClick: _evGo(ev) }));
   } catch (e) { console.warn('Inicio (evento próximo):', e); }
@@ -7100,13 +7144,13 @@ async function renderHome() {
       const _dailyUrl = 'https://www.jw.org/finder?srcid=jwlshare&alias=daily-text&date=' + _dailyYmd.replace(/-/g, '') + '&wtlocale=S';
       para.push({
         ts: _nowMs - 1, icon: 'book', col: 'blue', full: true, dailyText: true,
-        title: 'Texto Diario', sub: _daily.scripture,
-        meta: _homeLongDate(_dailyYmd) + ' · Abrir en JW Library',
+        title: _homeLang('home.dailyText'), sub: _daily.scripture,
+        meta: _homeLongDate(_dailyYmd) + ' · ' + _homeLang('home.openInJwLibrary'),
         onClick: () => window.open(_dailyUrl, '_blank', 'noopener')
       });
     } catch (e) { console.warn('Texto Diario en Para ti:', e); }
   }
-  recentTips.forEach((tp, i) => para.push({ ts: _nowMs + HORIZON + 2 * 86400000 + i, icon: 'bulb', col: 'yellow', img: tp.image_url || '', title: 'Novedad: nuevo Tip', sub: tp.title || '', meta: 'Toca para leerlo', onClick: () => openTipDetailModal(tp.id) }));
+  recentTips.forEach((tp, i) => para.push({ ts: _nowMs + HORIZON + 2 * 86400000 + i, icon: 'bulb', col: 'yellow', img: tp.image_url || '', title: _homeLang('home.newTip'), sub: tp.title || '', meta: _homeLang('home.tapToRead'), onClick: () => openTipDetailModal(tp.id) }));
 
   // Orden cronológico (lo más próximo primero) y clave para poder quitar tarjetas (mantener presionado).
   para.forEach(c => { if (!isFinite(c.ts)) c.ts = Infinity; c.pkey = _homeParaKey(c); });
@@ -7130,25 +7174,25 @@ async function renderHome() {
     if (k === 'texto') { return; } // v1.73.0: Texto Diario se integra en Para ti.
     let cards = [];
     if (k === 'carritos' && (sec('carritos')?.items || []).length) {
-      html += _homeSection(HOME_SECTIONS[k].title, '<div class="home-card-list">' + sec('carritos').items.map(it => msCardHtml({ punto: it.label, dia: it.dia, hora: it.hora, nombres: it.nombres, onclick: 'homeAct(' + (_homeActions.push(it.onClick || null) - 1) + ')' })).join('') + '</div>');
+      html += _homeSection(_homeSectionTitle(k), '<div class="home-card-list">' + sec('carritos').items.map(it => msCardHtml({ punto: it.label, dia: it.dia, hora: it.hora, nombres: it.nombres, onclick: 'homeAct(' + (_homeActions.push(it.onClick || null) - 1) + ')' })).join('') + '</div>');
       return;
     }
     if (k === 'resp' && (sec('resp')?.items || []).length) {
-      html += _homeSection(HOME_SECTIONS[k].title, '<div class="home-card-list">' + sec('resp').items.map(_homeRespCard).join('') + '</div>');
+      html += _homeSection(_homeSectionTitle(k), '<div class="home-card-list">' + sec('resp').items.map(_homeRespCard).join('') + '</div>');
       return;
     }
     if (k === 'tips' && (tips || []).length) {
-      html += _homeSection(HOME_SECTIONS[k].title, _homeTipsCarousel(tips));
+      html += _homeSection(_homeSectionTitle(k), _homeTipsCarousel(tips));
       return;
     }
     if (k === 'carritos') cards = (sec('carritos')?.items || []).map(it => ({ title: it.label, sub: it.sub, meta: it.partner, onClick: it.onClick }));
     else if (k === 'resp') cards = (sec('resp')?.items || []).map(it => ({ title: it.label, sub: it.sub, onClick: it.onClick }));
     else if (k === 'tips') cards = (tips || []).slice(0, 5).map(tp => ({ title: tp.title || 'Tip', onClick: () => openTipDetailModal(tp.id) }));
-    if (!cards.length) { html += _homeSection(HOME_SECTIONS[k].title, '<div class="home-empty">Nada por ahora.</div>'); return; }
-    html += _homeSection(HOME_SECTIONS[k].title, '<div class="home-card-list">' + cards.map(_homeCard).join('') + '</div>');
+    if (!cards.length) { html += _homeSection(_homeSectionTitle(k), '<div class="home-empty">' + _homeLang('home.nothingYet') + '</div>'); return; }
+    html += _homeSection(_homeSectionTitle(k), '<div class="home-card-list">' + cards.map(_homeCard).join('') + '</div>');
   });
   // v1.51.0.7-alpha: "Personalizar Inicio" vive al final de Inicio (ya no está en el menú Más Opciones).
-  html += '<button type="button" class="home-custom-btn" onclick="openHomeCustomize()"><svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="10" y2="18"/><circle cx="18" cy="16" r="3"/></svg>Personalizar Inicio</button>';
+  html += '<button type="button" class="home-custom-btn" onclick="openHomeCustomize()"><svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="10" y2="18"/><circle cx="18" cy="16" r="3"/></svg>' + _homeLang('home.customizeHome') + '</button>';
   wrap.innerHTML = html;
   wrap.dataset.ready = '1';
   if (document.getElementById('home-para')) _homeParaRender();
@@ -7181,8 +7225,8 @@ async function renderHomeEventos() {
   const today = _homeYmd(new Date());
   const evs = (assignments || []).filter(a => a.type === 'especial' && a.date >= today)
     .sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')));
-  let h = '<div class="home-section-title">Eventos</div>';
-  if (!evs.length) { el2.innerHTML = h + '<div class="home-empty">No hay eventos programados.</div>'; return; }
+  let h = '<div class="home-section-title">' + _homeLang('home.events') + '</div>';
+  if (!evs.length) { el2.innerHTML = h + '<div class="home-empty">' + _homeLang('home.noEvents') + '</div>'; return; }
   // v1.68: Inicio muestra únicamente el evento futuro más cercano.
   const nearest = evs[0];
   const n = _homeDiffDays(nearest.date);
@@ -7204,7 +7248,7 @@ async function renderHomeHoy() {
   if (!el2) return;
   renderSchedule({ container: el2, onlyToday: true });
   if (!el2.innerHTML.trim()) {
-    el2.innerHTML = '<div class="home-section-title">Predicación Hoy</div><div class="home-empty">No hay asignaciones de predicación para hoy.</div>';
+    el2.innerHTML = '<div class="home-section-title">' + _homeLang('home.preachingToday') + '</div><div class="home-empty">' + _homeLang('home.noPreachingToday') + '</div>';
   }
 }
 // ── Texto Diario (v1.51.0-beta) ─────────────────────────────────────────────
@@ -7264,15 +7308,15 @@ async function renderHomeTexto() {
     const el = document.getElementById('home-texto');
     if (el) el.innerHTML = _homeSection('Texto Diario', '<div class="home-card-list">' + _homeCard(card) + '</div>');
   };
-  draw({ cls: 'home-card-texto', title: 'Cargando el Texto Diario…', onClick: open });
+  draw({ cls: 'home-card-texto', title: _homeLang('home.loadingDailyText'), onClick: open });
   try {
     const r = await _homeLoadTextoDiario(ymd);
     // v1.52.1-beta: sin ícono ni comentario; solo el texto (más grande) para invitar a abrir JW Library.
     draw({ cls: 'home-card-texto is-verse', title: r.scripture,
-      meta: _homeLongDate(ymd) + ' · Abrir en JW Library', onClick: open });
+      meta: _homeLongDate(ymd) + ' · ' + _homeLang('home.openInJwLibrary'), onClick: open });
   } catch (e) {
     console.warn('Texto Diario:', e);
-    draw({ cls: 'home-card-texto', title: 'Texto Diario', sub: 'No se pudo cargar el texto de hoy. Toca para abrirlo en JW Library.',
+    draw({ cls: 'home-card-texto', title: _homeLang('home.dailyText'), sub: _homeLang('home.dailyTextLoadError'),
       meta: _homeLongDate(ymd), onClick: open });
   }
 }
@@ -7280,7 +7324,7 @@ function homeRefreshHoyIfVisible() {
   if (currentMainTab === 'inicio' && document.getElementById('home-hoy')) {
     renderSchedule({ container: document.getElementById('home-hoy'), onlyToday: true });
     const el = document.getElementById('home-hoy');
-    if (el && !el.innerHTML.trim()) el.innerHTML = '<div class="home-section-title">Predicación Hoy</div><div class="home-empty">No hay asignaciones de predicación para hoy.</div>';
+    if (el && !el.innerHTML.trim()) el.innerHTML = '<div class="home-section-title">' + _homeLang('home.preachingToday') + '</div><div class="home-empty">' + _homeLang('home.noPreachingToday') + '</div>';
   }
 }
 
@@ -7316,7 +7360,7 @@ function homeParaAskHide(i) {
       const h = _homeHiddenLoad(); h[key] = Date.now(); _homeHiddenSave(h);
       ov.remove();
       _homeParaRender(); // v1.61.0-beta: reacomoda los mosaicos (entra el siguiente en fecha, si hay)
-      showToast('Tarjeta quitada', '');
+      showToast(_homeLang('home.cardRemoved'), '');
     }
   });
   document.body.appendChild(ov);
@@ -7377,13 +7421,13 @@ function renderHomeCustomize() {
   let h = '<div class="home-custom-h">Tus apartados</div>';
   if (!layout.length) h += '<div class="home-empty">No tienes apartados. Agrega alguno abajo.</div>';
   layout.forEach((k, i) => {
-    h += '<div class="home-custom-row"' + (k === 'para' ? ' onclick="openHomeBoardCustomize()" style="cursor:pointer"' : '') + '>' + _homeIcoBox(HOME_SECTIONS[k].icon, HOME_SECTIONS[k].col, 'home-custom-ico') + '<div class="home-custom-name"' + (k === 'para' ? ' role="button" tabindex="0" onclick="openHomeBoardCustomize()" style="cursor:pointer"' : '') + '>' + escapeHtml(k === 'para' ? _homeLang('home.forYou') : HOME_SECTIONS[k].title) +
+    h += '<div class="home-custom-row"' + (k === 'para' ? ' onclick="openHomeBoardCustomize()" style="cursor:pointer"' : '') + '>' + _homeIcoBox(HOME_SECTIONS[k].icon, HOME_SECTIONS[k].col, 'home-custom-ico') + '<div class="home-custom-name"' + (k === 'para' ? ' role="button" tabindex="0" onclick="openHomeBoardCustomize()" style="cursor:pointer"' : '') + '>' + escapeHtml(k === 'para' ? _homeLang('home.forYou') : _homeSectionTitle(k)) +
       (k === 'para' ? '<div class="home-custom-note">' + _homeLang('home.customizeBoard') + '</div>' : '') + '</div>' +
       _homeIco('up', '', "homeMove('" + k + "',-1)", i === 0) + _homeIco('down', '', "homeMove('" + k + "',1)", i === layout.length - 1) + _homeIco('x', 'del', "homeRemove('" + k + "')") + '</div>';
   });
   if (avail.length) {
     h += '<div class="home-custom-h">Agregar</div>';
-    avail.forEach(k => { h += '<div class="home-custom-row">' + _homeIcoBox(HOME_SECTIONS[k].icon, HOME_SECTIONS[k].col, 'home-custom-ico') + '<div class="home-custom-name">' + escapeHtml(HOME_SECTIONS[k].title) + '</div>' + _homeIco('plus', 'add', "homeAdd('" + k + "')") + '</div>'; });
+    avail.forEach(k => { h += '<div class="home-custom-row">' + _homeIcoBox(HOME_SECTIONS[k].icon, HOME_SECTIONS[k].col, 'home-custom-ico') + '<div class="home-custom-name">' + escapeHtml(_homeSectionTitle(k)) + '</div>' + _homeIco('plus', 'add', "homeAdd('" + k + "')") + '</div>'; });
   }
   const nHid = Object.keys(_homeHiddenLoad()).length;
   if (nHid) h += '<button class="home-custom-reset" onclick="homeRestoreHidden()">Restaurar tarjetas quitadas de "Para tí" (' + nHid + ')</button>';
@@ -7397,7 +7441,21 @@ function _homeParaSizesSave(o) { try { localStorage.setItem(_homeParaSizesKey(),
 function homeParaSetSize(key, size) { const o = _homeParaSizesLoad(); if (size === 'auto') delete o[key]; else o[key] = size; _homeParaSizesSave(o); _homeParaRender(); renderHomeBoardCustomize(); }
 function homeParaSetSizeByIndex(index, size) { const c = _homeParaAll.filter(x => !_homeHiddenLoad()[x.pkey] && (!x.dailyText || new Date().getHours() < 12))[index]; if (c) homeParaSetSize(c.pkey, size); }
 function homeParaSetCount(delta) { setHomeParaCount(getHomeParaCount() + delta); _homeParaRender(); renderHomeBoardCustomize(); }
-function openHomeBoardMenu(ev) { if (ev) ev.stopPropagation(); document.getElementById('home-board-menu')?.classList.add('open'); }
+function openHomeBoardMenu(ev) {
+  if (ev) ev.stopPropagation();
+  const menu = document.getElementById('home-board-menu'), sheet = menu?.querySelector('.home-board-menu-sheet');
+  if (!menu || !sheet) return;
+  const trigger = ev?.currentTarget?.closest('.pt-head-action, .pt-head span') || ev?.target?.closest('.pt-head-action, .pt-head span');
+  const anchor = trigger || document.querySelector('.pt-head-action');
+  const r = anchor?.getBoundingClientRect();
+  if (r) {
+    const width = Math.min(260, window.innerWidth - 24);
+    const left = Math.max(12, Math.min(r.left, window.innerWidth - width - 12));
+    sheet.style.left = left + 'px';
+    sheet.style.top = Math.min(window.innerHeight - 70, r.bottom + 7) + 'px';
+  }
+  menu.classList.add('open');
+}
 function closeHomeBoardMenu() { document.getElementById('home-board-menu')?.classList.remove('open'); }
 async function openHomeBoardCustomize() {
   closeHomeBoardMenu();
@@ -7415,7 +7473,9 @@ function renderHomeBoardCustomize() {
   h += '<div class="home-board-count-control"><strong>' + _homeLang('home.cardCount') + '</strong><div class="count-actions">' + _homeIco('minus', '', 'homeParaSetCount(-1)', getHomeParaCount() <= HOME_PARA_MIN) + '<b>' + getHomeParaCount() + '</b>' + _homeIco('plus', '', 'homeParaSetCount(1)', getHomeParaCount() >= HOME_PARA_MAX) + '</div></div>';
   shown.slice(0, getHomeParaCount()).forEach((c, i) => {
     const label = c.title || (_homeLang('home.card') + ' ' + (i + 1));
-    h += '<div class="home-board-setting-row"><div class="home-board-setting-copy">' + escapeHtml(label) + '<small>' + _homeLang('home.cardSize') + '</small></div><select aria-label="' + escapeHtml(_homeLang('home.cardSize')) + '" onchange="homeParaSetSizeByIndex(' + i + ',this.value)"><option value="auto"' + (!sizes[c.pkey] ? ' selected' : '') + '>' + _homeLang('home.auto') + '</option><option value="small"' + (sizes[c.pkey] === 'small' ? ' selected' : '') + '>' + _homeLang('home.small') + '</option><option value="medium"' + (sizes[c.pkey] === 'medium' ? ' selected' : '') + '>' + _homeLang('home.medium') + '</option><option value="large"' + (sizes[c.pkey] === 'large' ? ' selected' : '') + '>' + _homeLang('home.large') + '</option></select></div>';
+    const selectedSize = sizes[c.pkey] || 'auto';
+    h += '<div class="home-board-setting-row home-board-setting-row-visual"><div class="home-board-setting-copy">' + escapeHtml(label) + '<small>' + _homeLang('home.cardSize') + '</small></div><div class="home-size-choices" role="group" aria-label="' + escapeHtml(_homeLang('home.cardSize')) + '">' +
+      [['auto','home.auto','auto'],['small','home.small','small'],['medium','home.medium','medium'],['large','home.large','large']].map(([v,k,shape]) => '<button type="button" class="home-size-choice' + (selectedSize === v ? ' active' : '') + '" aria-pressed="' + (selectedSize === v) + '" title="' + escapeHtml(_homeLang(k)) + '" onclick="homeParaSetSizeByIndex(' + i + ',\'' + v + '\')"><span class="home-size-preview ' + shape + '"><i></i></span><span>' + _homeLang(k) + '</span></button>').join('') + '</div></div>';
   });
   if (!shown.length) h += '<div class="home-empty">' + _homeLang('home.customizeHint') + '</div>';
   body.innerHTML = h;
@@ -7755,7 +7815,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
     <div class="home-custom-body" id="home-custom-body"></div>
   </div>
   <div class="home-board-menu" id="home-board-menu" onclick="if(event.target===this)closeHomeBoardMenu()">
-    <div class="home-board-menu-sheet"><button type="button" onclick="closeHomeBoardMenu();openHomeBoardCustomize()" data-i18n="home.customizeBoard">Personalizar tablero Para ti</button></div>
+    <div class="home-board-menu-sheet"><button type="button" onclick="closeHomeBoardMenu();openHomeBoardCustomize()"><svg viewBox="0 0 24 24"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.7 2.94-.08-.02a1.7 1.7 0 0 0-1.76.58l-.05.07h-3.4l-.04-.08a1.7 1.7 0 0 0-1.53-.95 1.7 1.7 0 0 0-.85.23l-.08.05-2.94-1.7.02-.08a1.7 1.7 0 0 0-.58-1.76l-.07-.05v-3.4l.08-.04a1.7 1.7 0 0 0 .72-2.38l-.05-.08 1.7-2.94.08.02a1.7 1.7 0 0 0 1.76-.58l.05-.07h3.4l.04.08a1.7 1.7 0 0 0 2.38.72l.08-.05 2.94 1.7-.02.08a1.7 1.7 0 0 0 .58 1.76l.07.05v3.4l-.08.04Z"/></svg><span data-i18n="home.customizeBoard">Personalizar tablero Para ti</span></button></div>
   </div>
   <div class="home-custom-overlay home-board-custom-overlay" id="home-board-custom-overlay">
     <div class="subpage-topbar home-custom-top">
@@ -7989,7 +8049,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
   </div>
 
   <aside id="home-desktop-sidebar" class="home-desktop-sidebar" aria-label="Home">
-    <div class="home-desktop-sidebar-head"><strong data-i18n="home.title">Inicio</strong><button type="button" onclick="closeDesktopHome()" aria-label="Cerrar">×</button></div>
+    <div class="home-desktop-sidebar-head"><strong id="home-desktop-greeting"></strong><button type="button" onclick="closeDesktopHome()" aria-label="Cerrar">×</button></div>
     <div id="home-desktop-host"></div>
   </aside>
   <div class="main-content" id="main-content-shell">
@@ -11065,7 +11125,8 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.70: (1) Recuadro Live rediseñado (solo texto, botón Pausa/Play grande). (2) "Direcciones No Pasar" pasa arriba del recuadro Live, con espacio bajo el mapa y del tamaño de la dirección. (3) "Reportar Territorio" más redondeado. (4) El pill de Clima abre The Weather Channel (con confirmación).
 // v1.72: Detalle de un turno de Carritos con el mismo layout y estilo que el detalle de Predicación de Casa en casa (título "Detalles del Turno", nombre del punto y punto de retiro, participantes, Dropdowns de Llamar y Cómo llegar, hora completa del turno, avatares de los participantes, y Más opciones con Editar turno, Editar punto, Clima y Recordatorios para el turno).
 // v1.74.0: Personalizar Para ti con cantidad y tamaño por tarjeta; Inicio disponible en escritorio como panel lateral para la Interfaz Nueva.
-const APP_VERSION = '1.74.0';
+// v1.74.5: Inicio traducido a inglés y neerlandés; vista lateral desde Más Opciones en escritorio; personalización visual del tamaño de tarjetas.
+const APP_VERSION = '1.74.5'; // v1.74.5
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -12351,6 +12412,47 @@ const I18N = {
   'home.large': { es: 'Grande', en: 'Large', nl: 'Groot' },
   'home.card': { es: 'Tarjeta', en: 'Card', nl: 'Kaart' },
   'home.customizeHint': { es: 'Elige cuántas tarjetas mostrar y ajusta el tamaño de cada una.', en: 'Choose how many cards to show and adjust each card’s size.', nl: 'Kies hoeveel kaarten je wilt tonen en pas het formaat van elke kaart aan.' },
+  'home.greeting': { es: 'Hola', en: 'Hello', nl: 'Hallo' },
+  'home.preachingToday': { es: 'Predicación Hoy', en: 'Preaching Today', nl: 'Prediking vandaag' },
+  'home.myShifts': { es: 'Mis Turnos', en: 'My Shifts', nl: 'Mijn diensten' },
+  'home.myResponsibilities': { es: 'Mis Responsabilidades', en: 'My Responsibilities', nl: 'Mijn verantwoordelijkheden' },
+  'home.tips': { es: 'Tips', en: 'Tips', nl: 'Tips' },
+  'home.dailyText': { es: 'Texto Diario', en: 'Daily Text', nl: 'Dagtekst' },
+  'home.upcomingEvents': { es: 'Próximos Eventos', en: 'Upcoming Events', nl: 'Aankomende evenementen' },
+  'home.events': { es: 'Eventos', en: 'Events', nl: 'Evenementen' },
+  'home.customizeHome': { es: 'Personalizar Inicio', en: 'Customize Home', nl: 'Startpagina aanpassen' },
+  'home.today': { es: 'Hoy', en: 'Today', nl: 'Vandaag' },
+  'home.tomorrow': { es: 'Mañana', en: 'Tomorrow', nl: 'Morgen' },
+  'home.day': { es: 'día', en: 'day', nl: 'dag' },
+  'home.days': { es: 'días', en: 'days', nl: 'dagen' },
+  'home.remaining': { es: 'Faltan', en: 'In', nl: 'Nog' },
+  'home.rememberReport': { es: 'Recuerda realizar tu reporte de territorio', en: 'Remember to submit your territory report', nl: 'Vergeet niet je gebiedsrapport in te dienen' },
+  'home.meetingAssignment': { es: 'Asignación para la reunión', en: 'Meeting assignment', nl: 'Toewijzing voor de vergadering' },
+  'home.publicMeetingAssignment': { es: 'Asignación para la reunión pública', en: 'Public meeting assignment', nl: 'Toewijzing voor de openbare vergadering' },
+  'home.preachingAssignment': { es: 'Asignación de Predicación', en: 'Preaching Assignment', nl: 'Predikingstoewijzing' },
+  'home.hallCleaningLead': { es: 'Encargado del aseo del salón', en: 'Kingdom Hall cleaning coordinator', nl: 'Coördinator Koninkrijkszaal schoonmaak' },
+  'home.groupHallCleaning': { es: 'Aseo del salón de tu grupo', en: 'Your group’s Kingdom Hall cleaning', nl: 'Schoonmaak van de Koninkrijkszaal door jouw groep' },
+  'home.group': { es: 'Grupo', en: 'Group', nl: 'Groep' },
+  'home.territory': { es: 'Territorio', en: 'Territory', nl: 'Gebied' },
+  'home.newDoNotCall': { es: 'Nuevo No Pasar', en: 'New Do Not Call', nl: 'Nieuwe Niet-Bezoeken' },
+  'home.upcomingVisit': { es: 'Visita próxima', en: 'Upcoming Visit', nl: 'Komend bezoek' },
+  'home.upcomingEvent': { es: 'Evento próximo', en: 'Upcoming Event', nl: 'Aankomend evenement' },
+  'home.visit': { es: 'Visita', en: 'Visit', nl: 'Bezoek' },
+  'home.event': { es: 'Evento', en: 'Event', nl: 'Evenement' },
+  'home.openInJwLibrary': { es: 'Abrir en JW Library', en: 'Open in JW Library', nl: 'Openen in JW Library' },
+  'home.newTip': { es: 'Novedad: nuevo Tip', en: 'New: a new tip', nl: 'Nieuw: een nieuwe tip' },
+  'home.tapToRead': { es: 'Toca para leerlo', en: 'Tap to read', nl: 'Tik om te lezen' },
+  'home.noEvents': { es: 'No hay eventos programados.', en: 'There are no scheduled events.', nl: 'Er zijn geen evenementen gepland.' },
+  'home.allCaughtUp': { es: 'Estás al día. Aquí verás tus recordatorios y novedades.', en: 'You’re all caught up. Your reminders and updates will appear here.', nl: 'Je bent helemaal bij. Hier verschijnen je herinneringen en updates.' },
+  'home.nothingYet': { es: 'Nada por ahora.', en: 'Nothing here for now.', nl: 'Voorlopig niets.' },
+  'home.noPreachingToday': { es: 'No hay asignaciones de predicación para hoy.', en: 'There are no preaching assignments for today.', nl: 'Er zijn vandaag geen predikingstoewijzingen.' },
+  'home.loadingDailyText': { es: 'Cargando el Texto Diario…', en: 'Loading the Daily Text…', nl: 'Dagtekst laden…' },
+  'home.dailyTextLoadError': { es: 'No se pudo cargar el texto de hoy. Toca para abrirlo en JW Library.', en: 'Today’s text could not be loaded. Tap to open it in JW Library.', nl: 'De tekst van vandaag kon niet worden geladen. Tik om deze in JW Library te openen.' },
+  'home.cardWillHide': { es: 'Dejará de mostrarse en "Para ti". Puedes restaurarla desde Personalizar Inicio.', en: 'This card will no longer appear in For You. You can restore it from Customize Home.', nl: 'Deze kaart wordt niet meer weergegeven bij Voor jou. Je kunt deze herstellen via Startpagina aanpassen.' },
+  'home.removeCardQuestion': { es: '¿Quitar esta tarjeta?', en: 'Remove this card?', nl: 'Deze kaart verwijderen?' },
+  'home.cardRemoved': { es: 'Tarjeta quitada', en: 'Card removed', nl: 'Kaart verwijderd' },
+  'h2h.openSidebar': { es: 'Abrir en panel derecho', en: 'Open in right sidebar', nl: 'Openen in rechterzijbalk' },
+  'h2h.returnPopup': { es: 'Volver a ventana emergente', en: 'Return to pop-up', nl: 'Terug naar pop-up' },
   'nav.predicacion':        { es: 'Predicación',            en: 'Preaching',           nl: 'Prediking' },
   'nav.reuniones':          { es: 'Reuniones',               en: 'Meetings',           nl: 'Vergaderingen' },
   'subtab.casa':            { es: 'Casa en casa',            en: 'House to House',      nl: 'Huis aan huis' },
@@ -12534,7 +12636,6 @@ const I18N = {
   // ── Mi Perfil ──
   'profile.title':          { es: 'Mi Perfil',               en: 'My Profile' },
   'nav.inicio':             { es: 'Inicio',                  en: 'Home',              nl: 'Start' },
-  'home.greeting':          { es: 'Hola',                    en: 'Hello',             nl: 'Hallo' },
   'profile.grupo':          { es: 'Grupo de Servicio',       en: 'Service Group',     nl: 'Dienstgroep' },
   'profile.grupo.asignado': { es: 'Grupo asignado',          en: 'Assigned group',    nl: 'Toegewezen groep' },
   'profile.rolgrupo':       { es: 'Rol en el grupo',         en: 'Role in group',     nl: 'Rol in de groep' },
@@ -12644,6 +12745,8 @@ function applyLanguage(lang) {
   try { if (typeof updateSimplifiedModeToggleUI === 'function') updateSimplifiedModeToggleUI(); } catch {}
   try { if (typeof updateWeatherToggleUI === 'function') updateWeatherToggleUI(); } catch {}
   try { applyInicioChrome(); } catch {}
+  try { if (currentMainTab === 'inicio' || document.documentElement.classList.contains('home-desktop-open')) renderHome(); } catch {}
+  try { updateDesktopHomeGreeting(); } catch {}
   updateLangPrefUI();
 }
 function updateLangPrefUI() {
@@ -17105,6 +17208,7 @@ function _loadNavState() {
 }
 
 function switchMainTab(tab, btn) {
+  if (tab !== 'inicio' && document.documentElement.classList.contains('home-desktop-open')) closeDesktopHome();
   currentMainTab = tab;
   document.querySelectorAll('.main-seg-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -18636,6 +18740,7 @@ async function viewAssignment(id) {
   const _detailOverlay = document.getElementById('detail-overlay');
   const _useSidebarMode = window.innerWidth >= 640 && typeof getHouseToHouseViewMode === 'function' && getHouseToHouseViewMode() === 'sidebar';
   _detailOverlay.classList.toggle('sidebar-mode', _useSidebarMode);
+  if (_useSidebarMode && typeof closeDesktopHome === 'function') closeDesktopHome();
   document.body.classList.toggle('h2h-sidebar-open', _useSidebarMode);
   _detailOverlay.classList.add('open');
   document.body.style.overflow = _useSidebarMode ? '' : 'hidden';
@@ -24820,6 +24925,7 @@ function toggleH2HSidebarLive() {
   const current = getHouseToHouseViewMode();
   const next = current === 'sidebar' ? 'popup' : 'sidebar';
   setHouseToHouseViewMode(next);
+  if (next === 'sidebar' && window.innerWidth >= 640 && typeof closeDesktopHome === 'function') closeDesktopHome();
   const overlay = document.getElementById('detail-overlay');
   if (overlay && window.innerWidth >= 640) {
     overlay.classList.toggle('sidebar-mode', next === 'sidebar');
@@ -34119,7 +34225,8 @@ const _DAM_ICON = {
   ter: '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><line x1="12" y1="6.5" x2="12" y2="11.5"/><line x1="9.5" y1="9" x2="14.5" y2="9"/></svg>',
   live: '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>',
   weather: '<svg viewBox="0 0 24 24"><path d="M17.5 19H8a5 5 0 1 1 1.35-9.8A6 6 0 0 1 21 11.5 4.5 4.5 0 0 1 17.5 19z"/></svg>',
-  share: '<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>'
+  share: '<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>',
+  sidebar: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M14 4v16"/></svg>'
 };
 // v1.69.0: el menú se arma según quién mira: Editar y Asignar nuevo territorio (Administradores de Predicación; esto último
 // también el Encargado de la asignación), Clima y Compartir para cualquiera (incluidos Visitantes).
@@ -34134,11 +34241,20 @@ function detailRenderMoreMenu() {
   h+=`<button type="button" class="dam-toggle-row" role="switch" aria-checked="${liveOn}" onclick="detailMoreAction('live')">${_DAM_ICON.live}<span class="dam-label">Live</span><span class="dam-switch${liveOn?' on':''}"><span class="dam-thumb"></span></span></button>`;
   h+=`<button type="button" class="dam-toggle-row" role="switch" aria-checked="${on}" onclick="detailMoreAction('weather')">${_DAM_ICON.weather}<span class="dam-label">Clima</span><span class="dam-switch${on?' on':''}"><span class="dam-thumb"></span></span></button>`;
   h+=`<button type="button" onclick="detailMoreAction('share')">${_DAM_ICON.share}Compartir</button>`;
+  if (window.innerWidth >= 640) {
+    const sideOn = getHouseToHouseViewMode() === 'sidebar';
+    h+=`<button type="button" onclick="detailMoreAction('sidebar')">${_DAM_ICON.sidebar}<span>${sideOn ? t('h2h.returnPopup') : t('h2h.openSidebar')}</span></button>`;
+  }
   menu.innerHTML=h;
 }
 function detailMoreAction(action) {
   const panel=document.getElementById('detail-panel');
   const id=panel?._openAssignmentId;
+  if (action==='sidebar') {
+    detailCloseMoreMenu();
+    if (window.innerWidth >= 640) toggleH2HSidebarLive();
+    return;
+  }
   if (action==='live') {
     // v1.69.1: activa/desactiva Live por completo (misma preferencia que Configuración → Funciones especiales).
     const next=localStorage.getItem('fleming_live_enabled')==='false';
