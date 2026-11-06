@@ -5493,6 +5493,108 @@
 #sub-content-carritos .ct-days-row, #admin-carritos .ct-days-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
 #sub-content-carritos .ct-days-row::-webkit-scrollbar, #admin-carritos .ct-days-row::-webkit-scrollbar { display: none; }
 
+/* ---------- v1.76: DETALLE DE PUNTO (nueva interfaz con portada) ---------- */
+#detail-ct-screen #cartDetailScrollBody.cpd-scroll { padding: 0; }
+.cpd-hero {
+  position: relative; min-height: 390px; display: flex; flex-direction: column; justify-content: flex-end;
+  color: #fff; border-radius: 0 0 40px 40px; overflow: hidden; isolation: isolate;
+  background: linear-gradient(160deg, #2f7bff 0%, #0a47b8 58%, #062b6b 100%);
+}
+.cpd-hero-img { position: absolute; inset: 0; z-index: -2; background-size: cover; background-position: center; opacity: 0; transition: opacity 0.45s ease; }
+.cpd-hero.has-img .cpd-hero-img { opacity: 1; }
+.cpd-hero-shade { position: absolute; inset: 0; z-index: -1; background: linear-gradient(to bottom, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0) 28%, rgba(0,0,0,0) 42%, rgba(0,0,0,0.68) 100%); }
+.cpd-topbar { position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: calc(env(safe-area-inset-top, 0px) + 14px) 16px 0; z-index: 2; }
+.cpd-circle {
+  width: 46px; height: 46px; border-radius: 50%; border: 0; padding: 0; flex-shrink: 0; cursor: pointer;
+  background: rgba(255,255,255,0.82); color: #1c1c1e; display: flex; align-items: center; justify-content: center;
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); transition: transform 0.15s, background-color 0.2s, color 0.2s;
+}
+.cpd-circle:active { transform: scale(0.92); }
+.cpd-circle.on { background: var(--accent); color: #fff; }
+.cpd-circle-soft { background: var(--surface3); color: var(--text2); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.cpd-circle-soft.on { background: var(--accent); color: #fff; }
+.cpd-pill { padding: 12px 22px; border-radius: 99px; background: rgba(255,255,255,0.74); color: #3c3c43; font-weight: 700; font-size: 1.02rem; white-space: nowrap; -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+.cpd-hero-bottom { padding: 90px 18px 18px; }
+.cpd-hero-bottom h1 { margin: 0; font-size: 2.35rem; line-height: 1.05; font-weight: 800; letter-spacing: -0.03em; text-shadow: 0 2px 14px rgba(0,0,0,0.35); color: #fff; }
+.cpd-hero-sub { margin-top: 6px; font-size: 1rem; font-weight: 500; opacity: 0.95; text-shadow: 0 1px 8px rgba(0,0,0,0.35); }
+.cpd-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+.cpd-act { height: 56px; border-radius: 99px; border: 0; font-family: inherit; font-size: 1.12rem; font-weight: 700; cursor: pointer; transition: transform 0.15s; -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+.cpd-act:active { transform: scale(0.96); }
+.cpd-act-call { background: rgba(240,240,244,0.9); color: #3c3c43; }
+.cpd-act-route { background: rgba(255,255,255,0.28); color: #fff; border: 1px solid rgba(255,255,255,0.3); }
+
+.cpd-search { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.32s var(--ease-fluid); }
+.cpd-search.open { grid-template-rows: 1fr; }
+.cpd-search-inner { overflow: hidden; padding: 0 16px; }
+.cpd-search-box { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding: 0 8px 0 16px; height: 50px; border-radius: 99px; background: var(--surface3); color: var(--text3); }
+.cpd-search-box input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font-family: inherit; font-size: 1rem; color: var(--text); }
+.cpd-search-clear { width: 34px; height: 34px; border: 0; border-radius: 50%; background: transparent; color: var(--text3); font-size: 1.5rem; line-height: 1; cursor: pointer; }
+
+.cpd-body { padding: 16px 16px 32px; }
+.cpd-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 24px; padding: 16px 18px; margin-bottom: 12px; }
+.cpd-card-h { display: flex; align-items: center; gap: 10px; color: var(--accent); font-weight: 700; font-size: 1.02rem; }
+.cpd-card-h svg { width: 26px; height: 26px; flex-shrink: 0; }
+.cpd-card-p { margin: 6px 0 0 36px; color: var(--text2); font-size: 1rem; line-height: 1.35; }
+.cpd-card-p.is-empty { color: var(--text3); }
+
+.cpd-sec-head { display: flex; align-items: center; justify-content: space-between; margin: 22px 0 6px; }
+.cpd-sec-title { margin: 0; font-size: 1.45rem; font-weight: 700; color: var(--text2); letter-spacing: -0.02em; }
+.cpd-fotos-title { margin: 30px 0 12px; }
+.cpd-filter-wrap { position: relative; }
+.cpd-menu {
+  position: absolute; right: 0; top: calc(100% + 8px); min-width: 220px; z-index: 30; padding: 6px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow-lg);
+  opacity: 0; transform: translateY(-6px) scale(0.97); transform-origin: top right; pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.22s var(--ease-fluid-soft);
+}
+.cpd-menu.open { opacity: 1; transform: none; pointer-events: auto; }
+.cpd-menu button { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 0; border-radius: 12px; background: transparent; color: var(--text); font-family: inherit; font-size: 0.95rem; font-weight: 600; text-align: left; cursor: pointer; }
+.cpd-menu button:hover { background: var(--surface3); }
+.cpd-menu button .cpd-ck { opacity: 0; }
+.cpd-menu button.sel { color: var(--accent); }
+.cpd-menu button.sel .cpd-ck { opacity: 1; }
+
+.cpd-day { margin-top: 12px; }
+.cpd-day-title { margin: 0 0 10px; font-size: 1.45rem; font-weight: 600; color: var(--accent); letter-spacing: -0.01em; }
+.cpd-day-empty { color: var(--text3); font-size: 0.92rem; padding: 2px 0 18px; }
+.cpd-none { text-align: center; color: var(--text3); padding: 28px 8px; font-size: 0.95rem; }
+
+.cpd-slot {
+  display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; padding: 14px 16px; cursor: pointer;
+  background: linear-gradient(155deg, var(--surface3) 0%, var(--surface) 78%);
+  border: 1px solid var(--border); border-radius: 24px; box-shadow: var(--shadow);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.cpd-slot:hover { transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+.cpd-slot:active { transform: scale(0.98); }
+.cpd-slot-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.cpd-slot-time { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 0.98rem; color: var(--text); }
+.cpd-slot-time svg { width: 15px; height: 15px; opacity: 0.6; }
+.cpd-slot-chev { font-size: 1.4rem; line-height: 1; color: var(--text3); }
+.cpd-slot-people { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 10px; border-top: 1px solid var(--border); }
+.cpd-slot-note { font-size: 0.9rem; font-weight: 600; color: var(--text2); }
+.cpd-slot .ms-person.hit { box-shadow: 0 0 0 2px var(--accent); }
+.cpd-slot.is-avail { background: linear-gradient(135deg, #16a34a, #22c55e); border-color: transparent; box-shadow: 0 3px 10px rgba(22,163,74,0.25); color: #fff; }
+.cpd-slot.is-avail .cpd-slot-time, .cpd-slot.is-avail .cpd-slot-note { color: #fff; }
+.cpd-slot.is-avail .cpd-slot-chev { color: rgba(255,255,255,0.85); }
+.cpd-slot.is-avail .cpd-slot-people { border-color: rgba(255,255,255,0.28); }
+
+.cpd-photos { display: flex; gap: 12px; overflow-x: auto; margin: 0 -16px; padding: 2px 16px 6px; scroll-snap-type: x proximity; scrollbar-width: none; }
+.cpd-photos::-webkit-scrollbar { display: none; }
+.cpd-photo, .cpd-photo-add { flex: 0 0 auto; width: min(46vw, 190px); aspect-ratio: 1 / 1.1; border-radius: 24px; overflow: hidden; border: 0; padding: 0; scroll-snap-align: start; cursor: pointer; background: var(--surface3); }
+.cpd-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cpd-photo-add { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: transparent; border: 2px dashed var(--accent); color: var(--accent); font-family: inherit; font-weight: 700; font-size: 0.9rem; }
+.cpd-photos-empty { color: var(--text3); font-size: 0.92rem; }
+
+.cpd-lb { position: fixed; inset: 0; z-index: 6000; background: rgba(0,0,0,0.93); display: flex; align-items: center; justify-content: center; animation: fadeIn 0.2s ease; }
+.cpd-lb img { max-width: 100%; max-height: 82vh; object-fit: contain; }
+.cpd-lb-top { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: calc(env(safe-area-inset-top, 0px) + 14px) 16px 0; color: #fff; font-weight: 600; }
+.cpd-lb-btn { width: 44px; height: 44px; border: 0; border-radius: 50%; background: rgba(255,255,255,0.16); color: #fff; font-size: 1.6rem; line-height: 1; cursor: pointer; }
+.cpd-lb-nav { position: absolute; top: 50%; transform: translateY(-50%); }
+.cpd-lb-acts { position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: center; gap: 10px; padding: 0 16px calc(env(safe-area-inset-bottom, 0px) + 20px); }
+.cpd-lb-acts button { padding: 12px 18px; border: 0; border-radius: 99px; background: rgba(255,255,255,0.18); color: #fff; font-family: inherit; font-weight: 700; font-size: 0.92rem; cursor: pointer; }
+.cpd-lb-acts button.danger { background: rgba(255,59,48,0.85); }
+
 /* ---------- TURN DETAIL SCREEN ---------- */
 #sub-content-carritos .ct-turn-detail-screen, #admin-carritos .ct-turn-detail-screen {
   position: fixed; top: 0; left: 100%; width: 100%; height: 100%;
@@ -8106,20 +8208,68 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
     </section>
 
     <section class="ct-screen" id="detail-ct-screen" onclick="cartOverlayClick(event)">
-      <div class="ct-detail-panel" onclick="event.stopPropagation()">
-        <div class="ct-detail-topbar">
-          <button onclick="cartGoBack()" class="ct-header-btn ct-detail-back-btn" aria-label="Volver">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <button onclick="cartGoBack()" class="ct-header-btn ct-detail-close-btn" aria-label="Cerrar">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-        </div>
-        <div class="ct-scroll-container" id="cartDetailScrollBody">
-          <h1 id="cartCurrentPointTitle" style="margin-top:12px; margin-bottom:16px; font-size: 1.7rem; line-height:1.2;">Punto</h1>
-          <div id="cartLogisticsInfo"></div>
-          <div id="cartDaysRow" class="ct-days-row" style="margin: 16px 0;"></div>
-          <div id="cartSlotsContainer"></div>
+      <!-- v1.76: nueva interfaz del detalle de punto (portada, acciones rápidas, dirección, encargado, turnos agrupados por día y fotos) -->
+      <div class="ct-detail-panel cpd-panel" onclick="event.stopPropagation()">
+        <div class="ct-scroll-container cpd-scroll" id="cartDetailScrollBody">
+          <div class="cpd-hero" id="cpdHero">
+            <div class="cpd-hero-img" id="cpdHeroImg"></div>
+            <div class="cpd-hero-shade"></div>
+            <div class="cpd-topbar">
+              <div>
+                <button onclick="cartGoBack()" class="cpd-circle ct-detail-back-btn" aria-label="Volver">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <button onclick="cartGoBack()" class="cpd-circle ct-detail-close-btn" aria-label="Cerrar">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+              <div class="cpd-pill">Punto de Carrito</div>
+              <button id="cpdSearchBtn" onclick="cpdToggleSearch()" class="cpd-circle" aria-label="Buscar en los turnos">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </button>
+            </div>
+            <div class="cpd-hero-bottom">
+              <h1 id="cartCurrentPointTitle">Punto</h1>
+              <div class="cpd-hero-sub" id="cpdHeroSub"></div>
+              <div class="cpd-actions">
+                <button type="button" class="cpd-act cpd-act-call" onclick="cpdCallEncargado()">Llamar</button>
+                <button type="button" class="cpd-act cpd-act-route" onclick="cpdDirections()">Cómo llegar</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="cpd-search" id="cpdSearch">
+            <div class="cpd-search-inner">
+              <div class="cpd-search-box">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input id="cpdSearchInput" type="search" placeholder="Buscar persona en los turnos" autocomplete="off" oninput="cpdOnSearch(this.value)">
+                <button type="button" class="cpd-search-clear" onclick="cpdClearSearch()" aria-label="Borrar búsqueda">&times;</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="cpd-body">
+            <div id="cpdInfo"></div>
+
+            <div class="cpd-sec-head">
+              <h2 class="cpd-sec-title">Turnos</h2>
+              <div class="cpd-filter-wrap">
+                <button id="cpdFilterBtn" type="button" class="cpd-circle cpd-circle-soft" onclick="cpdToggleFilter(event)" aria-label="Filtrar turnos">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="10" y1="17" x2="14" y2="17"/></svg>
+                </button>
+                <div class="cpd-menu" id="cpdFilterMenu" role="menu">
+                  <button type="button" role="menuitem" data-f="todos" onclick="cpdSetFilter('todos')"><span>Todos los turnos</span><svg class="cpd-ck" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></button>
+                  <button type="button" role="menuitem" data-f="reservados" onclick="cpdSetFilter('reservados')"><span>Turnos reservados</span><svg class="cpd-ck" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></button>
+                  <button type="button" role="menuitem" data-f="disponibles" onclick="cpdSetFilter('disponibles')"><span>Turnos disponibles</span><svg class="cpd-ck" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></button>
+                </div>
+              </div>
+            </div>
+            <div id="cartSlotsContainer"></div>
+
+            <h2 class="cpd-sec-title cpd-fotos-title">Fotos</h2>
+            <div id="cpdPhotos"></div>
+            <input type="file" id="cpdFileInput" accept="image/*" multiple hidden onchange="cpdUploadPhotos(this)">
+          </div>
         </div>
       </div>
     </section>
@@ -11157,7 +11307,7 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.75.2: el botón Back del sistema ahora retrocede una pantalla por vez (cierra tutoriales, Voz, menús, modales y páginas); desde Predicación o Reuniones vuelve a Inicio, y en Inicio o con UI Classic cierra la plataforma.
 // v1.75.3: el botón "Ver responsabilidades para este día" también está en la sub-sección Reunión Pública (lleva al día de Reunión Pública de esa semana).
 // v1.75.3.5: en el Perfil de un usuario externo se puede presionar su imagen de perfil para verla en grande.
-const APP_VERSION = '1.75.3.5'; // v1.75.3.5 — imagen de perfil en grande (base: v1.75.3 botón a Responsabilidades en Reunión Pública)
+const APP_VERSION = '1.76'; // v1.75.3.5 — imagen de perfil en grande (base: v1.75.3 botón a Responsabilidades en Reunión Pública)
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -31780,42 +31930,268 @@ function cartRenderHome() {
   home.appendChild(grid);
 }
 
+// ── v1.76: Detalle de punto con nueva interfaz ──
+// Portada con foto + nombre + acciones rápidas (Llamar al encargado / Cómo llegar), tarjetas de Dirección y Encargado,
+// turnos agrupados por día en una sola lista (con búsqueda por persona y filtro Todos / Reservados / Disponibles) y
+// sección de Fotos (solo las sube el Administrador de Predicación o el Admin con acceso a Carritos).
+// Requiere en Supabase: columnas cart_puntos.fotos (jsonb) y cart_puntos.portada_url (text) + bucket público "cart-fotos" (ver SQL entregado).
+let cartTurnFilter = 'todos';
+let cartTurnSearch = '';
+let _cpdPhotoIdx = 0;
+const CPD_BUCKET = 'cart-fotos';
+const _CPD_ICO = {
+  pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-6.3 7-12a7 7 0 1 0-14 0c0 5.7 7 12 7 12z"/><circle cx="12" cy="10" r="2.6"/></svg>',
+  face: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9.5" x2="9.01" y2="9.5"/><line x1="15" y1="9.5" x2="15.01" y2="9.5"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg>',
+  plus: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
+};
+
+function _cpdDia(d) { return d === 'Miercoles' ? 'Miércoles' : (d === 'Sabado' ? 'Sábado' : d); }
+function _cpdPoint() { return cartPUNTOS.find(x => String(x.id) === String(cartCurrentPointId)); }
+
+// "Lunes a Domingo", "Lunes a Viernes", "Martes, Jueves y Sábado"…
+function _cpdDiasLabel(dias) {
+  const ds = CART_DIAS.filter(d => (dias || []).some(x => _cartNorm(x) === _cartNorm(d)));
+  if (!ds.length) return '';
+  if (ds.length === 1) return _cpdDia(ds[0]);
+  const idx = ds.map(d => CART_DIAS.indexOf(d));
+  if (ds.length >= 3 && idx.every((v, i) => i === 0 || v === idx[i - 1] + 1)) return _cpdDia(ds[0]) + ' a ' + _cpdDia(ds[ds.length - 1]);
+  return ds.slice(0, -1).map(_cpdDia).join(', ') + ' y ' + _cpdDia(ds[ds.length - 1]);
+}
+
+function _cpdState(s) {
+  const isTD = String(s.tipo || '').includes('TD');
+  const has = String(s.nombres || '').trim() !== '';
+  const res = s.estado === 'reservado';
+  return { isTD, has, reserved: has || res, available: isTD && !has && !res };
+}
+
 function cartSelectPoint(id) {
   cartCurrentPointId = id;
-  const p = cartPUNTOS.find(x => x.id === id);
+  const p = cartPUNTOS.find(x => String(x.id) === String(id));
   if (!p) return;
+  cartTurnFilter = 'todos'; cartTurnSearch = '';
+  cpdReset();
   document.getElementById('cartCurrentPointTitle').innerText = p.nombre;
-  document.getElementById('cartLogisticsInfo').innerHTML = `<div class="ct-logistics-box ct-orange"><h4>${cartICONS.pin} Retiro</h4><p>${p.retiro_nombre || ''}</p><div style="display:flex; gap:8px; margin-top:12px;"><a href="tel:${p.retiro_tel || ''}" class="ct-btn-mini">${cartICONS.phone} Llamar</a><a href="http://maps.google.com/?q=${encodeURIComponent(p.retiro_nombre || '')}" target="_blank" class="ct-btn-mini">${cartICONS.map} Mapa</a></div></div><div class="ct-logistics-box"><h4>${cartICONS.user} Encargado</h4><p>${p.encargado_nombre || ''}</p><div style="display:flex; gap:8px; margin-top:12px;"><a href="tel:${p.encargado_tel || ''}" class="ct-btn-mini">${cartICONS.phone} Llamar</a></div></div>`;
-  const dRow = document.getElementById('cartDaysRow');
-  dRow.innerHTML = '';
-  cartCurrentDay = (p.dias || [])[0] || '';
-  (p.dias || []).forEach(d => {
-    const b = document.createElement('div');
-    b.className = `ct-filter-chip ${d === cartCurrentDay ? 'ct-active' : ''}`;
-    b.innerText = d.substring(0, 3);
-    b.onclick = () => {
-      document.querySelectorAll('#cartDaysRow .ct-filter-chip').forEach(x => x.classList.remove('ct-active'));
-      b.classList.add('ct-active');
-      cartCurrentDay = d;
-      cartRenderShifts();
-    };
-    dRow.appendChild(b);
-  });
+  document.getElementById('cpdHeroSub').textContent = _cpdDiasLabel(p.dias);
+  cpdRenderHero();
+  document.getElementById('cpdInfo').innerHTML =
+    '<div class="cpd-card"><div class="cpd-card-h">' + _CPD_ICO.pin + '<span>Dirección del retiro de carrito</span></div>' +
+      '<div class="cpd-card-p' + (p.retiro_nombre ? '' : ' is-empty') + '">' + escapeHtml(p.retiro_nombre || 'Sin dirección registrada') + '</div></div>' +
+    '<div class="cpd-card"><div class="cpd-card-h">' + _CPD_ICO.face + '<span>Encargado de este punto</span></div>' +
+      '<div class="cpd-card-p' + (p.encargado_nombre ? '' : ' is-empty') + '">' + escapeHtml(p.encargado_nombre || 'Sin encargado registrado') + '</div></div>';
   document.getElementById('detail-ct-screen').classList.add('ct-active');
+  const sc = document.getElementById('cartDetailScrollBody'); if (sc) sc.scrollTop = 0;
   cartRenderShifts();
+  cpdRenderPhotos();
+}
+
+function cpdRenderHero() {
+  const p = _cpdPoint(); if (!p) return;
+  const url = p.portada_url || (Array.isArray(p.fotos) && p.fotos[0]) || '';
+  const hero = document.getElementById('cpdHero'), img = document.getElementById('cpdHeroImg');
+  if (url) { img.style.backgroundImage = 'url("' + String(url).replace(/"/g, '%22') + '")'; hero.classList.add('has-img'); }
+  else { img.style.backgroundImage = ''; hero.classList.remove('has-img'); }
+}
+
+// Llamar: se llama al encargado del punto.
+function cpdCallEncargado() {
+  const p = _cpdPoint(); if (!p) return;
+  const tel = String(p.encargado_tel || '').replace(/[^\d+]/g, '');
+  if (!tel) { showToast('Este punto no tiene teléfono del encargado.', 'error'); return; }
+  window.location.href = 'tel:' + tel;
+}
+function cpdDirections() {
+  const p = _cpdPoint(); if (!p) return;
+  const dest = String(p.retiro_nombre || '').trim();
+  if (!dest) { showToast('Este punto no tiene dirección de retiro.', 'error'); return; }
+  window.open('https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(dest), '_blank');
+}
+
+// ── Búsqueda y filtro ──
+function cpdToggleSearch() {
+  const box = document.getElementById('cpdSearch'), btn = document.getElementById('cpdSearchBtn');
+  const open = !box.classList.contains('open');
+  box.classList.toggle('open', open); btn.classList.toggle('on', open);
+  if (open) setTimeout(() => { try { document.getElementById('cpdSearchInput').focus(); } catch (e) {} }, 320);
+  else cpdClearSearch();
+}
+function cpdOnSearch(v) { cartTurnSearch = v || ''; cartRenderShifts(); }
+function cpdClearSearch() {
+  const i = document.getElementById('cpdSearchInput'); if (i) i.value = '';
+  cartTurnSearch = ''; cartRenderShifts();
+}
+function cpdToggleFilter(ev) {
+  if (ev) ev.stopPropagation();
+  document.getElementById('cpdFilterMenu').classList.toggle('open');
+}
+function cpdSetFilter(f) {
+  cartTurnFilter = f;
+  cpdSyncFilterUi();
+  document.getElementById('cpdFilterMenu').classList.remove('open');
+  cartRenderShifts();
+}
+function cpdSyncFilterUi() {
+  document.querySelectorAll('#cpdFilterMenu button').forEach(b => b.classList.toggle('sel', b.dataset.f === cartTurnFilter));
+  const fb = document.getElementById('cpdFilterBtn'); if (fb) fb.classList.toggle('on', cartTurnFilter !== 'todos');
+}
+function cpdReset() {
+  try {
+    document.getElementById('cpdSearch').classList.remove('open');
+    document.getElementById('cpdSearchBtn').classList.remove('on');
+    const i = document.getElementById('cpdSearchInput'); if (i) i.value = '';
+    document.getElementById('cpdFilterMenu').classList.remove('open');
+    cartTurnFilter = 'todos'; cartTurnSearch = '';
+    cpdSyncFilterUi();
+  } catch (e) {}
+}
+document.addEventListener('click', e => {
+  const m = document.getElementById('cpdFilterMenu');
+  if (m && m.classList.contains('open') && !e.target.closest('.cpd-filter-wrap')) m.classList.remove('open');
+});
+
+// ── Turnos: todos juntos, categorizados por día ──
+function _cpdSlotHtml(s, q) {
+  const st = _cpdState(s);
+  const people = String(s.nombres || '').split(/[,\/&+\n]+/).map(x => x.trim()).filter(Boolean);
+  let bottom = '';
+  if (st.available) {
+    bottom = '<div class="cpd-slot-people"><span class="cpd-slot-note">Turno disponible</span></div>';
+  } else if (people.length) {
+    bottom = '<div class="cpd-slot-people">' + people.map(n => {
+      const hit = q && _cartNorm(n).includes(q);
+      return '<span class="ms-person' + (hit ? ' hit' : '') + '">' + buildAvatarHtml(_msResolveName(n), 22, '0.58rem') + '<span class="ms-pname">' + escapeHtml(n) + '</span></span>';
+    }).join('') + '</div>';
+  } else if (st.reserved) {
+    bottom = '<div class="cpd-slot-people"><span class="cpd-slot-note">Reservado por ' + escapeHtml(s.reservado_por || 'alguien') + '</span></div>';
+  }
+  return '<div class="cpd-slot' + (st.available ? ' is-avail' : '') + '" onclick="cartOpenTurnDetail(\'' + s.id + '\')">' +
+    '<div class="cpd-slot-top"><span class="cpd-slot-time">' + _CPD_ICO.clock + escapeHtml(_cartHoraRango(s.hora)) + '</span><span class="cpd-slot-chev">&#8250;</span></div>' +
+    bottom + '</div>';
 }
 
 function cartRenderShifts() {
   const cont = document.getElementById('cartSlotsContainer');
-  const pNombre = (cartPUNTOS.find(x => x.id === cartCurrentPointId) || {}).nombre;
-  const filtered = cartTURNOS.filter(d => (d.dia || '').toLowerCase() === cartCurrentDay.toLowerCase() && d.punto === pNombre);
-  cont.innerHTML = filtered.map(s => {
-    const isTD = s.tipo.includes('TD');
-    const isReservado = isTD && s.estado === 'reservado';
-    const claseColor = isReservado ? 'ct-turno-RESERVADO' : (isTD ? 'ct-turno-TD' : (s.tipo.startsWith('T') ? 'ct-turno-T' : 'ct-turno-M'));
-    const etiqueta = isReservado ? `Reservado por ${s.reservado_por || 'alguien'}` : s.hora;
-    return `<div class="ct-slot ${claseColor}" onclick="cartOpenTurnDetail('${s.id}')"><div style="display:flex; justify-content:space-between; align-items:center;"><b style="font-size:1rem;">${s.nombres || (isTD ? 'Disponible' : '')}</b><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div><div class="ct-slot-pill">${etiqueta}</div></div>`;
-  }).join('') || '<p style="text-align:center; opacity:0.5; margin-top:20px;">No hay turnos hoy.</p>';
+  const p = _cpdPoint(); if (!cont || !p) return;
+  const q = _cartNorm(cartTurnSearch.trim());
+  const filtering = cartTurnFilter !== 'todos' || !!q;
+  const mine = cartTURNOS.filter(t => String(t.punto_id) === String(p.id) || (!t.punto_id && t.punto === p.nombre));
+  const dias = CART_DIAS.filter(d => (p.dias || []).some(x => _cartNorm(x) === _cartNorm(d)) || mine.some(t => _cartNorm(t.dia) === _cartNorm(d)));
+  let html = '', total = 0;
+  dias.forEach(d => {
+    const list = mine.filter(t => _cartNorm(t.dia) === _cartNorm(d)).filter(t => {
+      const st = _cpdState(t);
+      if (cartTurnFilter === 'reservados' && !st.reserved) return false;
+      if (cartTurnFilter === 'disponibles' && !st.available) return false;
+      if (q && !_cartNorm((t.nombres || '') + ' ' + (t.reservado_por || '')).includes(q)) return false;
+      return true;
+    }).sort((a, b) => String(_cartStartHHMM(a.hora) || '99:99').localeCompare(String(_cartStartHHMM(b.hora) || '99:99')));
+    if (!list.length && filtering) return;
+    total += list.length;
+    html += '<div class="cpd-day"><h3 class="cpd-day-title">' + escapeHtml(_cpdDia(d)) + '</h3>' +
+      (list.length ? list.map(s => _cpdSlotHtml(s, q)).join('') : '<div class="cpd-day-empty">Sin turnos este día</div>') + '</div>';
+  });
+  if (!html) html = '<div class="cpd-none">' + (filtering ? 'No hay turnos que coincidan.' : 'Este punto aún no tiene turnos.') + '</div>';
+  cont.innerHTML = html;
+}
+
+// ── Fotos del punto ──
+function cpdRenderPhotos() {
+  const p = _cpdPoint(); const box = document.getElementById('cpdPhotos'); if (!p || !box) return;
+  const fotos = Array.isArray(p.fotos) ? p.fotos : [];
+  const admin = cartIsAdmin();
+  if (!fotos.length && !admin) { box.innerHTML = '<div class="cpd-photos-empty">Aún no hay fotos de este punto.</div>'; return; }
+  box.innerHTML = '<div class="cpd-photos">' +
+    (admin ? '<button type="button" class="cpd-photo-add" onclick="document.getElementById(\'cpdFileInput\').click()">' + _CPD_ICO.plus + 'Agregar foto</button>' : '') +
+    fotos.map((u, i) => '<button type="button" class="cpd-photo" onclick="cpdOpenPhoto(' + i + ')"><img src="' + escapeHtml(u) + '" alt="Foto del punto" loading="lazy"></button>').join('') + '</div>';
+}
+
+function _cpdResize(file, max) {
+  max = max || 1600;
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file); const img = new Image();
+    img.onload = () => {
+      const r = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement('canvas'); c.width = Math.round(img.width * r); c.height = Math.round(img.height * r);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      c.toBlob(b => b ? resolve(b) : reject(new Error('No se pudo procesar la imagen')), 'image/jpeg', 0.82);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Imagen no válida')); };
+    img.src = url;
+  });
+}
+
+async function cpdUploadPhotos(input) {
+  const p = _cpdPoint();
+  const files = Array.from((input && input.files) || []); if (input) input.value = '';
+  if (!p || !files.length) return;
+  if (!cartIsAdmin()) { showToast('Solo un administrador puede subir fotos.', 'error'); return; }
+  showToast('Subiendo ' + (files.length > 1 ? files.length + ' fotos…' : 'foto…'));
+  const urls = [];
+  for (const f of files) {
+    try {
+      const blob = await _cpdResize(f);
+      const path = p.id + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.jpg';
+      const up = await sb.storage.from(CPD_BUCKET).upload(path, blob, { contentType: 'image/jpeg', cacheControl: '31536000' });
+      if (up.error) throw up.error;
+      urls.push(sb.storage.from(CPD_BUCKET).getPublicUrl(path).data.publicUrl);
+    } catch (e) { console.error(e); showToast('No se pudo subir una foto: ' + (e.message || e), 'error'); }
+  }
+  if (!urls.length) return;
+  const nuevas = (Array.isArray(p.fotos) ? p.fotos : []).concat(urls);
+  const { error } = await sb.from('cart_puntos').update({ fotos: nuevas }).eq('id', p.id);
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  p.fotos = nuevas; cpdRenderPhotos(); cpdRenderHero();
+  showToast(urls.length > 1 ? 'Fotos agregadas.' : 'Foto agregada.', 'success');
+}
+
+function cpdOpenPhoto(i) {
+  const p = _cpdPoint(); if (!p || !Array.isArray(p.fotos) || !p.fotos.length) return;
+  _cpdPhotoIdx = Math.max(0, Math.min(i, p.fotos.length - 1));
+  cpdCloseLightbox();
+  const lb = document.createElement('div'); lb.id = 'cpdLightbox'; lb.className = 'cpd-lb';
+  lb.onclick = e => { if (e.target === lb) cpdCloseLightbox(); };
+  document.body.appendChild(lb);
+  cpdPaintLightbox();
+}
+function cpdPaintLightbox() {
+  const p = _cpdPoint(), lb = document.getElementById('cpdLightbox'); if (!p || !lb) return;
+  const f = p.fotos, url = f[_cpdPhotoIdx];
+  const isCover = (p.portada_url || f[0]) === url;
+  lb.innerHTML =
+    '<img src="' + escapeHtml(url) + '" alt="Foto del punto">' +
+    '<div class="cpd-lb-top"><span>' + (_cpdPhotoIdx + 1) + ' / ' + f.length + '</span><button class="cpd-lb-btn" onclick="cpdCloseLightbox()" aria-label="Cerrar">&times;</button></div>' +
+    (f.length > 1 ? '<button class="cpd-lb-btn cpd-lb-nav" style="left:12px" onclick="cpdStepPhoto(-1)" aria-label="Anterior">&#8249;</button><button class="cpd-lb-btn cpd-lb-nav" style="right:12px" onclick="cpdStepPhoto(1)" aria-label="Siguiente">&#8250;</button>' : '') +
+    (cartIsAdmin() ? '<div class="cpd-lb-acts">' + (isCover ? '' : '<button onclick="cpdSetCover()">Usar como portada</button>') + '<button class="danger" onclick="cpdDeletePhoto()">Eliminar</button></div>' : '');
+}
+function cpdStepPhoto(d) {
+  const p = _cpdPoint(); if (!p) return;
+  _cpdPhotoIdx = (_cpdPhotoIdx + d + p.fotos.length) % p.fotos.length; cpdPaintLightbox();
+}
+function cpdCloseLightbox() { const lb = document.getElementById('cpdLightbox'); if (lb) lb.remove(); }
+
+async function cpdSetCover() {
+  const p = _cpdPoint(); if (!p || !cartIsAdmin()) return;
+  const url = p.fotos[_cpdPhotoIdx];
+  const { error } = await sb.from('cart_puntos').update({ portada_url: url }).eq('id', p.id);
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  p.portada_url = url; cpdRenderHero(); cpdPaintLightbox(); showToast('Portada actualizada.', 'success');
+}
+async function cpdDeletePhoto() {
+  const p = _cpdPoint(); if (!p || !cartIsAdmin()) return;
+  if (!confirm('¿Eliminar esta foto?')) return;
+  const url = p.fotos[_cpdPhotoIdx];
+  const nuevas = p.fotos.filter((_, i) => i !== _cpdPhotoIdx);
+  const patch = { fotos: nuevas };
+  if (p.portada_url === url) patch.portada_url = null;
+  const { error } = await sb.from('cart_puntos').update(patch).eq('id', p.id);
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  try { const k = String(url).split('/' + CPD_BUCKET + '/')[1]; if (k) await sb.storage.from(CPD_BUCKET).remove([decodeURIComponent(k.split('?')[0])]); } catch (e) {}
+  p.fotos = nuevas; if (patch.portada_url === null) p.portada_url = null;
+  cpdRenderPhotos(); cpdRenderHero();
+  if (!nuevas.length) cpdCloseLightbox(); else { _cpdPhotoIdx = Math.min(_cpdPhotoIdx, nuevas.length - 1); cpdPaintLightbox(); }
+  showToast('Foto eliminada.', 'success');
 }
 
 // ── v1.72: Detalle de un turno de Carritos (mismo layout/estilo que el detalle de Casa en casa) ──
@@ -32187,7 +32563,7 @@ function cartClearFilters() {
   document.querySelectorAll('#cartFilterMenu .ct-filter-chip').forEach(chip => chip.classList.remove('ct-active'));
   cartHandleSearch();
 }
-function cartGoBack() { document.getElementById('detail-ct-screen').classList.remove('ct-active'); }
+function cartGoBack() { document.getElementById('detail-ct-screen').classList.remove('ct-active'); try { cpdReset(); cpdCloseLightbox(); } catch (e) {} }
 function cartCloseTurnDetail() {
   document.getElementById('cartTurnDetailScreen').classList.remove('ct-turn-active');
   window._cartTurnOpenId = null; // v1.72
