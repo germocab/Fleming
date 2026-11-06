@@ -3433,6 +3433,30 @@
     animation: fadeIn 0.26s var(--ease-fluid-soft);
   }
   #page-user-profile.open { display: flex; }
+  /* v1.75.3.5: imagen de perfil en grande (solo desde el Perfil de un usuario externo) */
+  .uprofile-avatar.uav-zoomable { cursor: zoom-in; -webkit-tap-highlight-color: transparent; transition: transform 0.18s var(--ease-fluid-soft, ease); }
+  .uprofile-avatar.uav-zoomable:active { transform: scale(0.95); }
+  .uav-viewer {
+    display: none; position: fixed; inset: 0; z-index: 900;
+    flex-direction: column; align-items: center; justify-content: center; gap: 1rem;
+    background: rgba(0,0,0,0.82); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    padding: env(safe-area-inset-top, 0px) 1.25rem env(safe-area-inset-bottom, 0px);
+  }
+  .uav-viewer.open { display: flex; animation: fadeIn 0.22s var(--ease-fluid-soft, ease); }
+  .uav-viewer-card {
+    --uav-size: min(80vw, 62vh, 420px);
+    width: var(--uav-size); height: var(--uav-size); border-radius: 28%;
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+    font-size: calc(var(--uav-size) * 0.34); font-weight: 900; color: #fff; letter-spacing: -0.02em;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5); border: 3px solid rgba(255,255,255,0.25);
+  }
+  .uav-viewer-name { color: #fff; font-size: 1.05rem; font-weight: 700; text-align: center; text-shadow: 0 1px 8px rgba(0,0,0,0.4); }
+  .uav-viewer-close {
+    position: absolute; top: calc(1.25rem + env(safe-area-inset-top, 0px)); right: 1.25rem;
+    width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer;
+    background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center;
+  }
+  .uav-viewer-close svg { width: 18px; height: 18px; stroke: #fff; fill: none; stroke-width: 2.4; stroke-linecap: round; }
 
 
   #page-member-perfil {
@@ -9650,6 +9674,15 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
   </div>
 </div>
 
+<!-- v1.75.3.5: visor de la imagen de perfil de un usuario externo -->
+<div class="uav-viewer" id="uprofile-avatar-viewer" onclick="closeUserAvatarViewer()">
+  <button class="uav-viewer-close" onclick="event.stopPropagation();closeUserAvatarViewer()" aria-label="Cerrar">
+    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <div class="uav-viewer-card" id="uprofile-avatar-viewer-card" onclick="event.stopPropagation()"></div>
+  <div class="uav-viewer-name" id="uprofile-avatar-viewer-name"></div>
+</div>
+
 <!-- ── User Profile fullscreen page ── -->
 <div id="page-user-profile" class="">
   <nav class="subpage-topbar">
@@ -11122,7 +11155,9 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.74.10: Inicio solo en móviles; se retira Texto Diario de Inicio/Para ti; vista previa del tablero; tutorial y buscador de Grupos ajustados.
 // v1.75.1: Vida y Ministerio — nuevo botón "Ver responsabilidades para este día" bajo "Ir a la Guía de Actividades"; lleva a la sub-sección Responsabilidades y muestra el día de la reunión de esa semana.
 // v1.75.2: el botón Back del sistema ahora retrocede una pantalla por vez (cierra tutoriales, Voz, menús, modales y páginas); desde Predicación o Reuniones vuelve a Inicio, y en Inicio o con UI Classic cierra la plataforma.
-const APP_VERSION = '1.75.2'; // v1.75.2 — botón Back del sistema (base: v1.75.1 botón a Responsabilidades)
+// v1.75.3: el botón "Ver responsabilidades para este día" también está en la sub-sección Reunión Pública (lleva al día de Reunión Pública de esa semana).
+// v1.75.3.5: en el Perfil de un usuario externo se puede presionar su imagen de perfil para verla en grande.
+const APP_VERSION = '1.75.3.5'; // v1.75.3.5 — imagen de perfil en grande (base: v1.75.3 botón a Responsabilidades en Reunión Pública)
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -23348,6 +23383,9 @@ async function openUserProfilePage(uid) {
   const avatarEl = document.getElementById('uprofile-avatar');
   avatarEl.style.background = col;
   avatarEl.innerHTML = inits;
+  // v1.75.3.5: solo en el Perfil de un usuario externo se puede ver la imagen en grande.
+  avatarEl.classList.toggle('uav-zoomable', !isCurrentUser);
+  avatarEl.onclick = isCurrentUser ? null : () => openUserAvatarViewer(uid);
   document.getElementById('uprofile-name').textContent = u.name;
   { const _uidEl = document.getElementById('uprofile-userid'); // v1.54.0: el UserID solo lo ve su dueño o el DEV
     if (_uidEl) { const _show = u.user_id && (isDev || isCurrentUser); _uidEl.style.display = _show ? '' : 'none'; _uidEl.textContent = _show ? u.user_id : ''; } }
@@ -23599,9 +23637,26 @@ function updateUprofGeneroUI() {
 }
 
 function closeUserProfilePage() {
+  closeUserAvatarViewer();
   document.getElementById('page-user-profile').classList.remove('open');
   _currentProfileUserId = null;
 }
+
+// v1.75.3.5: imagen de perfil en grande. Solo desde el Perfil de un usuario externo.
+function openUserAvatarViewer(uid) {
+  if (!document.getElementById('page-user-profile')?.classList.contains('open')) return;
+  const u = activeUsers.find(x => x.id === (uid || _currentProfileUserId));
+  if (!u || (currentUser && u.name === currentUser.name)) return;
+  const card = document.getElementById('uprofile-avatar-viewer-card');
+  card.style.background = u.avatar_color || userColor(u.name);
+  card.innerHTML = avatarGlyphHtml(u.name, u.avatar_icon || null);
+  document.getElementById('uprofile-avatar-viewer-name').textContent = u.name;
+  document.getElementById('uprofile-avatar-viewer').classList.add('open');
+}
+function closeUserAvatarViewer() {
+  document.getElementById('uprofile-avatar-viewer')?.classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeUserAvatarViewer(); });
 
 async function saveProfileChanges(uid) {
   const roleSel   = document.getElementById('uprof-role-sel');
@@ -26514,6 +26569,7 @@ function _backOpenLayers() {
     ['page-preferencias', 'open', 'closePreferencias', 0],
     ['page-avatar-edit', 'open', 'closeAvatarColorSheet', 0.5],
     ['page-member-perfil', 'open', 'closeMemberPerfil', 0],
+    ['uprofile-avatar-viewer', 'open', 'closeUserAvatarViewer', 0],
     ['page-user-profile', 'open', 'closeUserProfilePage', 0],
     ['page-grupo', 'open', 'closeGrupoDetailPage', 0],
     ['page-otros-grupos', 'open', 'closeOtrosGruposScreen', 0],
@@ -28999,10 +29055,12 @@ function vmcOpenActivityGuide(dateStart) {
 // v1.75.1: lleva a Reuniones → Responsabilidades y, si existe, destaca la tarjeta del día de
 // Vida y Ministerio de la semana consultada (MEETING_DAY_VMC).
 let respPendingFocusDate = null;
-function vmcOpenResponsibilities(dateStart) {
+function vmcOpenResponsibilities(dateStart, kind) {
   try {
+    // v1.75.3: también se usa desde Reunión Pública (kind 'fs' → día de Reunión Pública).
+    const meetingDay = kind === 'fs' ? MEETING_DAY_FS : MEETING_DAY_VMC;
     const d = new Date(dateStart + 'T00:00:00');
-    for (let i = 0; i < 7 && d.getDay() !== MEETING_DAY_VMC; i++) d.setDate(d.getDate() + 1);
+    for (let i = 0; i < 7 && d.getDay() !== meetingDay; i++) d.setDate(d.getDate() + 1);
     respPendingFocusDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   } catch (e) { respPendingFocusDate = null; }
   inicioGoTo('reuniones', 'responsabilidades');
@@ -30821,7 +30879,11 @@ function fsRenderWeekProgram(week) {
       <div class="vmc-program-title">${fsFormatRange(week)}</div>
     </div>
     ${myBlock}
-    ${programBody}`;
+    ${programBody}
+    <button type="button" class="vmc-guide-button" onclick="vmcOpenResponsibilities('${week.date_start}', 'fs')">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Ver responsabilidades para este día
+    </button>`;
 }
 
 // ── Hook into switchAdminTab & app init ───────────────────────────────────────
