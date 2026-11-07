@@ -5626,6 +5626,11 @@
 #cartTurnDetailScreen .ctd-dd-menu button.ctd-off { opacity: 0.45; }
 #cartTurnDetailScreen .ctd-dd-menu svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: 0 0 17px; }
 #cartTurnDetailScreen .ctd-book { padding: 0 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 10px; }
+/* v1.76.4: la acción principal (p. ej. "Solicitar Turno") queda fija al pie de la pantalla, al alcance del pulgar */
+#cartTurnDetailScreen #cartTurnDetailBody { flex: 1 0 auto; }
+#cartTurnDetailScreen #cartTurnActionBar { position: sticky; bottom: 0; z-index: 6; margin-top: auto; flex-shrink: 0; }
+#cartTurnDetailScreen #cartTurnActionBar:not(:empty) { background: linear-gradient(to top, var(--surface) 78%, color-mix(in srgb, var(--surface) 0%, transparent)); padding-top: 14px; }
+#cartTurnDetailScreen #cartTurnActionBar .ctd-book { padding: 0 1.25rem calc(1rem + env(safe-area-inset-bottom, 0px)); }
 #cartTurnDetailScreen .ctd-book-note { text-align: center; color: var(--text3); font-weight: 600; padding: 6px; font-size: 0.88rem; }
 @media (min-width: 768px) {
   #sub-content-carritos #cartTurnDetailScreen .ctd-panel, #admin-carritos #cartTurnDetailScreen .ctd-panel { border-radius: 20px; max-width: 480px; max-height: 88vh; animation: slideUp 0.42s var(--ease-fluid-soft); }
@@ -6519,6 +6524,8 @@ html.modo-sencillo-mode .ms-header-shell { display: none !important; }
 .pt-grid { display: grid; width:100%; max-width:680px; margin:0 auto; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .pt-tile { position: relative; min-width: 0; overflow: hidden; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; cursor: pointer; transition: transform 0.15s, background 0.15s; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 .pt-tile:active { transform: scale(0.97); }
+/* v1.76.4: degradé interno del color de la tarjeta, igual que "Mis Turnos" y "Mis Responsabilidades" */
+.pt-tile { background: linear-gradient(155deg, color-mix(in srgb, var(--pt-c, var(--accent)) 16%, var(--surface)) 0%, var(--surface) 75%); border-color: color-mix(in srgb, var(--pt-c, var(--accent)) 22%, var(--border)); }
 .pt-tile.lp-press { transform: scale(0.96); transition: transform 0.5s; }
 .pt-txt { min-width: 0; }
 .pt-title { font-size: 0.8rem; font-weight: 700; line-height: 1.25; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -7148,6 +7155,7 @@ function _ptModes(list) {
   }
   list.splice(0, list.length, ...out);
 }
+function _ptTint(c) { const k = c && _HC[c.col]; return k ? ' style="--pt-c:' + k[0] + '"' : (c && c.icon ? ' style="--pt-c:' + _HC.blue[0] + '"' : ''); }
 function _ptTile(c) {
   const idx = _homeActions.push(c.onClick || null) - 1;
   const pk = c.pkey ? ' data-pk="' + (_homeParaKeys.push(c.pkey) - 1) + '"' : '';
@@ -7155,13 +7163,13 @@ function _ptTile(c) {
   const txt = '<div class="pt-txt"><div class="pt-title">' + escapeHtml(c.title || '') + '</div>' +
     (c.sub ? '<div class="pt-sub">' + escapeHtml(c.sub) + '</div>' : '') +
     (c.meta ? '<div class="pt-meta">' + escapeHtml(c.meta) + '</div>' : '') + '</div>';
-  if ((c.mode === 'sq' || c.mode === 'wide') && c.big) return '<div class="pt-tile pt-' + c.mode + (c.userSize ? ' pt-size-' + c.userSize : '') + '"' + pk + oc + '>' + txt + '<div class="pt-big">' + c.big + '</div></div>';
+  if ((c.mode === 'sq' || c.mode === 'wide') && c.big) return '<div class="pt-tile pt-' + c.mode + (c.userSize ? ' pt-size-' + c.userSize : '') + '"' + _ptTint(c) + pk + oc + '>' + txt + '<div class="pt-big">' + c.big + '</div></div>';
   if (c.mode === 'sq') {
     const r = c.countDate ? _homeCountHtml(c.countDate, 'home-count') : (c.rel ? '<div class="pt-rel">' + escapeHtml(c.rel) + '</div>' : '');
-    return '<div class="pt-tile pt-sq pt-sqi"' + pk + oc + '><div class="pt-sqtop">' + _homeIcoBox(c.icon, c.col, 'pt-ico', c.img) + r + '</div>' + txt + '</div>';
+    return '<div class="pt-tile pt-sq pt-sqi"' + _ptTint(c) + pk + oc + '><div class="pt-sqtop">' + _homeIcoBox(c.icon, c.col, 'pt-ico', c.img) + r + '</div>' + txt + '</div>';
   }
   const right = c.countDate ? _homeCountHtml(c.countDate, 'home-count') : (c.rel ? '<div class="pt-rel">' + escapeHtml(c.rel) + '</div>' : '');
-  return '<div class="pt-tile pt-rect' + (c.userSize ? ' pt-size-' + c.userSize : '') + '"' + pk + oc + '>' + _homeIcoBox(c.icon, c.col, 'pt-ico', c.img) + txt + right + '</div>';
+  return '<div class="pt-tile pt-rect' + (c.userSize ? ' pt-size-' + c.userSize : '') + '"' + _ptTint(c) + pk + oc + '>' + _homeIcoBox(c.icon, c.col, 'pt-ico', c.img) + txt + right + '</div>';
 }
 function _homeParaRender() {
   const el = document.getElementById('home-para');
@@ -11308,7 +11316,9 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.75.2: el botón Back del sistema ahora retrocede una pantalla por vez (cierra tutoriales, Voz, menús, modales y páginas); desde Predicación o Reuniones vuelve a Inicio, y en Inicio o con UI Classic cierra la plataforma.
 // v1.75.3: el botón "Ver responsabilidades para este día" también está en la sub-sección Reunión Pública (lleva al día de Reunión Pública de esa semana).
 // v1.75.3.5: en el Perfil de un usuario externo se puede presionar su imagen de perfil para verla en grande.
-const APP_VERSION = '1.76.2.2'; // v1.75.3.5 — imagen de perfil en grande (base: v1.75.3 botón a Responsabilidades en Reunión Pública)
+// v1.76.3: en el detalle de una asignación de Casa en casa se puede hacer swipe entre asignaciones: deslizar a la izquierda abre la siguiente (p. ej. del 7 al 8 de noviembre) y a la derecha la anterior, con animación.
+// v1.76.4: (1) En un turno Disponible de Carritos, el botón "Solicitar Turno" queda fijo en la parte inferior de la pantalla, al alcance del dedo. (2) Las tarjetas internas de "Para ti" en Inicio llevan un degradé interno (del color de su ícono), como "Mis Turnos" y "Mis Responsabilidades".
+const APP_VERSION = '1.76.4'; // v1.76.4 — Solicitar Turno abajo y degradé en tarjetas de Para ti (base: v1.76.3)
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -13948,6 +13958,122 @@ function _grupoSwipeNavigate(direction) {
     if (e.key === 'ArrowLeft') _grupoSwipeNavigate(-1);
     else if (e.key === 'ArrowRight') _grupoSwipeNavigate(1);
   });
+})();
+
+// ── Swipe entre Asignaciones de Casa en casa (v1.76.3) ─────────────────────
+// En el detalle de una asignación, deslizar el dedo a la izquierda abre la siguiente asignación
+// (orden cronológico: fecha y hora, p. ej. del 7 al 8 de noviembre) y a la derecha la anterior,
+// sin salir a la lista. Solo recorre asignaciones de hoy en adelante (más la que está abierta).
+let _asigSwipeBusy = false;
+
+function _asigSwipeList(currentId) {
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  return assignments
+    .filter(a => a.date >= todayStr || a.id === currentId)
+    .slice()
+    .sort((a, b) => (a.date || '').localeCompare(b.date || '') || (a.time || '').localeCompare(b.time || ''));
+}
+
+// Limpia el estado visual que deja la asignación anterior (lo mismo que closeDetail, pero sin cerrar la pantalla).
+function _detailResetForSwipe() {
+  if (typeof detailCloseMoreMenu === 'function') detailCloseMoreMenu();
+  const $ = id => document.getElementById(id);
+  const panel = $('detail-panel');
+  if (!panel) return;
+  panel.classList.remove('territory-mode');
+  if ($('detail-time-chip')) $('detail-time-chip').style.display = '';
+  if ($('detail-address')) $('detail-address').style.fontSize = '';
+  if ($('detail-house-label')) $('detail-house-label').textContent = '';
+  if ($('detail-visita-address')) $('detail-visita-address').style.display = 'none';
+  if ($('detail-visita-grupo-wrap')) $('detail-visita-grupo-wrap').style.display = 'none';
+  if ($('detail-actions')) $('detail-actions').style.display = '';
+  if ($('detail-ter-tabs')) $('detail-ter-tabs').style.display = 'none';
+  $('detail-ter-tab-1')?.classList.add('active');
+  $('detail-ter-tab-2')?.classList.remove('active');
+  const vg = $('detail-visita-ter-grid');
+  if (vg) { vg.style.display = 'none'; vg.innerHTML = ''; vg.classList.remove('grid-2col'); }
+  const vp = $('detail-visita-picker-grid');
+  if (vp) { vp.style.display = 'none'; vp.innerHTML = ''; }
+  $('detail-ter-badge')?.classList.remove('self-assignable');
+  panel._ter1 = null; panel._ter2 = null; panel._ter3 = null;
+  panel._manz1 = null; panel._manz2 = null; panel._manz3 = null;
+  panel._visitaTers = null;
+  $('suggest-np-form')?.classList.remove('open');
+  ['snp-calle','snp-numero','snp-motivo'].forEach(id => { const el = $(id); if (el) el.value = ''; });
+  if (_liveActive) stopLiveMode();
+  if (typeof _liveHostOnCloseDetail === 'function') _liveHostOnCloseDetail();
+}
+
+async function _asigSwipeNavigate(direction) {
+  if (_asigSwipeBusy) return;
+  const panel = document.getElementById('detail-panel');
+  const id = panel && panel._openAssignmentId;
+  if (!id) return;
+  const list = _asigSwipeList(id);
+  const idx = list.findIndex(a => a.id === id);
+  if (idx === -1) return;
+  const next = list[idx + direction];
+  if (!next) return; // ya está en la primera/última asignación
+  _asigSwipeBusy = true;
+  try {
+    _detailResetForSwipe();
+    await viewAssignment(next.id);
+    panel.scrollTop = 0;
+    // Animación: la siguiente entra por la derecha, la anterior por la izquierda (igual que en Grupos).
+    const cls = direction > 0 ? 'grupo-slide-from-right' : 'grupo-slide-from-left';
+    panel.querySelectorAll('.detail-especial-photo-wrap, .detail-main-row, .detail-actions, .detail-manzanas-card, .detail-map-wrap, .no-pasar-section')
+      .forEach(el => { el.classList.remove('grupo-slide-from-right', 'grupo-slide-from-left'); void el.offsetWidth; el.classList.add(cls); });
+  } finally {
+    setTimeout(() => { _asigSwipeBusy = false; }, 320);
+  }
+}
+
+(function initAsignacionSwipeNav() {
+  let startX = 0, startY = 0, active = false;
+  const SWIPE_THRESHOLD = 60;    // px mínimos horizontales para considerar swipe
+  const SWIPE_MAX_VERTICAL = 80; // tolerancia vertical, para no interferir con el scroll
+  const BLOCK = 'input, textarea, select, [data-no-swipe], .full-map-lightbox, .img-lightbox, .modal-overlay.open, ' +
+                '.detail-ter-tabs, .detail-visita-picker-grid, .detail-visita-ter-grid';
+
+  function detailActive() {
+    const ov = document.getElementById('detail-overlay');
+    const panel = document.getElementById('detail-panel');
+    return !!ov && ov.classList.contains('open') && !!panel && !!panel._openAssignmentId &&
+           !panel.classList.contains('territory-mode') && !window._guestShareMode;
+  }
+  // true si el toque empezó dentro de un contenedor que se desplaza horizontalmente por sí solo
+  function inHScroll(el, stop) {
+    for (; el && el !== stop; el = el.parentElement) {
+      if (el.scrollWidth > el.clientWidth + 2) {
+        const ox = getComputedStyle(el).overflowX;
+        if (ox === 'auto' || ox === 'scroll') return true;
+      }
+    }
+    return false;
+  }
+
+  document.addEventListener('touchstart', (e) => {
+    active = false;
+    if (e.touches.length !== 1 || !detailActive()) return;
+    const panel = document.getElementById('detail-panel');
+    if (!panel.contains(e.target) || e.target.closest(BLOCK) || inHScroll(e.target, panel)) return;
+    if (_liveActive) return; // con Live activo no se cambia de asignación por accidente
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    active = true;
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    if (!active) return;
+    active = false;
+    if (!detailActive()) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - startX, dy = t.clientY - startY;
+    if (Math.abs(dx) < SWIPE_THRESHOLD || Math.abs(dy) > SWIPE_MAX_VERTICAL || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    // dedo a la izquierda (dx < 0) → asignación siguiente; a la derecha (dx > 0) → asignación anterior.
+    _asigSwipeNavigate(dx > 0 ? -1 : 1);
+  }, { passive: true });
 })();
 
 function getApellido(nombreCompleto) {
