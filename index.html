@@ -7158,16 +7158,25 @@ function _ptModes(list) {
   list.splice(0, list.length, ...out);
 }
 function _ptTint(c) { const k = c && _HC[c.col]; return k ? ' style="--pt-c:' + k[0] + '"' : (c && c.icon ? ' style="--pt-c:' + _HC.blue[0] + '"' : ''); }
-// v1.76.5: tamaño automático según cuántas tarjetas se muestran (el tamaño que el usuario fije en una tarjeta sigue mandando).
-// 1–2 tarjetas → grandes; 3 → medianas; 4 → se dejan compactas (cuadradas de a dos; las de texto largo, rectangulares).
-function _ptAutoSize(n) { return n <= 2 ? 'large' : n === 3 ? 'medium' : ''; }
+// v1.76.5.1: el tamaño automático depende de la información de cada tarjeta (cuadrada si es breve o lleva ícono/número grande;
+// alargada si es larga) y todas se acomodan sin dejar huecos: los cuadrados se emparejan (adelantando el siguiente cuadrado si
+// hace falta) y un cuadrado que quedaría solo en su fila ocupa todo el ancho. El tamaño que el usuario fije en una tarjeta
+// sigue mandando, pero tampoco puede dejar un hueco: si queda solo, se estira.
 function _ptApplySizes(list, sizes) {
-  const auto = _ptAutoSize(list.length);
   list.forEach(c => {
-    const eff = (sizes && sizes[c.pkey]) || auto;
-    if (eff) c.mode = eff === 'small' ? 'sq' : eff === 'large' ? 'wide' : 'rect';
-    c.userSize = eff || 'auto';
+    const sz = sizes && sizes[c.pkey];
+    c.userSize = sz || 'auto';
+    c.mode = sz ? (sz === 'small' ? 'sq' : sz === 'large' ? 'wide' : 'rect') : (_ptCompact(c) ? 'sq' : 'rect');
   });
+  const rest = list.slice(), out = [];
+  while (rest.length) {
+    const t = rest.shift();
+    if (t.mode !== 'sq') { out.push(t); continue; }
+    const j = rest.findIndex(x => x.mode === 'sq');
+    if (j === -1) { t.mode = t.big ? 'wide' : 'rect'; t.userSize = 'auto'; out.push(t); continue; } // cuadrado solo → ancho completo
+    out.push(t, rest.splice(j, 1)[0]);
+  }
+  list.splice(0, list.length, ...out);
 }
 function _ptTile(c) {
   const idx = _homeActions.push(c.onClick || null) - 1;
@@ -11210,7 +11219,7 @@ function applyAuthMode(mode) {
   const er = document.getElementById('auth-error'); if (er) er.style.display = 'none';
 }
 function toggleAuthMode() { applyAuthMode(_authMode === 'userid' ? 'name' : 'userid'); }
-try { applyAuthMode(localStorage.getItem('fleming_has_account') === '1' ? 'userid' : 'name'); } catch (e) {}
+try { applyAuthMode(localStorage.getItem('fleming_has_account') === '1' && localStorage.getItem('fleming_uid_exempt') !== '1' ? 'userid' : 'name'); } catch (e) {}
 
 const USERID_RE = /^[a-z0-9._-]{3,40}$/;
 function _uidSlug(str) {
@@ -11237,12 +11246,23 @@ async function _uidInsertNotice(name, uid) {
     });
   } catch (e) {}
 }
+// v1.76.6: lee los datos de UserID de una cuenta. Si la columna userid_exempt aún no existe en Supabase, reintenta sin ella
+// (en ese caso nadie está exento y todo funciona como antes).
+async function _uidFetchAuth(fullName) {
+  let r = await sb.from('platform_users').select('id, name, user_id, userid_recovery, userid_exempt').ilike('name', fullName).maybeSingle();
+  if (r.error) r = await sb.from('platform_users').select('id, name, user_id, userid_recovery').ilike('name', fullName).maybeSingle();
+  return r;
+}
+function _uidSetExemptFlag(on) { try { if (on) localStorage.setItem('fleming_uid_exempt', '1'); else localStorage.removeItem('fleming_uid_exempt'); } catch (e) {} }
 async function ensureUserId() {
   if (!currentUser || currentRole === 'dev' || currentRole === 'pending') return;
   try { localStorage.setItem('fleming_has_account', '1'); } catch (e) {}
   try {
-    const { data: row, error } = await sb.from('platform_users').select('id, name, user_id, userid_recovery').ilike('name', currentUser.name).maybeSingle();
+    const { data: row, error } = await _uidFetchAuth(currentUser.name);
     if (error || !row) return; // columna aún no creada o sin registro: no se interrumpe nada
+    // v1.76.6: si el DEV lo eximió de usar UserID, en este dispositivo se entra con nombre y apellido y no se le avisa de ningún UserID.
+    _uidSetExemptFlag(!!row.userid_exempt);
+    if (row.userid_exempt) return;
     if (row.user_id) {
       if (row.userid_recovery) {
         await sb.from('platform_users').update({ userid_recovery: false }).eq('id', row.id);
@@ -11283,6 +11303,18 @@ async function devSaveUserId(rowId) {
   if (error) { showToast('No se pudo guardar: ' + error.message, 'error'); return; }
   const u = activeUsers.find(x => x.id === rowId); if (u) u.user_id = v;
   showToast('UserID actualizado', 'success');
+  openUserProfilePage(rowId);
+}
+async function devSetUserIdExempt(rowId, on) {
+  if (currentRole !== 'dev') return;
+  const { error } = await sb.from('platform_users').update({ userid_exempt: !!on }).eq('id', rowId);
+  if (error) {
+    const missing = /userid_exempt/i.test(error.message || '');
+    showToast(missing ? 'Falta la columna userid_exempt en Supabase (boolean, por defecto false).' : 'No se pudo actualizar: ' + error.message, 'error');
+    return;
+  }
+  const u = activeUsers.find(x => x.id === rowId); if (u) u.userid_exempt = !!on;
+  showToast(on ? 'Este usuario puede entrar con nombre y apellido' : 'Este usuario deberá entrar con su UserID', 'success');
   openUserProfilePage(rowId);
 }
 async function devSetUserIdRecovery(rowId, on) {
@@ -11333,7 +11365,9 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.76.4: (1) En un turno Disponible de Carritos, el botón "Solicitar Turno" queda fijo en la parte inferior de la pantalla, al alcance del dedo. (2) Las tarjetas internas de "Para ti" en Inicio llevan un degradé interno (del color de su ícono), como "Mis Turnos" y "Mis Responsabilidades".
 // v1.76.4.2: en las tarjetas de "Para ti", la asignación de predicación ya no usa el sol (ahora un mapa plegado) y la de Carritos ya no usa el carrito (ahora un reloj).
 // v1.76.5: el tamaño de las tarjetas de "Para ti" se ajusta solo según cuántas se muestran (1–2 grandes, 3 medianas, 4 pequeñas/cuadradas), sin tener que entrar a la configuración; el tamaño elegido a mano en una tarjeta sigue mandando.
-const APP_VERSION = '1.76.5'; // v1.76.5 — tamaño automático de tarjetas de Para ti según su cantidad (base: v1.76.4.2)
+// v1.76.5.1: Para ti — el tamaño de cada tarjeta se decide por la cantidad de información que lleva (cuadrada si es breve, alargada si es larga) y las tarjetas se acomodan sin dejar espacios en blanco: los cuadrados se emparejan y uno que quedaría solo ocupa todo el ancho.
+// v1.76.6: el usuario DEV decide, desde el perfil de cada usuario (Administración), quién debe iniciar sesión con su UserID y quién puede seguir entrando con nombre y apellido. Requiere la columna userid_exempt en platform_users (por defecto nadie está exento, así que todo sigue igual hasta que el DEV lo cambie).
+const APP_VERSION = '1.76.6'; // v1.76.6 — UserID opcional por usuario, decidido por el DEV (base: v1.76.5.1)
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -16058,7 +16092,7 @@ function resetAuthScreenToNormal() {
   const passGroup = document.getElementById('auth-pass-group');
   if (titleEl) titleEl.textContent = 'Bienvenido';
   if (subEl) subEl.textContent = 'Ingresa tus datos para continuar.';
-  try { applyAuthMode(localStorage.getItem('fleming_has_account') === '1' ? 'userid' : 'name'); } catch (e) {}
+  try { applyAuthMode(localStorage.getItem('fleming_has_account') === '1' && localStorage.getItem('fleming_uid_exempt') !== '1' ? 'userid' : 'name'); } catch (e) {}
   if (passGroup) passGroup.style.display = '';
   const passInput = document.getElementById('auth-pass');
   if (passInput) passInput.value = '';
@@ -17303,8 +17337,10 @@ async function doAccess() {
     // v1.54.0: una cuenta que ya tiene UserID entra con su UserID (salvo que el DEV le haya dado acceso de recuperación).
     if (baseRole !== 'dev' && !_viaUserId && !_wasInvite) {
       try {
-        const r = await sb.from('platform_users').select('user_id, userid_recovery').ilike('name', first + ' ' + last).maybeSingle();
-        if (r.data && r.data.user_id && !r.data.userid_recovery) {
+        const r = await _uidFetchAuth(first + ' ' + last);
+        // v1.76.6: las cuentas que el DEV eximió de usar UserID siguen entrando con nombre y apellido.
+        if (r.data && r.data.user_id && !r.data.userid_recovery && !r.data.userid_exempt) {
+          _uidSetExemptFlag(false); applyAuthMode('userid');
           errEl.style.display='block';
           errEl.textContent='Esta cuenta ya tiene un UserID. Inicia sesión con tu UserID; si no lo recuerdas, pide acceso a un encargado.';
           return;
@@ -23873,7 +23909,15 @@ async function openUserProfilePage(uid) {
         <input type="text" class="form-input" id="uprof-userid-input" value="${u.user_id || ''}" placeholder="sin UserID" autocapitalize="none" autocorrect="off" spellcheck="false" style="flex:1">
         <button class="btn-primary" style="padding:0 16px;border-radius:12px;font-weight:700" onclick="devSaveUserId('${u.id}')">Guardar</button>
       </div>
-      <div style="padding:0 1rem 1rem">
+      <div style="padding:0 1rem 0.8rem">
+        <div style="font-size:0.75rem;color:var(--text3);line-height:1.4;margin-bottom:8px">¿Cómo inicia sesión este usuario?</div>
+        ${u.userid_exempt
+          ? `<div style="font-size:0.78rem;color:var(--accent);font-weight:600;margin-bottom:6px">Entra con nombre y apellido (no necesita UserID).</div>
+             <button class="btn-primary" style="width:100%;padding:0.7rem;border-radius:12px;font-weight:700;background:var(--surface3);color:var(--text)" onclick="devSetUserIdExempt('${u.id}', false)">Exigir UserID</button>`
+          : `<div style="font-size:0.78rem;color:var(--text2);font-weight:600;margin-bottom:6px">Debe entrar con su UserID.</div>
+             <button class="btn-primary" style="width:100%;padding:0.7rem;border-radius:12px;font-weight:700" onclick="devSetUserIdExempt('${u.id}', true)">Permitir nombre y apellido (sin UserID)</button>`}
+      </div>
+      <div style="padding:0 1rem 1rem${u.userid_exempt ? ';display:none' : ''}">
         ${u.userid_recovery
           ? `<div style="font-size:0.78rem;color:var(--accent);font-weight:600;margin-bottom:6px">Acceso de recuperación activo: puede entrar una vez con nombre y contraseña.</div>
              <button class="btn-primary" style="width:100%;padding:0.7rem;border-radius:12px;font-weight:700;background:var(--surface3);color:var(--text)" onclick="devSetUserIdRecovery('${u.id}', false)">Quitar acceso</button>`
