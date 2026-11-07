@@ -6608,6 +6608,8 @@ const _HI = {
   bulb: '<path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2V17h6v-.3c0-.8.4-1.5 1-2A7 7 0 0 0 12 2z"/>',
   doc: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="11" x2="15" y2="11"/>',
   star: '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>',
+  map: '<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>',
+  clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
 };
 const _HC = {
   blue: ['var(--accent)', 'var(--accent-light)'], green: ['#34c759', 'rgba(52,199,89,0.12)'], red: ['var(--red)', 'rgba(255,59,48,0.12)'],
@@ -7156,6 +7158,17 @@ function _ptModes(list) {
   list.splice(0, list.length, ...out);
 }
 function _ptTint(c) { const k = c && _HC[c.col]; return k ? ' style="--pt-c:' + k[0] + '"' : (c && c.icon ? ' style="--pt-c:' + _HC.blue[0] + '"' : ''); }
+// v1.76.5: tamaño automático según cuántas tarjetas se muestran (el tamaño que el usuario fije en una tarjeta sigue mandando).
+// 1–2 tarjetas → grandes; 3 → medianas; 4 → se dejan compactas (cuadradas de a dos; las de texto largo, rectangulares).
+function _ptAutoSize(n) { return n <= 2 ? 'large' : n === 3 ? 'medium' : ''; }
+function _ptApplySizes(list, sizes) {
+  const auto = _ptAutoSize(list.length);
+  list.forEach(c => {
+    const eff = (sizes && sizes[c.pkey]) || auto;
+    if (eff) c.mode = eff === 'small' ? 'sq' : eff === 'large' ? 'wide' : 'rect';
+    c.userSize = eff || 'auto';
+  });
+}
 function _ptTile(c) {
   const idx = _homeActions.push(c.onClick || null) - 1;
   const pk = c.pkey ? ' data-pk="' + (_homeParaKeys.push(c.pkey) - 1) + '"' : '';
@@ -7178,7 +7191,7 @@ function _homeParaRender() {
   const shown = _homeParaAll.filter(c => !hid[c.pkey]).slice(0, getHomeParaCount());
   _ptModes(shown);
   const sizes = _homeParaSizesLoad();
-  shown.forEach(c => { const sz = sizes[c.pkey]; if (sz) c.mode = sz === 'small' ? 'sq' : sz === 'large' ? 'wide' : 'rect'; c.userSize = sz || 'auto'; });
+  _ptApplySizes(shown, sizes);
   el.innerHTML = '<div class="pt-card"><div class="pt-head"><span onclick="openHomeBoardMenu(event)" style="cursor:pointer">' + _homeLang('home.forYou') + '</span><button class="pt-head-action" type="button" onclick="openHomeBoardMenu(event)" aria-label="' + _homeLang('home.customizeBoard') + '" title="' + _homeLang('home.customizeBoard') + '"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button></div>' + (shown.length
     ? '<div class="pt-grid">' + shown.map(_ptTile).join('') + '</div>'
     : '<div class="pt-empty">' + _homeLang('home.allCaughtUp') + '</div>') + '</div>';
@@ -7220,7 +7233,7 @@ async function renderHome() {
   });
   // Próximas asignaciones (14 días) de todas las categorías.
   const _nowMs = Date.now(), _day0 = new Date(); _day0.setHours(0, 0, 0, 0);
-  [['casa', 'sun', 'blue'], ['carritos', 'cart', 'teal'], ['aseo', 'house', 'orange'], ['resp', 'users', 'purple']].forEach(([k, ic, cl]) => {
+  [['casa', 'map', 'blue'], ['carritos', 'clock', 'teal'], ['aseo', 'house', 'orange'], ['resp', 'users', 'purple']].forEach(([k, ic, cl]) => {
     (sec(k)?.items || []).forEach(it => {
       const sk = it.sortKey;
       const lower = (k === 'carritos' || (k === 'casa' && it.timeRaw)) ? _nowMs - 3600000 : _day0.getTime();
@@ -7588,7 +7601,7 @@ function renderHomeBoardCustomize() {
   // Live preview: it is rebuilt whenever a size or card-count control changes.
   const previewCards = shown.slice(0, getHomeParaCount()).map(c => ({ ...c }));
   _ptModes(previewCards);
-  previewCards.forEach(c => { const sz = sizes[c.pkey]; if (sz) c.mode = sz === 'small' ? 'sq' : sz === 'large' ? 'wide' : 'rect'; c.userSize = sz || 'auto'; });
+  _ptApplySizes(previewCards, sizes);
   h += '<div class="home-board-preview"><div class="home-board-preview-title">' + _homeLang('home.preview') + '</div><div class="pt-card"><div class="pt-head"><span>' + _homeLang('home.forYou') + '</span></div>' + (previewCards.length ? '<div class="pt-grid">' + previewCards.map(c => _ptTile({ ...c, onClick: null, pkey: null })).join('') + '</div>' : '<div class="pt-empty">' + _homeLang('home.allCaughtUp') + '</div>') + '</div></div>';
   h += '<div class="home-board-count-control"><strong>' + _homeLang('home.cardCount') + '</strong><div class="count-actions">' + _homeIco('minus', '', 'homeParaSetCount(-1)', getHomeParaCount() <= HOME_PARA_MIN) + '<b>' + getHomeParaCount() + '</b>' + _homeIco('plus', '', 'homeParaSetCount(1)', getHomeParaCount() >= HOME_PARA_MAX) + '</div></div>';
   shown.slice(0, getHomeParaCount()).forEach((c, i) => {
@@ -11318,7 +11331,9 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.75.3.5: en el Perfil de un usuario externo se puede presionar su imagen de perfil para verla en grande.
 // v1.76.3: en el detalle de una asignación de Casa en casa se puede hacer swipe entre asignaciones: deslizar a la izquierda abre la siguiente (p. ej. del 7 al 8 de noviembre) y a la derecha la anterior, con animación.
 // v1.76.4: (1) En un turno Disponible de Carritos, el botón "Solicitar Turno" queda fijo en la parte inferior de la pantalla, al alcance del dedo. (2) Las tarjetas internas de "Para ti" en Inicio llevan un degradé interno (del color de su ícono), como "Mis Turnos" y "Mis Responsabilidades".
-const APP_VERSION = '1.76.4'; // v1.76.4 — Solicitar Turno abajo y degradé en tarjetas de Para ti (base: v1.76.3)
+// v1.76.4.2: en las tarjetas de "Para ti", la asignación de predicación ya no usa el sol (ahora un mapa plegado) y la de Carritos ya no usa el carrito (ahora un reloj).
+// v1.76.5: el tamaño de las tarjetas de "Para ti" se ajusta solo según cuántas se muestran (1–2 grandes, 3 medianas, 4 pequeñas/cuadradas), sin tener que entrar a la configuración; el tamaño elegido a mano en una tarjeta sigue mandando.
+const APP_VERSION = '1.76.5'; // v1.76.5 — tamaño automático de tarjetas de Para ti según su cantidad (base: v1.76.4.2)
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
