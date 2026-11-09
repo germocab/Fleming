@@ -929,6 +929,9 @@
   .pia-empty p { font-size: 0.82rem; line-height: 1.45; }
 
   .date-section { margin-bottom: 1.75rem; }
+  /* v1.77.12: Aseo del Salón, Hospitalidad y Responsabilidades — fecha arriba de cada tarjeta */
+  .resp-date-section { margin-bottom: 1.25rem; }
+  .resp-date-header { margin: 0 1.25rem 0.6rem; font-size: 1.05rem; }
   .date-section-header {
     font-size: 1.15rem; font-weight: 700;
     margin-bottom: 0.85rem; color: var(--text);
@@ -1274,7 +1277,8 @@
   .detail-sidebar-fab { display: none; }
   @media (min-width: 640px) { .detail-sidebar-fab { display: flex; } }
 
-  .detail-handle { width: 36px; height: 4px; background: var(--surface3); border-radius: 2px; margin: 10px auto 0; }
+  /* v1.77.12: el handle superior no hace nada (ni en Sidebar ni en PopUp de Desktop): se quita */
+  .detail-handle { display: none; }
  
   .detail-panel .detail-territory-topbar { display: none; }
   .detail-panel.territory-mode .detail-territory-topbar { display: flex; }
@@ -1323,6 +1327,18 @@
     /* v1.60.7-beta: en eventos/visitas con imagen, la foto sube por debajo del encabezado (volver, fecha, editar)
        hasta el borde superior de la pantalla, para que se vea el efecto frost/blur de esos botones sobre la imagen. */
     .detail-panel.has-hero { --dt-bar-h: calc(40px + 1.4rem); } /* alto del encabezado móvil (botones de 40px + padding .7rem arriba y abajo) */
+    .detail-panel.has-hero .detail-especial-photo-wrap {
+      position: relative; z-index: 0;
+      margin-top: calc(var(--dt-bar-h) * -1);
+      max-height: none; height: calc(220px + var(--dt-bar-h));
+      border-radius: 0 0 22px 22px;
+    }
+    .detail-panel.has-hero .detail-especial-photo-wrap img { height: 100%; max-height: none; }
+  }
+
+  /* v1.77.12: en Desktop (Sidebar y PopUp) la portada del Evento también sube por detrás del botón Back y el título. */
+  @media (min-width: 640px) {
+    .detail-panel.has-hero { --dt-bar-h: calc(40px + 1.7rem); }
     .detail-panel.has-hero .detail-especial-photo-wrap {
       position: relative; z-index: 0;
       margin-top: calc(var(--dt-bar-h) * -1);
@@ -3263,6 +3279,10 @@
   .vmc-program-container { padding: 0 1rem 5rem; }
   /* v1.60.0-beta: en Reuniones, las tarjetas del programa usan el mismo ancho que "Conferencias salientes" */
   #vmc-program-container, #fs-program-container { padding-left: 0; padding-right: 0; }
+  /* v1.77.12: Reunión Pública — en Desktop / pantallas grandes, el programa y "Conferencias salientes" van lado a lado */
+  @media (min-width: 900px) {
+    #fs-program-container .fs-two-col { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 1.25rem; align-items: start; }
+  }
   .vmc-program-header {
     margin-bottom: 1.1rem;
   }
@@ -5125,6 +5145,30 @@
   }
   #page-preferencias.open, .pref-subpage.open { display: flex; }
   .pref-subpage { z-index: 255; }
+
+  /* v1.77.11: en Desktop / pantallas grandes, Configuración (y sus sub-pantallas) se abre como PopUp centrado
+     sobre un fondo atenuado, en lugar de ocupar toda la pantalla. En móvil no cambia nada. */
+  #pref-modal-backdrop { display: none; }
+  @media (min-width: 900px) and (min-height: 560px) {
+    #pref-modal-backdrop {
+      position: fixed; inset: 0; z-index: 249;
+      background: rgba(0,0,0,0.45);
+      -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+      animation: prefBackdropIn 0.2s ease;
+    }
+    body:has(#page-preferencias.open) #pref-modal-backdrop { display: block; }
+    #page-preferencias, .pref-subpage {
+      inset: 0; margin: auto;
+      width: min(720px, calc(100vw - 4rem));
+      height: min(780px, calc(100vh - 4rem));
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      box-shadow: 0 24px 70px rgba(0,0,0,0.35), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    #page-preferencias > div, .pref-subpage > div { padding-left: 1rem; padding-right: 1rem; box-sizing: border-box; }
+    #page-preferencias .subpage-topbar, .pref-subpage .subpage-topbar { background: var(--bg); border-radius: 20px 20px 0 0; }
+  }
+  @keyframes prefBackdropIn { from { opacity: 0; } to { opacity: 1; } }
 
   .pref-nav-row { display: flex; align-items: center; gap: 12px; padding: 0.85rem 1rem; border-top: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
   .pref-nav-row:first-of-type { border-top: none; }
@@ -9313,6 +9357,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
           <div class="dec-seg"><b data-u="d">0</b><span>Días</span></div>
           <div class="dec-seg"><b data-u="h">0</b><span>Horas</span></div>
           <div class="dec-seg"><b data-u="m">0</b><span>Minutos</span></div>
+          <div class="dec-seg dec-seg-s"><b data-u="s">0</b><span>Segundos</span></div>
         </div>
       </div>
     </div>
@@ -10099,6 +10144,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
 </div>
 
 <!-- ── Preferencias (fullscreen overlay) — pantalla principal ── -->
+<div id="pref-modal-backdrop" onclick="closePreferencias()" aria-hidden="true"></div>
 <div id="page-preferencias" class="">
   <nav class="subpage-topbar">
     <button class="pill-back-btn" onclick="closePreferencias()" title="Inicio" data-i18n-title="nav.inicio">
@@ -10687,6 +10733,22 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
         </div>
         <div id="ter-nopreview-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
           <div id="ter-nopreview-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-section" style="margin-top:1rem">
+      <div class="profile-section-title" data-i18n="exp.evCdSec.section">Eventos</div>
+      <div class="profile-row" style="cursor:pointer" onclick="toggleEvCdSeconds()">
+        <div class="profile-row-icon" style="background:var(--accent-light);color:var(--accent)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 14.5 14.5"/><line x1="9" y1="2" x2="15" y2="2"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="exp.evCdSec.title">Segundos en la cuenta regresiva</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.evCdSec.desc">Muestra los segundos en la cuenta regresiva dentro de un Evento. Desactívalo para ver solo días, horas y minutos.</div>
+        </div>
+        <div id="ev-cdsec-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="ev-cdsec-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
     </div>
@@ -11573,11 +11635,13 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.76.9: detalle de Grupo de Servicio — la barra superior (Back y título) ya no tiene franja de fondo: el contenido pasa por detrás. Nueva portada: imagen de fondo con "integrantes" pequeño y "Grupo N" en grande encima. La portada se sube desde Administración › Grupos (DEV o admin con permiso de Grupos).
 // v1.76.9.2: (1) La portada ahora es individual para cada Grupo de Servicio (antes era una sola para todos). (2) Panel de Administración › Grupos rediseñado: tarjetas con la portada de cada grupo y una pantalla de configuración por grupo (portada con vista previa, integrantes, número y eliminar). (3) La subida de portada avisa con claridad si algo falla (formato no compatible, sin permiso, error de la base de datos) en vez de fallar en silencio.
 // v1.77: (1) Territorios: el degradé de color de las tarjetas es más suave y deja ver más del mapa. (2) Interfaz Sencilla sin Clima ni Live (se ocultan también sus opciones en Ajustes y en el menú ⋯ de las asignaciones). (3) Interfaz Sencilla: menú rediseñado para personas mayores — pantalla completa con letra grande y dos desplegables (Predicación y Reuniones) que contienen sus sub-secciones; el botón del encabezado dice "Menú". (4) Interfaz Sencilla: Ajustes, Notificaciones y Perfil son botones de solo texto (sin íconos); el Perfil ya no muestra la foto.
+// v1.77.12: (1) Reunión Pública: en Desktop/pantallas grandes, el programa y "Conferencias salientes" van lado a lado. (2) Portada del Evento sube por detrás del botón Volver y el título en Desktop (Sidebar y PopUp). (3) Se quita el handle superior del detalle en Desktop. (4) Aseo del Salón, Hospitalidad y Responsabilidades: la fecha va arriba de cada tarjeta (móvil y Desktop). (5) Cuenta regresiva de Evento con segundos; se puede desactivar en Experimentos.
+// v1.77.11: En Desktop o pantallas grandes, Configuración se abre en un PopUp centrado (con fondo atenuado) y no como pantalla completa. En móvil sigue igual.
 // v1.77.10: Las tarjetas de la subsección Territorios usan el color de acento de la plataforma en lugar del color de cada territorio.
 // v1.77.9: Nuevo experimento "Espaciado del contenido": slider de 10 niveles (predeterminado 2 = espaciado actual).
 // v1.77.8: (1) La dirección en el detalle de una asignación de casa en casa es un poco más grande (solo esa pantalla). (2) El botón de Clima de la asignación ya no abre el sitio del clima. (3) Nuevo ícono de Carritos (Inicio, Mis Turnos, Ajustes > Notificaciones y menú de Predicación). (4) Nuevo experimento "Resolución reducida en medios" para imágenes y PDF. (5) Carga más rápida: pdf.js y QR con defer, preconnect, fuentes con display=swap, decodificación asíncrona de imágenes.
 // v1.77.5: (1) Detalle de un Territorio: el título del encabezado ahora dice "Detalles del territorio" (el número ya aparece en el círculo de color). (2) Más opciones en Inicio incluye "Personalizar Inicio" (el botón al final de Inicio se mantiene). (3) Nuevo experimento "Territorios sin vista previa": las tarjetas de Territorios muestran solo el degradé y el nombre.
-const APP_VERSION = '1.77.10'; // v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
+const APP_VERSION = '1.77.12'; // v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -12883,6 +12947,9 @@ const I18N = {
   'exp.lowRes.section': { es: 'Rendimiento', en: 'Performance', nl: 'Prestaties' },
   'exp.lowRes.title': { es: 'Resolución reducida en medios', en: 'Reduced media resolution', nl: 'Verlaagde mediaresolutie' },
   'exp.lowRes.desc': { es: 'Desactiva la resolución máxima en imágenes y PDF (como el Mapa de la congregación) para ahorrar memoria y batería en dispositivos de bajos recursos.', en: 'Turns off maximum resolution for images and PDFs (like the congregation Map) to save memory and battery on low-end devices.', nl: 'Schakelt de maximale resolutie van afbeeldingen en pdf\'s uit (zoals de gemeentekaart) om geheugen en batterij te sparen op eenvoudige apparaten.' },
+  'exp.evCdSec.section': { es: 'Eventos', en: 'Events', nl: 'Evenementen' },
+  'exp.evCdSec.title': { es: 'Segundos en la cuenta regresiva', en: 'Seconds in the countdown', nl: 'Seconden in het aftellen' },
+  'exp.evCdSec.desc': { es: 'Muestra los segundos en la cuenta regresiva dentro de un Evento. Desactívalo para ver solo días, horas y minutos.', en: 'Shows seconds in the countdown inside an Event. Turn it off to see only days, hours and minutes.', nl: 'Toont seconden in het aftellen binnen een evenement. Zet uit om alleen dagen, uren en minuten te zien.' },
   'exp.terNoPreview.section': { es: 'Territorios', en: 'Territories', nl: 'Gebieden' },
   'exp.terNoPreview.title': { es: 'Territorios sin vista previa', en: 'Territories without preview', nl: 'Gebieden zonder voorvertoning' },
   'exp.terNoPreview.desc': { es: 'Quita la imagen del mapa en las tarjetas de Territorios y muestra solo el degradé de color y el nombre.', en: 'Removes the map image from the Territories cards and shows only the color gradient and the name.', nl: 'Verwijdert de kaartafbeelding op de gebiedskaarten en toont alleen het kleurverloop en de naam.' },
@@ -19154,7 +19221,9 @@ function _evCountdownStop() {
   const el = document.getElementById('detail-especial-countdown');
   if (el) el.style.display = 'none';
 }
+let _evCdTarget = null;
 function _evCountdownStart(target) {
+  _evCdTarget = target;
   const el = document.getElementById('detail-especial-countdown');
   if (!el) return;
   const tick = () => {
@@ -19166,10 +19235,15 @@ function _evCountdownStart(target) {
     el.querySelector('[data-u="d"]').textContent = Math.floor(mins / 1440);
     el.querySelector('[data-u="h"]').textContent = Math.floor((mins % 1440) / 60);
     el.querySelector('[data-u="m"]').textContent = mins % 60;
+    // v1.77.12: segundos (se pueden desactivar desde Experimentos)
+    const showSec = isEvCountdownSecondsEnabled();
+    const segS = el.querySelector('.dec-seg-s');
+    if (segS) segS.style.display = showSec ? '' : 'none';
+    if (showSec) el.querySelector('[data-u="s"]').textContent = Math.floor((ms % 60000) / 1000);
     el.style.display = '';
   };
   tick();
-  _evCdTimer = setInterval(tick, 5000);
+  _evCdTimer = setInterval(tick, isEvCountdownSecondsEnabled() ? 1000 : 5000);
 }
 async function viewAssignment(id) {
   document.getElementById('detail-panel')?.classList.add('assignment-desktop-topbar');
@@ -21888,6 +21962,11 @@ async function deleteHermano(id) {
 }
 
 // ── Asignar cargos para un Jueves o Sábado específico ──
+// v1.77.12: la fecha va ARRIBA de la tarjeta (como en Predicación), no dentro de ella.
+function respDateSectionWrap(dateStr, cardHtml, attrs) {
+  const lbl = capitalizar(respDiaLabel(dateStr));
+  return `<div class="date-section resp-date-section" ${attrs || ''}><div class="date-section-header resp-date-header">${lbl}</div>${cardHtml}</div>`;
+}
 function respDiaLabel(dateStr) {
   const d = new Date(dateStr + 'T00:00:00');
   return d.toLocaleDateString(_uiDateLocale(), { weekday: 'long', day: 'numeric', month: 'long' });
@@ -22292,9 +22371,8 @@ async function renderRespUserView() {
   const myName = currentUser ? getIdentityName().trim().toLowerCase() : undefined;
   el.innerHTML = dates.map(dateStr => {
     const cargosDia = rows.filter(r => r.fecha === dateStr);
-    return `
-    <div class="profile-section" data-resp-date="${dateStr}" style="margin-bottom:1rem;cursor:pointer" onclick="openRespShareChooser('${dateStr}')">
-      <div class="profile-section-title">${respDiaLabel(dateStr)}</div>
+    return respDateSectionWrap(dateStr, `
+    <div class="profile-section" data-resp-date="${dateStr}" style="margin-bottom:0;cursor:pointer" onclick="openRespShareChooser('${dateStr}')">
       ${RESP_CARGOS.map(cargo => {
         const r = cargosDia.find(x => x.cargo === cargo);
         const name = r?.hermano || null;
@@ -22311,7 +22389,7 @@ async function renderRespUserView() {
           </div>
         </div>`;
       }).join('')}
-    </div>`;
+    </div>`);
   }).join('');
   // v1.75.1: al llegar desde Vida y Ministerio, se desplaza hasta el día de esa reunión.
   if (respPendingFocusDate) {
@@ -22621,9 +22699,8 @@ async function renderAseoUserView() {
   const myName = currentUser ? getIdentityName().trim().toLowerCase() : undefined;
   el.innerHTML = rows.map((row, idx) => {
     const isMe = myName && row.encargado_nombre && row.encargado_nombre.trim().toLowerCase() === myName;
-    return `
-    <div class="profile-section aseo-card" style="margin-bottom:1rem" onclick="openAseoModeChooser(${idx})">
-      <div class="profile-section-title">${capitalizar(respDiaLabel(row.fecha))}</div>
+    return respDateSectionWrap(row.fecha, `
+    <div class="profile-section aseo-card" style="margin-bottom:0" onclick="openAseoModeChooser(${idx})">
       <div class="profile-row">
         <div class="service-group-badges">${[row.grupo1_numero,row.grupo2_numero].filter(Boolean).map(n => `<span class="service-group-number" aria-label="Grupo ${n}">${n}</span>`).join('')}</div>
         <div class="profile-row-content">
@@ -22640,7 +22717,7 @@ async function renderAseoUserView() {
           <div class="profile-row-value" style="${isMe?'font-weight:700':''}">${row.encargado_nombre || '<span class="profile-row-empty">Sin asignar</span>'}</div>
         </div>
       </div>
-    </div>`;
+    </div>`);
   }).join('');
 }
 
@@ -22861,9 +22938,8 @@ async function renderHospUserView() {
   el.innerHTML = rows.map(row => {
     const grupoAsignado = grupos.find(g => g.numero === row.grupo_numero);
     const isMyGroup = myNombre && grupoAsignado && (grupoAsignado.miembros || []).some(m => m.nombre.trim().toLowerCase() === myNombre);
-    return `
-    <div class="profile-section" style="margin-bottom:1rem">
-      <div class="profile-section-title">${capitalizar(respDiaLabel(row.fecha))}</div>
+    return respDateSectionWrap(row.fecha, `
+    <div class="profile-section" style="margin-bottom:0">
       <div class="profile-row" style="${isMyGroup ? 'background:var(--accent-light);border-radius:var(--radius-sm)' : ''}">
         <div class="service-group-badges">${row.grupo_numero ? `<span class="service-group-number" aria-label="Grupo ${row.grupo_numero}">${row.grupo_numero}</span>` : ''}</div>
         <div class="profile-row-content">
@@ -22871,7 +22947,7 @@ async function renderHospUserView() {
           <div class="profile-row-value" style="${isMyGroup?'font-weight:700':''}">${hospGrupoLabel(row)}</div>
         </div>
       </div>
-    </div>`;
+    </div>`);
   }).join('');
 }
 
@@ -25547,7 +25623,7 @@ function openPrefScreen(name) {
   if (name === 'notificaciones') renderPrefNotifList();
   if (name === 'ayuda') { renderAyudaTipsList(); updateInicioTutorialRow(); }
   if (name === 'preferencias') { updateAnimationsEnabledToggleUI(); updateWeatherToggleUI(); if (typeof updateModoSencilloToggleUI === 'function') updateModoSencilloToggleUI(); updateAccentSwatchesUI(); if (typeof updateHomeExpToggleUI === 'function') updateHomeExpToggleUI(); }
-  if (name === 'experimentos') { updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateNavbarBtnSizeUI(); updateFullscreenExperimentUI(); updateTerNoPreviewUI(); updateLowResUI(); updateContentSpacingUI(); }
+  if (name === 'experimentos') { updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateNavbarBtnSizeUI(); updateFullscreenExperimentUI(); updateTerNoPreviewUI(); updateEvCdSecondsUI(); updateLowResUI(); updateContentSpacingUI(); }
   if (name === 'legal-terms') renderPrefLegalTerms();
   if (name === 'legal-privacy') renderPrefLegalPrivacy();
   if (name === 'version') {
@@ -31464,6 +31540,7 @@ function renderFsUserView() {
   const hasRight = idx < sorted.length - 1;
 
   const programHtml = fsRenderWeekProgram(week);
+  const _fsOut = fsRenderOutgoingSection(); // v1.77.12: en pantallas grandes va al lado del programa
 
   container.innerHTML = `
     <div class="vmc-week-selector-row">
@@ -31478,7 +31555,7 @@ function renderFsUserView() {
       </div>
       <div class="vmc-cal-popover" id="fs-cal-popover"></div>
     </div>
-    <div class="vmc-program-container" id="fs-program-container">${programHtml}${fsRenderOutgoingSection()}</div>`;
+    <div class="vmc-program-container" id="fs-program-container">${_fsOut ? `<div class="fs-two-col"><div class="fs-col-main">${programHtml}</div><div class="fs-col-out">${_fsOut}</div></div>` : programHtml}</div>`;
 }
 
 // v1.52.0: Conferencias salientes próximas (hoy en adelante), debajo del programa.
@@ -35779,6 +35856,30 @@ document.addEventListener('click', (e) => {
   style.textContent=`.detail-assignment-more-menu{display:none;position:absolute;z-index:120;right:16px;top:64px;min-width:210px;padding:6px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-lg)}.detail-assignment-more-menu.open{display:block;animation:menuMorphIn .2s var(--ease-fluid-soft)}.detail-assignment-more-menu button{display:flex;align-items:center;gap:10px;width:100%;padding:11px 12px;border:0;border-radius:9px;background:transparent;color:var(--text);font:600 .86rem var(--font);text-align:left;cursor:pointer}.detail-assignment-more-menu button:hover{background:var(--surface2)}.detail-assignment-more-menu .dam-label{flex:1}.dam-switch{position:relative;width:38px;height:22px;border-radius:99px;background:var(--surface3);flex:0 0 38px;transition:background .2s}.dam-switch.on{background:var(--accent)}.dam-thumb{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s var(--ease-fluid-soft)}.dam-switch.on .dam-thumb{transform:translateX(16px)}.detail-assignment-more-menu .dam-toggle-row svg{flex:0 0 17px}.detail-assignment-more-menu svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:0 0 17px}`;
   document.head.appendChild(style);
 })();
+
+// ── v1.77.12: experimento "Segundos en la cuenta regresiva del Evento" (activado por defecto) ──
+function isEvCountdownSecondsEnabled() {
+  try { return localStorage.getItem('fleming_experiment_ev_countdown_seconds') !== 'false'; } catch (e) { return true; }
+}
+function updateEvCdSecondsUI() {
+  const on = isEvCountdownSecondsEnabled();
+  const track = document.getElementById('ev-cdsec-toggle');
+  const thumb = document.getElementById('ev-cdsec-thumb');
+  if (track) track.style.background = on ? 'var(--accent)' : 'var(--surface3)';
+  if (thumb) thumb.style.left = on ? '21px' : '3px';
+}
+function toggleEvCdSeconds() {
+  const next = !isEvCountdownSecondsEnabled();
+  try { localStorage.setItem('fleming_experiment_ev_countdown_seconds', String(next)); } catch (e) {}
+  updateEvCdSecondsUI();
+  // Si hay un Evento abierto con la cuenta regresiva activa, se reinicia el temporizador con el nuevo ritmo.
+  try {
+    if (_evCdTimer) {
+      clearInterval(_evCdTimer); _evCdTimer = null;
+      if (_evCdTarget) _evCountdownStart(_evCdTarget);
+    }
+  } catch (e) {}
+}
 
 // ── v1.77.5: experimento "Territorios sin vista previa" ─────────────────────
 function isTerNoPreviewEnabled() {
