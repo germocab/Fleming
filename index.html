@@ -4338,8 +4338,6 @@
     color: #fff; text-shadow: 0 2px 16px rgba(0,0,0,0.4);
   }
 
-  /* Admin: tarjeta para subir la portada de los grupos */
-  #grupos-cover-preview-wrap img { max-height: 180px; object-fit: cover; }
 
   .grupo-detail-body {
     max-width: 640px; width: 100%; margin: 0 auto;
@@ -4606,7 +4604,67 @@
     padding: 0.5rem 0 0.25rem; font-style: italic;
   }
 
-  /* ── Admin grupos ─────────────────────────────────────────────────────────── */
+  /* ── Admin grupos (v1.76.9.2: tarjetas + pantalla de configuración por grupo) ── */
+  #grupo-modal, #miembro-modal { z-index: 320; }
+  .ga-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+  @media (max-width: 480px) { .ga-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
+  .ga-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+    overflow: hidden; cursor: pointer; display: flex; flex-direction: column;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  }
+  .ga-card:hover { box-shadow: var(--shadow); border-color: var(--border-active); }
+  .ga-card:active { transform: scale(0.97); }
+  .ga-card-cover {
+    position: relative; aspect-ratio: 16 / 11; color: #fff; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: flex-end; padding: 10px 13px;
+    background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 78%, #000) 0%, var(--accent) 100%);
+  }
+  .ga-card-cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .ga-card-cover::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.12) 100%); }
+  .ga-card-cover > div, .ga-card-cover > span { position: relative; z-index: 1; }
+  .ga-card-count { font-size: 0.7rem; font-weight: 600; opacity: 0.92; }
+  .ga-card-name { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.025em; line-height: 1.05; text-shadow: 0 1px 8px rgba(0,0,0,0.35); }
+  .ga-nocover {
+    position: absolute !important; top: 8px; right: 8px; z-index: 2;
+    font-size: 0.62rem; font-weight: 700; padding: 3px 8px; border-radius: 99px;
+    background: rgba(0,0,0,0.35); color: #fff; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  }
+  .ga-card-foot { padding: 9px 12px; display: flex; align-items: center; gap: 8px; font-size: 0.74rem; color: var(--text3); }
+  .ga-card-lead { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ga-card-lead b { color: var(--text2); font-weight: 600; }
+  .ga-card-foot svg { width: 14px; height: 14px; stroke: var(--text3); fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+  #page-grupo-admin {
+    display: none; position: fixed; inset: 0; z-index: 301;
+    background: var(--bg); flex-direction: column; overflow-y: auto;
+    animation: fadeIn 0.28s var(--ease-fluid-soft);
+  }
+  #page-grupo-admin.open { display: flex; }
+  #page-grupo-admin .pill-header-title { opacity: 1; }
+  .ga-wrap { width: 100%; max-width: 640px; margin: 0 auto; padding: 0 1.25rem 3rem; }
+  .ga-hero { min-height: 230px; padding: 2rem 0 1.25rem; border-radius: 22px; cursor: pointer; border-bottom: none; margin-bottom: 0.85rem; }
+  .ga-hero .grupo-detail-hero-inner { padding: 0 1.25rem; }
+  .ga-hero-chip {
+    position: absolute; top: 12px; right: 12px; z-index: 2;
+    display: flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px;
+    background: var(--nav-bg); backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%); -webkit-backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%);
+    border: 1px solid var(--border); color: var(--text); font-size: 0.78rem; font-weight: 700;
+  }
+  .ga-hero-chip svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
+  .ga-cover-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .ga-hint { font-size: 0.74rem; color: var(--text3); margin: 0.6rem 0.15rem 1.4rem; line-height: 1.4; }
+  .ga-sec { margin-bottom: 1.1rem; }
+  .ga-sec-head { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1rem 0.5rem; border-bottom: 1px solid var(--border); }
+  .ga-count { font-size: 0.72rem; font-weight: 700; padding: 2px 9px; border-radius: 99px; background: var(--accent-light); color: var(--accent); }
+  .ga-sec-body { padding: 0.5rem 1rem 1rem; }
+  .ga-sec-body .admin-grupo-quickadd { margin: 0.4rem 0 0.5rem; }
+  .ga-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0.7rem 0; border-bottom: 1px solid var(--border); }
+  .ga-row:last-child { border-bottom: none; }
+  .ga-row-label { font-size: 0.78rem; color: var(--text3); font-weight: 600; }
+  .ga-row-val { font-size: 1.05rem; font-weight: 800; color: var(--text); margin-top: 1px; }
+
+  /* ── Admin grupos (antiguo acordeón, ya sin uso) ───────────────────────────── */
   .admin-grupo-card {
     background: var(--surface2);
     border: 1px solid var(--border);
@@ -8674,30 +8732,11 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
       </div>
       <div class="admin-section" id="admin-grupos">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
-          <span style="flex:1;font-size:0.95rem;font-weight:700">Grupos de Servicio</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:0.95rem;font-weight:700">Grupos de Servicio</div>
+            <div style="font-size:0.76rem;color:var(--text3);margin-top:2px">Toca un grupo para configurar su portada, integrantes y más</div>
+          </div>
           <button class="btn-secondary" onclick="openGrupoModal()">+ Nuevo grupo</button>
-        </div>
-        <!-- v1.76.9: portada de la pantalla de detalle de los Grupos de Servicio -->
-        <div class="full-map-admin-card" id="grupos-cover-admin-card">
-          <div class="full-map-admin-header">
-            <div class="full-map-admin-icon">
-              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-            </div>
-            <div>
-              <div class="full-map-admin-title">Portada de los Grupos</div>
-              <div class="full-map-admin-sub" id="grupos-cover-admin-sub">Imagen que se ve detrás del título en el detalle de cada grupo</div>
-            </div>
-          </div>
-          <div class="full-map-preview-wrap" id="grupos-cover-preview-wrap">
-            <img id="grupos-cover-preview-img" alt="Portada de los grupos">
-          </div>
-          <div class="full-map-admin-actions">
-            <button class="btn-secondary" onclick="document.getElementById('grupos-cover-file-input').click()">
-              <span id="grupos-cover-upload-label">Subir portada</span>
-            </button>
-            <button class="btn-danger" id="grupos-cover-delete-btn" onclick="deleteGruposCover()" style="display:none">Eliminar portada</button>
-            <input type="file" id="grupos-cover-file-input" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="handleGruposCoverUpload(event)">
-          </div>
         </div>
         <div id="admin-grupos-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Grupos</div></div></div>
       </div>
@@ -11485,7 +11524,8 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.76.7: visor del Mapa de la congregación — la barra superior (Back y título) ya no tiene franja de fondo: el mapa ocupa toda la pantalla y pasa por detrás. Nuevos botones circulares (solo icono) en la esquina superior derecha, en pila vertical: Ajustar para verse completo, Acercar y Alejar.
 // v1.76.8: (1) Botón "Mapa de la congregación": sin la leyenda "PDF · Toca para ver" y con ícono de mapa en el color de acento (antes un ícono de PDF). (2) Tarjetas de cada Territorio rediseñadas: el nombre es más grande y queda sobre un degradé del color del territorio (como "Mis turnos") que deja ver parte del mapa por detrás.
 // v1.76.9: detalle de Grupo de Servicio — la barra superior (Back y título) ya no tiene franja de fondo: el contenido pasa por detrás. Nueva portada: imagen de fondo con "integrantes" pequeño y "Grupo N" en grande encima. La portada se sube desde Administración › Grupos (DEV o admin con permiso de Grupos).
-const APP_VERSION = '1.76.9'; // v1.76.9 — Portada y nuevo encabezado del detalle de Grupo (base: v1.76.8)
+// v1.76.9.2: (1) La portada ahora es individual para cada Grupo de Servicio (antes era una sola para todos). (2) Panel de Administración › Grupos rediseñado: tarjetas con la portada de cada grupo y una pantalla de configuración por grupo (portada con vista previa, integrantes, número y eliminar). (3) La subida de portada avisa con claridad si algo falla (formato no compatible, sin permiso, error de la base de datos) en vez de fallar en silencio.
+const APP_VERSION = '1.76.9.2'; // v1.76.9.2 — Portada por grupo y panel de Grupos rediseñado (base: v1.76.9)
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -14050,8 +14090,8 @@ async function openGrupoDetailPage(gid) {
   document.getElementById('grupo-detail-badge').textContent = g.numero;
   document.getElementById('grupo-detail-sub').textContent = `${g.miembros.length} integrante${g.miembros.length !== 1 ? 's' : ''}`;
   // v1.76.9: portada (se muestra la ya cargada al instante y se refresca desde la base de datos)
-  _applyGrupoCover();
-  _loadGrupoCover().then(_applyGrupoCover);
+  _applyGrupoCover(gid);
+  _loadGrupoCover(gid).then(() => { if (_currentGrupoId === gid) _applyGrupoCover(gid); });
 
   // Members
   _renderGrupoDetailMembers(g);
@@ -14064,78 +14104,208 @@ async function openGrupoDetailPage(gid) {
   await _loadGrupoMap(gid);
 }
 
-// ── Portada de los Grupos (v1.76.9) ──────────────────────────────────────────
-// Una sola imagen para todos los grupos, guardada en platform_config (key "grupos_cover").
-let _grupoCoverSrc = undefined; // undefined = aún no cargada; null = no hay portada
-async function _loadGrupoCover(force) {
-  if (_grupoCoverSrc !== undefined && !force) return;
+// ── Portada de cada Grupo (v1.76.9.2) ─────────────────────────────────────────
+// Cada grupo tiene su propia portada, guardada en platform_config:
+//   grupo_cover_<id>        → imagen completa (se ve en el detalle del grupo)
+//   grupo_cover_thumb_<id>  → miniatura liviana (se usa en las tarjetas del panel de Administración)
+const _grupoCovers = {};        // gid → src | null  (undefined = aún no cargada)
+const _grupoCoverThumbs = {};   // gid → src
+let _gaThumbsPromise = null;
+
+async function _loadGrupoCover(gid, force) {
+  if (!gid || (_grupoCovers[gid] !== undefined && !force)) return;
   try {
-    const { data, error } = await sb.from('platform_config').select('value').eq('key', 'grupos_cover');
+    const { data, error } = await sb.from('platform_config').select('value').eq('key', `grupo_cover_${gid}`);
     if (error) return;
-    _grupoCoverSrc = (data && data.length && data[0].value) ? data[0].value : null;
+    _grupoCovers[gid] = (data && data.length && data[0].value) ? data[0].value : null;
   } catch (e) { /* sin conexión: se mantiene lo que haya */ }
 }
-function _applyGrupoCover() {
+function _applyGrupoCover(gid) {
   const hero = document.getElementById('grupo-detail-hero');
   const img = document.getElementById('grupo-detail-cover');
   if (!hero || !img) return;
-  if (_grupoCoverSrc) { if (img.getAttribute('src') !== _grupoCoverSrc) img.src = _grupoCoverSrc; hero.classList.add('has-cover'); }
+  const src = _grupoCovers[gid];
+  if (src) { if (img.getAttribute('src') !== src) img.src = src; hero.classList.add('has-cover'); }
   else { img.removeAttribute('src'); hero.classList.remove('has-cover'); }
 }
+function _loadGrupoCoverThumbs(force) {
+  if (_gaThumbsPromise && !force) return _gaThumbsPromise;
+  _gaThumbsPromise = (async () => {
+    try {
+      const keys = (grupos || []).map(g => `grupo_cover_thumb_${g.id}`);
+      if (!keys.length) return;
+      const { data, error } = await sb.from('platform_config').select('key,value').in('key', keys);
+      if (error) return;
+      (data || []).forEach(r => { _grupoCoverThumbs[r.key.replace('grupo_cover_thumb_', '')] = r.value; });
+    } catch (e) { /* se reintenta la próxima vez */ }
+  })();
+  return _gaThumbsPromise;
+}
+
 function _canManageGruposCover() {
   return currentRole === 'dev' || (currentRole === 'admin' && canAccessModule(_currentUserPermsCache, 'grupos'));
 }
-async function _refreshGruposCoverAdminUI(force) {
-  await _loadGrupoCover(force);
-  const card = document.getElementById('grupos-cover-admin-card');
-  if (!card) return;
-  const has = !!_grupoCoverSrc;
-  const img = document.getElementById('grupos-cover-preview-img');
-  const wrap = document.getElementById('grupos-cover-preview-wrap');
-  if (img) { if (has) img.src = _grupoCoverSrc; else img.removeAttribute('src'); }
-  if (wrap) wrap.classList.toggle('visible', has);
-  card.classList.toggle('has-map', has);
-  const del = document.getElementById('grupos-cover-delete-btn'); if (del) del.style.display = has ? '' : 'none';
-  const lab = document.getElementById('grupos-cover-upload-label'); if (lab) lab.textContent = has ? 'Cambiar portada' : 'Subir portada';
+
+// Lee la imagen elegida. Intenta createImageBitmap y, si falla, <img>. Avisa si el formato no se puede leer.
+async function _gaLoadImage(file) {
+  if (window.createImageBitmap) {
+    try { const bm = await createImageBitmap(file); return { src: bm, w: bm.width, h: bm.height, done: () => { try { bm.close(); } catch (_) {} } }; } catch (_) {}
+  }
+  const url = URL.createObjectURL(file);
+  try {
+    const im = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('No se pudo leer la imagen (formato no compatible). Prueba con JPG o PNG.')); i.src = url; });
+    return { src: im, w: im.naturalWidth, h: im.naturalHeight, done: () => URL.revokeObjectURL(url) };
+  } catch (e) { URL.revokeObjectURL(url); throw e; }
 }
-async function handleGruposCoverUpload(event) {
+function _gaEncode(img, maxSide, quality, maxChars) {
+  let w = img.w, h = img.h;
+  const k = Math.min(1, maxSide / Math.max(w, h));
+  w = Math.max(1, Math.round(w * k)); h = Math.max(1, Math.round(h * k));
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h);
+  ctx.drawImage(img.src, 0, 0, w, h);
+  let out = c.toDataURL('image/jpeg', quality);
+  if (maxChars && out.length > maxChars) out = c.toDataURL('image/jpeg', Math.max(0.5, quality - 0.2));
+  return out;
+}
+// Guarda (o crea) una fila de platform_config y comprueba que de verdad se escribió.
+async function _gaSaveConfig(key, value) {
+  const { data: ex, error: e0 } = await sb.from('platform_config').select('key').eq('key', key);
+  if (e0) throw e0;
+  let res;
+  if (ex && ex.length) res = await sb.from('platform_config').update({ value }).eq('key', key).select('key');
+  else res = await sb.from('platform_config').insert({ key, value }).select('key');
+  if (res.error) throw res.error;
+  if (!res.data || !res.data.length) throw new Error('La base de datos no permitió guardar el cambio (permisos).');
+}
+
+let _gaUploading = false;
+function gaPickCover() {
+  if (_gaUploading) return;
+  const inp = document.getElementById('ga-cover-file-input');
+  if (inp) inp.click();
+}
+async function gaUploadCover(event) {
   const file = event.target.files[0]; event.target.value = '';
-  if (!file) return;
+  const gid = _gaId;
+  if (!file || !gid) return;
   if (!_canManageGruposCover()) { showToast('No tienes permiso para cambiar la portada', 'error'); return; }
-  if (!file.type.startsWith('image/')) { showToast('Solo imágenes', 'error'); return; }
-  showToast('Procesando portada…', '');
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const im = new Image();
-    im.onload = async () => {
-      const MAX = 1600; let w = im.width, h = im.height;
-      if (w > MAX || h > MAX) { if (w > h) { h = Math.round(h * MAX / w); w = MAX; } else { w = Math.round(w * MAX / h); h = MAX; } }
-      const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(im, 0, 0, w, h);
-      let b64 = canvas.toDataURL('image/jpeg', 0.85);
-      if (b64.length > 3 * 1024 * 1024) b64 = canvas.toDataURL('image/jpeg', 0.65);
-      const key = 'grupos_cover';
-      const { data: ex } = await sb.from('platform_config').select('key').eq('key', key);
-      let err;
-      if (ex && ex.length) { ({ error: err } = await sb.from('platform_config').update({ value: b64 }).eq('key', key)); }
-      else { ({ error: err } = await sb.from('platform_config').insert({ key, value: b64 })); }
-      if (err) { showToast('Error: ' + err.message, 'error'); return; }
-      _grupoCoverSrc = b64;
-      _refreshGruposCoverAdminUI(); _applyGrupoCover();
-      showToast('Portada guardada ✓', 'success');
-    };
-    im.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
+  if (!file.type.startsWith('image/')) { showToast('Solo se aceptan imágenes', 'error'); return; }
+  _gaUploading = true; _renderGrupoAdminPage();
+  showToast('Subiendo portada…', '');
+  let img;
+  try {
+    img = await _gaLoadImage(file);
+    const full = _gaEncode(img, 1600, 0.85, 2.5 * 1024 * 1024);
+    const thumb = _gaEncode(img, 520, 0.75, 0);
+    await _gaSaveConfig(`grupo_cover_${gid}`, full);
+    await _gaSaveConfig(`grupo_cover_thumb_${gid}`, thumb);
+    _grupoCovers[gid] = full; _grupoCoverThumbs[gid] = thumb;
+    showToast('Portada guardada ✓', 'success');
+  } catch (e) {
+    console.error('gaUploadCover:', e);
+    showToast('No se pudo subir la portada: ' + ((e && e.message) || 'error desconocido'), 'error');
+  } finally {
+    if (img) img.done();
+    _gaUploading = false;
+    if (_gaId === gid) _renderGrupoAdminPage();
+    renderAdminGrupos();
+  }
 }
-async function deleteGruposCover() {
-  if (!_canManageGruposCover()) return;
-  if (!confirm('¿Eliminar la portada de los grupos?')) return;
-  const { error } = await sb.from('platform_config').delete().eq('key', 'grupos_cover');
-  if (error) { showToast('Error al eliminar', 'error'); return; }
-  _grupoCoverSrc = null;
-  _refreshGruposCoverAdminUI(); _applyGrupoCover();
+async function gaDeleteCover() {
+  const gid = _gaId; if (!gid || !_canManageGruposCover()) return;
+  if (!confirm('¿Quitar la portada de este grupo?')) return;
+  const r1 = await sb.from('platform_config').delete().eq('key', `grupo_cover_${gid}`);
+  await sb.from('platform_config').delete().eq('key', `grupo_cover_thumb_${gid}`);
+  if (r1.error) { showToast('Error al quitar la portada', 'error'); return; }
+  _grupoCovers[gid] = null; delete _grupoCoverThumbs[gid];
+  _renderGrupoAdminPage(); renderAdminGrupos();
   showToast('Portada eliminada', 'success');
+}
+
+// ── Pantalla de configuración de un Grupo (Administración) ───────────────────
+let _gaId = null;
+function openGrupoAdminPage(gid) {
+  _gaId = gid;
+  const pg = document.getElementById('page-grupo-admin');
+  if (!pg) return;
+  pg.classList.add('open'); pg.scrollTop = 0;
+  _renderGrupoAdminPage();
+  _loadGrupoCover(gid).then(() => { if (_gaId === gid) _renderGrupoAdminPage(); });
+}
+function closeGrupoAdminPage() {
+  const pg = document.getElementById('page-grupo-admin');
+  if (pg) pg.classList.remove('open');
+  _gaId = null;
+  renderAdminGrupos();
+}
+async function gaQuickAdd(gid, inputEl) {
+  await quickAddMiembro(gid, inputEl);
+  const fresh = document.getElementById('ga-quickadd');
+  if (fresh) { fresh.value = ''; fresh.focus(); }
+}
+function _renderGrupoAdminPage() {
+  const box = document.getElementById('ga-content');
+  if (!box || !_gaId) return;
+  const g = grupos.find(x => x.id === _gaId);
+  if (!g) { closeGrupoAdminPage(); return; }
+  const n = g.miembros.length;
+  const cover = _grupoCovers[g.id];
+  const miembros = sortMiembrosJerarquico(g.miembros);
+  document.getElementById('ga-nav-title').textContent = `${t('grupos.grupo-num')} ${g.numero}`;
+  const canCover = _canManageGruposCover();
+  const membersHtml = miembros.length ? miembros.map(m => `
+    <div class="admin-miembro-row">
+      <div class="grupo-member-avatar" style="background:${memberColor(m.nombre)};width:30px;height:30px;font-size:0.62rem">${memberInitials(m.nombre)}</div>
+      <span class="admin-miembro-name" onclick="openEditMiembro('${g.id}','${m.id}')" title="Editar rol y opciones">${m.nombre}</span>
+      <div class="admin-miembro-badges">
+        ${m.rol === 'superintendente' ? `<span class="rol-badge rol-s">${t('grupos.rol.super-abrev')}</span>` : m.rol === 'auxiliar' ? `<span class="rol-badge rol-a">${t('grupos.rol.auxiliar')}</span>` : ''}
+        ${m.precursor ? `<span class="precursor-badge">${t('grupos.precursor')}</span>` : ''}
+      </div>
+      <button class="btn-icon-sm danger" title="${t('btn.eliminar')}" onclick="deleteMiembro('${m.id}','${g.id}')">
+        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+      </button>
+    </div>`).join('') : `<div style="color:var(--text3);font-size:0.82rem;padding:0.6rem 0">${t('grupos.sinmiembros')}</div>`;
+  const camIcon = '<svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>';
+  box.innerHTML = `
+    <div class="grupo-detail-hero ga-hero ${cover ? 'has-cover' : ''}" ${canCover ? 'onclick="gaPickCover()"' : ''}>
+      <img class="grupo-detail-cover" ${cover ? `src="${cover}"` : ''} alt="" draggable="false">
+      <div class="grupo-detail-hero-inner">
+        <div class="grupo-detail-sub">${n} integrante${n !== 1 ? 's' : ''}</div>
+        <div class="grupo-detail-title"><span>${t('grupos.grupo-num')}</span><span>${g.numero}</span></div>
+      </div>
+      ${canCover ? `<div class="ga-hero-chip">${camIcon}<span>${_gaUploading ? 'Subiendo…' : (cover ? 'Cambiar portada' : 'Agregar portada')}</span></div>` : ''}
+    </div>
+    ${canCover ? `<div class="ga-cover-actions">
+      <button class="btn-secondary" onclick="gaPickCover()" ${_gaUploading ? 'disabled' : ''}>${_gaUploading ? 'Subiendo…' : (cover ? 'Cambiar portada' : 'Subir portada')}</button>
+      ${cover ? `<button class="btn-danger" onclick="gaDeleteCover()" ${_gaUploading ? 'disabled' : ''}>Quitar portada</button>` : ''}
+    </div>
+    <div class="ga-hint">Esta portada es solo de este grupo. Usa una imagen horizontal; el título se superpone, así que se oscurece un poco para que se lea.</div>` : ''}
+
+    <div class="grupo-section ga-sec">
+      <div class="ga-sec-head"><span class="grupo-section-title" style="border:none;padding:0">Integrantes</span><span class="ga-count">${n}</span></div>
+      <div class="ga-sec-body">
+        <input type="text" id="ga-quickadd" class="admin-grupo-quickadd" placeholder="Escribe nombre y apellido, presiona Enter…" autocomplete="off"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();gaQuickAdd('${g.id}', this);}">
+        ${membersHtml}
+        <button class="btn-secondary" style="margin-top:0.7rem;width:100%" onclick="openAddMiembro('${g.id}')">+ Agregar con rol (encargado, auxiliar, precursor)</button>
+      </div>
+    </div>
+
+    <div class="grupo-section ga-sec">
+      <div class="ga-sec-head"><span class="grupo-section-title" style="border:none;padding:0">Ajustes del grupo</span></div>
+      <div class="ga-sec-body">
+        <div class="ga-row">
+          <div><div class="ga-row-label">Número del grupo</div><div class="ga-row-val">${g.numero}</div></div>
+          <button class="btn-secondary" onclick="openGrupoModal('${g.id}')">Cambiar</button>
+        </div>
+        <div class="ga-row">
+          <div><div class="ga-row-label">Eliminar grupo</div><div class="ga-row-val" style="font-size:0.74rem;font-weight:500;color:var(--text3)">Se borran también todos sus integrantes</div></div>
+          <button class="btn-danger" onclick="deleteGrupo('${g.id}')">Eliminar</button>
+        </div>
+      </div>
+    </div>`;
 }
 
 function closeGrupoDetailPage() {
@@ -15878,48 +16048,30 @@ function toggleUserPermissionModule(uid, key) {
 function renderAdminGrupos() {
   const container = document.getElementById('admin-grupos-list');
   if (!container) return;
-  _refreshGruposCoverAdminUI();
+  if (_gaId) _renderGrupoAdminPage();
   if (!grupos.length) {
     container.innerHTML = `<div style="color:var(--text3);font-size:0.875rem;padding:1rem 0">No hay grupos. Crea el primero con "+ Nuevo grupo".</div>`;
     return;
   }
-  container.innerHTML = grupos.map(g => {
-    const miembrosOrdenados = sortMiembrosJerarquico(g.miembros);
-    const membersHtml = miembrosOrdenados.length ? miembrosOrdenados.map(m => `
-      <div class="admin-miembro-row">
-        <div class="grupo-member-avatar" style="background:${memberColor(m.nombre)};width:26px;height:26px;font-size:0.58rem">${memberInitials(m.nombre)}</div>
-        <span class="admin-miembro-name" onclick="openEditMiembro('${g.id}','${m.id}')" title="Editar rol y opciones">${m.nombre}</span>
-        <div class="admin-miembro-badges">
-          ${m.rol === 'superintendente' ? `<span class="rol-badge rol-s">${t('grupos.rol.super-abrev')}</span>` : m.rol === 'auxiliar' ? `<span class="rol-badge rol-a">${t('grupos.rol.auxiliar')}</span>` : ''}
-          ${m.precursor ? `<span class="precursor-badge">${t('grupos.precursor')}</span>` : ''}
-        </div>
-        <button class="btn-icon-sm danger" title="${t('btn.eliminar')}" onclick="deleteMiembro('${m.id}','${g.id}')">
-          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-        </button>
-      </div>`).join('') : `<div style="color:var(--text3);font-size:0.82rem;padding:0.5rem 0">${t('grupos.sinmiembros')}</div>`;
-    return `<div class="admin-grupo-card">
-      <div class="admin-grupo-header" onclick="toggleAdminGrupo('${g.id}')">
-        <div class="admin-grupo-num">${g.numero}</div>
-        <div class="admin-grupo-name">${t('grupos.grupo-num')} ${g.numero}</div>
-        <div class="admin-grupo-meta">${miembrosOrdenados.length} miembro${miembrosOrdenados.length !== 1 ? 's' : ''}</div>
-        <div class="admin-grupo-actions" onclick="event.stopPropagation()">
-          <button class="btn-icon-sm" title="${t('grupos.editar-grupo')}" onclick="openGrupoModal('${g.id}')">
-            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
-          <button class="btn-icon-sm danger" title="${t('grupos.eliminar-grupo')}" onclick="deleteGrupo('${g.id}')">
-            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-          </button>
-        </div>
+  // Las miniaturas de portada se cargan una sola vez; al llegar se vuelve a pintar la lista.
+  if (!_gaThumbsPromise) _loadGrupoCoverThumbs().then(() => renderAdminGrupos());
+  container.innerHTML = '<div class="ga-grid">' + grupos.map(g => {
+    const n = g.miembros.length;
+    const thumb = _grupoCoverThumbs[g.id];
+    const lider = g.miembros.find(m => m.rol === 'superintendente');
+    return `<div class="ga-card" onclick="openGrupoAdminPage('${g.id}')">
+      <div class="ga-card-cover">
+        ${thumb ? `<img src="${thumb}" alt="" loading="lazy" draggable="false">` : ''}
+        ${thumb ? '' : '<span class="ga-nocover">Sin portada</span>'}
+        <div class="ga-card-count">${n} integrante${n !== 1 ? 's' : ''}</div>
+        <div class="ga-card-name">${t('grupos.grupo-num')} ${g.numero}</div>
       </div>
-      <div class="admin-grupo-body" id="admin-grupo-body-${g.id}" style="display:none">
-        <div class="admin-grupo-quickadd-wrap">
-          <input type="text" class="admin-grupo-quickadd" data-i18n-ph="grupos.quickadd.placeholder" placeholder="Escribe nombre y apellido, presiona Enter…" autocomplete="off"
-            onkeydown="if(event.key==='Enter'){event.preventDefault();quickAddMiembro('${g.id}', this);}">
-        </div>
-        ${membersHtml}
+      <div class="ga-card-foot">
+        <span class="ga-card-lead">${lider ? 'Encargado: <b>' + lider.nombre + '</b>' : 'Sin encargado asignado'}</span>
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
     </div>`;
-  }).join('');
+  }).join('') + '</div>';
 }
 
 function toggleAdminGrupo(gid) {
@@ -27104,6 +27256,7 @@ function _backOpenLayers() {
     ['uprofile-avatar-viewer', 'open', 'closeUserAvatarViewer', 0],
     ['page-user-profile', 'open', 'closeUserProfilePage', 0],
     ['page-grupo', 'open', 'closeGrupoDetailPage', 0],
+    ['page-grupo-admin', 'open', 'closeGrupoAdminPage', 0],
     ['page-otros-grupos', 'open', 'closeOtrosGruposScreen', 0],
     ['page-profile', 'open', 'closeProfilePage', 0],
     ['page-admin', 'active', 'closeAdminPage', 0]
@@ -31666,6 +31819,20 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
   <div style="max-width:600px;width:100%;margin:0 auto;padding-bottom:2.5rem">
     <div id="otros-grupos-content"></div>
   </div>
+</div>
+
+<!-- ── Configuración de un Grupo (Administración) — v1.76.9.2 ── -->
+<div id="page-grupo-admin">
+  <nav class="subpage-topbar">
+    <button class="pill-back-btn" onclick="closeGrupoAdminPage()" title="Grupos">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span id="ga-nav-title" class="pill-header-title">Grupo</span>
+  </nav>
+  <div class="ga-wrap">
+    <div id="ga-content"></div>
+  </div>
+  <input type="file" id="ga-cover-file-input" accept="image/*" style="display:none" onchange="gaUploadCover(event)">
 </div>
 
 <!-- ── Grupo Detail fullscreen page ── -->
