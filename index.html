@@ -5638,7 +5638,7 @@
 /* Mismo tratamiento visual que la barra de búsqueda de "Grupos"; la única
    diferencia funcional es el botón de filtros a la derecha. */
 #sub-content-carritos .ct-search-wrapper, #admin-carritos .ct-search-wrapper { padding:0 20px 12px; max-width:680px; margin:0 auto; }
-#sub-content-carritos .ct-search-inner, #admin-carritos .ct-search-inner { position:relative; display:flex; align-items:center; gap:10px; min-height:46px; padding:0 10px 0 14px; border-radius:14px; border:1px solid var(--border); background:var(--surface); box-shadow:var(--shadow); transition:border-color .18s ease,box-shadow .18s ease; }
+#sub-content-carritos .ct-search-inner, #admin-carritos .ct-search-inner { position:relative; display:flex; align-items:center; gap:10px; min-height:46px; padding:0 4px 0 14px; border-radius:14px; border:1px solid var(--border); background:var(--surface); box-shadow:var(--shadow); transition:border-color .18s ease,box-shadow .18s ease; }
 #sub-content-carritos .ct-search-inner:focus-within, #admin-carritos .ct-search-inner:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-light); }
 #sub-content-carritos .ct-search-icon, #admin-carritos .ct-search-icon {
   position:static; width:18px; height:18px; flex:0 0 18px; stroke:var(--text3); fill:none;
@@ -5651,12 +5651,14 @@
 }
 #sub-content-carritos .ct-search-inner input:focus, #admin-carritos .ct-search-inner input:focus { border-color: var(--ct-accent); box-shadow: 0 0 0 3px var(--ct-accent-light); }
 #sub-content-carritos .ct-search-inner input::placeholder, #admin-carritos .ct-search-inner input::placeholder { color: var(--text-light); }
+/* v1.79.10: mismo botón de filtros (círculo suave + ícono) que el detalle de un punto de carrito */
 #sub-content-carritos .ct-search-filter-btn, #admin-carritos .ct-search-filter-btn {
-  position:static; flex:0 0 30px; width:30px; height:30px; background:var(--surface3); border:0; cursor:pointer;
+  position:static; flex:0 0 38px; width:38px; height:38px; margin:4px 0; background:var(--surface3); border:0; padding:0; cursor:pointer;
   color:var(--text2); border-radius:50%; display:flex; align-items:center; justify-content:center;
-  transition:color var(--transition-fast),background var(--transition-fast);
+  transition:transform .15s, background-color .2s, color .2s;
 }
-#sub-content-carritos .ct-search-filter-btn:hover, #admin-carritos .ct-search-filter-btn:hover { color: var(--ct-accent); background: var(--ct-accent-light); }
+#sub-content-carritos .ct-search-filter-btn:active, #admin-carritos .ct-search-filter-btn:active { transform: scale(0.92); }
+#sub-content-carritos .ct-search-filter-btn.on, #admin-carritos .ct-search-filter-btn.on, #sub-content-carritos .ct-search-filter-btn[aria-expanded="true"], #admin-carritos .ct-search-filter-btn[aria-expanded="true"] { background: var(--accent); color: #fff; }
 #sub-content-carritos #cartFilterMenu, #admin-carritos #cartFilterMenu { max-height: 0; opacity: 0; overflow: hidden; transform: translateY(-6px); transition: max-height 0.35s ease, opacity 0.25s ease, transform 0.3s ease; }
 #sub-content-carritos #cartFilterMenu.ct-open, #admin-carritos #cartFilterMenu.ct-open { max-height: 300px; opacity: 1; transform: translateY(0); }
 #sub-content-carritos .ct-filter-panel, #admin-carritos .ct-filter-panel { margin-top: 10px; padding: 14px 16px; background: var(--bg-card); border-radius: var(--radius-sm); border: 1px solid var(--border-color); }
@@ -5796,17 +5798,21 @@
 .cpd-hero-img { position: absolute; inset: 0; z-index: -2; background-size: cover; background-position: center; opacity: 0; transition: opacity 0.45s ease; }
 .cpd-hero.has-img .cpd-hero-img { opacity: 1; }
 .cpd-hero-shade { position: absolute; inset: 0; z-index: -1; background: linear-gradient(to bottom, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0) 28%, rgba(0,0,0,0) 42%, rgba(0,0,0,0.68) 100%); }
-.cpd-topbar { position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: calc(env(safe-area-inset-top, 0px) + 14px) 20px 0; z-index: 2; }
+.cpd-topbar { position: sticky; top: 0; height: 0; z-index: 30; }
+.cpd-topbar-in { position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: calc(env(safe-area-inset-top, 0px) + 14px) 20px 0; }
+.cpd-topbar-in > div { display: flex; gap: 8px; }
+.cpd-topbar-spacer { width: 40px; height: 40px; flex-shrink: 0; }
 .cpd-circle {
   width: 40px; height: 40px; border-radius: 50%; border: 0; padding: 0; flex-shrink: 0; cursor: pointer;
-  background: rgba(255,255,255,0.82); color: #1c1c1e; display: flex; align-items: center; justify-content: center;
-  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); transition: transform 0.15s, background-color 0.2s, color 0.2s;
+  /* v1.79.10: sigue el modo claro/oscuro (antes era blanco fijo) */
+  background: color-mix(in srgb, var(--surface) 82%, transparent); color: var(--text); display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.16); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); transition: transform 0.15s, background-color 0.2s, color 0.2s;
 }
 .cpd-circle:active { transform: scale(0.92); }
 .cpd-circle.on { background: var(--accent); color: #fff; }
-.cpd-circle-soft { background: var(--surface3); color: var(--text2); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.cpd-circle-soft { background: var(--surface3); color: var(--text2); box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 .cpd-circle-soft.on { background: var(--accent); color: #fff; }
-.cpd-pill { display: flex; align-items: center; justify-content: center; height: 40px; padding: 0 1.15rem; border-radius: 99px; background: rgba(255,255,255,0.74); color: #3c3c43; font-weight: 700; font-size: 1rem; letter-spacing: -0.01em; white-space: nowrap; -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+.cpd-pill { display: flex; align-items: center; justify-content: center; height: 40px; padding: 0 1.15rem; border-radius: 99px; background: color-mix(in srgb, var(--surface) 78%, transparent); color: var(--text); font-weight: 700; font-size: 1rem; letter-spacing: -0.01em; white-space: nowrap; box-shadow: 0 2px 10px rgba(0,0,0,0.16); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
 .cpd-hero-bottom { padding: 72px 20px 22px; }
 .cpd-hero-bottom h1 { margin: 0; font-size: 1.75rem; line-height: 1.1; font-weight: 800; letter-spacing: -0.025em; text-shadow: 0 2px 14px rgba(0,0,0,0.35); color: #fff; }
 .cpd-hero-sub { margin-top: 8px; font-size: 0.9rem; font-weight: 500; opacity: 0.95; text-shadow: 0 1px 8px rgba(0,0,0,0.35); }
@@ -5816,12 +5822,6 @@
 .cpd-act-call { background: rgba(240,240,244,0.9); color: #3c3c43; }
 .cpd-act-route { background: rgba(255,255,255,0.28); color: #fff; border: 1px solid rgba(255,255,255,0.3); }
 
-.cpd-search { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.32s var(--ease-fluid); }
-.cpd-search.open { grid-template-rows: 1fr; }
-.cpd-search-inner { overflow: hidden; padding: 0 20px; }
-.cpd-search-box { display: flex; align-items: center; gap: 10px; margin-top: 16px; padding: 0 6px 0 14px; height: 44px; border-radius: 99px; background: var(--surface3); color: var(--text3); }
-.cpd-search-box input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font-family: inherit; font-size: 0.92rem; color: var(--text); }
-.cpd-search-clear { width: 34px; height: 34px; border: 0; border-radius: 50%; background: transparent; color: var(--text3); font-size: 1.5rem; line-height: 1; cursor: pointer; }
 
 .cpd-body { padding: 24px 20px 56px; }
 .cpd-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 18px 18px; margin-bottom: 14px; }
@@ -5831,8 +5831,13 @@
 .cpd-card-p.is-empty { color: var(--text3); }
 
 .cpd-sec-head { display: flex; align-items: center; justify-content: space-between; margin: 32px 0 16px; }
+.cpd-rem-title { margin: 40px 0 16px; }
+.cpd-rem-card { display: flex; align-items: flex-start; gap: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 16px 18px; margin-bottom: 12px; }
+.cpd-rem-ico { flex-shrink: 0; width: 22px; height: 22px; color: var(--accent); margin-top: 1px; }
+.cpd-rem-ico svg { width: 22px; height: 22px; display: block; }
+.cpd-rem-text { margin: 0; flex: 1; min-width: 0; color: var(--text); font-size: 0.92rem; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+.cpd-rem-empty { color: var(--text3); font-size: 0.85rem; }
 .cpd-sec-title { margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--text2); letter-spacing: -0.02em; }
-.cpd-fotos-title { margin: 40px 0 16px; }
 .cpd-filter-wrap { position: relative; }
 .cpd-menu {
   position: absolute; right: 0; top: calc(100% + 8px); min-width: 220px; z-index: 30; padding: 6px;
@@ -5873,21 +5878,7 @@
 .cpd-slot.is-avail .cpd-slot-chev { color: rgba(255,255,255,0.85); }
 .cpd-slot.is-avail .cpd-slot-people { border-color: rgba(255,255,255,0.28); }
 
-.cpd-photos { display: flex; gap: 14px; overflow-x: auto; margin: 0 -20px; padding: 2px 20px 8px; scroll-snap-type: x proximity; scrollbar-width: none; }
-.cpd-photos::-webkit-scrollbar { display: none; }
-.cpd-photo, .cpd-photo-add { flex: 0 0 auto; width: min(38vw, 150px); aspect-ratio: 1 / 1.1; border-radius: 20px; overflow: hidden; border: 0; padding: 0; scroll-snap-align: start; cursor: pointer; background: var(--surface3); }
-.cpd-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.cpd-photo-add { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: transparent; border: 2px dashed var(--accent); color: var(--accent); font-family: inherit; font-weight: 700; font-size: 0.82rem; }
-.cpd-photos-empty { color: var(--text3); font-size: 0.85rem; }
 
-.cpd-lb { position: fixed; inset: 0; z-index: 6000; background: rgba(0,0,0,0.93); display: flex; align-items: center; justify-content: center; animation: fadeIn 0.2s ease; }
-.cpd-lb img { max-width: 100%; max-height: 82vh; object-fit: contain; }
-.cpd-lb-top { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: calc(env(safe-area-inset-top, 0px) + 14px) 16px 0; color: #fff; font-weight: 600; }
-.cpd-lb-btn { width: 40px; height: 40px; border: 0; border-radius: 50%; background: rgba(255,255,255,0.16); color: #fff; font-size: 1.6rem; line-height: 1; cursor: pointer; }
-.cpd-lb-nav { position: absolute; top: 50%; transform: translateY(-50%); }
-.cpd-lb-acts { position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: center; gap: 10px; padding: 0 16px calc(env(safe-area-inset-bottom, 0px) + 20px); }
-.cpd-lb-acts button { padding: 11px 16px; border: 0; border-radius: 99px; background: rgba(255,255,255,0.18); color: #fff; font-family: inherit; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
-.cpd-lb-acts button.danger { background: rgba(255,59,48,0.85); }
 
 /* ---------- TURN DETAIL SCREEN ---------- */
 #sub-content-carritos .ct-turn-detail-screen, #admin-carritos .ct-turn-detail-screen {
@@ -7546,21 +7537,7 @@ async function renderHome() {
       para.push(c);
     });
   });
-  // Nuevos No Pasar (últimos 7 días).
-  try {
-    const { data: terRows } = await sb.from('territories').select('id, number, no_pasar');
-    const since = Date.now() - 7 * 86400000;
-    const freshTers = [];
-    (terRows || []).forEach(tr => {
-      let entries = []; try { entries = parseNoPasar(tr.no_pasar); } catch (e) {}
-      const fresh = entries.filter(e => e.date && /^\d{4}-\d{2}-\d{2}/.test(e.date) && new Date(e.date.slice(0, 10) + 'T00:00:00').getTime() >= since);
-      if (fresh.length) freshTers.push({ tr, fresh, last: fresh.map(e => e.date.slice(0, 10)).sort().pop() });
-    });
-    freshTers.sort((a, b) => b.last.localeCompare(a.last)).slice(0, 2).forEach(({ tr, fresh, last }, i) => para.push({
-      ts: _nowMs + HORIZON + 86400000 + i, icon: 'ban', col: 'red', title: _homeLang('home.newDoNotCall'),
-      sub: (typeof terLabel === 'function' ? terLabel(tr.number) : _homeLang('home.territory') + ' ' + tr.number) + ': ' + fresh[0].addr + (fresh.length > 1 ? ' (+' + (fresh.length - 1) + ' más)' : ''),
-      meta: _homeShortDate(last), onClick: () => inicioGoTo('predicacion', 'territorios') }));
-  } catch (e) { console.warn('Inicio (nuevos No Pasar):', e); }
+  // v1.79.10: las direcciones No Pasar nuevas ya no aparecen en "Para tí".
   // v1.60.8.5-beta: Eventos próximos desde 1 semana antes, con contador de días. (Visitas: hasta 14 días.)
   try {
     const { data: evs } = await sb.from('assignments').select('id,date,time,type,especial_titulo')
@@ -8478,7 +8455,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
           <svg class="ct-search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input type="text" id="cartSearchInput" data-i18n-ph="search.buscar-nombre" placeholder="Buscar por nombre…" data-i18n-aria="search.buscar-nombre" aria-label="Buscar por nombre" oninput="cartHandleSearch()">
           <button onclick="cartToggleFilterMenu()" class="ct-search-filter-btn" aria-label="Abrir filtros" aria-expanded="false" aria-controls="cartFilterMenu">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="10" cy="6" r="2"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="14" cy="12" r="2"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="8" cy="18" r="2"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="10" y1="17" x2="14" y2="17"/></svg>
           </button>
         </div>
         <div id="cartFilterMenu">
@@ -8504,10 +8481,9 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
       <!-- v1.76: nueva interfaz del detalle de punto (portada, acciones rápidas, dirección, encargado, turnos agrupados por día y fotos) -->
       <div class="ct-detail-panel cpd-panel" onclick="event.stopPropagation()">
         <div class="ct-scroll-container cpd-scroll" id="cartDetailScrollBody">
-          <div class="cpd-hero" id="cpdHero">
-            <div class="cpd-hero-img" id="cpdHeroImg"></div>
-            <div class="cpd-hero-shade"></div>
-            <div class="cpd-topbar">
+          <!-- v1.79.10: la barra superior queda fija arriba al hacer scroll y sigue el modo claro/oscuro -->
+          <div class="cpd-topbar">
+            <div class="cpd-topbar-in">
               <div>
                 <button onclick="cartGoBack()" class="cpd-circle ct-detail-back-btn" aria-label="Volver">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -8517,26 +8493,18 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
                 </button>
               </div>
               <div class="cpd-pill">Punto de Carrito</div>
-              <button id="cpdSearchBtn" onclick="cpdToggleSearch()" class="cpd-circle" aria-label="Buscar en los turnos">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              </button>
+              <span class="cpd-topbar-spacer" aria-hidden="true"></span>
             </div>
+          </div>
+          <div class="cpd-hero" id="cpdHero">
+            <div class="cpd-hero-img" id="cpdHeroImg"></div>
+            <div class="cpd-hero-shade"></div>
             <div class="cpd-hero-bottom">
               <h1 id="cartCurrentPointTitle">Punto</h1>
               <div class="cpd-hero-sub" id="cpdHeroSub"></div>
               <div class="cpd-actions">
                 <button type="button" class="cpd-act cpd-act-call" onclick="cpdCallEncargado()">Llamar</button>
                 <button type="button" class="cpd-act cpd-act-route" onclick="cpdDirections()">Cómo llegar</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="cpd-search" id="cpdSearch">
-            <div class="cpd-search-inner">
-              <div class="cpd-search-box">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input id="cpdSearchInput" type="search" placeholder="Buscar persona en los turnos" autocomplete="off" oninput="cpdOnSearch(this.value)">
-                <button type="button" class="cpd-search-clear" onclick="cpdClearSearch()" aria-label="Borrar búsqueda">&times;</button>
               </div>
             </div>
           </div>
@@ -8559,9 +8527,8 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
             </div>
             <div id="cartSlotsContainer"></div>
 
-            <h2 class="cpd-sec-title cpd-fotos-title">Fotos</h2>
-            <div id="cpdPhotos"></div>
-            <input type="file" id="cpdFileInput" accept="image/*" multiple hidden onchange="cpdUploadPhotos(this)">
+            <h2 class="cpd-sec-title cpd-rem-title">Recordatorios</h2>
+            <div id="cpdReminders"></div>
           </div>
         </div>
       </div>
@@ -11772,6 +11739,7 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.76.9: detalle de Grupo de Servicio — la barra superior (Back y título) ya no tiene franja de fondo: el contenido pasa por detrás. Nueva portada: imagen de fondo con "integrantes" pequeño y "Grupo N" en grande encima. La portada se sube desde Administración › Grupos (DEV o admin con permiso de Grupos).
 // v1.76.9.2: (1) La portada ahora es individual para cada Grupo de Servicio (antes era una sola para todos). (2) Panel de Administración › Grupos rediseñado: tarjetas con la portada de cada grupo y una pantalla de configuración por grupo (portada con vista previa, integrantes, número y eliminar). (3) La subida de portada avisa con claridad si algo falla (formato no compatible, sin permiso, error de la base de datos) en vez de fallar en silencio.
 // v1.77: (1) Territorios: el degradé de color de las tarjetas es más suave y deja ver más del mapa. (2) Interfaz Sencilla sin Clima ni Live (se ocultan también sus opciones en Ajustes y en el menú ⋯ de las asignaciones). (3) Interfaz Sencilla: menú rediseñado para personas mayores — pantalla completa con letra grande y dos desplegables (Predicación y Reuniones) que contienen sus sub-secciones; el botón del encabezado dice "Menú". (4) Interfaz Sencilla: Ajustes, Notificaciones y Perfil son botones de solo texto (sin íconos); el Perfil ya no muestra la foto.
+// v1.79.10: (1) Las direcciones No Pasar nuevas ya no se muestran en el widget "Para tí". (2) Detalle de un punto de carrito: se elimina Fotos (solo la portada) y se agrega Recordatorios, cada uno en su propia tarjeta (se editan en "Editar punto"); se quita el botón de Búsqueda; los botones superiores siguen el modo oscuro y quedan fijos al hacer scroll. (3) Carritos: el botón de filtros de la barra de búsqueda se ve igual al del detalle de un punto. (4) Las notificaciones de Aseo del Salón solo llegan a los miembros de los dos grupos asignados.
 // v1.79.5: (1) Otros Grupos: los títulos "Grupo X" usan el mismo formato que las fechas de Predicación Casa en Casa. (2) El botón azul de Volver arriba ya no estorba a la NavBar inferior de la UI nueva (queda por encima). (3) En la UI nueva, "Más Opciones" (abajo) ya no incluye Perfil, que está arriba a la derecha. (4) Se retira el mensaje emergente de bienvenida "Hola, Usuario".
 // v1.79.2.5: (1) Precursores regulares y especiales: la estrella morada se reemplaza por un marco con degradé Azul-Morado en el botón de la foto de perfil (barra superior), Mi Perfil y la lista de usuarios de los Grupos de Servicio. (2) Editar perfil: solo quedan los íconos Estrella, Corona y Corazón (más Iniciales y Personajes Bíblicos); Colores e Iniciales/íconos van dentro de un contenedor como la tarjeta de Mi grupo.
 // v1.79: (1) Nuevo Inicio de Sesión (Desktop y Móvil) con un solo campo "Nombre y Apellido". (2) Territorios: subir un SVG (individual, masivo o desde el formulario) JAMÁS borra los mapas PNG Claro/Oscuro ni las manzanas; solo se escriben las columnas que cambiaron y un vacío nunca pisa un dato. (3) Administración → Territorios → "Manzanas": define la cantidad de manzanas (A, B, C…) de muchos territorios a la vez, con verificación del enlace contra los id del SVG. (4) Rendimiento: carga de datos en paralelo, mapas por bloques con reintentos y sin re-descargas innecesarias, fuentes sin bloqueo, sondeos en pausa con la app oculta.
@@ -11783,7 +11751,7 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.77.9: Nuevo experimento "Espaciado del contenido": slider de 10 niveles (predeterminado 2 = espaciado actual).
 // v1.77.8: (1) La dirección en el detalle de una asignación de casa en casa es un poco más grande (solo esa pantalla). (2) El botón de Clima de la asignación ya no abre el sitio del clima. (3) Nuevo ícono de Carritos (Inicio, Mis Turnos, Ajustes > Notificaciones y menú de Predicación). (4) Nuevo experimento "Resolución reducida en medios" para imágenes y PDF. (5) Carga más rápida: pdf.js y QR con defer, preconnect, fuentes con display=swap, decodificación asíncrona de imágenes.
 // v1.77.5: (1) Detalle de un Territorio: el título del encabezado ahora dice "Detalles del territorio" (el número ya aparece en el círculo de color). (2) Más opciones en Inicio incluye "Personalizar Inicio" (el botón al final de Inicio se mantiene). (3) Nuevo experimento "Territorios sin vista previa": las tarjetas de Territorios muestran solo el degradé y el nombre.
-const APP_VERSION = '1.79.5'; // v1.79.5 — Otros Grupos con títulos como las fechas; botón Volver arriba sobre la NavBar inferior; Más Opciones sin Perfil en la UI nueva; sin saludo emergente; v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
+const APP_VERSION = '1.79.10'; // v1.79.10 — sin No Pasar nuevos en Para tí; detalle de punto de carrito con Recordatorios (sin Fotos ni búsqueda) y barra superior fija con modo oscuro; filtro de Carritos unificado; Aseo solo a los dos grupos asignados; v1.79.5 — Otros Grupos con títulos como las fechas; botón Volver arriba sobre la NavBar inferior; Más Opciones sin Perfil en la UI nueva; sin saludo emergente; v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -23034,7 +23002,8 @@ async function saveAseoSalonAsignacion() {
   if (error) { showToast('Error al guardar: ' + error.message, 'error'); return; }
   showToast('Asignación guardada ✓', 'success');
 
-  // Notificar a todos los miembros (por nombre) de ambos grupos asignados.
+  // v1.79.10: la notificación de aseo es solo para los miembros de los dos grupos asignados (nunca general).
+  try { await loadGruposIfNeeded(); } catch (e) {}
   const gruposAsignados = grupos.filter(g => g.numero === grupo1_numero || g.numero === grupo2_numero);
   const targetNames = [...new Set(
     gruposAsignados.flatMap(g => g.miembros.map(m => m.nombre.trim().toLowerCase()))
@@ -29222,7 +29191,7 @@ function isNotifForMe(n, myNameLower) {
     return false;
   }
   if (!isNotifCategoryEnabled(n)) return false;
-  if (!n.target_names || !Array.isArray(n.target_names) || n.target_names.length === 0) return true;
+  if (!n.target_names || !Array.isArray(n.target_names) || n.target_names.length === 0) return n.notif_category !== 'aseo'; // v1.79.10: Aseo nunca es general
   if (!myNameLower) return false;
   return n.target_names.some(t => (t || '').trim().toLowerCase() === myNameLower);
 }
@@ -33169,11 +33138,10 @@ function cartRenderHome() {
 // ── v1.76: Detalle de punto con nueva interfaz ──
 // Portada con foto + nombre + acciones rápidas (Llamar al encargado / Cómo llegar), tarjetas de Dirección y Encargado,
 // turnos agrupados por día en una sola lista (con búsqueda por persona y filtro Todos / Reservados / Disponibles) y
-// sección de Fotos (solo las sube el Administrador de Predicación o el Admin con acceso a Carritos).
+// y sección de Recordatorios (v1.79.10: sin Fotos ni búsqueda; solo se usa la foto de portada, que se sube desde "Editar punto").
 // Requiere en Supabase: columnas cart_puntos.fotos (jsonb) y cart_puntos.portada_url (text) + bucket público "cart-fotos" (ver SQL entregado).
 let cartTurnFilter = 'todos';
 let cartTurnSearch = '';
-let _cpdPhotoIdx = 0;
 const CPD_BUCKET = 'cart-fotos';
 const _CPD_ICO = {
   pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-6.3 7-12a7 7 0 1 0-14 0c0 5.7 7 12 7 12z"/><circle cx="12" cy="10" r="2.6"/></svg>',
@@ -33219,7 +33187,7 @@ function cartSelectPoint(id) {
   document.getElementById('detail-ct-screen').classList.add('ct-active');
   const sc = document.getElementById('cartDetailScrollBody'); if (sc) sc.scrollTop = 0;
   cartRenderShifts();
-  cpdRenderPhotos();
+  cpdRenderReminders();
 }
 
 function cpdRenderHero() {
@@ -33244,19 +33212,7 @@ function cpdDirections() {
   window.open('https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(dest), '_blank');
 }
 
-// ── Búsqueda y filtro ──
-function cpdToggleSearch() {
-  const box = document.getElementById('cpdSearch'), btn = document.getElementById('cpdSearchBtn');
-  const open = !box.classList.contains('open');
-  box.classList.toggle('open', open); btn.classList.toggle('on', open);
-  if (open) setTimeout(() => { try { document.getElementById('cpdSearchInput').focus(); } catch (e) {} }, 320);
-  else cpdClearSearch();
-}
-function cpdOnSearch(v) { cartTurnSearch = v || ''; cartRenderShifts(); }
-function cpdClearSearch() {
-  const i = document.getElementById('cpdSearchInput'); if (i) i.value = '';
-  cartTurnSearch = ''; cartRenderShifts();
-}
+// ── Filtro de turnos (v1.79.10: ya no hay búsqueda en el detalle del punto) ──
 function cpdToggleFilter(ev) {
   if (ev) ev.stopPropagation();
   document.getElementById('cpdFilterMenu').classList.toggle('open');
@@ -33273,9 +33229,6 @@ function cpdSyncFilterUi() {
 }
 function cpdReset() {
   try {
-    document.getElementById('cpdSearch').classList.remove('open');
-    document.getElementById('cpdSearchBtn').classList.remove('on');
-    const i = document.getElementById('cpdSearchInput'); if (i) i.value = '';
     document.getElementById('cpdFilterMenu').classList.remove('open');
     cartTurnFilter = 'todos'; cartTurnSearch = '';
     cpdSyncFilterUi();
@@ -33331,15 +33284,19 @@ function cartRenderShifts() {
   cont.innerHTML = html;
 }
 
-// ── Fotos del punto ──
-function cpdRenderPhotos() {
-  const p = _cpdPoint(); const box = document.getElementById('cpdPhotos'); if (!p || !box) return;
-  const fotos = Array.isArray(p.fotos) ? p.fotos : [];
-  const admin = cartIsAdmin();
-  if (!fotos.length && !admin) { box.innerHTML = '<div class="cpd-photos-empty">Aún no hay fotos de este punto.</div>'; return; }
-  box.innerHTML = '<div class="cpd-photos">' +
-    (admin ? '<button type="button" class="cpd-photo-add" onclick="document.getElementById(\'cpdFileInput\').click()">' + _CPD_ICO.plus + 'Agregar foto</button>' : '') +
-    fotos.map((u, i) => '<button type="button" class="cpd-photo" onclick="cpdOpenPhoto(' + i + ')"><img src="' + escapeHtml(u) + '" alt="Foto del punto" loading="lazy"></button>').join('') + '</div>';
+// ── Recordatorios del punto (v1.79.10) — cada uno en su propia tarjeta, con todo el texto visible ──
+// Requiere en Supabase: alter table cart_puntos add column if not exists recordatorios jsonb default '[]'::jsonb;
+function _cpdRecList(p) {
+  let r = p && p.recordatorios;
+  if (typeof r === 'string') { try { const j = JSON.parse(r); r = Array.isArray(j) ? j : r.split(/\n+/); } catch (e) { r = r.split(/\n+/); } }
+  return (Array.isArray(r) ? r : []).map(x => String(x && typeof x === 'object' ? (x.texto || x.text || '') : (x == null ? '' : x)).trim()).filter(Boolean);
+}
+function cpdRenderReminders() {
+  const p = _cpdPoint(); const box = document.getElementById('cpdReminders'); if (!p || !box) return;
+  const list = _cpdRecList(p);
+  if (!list.length) { box.innerHTML = '<div class="cpd-rem-empty">Este punto no tiene recordatorios.</div>'; return; }
+  const bell = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>';
+  box.innerHTML = list.map(t => '<div class="cpd-rem-card"><span class="cpd-rem-ico">' + bell + '</span><p class="cpd-rem-text">' + escapeHtml(t) + '</p></div>').join('');
 }
 
 // v1.76.2.2: procesado de imagen apto para móviles (HEIC/JPEG grandes, orientación EXIF, poca memoria).
@@ -33400,79 +33357,6 @@ async function _cpdStoragePut(path, blob, type) {
     await new Promise(r => setTimeout(r, 600));
   }
   throw lastErr;
-}
-
-async function cpdUploadPhotos(input) {
-  const p = _cpdPoint();
-  // Se copia la lista ANTES de tocar el input y este no se limpia hasta terminar (en móviles, limpiarlo antes invalida los archivos).
-  const files = Array.from((input && input.files) || []);
-  if (!p || !files.length) { if (input) input.value = ''; return; }
-  if (!cartIsAdmin()) { if (input) input.value = ''; showToast('Solo un administrador puede subir fotos.', 'error'); return; }
-  const urls = [];
-  try {
-    for (let i = 0; i < files.length; i++) {
-      showToast('Subiendo foto ' + (i + 1) + ' de ' + files.length + '…');
-      try {
-        const prep = await _cpdPrepare(files[i]);
-        const path = p.id + '/' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '.' + prep.ext;
-        urls.push(await _cpdStoragePut(path, prep.blob, prep.type));
-      } catch (e) { console.error(e); showToast('No se pudo subir una foto: ' + (e && e.message || e), 'error'); }
-    }
-    if (!urls.length) return;
-    const nuevas = (Array.isArray(p.fotos) ? p.fotos : []).concat(urls);
-    const { error } = await sb.from('cart_puntos').update({ fotos: nuevas }).eq('id', p.id);
-    if (error) { showToast('Error: ' + error.message, 'error'); return; }
-    p.fotos = nuevas; cpdRenderPhotos(); cpdRenderHero();
-    showToast(urls.length > 1 ? 'Fotos agregadas.' : 'Foto agregada.', 'success');
-  } finally { if (input) input.value = ''; }
-}
-
-function cpdOpenPhoto(i) {
-  const p = _cpdPoint(); if (!p || !Array.isArray(p.fotos) || !p.fotos.length) return;
-  _cpdPhotoIdx = Math.max(0, Math.min(i, p.fotos.length - 1));
-  cpdCloseLightbox();
-  const lb = document.createElement('div'); lb.id = 'cpdLightbox'; lb.className = 'cpd-lb';
-  lb.onclick = e => { if (e.target === lb) cpdCloseLightbox(); };
-  document.body.appendChild(lb);
-  cpdPaintLightbox();
-}
-function cpdPaintLightbox() {
-  const p = _cpdPoint(), lb = document.getElementById('cpdLightbox'); if (!p || !lb) return;
-  const f = p.fotos, url = f[_cpdPhotoIdx];
-  const isCover = (p.portada_url || f[0]) === url;
-  lb.innerHTML =
-    '<img src="' + escapeHtml(url) + '" alt="Foto del punto">' +
-    '<div class="cpd-lb-top"><span>' + (_cpdPhotoIdx + 1) + ' / ' + f.length + '</span><button class="cpd-lb-btn" onclick="cpdCloseLightbox()" aria-label="Cerrar">&times;</button></div>' +
-    (f.length > 1 ? '<button class="cpd-lb-btn cpd-lb-nav" style="left:12px" onclick="cpdStepPhoto(-1)" aria-label="Anterior">&#8249;</button><button class="cpd-lb-btn cpd-lb-nav" style="right:12px" onclick="cpdStepPhoto(1)" aria-label="Siguiente">&#8250;</button>' : '') +
-    (cartIsAdmin() ? '<div class="cpd-lb-acts">' + (isCover ? '' : '<button onclick="cpdSetCover()">Usar como portada</button>') + '<button class="danger" onclick="cpdDeletePhoto()">Eliminar</button></div>' : '');
-}
-function cpdStepPhoto(d) {
-  const p = _cpdPoint(); if (!p) return;
-  _cpdPhotoIdx = (_cpdPhotoIdx + d + p.fotos.length) % p.fotos.length; cpdPaintLightbox();
-}
-function cpdCloseLightbox() { const lb = document.getElementById('cpdLightbox'); if (lb) lb.remove(); }
-
-async function cpdSetCover() {
-  const p = _cpdPoint(); if (!p || !cartIsAdmin()) return;
-  const url = p.fotos[_cpdPhotoIdx];
-  const { error } = await sb.from('cart_puntos').update({ portada_url: url }).eq('id', p.id);
-  if (error) { showToast('Error: ' + error.message, 'error'); return; }
-  p.portada_url = url; cpdRenderHero(); cpdPaintLightbox(); showToast('Portada actualizada.', 'success');
-}
-async function cpdDeletePhoto() {
-  const p = _cpdPoint(); if (!p || !cartIsAdmin()) return;
-  if (!confirm('¿Eliminar esta foto?')) return;
-  const url = p.fotos[_cpdPhotoIdx];
-  const nuevas = p.fotos.filter((_, i) => i !== _cpdPhotoIdx);
-  const patch = { fotos: nuevas };
-  if (p.portada_url === url) patch.portada_url = null;
-  const { error } = await sb.from('cart_puntos').update(patch).eq('id', p.id);
-  if (error) { showToast('Error: ' + error.message, 'error'); return; }
-  try { const k = String(url).split('/' + CPD_BUCKET + '/')[1]; if (k) await sb.storage.from(CPD_BUCKET).remove([decodeURIComponent(k.split('?')[0])]); } catch (e) {}
-  p.fotos = nuevas; if (patch.portada_url === null) p.portada_url = null;
-  cpdRenderPhotos(); cpdRenderHero();
-  if (!nuevas.length) cpdCloseLightbox(); else { _cpdPhotoIdx = Math.min(_cpdPhotoIdx, nuevas.length - 1); cpdPaintLightbox(); }
-  showToast('Foto eliminada.', 'success');
 }
 
 // ── v1.72: Detalle de un turno de Carritos (mismo layout/estilo que el detalle de Casa en casa) ──
@@ -33844,7 +33728,7 @@ function cartClearFilters() {
   document.querySelectorAll('#cartFilterMenu .ct-filter-chip').forEach(chip => chip.classList.remove('ct-active'));
   cartHandleSearch();
 }
-function cartGoBack() { document.getElementById('detail-ct-screen').classList.remove('ct-active'); try { cpdReset(); cpdCloseLightbox(); } catch (e) {} }
+function cartGoBack() { document.getElementById('detail-ct-screen').classList.remove('ct-active'); try { cpdReset(); } catch (e) {} }
 function cartCloseTurnDetail() {
   document.getElementById('cartTurnDetailScreen').classList.remove('ct-turn-active');
   window._cartTurnOpenId = null; // v1.72
@@ -34058,6 +33942,15 @@ function cartPuntoCoverRemove() {
   _cfCover.blob = null; _cfCover.preview = ''; _cfCover.remove = true; _cfPaintCover();
 }
 
+function _cfRecRow(t) {
+  return '<div class="cf-rec-row" style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px"><textarea class="ct-form-input cf-rec-input" rows="2" placeholder="Escribe el recordatorio…" style="flex:1;resize:vertical">' + escapeHtml(t || '') + '</textarea>' +
+    '<button type="button" class="ct-admin-btn-secondary" style="margin:0;flex:0 0 auto;padding:0.55rem 0.8rem" aria-label="Quitar recordatorio" onclick="this.closest(\'.cf-rec-row\').remove()">&times;</button></div>';
+}
+function cfAddRec() {
+  const box = document.getElementById('cf_recs'); if (!box) return;
+  box.insertAdjacentHTML('beforeend', _cfRecRow(''));
+  const all = box.querySelectorAll('.cf-rec-input'); try { all[all.length - 1].focus(); } catch (e) {}
+}
 function cartOpenPuntoForm(id) {
   const p = id ? cartPUNTOS.find(x => x.id === id) : null;
   _cfCover = { blob: null, type: 'image/jpeg', ext: 'jpg', preview: '', remove: false, url: p ? (p.portada_url || '') : '' };
@@ -34089,6 +33982,9 @@ function cartOpenPuntoForm(id) {
     <div class="ct-form-group"><label for="cf_horario_m">Horario Mañana (M)</label><input class="ct-form-input" id="cf_horario_m" placeholder="ej: 09:00 - 11:00" value="${p ? (p.horario_m || '').replace(/"/g, '&quot;') : ''}"></div>
     <div class="ct-form-group"><label for="cf_horario_t">Horario Tarde (T)</label><input class="ct-form-input" id="cf_horario_t" placeholder="ej: 16:00 - 18:00" value="${p ? (p.horario_t || '').replace(/"/g, '&quot;') : ''}"></div>
     <div class="ct-form-group"><label for="cf_horario_td">Horario Disponible (TD)</label><input class="ct-form-input" id="cf_horario_td" placeholder="ej: 11:00 - 13:00" value="${p ? (p.horario_td || '').replace(/"/g, '&quot;') : ''}"></div>
+    <div class="ct-section-title" style="margin-top:18px; margin-bottom:6px;">Recordatorios del punto</div>
+    <div id="cf_recs">${(p ? _cpdRecList(p) : []).map(t => _cfRecRow(t)).join('')}</div>
+    <button type="button" class="ct-admin-btn-secondary" style="margin:0 0 14px;" onclick="cfAddRec()">+ Agregar recordatorio</button>
     <div class="ct-form-actions">
       <button class="ct-admin-btn-secondary" style="margin:0;" onclick="cartCloseForm()">Cancelar</button>
       <button class="ct-admin-btn-primary" onclick="cartSavePunto('${p ? p.id : ''}')">${p ? 'Guardar cambios' : 'Crear punto'}</button>
@@ -34111,7 +34007,8 @@ async function cartSavePunto(id) {
     orden: parseInt(document.getElementById('cf_orden').value || '0', 10),
     horario_m: document.getElementById('cf_horario_m').value.trim(),
     horario_t: document.getElementById('cf_horario_t').value.trim(),
-    horario_td: document.getElementById('cf_horario_td').value.trim()
+    horario_td: document.getElementById('cf_horario_td').value.trim(),
+    recordatorios: Array.from(document.querySelectorAll('#cf_recs .cf-rec-input')).map(x => x.value.trim()).filter(Boolean)
   };
 
   // Portada: se sube al bucket y se guarda su URL; "Quitar" la deja vacía.
@@ -34128,8 +34025,13 @@ async function cartSavePunto(id) {
   // La columna "color" ya no se edita; un punto nuevo conserva un valor por defecto por compatibilidad con la base de datos.
   if (!id) payload.color = '#f36100';
 
-  const res = id ? await sb.from('cart_puntos').update(payload).eq('id', id)
-                 : await sb.from('cart_puntos').insert(payload);
+  const _save = (pl) => id ? sb.from('cart_puntos').update(pl).eq('id', id) : sb.from('cart_puntos').insert(pl);
+  let res = await _save(payload);
+  if (res.error && /recordatorios/i.test(res.error.message || '')) { // la columna aún no existe en Supabase: se guarda el resto
+    const { recordatorios, ...sinRec } = payload;
+    res = await _save(sinRec);
+    if (!res.error) showToast('Falta la columna "recordatorios" en Supabase; los recordatorios no se guardaron.', 'error');
+  }
   if (!res.error && prevUrl && 'portada_url' in payload && payload.portada_url !== prevUrl) {
     try { const k = String(prevUrl).split('/' + CPD_BUCKET + '/')[1]; if (k && k.startsWith('portadas/')) await sb.storage.from(CPD_BUCKET).remove([decodeURIComponent(k.split('?')[0])]); } catch (e) {}
   }
