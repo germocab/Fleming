@@ -745,8 +745,19 @@
     align-items: center; justify-content: center; overflow: visible;
     transition: transform 0.15s, filter 0.15s; position: relative;
   }
-  .nav-avatar-pioneer-star { position:absolute; top:-4px; right:-5px; width:18px; height:18px; display:flex; align-items:center; justify-content:center; color:#a855f7; background:var(--surface); border:1.5px solid var(--surface); border-radius:50%; z-index:3; pointer-events:none; filter:drop-shadow(0 1px 2px rgba(0,0,0,.22)); }
-  .nav-avatar-pioneer-star svg { width:15px; height:15px; fill:currentColor; stroke:#fff; stroke-width:1.1; stroke-linejoin:round; }
+  /* v1.79.2.5: Precursores (regulares y especiales) — marco con degradé Azul→Morado en lugar de la estrella morada.
+     Se dibuja con un ::before fuera del avatar (anillo con máscara), así no cambia el tamaño ni el layout. */
+  .avatar-pioneer { position: relative; overflow: visible !important; --pf-gap: 2px; --pf-w: 3px; }
+  .avatar-pioneer::before {
+    content: ''; position: absolute; inset: calc(-1 * (var(--pf-gap) + var(--pf-w))); border-radius: inherit;
+    padding: var(--pf-w); background: linear-gradient(135deg, #3b82f6 0%, #6d5cf6 50%, #a855f7 100%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    pointer-events: none; z-index: 3;
+  }
+  .avatar-pioneer.avatar-frame-admin, .avatar-pioneer.avatar-frame-admintag { --pf-gap: 5px; } /* el anillo de Admin queda adentro */
+  .nav-avatar-btn.avatar-pioneer, .grupo-member-avatar-md.avatar-pioneer { --pf-gap: 1.5px; --pf-w: 2.5px; }
+  .grupo-member-avatar-md.avatar-pioneer { margin: 0 4px; }
   .nav-avatar-btn:hover { filter: brightness(0.93); }
   .nav-avatar-btn:active { transform: scale(0.94); }
   .nav-avatar-btn-img {
@@ -6827,6 +6838,12 @@ html.modo-sencillo-mode .simp-title-btn { height: 52px; font-size: 1.15rem; }
 .ape-name { font-size: 1.1rem; font-weight: 800; margin-top: 0.9rem; color: var(--text); }
 .ape-hint { font-size: 0.76rem; color: var(--text3); margin-top: 2px; }
 .ape-sec { margin-top: 1.2rem; }
+/* v1.79.2.5: Colores + Iniciales e íconos dentro de un contenedor (mismo estilo que la tarjeta de "Mi grupo") */
+.ape-box { background: var(--surface); border: 1px solid var(--border); border-radius: 28px; padding: 1.1rem 0 1.2rem; box-shadow: var(--shadow); margin: 1.2rem 1.25rem 0; }
+.ape-box .ape-sec:first-child { margin-top: 0; }
+.ape-box .ape-h { padding: 0 1.15rem; }
+.ape-box .ape-colors { padding: 0.2rem 1.15rem; }
+.ape-box .ape-icons { display: flex; flex-wrap: wrap; gap: 14px; justify-content: flex-start; padding: 0.2rem 1.15rem; }
 .ape-h { font-size: 1.02rem; font-weight: 800; color: var(--text); padding: 0 1.25rem; margin-bottom: 0.7rem; letter-spacing: -0.01em; }
 .ape-colors { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; padding: 0.2rem 1.25rem; justify-items: center; }
 .ape-icons { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; padding: 0.2rem 1.25rem; justify-items: center; }
@@ -11755,6 +11772,7 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.76.9: detalle de Grupo de Servicio — la barra superior (Back y título) ya no tiene franja de fondo: el contenido pasa por detrás. Nueva portada: imagen de fondo con "integrantes" pequeño y "Grupo N" en grande encima. La portada se sube desde Administración › Grupos (DEV o admin con permiso de Grupos).
 // v1.76.9.2: (1) La portada ahora es individual para cada Grupo de Servicio (antes era una sola para todos). (2) Panel de Administración › Grupos rediseñado: tarjetas con la portada de cada grupo y una pantalla de configuración por grupo (portada con vista previa, integrantes, número y eliminar). (3) La subida de portada avisa con claridad si algo falla (formato no compatible, sin permiso, error de la base de datos) en vez de fallar en silencio.
 // v1.77: (1) Territorios: el degradé de color de las tarjetas es más suave y deja ver más del mapa. (2) Interfaz Sencilla sin Clima ni Live (se ocultan también sus opciones en Ajustes y en el menú ⋯ de las asignaciones). (3) Interfaz Sencilla: menú rediseñado para personas mayores — pantalla completa con letra grande y dos desplegables (Predicación y Reuniones) que contienen sus sub-secciones; el botón del encabezado dice "Menú". (4) Interfaz Sencilla: Ajustes, Notificaciones y Perfil son botones de solo texto (sin íconos); el Perfil ya no muestra la foto.
+// v1.79.2.5: (1) Precursores regulares y especiales: la estrella morada se reemplaza por un marco con degradé Azul-Morado en el botón de la foto de perfil (barra superior), Mi Perfil y la lista de usuarios de los Grupos de Servicio. (2) Editar perfil: solo quedan los íconos Estrella, Corona y Corazón (más Iniciales y Personajes Bíblicos); Colores e Iniciales/íconos van dentro de un contenedor como la tarjeta de Mi grupo.
 // v1.79: (1) Nuevo Inicio de Sesión (Desktop y Móvil) con un solo campo "Nombre y Apellido". (2) Territorios: subir un SVG (individual, masivo o desde el formulario) JAMÁS borra los mapas PNG Claro/Oscuro ni las manzanas; solo se escriben las columnas que cambiaron y un vacío nunca pisa un dato. (3) Administración → Territorios → "Manzanas": define la cantidad de manzanas (A, B, C…) de muchos territorios a la vez, con verificación del enlace contra los id del SVG. (4) Rendimiento: carga de datos en paralelo, mapas por bloques con reintentos y sin re-descargas innecesarias, fuentes sin bloqueo, sondeos en pausa con la app oculta.
 // v1.78: OPTIMIZACIÓN DE REPORTES DE TERRITORIO — estabilidad y rendimiento (sin cambios de diseño). (1) SVG: lectura tolerante (Illustrator/Inkscape), saneado, viewBox garantizado y validación al subir (individual y masiva). (2) Mapas aislados: ya no se pisan ids ni estilos entre territorios y los colores de manzanas funcionan aunque el SVG use clases CSS. (3) Enlaces de reporte: se arman sin errores con # en la URL, se rescatan enlaces antiguos, un fallo de red ya no se muestra como 'Enlace inválido' y hay botón Reintentar. (4) Encargados: el reporte no se borra hasta que el nuevo se guarda; sin duplicados por doble toque; reintentos automáticos. (5) Rendimiento: solo se descargan los territorios/formularios necesarios, caché de mapas y miniaturas, sin re-descargas al abrir un día.
 // v1.77.13: (1) Íconos de Configuración: con acento Azul conservan sus colores; con otro acento adoptan ese color. (2) Reunión Pública (Desktop): Reunión Pública y Conferencias salientes a la misma altura; "Ver responsabilidades para este día" al final y centrado. (3) Las tarjetas ya no tienen degradé del color de acento: el degradé sigue el modo claro/oscuro. (4) Nuevo experimento "Tamaño del texto", independiente del tamaño de la interfaz.
@@ -11764,7 +11782,7 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.77.9: Nuevo experimento "Espaciado del contenido": slider de 10 niveles (predeterminado 2 = espaciado actual).
 // v1.77.8: (1) La dirección en el detalle de una asignación de casa en casa es un poco más grande (solo esa pantalla). (2) El botón de Clima de la asignación ya no abre el sitio del clima. (3) Nuevo ícono de Carritos (Inicio, Mis Turnos, Ajustes > Notificaciones y menú de Predicación). (4) Nuevo experimento "Resolución reducida en medios" para imágenes y PDF. (5) Carga más rápida: pdf.js y QR con defer, preconnect, fuentes con display=swap, decodificación asíncrona de imágenes.
 // v1.77.5: (1) Detalle de un Territorio: el título del encabezado ahora dice "Detalles del territorio" (el número ya aparece en el círculo de color). (2) Más opciones en Inicio incluye "Personalizar Inicio" (el botón al final de Inicio se mantiene). (3) Nuevo experimento "Territorios sin vista previa": las tarjetas de Territorios muestran solo el degradé y el nombre.
-const APP_VERSION = '1.79'; // v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
+const APP_VERSION = '1.79.2.5'; // v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -14842,7 +14860,8 @@ window.addEventListener('resize', _fitPrecTags);
 function _memberRowHtml(m) {
   const col    = getAvatarColorForName(m.nombre, memberColor(m.nombre));
   const glyph  = avatarGlyphHtml(m.nombre, _avatarIconCache[m.nombre] || null);
-  const avatarHtml = `<div class="grupo-member-avatar-md" style="background:${col}">${glyph}</div>`;
+  const isPio = !!m.precursor || isPioneerName(m.nombre); // v1.79.2.5: marco degradé para precursores
+  const avatarHtml = `<div class="grupo-member-avatar-md${isPio ? ' avatar-pioneer' : ''}" style="background:${col}">${glyph}</div>`;
   const roleLabel = m.rol === 'superintendente'
     ? `<span class="grupo-member-role-label role-super">${t('grupos.rol.superintendente')}</span>`
     : m.rol === 'auxiliar'
@@ -15144,15 +15163,13 @@ function parseLabels(raw) {
 
 // ── Íconos de avatar (v1.45.2-sb) ───────────────────────────────────────────
 // Alternativa opcional a las iniciales: el usuario puede elegir uno de estos
-// 5 íconos predeterminados desde su Perfil, en lugar de sus iniciales. El
+// 3 íconos (Estrella, Corona y Corazón) desde su Perfil (v1.79.2.5: Flor y Fútbol retirados; quien los tenía vuelve a sus iniciales), en lugar de sus iniciales. El
 // ícono se dibuja siempre sobre el color de fondo elegido (avatar_color).
 // Requiere la siguiente columna en Supabase:
 //   alter table platform_users add column if not exists avatar_icon text;
 const AVATAR_ICONS = {
   estrella: '<path d="M12 2.5l2.97 6.19 6.83.86-5.02 4.72 1.34 6.78L12 17.98l-6.12 3.07 1.34-6.78-5.02-4.72 6.83-.86L12 2.5z"/>',
   corazon: '<path d="M12 20.5s-7.36-4.6-10-9.1C.6 8.6 1.4 5.1 4.4 3.7c2.3-1.1 4.9-.3 6.4 1.7l1.2 1.6 1.2-1.6c1.5-2 4.1-2.8 6.4-1.7 3 1.4 3.8 4.9 2.4 7.7-2.64 4.5-10 9.1-10 9.1z"/>',
-  flor: '<g><circle cx="12" cy="12" r="2.3"/><ellipse cx="12" cy="5.8" rx="2.6" ry="3.6"/><ellipse cx="12" cy="18.2" rx="2.6" ry="3.6"/><ellipse cx="5.8" cy="12" rx="3.6" ry="2.6"/><ellipse cx="18.2" cy="12" rx="3.6" ry="2.6"/></g>',
-  futbol: '<g fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9.5" fill="currentColor" stroke="none"/><g fill="var(--su-fut-dark,#111)" stroke="none"><polygon points="12,7.3 15,9.5 13.9,13 10.1,13 9,9.5"/></g><path d="M12 2.5v4.8M4.4 7l3.6 2.6M4.4 17l4.7-3.4M19.6 7l-3.6 2.6M19.6 17l-4.7-3.4M9.3 21.3l.8-4.3M14.7 21.3l-.8-4.3"/></g>',
   corona: '<path d="M3 8.5l4 3.2L12 5l5 6.7 4-3.2-1.6 9.8H4.6L3 8.5z"/><rect x="4.6" y="17.5" width="14.8" height="2.3" rx="0.8"/>',
 };
 function avatarGlyphHtml(name, iconKey) {
@@ -15184,7 +15201,14 @@ function buildAvatarHtml(name, size = 28, fontSize = '0.62rem', radius = '50%') 
 
 // Cache de name→ícono de avatar personalizado (v1.45.2-sb), mismo patrón que
 // _avatarColorCache.
-let _avatarIconCache = {}; // { [name]: 'estrella'|'corazon'|'flor'|'futbol'|'corona'|null }
+let _pioneerCache = {}; // v1.79.2.5: { [name]: true } precursores regulares/especiales (de platform_users.labels)
+function isPioneerName(name) {
+  if (!name) return false;
+  if (_pioneerCache[name]) return true;
+  const lk = String(name).trim().toLowerCase();
+  return Object.keys(_pioneerCache).some(k => String(k).trim().toLowerCase() === lk);
+}
+let _avatarIconCache = {}; // { [name]: 'estrella'|'corona'|'corazon'|null }
 // v1.51.0-beta — Personajes Bíblicos. Requiere en Supabase (ver supabase_avatares.sql):
 //   create table avatar_characters (id uuid primary key default gen_random_uuid(), name text not null, image_url text not null, created_at timestamptz default now());
 //   alter table platform_users add column if not exists avatar_character uuid references avatar_characters(id) on delete set null;
@@ -15230,13 +15254,16 @@ async function loadAvatarCache() {
   try {
     // v1.51.0-beta: también carga el personaje elegido (avatar_character). Si la columna aún no
     // existe en Supabase, se cae a la consulta anterior para no perder colores ni íconos.
-    let res = await sb.from('platform_users').select('name, avatar_color, avatar_icon, avatar_character');
+    let res = await sb.from('platform_users').select('name, avatar_color, avatar_icon, avatar_character, labels');
+    if (res.error) res = await sb.from('platform_users').select('name, avatar_color, avatar_icon, avatar_character');
     if (res.error) res = await sb.from('platform_users').select('name, avatar_color, avatar_icon');
     const data = res.data;
     _avatarColorCache = {};
     _avatarIconCache = {};
     _avatarCharIdCache = {};
+    _pioneerCache = {};
     (data || []).forEach(u => {
+      try { const lb = parseLabels(u.labels); if (lb.precursor || lb.precursor_especial) _pioneerCache[u.name] = true; } catch (e) {}
       if (u.avatar_color) _avatarColorCache[u.name] = u.avatar_color;
       if (u.avatar_icon) _avatarIconCache[u.name] = u.avatar_icon;
       if (u.avatar_character) _avatarCharIdCache[u.name] = u.avatar_character;
@@ -15546,6 +15573,8 @@ async function renderProfilePage() {
     { key:'siervo',    label:'Siervo Ministerial', cls:'siervo'    },
   ];
   const activeTags = tagDefs.filter(t => labels[t.key]);
+  _ownIsPioneer = !!(labels.precursor || labels.precursor_especial); // v1.79.2.5: marco degradé en Mi Perfil
+  applyOwnAvatarToDropdowns();
   // AdminTag propia: se muestra debajo de las etiquetas generales, solo si
   // este usuario es Admin y tiene una AdminTag asignada por el DEV.
   const myAdminTag = (currentRole === 'admin' && me?.admin_tag_id)
@@ -16011,6 +16040,7 @@ function refreshAvatarEditPreview() {
   const n = currentUser.name;
   el.style.background = _ownAvatarColor || userColor(n);
   el.innerHTML = avatarGlyphHtml(n, _avatarIconCache[n] || null);
+  el.classList.toggle('avatar-pioneer', !!_ownIsPioneer);
   const nm = document.getElementById('ape-name'); if (nm) nm.textContent = n;
   updateAvatarColorPickerUI(_ownAvatarColor);
   updateAvatarIconPickerUI(_ownAvatarIcon || null);
@@ -16776,10 +16806,11 @@ function applyOwnAvatarToDropdowns() {
     el.style.background = col;
     el.innerHTML = glyph;
   });
+  ['profile-avatar-big', 'ape-preview'].forEach(id => document.getElementById(id)?.classList.toggle('avatar-pioneer', !!_ownIsPioneer)); // v1.79.2.5
   const navBtn = document.getElementById('nav-avatar-btn');
   if (navBtn) {
-    navBtn.querySelector('.nav-avatar-pioneer-star')?.remove();
-    if (_ownIsPioneer) navBtn.insertAdjacentHTML('beforeend', '<span class="nav-avatar-pioneer-star" title="Precursor" aria-label="Precursor"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span>');
+    navBtn.querySelector('.nav-avatar-pioneer-star')?.remove(); // v1.79.2.5: la estrella ya no se usa
+    navBtn.classList.toggle('avatar-pioneer', !!_ownIsPioneer);
   }
 }
 
@@ -32318,6 +32349,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
       <div class="ape-name" id="ape-name"></div>
       <div class="ape-hint">Así se ve tu foto de perfil</div>
     </div>
+    <div class="ape-box">
     <div class="ape-sec">
       <div class="ape-h">Colores</div>
       <div class="ape-colors">
@@ -32342,19 +32374,14 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
         <button class="avatar-icon-swatch" data-icon="estrella" onclick="setOwnAvatarIcon('estrella')" title="Estrella">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.97 6.19 6.83.86-5.02 4.72 1.34 6.78L12 17.98l-6.12 3.07 1.34-6.78-5.02-4.72 6.83-.86L12 2.5z"/></svg>
       </button>
-        <button class="avatar-icon-swatch" data-icon="corazon" onclick="setOwnAvatarIcon('corazon')" title="Corazón">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5s-7.36-4.6-10-9.1C.6 8.6 1.4 5.1 4.4 3.7c2.3-1.1 4.9-.3 6.4 1.7l1.2 1.6 1.2-1.6c1.5-2 4.1-2.8 6.4-1.7 3 1.4 3.8 4.9 2.4 7.7-2.64 4.5-10 9.1-10 9.1z"/></svg>
-      </button>
-        <button class="avatar-icon-swatch" data-icon="flor" onclick="setOwnAvatarIcon('flor')" title="Flor">
-        <svg viewBox="0 0 24 24" fill="currentColor"><g><circle cx="12" cy="12" r="2.3"/><ellipse cx="12" cy="5.8" rx="2.6" ry="3.6"/><ellipse cx="12" cy="18.2" rx="2.6" ry="3.6"/><ellipse cx="5.8" cy="12" rx="3.6" ry="2.6"/><ellipse cx="18.2" cy="12" rx="3.6" ry="2.6"/></g></svg>
-      </button>
-        <button class="avatar-icon-swatch" data-icon="futbol" onclick="setOwnAvatarIcon('futbol')" title="Fútbol">
-        <svg viewBox="0 0 24 24" fill="currentColor"><g fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9.5" fill="currentColor" stroke="none"/><g fill="var(--su-fut-dark,#111)" stroke="none"><polygon points="12,7.3 15,9.5 13.9,13 10.1,13 9,9.5"/></g><path d="M12 2.5v4.8M4.4 7l3.6 2.6M4.4 17l4.7-3.4M19.6 7l-3.6 2.6M19.6 17l-4.7-3.4M9.3 21.3l.8-4.3M14.7 21.3l-.8-4.3"/></g></svg>
-      </button>
         <button class="avatar-icon-swatch" data-icon="corona" onclick="setOwnAvatarIcon('corona')" title="Corona">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 8.5l4 3.2L12 5l5 6.7 4-3.2-1.6 9.8H4.6L3 8.5z"/><rect x="4.6" y="17.5" width="14.8" height="2.3" rx="0.8"/></svg>
       </button>
+        <button class="avatar-icon-swatch" data-icon="corazon" onclick="setOwnAvatarIcon('corazon')" title="Corazón">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5s-7.36-4.6-10-9.1C.6 8.6 1.4 5.1 4.4 3.7c2.3-1.1 4.9-.3 6.4 1.7l1.2 1.6 1.2-1.6c1.5-2 4.1-2.8 6.4-1.7 3 1.4 3.8 4.9 2.4 7.7-2.64 4.5-10 9.1-10 9.1z"/></svg>
+      </button>
       </div>
+    </div>
     </div>
     <div id="avatar-char-section" style="display:none">
       <div id="avatar-char-rows"></div>
