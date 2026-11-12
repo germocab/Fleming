@@ -4401,12 +4401,6 @@
   .otros-grupos-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; }
   .og-group-section { margin: 0 1.25rem 1.5rem; }
   .og-group-section:first-child { margin-top: 1rem; }
-  .og-group-title {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 0.78rem; font-weight: 700; letter-spacing: 0.02em;
-    color: var(--text2); margin-bottom: 0.6rem;
-  }
-  .og-group-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
   .og-group-cards { display: flex; flex-direction: column; gap: 0.6rem; }
   .og-empty { text-align: center; padding: 3rem 1.25rem; color: var(--text3); font-size: 0.85rem; }
 
@@ -6214,6 +6208,10 @@
 @media (max-width: 640px) {
   #scroll-top-fab { right: 14px; bottom: 18px; width: 42px; height: 42px; }
 }
+/* v1.79.5: con la UI nueva la NavBar inferior flota abajo; el botón sube para quedar por encima y no estorbarla */
+@media (max-width: 639px) {
+  html.inicio-mode #scroll-top-fab { bottom: calc(14px + 48px + 14px + env(safe-area-inset-bottom, 0px)); }
+}
 /* ── Modo Offline: banner flotante que indica que no hay conexión ──────────
    Aparece automáticamente al perder la conexión (evento 'offline' / detección
    de fallos de red) y desaparece al recuperarla. No bloquea la interacción
@@ -6506,6 +6504,8 @@ html.modo-sencillo-mode .simp-title-btn { height: 52px; font-size: 1.15rem; }
   /* v1.55.90-beta: el menú se abre desde abajo (Visitantes con Inicio) */
   .options-dropdown.from-bottom{position:fixed;top:auto;left:auto;right:12px;bottom:calc(80px + env(safe-area-inset-bottom,0px));transform-origin:bottom right;z-index:10050;max-height:calc(100vh - 140px);overflow-y:auto}
   .options-dropdown.from-bottom.open{animation:menuMorphInUp .32s var(--ease-fluid-snappy)}
+  /* v1.79.5: Perfil ya no va en este menú; está en la foto de perfil, arriba a la derecha */
+  .options-dropdown.from-bottom .options-user-info{display:none}
   /* v1.50.0-beta: botón Home de la NavBar (activo = blanco con ícono oscuro) */
   .home-bn-icon{flex-shrink:0;width:48px;height:48px;padding:0;border-radius:50%;border:1px solid var(--border);background:var(--nav-bg);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow-lg);backdrop-filter:blur(var(--ui-blur,34px)) saturate(180%);-webkit-backdrop-filter:blur(var(--ui-blur,34px)) saturate(180%);-webkit-tap-highlight-color:transparent;transition:transform .15s,background .22s,color .22s}
   .home-bn-icon:active{transform:scale(.92)}
@@ -11772,6 +11772,7 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.76.9: detalle de Grupo de Servicio — la barra superior (Back y título) ya no tiene franja de fondo: el contenido pasa por detrás. Nueva portada: imagen de fondo con "integrantes" pequeño y "Grupo N" en grande encima. La portada se sube desde Administración › Grupos (DEV o admin con permiso de Grupos).
 // v1.76.9.2: (1) La portada ahora es individual para cada Grupo de Servicio (antes era una sola para todos). (2) Panel de Administración › Grupos rediseñado: tarjetas con la portada de cada grupo y una pantalla de configuración por grupo (portada con vista previa, integrantes, número y eliminar). (3) La subida de portada avisa con claridad si algo falla (formato no compatible, sin permiso, error de la base de datos) en vez de fallar en silencio.
 // v1.77: (1) Territorios: el degradé de color de las tarjetas es más suave y deja ver más del mapa. (2) Interfaz Sencilla sin Clima ni Live (se ocultan también sus opciones en Ajustes y en el menú ⋯ de las asignaciones). (3) Interfaz Sencilla: menú rediseñado para personas mayores — pantalla completa con letra grande y dos desplegables (Predicación y Reuniones) que contienen sus sub-secciones; el botón del encabezado dice "Menú". (4) Interfaz Sencilla: Ajustes, Notificaciones y Perfil son botones de solo texto (sin íconos); el Perfil ya no muestra la foto.
+// v1.79.5: (1) Otros Grupos: los títulos "Grupo X" usan el mismo formato que las fechas de Predicación Casa en Casa. (2) El botón azul de Volver arriba ya no estorba a la NavBar inferior de la UI nueva (queda por encima). (3) En la UI nueva, "Más Opciones" (abajo) ya no incluye Perfil, que está arriba a la derecha. (4) Se retira el mensaje emergente de bienvenida "Hola, Usuario".
 // v1.79.2.5: (1) Precursores regulares y especiales: la estrella morada se reemplaza por un marco con degradé Azul-Morado en el botón de la foto de perfil (barra superior), Mi Perfil y la lista de usuarios de los Grupos de Servicio. (2) Editar perfil: solo quedan los íconos Estrella, Corona y Corazón (más Iniciales y Personajes Bíblicos); Colores e Iniciales/íconos van dentro de un contenedor como la tarjeta de Mi grupo.
 // v1.79: (1) Nuevo Inicio de Sesión (Desktop y Móvil) con un solo campo "Nombre y Apellido". (2) Territorios: subir un SVG (individual, masivo o desde el formulario) JAMÁS borra los mapas PNG Claro/Oscuro ni las manzanas; solo se escriben las columnas que cambiaron y un vacío nunca pisa un dato. (3) Administración → Territorios → "Manzanas": define la cantidad de manzanas (A, B, C…) de muchos territorios a la vez, con verificación del enlace contra los id del SVG. (4) Rendimiento: carga de datos en paralelo, mapas por bloques con reintentos y sin re-descargas innecesarias, fuentes sin bloqueo, sondeos en pausa con la app oculta.
 // v1.78: OPTIMIZACIÓN DE REPORTES DE TERRITORIO — estabilidad y rendimiento (sin cambios de diseño). (1) SVG: lectura tolerante (Illustrator/Inkscape), saneado, viewBox garantizado y validación al subir (individual y masiva). (2) Mapas aislados: ya no se pisan ids ni estilos entre territorios y los colores de manzanas funcionan aunque el SVG use clases CSS. (3) Enlaces de reporte: se arman sin errores con # en la URL, se rescatan enlaces antiguos, un fallo de red ya no se muestra como 'Enlace inválido' y hay botón Reintentar. (4) Encargados: el reporte no se borra hasta que el nuevo se guarda; sin duplicados por doble toque; reintentos automáticos. (5) Rendimiento: solo se descargan los territorios/formularios necesarios, caché de mapas y miniaturas, sin re-descargas al abrir un día.
@@ -11782,7 +11783,7 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.77.9: Nuevo experimento "Espaciado del contenido": slider de 10 niveles (predeterminado 2 = espaciado actual).
 // v1.77.8: (1) La dirección en el detalle de una asignación de casa en casa es un poco más grande (solo esa pantalla). (2) El botón de Clima de la asignación ya no abre el sitio del clima. (3) Nuevo ícono de Carritos (Inicio, Mis Turnos, Ajustes > Notificaciones y menú de Predicación). (4) Nuevo experimento "Resolución reducida en medios" para imágenes y PDF. (5) Carga más rápida: pdf.js y QR con defer, preconnect, fuentes con display=swap, decodificación asíncrona de imágenes.
 // v1.77.5: (1) Detalle de un Territorio: el título del encabezado ahora dice "Detalles del territorio" (el número ya aparece en el círculo de color). (2) Más opciones en Inicio incluye "Personalizar Inicio" (el botón al final de Inicio se mantiene). (3) Nuevo experimento "Territorios sin vista previa": las tarjetas de Territorios muestran solo el degradé y el nombre.
-const APP_VERSION = '1.79.2.5'; // v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
+const APP_VERSION = '1.79.5'; // v1.79.5 — Otros Grupos con títulos como las fechas; botón Volver arriba sobre la NavBar inferior; Más Opciones sin Perfil en la UI nueva; sin saludo emergente; v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -17007,7 +17008,7 @@ async function enterApp() {
   const taskEl = document.getElementById('dropdown-task');
   if (taskEl) taskEl.style.display = 'none';
 
-  showToast(`¡Hola, ${currentUser.name}!`, 'greeting');
+  // v1.79.5: se retira el saludo emergente "¡Hola, Usuario!" al iniciar sesión.
   startNotifPolling();
   scheduleMidnightRefresh();
   await subscribeToPush();
@@ -19356,9 +19357,8 @@ function openOtrosGruposScreen(date) {
       let html = '';
       groupsSorted.forEach(({ grupo, items }) => {
         const numero = grupo ? grupo.numero : null;
-        const color = numero != null ? grupoColorFor(numero) : '#64748b';
         html += `<div class="og-group-section">
-          <div class="og-group-title"><span class="og-group-dot" style="background:${color}"></span>${numero != null ? 'Grupo ' + numero : 'Grupo'}</div>
+          <div class="date-section-header">${numero != null ? 'Grupo ' + numero : 'Grupo'}</div>
           <div class="og-group-cards">`;
         items.forEach(a => {
           const timeStr = a.time ? a.time.substring(0,5) : '--:--';
