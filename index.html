@@ -10599,6 +10599,19 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
           <div id="pref-live-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
+      <!-- v1.79.20: LiveSnap — Live se pausa solo tras reconocer una calle (ahorra batería). Solo visible con Live activo. -->
+      <div class="profile-row" id="pref-livesnap-row" style="cursor:pointer" onclick="toggleLiveSnapPref()">
+        <div class="profile-row-icon" style="background:var(--ter-1-bg);color:var(--ter-1)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><path d="M9.5 9h5"/><path d="M12 6.5v5"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label" data-i18n="func.livesnap">LiveSnap</div>
+          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="func.livesnap.desc">Live se pausa solo tras reconocer una calle y sus No Pasar. Menor uso de batería</div>
+        </div>
+        <div id="pref-livesnap-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="pref-livesnap-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
     </div>
     <!-- v1.68: control global de Voz, solo para administradores con permiso Voz. -->
     <div class="profile-section" id="pref-voz-section" style="display:none">
@@ -11405,6 +11418,12 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
         <label class="form-label2">Número del grupo</label>
         <input type="number" min="1" class="form-input" id="grupo-numero" placeholder="Ej: 1">
       </div>
+      <!-- v1.79.50: territorios que el Encargado de este Grupo de Servicio puede agregarse a sí mismo (Reporte simple de los Sábados) -->
+      <div class="form-group2">
+        <label class="form-label2">Territorios permitidos <span style="font-weight:400;color:var(--text3)">(opcional)</span></label>
+        <div id="grupo-ter-chips" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px"></div>
+        <div style="font-size:0.75rem;color:var(--text3);line-height:1.4;margin-top:8px">El Encargado de una asignación de este grupo podrá agregar a su salida cualquiera de estos territorios (por ejemplo, desde el Reporte simple de los Sábados). Sin selección, no podrá agregar territorios por su cuenta.</div>
+      </div>
       <div id="grupo-error" class="form-error" style="display:none"></div>
     </div>
     <div class="modal-footer">
@@ -11751,7 +11770,7 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.77.9: Nuevo experimento "Espaciado del contenido": slider de 10 niveles (predeterminado 2 = espaciado actual).
 // v1.77.8: (1) La dirección en el detalle de una asignación de casa en casa es un poco más grande (solo esa pantalla). (2) El botón de Clima de la asignación ya no abre el sitio del clima. (3) Nuevo ícono de Carritos (Inicio, Mis Turnos, Ajustes > Notificaciones y menú de Predicación). (4) Nuevo experimento "Resolución reducida en medios" para imágenes y PDF. (5) Carga más rápida: pdf.js y QR con defer, preconnect, fuentes con display=swap, decodificación asíncrona de imágenes.
 // v1.77.5: (1) Detalle de un Territorio: el título del encabezado ahora dice "Detalles del territorio" (el número ya aparece en el círculo de color). (2) Más opciones en Inicio incluye "Personalizar Inicio" (el botón al final de Inicio se mantiene). (3) Nuevo experimento "Territorios sin vista previa": las tarjetas de Territorios muestran solo el degradé y el nombre.
-const APP_VERSION = '1.79.10'; // v1.79.10 — sin No Pasar nuevos en Para tí; detalle de punto de carrito con Recordatorios (sin Fotos ni búsqueda) y barra superior fija con modo oscuro; filtro de Carritos unificado; Aseo solo a los dos grupos asignados; v1.79.5 — Otros Grupos con títulos como las fechas; botón Volver arriba sobre la NavBar inferior; Más Opciones sin Perfil en la UI nueva; sin saludo emergente; v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
+const APP_VERSION = '1.79.50'; // v1.79.50 — Reporte de Territorio simple para los Sábados ("¿Completaste el territorio de hoy?"; si no, seguir con el mismo o agregar uno nuevo de los permitidos del Grupo de Servicio; el reporte convencional sigue disponible); Territorios permitidos por Grupo de Servicio; v1.79.20 — nuevo modo LiveSnap (Live se pausa solo tras reconocer una calle y sus No Pasar; ahorra batería); v1.79.10 — sin No Pasar nuevos en Para tí; detalle de punto de carrito con Recordatorios (sin Fotos ni búsqueda) y barra superior fija con modo oscuro; filtro de Carritos unificado; Aseo solo a los dos grupos asignados; v1.79.5 — Otros Grupos con títulos como las fechas; botón Volver arriba sobre la NavBar inferior; Más Opciones sin Perfil en la UI nueva; sin saludo emergente; v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -13228,6 +13247,8 @@ const I18N = {
   'func.lateral.help':     { es: 'En "Lateral", el detalle de la asignación se abre a la derecha, dejando la lista visible a la izquierda.', en: 'In "Sidebar", the assignment detail opens on the right, keeping the list visible on the left.', nl: 'Bij "Zijbalk" opent het toewijzingsdetail rechts, terwijl de lijst links zichtbaar blijft.' },
   'func.escritorio':       { es: 'Escritorio',              en: 'Desktop',  nl: 'Desktop' },
   'func.live':             { es: 'Función Live',            en: 'Live Feature', nl: 'Live-functie' },
+  'func.livesnap':         { es: 'LiveSnap', en: 'LiveSnap', nl: 'LiveSnap' },
+  'func.livesnap.desc':    { es: 'Live se pausa solo tras reconocer una calle y sus No Pasar. Menor uso de batería', en: 'Live pauses itself after recognizing a street and its Do-Not-Pass addresses. Uses less battery', nl: 'Live pauzeert zichzelf na het herkennen van een straat en de Niet-Bezoeken-adressen. Minder batterijverbruik' },
   'func.live.desc':        { es: 'Detección de calles y avisos de No Pasar en tiempo real', en: 'Real-time street detection and Do-Not-Pass alerts', nl: 'Realtime straatdetectie en Niet-Bezoeken-meldingen' },
   // ── Experimentos ──
   'exp.restricted.title':  { es: 'Transparencia y blur', en: 'Transparency and blur', nl: 'Transparantie en blur' },
@@ -16352,7 +16373,7 @@ function renderAdminGrupos() {
         <div class="ga-card-name">${t('grupos.grupo-num')} ${g.numero}</div>
       </div>
       <div class="ga-card-foot">
-        <span class="ga-card-lead">${lider ? 'Encargado: <b>' + lider.nombre + '</b>' : 'Sin encargado asignado'}</span>
+        <span class="ga-card-lead">${lider ? 'Encargado: <b>' + lider.nombre + '</b>' : 'Sin encargado asignado'}${Array.isArray(g.territorios_permitidos) && g.territorios_permitidos.length ? ' · Terr. ' + g.territorios_permitidos.map(id => (territories.find(t => t.id === id) || {}).number).filter(x => x != null).sort((x, y) => x - y).join(', ') : ''}</span>
         <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
     </div>`;
@@ -16364,11 +16385,29 @@ function toggleAdminGrupo(gid) {
   if (body) body.style.display = body.style.display === 'none' ? '' : 'none';
 }
 
+// v1.79.50: Territorios permitidos por Grupo de Servicio.
+// Requiere en Supabase: alter table grupos add column if not exists territorios_permitidos jsonb default '[]'::jsonb;
+let _grupoTerSel = [];
+function _renderGrupoTerChips() {
+  const box = document.getElementById('grupo-ter-chips'); if (!box) return;
+  const list = (typeof territories !== 'undefined' ? territories : []).slice().sort((x, y) => (x.number || 0) - (y.number || 0));
+  if (!list.length) { box.innerHTML = '<span style="font-size:0.8rem;color:var(--text3)">No hay territorios cargados.</span>'; return; }
+  box.innerHTML = list.map(t => {
+    const on = _grupoTerSel.includes(t.id);
+    return `<button type="button" onclick="toggleGrupoTer('${t.id}')" style="min-width:44px;height:38px;padding:0 12px;border-radius:12px;border:1px solid ${on ? 'var(--accent)' : 'var(--border)'};background:${on ? 'var(--accent)' : 'var(--surface2)'};color:${on ? '#fff' : 'var(--text)'};font:inherit;font-weight:700;cursor:pointer">${t.number}</button>`;
+  }).join('');
+}
+function toggleGrupoTer(id) {
+  _grupoTerSel = _grupoTerSel.includes(id) ? _grupoTerSel.filter(x => x !== id) : _grupoTerSel.concat(id);
+  _renderGrupoTerChips();
+}
 function openGrupoModal(id) {
   editingGrupoId = id || null;
   document.getElementById('grupo-modal-title').textContent = id ? 'Editar Grupo' : 'Nuevo Grupo';
   const g = id ? grupos.find(x => x.id === id) : null;
   document.getElementById('grupo-numero').value = g ? g.numero : '';
+  _grupoTerSel = (g && Array.isArray(g.territorios_permitidos)) ? g.territorios_permitidos.slice() : [];
+  _renderGrupoTerChips();
   document.getElementById('grupo-error').style.display = 'none';
   document.getElementById('grupo-modal').classList.add('open');
 }
@@ -16380,10 +16419,13 @@ async function saveGrupo() {
   const btn = document.getElementById('save-grupo-btn');
   btn.disabled = true; btn.textContent = 'Guardando...';
   let error;
-  if (editingGrupoId) {
-    ({ error } = await sb.from('grupos').update({ numero }).eq('id', editingGrupoId));
-  } else {
-    ({ error } = await sb.from('grupos').insert({ numero }));
+  const _gPayload = { numero, territorios_permitidos: _grupoTerSel.slice() };
+  const _gSave = (pl) => editingGrupoId ? sb.from('grupos').update(pl).eq('id', editingGrupoId) : sb.from('grupos').insert(pl);
+  ({ error } = await _gSave(_gPayload));
+  if (error && /territorios_permitidos/.test(error.message || '')) {
+    // La columna aún no existe en Supabase: se guarda el número igualmente y se avisa qué falta.
+    ({ error } = await _gSave({ numero }));
+    if (!error && _grupoTerSel.length) showToast('Grupo guardado, pero faltan los territorios permitidos: agrega la columna territorios_permitidos (jsonb) a la tabla grupos en Supabase.', 'error');
   }
   btn.disabled = false; btn.textContent = 'Guardar';
   if (error) { showError('grupo-error', error.message); return; }
@@ -20298,6 +20340,11 @@ async function _liveOnPosition(pos) {
     // es el Encargado de la asignación cuyo detalle tiene abierto, comparte
     // la calle detectada con quienes vean esa asignación.
     if (typeof _liveHostPublishIfApplicable === 'function') _liveHostPublishIfApplicable(road);
+    // v1.79.20: LiveSnap — calle y No Pasar reconocidos → Live se Pausa solo (conserva el resaltado en pantalla).
+    if (isLiveSnapEnabled() && _liveActive && !_livePaused) {
+      pauseLiveMode(true);
+      showToast('LiveSnap: calle reconocida. Live en pausa.');
+    }
   } else if (!road) {
     const nameEl = document.getElementById('live-street-name');
     if (nameEl) nameEl.textContent = 'Calle no identificada';
@@ -20368,7 +20415,7 @@ function toggleLivePause() {
   if (!_liveActive) return;
   if (_livePaused) resumeLiveMode(); else pauseLiveMode();
 }
-function pauseLiveMode() {
+function pauseLiveMode(keepHighlight) {
   if (!_liveActive || _livePaused) return;
   _livePaused = true;
   if (_liveWatchId !== null) { navigator.geolocation.clearWatch(_liveWatchId); _liveWatchId = null; }
@@ -20377,7 +20424,8 @@ function pauseLiveMode() {
   document.getElementById('live-street-banner')?.classList.add('paused');
   _updateLivePauseBtnUI();
   // Los No Pasar vuelven a verse "normales" mientras Live está pausado
-  _liveHighlight(null);
+  // (v1.79.20: LiveSnap conserva el resaltado de la calle reconocida hasta que se reanude Live)
+  if (!keepHighlight) _liveHighlight(null);
   // Mientras está pausado, la tarjeta deja de brillar (no se envían avisos)
   _liveApplyCardGlow();
 }
@@ -26006,6 +26054,7 @@ async function openPreferencias() {
   updatePrefThemeActive();
   updateDarkMapToggleUI();
   updateLiveToggleUI();
+  if (typeof updateLiveSnapToggleUI === 'function') updateLiveSnapToggleUI();
   updateTransparencyToggleUI();
   updateUiSizeToggleUI();
   updateH2HViewModeUI();
@@ -26027,7 +26076,7 @@ function openPrefScreen(name) {
   if (name === 'experimentos' && localStorage.getItem('fleming_egg_unlocked') !== '1') return;
   document.getElementById('page-pref-' + name)?.classList.add('open');
   trackEvent('settings_open', { screen: name });
-  if (name === 'funciones') { updateH2HViewModeUI(); if (typeof updateLiveAlwaysOnToggleUI === 'function') updateLiveAlwaysOnToggleUI(); if (typeof updatePinFeatureToggleUI === 'function') updatePinFeatureToggleUI(); if (typeof updateVozFeatureToggleUI === 'function') updateVozFeatureToggleUI(); }
+  if (name === 'funciones') { updateH2HViewModeUI(); if (typeof updateLiveAlwaysOnToggleUI === 'function') updateLiveAlwaysOnToggleUI(); if (typeof updateLiveSnapToggleUI === 'function') updateLiveSnapToggleUI(); if (typeof updatePinFeatureToggleUI === 'function') updatePinFeatureToggleUI(); if (typeof updateVozFeatureToggleUI === 'function') updateVozFeatureToggleUI(); }
   if (name === 'notificaciones') renderPrefNotifList();
   if (name === 'ayuda') { renderAyudaTipsList(); updateInicioTutorialRow(); }
   if (name === 'preferencias') { updateAnimationsEnabledToggleUI(); updateWeatherToggleUI(); if (typeof updateModoSencilloToggleUI === 'function') updateModoSencilloToggleUI(); updateAccentSwatchesUI(); if (typeof updateHomeExpToggleUI === 'function') updateHomeExpToggleUI(); }
@@ -26375,6 +26424,30 @@ function updateLiveToggleUI() {
   toggle.style.background = enabled ? 'var(--accent)' : 'var(--surface3)';
   thumb.style.left = enabled ? '21px' : '3px';
 }
+// v1.79.20: LiveSnap — Live solo está activo hasta reconocer una calle y sus direcciones No Pasar; después se Pausa solo
+// (menor uso de batería: el usuario decide cuándo volver a usar Live). Requiere que Live esté activo.
+function isLiveSnapEnabled() {
+  return isLiveFeatureEnabled() && localStorage.getItem('fleming_livesnap_enabled') === 'true'; // default false
+}
+function updateLiveSnapToggleUI() {
+  const on = isLiveSnapEnabled();
+  const toggle = document.getElementById('pref-livesnap-toggle');
+  const thumb  = document.getElementById('pref-livesnap-thumb');
+  const row    = document.getElementById('pref-livesnap-row');
+  if (row) row.style.display = isLiveFeatureEnabled() ? '' : 'none'; // solo aparece si Live está activo
+  if (!toggle || !thumb) return;
+  toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
+  thumb.style.left = on ? '21px' : '3px';
+}
+function setLiveSnapPref(next) {
+  localStorage.setItem('fleming_livesnap_enabled', next ? 'true' : 'false');
+  try { updateLiveSnapToggleUI(); } catch (e) {}
+  try { trackEvent('livesnap_toggle', { enabled: next }); } catch (e) {}
+}
+function toggleLiveSnapPref() {
+  if (!isLiveFeatureEnabled()) return;
+  setLiveSnapPref(localStorage.getItem('fleming_livesnap_enabled') !== 'true');
+}
 function toggleLiveFeaturePref() {
   const current = isLiveFeatureEnabled();
   const next = !current;
@@ -26382,6 +26455,7 @@ function toggleLiveFeaturePref() {
   updateLiveToggleUI();
   if (!next && _liveActive) stopLiveMode();
   _liveUpdateBtnVisibility();
+  try { updateLiveSnapToggleUI(); } catch (e) {}
   trackEvent('live_toggle', { enabled: next });
 }
 
@@ -27510,7 +27584,7 @@ async function renderAdminTipsList() {
 const PLATFORM_RESET_KEYS = [
   'fleming_accent', 'fleming_accent_bg', 'fleming_animations', 'fleming_blur_level',
   'fleming_dark_maps', 'fleming_egg_unlocked', 'fleming_group_minicards', 'fleming_h2h_view',
-  'fleming_lang', 'fleming_live_always_on', 'fleming_live_enabled', 'fleming_livehost_enabled',
+  'fleming_lang', 'fleming_live_always_on', 'fleming_live_enabled', 'fleming_livesnap_enabled', 'fleming_livehost_enabled',
   'fleming_navbar_options_avatar', 'fleming_navbar_btn_size', 'fleming_notif_levels', 'fleming_notif_prefs',
   'fleming_notif_templates', 'fleming_simplified_mode', 'fleming_modo_sencillo', 'fleming_theme', 'fleming_tip_font_scale',
   'fleming_transparency', 'fleming_transparency_level', 'fleming_ui_size', 'fleming_weather_enabled',
@@ -35499,6 +35573,11 @@ async function _trepOpenFromAssignment(assignmentId) {
     }
   }
 
+  // v1.79.50: los Sábados se usa el Reporte simple (el convencional sigue disponible desde ahí).
+  try { await loadGruposIfNeeded(); } catch (e) {}
+  _trepSimpleAsg = a;
+  _trepSimpleActive = _trepIsSaturday(a.date);
+  _trepSimpleStage = 'ask';
   closeDetail();
   _trepInAppOpen = true;
   document.getElementById('trep-pub-inapp-close').style.display = 'flex';
@@ -35519,12 +35598,14 @@ async function _trepOpenFromAssignment(assignmentId) {
 
 function trepCloseInAppScreen() {
   _trepInAppOpen = false;
+  _trepSimpleActive = false; _trepSimpleAsg = null;
   document.getElementById('trep-public-screen').style.display = 'none';
   document.getElementById('trep-pub-inapp-close').style.display = 'none';
   document.body.style.overflow = '';
 }
 
 function trepPubRenderOverview() {
+  if (_trepSimpleActive && _trepInAppOpen) { trepSimpleRender(); return; }   // v1.79.50: reporte simple de los Sábados
   const c = document.getElementById('trep-pub-content');
   c.style.display = 'block';
   document.getElementById('trep-pub-step-1').style.display = 'none';
@@ -35808,14 +35889,160 @@ async function trepPubSubmit() {
   if (!result.duplicate) notifyReportRecipients(t, payload).catch(err => console.warn('No se pudo notificar el reporte de territorio:', err.message));
 }
 
+// ══ v1.79.50: Reporte de Territorio SIMPLE (solo Sábados) ══════════════════════════════════════════════
+// Una sola pregunta: "¿Completaste el territorio de hoy?". Si no: seguir solo con ese territorio o agregar uno nuevo
+// de los territorios permitidos al Grupo de Servicio (grupos.territorios_permitidos). El reporte convencional (por
+// manzanas) sigue disponible desde el enlace de la pantalla.
+let _trepSimpleActive = false, _trepSimpleAsg = null, _trepSimpleStage = 'ask', _trepSimpleBusy = false;
+function _trepIsSaturday(dateStr) {
+  if (!dateStr) return false;
+  const d = new Date(String(dateStr).slice(0, 10) + 'T00:00:00');
+  return !isNaN(d.getTime()) && d.getDay() === 6;
+}
+function _trepSimpleGrupo(a) {
+  if (!a || !grupos || !grupos.length) return null;
+  if (a.grupo_id) return grupos.find(g => g.id === a.grupo_id) || null;
+  const c = (a.conductor || '').trim().toLowerCase();
+  if (!c) return null;
+  return grupos.find(g => g.miembros.some(m => m.rol === 'superintendente' && (m.nombre || '').trim().toLowerCase() === c))
+      || grupos.find(g => g.miembros.some(m => (m.nombre || '').trim().toLowerCase() === c)) || null;
+}
+function _trepSimpleIds(a) { return [a.territory_id, a.territory_id_2, a.territory_id_3].filter(Boolean); }
+function _trepSimpleFreeSlot(a) { return !a.territory_id ? 'territory_id' : (!a.territory_id_2 ? 'territory_id_2' : (!a.territory_id_3 ? 'territory_id_3' : null)); }
+function _trepSimpleAvailable(a) {
+  const g = _trepSimpleGrupo(a);
+  const allowed = g && Array.isArray(g.territorios_permitidos) ? g.territorios_permitidos : [];
+  const used = _trepSimpleIds(a);
+  return (territories || []).filter(t => allowed.includes(t.id) && !used.includes(t.id)).sort((x, y) => (x.number || 0) - (y.number || 0));
+}
+async function _trepSimpleEnsureTers(a) {
+  const missing = _trepSimpleIds(a).filter(id => !trepPubTerritories[id]);
+  if (!missing.length) return;
+  const { data, error } = await trepRetry(() => sb.from('territories').select('id, number, svg_data, manzanas').in('id', missing));
+  if (error) throw error;
+  (data || []).forEach(t => { trepPubTerritories[t.id] = t; });
+}
+function _trepSimplePending(a) { return _trepSimpleIds(a).filter(id => trepPubTerritories[id] && !trepPubReported.has(id)); }
+function _trepSimpleBtn(label, onclick, kind) {
+  const bg = kind === 'yes' ? '#22c55e' : (kind === 'primary' ? 'var(--accent)' : 'var(--surface2)');
+  const col = (kind === 'yes' || kind === 'primary') ? '#fff' : 'var(--text)';
+  return '<button type="button" onclick="' + onclick + '" style="width:100%;padding:0.95rem 1rem;border-radius:14px;border:' + (kind ? '0' : '1px solid var(--border)') + ';background:' + bg + ';color:' + col + ';font:inherit;font-weight:700;font-size:0.95rem;cursor:pointer">' + label + '</button>';
+}
+async function trepSimpleRender() {
+  const c = document.getElementById('trep-pub-content'); if (!c) return;
+  ['trep-pub-step-1', 'trep-pub-step-2'].forEach(id => { const e = document.getElementById(id); if (e) e.style.display = 'none'; });
+  document.getElementById('trep-pub-step-0').style.display = 'flex';
+  const a = _trepSimpleAsg;
+  if (!a) { trepPubShowMessage('Reporte no disponible', 'No se pudo cargar la asignación.'); return; }
+  try { await _trepSimpleEnsureTers(a); }
+  catch (e) { trepPubShowMessage('No se pudo cargar el reporte', 'Revisa tu conexión e inténtalo de nuevo.', () => trepSimpleRender()); return; }
+  document.getElementById('trep-pub-loading').style.display = 'none';
+  c.style.display = 'block';
+  const host = trepEsc(trepPubForm.host_name);
+  const pending = _trepSimplePending(a);
+  if (_trepSimpleStage === 'done') return; // la pantalla final ya está pintada
+  if (!pending.length) {
+    c.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:10px"><div style="font-size:2.2rem">✓</div><h2 style="font-size:1.25rem;font-weight:700">¡Gracias, ' + host + '!</h2><p style="color:var(--text3);font-size:0.85rem">Ya enviaste el reporte de hoy.</p></div>';
+    return;
+  }
+  const plural = pending.length > 1;
+  const chips = pending.map(id => '<span style="display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 10px;border-radius:10px;background:var(--accent);color:#fff;font-weight:700">' + trepEsc(trepPubTerritories[id].number) + '</span>').join(' ');
+  const gap = '<div style="display:flex;flex-direction:column;gap:10px;margin-top:1.2rem">';
+  if (_trepSimpleStage === 'ask') {
+    c.innerHTML = '<h1 style="font-size:1.4rem;font-weight:700;margin-bottom:4px">¡Hola, ' + host + '!</h1>' +
+      '<div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:0.6rem 0 0.4rem">' + chips + '</div>' +
+      '<h2 style="font-size:1.15rem;font-weight:700;margin-top:0.8rem">' + (plural ? '¿Completaste los territorios de hoy?' : '¿Completaste el territorio de hoy?') + '</h2>' +
+      gap + _trepSimpleBtn('Sí, lo completé', 'trepSimpleAnswer(true)', 'yes') + _trepSimpleBtn('No', 'trepSimpleAnswer(false)', '') + '</div>' +
+      '<button type="button" onclick="trepSimpleUseFull()" style="margin-top:1.4rem;background:none;border:0;color:var(--accent);font:inherit;font-size:0.85rem;cursor:pointer">Usar el reporte completo (por manzanas)</button>';
+  } else if (_trepSimpleStage === 'no') {
+    const canAdd = _trepSimpleAvailable(a).length > 0 && !!_trepSimpleFreeSlot(a);
+    c.innerHTML = '<h2 style="font-size:1.2rem;font-weight:700">¿Qué quieres hacer?</h2>' +
+      '<p style="color:var(--text3);font-size:0.85rem;margin-top:6px">' + (plural ? 'No completaste los territorios de hoy.' : 'No completaste el territorio de hoy.') + '</p>' +
+      gap + _trepSimpleBtn(plural ? 'Seguir completando solo estos territorios' : 'Seguir completando solo este territorio', 'trepSimpleKeep()', 'primary') +
+      (canAdd ? _trepSimpleBtn('Agregar un territorio nuevo (si termino el anterior)', 'trepSimpleGoPick()', '') : '') +
+      _trepSimpleBtn('Volver', 'trepSimpleBack()', '') + '</div>';
+  } else if (_trepSimpleStage === 'pick') {
+    const av = _trepSimpleAvailable(a);
+    c.innerHTML = '<h2 style="font-size:1.2rem;font-weight:700">Elige el territorio nuevo</h2>' +
+      '<p style="color:var(--text3);font-size:0.85rem;margin-top:6px">Territorios permitidos para tu Grupo de Servicio.</p>' + gap +
+      (av.length ? av.map(t => '<div onclick="trepSimpleAddTer(\'' + trepEsc(t.id) + '\')" style="cursor:pointer;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:0.9rem 1rem;display:flex;align-items:center;gap:12px;text-align:left"><div style="width:38px;height:38px;border-radius:10px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700">' + trepEsc(t.number) + '</div><div style="flex:1;font-weight:600">Territorio ' + trepEsc(t.number) + '</div></div>').join('') : '<p style="color:var(--text3);font-size:0.85rem">No hay territorios disponibles para agregar.</p>') +
+      _trepSimpleBtn('Volver', 'trepSimpleBack()', '') + '</div>';
+  }
+}
+function trepSimpleAnswer(done) { if (done) { trepSimpleSubmit(true); } else { _trepSimpleStage = 'no'; trepSimpleRender(); } }
+function trepSimpleBack() { _trepSimpleStage = _trepSimpleStage === 'pick' ? 'no' : 'ask'; trepSimpleRender(); }
+function trepSimpleGoPick() { _trepSimpleStage = 'pick'; trepSimpleRender(); }
+function trepSimpleKeep() { trepSimpleSubmit(false); }
+function trepSimpleUseFull() { _trepSimpleActive = false; trepPubRenderOverview(); }
+function _trepSimpleDone(title, body) {
+  _trepSimpleStage = 'done';
+  const c = document.getElementById('trep-pub-content'); if (!c) return;
+  c.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;gap:10px"><div style="font-size:2.2rem">✓</div><h2 style="font-size:1.25rem;font-weight:700">' + trepEsc(title) + '</h2><p style="color:var(--text3);font-size:0.85rem">' + trepEsc(body) + '</p></div>';
+}
+// Envía el reporte de todos los territorios pendientes de la asignación. complete=true → territorio completo.
+// complete=false → se registra como no completado (sin manzanas). Devuelve true si todo se guardó.
+async function _trepSimpleSendReports(complete, extra) {
+  const a = _trepSimpleAsg;
+  for (const id of _trepSimplePending(a)) {
+    const t = trepPubTerritories[id];
+    const manzanas = t.manzanas || [];
+    const payload = {
+      form_id: trepPubForm.id, territory_id: id, host_name: trepPubForm.host_name,
+      manzanas_done: complete ? manzanas : [], all_territory: complete, not_covered: false, total_manzanas: manzanas.length,
+    };
+    let result;
+    try { result = await trepSaveSubmission(payload, trepPubReplaceRows[id] || null); } catch (e) { result = { error: e }; }
+    if (result.error) {
+      console.error('trepSimple:', result.error);
+      alert(trepIsNetErr(result.error) ? 'No hay conexión estable. Toca de nuevo cuando tengas internet.' : 'Error al enviar el reporte. Intenta de nuevo.');
+      return false;
+    }
+    trepPubReported.add(id);
+    delete trepPubReplaceRows[id];
+    if (!result.duplicate) notifyReportRecipients(t, payload, { simple: true, extra }).catch(err => console.warn('No se pudo notificar el reporte de territorio:', err.message));
+  }
+  return true;
+}
+async function trepSimpleSubmit(complete) {
+  if (_trepSimpleBusy) return;
+  _trepSimpleBusy = true;
+  try {
+    if (!(await _trepSimpleSendReports(complete))) return;
+    _trepSimpleDone('¡Gracias, ' + (trepPubForm.host_name || '') + '!', complete ? 'Reporte enviado: territorio completado.' : 'Reporte enviado. Seguirás completando este territorio.');
+  } finally { _trepSimpleBusy = false; }
+}
+async function trepSimpleAddTer(terId) {
+  if (_trepSimpleBusy) return;
+  const a = _trepSimpleAsg;
+  const t = _trepSimpleAvailable(a).find(x => x.id === terId);
+  const slot = _trepSimpleFreeSlot(a);
+  if (!t || !slot) { alert('Ese territorio ya no está disponible para agregar.'); _trepSimpleStage = 'no'; trepSimpleRender(); return; }
+  _trepSimpleBusy = true;
+  try {
+    // Primero el reporte (queda como "no completado"); si falla, no se modifica la asignación.
+    if (!(await _trepSimpleSendReports(false, 'Agregó el Territorio ' + t.number + ' a su asignación.'))) return;
+    const { error } = await sb.from('assignments').update({ [slot]: terId }).eq('id', a.id);
+    if (error) { alert('No se pudo agregar el territorio: ' + error.message); return; }
+    a[slot] = terId;
+    const inList = (typeof assignments !== 'undefined') ? assignments.find(x => x.id === a.id) : null;
+    if (inList && inList !== a) inList[slot] = terId;
+    trepPubTerritories[terId] = trepPubTerritories[terId] || { id: t.id, number: t.number, manzanas: t.manzanas || [] };
+    _trepSimpleDone('Territorio ' + t.number + ' agregado', 'Ya está en tu asignación. Cuando termines, vuelve a reportar.');
+  } finally { _trepSimpleBusy = false; }
+}
+
 // Avisa al Usuario DEV y a los Usuarios Admin con el módulo "Reportes de
 // Territorio" habilitado cuando un encargado envía un reporte. No bloquea
 // el flujo de envío del publicador: se dispara "en segundo plano".
-async function notifyReportRecipients(territoryObj, submission) {
+async function notifyReportRecipients(territoryObj, submission, opts) {
   const terLabelStr = `Territorio ${territoryObj?.number ?? '?'}`;
   const title = `Nuevo reporte de ${terLabelStr}`;
   const bodyBits = [`${submission.host_name || 'Un publicador'} envió el reporte de ${terLabelStr}.`];
-  if (submission.not_covered) bodyBits.push('Indicó que no se pudo cubrir.');
+  if (opts && opts.simple) {
+    bodyBits.push(submission.all_territory ? 'Reporte simple (Sábado): completó el territorio.' : 'Reporte simple (Sábado): no completó el territorio.');
+    if (opts.extra) bodyBits.push(opts.extra);
+  }
+  else if (submission.not_covered) bodyBits.push('Indicó que no se pudo cubrir.');
   else if (submission.all_territory) bodyBits.push('Cubrió todo el territorio.');
   else if (submission.manzanas_done?.length) bodyBits.push(`Manzanas cubiertas: ${submission.manzanas_done.join(', ')}.`);
   const body = bodyBits.join(' ');
@@ -36507,6 +36734,7 @@ const _DAM_ICON = {
   edit: '<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>',
   ter: '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><line x1="12" y1="6.5" x2="12" y2="11.5"/><line x1="9.5" y1="9" x2="14.5" y2="9"/></svg>',
   live: '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>',
+  livesnap: '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><path d="M9.5 9h5"/><path d="M12 6.5v5"/></svg>',
   weather: '<svg viewBox="0 0 24 24"><path d="M17.5 19H8a5 5 0 1 1 1.35-9.8A6 6 0 0 1 21 11.5 4.5 4.5 0 0 1 17.5 19z"/></svg>',
   share: '<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>',
   sidebar: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M14 4v16"/></svg>'
@@ -36523,6 +36751,7 @@ function detailRenderMoreMenu() {
   const liveOn=localStorage.getItem('fleming_live_enabled')!=='false';
   const _msn=(typeof isModoSencilloActive==='function') && isModoSencilloActive(); // v1.77: sin Live ni Clima en Modo Sencillo
   if(!_msn) h+=`<button type="button" class="dam-toggle-row" role="switch" aria-checked="${liveOn}" onclick="detailMoreAction('live')">${_DAM_ICON.live}<span class="dam-label">Live</span><span class="dam-switch${liveOn?' on':''}"><span class="dam-thumb"></span></span></button>`;
+  if(!_msn && liveOn) { const snapOn=isLiveSnapEnabled(); h+=`<button type="button" class="dam-toggle-row" role="switch" aria-checked="${snapOn}" onclick="detailMoreAction('livesnap')">${_DAM_ICON.livesnap}<span class="dam-label">LiveSnap</span><span class="dam-switch${snapOn?' on':''}"><span class="dam-thumb"></span></span></button>`; }
   if(!_msn) h+=`<button type="button" class="dam-toggle-row" role="switch" aria-checked="${on}" onclick="detailMoreAction('weather')">${_DAM_ICON.weather}<span class="dam-label">Clima</span><span class="dam-switch${on?' on':''}"><span class="dam-thumb"></span></span></button>`;
   h+=`<button type="button" onclick="detailMoreAction('share')">${_DAM_ICON.share}Compartir</button>`;
   if (window.innerWidth >= 640) {
@@ -36539,11 +36768,21 @@ function detailMoreAction(action) {
     if (window.innerWidth >= 640) toggleH2HSidebarLive();
     return;
   }
+  if (action==='livesnap') {
+    // v1.79.20: LiveSnap (misma preferencia que Configuración → Funciones especiales).
+    if (localStorage.getItem('fleming_live_enabled')==='false') return;
+    const next=localStorage.getItem('fleming_livesnap_enabled')!=='true';
+    setLiveSnapPref(next);
+    showToast(next?'LiveSnap activado':'LiveSnap desactivado', next?'success':'');
+    detailRenderMoreMenu();
+    return;
+  }
   if (action==='live') {
     // v1.69.1: activa/desactiva Live por completo (misma preferencia que Configuración → Funciones especiales).
     const next=localStorage.getItem('fleming_live_enabled')==='false';
     localStorage.setItem('fleming_live_enabled', next?'true':'false');
     try { updateLiveToggleUI(); } catch {}
+    try { updateLiveSnapToggleUI(); } catch {}
     if (!next && _liveActive) stopLiveMode();
     try { _liveUpdateBtnVisibility(); } catch {}
     try { trackEvent('live_toggle', { enabled: next }); } catch {}
