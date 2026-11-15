@@ -1599,6 +1599,30 @@
 
   /* v1.80.2: LiveMap (Experimento) */
   .lm-canvas { position: relative; transform-origin: center center; --gre-inv: 1; background: #fff; border-radius: 6px; box-shadow: 0 2px 14px rgba(0,0,0,0.18); line-height: 0; }
+  .lme-label { font: 700 0.72rem var(--font); color: var(--text3); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+  .lme-chips { display: flex; flex-wrap: wrap; gap: 5px; max-height: 132px; overflow-y: auto; }
+  .lme-chip { min-width: 34px; height: 28px; padding: 0 8px; border: 2px solid transparent; border-radius: 14px; background: var(--c, #64748b); color: #fff; font: 700 0.74rem var(--font); cursor: pointer; opacity: 0.85; }
+  .lme-chip:hover { opacity: 1; }
+  .lme-chip.sel { border-color: var(--bg, #fff); opacity: 1; box-shadow: 0 0 0 2px var(--accent); }
+  .lme-chip.hid { opacity: 0.3; }
+  .lme-field { display: grid; grid-template-columns: 62px 1fr 72px; align-items: center; gap: 8px; font: 600 0.8rem var(--font); color: var(--text); }
+  .lme-field input[type=number] { width: 100%; padding: 5px 6px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); color: var(--text); font: 600 0.8rem var(--font); }
+  .lme-zoom { position: absolute; top: 12px; right: 12px; display: flex; flex-direction: column; gap: 6px; z-index: 5; }
+  .lme-zoom button { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text); font: 700 1.05rem var(--font); cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); }
+  .lme-hint { display: none; position: absolute; left: 12px; bottom: 10px; padding: 4px 10px; border-radius: 99px; background: rgba(0,0,0,0.55); color: #fff; font: 500 0.72rem var(--font); pointer-events: none; }
+  .lme-keys { font: 500 0.76rem var(--font); color: var(--text3); line-height: 1.5; }
+  .lme-keys summary { cursor: pointer; font-weight: 600; margin-bottom: 4px; }
+  .lme-foot { position: sticky; bottom: 0; margin-top: auto; padding-top: 8px; background: var(--surface); }
+  #lme-items .lm-item:hover { outline: 1px solid rgba(0,122,255,0.5); }
+  #lme-items .lm-item.sel { cursor: move; outline: 2px solid var(--accent); }
+  /* Laptop / pantallas anchas: el panel pasa a la derecha y el mapa ocupa todo el resto */
+  @media (min-width: 820px) {
+    #lm-editor.open { display: grid; grid-template-columns: minmax(0, 1fr) 340px; grid-template-rows: auto minmax(0, 1fr); }
+    #lm-editor > .gre-top { grid-column: 1 / -1; }
+    #lm-editor > .gre-stage { min-width: 0; min-height: 0; }
+    #lm-editor .lme-panel { max-height: none; height: 100%; min-height: 0; border-top: 0; border-left: 1px solid var(--border); }
+    .lme-hint { display: block; }
+  }
   .lm-canvas, .lm-canvas * { user-select: none; -webkit-user-select: none; -webkit-user-drag: none; -webkit-touch-callout: none; }
   .lm-items { position: absolute; inset: 0; }
   .lm-item { position: absolute; line-height: 0; transform-origin: center center; touch-action: none; }
@@ -11455,24 +11479,33 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
       <div class="gre-pins" id="lme-pins"></div>
       <div class="gm-marker gre-test" id="lme-test-dot" style="display:none"><span class="gm-acc"></span><span class="gm-dot"></span></div>
     </div>
+    <div class="lme-zoom" onpointerdown="event.stopPropagation()">
+      <button type="button" onclick="lmeZoomBtn('in')" title="Acercar (Ctrl + rueda)" aria-label="Acercar">+</button>
+      <button type="button" onclick="lmeZoomBtn('out')" title="Alejar" aria-label="Alejar">−</button>
+      <button type="button" onclick="lmeZoomBtn('fit')" title="Ver todo (0)" aria-label="Ver todo"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M16 21h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button>
+    </div>
+    <div class="lme-hint">Ctrl + rueda o pellizco: zoom · Rueda o dos dedos: mover la vista</div>
   </div>
-  <div class="gre-panel">
+  <div class="gre-panel lme-panel">
     <div id="lme-arrange">
-      <div class="gre-hint" id="lme-sel-hint">Toca un territorio para seleccionarlo y arrástralo para moverlo. Arrastra el fondo o pellizca para recorrer el mapa. Primero acopla todos los mapas; después pasa a “Calibrar”.</div>
-      <div class="lme-sel" id="lme-sel" style="display:none">
+      <div class="lme-label">Territorios</div>
+      <div class="lme-chips" id="lme-chips"></div>
+      <div class="gre-hint" id="lme-sel-hint" style="margin-top:8px">Elige un territorio de la lista o tócalo en el mapa y luego arrástralo. Primero acopla todos los mapas; después pasa a “Calibrar”.</div>
+      <div class="lme-sel" id="lme-sel" style="display:none;margin-top:10px">
         <div class="lme-name" id="lme-sel-name"></div>
-        <label class="lme-sl"><span>Rotación <span id="lme-r-val"></span></span><input type="range" id="lme-r" min="-180" max="180" step="0.5" oninput="lmeSetProp('r', +this.value)"></label>
+        <div class="lme-field"><span>Rotación</span><input type="range" id="lme-r" min="-180" max="180" step="0.5" oninput="lmeSetProp('r', +this.value)" onchange="this.blur()"><input type="number" id="lme-r-num" step="0.1" title="Grados" oninput="lmeSetProp('r', this.value === '' ? NaN : +this.value)"></div>
+        <div class="lme-field"><span>Tamaño</span><input type="range" id="lme-s" min="20" max="300" step="1" oninput="lmeSetProp('pct', +this.value)" onchange="this.blur()"><input type="number" id="lme-s-num" min="5" max="1000" step="1" title="Porcentaje" oninput="lmeSetProp('pct', this.value === '' ? NaN : +this.value)"></div>
         <div class="gre-row"><button type="button" class="detail-btn-secondary" onclick="lmeRot(-15)">−15°</button><button type="button" class="detail-btn-secondary" onclick="lmeRot(-1)">−1°</button><button type="button" class="detail-btn-secondary" onclick="lmeRot(1)">+1°</button><button type="button" class="detail-btn-secondary" onclick="lmeRot(15)">+15°</button></div>
-        <label class="lme-sl"><span>Tamaño <span id="lme-s-val"></span></span><input type="range" id="lme-s" min="20" max="300" step="1" oninput="lmeSetProp('pct', +this.value)"></label>
         <div class="gre-row"><button type="button" class="detail-btn-secondary" onclick="lmeScaleBy(0.98)">−2%</button><button type="button" class="detail-btn-secondary" onclick="lmeScaleBy(1.02)">+2%</button><button type="button" class="detail-btn-secondary" onclick="lmeNudge(-1,0)">←</button><button type="button" class="detail-btn-secondary" onclick="lmeNudge(0,-1)">↑</button><button type="button" class="detail-btn-secondary" onclick="lmeNudge(0,1)">↓</button><button type="button" class="detail-btn-secondary" onclick="lmeNudge(1,0)">→</button></div>
         <div class="gre-row"><button type="button" class="detail-btn-secondary" onclick="lmeZ('front')">Al frente</button><button type="button" class="detail-btn-secondary" onclick="lmeZ('back')">Al fondo</button><button type="button" class="detail-btn-secondary" id="lme-hide-btn" onclick="lmeToggleHidden()">Ocultar</button></div>
       </div>
-      <div class="gre-row"><button type="button" class="detail-btn-secondary" id="lme-trans-btn" onclick="lmeToggleTrans()">Transparencia</button><button type="button" class="detail-btn-secondary" onclick="lmeAutoGrid()">Auto-acomodar</button></div>
+      <div class="gre-row" style="margin-top:10px"><button type="button" class="detail-btn-secondary" id="lme-trans-btn" onclick="lmeToggleTrans()">Transparencia</button><button type="button" class="detail-btn-secondary" onclick="lmeAutoGrid()">Auto-acomodar</button></div>
+      <details class="lme-keys" style="margin-top:10px"><summary>Atajos de teclado</summary>Flechas: mover 1 px (con Shift, 10 px) · Q / E: rotar 1° (Shift: 15°) · + / −: tamaño · [ / ]: al fondo / al frente · H: ocultar · 0: ver todo · Esc: deseleccionar · Ctrl + S: guardar</details>
     </div>
     <div id="lme-calib" style="display:none">
-      <div class="gre-hint" id="lme-chint">Toca un punto reconocible de un territorio (esquina de manzana o cruce) y escribe sus coordenadas GPS. Reparte los puntos por distintos territorios y por toda la congregación.</div>
+      <div class="gre-hint" id="lme-chint">Haz clic en un punto reconocible de un territorio (esquina de manzana o cruce) y escribe sus coordenadas GPS. Reparte los puntos por distintos territorios y por toda la congregación.</div>
       <div class="gre-pending" id="lme-pending" style="display:none">
-        <input type="text" id="lme-coord" class="form-input" autocomplete="off" placeholder="Latitud, longitud (ej. -33.448900, -70.669300)">
+        <input type="text" id="lme-coord" class="form-input" autocomplete="off" placeholder="Latitud, longitud (ej. -33.448900, -70.669300)" onkeydown="if(event.key==='Enter'){event.preventDefault();lmeAddPoint();}">
         <div class="gre-row"><button type="button" class="detail-btn-secondary" onclick="lmeUseMyLocation()">Usar mi ubicación</button><button type="button" class="detail-btn-secondary" onclick="lmeAddPoint()" style="font-weight:700">Agregar punto</button><button type="button" class="detail-btn-secondary" onclick="lmeCancelPending()">Cancelar</button></div>
       </div>
       <div class="gre-list" id="lme-list"></div>
@@ -11480,7 +11513,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
       <div class="gre-row" style="margin-top:8px"><button type="button" class="detail-btn-secondary" id="lme-test-btn" onclick="lmeToggleTest()">Probar con mi ubicación</button></div>
       <div class="gre-quality" id="lme-test-info"></div>
     </div>
-    <div class="gre-row"><button type="button" class="gre-save" id="lme-save-btn" onclick="lmeSave()">Guardar</button></div>
+    <div class="lme-foot"><button type="button" class="gre-save" id="lme-save-btn" onclick="lmeSave()" style="width:100%">Guardar</button></div>
   </div>
 </div>
 <!-- v1.80.1: Editor de georreferenciación del Mapa interactivo (solo DEV) -->
@@ -27278,7 +27311,7 @@ async function lmOpenEditor() {
   const saved = await lmGetLayout(true);
   _lme = { layout: JSON.parse(JSON.stringify(saved)), b: null, sel: null, mode: 'arrange', trans: false, pending: null, dirty: false, testWatch: null, testFix: null, sBase: 1, loading: true };
   _lmeEl('lm-editor').classList.add('open');
-  lmeSetMode('arrange'); lmeBind(); _lmeZoom().reset(); _lmeZoom().init();
+  lmeSetMode('arrange'); lmeBind(); _lmeZoom().reset(); _lmeZoom().init(); _lmeZoom().getState().minScale = 0.25;
   lmeRender(true);
   const ids = territories.filter(t => t.id).map(t => t.id);
   await lmLoadAssets(ids, () => { if (_lme) lmeAfterAssets(); });
@@ -27321,7 +27354,7 @@ function lmeRender(rebuildBoard) {
   lmSizeCanvas(canvas, _lmeEl('lme-stage'), b);
   canvas.classList.toggle('trans', _lme.trans);
   _lmeEl('lme-items').innerHTML = lmItemsHtml(_lme.layout, b, { sel: _lme.sel, withHidden: true });
-  lmeRenderPins(); lmeRenderPanel();
+  lmeRenderChips(); lmeRenderPins(); lmeRenderPanel();
 }
 function lmeSetMode(m) {
   if (!_lme) return; _lme.mode = m; _lme.pending = null;
@@ -27335,17 +27368,17 @@ function lmeSelItem() { return _lme && _lme.sel ? _lme.layout.items.find(i => i.
 function lmeSelect(id) {
   _lme.sel = id; _lme.sBase = (lmeSelItem() || {}).s || 1;
   _lmeEl('lme-items').querySelectorAll('.lm-item').forEach(el => el.classList.toggle('sel', el.dataset.id === id));
-  lmeRenderPanel();
+  lmeRenderChips(); lmeRenderPanel();
 }
 function lmeRefreshEl(it) { const el = _lmeEl('lme-items').querySelector('.lm-item[data-id="' + it.id + '"]'); if (el) _lmApplyItemStyle(el, it, _lme.b); lmeRenderPins(); }
 function lmeSetProp(k, val) {
-  const it = lmeSelItem(); if (!it) return;
+  const it = lmeSelItem(); if (!it || !isFinite(val) || (k === 'pct' && val < 1)) return;
   if (k === 'r') it.r = val; else if (k === 'pct') it.s = _lme.sBase * val / 100;
   _lme.dirty = true; lmeRefreshEl(it); lmeRenderPanel(true);
 }
 function lmeRot(d) { const it = lmeSelItem(); if (!it) return; let r = it.r + d; r = ((r + 540) % 360) - 180; it.r = +r.toFixed(2); _lme.dirty = true; lmeRefreshEl(it); lmeRenderPanel(); }
 function lmeScaleBy(f) { const it = lmeSelItem(); if (!it) return; it.s *= f; _lme.sBase = it.s; _lme.dirty = true; lmeRefreshEl(it); lmeRenderPanel(); }
-function lmeNudge(dx, dy) { const it = lmeSelItem(); if (!it) return; const step = _lme.b.w / 600; it.x += dx * step; it.y += dy * step; _lme.dirty = true; lmeRefreshEl(it); }
+function lmeNudge(dx, dy) { const it = lmeSelItem(); if (!it) return; const k = _lme.b.w / _lmeEl('lme-canvas').getBoundingClientRect().width; it.x += dx * k; it.y += dy * k; _lme.dirty = true; lmeRefreshEl(it); } // dx,dy en píxeles de pantalla
 function lmeZ(where) {
   const L = _lme.layout, i = L.items.findIndex(x => x.id === _lme.sel); if (i < 0) return;
   const [it] = L.items.splice(i, 1); if (where === 'front') L.items.push(it); else L.items.unshift(it);
@@ -27359,8 +27392,8 @@ function lmeRenderPanel(light) {
   _lmeEl('lme-sel-hint').style.display = it ? 'none' : '';
   if (it) {
     _lmeEl('lme-sel-name').textContent = (t ? terLabel(t.number) : 'Territorio') + (it.hidden ? ' · oculto' : '');
-    _lmeEl('lme-r-val').textContent = it.r.toFixed(1) + '°'; _lmeEl('lme-s-val').textContent = Math.round(it.s / _lme.sBase * 100) + '%';
-    if (!light) { _lmeEl('lme-r').value = it.r; _lmeEl('lme-s').value = Math.round(it.s / _lme.sBase * 100); }
+    const pct = Math.round(it.s / _lme.sBase * 100), set = (id, v) => { const el = _lmeEl(id); if (el && document.activeElement !== el) el.value = v; };
+    set('lme-r', it.r); set('lme-r-num', it.r.toFixed(1)); set('lme-s', pct); set('lme-s-num', pct);
     _lmeEl('lme-hide-btn').textContent = it.hidden ? 'Mostrar' : 'Ocultar';
   }
   _lmeEl('lme-trans-btn').classList.toggle('on', _lme.trans);
@@ -27395,6 +27428,16 @@ function lmeBind() {
     window.addEventListener('pointermove', onMove, { passive: false }); window.addEventListener('pointerup', endDrag); window.addEventListener('pointercancel', endDrag);
   });
   stage.addEventListener('dragstart', e => e.preventDefault());
+  // Trackpad de laptop: pellizco (o Ctrl + rueda) = zoom hacia el cursor; dos dedos / rueda = mover la vista; doble clic no hace zoom.
+  stage.addEventListener('wheel', e => {
+    if (!_lme) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    const st = _lmeZoom().getState(), m = e.deltaMode === 1 ? 16 : 1;
+    if (e.ctrlKey || e.metaKey) lmeZoomAt(Math.exp(-e.deltaY * m * 0.01), e.clientX, e.clientY);
+    else { let dx = e.deltaX * m, dy = e.deltaY * m; if (e.shiftKey && !dx) { dx = dy; dy = 0; } st.x -= dx; st.y -= dy; lmeApplyView(); }
+  }, { capture: true, passive: false });
+  stage.addEventListener('dblclick', e => { e.preventDefault(); e.stopImmediatePropagation(); }, true);
+  if (!window._lmeKeyBound) { window._lmeKeyBound = true; document.addEventListener('keydown', lmeKey); }
   // Tocar: seleccionar (Acoplar) o anclar un punto (Calibrar). Va en el escenario porque el zoom captura el puntero
   // al tocar y los eventos ya no llegan a los mapas individuales.
   stage.addEventListener('pointerdown', e => {
@@ -27407,6 +27450,47 @@ function lmeBind() {
     if (moved < 8 && dt < 600) lmeTap(el, e.clientX, e.clientY);
   });
   stage.addEventListener('pointercancel', () => { tap = null; });
+}
+function lmeApplyView() {
+  const st = _lmeZoom().getState(), c = _lmeEl('lme-canvas');
+  c.style.transform = 'translate(' + st.x + 'px, ' + st.y + 'px) scale(' + st.scale + ')';
+  c.style.setProperty('--gre-inv', String(1 / st.scale));
+}
+function lmeZoomAt(f, cx, cy) { // zoom hacia el cursor (el lienzo está centrado en el escenario)
+  const st = _lmeZoom().getState(), r = _lmeEl('lme-stage').getBoundingClientRect();
+  const s2 = Math.min(st.maxScale, Math.max(st.minScale, st.scale * f)); if (s2 === st.scale) return;
+  const px = (cx == null ? r.left + r.width / 2 : cx) - (r.left + r.width / 2), py = (cy == null ? r.top + r.height / 2 : cy) - (r.top + r.height / 2);
+  st.x = px - (s2 / st.scale) * (px - st.x); st.y = py - (s2 / st.scale) * (py - st.y); st.scale = s2; lmeApplyView();
+}
+function lmeZoomBtn(k) { if (k === 'fit') _lmeZoom().reset(); else lmeZoomAt(k === 'in' ? 1.25 : 0.8); }
+function lmeFocus(id) { // centra la vista en un territorio
+  const it = _lme.layout.items.find(i => i.id === id); if (!it) return;
+  const c = _lmeEl('lme-canvas'), st = _lmeZoom().getState(), b = _lme.b;
+  st.x = -st.scale * ((it.x - b.x) / b.w - 0.5) * c.offsetWidth; st.y = -st.scale * ((it.y - b.y) / b.h - 0.5) * c.offsetHeight; lmeApplyView();
+}
+function lmeRenderChips() {
+  const box = _lmeEl('lme-chips'); if (!box || !_lme) return;
+  box.innerHTML = _lme.layout.items.slice().map(it => ({ it, t: territories.find(x => x.id === it.id) })).filter(o => o.t).sort((a, b) => a.t.number - b.t.number).map(o =>
+    '<button type="button" class="lme-chip' + (_lme.sel === o.it.id ? ' sel' : '') + (o.it.hidden ? ' hid' : '') + '" style="--c:' + getTerColorFromObj(o.t) + '" title="' + terLabel(o.t.number) + '" onclick="lmeSelect(\'' + o.it.id + '\');lmeFocus(\'' + o.it.id + '\')">' + o.t.number + '</button>').join('');
+}
+function lmeKey(e) {
+  if (!_lme || !_lmeEl('lm-editor').classList.contains('open')) return;
+  const t = e.target; if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+  const k = e.key, kl = k.toLowerCase(), big = e.shiftKey;
+  if ((e.ctrlKey || e.metaKey) && kl === 's') { e.preventDefault(); lmeSave(); return; }
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (kl === '0') { lmeZoomBtn('fit'); return; }
+  if (_lme.mode !== 'arrange') { if (k === 'Escape' && _lme.pending) lmeCancelPending(); return; }
+  if (k === 'Escape') { lmeSelect(null); return; }
+  if (!lmeSelItem()) return;
+  const px = big ? 10 : 1; let used = true;
+  if (k === 'ArrowLeft') lmeNudge(-px, 0); else if (k === 'ArrowRight') lmeNudge(px, 0);
+  else if (k === 'ArrowUp') lmeNudge(0, -px); else if (k === 'ArrowDown') lmeNudge(0, px);
+  else if (kl === 'q') lmeRot(big ? -15 : -1); else if (kl === 'e') lmeRot(big ? 15 : 1);
+  else if (k === '+' || k === '=') lmeScaleBy(big ? 1.1 : 1.02); else if (k === '-' || k === '_') lmeScaleBy(big ? 0.9 : 0.98);
+  else if (k === '[') lmeZ('back'); else if (k === ']') lmeZ('front'); else if (kl === 'h') lmeToggleHidden();
+  else used = false;
+  if (used) e.preventDefault();
 }
 function lmeTap(el, x, y) {
   if (_lme.mode === 'arrange') { lmeSelect(el ? el.dataset.id : null); return; }
