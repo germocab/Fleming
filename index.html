@@ -11490,9 +11490,10 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
     <div id="lme-arrange">
       <div class="lme-label">Territorios</div>
       <div class="lme-chips" id="lme-chips"></div>
-      <div class="gre-hint" id="lme-sel-hint" style="margin-top:8px">Elige un territorio de la lista o tócalo en el mapa y luego arrástralo. Primero acopla todos los mapas; después pasa a “Calibrar”.</div>
+      <div class="gre-hint" id="lme-sel-hint" style="margin-top:8px">Elige un territorio de la lista o tócalo en el mapa y luego arrástralo. Con Shift + clic puedes seleccionar varios para moverlos, rotarlos o cambiarles el tamaño juntos. Primero acopla todos los mapas; después pasa a “Calibrar”.</div>
       <div class="lme-sel" id="lme-sel" style="display:none;margin-top:10px">
         <div class="lme-name" id="lme-sel-name"></div>
+        <div class="gre-hint" id="lme-group-hint" style="display:none;margin:0">Selección múltiple: mover, rotar y cambiar el tamaño afectan a todos juntos, alrededor del centro de la selección. Rotación y Tamaño parten de 0° y 100 % con cada nueva selección. Shift + clic agrega o quita un territorio; clic sin Shift deja solo uno.</div>
         <div class="lme-field"><span>Rotación</span><input type="range" id="lme-r" min="-180" max="180" step="0.5" oninput="lmeSetProp('r', +this.value)" onchange="this.blur()"><input type="number" id="lme-r-num" step="0.1" title="Grados" oninput="lmeSetProp('r', this.value === '' ? NaN : +this.value)"></div>
         <div class="lme-field"><span>Tamaño</span><input type="range" id="lme-s" min="20" max="300" step="1" oninput="lmeSetProp('pct', +this.value)" onchange="this.blur()"><input type="number" id="lme-s-num" min="5" max="1000" step="1" title="Porcentaje" oninput="lmeSetProp('pct', this.value === '' ? NaN : +this.value)"></div>
         <div class="gre-row"><button type="button" class="detail-btn-secondary" onclick="lmeRot(-15)">−15°</button><button type="button" class="detail-btn-secondary" onclick="lmeRot(-1)">−1°</button><button type="button" class="detail-btn-secondary" onclick="lmeRot(1)">+1°</button><button type="button" class="detail-btn-secondary" onclick="lmeRot(15)">+15°</button></div>
@@ -11500,7 +11501,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
         <div class="gre-row"><button type="button" class="detail-btn-secondary" onclick="lmeZ('front')">Al frente</button><button type="button" class="detail-btn-secondary" onclick="lmeZ('back')">Al fondo</button><button type="button" class="detail-btn-secondary" id="lme-hide-btn" onclick="lmeToggleHidden()">Ocultar</button></div>
       </div>
       <div class="gre-row" style="margin-top:10px"><button type="button" class="detail-btn-secondary" id="lme-trans-btn" onclick="lmeToggleTrans()">Transparencia</button><button type="button" class="detail-btn-secondary" onclick="lmeAutoGrid()">Auto-acomodar</button></div>
-      <details class="lme-keys" style="margin-top:10px"><summary>Atajos de teclado</summary>Flechas: mover 1 px (con Shift, 10 px) · Q / E: rotar 1° (Shift: 15°) · + / −: tamaño · [ / ]: al fondo / al frente · H: ocultar · 0: ver todo · Esc: deseleccionar · Ctrl + S: guardar</details>
+      <details class="lme-keys" style="margin-top:10px"><summary>Atajos de teclado</summary>Shift + clic (en el mapa o en la lista): seleccionar varios · Flechas: mover 1 px (con Shift, 10 px) · Q / E: rotar 1° (Shift: 15°) · + / −: tamaño · [ / ]: al fondo / al frente · H: ocultar · 0: ver todo · Esc: deseleccionar · Ctrl + S: guardar</details>
     </div>
     <div id="lme-calib" style="display:none">
       <div class="gre-hint" id="lme-chint">Haz clic en un punto reconocible de un territorio (esquina de manzana o cruce) y escribe sus coordenadas GPS. Reparte los puntos por distintos territorios y por toda la congregación.</div>
@@ -12064,7 +12065,7 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.77.9: Nuevo experimento "Espaciado del contenido": slider de 10 niveles (predeterminado 2 = espaciado actual).
 // v1.77.8: (1) La dirección en el detalle de una asignación de casa en casa es un poco más grande (solo esa pantalla). (2) El botón de Clima de la asignación ya no abre el sitio del clima. (3) Nuevo ícono de Carritos (Inicio, Mis Turnos, Ajustes > Notificaciones y menú de Predicación). (4) Nuevo experimento "Resolución reducida en medios" para imágenes y PDF. (5) Carga más rápida: pdf.js y QR con defer, preconnect, fuentes con display=swap, decodificación asíncrona de imágenes.
 // v1.77.5: (1) Detalle de un Territorio: el título del encabezado ahora dice "Detalles del territorio" (el número ya aparece en el círculo de color). (2) Más opciones en Inicio incluye "Personalizar Inicio" (el botón al final de Inicio se mantiene). (3) Nuevo experimento "Territorios sin vista previa": las tarjetas de Territorios muestran solo el degradé y el nombre.
-const APP_VERSION = '1.80.2'; // v1.80.2 — LiveMap (Experimento): une los mapas SVG de los territorios en un solo mapa de la congregación con ubicación GPS (acople y calibración en Administración → LiveMap, solo DEV; se activa en Experimentos y se abre desde Mapa de la congregación); v1.80.1.5 — Mapa interactivo va con Live (sin interruptor propio) y sin etiqueta sobre el mapa; v1.80.1 — Mapa interactivo: ubicación GPS sobre los mapas PNG de territorio (georreferenciación por el usuario DEV; se activa en Más opciones de la asignación o en Funciones especiales); v1.80 — Reasignar Encargado: el Encargado de una asignación de Casa en casa puede cederle el cargo a otro conductor desde Más Opciones (avisa al nuevo Encargado, a los Administradores de Predicación y al DEV); v1.79.100d — onboarding de bienvenida (por cuenta, controlado por el DEV); v1.79.10 — sin No Pasar nuevos en Para tí; detalle de punto de carrito con Recordatorios (sin Fotos ni búsqueda) y barra superior fija con modo oscuro; filtro de Carritos unificado; Aseo solo a los dos grupos asignados; v1.79.5 — Otros Grupos con títulos como las fechas; botón Volver arriba sobre la NavBar inferior; Más Opciones sin Perfil en la UI nueva; sin saludo emergente; v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
+const APP_VERSION = '1.80.2d'; // v1.80.2d — LiveMap: selección múltiple de territorios con Shift + clic para moverlos, rotarlos o cambiarles el tamaño juntos (Administración → LiveMap, solo DEV); v1.80.2 — LiveMap (Experimento): une los mapas SVG de los territorios en un solo mapa de la congregación con ubicación GPS (acople y calibración en Administración → LiveMap, solo DEV; se activa en Experimentos y se abre desde Mapa de la congregación); v1.80.1.5 — Mapa interactivo va con Live (sin interruptor propio) y sin etiqueta sobre el mapa; v1.80.1 — Mapa interactivo: ubicación GPS sobre los mapas PNG de territorio (georreferenciación por el usuario DEV; se activa en Más opciones de la asignación o en Funciones especiales); v1.80 — Reasignar Encargado: el Encargado de una asignación de Casa en casa puede cederle el cargo a otro conductor desde Más Opciones (avisa al nuevo Encargado, a los Administradores de Predicación y al DEV); v1.79.100d — onboarding de bienvenida (por cuenta, controlado por el DEV); v1.79.10 — sin No Pasar nuevos en Para tí; detalle de punto de carrito con Recordatorios (sin Fotos ni búsqueda) y barra superior fija con modo oscuro; filtro de Carritos unificado; Aseo solo a los dos grupos asignados; v1.79.5 — Otros Grupos con títulos como las fechas; botón Volver arriba sobre la NavBar inferior; Más Opciones sin Perfil en la UI nueva; sin saludo emergente; v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -27202,7 +27203,7 @@ function lmItemsHtml(layout, b, o) {
   return layout.items.filter(it => o.withHidden || !it.hidden).map(it => {
     const a = _lmAssets[it.id], t = territories.find(x => x.id === it.id);
     const tag = t ? '<span class="lm-tag" style="background:' + getTerColorFromObj(t) + ';transform:translate(-50%,-50%) rotate(' + (-it.r) + 'deg) scale(var(--gre-inv,1))">' + t.number + '</span>' : '';
-    return '<div class="lm-item' + (a ? '' : ' lm-empty') + (o.sel === it.id ? ' sel' : '') + (it.hidden ? ' hid' : '') + '" data-id="' + it.id + '" style="left:' + ((it.x - b.x) / b.w * 100).toFixed(4) + '%;top:' + ((it.y - b.y) / b.h * 100).toFixed(4) +
+    return '<div class="lm-item' + (a ? '' : ' lm-empty') + ((o.sels ? o.sels.indexOf(it.id) >= 0 : o.sel === it.id) ? ' sel' : '') + (it.hidden ? ' hid' : '') + '" data-id="' + it.id + '" style="left:' + ((it.x - b.x) / b.w * 100).toFixed(4) + '%;top:' + ((it.y - b.y) / b.h * 100).toFixed(4) +
       '%;width:' + (it.w * it.s / b.w * 100).toFixed(4) + '%;aspect-ratio:' + it.w + '/' + it.h + ';transform:translate(-50%,-50%) rotate(' + it.r + 'deg)">' + (a ? '<img src="' + a.src + '" alt="" draggable="false">' : '') + tag + '</div>';
   }).join('');
 }
@@ -27309,7 +27310,7 @@ function _lmeEl(id) { return document.getElementById(id); }
 async function lmOpenEditor() {
   if (currentRole !== 'dev') { showToast('Solo el usuario DEV puede unir los mapas.', 'error'); return; }
   const saved = await lmGetLayout(true);
-  _lme = { layout: JSON.parse(JSON.stringify(saved)), b: null, sel: null, mode: 'arrange', trans: false, pending: null, dirty: false, testWatch: null, testFix: null, sBase: 1, loading: true };
+  _lme = { layout: JSON.parse(JSON.stringify(saved)), b: null, sel: null, mode: 'arrange', trans: false, pending: null, dirty: false, testWatch: null, testFix: null, sBase: 1, loading: true, sels: [], gR: 0, gPct: 100 };
   _lmeEl('lm-editor').classList.add('open');
   lmeSetMode('arrange'); lmeBind(); _lmeZoom().reset(); _lmeZoom().init(); _lmeZoom().getState().minScale = 0.25;
   lmeRender(true);
@@ -27341,7 +27342,7 @@ function lmeAutoGrid() {
   if (!confirm('¿Acomodar todos los mapas en una cuadrícula? Se perderán las posiciones, rotaciones y tamaños actuales (y la calibración dejará de coincidir).')) return;
   const ids = _lme.layout.items.filter(i => _lmAssets[i.id]).sort((a, b) => (territories.find(t => t.id === a.id)?.number || 0) - (territories.find(t => t.id === b.id)?.number || 0)).map(i => i.id);
   if (!ids.length) return;
-  lmePlaceGrid(ids, false); _lme.dirty = true; _lme.sel = null; lmeRender(true); _lmeZoom().reset();
+  lmePlaceGrid(ids, false); _lme.dirty = true; _lme.sel = null; _lme.sels = []; lmeRender(true); _lmeZoom().reset();
 }
 function lmeBoard() {
   const bb = lmBounds(_lme.layout.items, 0, true); if (!bb) return { x: 0, y: 0, w: 1000, h: 1000 };
@@ -27353,7 +27354,7 @@ function lmeRender(rebuildBoard) {
   const b = _lme.b, canvas = _lmeEl('lme-canvas');
   lmSizeCanvas(canvas, _lmeEl('lme-stage'), b);
   canvas.classList.toggle('trans', _lme.trans);
-  _lmeEl('lme-items').innerHTML = lmItemsHtml(_lme.layout, b, { sel: _lme.sel, withHidden: true });
+  _lmeEl('lme-items').innerHTML = lmItemsHtml(_lme.layout, b, { sels: _lme.sels, withHidden: true });
   lmeRenderChips(); lmeRenderPins(); lmeRenderPanel();
 }
 function lmeSetMode(m) {
@@ -27364,37 +27365,102 @@ function lmeSetMode(m) {
   lmeRenderPins(); lmeRenderPanel();
 }
 function lmeToggleTrans() { _lme.trans = !_lme.trans; _lmeEl('lme-canvas').classList.toggle('trans', _lme.trans); _lmeEl('lme-trans-btn').classList.toggle('on', _lme.trans); }
-function lmeSelItem() { return _lme && _lme.sel ? _lme.layout.items.find(i => i.id === _lme.sel) : null; }
-function lmeSelect(id) {
-  _lme.sel = id; _lme.sBase = (lmeSelItem() || {}).s || 1;
-  _lmeEl('lme-items').querySelectorAll('.lm-item').forEach(el => el.classList.toggle('sel', el.dataset.id === id));
+// ── Selección: uno o varios territorios (Shift + clic). _lme.sels = ids seleccionados; _lme.sel = el último elegido. ──
+function lmeSelItems() { if (!_lme) return []; const S = new Set(_lme.sels); return _lme.layout.items.filter(i => S.has(i.id)); }
+function lmeSelItem() { const a = lmeSelItems(); return a.length === 1 ? a[0] : null; } // solo cuando hay exactamente uno
+function lmeSetSel(ids) {
+  const have = new Set(_lme.layout.items.map(i => i.id));
+  _lme.sels = ids.filter((id, k) => have.has(id) && ids.indexOf(id) === k);
+  _lme.sel = _lme.sels.length ? _lme.sels[_lme.sels.length - 1] : null;
+  const one = lmeSelItem(); _lme.sBase = one ? one.s : 1;
+  _lme.gR = 0; _lme.gPct = 100; // en grupo, Rotación y Tamaño parten de 0° y 100 % al cambiar la selección
+  const S = new Set(_lme.sels);
+  _lmeEl('lme-items').querySelectorAll('.lm-item').forEach(el => el.classList.toggle('sel', S.has(el.dataset.id)));
   lmeRenderChips(); lmeRenderPanel();
 }
-function lmeRefreshEl(it) { const el = _lmeEl('lme-items').querySelector('.lm-item[data-id="' + it.id + '"]'); if (el) _lmApplyItemStyle(el, it, _lme.b); lmeRenderPins(); }
-function lmeSetProp(k, val) {
-  const it = lmeSelItem(); if (!it || !isFinite(val) || (k === 'pct' && val < 1)) return;
-  if (k === 'r') it.r = val; else if (k === 'pct') it.s = _lme.sBase * val / 100;
-  _lme.dirty = true; lmeRefreshEl(it); lmeRenderPanel(true);
+// Sin "add": deja solo ese territorio (o ninguno si id es null). Con "add" (Shift + clic): lo agrega a la selección o lo quita.
+function lmeSelect(id, add) {
+  if (id == null) { lmeSetSel([]); return; }
+  if (!add) { lmeSetSel([id]); return; }
+  const cur = _lme.sels.slice(), i = cur.indexOf(id);
+  if (i >= 0) cur.splice(i, 1); else cur.push(id);
+  lmeSetSel(cur);
 }
-function lmeRot(d) { const it = lmeSelItem(); if (!it) return; let r = it.r + d; r = ((r + 540) % 360) - 180; it.r = +r.toFixed(2); _lme.dirty = true; lmeRefreshEl(it); lmeRenderPanel(); }
-function lmeScaleBy(f) { const it = lmeSelItem(); if (!it) return; it.s *= f; _lme.sBase = it.s; _lme.dirty = true; lmeRefreshEl(it); lmeRenderPanel(); }
-function lmeNudge(dx, dy) { const it = lmeSelItem(); if (!it) return; const k = _lme.b.w / _lmeEl('lme-canvas').getBoundingClientRect().width; it.x += dx * k; it.y += dy * k; _lme.dirty = true; lmeRefreshEl(it); } // dx,dy en píxeles de pantalla
-function lmeZ(where) {
-  const L = _lme.layout, i = L.items.findIndex(x => x.id === _lme.sel); if (i < 0) return;
-  const [it] = L.items.splice(i, 1); if (where === 'front') L.items.push(it); else L.items.unshift(it);
+function lmeChip(e, id) { const add = !!(e && e.shiftKey); lmeSelect(id, add); if (!add) lmeFocus(id); }
+function lmeRefreshEls(items) {
+  items.forEach(it => { const el = _lmeEl('lme-items').querySelector('.lm-item[data-id="' + it.id + '"]'); if (el) _lmApplyItemStyle(el, it, _lme.b); });
+  lmeRenderPins();
+}
+function lmeRefreshEl(it) { lmeRefreshEls([it]); }
+function _lmNormDeg(r) { return ((r + 540) % 360) - 180; }
+// Transformación de grupo: gira dr grados y escala f veces alrededor del centro de la selección (promedio de los centros).
+// Ese punto no se mueve al girar/escalar, así que el pivote es estable entre un paso y otro.
+function lmeGroupXform(items, dr, f) {
+  let px = 0, py = 0; items.forEach(i => { px += i.x; py += i.y; }); px /= items.length; py /= items.length;
+  const a = dr * Math.PI / 180, c = Math.cos(a), sn = Math.sin(a);
+  items.forEach(it => {
+    const dx = it.x - px, dy = it.y - py;
+    it.x = px + f * (dx * c - dy * sn); it.y = py + f * (dx * sn + dy * c);
+    it.s *= f; it.r = _lmNormDeg(it.r + dr);
+  });
+}
+function lmeSetProp(k, val) {
+  const items = lmeSelItems(); if (!items.length || !isFinite(val) || (k === 'pct' && val < 1)) return;
+  if (items.length > 1) { // grupo: los valores son relativos a la selección actual (0° / 100 %)
+    if (k === 'r') { lmeGroupXform(items, val - _lme.gR, 1); _lme.gR = val; }
+    else if (k === 'pct') { lmeGroupXform(items, 0, val / _lme.gPct); _lme.gPct = val; }
+  } else {
+    const it = items[0]; if (k === 'r') it.r = val; else if (k === 'pct') it.s = _lme.sBase * val / 100;
+  }
+  _lme.dirty = true; lmeRefreshEls(items); lmeRenderPanel(true);
+}
+function lmeRot(d) {
+  const items = lmeSelItems(); if (!items.length) return;
+  if (items.length > 1) { lmeGroupXform(items, d, 1); _lme.gR = _lmNormDeg(_lme.gR + d); }
+  else { const it = items[0]; it.r = +_lmNormDeg(it.r + d).toFixed(2); }
+  _lme.dirty = true; lmeRefreshEls(items); lmeRenderPanel();
+}
+function lmeScaleBy(f) {
+  const items = lmeSelItems(); if (!items.length) return;
+  if (items.length > 1) { lmeGroupXform(items, 0, f); _lme.gPct = 100; }
+  else { items[0].s *= f; _lme.sBase = items[0].s; }
+  _lme.dirty = true; lmeRefreshEls(items); lmeRenderPanel();
+}
+function lmeNudge(dx, dy) { // dx,dy en píxeles de pantalla; mueve todos los seleccionados
+  const items = lmeSelItems(); if (!items.length) return;
+  const k = _lme.b.w / _lmeEl('lme-canvas').getBoundingClientRect().width;
+  items.forEach(it => { it.x += dx * k; it.y += dy * k; });
+  _lme.dirty = true; lmeRefreshEls(items);
+}
+function lmeZ(where) { // los seleccionados conservan su orden relativo
+  const L = _lme.layout, S = new Set(_lme.sels), moved = L.items.filter(i => S.has(i.id)); if (!moved.length) return;
+  const rest = L.items.filter(i => !S.has(i.id));
+  L.items.splice(0, L.items.length, ...(where === 'front' ? rest.concat(moved) : moved.concat(rest)));
   _lme.dirty = true; lmeRender(false);
 }
-function lmeToggleHidden() { const it = lmeSelItem(); if (!it) return; it.hidden = !it.hidden; _lme.dirty = true; lmeRender(false); }
+function lmeToggleHidden() {
+  const items = lmeSelItems(); if (!items.length) return;
+  const hide = items.some(i => !i.hidden); items.forEach(i => { i.hidden = hide; });
+  _lme.dirty = true; lmeRender(false);
+}
 function lmeRenderPanel(light) {
   if (!_lme) return;
-  const it = lmeSelItem(), t = it && territories.find(x => x.id === it.id);
-  _lmeEl('lme-sel').style.display = it ? '' : 'none';
-  _lmeEl('lme-sel-hint').style.display = it ? 'none' : '';
-  if (it) {
-    _lmeEl('lme-sel-name').textContent = (t ? terLabel(t.number) : 'Territorio') + (it.hidden ? ' · oculto' : '');
-    const pct = Math.round(it.s / _lme.sBase * 100), set = (id, v) => { const el = _lmeEl(id); if (el && document.activeElement !== el) el.value = v; };
-    set('lme-r', it.r); set('lme-r-num', it.r.toFixed(1)); set('lme-s', pct); set('lme-s-num', pct);
-    _lmeEl('lme-hide-btn').textContent = it.hidden ? 'Mostrar' : 'Ocultar';
+  const items = lmeSelItems(), n = items.length, it = n === 1 ? items[0] : null;
+  _lmeEl('lme-sel').style.display = n ? '' : 'none';
+  _lmeEl('lme-sel-hint').style.display = n ? 'none' : '';
+  const gh = _lmeEl('lme-group-hint'); if (gh) gh.style.display = n > 1 ? '' : 'none';
+  if (n) {
+    const hid = items.filter(i => i.hidden).length;
+    if (n === 1) {
+      const t = territories.find(x => x.id === it.id);
+      _lmeEl('lme-sel-name').textContent = (t ? terLabel(t.number) : 'Territorio') + (it.hidden ? ' · oculto' : '');
+    } else {
+      const nums = items.map(i => territories.find(x => x.id === i.id)).filter(Boolean).map(t => t.number).sort((a, b) => a - b);
+      _lmeEl('lme-sel-name').textContent = n + ' territorios seleccionados · ' + nums.slice(0, 12).map(x => 'T' + x).join(', ') + (nums.length > 12 ? '…' : '') + (hid ? ' (' + hid + ' ocultos)' : '');
+    }
+    const rv = n > 1 ? _lme.gR : it.r, pct = Math.round(n > 1 ? _lme.gPct : it.s / _lme.sBase * 100), set = (id, v) => { const el = _lmeEl(id); if (el && document.activeElement !== el) el.value = v; };
+    set('lme-r', rv); set('lme-r-num', (+rv).toFixed(1)); set('lme-s', pct); set('lme-s-num', pct);
+    _lmeEl('lme-hide-btn').textContent = items.every(i => i.hidden) ? 'Mostrar' : 'Ocultar';
   }
   _lmeEl('lme-trans-btn').classList.toggle('on', _lme.trans);
   if (_lme.mode === 'calib') lmeRenderCalib();
@@ -27402,29 +27468,33 @@ function lmeRenderPanel(light) {
 function lmeBind() {
   const box = _lmeEl('lme-items'), stage = _lmeEl('lme-stage'); if (!box || !stage || box._b) return; box._b = true;
   let drag = null, tap = null;
-  // Arrastrar: solo el territorio ya seleccionado (si no, el gesto recorre el mapa). Se detecta por la posición del
-  // dedo dentro del mapa seleccionado (aunque otro mapa quede encima).
+  // Arrastrar: solo un territorio ya seleccionado (si no, el gesto recorre el mapa). Se detecta por la posición del puntero dentro de
+  // alguno de los mapas seleccionados (aunque otro mapa quede encima). Con varios seleccionados, todos se mueven juntos.
   const onMove = e => {
     if (!drag || !_lme) return;
-    const it = lmeSelItem(); if (!it) return;
+    // Con Shift o con varios seleccionados, un toque sin mover (< 4 px) no desplaza nada: sirve para agregar/quitar de la selección.
+    if (drag.tapish && !drag.moving) { if (Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) < 4) return; drag.moving = true; }
     e.preventDefault();
-    const k = _lme.b.w / _lmeEl('lme-canvas').getBoundingClientRect().width;
-    it.x = drag.ox + (e.clientX - drag.sx) * k; it.y = drag.oy + (e.clientY - drag.sy) * k;
-    _lme.dirty = true; const el = box.querySelector('.lm-item[data-id="' + it.id + '"]'); if (el) _lmApplyItemStyle(el, it, _lme.b);
+    const k = _lme.b.w / _lmeEl('lme-canvas').getBoundingClientRect().width, dx = (e.clientX - drag.sx) * k, dy = (e.clientY - drag.sy) * k;
+    drag.orig.forEach(o => { o.it.x = o.x + dx; o.it.y = o.y + dy; const el = box.querySelector('.lm-item[data-id="' + o.it.id + '"]'); if (el) _lmApplyItemStyle(el, o.it, _lme.b); });
+    _lme.dirty = true;
   };
-  const endDrag = () => {
-    if (!drag) return; drag = null;
+  const endDrag = e => {
+    if (!drag) return; const d = drag; drag = null;
     window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', endDrag); window.removeEventListener('pointercancel', endDrag);
     lmeRenderPins();
+    if (_lme && d.tapish && !d.moving && e && e.type === 'pointerup' && Date.now() - d.t < 600) lmeTap(d.el, e.clientX, e.clientY, d.shift);
   };
   box.addEventListener('pointerdown', e => {
     if (!_lme || _lme.mode !== 'arrange' || !e.isPrimary) return;
-    const it = lmeSelItem(); if (!it || it.hidden) return;
+    const sel = lmeSelItems(); if (!sel.length) return;
     const r = _lmeEl('lme-canvas').getBoundingClientRect(), b = _lme.b;
-    const loc = lmWorldToLocal(it, b.x + (e.clientX - r.left) / r.width * b.w, b.y + (e.clientY - r.top) / r.height * b.h);
-    if (loc.u < 0 || loc.u > 1 || loc.v < 0 || loc.v > 1) return;
+    const wx = b.x + (e.clientX - r.left) / r.width * b.w, wy = b.y + (e.clientY - r.top) / r.height * b.h;
+    const hit = sel.some(it => { if (it.hidden) return false; const loc = lmWorldToLocal(it, wx, wy); return loc.u >= 0 && loc.u <= 1 && loc.v >= 0 && loc.v <= 1; });
+    if (!hit) return;
     e.preventDefault(); e.stopPropagation(); // evita el arrastre/selección nativos del navegador
-    drag = { sx: e.clientX, sy: e.clientY, ox: it.x, oy: it.y };
+    drag = { sx: e.clientX, sy: e.clientY, t: Date.now(), shift: e.shiftKey, el: e.target && e.target.closest ? e.target.closest('.lm-item') : null,
+      orig: sel.map(it => ({ it, x: it.x, y: it.y })), tapish: e.shiftKey || sel.length > 1, moving: false };
     window.addEventListener('pointermove', onMove, { passive: false }); window.addEventListener('pointerup', endDrag); window.addEventListener('pointercancel', endDrag);
   });
   stage.addEventListener('dragstart', e => e.preventDefault());
@@ -27442,12 +27512,12 @@ function lmeBind() {
   // al tocar y los eventos ya no llegan a los mapas individuales.
   stage.addEventListener('pointerdown', e => {
     const el = e.target && e.target.closest ? e.target.closest('.lm-item') : null;
-    tap = e.isPrimary ? { x: e.clientX, y: e.clientY, t: Date.now(), el } : null;
+    tap = e.isPrimary ? { x: e.clientX, y: e.clientY, t: Date.now(), el, shift: e.shiftKey } : null;
   });
   stage.addEventListener('pointerup', e => {
     if (!tap || !e.isPrimary || !_lme) { tap = null; return; }
-    const moved = Math.hypot(e.clientX - tap.x, e.clientY - tap.y), dt = Date.now() - tap.t, el = tap.el; tap = null;
-    if (moved < 8 && dt < 600) lmeTap(el, e.clientX, e.clientY);
+    const moved = Math.hypot(e.clientX - tap.x, e.clientY - tap.y), dt = Date.now() - tap.t, el = tap.el, shift = tap.shift || e.shiftKey; tap = null;
+    if (moved < 8 && dt < 600) lmeTap(el, e.clientX, e.clientY, shift);
   });
   stage.addEventListener('pointercancel', () => { tap = null; });
 }
@@ -27471,7 +27541,7 @@ function lmeFocus(id) { // centra la vista en un territorio
 function lmeRenderChips() {
   const box = _lmeEl('lme-chips'); if (!box || !_lme) return;
   box.innerHTML = _lme.layout.items.slice().map(it => ({ it, t: territories.find(x => x.id === it.id) })).filter(o => o.t).sort((a, b) => a.t.number - b.t.number).map(o =>
-    '<button type="button" class="lme-chip' + (_lme.sel === o.it.id ? ' sel' : '') + (o.it.hidden ? ' hid' : '') + '" style="--c:' + getTerColorFromObj(o.t) + '" title="' + terLabel(o.t.number) + '" onclick="lmeSelect(\'' + o.it.id + '\');lmeFocus(\'' + o.it.id + '\')">' + o.t.number + '</button>').join('');
+    '<button type="button" class="lme-chip' + (_lme.sels.indexOf(o.it.id) >= 0 ? ' sel' : '') + (o.it.hidden ? ' hid' : '') + '" style="--c:' + getTerColorFromObj(o.t) + '" title="' + terLabel(o.t.number) + '" onclick="lmeChip(event,\'' + o.it.id + '\')">' + o.t.number + '</button>').join('');
 }
 function lmeKey(e) {
   if (!_lme || !_lmeEl('lm-editor').classList.contains('open')) return;
@@ -27482,7 +27552,7 @@ function lmeKey(e) {
   if (kl === '0') { lmeZoomBtn('fit'); return; }
   if (_lme.mode !== 'arrange') { if (k === 'Escape' && _lme.pending) lmeCancelPending(); return; }
   if (k === 'Escape') { lmeSelect(null); return; }
-  if (!lmeSelItem()) return;
+  if (!lmeSelItems().length) return;
   const px = big ? 10 : 1; let used = true;
   if (k === 'ArrowLeft') lmeNudge(-px, 0); else if (k === 'ArrowRight') lmeNudge(px, 0);
   else if (k === 'ArrowUp') lmeNudge(0, -px); else if (k === 'ArrowDown') lmeNudge(0, px);
@@ -27492,8 +27562,11 @@ function lmeKey(e) {
   else used = false;
   if (used) e.preventDefault();
 }
-function lmeTap(el, x, y) {
-  if (_lme.mode === 'arrange') { lmeSelect(el ? el.dataset.id : null); return; }
+function lmeTap(el, x, y, shift) {
+  if (_lme.mode === 'arrange') {
+    if (shift) { if (el) lmeSelect(el.dataset.id, true); return; } // Shift + clic: agrega/quita de la selección (en el vacío no cambia nada)
+    lmeSelect(el ? el.dataset.id : null); return;
+  }
   if (!el) return;
   const it = _lme.layout.items.find(i => i.id === el.dataset.id); if (!it || it.hidden) return;
   const r = _lmeEl('lme-canvas').getBoundingClientRect(), b = _lme.b;
