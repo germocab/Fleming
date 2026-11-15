@@ -1599,6 +1599,7 @@
 
   /* v1.80.2: LiveMap (Experimento) */
   .lm-canvas { position: relative; transform-origin: center center; --gre-inv: 1; background: #fff; border-radius: 6px; box-shadow: 0 2px 14px rgba(0,0,0,0.18); line-height: 0; }
+  .lm-canvas, .lm-canvas * { user-select: none; -webkit-user-select: none; -webkit-user-drag: none; -webkit-touch-callout: none; }
   .lm-items { position: absolute; inset: 0; }
   .lm-item { position: absolute; line-height: 0; transform-origin: center center; touch-action: none; }
   .lm-item img { display: block; width: 100%; height: auto; pointer-events: none; user-select: none; -webkit-user-drag: none; }
@@ -27370,24 +27371,30 @@ function lmeBind() {
   let drag = null, tap = null;
   // Arrastrar: solo el territorio ya seleccionado (si no, el gesto recorre el mapa). Se detecta por la posición del
   // dedo dentro del mapa seleccionado (aunque otro mapa quede encima).
+  const onMove = e => {
+    if (!drag || !_lme) return;
+    const it = lmeSelItem(); if (!it) return;
+    e.preventDefault();
+    const k = _lme.b.w / _lmeEl('lme-canvas').getBoundingClientRect().width;
+    it.x = drag.ox + (e.clientX - drag.sx) * k; it.y = drag.oy + (e.clientY - drag.sy) * k;
+    _lme.dirty = true; const el = box.querySelector('.lm-item[data-id="' + it.id + '"]'); if (el) _lmApplyItemStyle(el, it, _lme.b);
+  };
+  const endDrag = () => {
+    if (!drag) return; drag = null;
+    window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', endDrag); window.removeEventListener('pointercancel', endDrag);
+    lmeRenderPins();
+  };
   box.addEventListener('pointerdown', e => {
     if (!_lme || _lme.mode !== 'arrange' || !e.isPrimary) return;
     const it = lmeSelItem(); if (!it || it.hidden) return;
     const r = _lmeEl('lme-canvas').getBoundingClientRect(), b = _lme.b;
     const loc = lmWorldToLocal(it, b.x + (e.clientX - r.left) / r.width * b.w, b.y + (e.clientY - r.top) / r.height * b.h);
     if (loc.u < 0 || loc.u > 1 || loc.v < 0 || loc.v > 1) return;
+    e.preventDefault(); e.stopPropagation(); // evita el arrastre/selección nativos del navegador
     drag = { sx: e.clientX, sy: e.clientY, ox: it.x, oy: it.y };
-    e.stopPropagation(); try { box.setPointerCapture(e.pointerId); } catch (x) {}
+    window.addEventListener('pointermove', onMove, { passive: false }); window.addEventListener('pointerup', endDrag); window.addEventListener('pointercancel', endDrag);
   });
-  box.addEventListener('pointermove', e => {
-    if (!drag || !_lme) return;
-    const it = lmeSelItem(); if (!it) return;
-    const k = _lme.b.w / _lmeEl('lme-canvas').getBoundingClientRect().width;
-    it.x = drag.ox + (e.clientX - drag.sx) * k; it.y = drag.oy + (e.clientY - drag.sy) * k;
-    _lme.dirty = true; const el = box.querySelector('.lm-item[data-id="' + it.id + '"]'); if (el) _lmApplyItemStyle(el, it, _lme.b);
-  });
-  const endDrag = e => { if (!drag) return; drag = null; try { box.releasePointerCapture(e.pointerId); } catch (x) {} lmeRenderPins(); };
-  box.addEventListener('pointerup', endDrag); box.addEventListener('pointercancel', endDrag);
+  stage.addEventListener('dragstart', e => e.preventDefault());
   // Tocar: seleccionar (Acoplar) o anclar un punto (Calibrar). Va en el escenario porque el zoom captura el puntero
   // al tocar y los eventos ya no llegan a los mapas individuales.
   stage.addEventListener('pointerdown', e => {
