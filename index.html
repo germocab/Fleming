@@ -1596,6 +1596,25 @@
   .gre-item button { border: 0; background: transparent; color: var(--red); font-size: 1.2rem; line-height: 1; cursor: pointer; padding: 0 4px; }
   .gre-save { flex: 1 1 auto; padding: 0 1rem; height: 40px; border: 0; border-radius: 12px; background: var(--accent); color: #fff; font: 700 0.88rem var(--font); cursor: pointer; }
   .gre-save:disabled { opacity: 0.45; cursor: default; }
+
+  /* v1.80.2: LiveMap (Experimento) */
+  .lm-canvas { position: relative; transform-origin: center center; --gre-inv: 1; background: #fff; border-radius: 6px; box-shadow: 0 2px 14px rgba(0,0,0,0.18); line-height: 0; }
+  .lm-items { position: absolute; inset: 0; }
+  .lm-item { position: absolute; line-height: 0; transform-origin: center center; touch-action: none; }
+  .lm-item img { display: block; width: 100%; height: auto; pointer-events: none; user-select: none; -webkit-user-drag: none; }
+  .lm-item.lm-empty { background: rgba(120,120,120,0.12); }
+  .lm-item.sel { outline: 2px solid var(--accent); z-index: 2; }
+  .lm-item.hid { opacity: 0.18; }
+  .lm-canvas.trans .lm-item { opacity: 0.55; }
+  .lm-tag { position: absolute; left: 50%; top: 50%; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; color: #fff; font: 700 0.72rem var(--font); display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,0.35); pointer-events: none; line-height: 1; white-space: nowrap; }
+  .lme-modes { margin-left: auto; display: flex; gap: 4px; background: var(--surface2); padding: 3px; border-radius: 10px; }
+  .lme-modes button { border: 0; background: transparent; color: var(--text); font: 600 0.8rem var(--font); padding: 6px 10px; border-radius: 8px; cursor: pointer; }
+  .lme-modes button.active { background: var(--accent); color: #fff; }
+  .lme-sel { display: flex; flex-direction: column; gap: 10px; }
+  .lme-name { font: 700 0.9rem var(--font); color: var(--text); }
+  .lme-sl { display: flex; flex-direction: column; gap: 4px; font: 600 0.8rem var(--font); color: var(--text); }
+  .lme-sl input { width: 100%; }
+  .gre-row button.on { background: var(--accent); color: #fff; }
   .detail-map-offline-placeholder {
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
     min-height: 160px; padding: 1.5rem 1rem; color: var(--text3);
@@ -8776,6 +8795,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
         <button class="admin-tab" id="admin-tab-legal" data-tab="legal" onclick="switchAdminTab('legal')" style="display:none">Legal</button>
         <button class="admin-tab" id="admin-tab-avatares" data-tab="avatares" onclick="switchAdminTab('avatares')" style="display:none">Avatares</button>
         <button class="admin-tab" id="admin-tab-voz" data-tab="voz" onclick="switchAdminTab('voz')" style="display:none">Voz</button>
+        <button class="admin-tab" id="admin-tab-livemap" data-tab="livemap" onclick="switchAdminTab('livemap')" style="display:none">LiveMap</button>
       </div>
       <div class="admin-section active" id="admin-assignments">
         <div style="display:flex;gap:10px;margin-bottom:1.1rem;align-items:center">
@@ -9292,6 +9312,14 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
         </div>
         <div style="font-size:0.8rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;margin:0.5rem 0 0.6rem">Tips publicados</div>
         <div id="admin-tips-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Tips</div></div></div>
+      </div>
+
+      <!-- ── LiveMap (v1.80.2, Experimento) — Administración → FlemingApp → LiveMap: une y calibra los mapas (solo DEV) ── -->
+      <div class="admin-section" id="admin-livemap">
+        <div style="display:flex;align-items:center;margin-bottom:.4rem"><span style="flex:1;font-size:.95rem;font-weight:700">LiveMap</span><span class="voz-kind">Experimental</span></div>
+        <div class="voz-hint">Une los mapas SVG de los territorios (los de los reportes) en un solo mapa de la congregación, sin nombres de calles, y califícalo con puntos GPS para que los usuarios vean su ubicación en todo el territorio. Cada usuario lo activa en Configuración → Experimentos y lo abre desde Territorios → Mapa de la congregación.</div>
+        <div class="gre-quality" id="lm-admin-status" style="margin:.8rem 0"></div>
+        <button type="button" class="btn-secondary" onclick="lmOpenEditor()" style="width:100%">Unir, acoplar y calibrar mapas</button>
       </div>
 
       <!-- ── Voz (v1.57.0-beta) — Administración → FlemingApp → Voz: define quién puede usarla (solo DEV) ── -->
@@ -10726,19 +10754,6 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
           <div id="pref-live-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
-      <!-- v1.80.1: Mapa interactivo -->
-      <div class="profile-row" style="cursor:pointer" onclick="toggleGeoMapPref()">
-        <div class="profile-row-icon" style="background:var(--ter-1-bg);color:var(--ter-1)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><circle cx="12" cy="11" r="2.2"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="func.geomap">Mapa interactivo</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="func.geomap.desc">Muestra tu ubicación sobre el mapa del territorio en Casa en casa</div>
-        </div>
-        <div id="pref-geomap-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--accent);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="pref-geomap-thumb" style="position:absolute;top:3px;left:21px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
-      </div>
     </div>
     <!-- v1.68: control global de Voz, solo para administradores con permiso Voz. -->
     <div class="profile-section" id="pref-voz-section" style="display:none">
@@ -11047,6 +11062,22 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
         </div>
       </div>
       <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">El navegador puede exigir una interacción del usuario para activar la pantalla completa. Si bloquea la activación automática, usa el control de pantalla completa del navegador.</div>
+    </div>
+
+    <div class="profile-section" style="margin-top:1rem">
+      <div class="profile-row" style="cursor:pointer" onclick="toggleLiveMapExperiment()">
+        <div class="profile-row-icon" style="background:var(--accent-light);color:var(--accent)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 22s-7-6.1-7-12a7 7 0 0 1 14 0c0 5.9-7 12-7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">LiveMap</div>
+          <div class="profile-row-value" style="font-size:0.8rem">Tu ubicación en vivo sobre el mapa de toda la congregación</div>
+        </div>
+        <div id="livemap-exp-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s">
+          <div id="livemap-exp-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
+      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">Se abre con el botón LiveMap dentro de Territorios → Mapa de la congregación. Requiere que el usuario DEV haya unido y calibrado los mapas en Administración.</div>
     </div>
 
   </div>
@@ -11393,6 +11424,64 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
 </div>
 
 
+<!-- v1.80.2: LiveMap — visor (usuarios) y editor de acoplamiento/calibración (solo DEV) -->
+<div class="gre-overlay" id="livemap-viewer" style="z-index:1002">
+  <div class="gre-top">
+    <button type="button" class="gre-x" onclick="closeLiveMap()" aria-label="Cerrar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <div id="lm-title">LiveMap</div>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button type="button" class="gre-x" onclick="lmCenterMe()" title="Centrar en mi ubicación" aria-label="Centrar en mi ubicación"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/><line x1="12" y1="1" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="23"/><line x1="1" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="23" y2="12"/></svg></button>
+      <button type="button" class="gre-x" onclick="lmFitView()" title="Ver todo" aria-label="Ver todo el mapa"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M16 21h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button>
+    </div>
+  </div>
+  <div class="gre-stage" id="lm-stage">
+    <div class="lm-canvas" id="lm-canvas">
+      <div class="lm-items" id="lm-items"></div>
+      <div class="gm-marker gre-test" id="lm-me" style="display:none"><span class="gm-acc"></span><span class="gm-hd"></span><span class="gm-dot"></span></div>
+    </div>
+    <div class="gm-pill" id="lm-pill" style="display:none"></div>
+  </div>
+</div>
+<div class="gre-overlay" id="lm-editor">
+  <div class="gre-top">
+    <button type="button" class="gre-x" onclick="lmEditorClose()" aria-label="Cerrar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <div id="lme-title" style="font:700 0.95rem var(--font);color:var(--text)">LiveMap</div>
+    <div class="lme-modes"><button type="button" id="lme-mode-arrange" class="active" onclick="lmeSetMode('arrange')">Acoplar</button><button type="button" id="lme-mode-calib" onclick="lmeSetMode('calib')">Calibrar</button></div>
+  </div>
+  <div class="gre-stage" id="lme-stage">
+    <div class="lm-canvas" id="lme-canvas">
+      <div class="lm-items" id="lme-items"></div>
+      <div class="gre-pins" id="lme-pins"></div>
+      <div class="gm-marker gre-test" id="lme-test-dot" style="display:none"><span class="gm-acc"></span><span class="gm-dot"></span></div>
+    </div>
+  </div>
+  <div class="gre-panel">
+    <div id="lme-arrange">
+      <div class="gre-hint" id="lme-sel-hint">Toca un territorio para seleccionarlo y arrástralo para moverlo. Arrastra el fondo o pellizca para recorrer el mapa. Primero acopla todos los mapas; después pasa a “Calibrar”.</div>
+      <div class="lme-sel" id="lme-sel" style="display:none">
+        <div class="lme-name" id="lme-sel-name"></div>
+        <label class="lme-sl"><span>Rotación <span id="lme-r-val"></span></span><input type="range" id="lme-r" min="-180" max="180" step="0.5" oninput="lmeSetProp('r', +this.value)"></label>
+        <div class="gre-row"><button type="button" class="detail-btn-secondary" onclick="lmeRot(-15)">−15°</button><button type="button" class="detail-btn-secondary" onclick="lmeRot(-1)">−1°</button><button type="button" class="detail-btn-secondary" onclick="lmeRot(1)">+1°</button><button type="button" class="detail-btn-secondary" onclick="lmeRot(15)">+15°</button></div>
+        <label class="lme-sl"><span>Tamaño <span id="lme-s-val"></span></span><input type="range" id="lme-s" min="20" max="300" step="1" oninput="lmeSetProp('pct', +this.value)"></label>
+        <div class="gre-row"><button type="button" class="detail-btn-secondary" onclick="lmeScaleBy(0.98)">−2%</button><button type="button" class="detail-btn-secondary" onclick="lmeScaleBy(1.02)">+2%</button><button type="button" class="detail-btn-secondary" onclick="lmeNudge(-1,0)">←</button><button type="button" class="detail-btn-secondary" onclick="lmeNudge(0,-1)">↑</button><button type="button" class="detail-btn-secondary" onclick="lmeNudge(0,1)">↓</button><button type="button" class="detail-btn-secondary" onclick="lmeNudge(1,0)">→</button></div>
+        <div class="gre-row"><button type="button" class="detail-btn-secondary" onclick="lmeZ('front')">Al frente</button><button type="button" class="detail-btn-secondary" onclick="lmeZ('back')">Al fondo</button><button type="button" class="detail-btn-secondary" id="lme-hide-btn" onclick="lmeToggleHidden()">Ocultar</button></div>
+      </div>
+      <div class="gre-row"><button type="button" class="detail-btn-secondary" id="lme-trans-btn" onclick="lmeToggleTrans()">Transparencia</button><button type="button" class="detail-btn-secondary" onclick="lmeAutoGrid()">Auto-acomodar</button></div>
+    </div>
+    <div id="lme-calib" style="display:none">
+      <div class="gre-hint" id="lme-chint">Toca un punto reconocible de un territorio (esquina de manzana o cruce) y escribe sus coordenadas GPS. Reparte los puntos por distintos territorios y por toda la congregación.</div>
+      <div class="gre-pending" id="lme-pending" style="display:none">
+        <input type="text" id="lme-coord" class="form-input" autocomplete="off" placeholder="Latitud, longitud (ej. -33.448900, -70.669300)">
+        <div class="gre-row"><button type="button" class="detail-btn-secondary" onclick="lmeUseMyLocation()">Usar mi ubicación</button><button type="button" class="detail-btn-secondary" onclick="lmeAddPoint()" style="font-weight:700">Agregar punto</button><button type="button" class="detail-btn-secondary" onclick="lmeCancelPending()">Cancelar</button></div>
+      </div>
+      <div class="gre-list" id="lme-list"></div>
+      <div class="gre-quality" id="lme-quality"></div>
+      <div class="gre-row" style="margin-top:8px"><button type="button" class="detail-btn-secondary" id="lme-test-btn" onclick="lmeToggleTest()">Probar con mi ubicación</button></div>
+      <div class="gre-quality" id="lme-test-info"></div>
+    </div>
+    <div class="gre-row"><button type="button" class="gre-save" id="lme-save-btn" onclick="lmeSave()">Guardar</button></div>
+  </div>
+</div>
 <!-- v1.80.1: Editor de georreferenciación del Mapa interactivo (solo DEV) -->
 <div class="gre-overlay" id="georef-editor">
   <div class="gre-top">
@@ -11551,6 +11640,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
         <span id="fm-page-indicator">1/1</span>
         <button onclick="changeFullMapPage(1)" id="fm-page-next"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
+      <button class="full-map-lb-download-btn" id="fm-livemap-btn" onclick="openLiveMap()" style="display:none" title="LiveMap" aria-label="LiveMap"><svg viewBox="0 0 24 24"><path d="M12 22s-7-6.1-7-12a7 7 0 0 1 14 0c0 5.9-7 12-7 12z"/><circle cx="12" cy="10" r="2.5"/></svg></button>
       <button class="full-map-lb-download-btn" onclick="downloadFullMap()" title="Descargar PDF" aria-label="Descargar PDF">
         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       </button>
@@ -11940,7 +12030,7 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.77.9: Nuevo experimento "Espaciado del contenido": slider de 10 niveles (predeterminado 2 = espaciado actual).
 // v1.77.8: (1) La dirección en el detalle de una asignación de casa en casa es un poco más grande (solo esa pantalla). (2) El botón de Clima de la asignación ya no abre el sitio del clima. (3) Nuevo ícono de Carritos (Inicio, Mis Turnos, Ajustes > Notificaciones y menú de Predicación). (4) Nuevo experimento "Resolución reducida en medios" para imágenes y PDF. (5) Carga más rápida: pdf.js y QR con defer, preconnect, fuentes con display=swap, decodificación asíncrona de imágenes.
 // v1.77.5: (1) Detalle de un Territorio: el título del encabezado ahora dice "Detalles del territorio" (el número ya aparece en el círculo de color). (2) Más opciones en Inicio incluye "Personalizar Inicio" (el botón al final de Inicio se mantiene). (3) Nuevo experimento "Territorios sin vista previa": las tarjetas de Territorios muestran solo el degradé y el nombre.
-const APP_VERSION = '1.80.1'; // v1.80.1 — Mapa interactivo: ubicación GPS sobre los mapas PNG de territorio (georreferenciación por el usuario DEV; se activa en Más opciones de la asignación o en Funciones especiales); v1.80 — Reasignar Encargado: el Encargado de una asignación de Casa en casa puede cederle el cargo a otro conductor desde Más Opciones (avisa al nuevo Encargado, a los Administradores de Predicación y al DEV); v1.79.100d — onboarding de bienvenida (por cuenta, controlado por el DEV); v1.79.10 — sin No Pasar nuevos en Para tí; detalle de punto de carrito con Recordatorios (sin Fotos ni búsqueda) y barra superior fija con modo oscuro; filtro de Carritos unificado; Aseo solo a los dos grupos asignados; v1.79.5 — Otros Grupos con títulos como las fechas; botón Volver arriba sobre la NavBar inferior; Más Opciones sin Perfil en la UI nueva; sin saludo emergente; v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
+const APP_VERSION = '1.80.2'; // v1.80.2 — LiveMap (Experimento): une los mapas SVG de los territorios en un solo mapa de la congregación con ubicación GPS (acople y calibración en Administración → LiveMap, solo DEV; se activa en Experimentos y se abre desde Mapa de la congregación); v1.80.1.5 — Mapa interactivo va con Live (sin interruptor propio) y sin etiqueta sobre el mapa; v1.80.1 — Mapa interactivo: ubicación GPS sobre los mapas PNG de territorio (georreferenciación por el usuario DEV; se activa en Más opciones de la asignación o en Funciones especiales); v1.80 — Reasignar Encargado: el Encargado de una asignación de Casa en casa puede cederle el cargo a otro conductor desde Más Opciones (avisa al nuevo Encargado, a los Administradores de Predicación y al DEV); v1.79.100d — onboarding de bienvenida (por cuenta, controlado por el DEV); v1.79.10 — sin No Pasar nuevos en Para tí; detalle de punto de carrito con Recordatorios (sin Fotos ni búsqueda) y barra superior fija con modo oscuro; filtro de Carritos unificado; Aseo solo a los dos grupos asignados; v1.79.5 — Otros Grupos con títulos como las fechas; botón Volver arriba sobre la NavBar inferior; Más Opciones sin Perfil en la UI nueva; sin saludo emergente; v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -12000,6 +12090,8 @@ function canUseVoz() {
   return currentRole === 'admin' && !!(_currentUserPermsCache && _currentUserPermsCache.voz === true);
 }
 function vozApplyTabVisibility() {
+  const _lmTab = document.getElementById('admin-tab-livemap'); // v1.80.2: LiveMap (solo DEV)
+  if (_lmTab) _lmTab.style.display = currentRole === 'dev' ? '' : 'none';
   const t = document.getElementById('admin-tab-voz');
   if (t) t.style.display = currentRole === 'dev' && _vozFeatureEnabled ? '' : 'none';
   try { updateVozFeatureToggleUI(); } catch (e) {}
@@ -13419,8 +13511,6 @@ const I18N = {
   'func.escritorio':       { es: 'Escritorio',              en: 'Desktop',  nl: 'Desktop' },
   'func.live':             { es: 'Función Live',            en: 'Live Feature', nl: 'Live-functie' },
   'func.live.desc':        { es: 'Detección de calles y avisos de No Pasar en tiempo real', en: 'Real-time street detection and Do-Not-Pass alerts', nl: 'Realtime straatdetectie en Niet-Bezoeken-meldingen' },
-  'func.geomap':           { es: 'Mapa interactivo', en: 'Interactive Map', nl: 'Interactieve kaart' },
-  'func.geomap.desc':      { es: 'Muestra tu ubicación sobre el mapa del territorio en Casa en casa', en: 'Shows your location on the territory map in house-to-house', nl: 'Toont je locatie op de gebiedskaart bij huis-aan-huis' },
   // ── Experimentos ──
   'exp.restricted.title':  { es: 'Transparencia y blur', en: 'Transparency and blur', nl: 'Transparantie en blur' },
   'exp.restricted.desc':   { es: 'No están disponibles mientras la Versión Simplificada está activa', en: 'Not available while Simplified Mode is active', nl: 'Niet beschikbaar terwijl de Vereenvoudigde Versie actief is' },
@@ -18791,7 +18881,7 @@ async function openAdminPage(requestedTab) {
   // currentRole === 'admin': resolvemos los permisos ANTES de mostrar nada.
   await refreshCurrentUserPermsCache();
   const perms = _currentUserPermsCache;
-  const isTabAllowed = (tab) => tab === 'voz' ? canUseVoz() : (!ADMIN_TAB_PERM_KEY[tab] || canAccessModule(perms, ADMIN_TAB_PERM_KEY[tab]));
+  const isTabAllowed = (tab) => tab === 'livemap' ? currentRole === 'dev' : tab === 'voz' ? canUseVoz() : (!ADMIN_TAB_PERM_KEY[tab] || canAccessModule(perms, ADMIN_TAB_PERM_KEY[tab]));
 
   let targetTab = requestedTab;
   if (targetTab) {
@@ -18844,7 +18934,7 @@ const ADMIN_TAB_SECTION = {
   assignments: 'predicacion', territories: 'predicacion', conductores: 'predicacion',
   casas: 'predicacion', grupos: 'predicacion', carritos: 'predicacion', reports: 'predicacion',
   vmc: 'reuniones', 'fin-semana': 'reuniones', audiovideo: 'reuniones', acomodacion: 'reuniones', 'aseo-salon': 'reuniones', hospitalidad: 'reuniones',
-  usuarios: 'fleming', notificaciones: 'fleming', tips: 'fleming', monitor: 'fleming', legal: 'fleming', avatares: 'fleming', voz: 'fleming',
+  usuarios: 'fleming', notificaciones: 'fleming', tips: 'fleming', monitor: 'fleming', legal: 'fleming', avatares: 'fleming', voz: 'fleming', livemap: 'fleming',
 };
 
 // Cambia la sección visible (Predicación/Reuniones) y activa la primera sub-pestaña disponible dentro de ella.
@@ -18881,6 +18971,10 @@ async function switchAdminTab(tab) {
   // Legal (v1.41.0-stable_beta): edición exclusiva del Usuario DEV, no delegable a Admins.
   // Avatares de Personajes (v1.51.0-beta): gestión exclusiva del Usuario DEV.
   if (tab === 'voz' && !canUseVoz()) {
+    showToast('No tienes permisos para acceder a este módulo.', 'error');
+    return;
+  }
+  if (tab === 'livemap' && currentRole !== 'dev') {
     showToast('No tienes permisos para acceder a este módulo.', 'error');
     return;
   }
@@ -18955,6 +19049,7 @@ async function switchAdminTab(tab) {
   if (tab === 'avatares') { renderAdminAvatares(); }
   if (tab === 'carritos') { cartOpenAdminSection(); }
   if (tab === 'reports') { trepOpenAdminSection(); }
+  if (tab === 'livemap') { lmOpenAdminSection(); }
 }
 
 // Mapa de tab de admin -> clave de permiso (PERM_MODULES). Se restringen
@@ -26611,7 +26706,7 @@ let _gmLbWanted = false, _gmLbActive = false;
 function isGeoMapEnabled() {
   if (typeof isModoSencilloActive === 'function' && isModoSencilloActive()) return false;
   if (typeof isSimplifiedModeActive === 'function' && isSimplifiedModeActive()) return false;
-  return localStorage.getItem(GM_PREF_KEY) !== 'false'; // default true (solo actúa en territorios ya georreferenciados)
+  return localStorage.getItem('fleming_live_enabled') !== 'false'; // v1.80.1.5: va de la mano con Live (sin conexión sigue funcionando); solo actúa en territorios georreferenciados
 }
 function _gmValid(g) {
   return !!(g && g.v === 1 && g.w > 0 && g.h > 0 && Array.isArray(g.pts) && g.pts.length >= 2 &&
@@ -26709,7 +26804,7 @@ function _gmDrawOn(host, img) {
   mk.style.setProperty('--gm-r', Math.min(f.acc * pxPerM, 140).toFixed(1) + 'px');
   const hd = mk.querySelector('.gm-hd');
   if (f.hd != null) { hd.style.display = ''; hd.style.transform = 'rotate(' + _gmHeadingDeg(md, f.hd).toFixed(1) + 'deg)'; } else hd.style.display = 'none';
-  pill.textContent = 'Mapa interactivo · ±' + Math.max(1, Math.round(f.acc)) + ' m'; pill.style.display = '';
+  pill.style.display = 'none'; // v1.80.1.5: sin etiqueta sobre el mapa
 }
 function _gmRender() {
   if (_gmRaf) return;
@@ -26770,19 +26865,8 @@ function _gmOnLightboxOpen() {
 function _gmOnLightboxClose() { _gmLbActive = false; document.querySelectorAll('#img-lightbox > .gm-layer').forEach(n => n.remove()); }
 document.addEventListener('visibilitychange', () => { if (_gmTer) _gmSync(); });
 
-// ── Activar / desactivar (Configuración → Funciones especiales, y Más opciones de la asignación) ──
-function updateGeoMapToggleUI() {
-  const on = isGeoMapEnabled(), t = document.getElementById('pref-geomap-toggle'), th = document.getElementById('pref-geomap-thumb');
-  if (!t || !th) return;
-  t.style.background = on ? 'var(--accent)' : 'var(--surface3)'; th.style.left = on ? '21px' : '3px';
-}
-function setGeoMapPref(next) {
-  localStorage.setItem(GM_PREF_KEY, next ? 'true' : 'false');
-  try { updateGeoMapToggleUI(); } catch (e) {}
-  try { trackEvent('geomap_toggle', { enabled: next }); } catch (e) {}
-  if (_gmTer) _gmAttachDetail(_gmTer); else _gmSync();
-}
-function toggleGeoMapPref() { setGeoMapPref(!isGeoMapEnabled()); }
+// v1.80.1.5: el Mapa interactivo no tiene interruptor propio: está activo mientras Live lo esté.
+function _gmOnLiveToggle() { if (_gmTer) _gmAttachDetail(_gmTer); else _gmSync(); }
 
 // ── Editor de georreferenciación (solo DEV): Territorios → Editar → Mapa interactivo ──
 let _greZ = null, _greTerId = null, _grePts = [], _grePending = null, _greW = 0, _greH = 0, _greTestWatch = null, _greTestFix = null;
@@ -26953,6 +27037,467 @@ async function greRemove() {
   const id = _greTerId; greClose(); greUpdateModalStatus(id);
 }
 
+// ══ v1.80.2: LIVEMAP (Experimento) ═══════════════════════════════════════════════════════════════════════════
+// Une los mapas SVG de los territorios (los de los reportes) en un solo mapa de la congregación, sin nombres de calles,
+// y le aplica la misma ubicación GPS del Mapa interactivo. El usuario DEV acopla los mapas (mueve / rota / escala cada
+// uno) y calibra el conjunto con puntos GPS en Administración → FlemingApp → LiveMap. Se activa en Configuración →
+// Experimentos y se abre desde "Mapa de la congregación" (botón circular "LiveMap").
+// Se guarda en platform_settings (key 'livemap_layout'):
+//   { v:1, items:[{ id, x, y, s, r, w, h, hidden }], pts:[{ t:<id territorio>, u, v, lat, lng }] }
+//   x,y = centro del mapa del territorio en el lienzo · s = escala · r = rotación (grados) · w,h = viewBox del SVG
+//   Los puntos GPS quedan anclados a un territorio (u,v locales del SVG): si luego se mueve un mapa, la calibración lo sigue.
+const LM_KEY = 'livemap_layout', LM_EXP_KEY = 'fleming_experiment_livemap', LM_LAYOUT_LS = 'fleming_livemap_layout_v1', LM_CACHE = 'fleming-livemap-v1';
+let _lmLayout = null, _lmAssets = {};
+
+function isLiveMapExperimentEnabled() { try { return localStorage.getItem(LM_EXP_KEY) === 'true'; } catch (e) { return false; } }
+function updateLiveMapExperimentUI() {
+  const on = isLiveMapExperimentEnabled(), tr = document.getElementById('livemap-exp-toggle'), th = document.getElementById('livemap-exp-thumb');
+  if (tr) tr.style.background = on ? 'var(--accent)' : 'var(--surface3)';
+  if (th) th.style.left = on ? '21px' : '3px';
+}
+function toggleLiveMapExperiment() {
+  const next = !isLiveMapExperimentEnabled();
+  try { localStorage.setItem(LM_EXP_KEY, String(next)); } catch (e) {}
+  updateLiveMapExperimentUI(); lmUpdateEntryButton();
+  try { trackEvent('livemap_experiment', { enabled: next }); } catch (e) {}
+}
+async function lmUpdateEntryButton() {
+  const b = document.getElementById('fm-livemap-btn'); if (!b) return;
+  if (!isLiveMapExperimentEnabled()) { b.style.display = 'none'; return; }
+  b.style.display = '';
+  try { const L = await lmGetLayout(); b.style.display = (isLiveMapExperimentEnabled() && L.items.length) ? '' : 'none'; } catch (e) {}
+}
+
+// ── Datos ──
+function _lmNormLayout(v) {
+  if (!v || !Array.isArray(v.items)) return { v: 1, items: [], pts: [] };
+  return {
+    v: 1,
+    items: v.items.filter(i => i && i.id && isFinite(i.x) && isFinite(i.y) && i.s > 0 && i.w > 0 && i.h > 0)
+      .map(i => ({ id: i.id, x: +i.x, y: +i.y, s: +i.s, r: +i.r || 0, w: +i.w, h: +i.h, hidden: !!i.hidden })),
+    pts: (v.pts || []).filter(p => p && p.t && isFinite(p.u) && isFinite(p.v) && isFinite(p.lat) && isFinite(p.lng))
+      .map(p => ({ t: p.t, u: +p.u, v: +p.v, lat: +p.lat, lng: +p.lng }))
+  };
+}
+async function lmGetLayout(force) {
+  if (_lmLayout && !force) return _lmLayout;
+  try {
+    if (isAppOnline()) {
+      const { data, error } = await sb.from('platform_settings').select('value').eq('key', LM_KEY).maybeSingle();
+      if (error) throw error;
+      _lmLayout = _lmNormLayout(data && data.value);
+      try { localStorage.setItem(LM_LAYOUT_LS, JSON.stringify(_lmLayout)); } catch (e) {}
+      return _lmLayout;
+    }
+  } catch (e) { console.warn('livemap layout:', e && e.message); }
+  if (!_lmLayout) { try { _lmLayout = _lmNormLayout(JSON.parse(localStorage.getItem(LM_LAYOUT_LS) || 'null')); } catch (e) { _lmLayout = _lmNormLayout(null); } }
+  return _lmLayout;
+}
+function _lmHash(s) { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return s.length + ':' + h; }
+async function _lmCacheGet(id) { try { const c = await caches.open(LM_CACHE); const r = await c.match('/__livemap__/' + id); return r ? await r.text() : null; } catch (e) { return null; } }
+async function _lmCachePut(id, txt) { try { const c = await caches.open(LM_CACHE); await c.put('/__livemap__/' + id, new Response(txt)); } catch (e) {} }
+function _lmMakeAsset(raw) {
+  const r = trepSanitizeSvg(raw); if (!r.ok) return null;
+  const vb = String(r.el.getAttribute('viewBox') || '').trim().split(/[\s,]+/).map(Number);
+  if (vb.length !== 4 || !(vb[2] > 0 && vb[3] > 0)) return null;
+  return { src: trepSvgToImgSrc(r.svg), w: vb[2], h: vb[3], sig: _lmHash(raw) };
+}
+// Carga los SVG: primero la copia local (instantánea y sirve sin conexión) y luego refresca desde la red lo que cambió.
+async function lmLoadAssets(ids, onUpdate) {
+  const need = ids.filter(id => !_lmAssets[id]);
+  await Promise.all(need.map(async id => { const t = await _lmCacheGet(id); const a = t && _lmMakeAsset(t); if (a) _lmAssets[id] = a; }));
+  if (need.some(id => _lmAssets[id]) && onUpdate) onUpdate();
+  if (!isAppOnline()) return;
+  for (let i = 0; i < ids.length; i += 6) {
+    let changed = false;
+    try {
+      const res = await trepRetry(() => sb.from('territories').select('id, svg_data').in('id', ids.slice(i, i + 6)));
+      (res.data || []).forEach(d => {
+        if (!d.svg_data) return;
+        const cur = _lmAssets[d.id]; if (cur && cur.sig === _lmHash(d.svg_data)) return;
+        const a = _lmMakeAsset(d.svg_data);
+        if (a) { _lmAssets[d.id] = a; _lmCachePut(d.id, d.svg_data); changed = true; }
+      });
+    } catch (e) { console.warn('livemap svg:', e && e.message); }
+    if (changed && onUpdate) onUpdate();
+  }
+}
+
+// ── Geometría del lienzo ──
+function _lmCorners(it) {
+  const w = it.w * it.s, h = it.h * it.s, r = it.r * Math.PI / 180, c = Math.cos(r), s = Math.sin(r);
+  return [[-w / 2, -h / 2], [w / 2, -h / 2], [w / 2, h / 2], [-w / 2, h / 2]].map(([x, y]) => [it.x + x * c - y * s, it.y + x * s + y * c]);
+}
+function lmBounds(items, pad, withHidden) {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  items.forEach(it => { if (it.hidden && !withHidden) return; _lmCorners(it).forEach(([x, y]) => { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }); });
+  if (!isFinite(x0)) return null;
+  const m = Math.max(x1 - x0, y1 - y0) * (pad == null ? 0.04 : pad);
+  return { x: x0 - m, y: y0 - m, w: x1 - x0 + 2 * m, h: y1 - y0 + 2 * m };
+}
+function lmLocalToWorld(it, u, v) {
+  const lx = (u - 0.5) * it.w * it.s, ly = (v - 0.5) * it.h * it.s, r = it.r * Math.PI / 180;
+  return { x: it.x + lx * Math.cos(r) - ly * Math.sin(r), y: it.y + lx * Math.sin(r) + ly * Math.cos(r) };
+}
+function lmWorldToLocal(it, x, y) {
+  const dx = x - it.x, dy = y - it.y, r = it.r * Math.PI / 180, c = Math.cos(r), s = Math.sin(r);
+  return { u: (dx * c + dy * s) / (it.w * it.s) + 0.5, v: (-dx * s + dy * c) / (it.h * it.s) + 0.5 };
+}
+// Ajuste GPS → lienzo con los puntos anclados. Devuelve { md, used:[índices de pts usados] } o null.
+function lmFitGeoref(layout, b) {
+  if (!b) return null;
+  const pts = [], used = [];
+  (layout.pts || []).forEach((p, i) => {
+    const it = layout.items.find(x => x.id === p.t); if (!it || it.hidden) return;
+    const w = lmLocalToWorld(it, p.u, p.v);
+    pts.push({ u: (w.x - b.x) / b.w, v: (w.y - b.y) / b.h, lat: p.lat, lng: p.lng }); used.push(i);
+  });
+  if (pts.length < 2) return null;
+  const md = gmFit({ v: 1, w: b.w, h: b.h, pts });
+  return md ? { md, used } : null;
+}
+function _lmApplyItemStyle(el, it, b) {
+  el.style.left = ((it.x - b.x) / b.w * 100).toFixed(4) + '%';
+  el.style.top = ((it.y - b.y) / b.h * 100).toFixed(4) + '%';
+  el.style.width = (it.w * it.s / b.w * 100).toFixed(4) + '%';
+  el.style.transform = 'translate(-50%,-50%) rotate(' + it.r + 'deg)';
+  const tg = el.querySelector('.lm-tag'); if (tg) tg.style.transform = 'translate(-50%,-50%) rotate(' + (-it.r) + 'deg) scale(var(--gre-inv,1))';
+}
+function lmItemsHtml(layout, b, o) {
+  o = o || {};
+  return layout.items.filter(it => o.withHidden || !it.hidden).map(it => {
+    const a = _lmAssets[it.id], t = territories.find(x => x.id === it.id);
+    const tag = t ? '<span class="lm-tag" style="background:' + getTerColorFromObj(t) + ';transform:translate(-50%,-50%) rotate(' + (-it.r) + 'deg) scale(var(--gre-inv,1))">' + t.number + '</span>' : '';
+    return '<div class="lm-item' + (a ? '' : ' lm-empty') + (o.sel === it.id ? ' sel' : '') + (it.hidden ? ' hid' : '') + '" data-id="' + it.id + '" style="left:' + ((it.x - b.x) / b.w * 100).toFixed(4) + '%;top:' + ((it.y - b.y) / b.h * 100).toFixed(4) +
+      '%;width:' + (it.w * it.s / b.w * 100).toFixed(4) + '%;aspect-ratio:' + it.w + '/' + it.h + ';transform:translate(-50%,-50%) rotate(' + it.r + 'deg)">' + (a ? '<img src="' + a.src + '" alt="" draggable="false">' : '') + tag + '</div>';
+  }).join('');
+}
+function lmSizeCanvas(canvas, stage, b) {
+  const f = Math.min((stage.clientWidth - 24) / b.w, (stage.clientHeight - 24) / b.h);
+  canvas.style.width = Math.max(40, b.w * f) + 'px'; canvas.style.height = Math.max(40, b.h * f) + 'px';
+}
+
+// ── Visor (usuarios) ──
+let _lmZ = null, _lmView = null, _lmWatchId = null, _lmFix = null, _lmErr = null;
+function _lmZoom() {
+  if (!_lmZ) {
+    _lmZ = createMapZoomController('lm-canvas', 'lm-stage', null, st => { document.getElementById('lm-canvas')?.style.setProperty('--gre-inv', String(1 / st.scale)); });
+    _lmZ.getState().maxScale = 14;
+  }
+  return _lmZ;
+}
+async function openLiveMap() {
+  if (!isLiveMapExperimentEnabled()) return;
+  const layout = await lmGetLayout(true);
+  if (!layout.items.filter(i => !i.hidden).length) { showToast('LiveMap aún no está configurado: el usuario DEV debe unir los mapas en Administración.', ''); return; }
+  _lmView = { layout, b: lmBounds(layout.items, 0.04), fit: lmFitGeoref(layout, lmBounds(layout.items, 0.04)) };
+  document.getElementById('livemap-viewer').classList.add('open');
+  lmRenderViewer(); _lmZoom().reset(); _lmZoom().init();
+  lmStartWatch();
+  lmLoadAssets(layout.items.filter(i => !i.hidden).map(i => i.id), lmRenderViewer);
+}
+function closeLiveMap() {
+  document.getElementById('livemap-viewer').classList.remove('open');
+  lmStopWatch(); _lmView = null; _lmZoom().reset();
+}
+function lmRenderViewer() {
+  if (!_lmView) return;
+  const stage = document.getElementById('lm-stage'), canvas = document.getElementById('lm-canvas');
+  lmSizeCanvas(canvas, stage, _lmView.b);
+  document.getElementById('lm-items').innerHTML = lmItemsHtml(_lmView.layout, _lmView.b);
+  lmDrawMe();
+}
+function lmFitView() { _lmZoom().reset(); }
+function lmCenterMe() {
+  if (!_lmView || !_lmView.fit || !_lmFix) { showToast('Aún no tengo tu ubicación sobre el mapa.', ''); return; }
+  const uv = gmToUV(_lmView.fit.md, _lmFix.lat, _lmFix.lng), c = document.getElementById('lm-canvas'), st = _lmZoom().getState();
+  if (uv.u < 0 || uv.u > 1 || uv.v < 0 || uv.v > 1) { showToast('Estás fuera del mapa de la congregación.', ''); return; }
+  st.scale = Math.max(st.scale, 3);
+  st.x = -st.scale * (uv.u - 0.5) * c.offsetWidth; st.y = -st.scale * (uv.v - 0.5) * c.offsetHeight;
+  c.style.transform = 'translate(' + st.x + 'px, ' + st.y + 'px) scale(' + st.scale + ')';
+  c.style.setProperty('--gre-inv', String(1 / st.scale));
+}
+function lmOnPos(p) {
+  const c = p.coords, now = Date.now(), prev = _lmFix;
+  let lat = c.latitude, lng = c.longitude;
+  if (prev && now - prev.t < 10000) { lat = prev.lat * 0.4 + lat * 0.6; lng = prev.lng * 0.4 + lng * 0.6; }
+  const moving = isFinite(c.heading) && c.heading != null && c.speed != null && c.speed > 0.8;
+  _lmFix = { lat, lng, acc: c.accuracy || 30, hd: moving ? c.heading : null, t: now }; _lmErr = null;
+  lmDrawMe();
+}
+function lmOnErr(e) { _lmErr = (e && e.code === 1) ? 'denied' : 'unavailable'; lmDrawMe(); }
+function lmStartWatch() {
+  if (_lmWatchId != null || !navigator.geolocation) return;
+  _lmWatchId = navigator.geolocation.watchPosition(lmOnPos, lmOnErr, { enableHighAccuracy: true, maximumAge: 2000, timeout: 20000 });
+}
+function lmStopWatch() {
+  if (_lmWatchId != null) { try { navigator.geolocation.clearWatch(_lmWatchId); } catch (e) {} }
+  _lmWatchId = null; _lmFix = null; _lmErr = null;
+}
+function lmDrawMe() {
+  const me = document.getElementById('lm-me'), pill = document.getElementById('lm-pill'), canvas = document.getElementById('lm-canvas');
+  if (!me || !pill || !canvas || !_lmView) return;
+  const hide = txt => { me.style.display = 'none'; pill.textContent = txt || ''; pill.style.display = txt ? '' : 'none'; };
+  const fit = _lmView.fit, b = _lmView.b;
+  if (!fit) return hide('Este mapa aún no está calibrado con puntos GPS.');
+  if (_lmErr === 'denied') return hide('Activa el permiso de ubicación');
+  if (!_lmFix) return hide('Buscando tu ubicación…');
+  const uv = gmToUV(fit.md, _lmFix.lat, _lmFix.lng);
+  if (uv.u < -0.03 || uv.u > 1.03 || uv.v < -0.03 || uv.v > 1.03) return hide('Estás fuera del mapa de la congregación');
+  me.style.display = ''; pill.style.display = 'none';
+  me.style.left = (uv.u * 100).toFixed(4) + '%'; me.style.top = (uv.v * 100).toFixed(4) + '%';
+  me.style.setProperty('--gm-r', Math.min(_lmFix.acc * (canvas.offsetWidth / b.w) / fit.md.mpp, 220).toFixed(1) + 'px');
+  const hd = me.querySelector('.gm-hd');
+  if (_lmFix.hd != null) { hd.style.display = ''; hd.style.transform = 'rotate(' + _gmHeadingDeg(fit.md, _lmFix.hd).toFixed(1) + 'deg) scale(var(--gre-inv,1))'; } else hd.style.display = 'none';
+}
+window.addEventListener('resize', () => { if (_lmView) lmRenderViewer(); });
+
+// ── Administración → FlemingApp → LiveMap (solo DEV) ──
+async function lmOpenAdminSection() { lmUpdateAdminStatus(); }
+async function lmUpdateAdminStatus() {
+  const el = document.getElementById('lm-admin-status'); if (!el) return;
+  const L = await lmGetLayout(true), n = L.items.filter(i => !i.hidden).length;
+  if (!L.items.length) { el.textContent = 'Aún no has unido los mapas.'; return; }
+  const f = lmFitGeoref(L, lmBounds(L.items, 0.04));
+  el.textContent = n + ' territorios acoplados · ' + (f ? ('calibrado con ' + f.used.length + ' puntos · error medio ≈ ' + f.md.rms.toFixed(1) + ' m') : 'sin calibrar (los usuarios verán el mapa pero no su ubicación)');
+}
+
+// ── Editor: acoplar y calibrar ──
+let _lme = null, _lmeZ = null;
+function _lmeZoom() {
+  if (!_lmeZ) {
+    _lmeZ = createMapZoomController('lme-canvas', 'lme-stage', null, st => { document.getElementById('lme-canvas')?.style.setProperty('--gre-inv', String(1 / st.scale)); });
+    _lmeZ.getState().maxScale = 14;
+  }
+  return _lmeZ;
+}
+function _lmeEl(id) { return document.getElementById(id); }
+async function lmOpenEditor() {
+  if (currentRole !== 'dev') { showToast('Solo el usuario DEV puede unir los mapas.', 'error'); return; }
+  const saved = await lmGetLayout(true);
+  _lme = { layout: JSON.parse(JSON.stringify(saved)), b: null, sel: null, mode: 'arrange', trans: false, pending: null, dirty: false, testWatch: null, testFix: null, sBase: 1, loading: true };
+  _lmeEl('lm-editor').classList.add('open');
+  lmeSetMode('arrange'); lmeBind(); _lmeZoom().reset(); _lmeZoom().init();
+  lmeRender(true);
+  const ids = territories.filter(t => t.id).map(t => t.id);
+  await lmLoadAssets(ids, () => { if (_lme) lmeAfterAssets(); });
+  if (_lme) { _lme.loading = false; lmeAfterAssets(); }
+}
+// Cada territorio con SVG tiene su item: los nuevos se agregan al final en cuadrícula; se actualizan w,h si el SVG cambió.
+function lmeAfterAssets() {
+  const L = _lme.layout, have = new Set(L.items.map(i => i.id));
+  L.items = L.items.filter(i => territories.some(t => t.id === i.id));
+  L.items.forEach(i => { const a = _lmAssets[i.id]; if (a && (a.w !== i.w || a.h !== i.h)) { i.w = a.w; i.h = a.h; } });
+  const fresh = territories.filter(t => _lmAssets[t.id] && !have.has(t.id)).sort((a, b) => a.number - b.number);
+  if (fresh.length) { lmePlaceGrid(fresh.map(t => t.id), true); if (L.items.length > fresh.length) _lme.dirty = true; }
+  lmeRender(!_lme.b || fresh.length > 0);
+}
+function lmePlaceGrid(ids, append) {
+  const L = _lme.layout, sizes = ids.map(id => Math.max(_lmAssets[id].w, _lmAssets[id].h)).sort((a, b) => a - b);
+  const C = sizes[Math.floor(sizes.length / 2)] || 1000, cols = Math.max(1, Math.ceil(Math.sqrt(ids.length)));
+  const bb = append ? lmBounds(L.items, 0, true) : null, x0 = bb ? bb.x + bb.w + C * 0.5 : 0, y0 = bb ? bb.y : 0;
+  ids.forEach((id, k) => {
+    const a = _lmAssets[id], s = C / Math.max(a.w, a.h), x = x0 + ((k % cols) + 0.5) * C * 1.1, y = y0 + (Math.floor(k / cols) + 0.5) * C * 1.1;
+    let it = L.items.find(i => i.id === id);
+    if (!it) { it = { id, x, y, s, r: 0, w: a.w, h: a.h, hidden: false }; L.items.push(it); }
+    else { it.x = x; it.y = y; it.s = s; it.r = 0; it.w = a.w; it.h = a.h; }
+  });
+}
+function lmeAutoGrid() {
+  if (!confirm('¿Acomodar todos los mapas en una cuadrícula? Se perderán las posiciones, rotaciones y tamaños actuales (y la calibración dejará de coincidir).')) return;
+  const ids = _lme.layout.items.filter(i => _lmAssets[i.id]).sort((a, b) => (territories.find(t => t.id === a.id)?.number || 0) - (territories.find(t => t.id === b.id)?.number || 0)).map(i => i.id);
+  if (!ids.length) return;
+  lmePlaceGrid(ids, false); _lme.dirty = true; _lme.sel = null; lmeRender(true); _lmeZoom().reset();
+}
+function lmeBoard() {
+  const bb = lmBounds(_lme.layout.items, 0, true); if (!bb) return { x: 0, y: 0, w: 1000, h: 1000 };
+  const m = Math.max(bb.w, bb.h) * 0.6; return { x: bb.x - m, y: bb.y - m, w: bb.w + 2 * m, h: bb.h + 2 * m };
+}
+function lmeRender(rebuildBoard) {
+  if (!_lme) return;
+  if (rebuildBoard || !_lme.b) _lme.b = lmeBoard();
+  const b = _lme.b, canvas = _lmeEl('lme-canvas');
+  lmSizeCanvas(canvas, _lmeEl('lme-stage'), b);
+  canvas.classList.toggle('trans', _lme.trans);
+  _lmeEl('lme-items').innerHTML = lmItemsHtml(_lme.layout, b, { sel: _lme.sel, withHidden: true });
+  lmeRenderPins(); lmeRenderPanel();
+}
+function lmeSetMode(m) {
+  if (!_lme) return; _lme.mode = m; _lme.pending = null;
+  _lmeEl('lme-mode-arrange').classList.toggle('active', m === 'arrange'); _lmeEl('lme-mode-calib').classList.toggle('active', m === 'calib');
+  _lmeEl('lme-arrange').style.display = m === 'arrange' ? '' : 'none'; _lmeEl('lme-calib').style.display = m === 'calib' ? '' : 'none';
+  if (m !== 'calib') lmeStopTest();
+  lmeRenderPins(); lmeRenderPanel();
+}
+function lmeToggleTrans() { _lme.trans = !_lme.trans; _lmeEl('lme-canvas').classList.toggle('trans', _lme.trans); _lmeEl('lme-trans-btn').classList.toggle('on', _lme.trans); }
+function lmeSelItem() { return _lme && _lme.sel ? _lme.layout.items.find(i => i.id === _lme.sel) : null; }
+function lmeSelect(id) {
+  _lme.sel = id; _lme.sBase = (lmeSelItem() || {}).s || 1;
+  _lmeEl('lme-items').querySelectorAll('.lm-item').forEach(el => el.classList.toggle('sel', el.dataset.id === id));
+  lmeRenderPanel();
+}
+function lmeRefreshEl(it) { const el = _lmeEl('lme-items').querySelector('.lm-item[data-id="' + it.id + '"]'); if (el) _lmApplyItemStyle(el, it, _lme.b); lmeRenderPins(); }
+function lmeSetProp(k, val) {
+  const it = lmeSelItem(); if (!it) return;
+  if (k === 'r') it.r = val; else if (k === 'pct') it.s = _lme.sBase * val / 100;
+  _lme.dirty = true; lmeRefreshEl(it); lmeRenderPanel(true);
+}
+function lmeRot(d) { const it = lmeSelItem(); if (!it) return; let r = it.r + d; r = ((r + 540) % 360) - 180; it.r = +r.toFixed(2); _lme.dirty = true; lmeRefreshEl(it); lmeRenderPanel(); }
+function lmeScaleBy(f) { const it = lmeSelItem(); if (!it) return; it.s *= f; _lme.sBase = it.s; _lme.dirty = true; lmeRefreshEl(it); lmeRenderPanel(); }
+function lmeNudge(dx, dy) { const it = lmeSelItem(); if (!it) return; const step = _lme.b.w / 600; it.x += dx * step; it.y += dy * step; _lme.dirty = true; lmeRefreshEl(it); }
+function lmeZ(where) {
+  const L = _lme.layout, i = L.items.findIndex(x => x.id === _lme.sel); if (i < 0) return;
+  const [it] = L.items.splice(i, 1); if (where === 'front') L.items.push(it); else L.items.unshift(it);
+  _lme.dirty = true; lmeRender(false);
+}
+function lmeToggleHidden() { const it = lmeSelItem(); if (!it) return; it.hidden = !it.hidden; _lme.dirty = true; lmeRender(false); }
+function lmeRenderPanel(light) {
+  if (!_lme) return;
+  const it = lmeSelItem(), t = it && territories.find(x => x.id === it.id);
+  _lmeEl('lme-sel').style.display = it ? '' : 'none';
+  _lmeEl('lme-sel-hint').style.display = it ? 'none' : '';
+  if (it) {
+    _lmeEl('lme-sel-name').textContent = (t ? terLabel(t.number) : 'Territorio') + (it.hidden ? ' · oculto' : '');
+    _lmeEl('lme-r-val').textContent = it.r.toFixed(1) + '°'; _lmeEl('lme-s-val').textContent = Math.round(it.s / _lme.sBase * 100) + '%';
+    if (!light) { _lmeEl('lme-r').value = it.r; _lmeEl('lme-s').value = Math.round(it.s / _lme.sBase * 100); }
+    _lmeEl('lme-hide-btn').textContent = it.hidden ? 'Mostrar' : 'Ocultar';
+  }
+  _lmeEl('lme-trans-btn').classList.toggle('on', _lme.trans);
+  if (_lme.mode === 'calib') lmeRenderCalib();
+}
+function lmeBind() {
+  const box = _lmeEl('lme-items'); if (!box || box._b) return; box._b = true;
+  let drag = null, tap = null;
+  box.addEventListener('pointerdown', e => {
+    const el = e.target.closest('.lm-item');
+    tap = e.isPrimary ? { x: e.clientX, y: e.clientY, t: Date.now(), el } : null;
+    if (_lme && _lme.mode === 'arrange' && el && e.isPrimary && el.dataset.id === _lme.sel) {
+      const it = lmeSelItem();
+      drag = { sx: e.clientX, sy: e.clientY, ox: it.x, oy: it.y };
+      e.stopPropagation(); try { box.setPointerCapture(e.pointerId); } catch (x) {}
+    }
+  });
+  box.addEventListener('pointermove', e => {
+    if (!drag || !_lme) return;
+    const it = lmeSelItem(); if (!it) return;
+    const k = _lme.b.w / _lmeEl('lme-canvas').getBoundingClientRect().width;
+    it.x = drag.ox + (e.clientX - drag.sx) * k; it.y = drag.oy + (e.clientY - drag.sy) * k;
+    _lme.dirty = true; const el = box.querySelector('.lm-item[data-id="' + it.id + '"]'); if (el) _lmApplyItemStyle(el, it, _lme.b);
+  });
+  const end = e => {
+    if (drag) { drag = null; try { box.releasePointerCapture(e.pointerId); } catch (x) {} tap = null; lmeRenderPins(); return; }
+    if (!tap || !e.isPrimary || !_lme) { tap = null; return; }
+    const moved = Math.hypot(e.clientX - tap.x, e.clientY - tap.y), dt = Date.now() - tap.t, el = tap.el; tap = null;
+    if (moved < 8 && dt < 600) lmeTap(el, e.clientX, e.clientY);
+  };
+  box.addEventListener('pointerup', end);
+  box.addEventListener('pointercancel', () => { drag = null; tap = null; });
+}
+function lmeTap(el, x, y) {
+  if (_lme.mode === 'arrange') { lmeSelect(el ? el.dataset.id : null); return; }
+  if (!el) return;
+  const it = _lme.layout.items.find(i => i.id === el.dataset.id); if (!it || it.hidden) return;
+  const r = _lmeEl('lme-canvas').getBoundingClientRect(), b = _lme.b;
+  const loc = lmWorldToLocal(it, b.x + (x - r.left) / r.width * b.w, b.y + (y - r.top) / r.height * b.h);
+  if (loc.u < 0 || loc.u > 1 || loc.v < 0 || loc.v > 1) return;
+  _lme.pending = { t: it.id, u: loc.u, v: loc.v }; lmeRenderPins(); lmeRenderCalib();
+}
+function lmeRenderPins() {
+  const pins = _lmeEl('lme-pins'); if (!pins || !_lme) return;
+  if (_lme.mode !== 'calib') { pins.innerHTML = ''; return; }
+  const b = _lme.b, pos = (it, u, v) => { const w = lmLocalToWorld(it, u, v); return 'left:' + ((w.x - b.x) / b.w * 100).toFixed(3) + '%;top:' + ((w.y - b.y) / b.h * 100).toFixed(3) + '%'; };
+  let h = '';
+  _lme.layout.pts.forEach((p, i) => { const it = _lme.layout.items.find(x => x.id === p.t); if (it) h += '<div class="gre-pin" style="' + pos(it, p.u, p.v) + '"><span>' + (i + 1) + '</span></div>'; });
+  if (_lme.pending) { const it = _lme.layout.items.find(x => x.id === _lme.pending.t); if (it) h += '<div class="gre-pin pending" style="' + pos(it, _lme.pending.u, _lme.pending.v) + '"><span>+</span></div>'; }
+  pins.innerHTML = h;
+}
+function lmeFit() { return lmFitGeoref(_lme.layout, lmBounds(_lme.layout.items, 0.04)); }
+function lmeRenderCalib() {
+  if (!_lme) return;
+  const L = _lme.layout, f = lmeFit();
+  _lmeEl('lme-pending').style.display = _lme.pending ? '' : 'none';
+  _lmeEl('lme-chint').style.display = _lme.pending ? 'none' : '';
+  _lmeEl('lme-list').innerHTML = L.pts.map((p, i) => {
+    const t = territories.find(x => x.id === p.t), k = f ? f.used.indexOf(i) : -1;
+    return '<div class="gre-item"><b>' + (i + 1) + '</b><span>' + (t ? 'T' + t.number + ' · ' : '') + p.lat.toFixed(6) + ', ' + p.lng.toFixed(6) + (f && k >= 0 && f.used.length >= 3 ? ' · ±' + f.md.res[k].toFixed(1) + ' m' : '') + '</span><button type="button" onclick="lmeDelPoint(' + i + ')" aria-label="Quitar punto">×</button></div>';
+  }).join('') || '<div class="gre-empty">Aún no hay puntos.</div>';
+  const q = _lmeEl('lme-quality');
+  if (L.pts.length < 2) { q.textContent = 'Marca al menos 2 puntos (ideal 4 o más, repartidos por toda la congregación).'; q.style.color = ''; }
+  else if (!f) { q.textContent = 'Los puntos están alineados o muy juntos: sepáralos más.'; q.style.color = 'var(--red)'; }
+  else {
+    q.textContent = f.used.length + ' puntos · error medio ' + f.md.rms.toFixed(1) + ' m' + (f.used.length < 3 ? ' · con 3 o más puntos el ajuste mejora' : '');
+    q.style.color = f.md.rms < 8 ? 'var(--green, #28cd41)' : (f.md.rms < 25 ? 'var(--orange, #f59e0b)' : 'var(--red)');
+  }
+  if (_lme.testWatch != null) lmeDrawTest();
+}
+function lmeAddPoint() {
+  if (!_lme.pending) return;
+  const c = greParseCoords(_lmeEl('lme-coord').value);
+  if (!c) { showToast('Escribe las coordenadas como "latitud, longitud" (ej. -33.448900, -70.669300).', 'error'); return; }
+  _lme.layout.pts.push({ t: _lme.pending.t, u: _lme.pending.u, v: _lme.pending.v, lat: c.lat, lng: c.lng });
+  _lme.pending = null; _lme.dirty = true; _lmeEl('lme-coord').value = ''; lmeRenderPins(); lmeRenderCalib();
+}
+function lmeCancelPending() { _lme.pending = null; _lmeEl('lme-coord').value = ''; lmeRenderPins(); lmeRenderCalib(); }
+function lmeDelPoint(i) { _lme.layout.pts.splice(i, 1); _lme.dirty = true; lmeRenderPins(); lmeRenderCalib(); }
+function lmeUseMyLocation() {
+  if (!navigator.geolocation) { showToast('Este dispositivo no tiene geolocalización.', 'error'); return; }
+  showToast('Obteniendo tu ubicación…', '');
+  navigator.geolocation.getCurrentPosition(p => {
+    _lmeEl('lme-coord').value = p.coords.latitude.toFixed(6) + ', ' + p.coords.longitude.toFixed(6);
+    showToast('Ubicación tomada (±' + Math.round(p.coords.accuracy) + ' m). Úsala solo si estás parado en ese punto del mapa.', 'success');
+  }, () => showToast('No se pudo obtener tu ubicación.', 'error'), { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
+}
+function lmeToggleTest() {
+  if (_lme.testWatch != null) { lmeStopTest(); return; }
+  if (!navigator.geolocation) { showToast('Este dispositivo no tiene geolocalización.', 'error'); return; }
+  _lme.testWatch = navigator.geolocation.watchPosition(p => { _lme.testFix = { lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy }; lmeDrawTest(); },
+    () => { _lmeEl('lme-test-info').textContent = 'No se pudo obtener tu ubicación.'; }, { enableHighAccuracy: true, maximumAge: 2000, timeout: 20000 });
+  _lmeEl('lme-test-btn').textContent = 'Detener prueba'; _lmeEl('lme-test-info').textContent = 'Buscando tu ubicación…';
+}
+function lmeStopTest() {
+  if (!_lme) return;
+  if (_lme.testWatch != null) { try { navigator.geolocation.clearWatch(_lme.testWatch); } catch (e) {} }
+  _lme.testWatch = null; _lme.testFix = null;
+  const b = _lmeEl('lme-test-btn'); if (b) b.textContent = 'Probar con mi ubicación';
+  const i = _lmeEl('lme-test-info'); if (i) i.textContent = '';
+  const d = _lmeEl('lme-test-dot'); if (d) d.style.display = 'none';
+}
+function lmeDrawTest() {
+  const dot = _lmeEl('lme-test-dot'), info = _lmeEl('lme-test-info'), f = lmeFit();
+  if (!dot || !info || !_lme) return;
+  if (!f) { dot.style.display = 'none'; info.textContent = 'Agrega al menos 2 puntos para probar.'; return; }
+  if (!_lme.testFix) return;
+  // El punto de prueba se dibuja sobre el tablero del editor: lienzo normalizado (bounds) → tablero.
+  const nb = lmBounds(_lme.layout.items, 0.04), b = _lme.b, uv = gmToUV(f.md, _lme.testFix.lat, _lme.testFix.lng);
+  const wx = nb.x + uv.u * nb.w, wy = nb.y + uv.v * nb.h;
+  if (uv.u < -0.03 || uv.u > 1.03 || uv.v < -0.03 || uv.v > 1.03) { dot.style.display = 'none'; info.textContent = 'Tu ubicación cae fuera del mapa (±' + Math.round(_lme.testFix.acc) + ' m).'; return; }
+  dot.style.display = ''; dot.style.left = ((wx - b.x) / b.w * 100) + '%'; dot.style.top = ((wy - b.y) / b.h * 100) + '%';
+  dot.style.setProperty('--gm-r', Math.min(_lme.testFix.acc * (_lmeEl('lme-canvas').offsetWidth / nb.w) / f.md.mpp * (nb.w / b.w), 220).toFixed(1) + 'px');
+  info.textContent = 'Tu ubicación sobre el mapa (±' + Math.round(_lme.testFix.acc) + ' m). Compárala con dónde estás realmente parado.';
+}
+async function lmeSave() {
+  const L = _lme.layout;
+  const payload = {
+    v: 1,
+    items: L.items.map(i => ({ id: i.id, x: +i.x.toFixed(2), y: +i.y.toFixed(2), s: +i.s.toFixed(6), r: +(+i.r).toFixed(2), w: i.w, h: i.h, hidden: !!i.hidden })),
+    pts: L.pts.map(p => ({ t: p.t, u: +p.u.toFixed(5), v: +p.v.toFixed(5), lat: +(+p.lat).toFixed(7), lng: +(+p.lng).toFixed(7) }))
+  };
+  const btn = _lmeEl('lme-save-btn'); btn.disabled = true; btn.textContent = 'Guardando…';
+  try {
+    const { error } = await sb.from('platform_settings').upsert({ key: LM_KEY, value: payload });
+    if (error) throw error;
+    _lmLayout = _lmNormLayout(payload);
+    try { localStorage.setItem(LM_LAYOUT_LS, JSON.stringify(_lmLayout)); } catch (e) {}
+    _lme.dirty = false; showToast('LiveMap guardado ✓', 'success');
+    lmUpdateAdminStatus(); lmUpdateEntryButton();
+  } catch (e) { console.error('lmeSave:', e); showToast('No se pudo guardar: ' + (e.message || 'error'), 'error'); }
+  btn.disabled = false; btn.textContent = 'Guardar';
+}
+function lmEditorClose() {
+  if (_lme && _lme.dirty && !confirm('Hay cambios sin guardar. ¿Salir sin guardar?')) return;
+  lmeStopTest(); _lmeEl('lm-editor').classList.remove('open'); _lme = null;
+}
+
 // ── Función Live: activar/desactivar por completo ────────────────────────────
 function isLiveFeatureEnabled() {
   if (typeof isModoSencilloActive === 'function' && isModoSencilloActive()) return false; // v1.77: sin Live en Modo Sencillo
@@ -26961,7 +27506,6 @@ function isLiveFeatureEnabled() {
   return localStorage.getItem('fleming_live_enabled') !== 'false'; // default true
 }
 function updateLiveToggleUI() {
-  try { updateGeoMapToggleUI(); } catch (e) {}
   const enabled = isLiveFeatureEnabled();
   const toggle = document.getElementById('pref-live-toggle');
   const thumb  = document.getElementById('pref-live-thumb');
@@ -26976,6 +27520,7 @@ function toggleLiveFeaturePref() {
   updateLiveToggleUI();
   if (!next && _liveActive) stopLiveMode();
   _liveUpdateBtnVisibility();
+  try { _gmOnLiveToggle(); } catch (e) {}
   trackEvent('live_toggle', { enabled: next });
 }
 
@@ -28849,6 +29394,7 @@ const fullMapZoomCtrl  = createMapZoomController('full-map-lb-canvas', 'full-map
 const lightboxZoomCtrl = createMapZoomController('lightbox-img',    'img-lightbox',     'lightbox-zoom-hint', () => { if (typeof _gmLbActive !== 'undefined' && _gmLbActive) _gmRender(); });
 
 async function openFullMap() {
+  try { lmUpdateEntryButton(); } catch (e) {} // v1.80.2: LiveMap
   if (!_fullMapPdfDoc) { showToast('El mapa aún no se pudo cargar. Intenta de nuevo en unos segundos.', 'error'); return; }
   fullMapCurrentPage = 1;
   fullMapZoomCtrl.reset();
@@ -37695,7 +38241,6 @@ const _DAM_ICON = {
   weather: '<svg viewBox="0 0 24 24"><path d="M17.5 19H8a5 5 0 1 1 1.35-9.8A6 6 0 0 1 21 11.5 4.5 4.5 0 0 1 17.5 19z"/></svg>',
   share: '<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>',
   sidebar: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M14 4v16"/></svg>',
-  geomap: '<svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><circle cx="12" cy="11" r="2.2"/></svg>',
   swap: '<svg viewBox="0 0 24 24"><path d="M17 3l4 4-4 4"/><path d="M3 7h18"/><path d="M7 21l-4-4 4-4"/><path d="M21 17H3"/></svg>'
 };
 // v1.69.0: el menú se arma según quién mira: Editar y Asignar nuevo territorio (Administradores de Predicación; esto último
@@ -37711,7 +38256,6 @@ function detailRenderMoreMenu() {
   const liveOn=localStorage.getItem('fleming_live_enabled')!=='false';
   const _msn=(typeof isModoSencilloActive==='function') && isModoSencilloActive(); // v1.77: sin Live ni Clima en Modo Sencillo
   if(!_msn) h+=`<button type="button" class="dam-toggle-row" role="switch" aria-checked="${liveOn}" onclick="detailMoreAction('live')">${_DAM_ICON.live}<span class="dam-label">Live</span><span class="dam-switch${liveOn?' on':''}"><span class="dam-thumb"></span></span></button>`;
-  if(!_msn) { const gmOn=isGeoMapEnabled(); h+=`<button type="button" class="dam-toggle-row" role="switch" aria-checked="${gmOn}" onclick="detailMoreAction('geomap')">${_DAM_ICON.geomap}<span class="dam-label">Mapa interactivo</span><span class="dam-switch${gmOn?' on':''}"><span class="dam-thumb"></span></span></button>`; } // v1.80.1
   if(!_msn) h+=`<button type="button" class="dam-toggle-row" role="switch" aria-checked="${on}" onclick="detailMoreAction('weather')">${_DAM_ICON.weather}<span class="dam-label">Clima</span><span class="dam-switch${on?' on':''}"><span class="dam-thumb"></span></span></button>`;
   h+=`<button type="button" onclick="detailMoreAction('share')">${_DAM_ICON.share}Compartir</button>`;
   if (window.innerWidth >= 640) {
@@ -37735,17 +38279,9 @@ function detailMoreAction(action) {
     try { updateLiveToggleUI(); } catch {}
     if (!next && _liveActive) stopLiveMode();
     try { _liveUpdateBtnVisibility(); } catch {}
+    try { _gmOnLiveToggle(); } catch {}
     try { trackEvent('live_toggle', { enabled: next }); } catch {}
     showToast(next?'Live activado':'Live desactivado', next?'success':'');
-    detailRenderMoreMenu();
-    return;
-  }
-  if (action==='geomap') {
-    // v1.80.1: activa/desactiva el Mapa interactivo (misma preferencia que Configuración → Funciones especiales).
-    const next=!isGeoMapEnabled();
-    setGeoMapPref(next);
-    showToast(next?'Mapa interactivo activado':'Mapa interactivo desactivado', next?'success':'');
-    if (next && _gmTer && isAppOnline()) _gmLoad([_gmTer.id]).then(()=>{ if (_gmTer && _gmCache[_gmTer.id]===null && !_gmNoColumn) showToast('Este territorio aún no tiene Mapa interactivo',''); });
     detailRenderMoreMenu();
     return;
   }
@@ -38007,6 +38543,7 @@ function isFullscreenExperimentEnabled() {
   try { return localStorage.getItem('fleming_experiment_fullscreen') === 'true'; } catch (e) { return false; }
 }
 function updateFullscreenExperimentUI() {
+  try { updateLiveMapExperimentUI(); } catch (e) {}
   const on = isFullscreenExperimentEnabled();
   const track = document.getElementById('fullscreen-experiment-toggle');
   const thumb = document.getElementById('fullscreen-experiment-thumb');
