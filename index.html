@@ -9770,6 +9770,31 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
   </div>
 </div>
 
+<!-- v1.80: Reasignar Encargado — el Encargado de una asignación le cede el cargo a otro conductor de la lista existente. -->
+<div class="modal-overlay" id="reassign-enc-modal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <div class="modal-title">Reasignar Encargado</div>
+      <button class="modal-close" onclick="closeReassignEncModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div id="reassign-enc-step-pick">
+        <div style="font-size:0.78rem;color:var(--text3);margin-bottom:10px">Elige a quién le cedes el cargo de Encargado de esta asignación. Solo aparecen los conductores registrados.</div>
+        <input type="text" class="form-input" id="reassign-enc-search" placeholder="Buscar conductor…" autocomplete="off" oninput="reassignEncRenderList(this.value)" style="margin-bottom:10px">
+        <div id="reassign-enc-list" style="display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto"></div>
+      </div>
+      <div id="reassign-enc-step-confirm" style="display:none">
+        <div id="reassign-enc-confirm-text" style="font-size:0.92rem;line-height:1.45;color:var(--text)"></div>
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button type="button" class="btn-secondary" style="flex:1" onclick="reassignEncBack()">Atrás</button>
+          <button type="button" class="btn-primary" style="flex:1" id="reassign-enc-confirm-btn" onclick="reassignEncConfirm()">Confirmar</button>
+        </div>
+      </div>
+      <div class="auth-error" id="reassign-enc-error" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
 <!-- v1.79: Manzanas por territorio — define de una sola vez cuántas manzanas (A, B, C…) tiene cada territorio, en vez de ir
      territorio por territorio. Las letras deben coincidir con los id de las manzanas dentro del SVG de cada territorio. -->
 <div class="modal-overlay" id="ter-manz-modal">
@@ -11808,7 +11833,7 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.77.9: Nuevo experimento "Espaciado del contenido": slider de 10 niveles (predeterminado 2 = espaciado actual).
 // v1.77.8: (1) La dirección en el detalle de una asignación de casa en casa es un poco más grande (solo esa pantalla). (2) El botón de Clima de la asignación ya no abre el sitio del clima. (3) Nuevo ícono de Carritos (Inicio, Mis Turnos, Ajustes > Notificaciones y menú de Predicación). (4) Nuevo experimento "Resolución reducida en medios" para imágenes y PDF. (5) Carga más rápida: pdf.js y QR con defer, preconnect, fuentes con display=swap, decodificación asíncrona de imágenes.
 // v1.77.5: (1) Detalle de un Territorio: el título del encabezado ahora dice "Detalles del territorio" (el número ya aparece en el círculo de color). (2) Más opciones en Inicio incluye "Personalizar Inicio" (el botón al final de Inicio se mantiene). (3) Nuevo experimento "Territorios sin vista previa": las tarjetas de Territorios muestran solo el degradé y el nombre.
-const APP_VERSION = '1.79.100d'; // v1.79.100d — onboarding de bienvenida (por cuenta, controlado por el DEV); v1.79.10 — sin No Pasar nuevos en Para tí; detalle de punto de carrito con Recordatorios (sin Fotos ni búsqueda) y barra superior fija con modo oscuro; filtro de Carritos unificado; Aseo solo a los dos grupos asignados; v1.79.5 — Otros Grupos con títulos como las fechas; botón Volver arriba sobre la NavBar inferior; Más Opciones sin Perfil en la UI nueva; sin saludo emergente; v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
+const APP_VERSION = '1.80'; // v1.80 — Reasignar Encargado: el Encargado de una asignación de Casa en casa puede cederle el cargo a otro conductor desde Más Opciones (avisa al nuevo Encargado, a los Administradores de Predicación y al DEV); v1.79.100d — onboarding de bienvenida (por cuenta, controlado por el DEV); v1.79.10 — sin No Pasar nuevos en Para tí; detalle de punto de carrito con Recordatorios (sin Fotos ni búsqueda) y barra superior fija con modo oscuro; filtro de Carritos unificado; Aseo solo a los dos grupos asignados; v1.79.5 — Otros Grupos con títulos como las fechas; botón Volver arriba sobre la NavBar inferior; Más Opciones sin Perfil en la UI nueva; sin saludo emergente; v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -29126,6 +29151,22 @@ const NOTIF_TEMPLATES_DEFAULT = [
     vars: ['tema', 'congregacion', 'fecha'],
   },
   {
+    id: 'encargado_cedido',
+    label: 'Cargo de Encargado Cedido (nuevo Encargado)',
+    desc: 'Se envía al conductor que recibe el cargo de Encargado cuando el Encargado anterior le cede una asignación de Casa en casa.',
+    title: 'Ahora eres el Encargado',
+    body: '{anterior} te cedió el cargo de Encargado de la asignación del {fecha} a las {hora}hrs.',
+    vars: ['anterior', 'fecha', 'hora'],
+  },
+  {
+    id: 'encargado_reasignado',
+    label: 'Cambio de Encargado (Administradores y DEV)',
+    desc: 'Se envía al DEV y a los Administradores de Predicación cuando un Encargado le cede el cargo a otro conductor.',
+    title: 'Cambio de Encargado',
+    body: '{anterior} cedió a {nuevo} el cargo de Encargado de la asignación del {fecha} a las {hora}hrs.',
+    vars: ['anterior', 'nuevo', 'fecha', 'hora'],
+  },
+  {
     id: 'casa_asignada',
     label: 'Casa Asignada (Amo de Casa)',
     desc: 'Se envía al Usuario Amo de Casa vinculado cuando su casa es asignada a una predicación de casa en casa.',
@@ -33271,6 +33312,134 @@ async function devOnboardingAll() {
 }
 </script>
 <script>
+/* ===== REASIGNAR ENCARGADO (v1.80) ===== */
+// El Encargado de una asignación de Casa en casa (campo assignments.conductor) puede cederle el cargo a otro
+// conductor de la lista existente (tabla conductores). Se actualizan conductor, conductor_id y phone, igual que al
+// editar la asignación. Avisa: al nuevo Encargado, a los Administradores de Predicación (admin con el módulo
+// "Asignaciones") y al DEV. Sin columnas nuevas en Supabase.
+let _reassignPick = null, _reassignBusy = false;
+function _reassignFullName(c) { return ((c.nombre || '') + ' ' + (c.apellido || '')).trim(); }
+function _reassignCurrentAssignment() {
+  const panel = document.getElementById('detail-panel');
+  return (panel && assignments.find(x => x.id === panel._openAssignmentId)) || null;
+}
+async function detailReassignEncargado() {
+  const a = _reassignCurrentAssignment();
+  if (!a) return;
+  if (!currentUser || !_namesMatch(getIdentityName(), a.conductor)) { showToast('Solo el Encargado puede reasignar esta asignación.', 'error'); return; }
+  if (!conductores.length) {
+    try { const { data } = await sb.from('conductores').select('*').order('apellido').order('nombre'); conductores = data || []; } catch {}
+  }
+  _reassignPick = null;
+  const s = document.getElementById('reassign-enc-search'); if (s) s.value = '';
+  document.getElementById('reassign-enc-error').style.display = 'none';
+  document.getElementById('reassign-enc-step-pick').style.display = '';
+  document.getElementById('reassign-enc-step-confirm').style.display = 'none';
+  reassignEncRenderList('');
+  document.getElementById('reassign-enc-modal').classList.add('open');
+}
+function closeReassignEncModal() { document.getElementById('reassign-enc-modal')?.classList.remove('open'); _reassignPick = null; }
+function reassignEncRenderList(q) {
+  const a = _reassignCurrentAssignment();
+  const list = document.getElementById('reassign-enc-list');
+  if (!a || !list) return;
+  const norm = s => (s || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const nq = norm(q).trim();
+  const items = conductores
+    .filter(c => c.id !== a.conductor_id && !_namesMatch(_reassignFullName(c), a.conductor))
+    .filter(c => !nq || norm(_reassignFullName(c)).includes(nq));
+  if (!items.length) {
+    list.innerHTML = '<div style="font-size:0.84rem;color:var(--text3)">' + (nq ? 'Ningún conductor coincide con la búsqueda.' : 'No hay otros conductores en la lista.') + '</div>';
+    return;
+  }
+  const esc = s => String(s).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+  list.innerHTML = items.map(c => {
+    const name = _reassignFullName(c);
+    const ini = name.split(' ').filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+    let col = 'var(--accent)'; try { col = userColor(name) || col; } catch {}
+    return '<button type="button" onclick="reassignEncPick(\'' + c.id + '\')" style="display:flex;align-items:center;gap:10px;padding:0.65rem 0.8rem;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);font-family:var(--font);font-size:0.92rem;font-weight:600;cursor:pointer;text-align:left">' +
+      '<span style="width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:800;color:#fff;background:' + col + ';flex-shrink:0">' + esc(ini) + '</span>' + esc(name) + '</button>';
+  }).join('');
+}
+function reassignEncPick(id) {
+  const c = conductores.find(x => x.id === id); if (!c) return;
+  _reassignPick = id;
+  document.getElementById('reassign-enc-error').style.display = 'none';
+  const nm = _reassignFullName(c).replace(/[&<>]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[ch]));
+  document.getElementById('reassign-enc-confirm-text').innerHTML = '¿Quieres cederle el cargo de Encargado a <b>' + nm + '</b>?<br><span style="color:var(--text3);font-size:0.84rem">Dejarás de ser el Encargado de esta asignación y ya no podrás reasignarla.</span>';
+  document.getElementById('reassign-enc-step-pick').style.display = 'none';
+  document.getElementById('reassign-enc-step-confirm').style.display = '';
+}
+function reassignEncBack() {
+  _reassignPick = null;
+  document.getElementById('reassign-enc-error').style.display = 'none';
+  document.getElementById('reassign-enc-step-confirm').style.display = 'none';
+  document.getElementById('reassign-enc-step-pick').style.display = '';
+}
+async function reassignEncConfirm() {
+  if (_reassignBusy || !_reassignPick) return;
+  const a = _reassignCurrentAssignment();
+  const nc = conductores.find(c => c.id === _reassignPick);
+  if (!a || !nc) return;
+  const btn = document.getElementById('reassign-enc-confirm-btn');
+  _reassignBusy = true; if (btn) { btn.disabled = true; btn.textContent = 'Guardando…'; }
+  try {
+    // Se revalida contra la base de datos por si el cargo ya cambió (por el Administrador o desde otro dispositivo).
+    const { data: cur, error: e0 } = await sb.from('assignments').select('conductor').eq('id', a.id).maybeSingle();
+    if (e0) throw e0;
+    if (cur && !_namesMatch(getIdentityName(), cur.conductor)) {
+      a.conductor = cur.conductor;
+      showError('reassign-enc-error', 'Ya no eres el Encargado de esta asignación.');
+      return;
+    }
+    const nuevo = _reassignFullName(nc);
+    const anterior = a.conductor || getIdentityName();
+    const patch = { conductor: nuevo, conductor_id: nc.id, phone: nc.telefono || null };
+    const { error } = await sb.from('assignments').update(patch).eq('id', a.id);
+    if (error) throw error;
+    Object.assign(a, patch);
+    closeReassignEncModal();
+    showToast(nuevo + ' ahora es el Encargado', 'success');
+    notifyEncargadoReassigned(a, anterior, nuevo).catch(err => console.warn('No se pudo notificar el cambio de Encargado:', err && err.message));
+    try { viewAssignment(a.id); } catch {}
+    try { if (typeof renderSchedule === 'function') renderSchedule(); } catch {}
+  } catch (err) {
+    showError('reassign-enc-error', 'No se pudo reasignar: ' + ((err && err.message) || err));
+  } finally {
+    _reassignBusy = false;
+    if (btn) { btn.disabled = false; btn.textContent = 'Confirmar'; }
+  }
+}
+// Avisa al nuevo Encargado, a los Administradores de Predicación y al DEV. Cada uno recibe UNA sola notificación:
+// el nuevo Encargado una propia, los administradores una compartida (target_names) y el DEV la suya (dev_only).
+async function notifyEncargadoReassigned(a, anterior, nuevo) {
+  const d = new Date(a.date + 'T00:00:00');
+  const fecha = typeof fmtCasaLongDate === 'function' ? fmtCasaLongDate(d) : d.toLocaleDateString(_uiDateLocale(), { weekday: 'long', day: 'numeric', month: 'long' });
+  const hora = a.time ? a.time.substring(0, 5) : '';
+  const tplNew = renderTemplate('encargado_cedido', { anterior, fecha, hora });
+  const tplAdm = renderTemplate('encargado_reasignado', { anterior, nuevo, fecha, hora });
+  const low = s => (s || '').trim().toLowerCase();
+  const excl = new Set([low(nuevo), low(getIdentityName()), low(currentUser && currentUser.name)]);
+  let adminNames = [], devNames = [];
+  try {
+    const { data } = await sb.from('platform_users').select('name, role, permissions').in('role', ['admin', 'dev']);
+    (data || []).forEach(u => {
+      if (!u.name || excl.has(low(u.name))) return;
+      if (u.role === 'dev') devNames.push(u.name);
+      else if (canAccessModule(parsePermissions(u.permissions), 'assignments')) adminNames.push(u.name);
+    });
+  } catch (e) { console.warn('No se pudo resolver administradores:', e.message); }
+  const rows = [{ title: tplNew.title, body: tplNew.body, target_names: [nuevo], notif_category: 'casa' }];
+  if (adminNames.length) rows.push({ title: tplAdm.title, body: tplAdm.body, target_names: adminNames, notif_category: 'casa' });
+  rows.push({ title: tplAdm.title, body: tplAdm.body, notif_category: 'casa', dev_only: true });
+  await sb.from('notifications').insert(rows);
+  // Push (best-effort). Los DEV ven la suya en la app por dev_only; aquí solo se suman al aviso push de los administradores.
+  notifyUsersPush('casa', { title: tplNew.title, body: tplNew.body, target_names: [nuevo] }).catch(() => {});
+  const pushAdm = adminNames.concat(devNames);
+  if (pushAdm.length) notifyUsersPush('casa', { title: tplAdm.title, body: tplAdm.body, target_names: pushAdm }).catch(() => {});
+}
+</script>
+<script>
 /* ===== CARRITOS v0.34.11-alpha ===== */
 // =========================================================================
 // CARRITOS (v0.34.11-alpha)
@@ -36784,7 +36953,8 @@ const _DAM_ICON = {
   live: '<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>',
   weather: '<svg viewBox="0 0 24 24"><path d="M17.5 19H8a5 5 0 1 1 1.35-9.8A6 6 0 0 1 21 11.5 4.5 4.5 0 0 1 17.5 19z"/></svg>',
   share: '<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>',
-  sidebar: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M14 4v16"/></svg>'
+  sidebar: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M14 4v16"/></svg>',
+  swap: '<svg viewBox="0 0 24 24"><path d="M17 3l4 4-4 4"/><path d="M3 7h18"/><path d="M7 21l-4-4 4-4"/><path d="M21 17H3"/></svg>'
 };
 // v1.69.0: el menú se arma según quién mira: Editar y Asignar nuevo territorio (Administradores de Predicación; esto último
 // también el Encargado de la asignación), Clima y Compartir para cualquiera (incluidos Visitantes).
@@ -36795,6 +36965,7 @@ function detailRenderMoreMenu() {
   let h='';
   if (c.canManage) h+=`<button type="button" onclick="detailMoreAction('edit')">${_DAM_ICON.edit}Editar asignación</button>`;
   if (c.canAddTer) h+=`<button type="button" onclick="detailMoreAction('newter')">${_DAM_ICON.ter}Asignar nuevo territorio</button>`;
+  if (c.canReassign) h+=`<button type="button" onclick="detailMoreAction('reassign')">${_DAM_ICON.swap}Reasignar Encargado</button>`; // v1.80: solo el Encargado de la asignación
   const liveOn=localStorage.getItem('fleming_live_enabled')!=='false';
   const _msn=(typeof isModoSencilloActive==='function') && isModoSencilloActive(); // v1.77: sin Live ni Clima en Modo Sencillo
   if(!_msn) h+=`<button type="button" class="dam-toggle-row" role="switch" aria-checked="${liveOn}" onclick="detailMoreAction('live')">${_DAM_ICON.live}<span class="dam-label">Live</span><span class="dam-switch${liveOn?' on':''}"><span class="dam-thumb"></span></span></button>`;
@@ -36846,6 +37017,7 @@ function detailMoreAction(action) {
   if (action==='share') shareCasaEnCasaAssignment();
   else if (action==='edit' && id) goToAdminAssignment(id);
   else if (action==='newter' && id) detailAssignNewTerritory();
+  else if (action==='reassign' && id) detailReassignEncargado();
 }
 function detailConfigureAssignmentActions(a, canManage, isCasaEnCasa=true) {
   const isAssignment = !!a && isCasaEnCasa && !['evento','visita','especial'].includes(String(a.type||'').toLowerCase());
@@ -36858,7 +37030,7 @@ function detailConfigureAssignmentActions(a, canManage, isCasaEnCasa=true) {
   const esEncargado = isAssignment && !!currentUser && _namesMatch(getIdentityName(), a.conductor);
   const usedTers = a ? [a.territory_id, a.territory_id_2, a.territory_id_3].filter(Boolean).length : 0;
   if (menu) {
-    menu._ctx = { canManage: !!canManage && isAssignment, canAddTer: isAssignment && (!!canManage || esEncargado) && usedTers < 3 };
+    menu._ctx = { canManage: !!canManage && isAssignment, canAddTer: isAssignment && (!!canManage || esEncargado) && usedTers < 3, canReassign: isAssignment && esEncargado };
     menu.style.display = isAssignment ? '' : 'none';
     if (menu.classList.contains('open')) detailRenderMoreMenu();
   }
