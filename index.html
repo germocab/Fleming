@@ -1641,6 +1641,22 @@
   .lme-sl input { width: 100%; }
   .gre-row button.on { background: var(--accent); color: #fff; }
   .lme-hist button:disabled { opacity: 0.4; cursor: default; }
+  /* v1.80.2f: selector de mapa — el título "Mapa" abre un menú con Mapa en PDF / LiveMap */
+  .full-map-lightbox .subpage-topbar .pill-header-title.fm-title-btn { pointer-events: auto; cursor: pointer; font-family: inherit; gap: 6px; -webkit-tap-highlight-color: transparent; }
+  .fm-title-chev { width: 14px; height: 14px; flex-shrink: 0; stroke: currentColor; fill: none; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.18s ease; }
+  [aria-expanded="true"] > .fm-title-chev { transform: rotate(180deg); }
+  .lm-title-btn { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border: 0; border-radius: 10px; background: transparent; color: var(--text); font: 700 0.95rem var(--font); cursor: pointer; }
+  .lm-title-btn:hover { background: var(--surface2); }
+  .map-switcher { display: none; position: fixed; z-index: 1100; min-width: 232px; max-width: calc(100vw - 16px); padding: 6px; border-radius: 16px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .map-switcher.open { display: block; animation: fadeIn 0.15s ease; }
+  .map-switcher button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border: 0; border-radius: 11px; background: transparent; color: var(--text); font: 600 0.9rem var(--font); text-align: left; cursor: pointer; }
+  .map-switcher button:hover { background: var(--surface2); }
+  .map-switcher .ms-ico { flex-shrink: 0; width: 34px; height: 34px; border-radius: 10px; background: var(--accent-light); color: var(--accent); display: flex; align-items: center; justify-content: center; }
+  .map-switcher .ms-ico svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .map-switcher .ms-txt { flex: 1; min-width: 0; line-height: 1.25; }
+  .map-switcher .ms-sub { display: block; margin-top: 1px; font: 500 0.72rem var(--font); color: var(--text3); }
+  .map-switcher .ms-check { flex-shrink: 0; width: 18px; height: 18px; stroke: var(--accent); fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+  .map-switcher button.on .ms-check { opacity: 1; }
   .detail-map-offline-placeholder {
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
     min-height: 160px; padding: 1.5rem 1rem; color: var(--text3);
@@ -9340,10 +9356,10 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
         <div id="admin-tips-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Tips</div></div></div>
       </div>
 
-      <!-- ── LiveMap (v1.80.2, Experimento) — Administración → FlemingApp → LiveMap: une y calibra los mapas (solo DEV) ── -->
+      <!-- ── LiveMap (v1.80.2) — Administración → FlemingApp → LiveMap: une y calibra los mapas (solo DEV) ── -->
       <div class="admin-section" id="admin-livemap">
-        <div style="display:flex;align-items:center;margin-bottom:.4rem"><span style="flex:1;font-size:.95rem;font-weight:700">LiveMap</span><span class="voz-kind">Experimental</span></div>
-        <div class="voz-hint">Une los mapas SVG de los territorios (los de los reportes) en un solo mapa de la congregación, sin nombres de calles, y califícalo con puntos GPS para que los usuarios vean su ubicación en todo el territorio. Cada usuario lo activa en Configuración → Experimentos y lo abre desde Territorios → Mapa de la congregación.</div>
+        <div style="display:flex;align-items:center;margin-bottom:.4rem"><span style="flex:1;font-size:.95rem;font-weight:700">LiveMap</span></div>
+        <div class="voz-hint">Une los mapas SVG de los territorios (los de los reportes) en un solo mapa de la congregación, sin nombres de calles, y califícalo con puntos GPS para que los usuarios vean su ubicación en todo el territorio. Está activo para todos los usuarios: en Territorios → Mapa de la congregación (que sigue abriéndose en PDF), tocando el título «Mapa» eligen entre Mapa en PDF y LiveMap.</div>
         <div class="gre-quality" id="lm-admin-status" style="margin:.8rem 0"></div>
         <button type="button" class="btn-secondary" onclick="lmOpenEditor()" style="width:100%">Unir, acoplar y calibrar mapas</button>
       </div>
@@ -11090,22 +11106,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
       <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">El navegador puede exigir una interacción del usuario para activar la pantalla completa. Si bloquea la activación automática, usa el control de pantalla completa del navegador.</div>
     </div>
 
-    <div class="profile-section" style="margin-top:1rem">
-      <div class="profile-row" style="cursor:pointer" onclick="toggleLiveMapExperiment()">
-        <div class="profile-row-icon" style="background:var(--accent-light);color:var(--accent)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 22s-7-6.1-7-12a7 7 0 0 1 14 0c0 5.9-7 12-7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label">LiveMap</div>
-          <div class="profile-row-value" style="font-size:0.8rem">Tu ubicación en vivo sobre el mapa de toda la congregación</div>
-        </div>
-        <div id="livemap-exp-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s">
-          <div id="livemap-exp-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
-      </div>
-      <div style="padding:0 1rem 0.9rem;font-size:0.75rem;color:var(--text3);line-height:1.4">Se abre con el botón LiveMap dentro de Territorios → Mapa de la congregación. Requiere que el usuario DEV haya unido y calibrado los mapas en Administración.</div>
-    </div>
-
+    
   </div>
 </div>
 
@@ -11453,8 +11454,8 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
 <!-- v1.80.2: LiveMap — visor (usuarios) y editor de acoplamiento/calibración (solo DEV) -->
 <div class="gre-overlay" id="livemap-viewer" style="z-index:1002">
   <div class="gre-top">
-    <button type="button" class="gre-x" onclick="closeLiveMap()" aria-label="Cerrar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    <div id="lm-title">LiveMap</div>
+    <button type="button" class="gre-x" onclick="closeLiveMapAll()" aria-label="Cerrar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <button type="button" id="lm-title" class="lm-title-btn" onclick="mapSwitcherToggle(this)" aria-haspopup="menu" aria-expanded="false" title="Cambiar de mapa">LiveMap<svg viewBox="0 0 24 24" class="fm-title-chev"><polyline points="6 9 12 15 18 9"/></svg></button>
     <div style="margin-left:auto;display:flex;gap:8px">
       <button type="button" class="gre-x" onclick="lmCenterMe()" title="Centrar en mi ubicación" aria-label="Centrar en mi ubicación"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/><line x1="12" y1="1" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="23"/><line x1="1" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="23" y2="12"/></svg></button>
       <button type="button" class="gre-x" onclick="lmFitView()" title="Ver todo" aria-label="Ver todo el mapa"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M16 21h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button>
@@ -11669,7 +11670,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
     <button class="pill-back-btn" onclick="closeFullMap()" title="Territorios">
       <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
     </button>
-    <span class="pill-header-title">Mapa</span>
+    <button type="button" class="pill-header-title fm-title-btn" id="fm-title-btn" onclick="mapSwitcherToggle(this)" aria-haspopup="menu" aria-expanded="false" title="Cambiar de mapa">Mapa<svg viewBox="0 0 24 24" class="fm-title-chev"><polyline points="6 9 12 15 18 9"/></svg></button>
     <div class="subpage-topbar-right full-map-lb-actions">
       <div class="fm-top-row">
       <div class="fm-page-nav" id="fm-page-nav" style="display:none">
@@ -11677,7 +11678,6 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
         <span id="fm-page-indicator">1/1</span>
         <button onclick="changeFullMapPage(1)" id="fm-page-next"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
       </div>
-      <button class="full-map-lb-download-btn" id="fm-livemap-btn" onclick="openLiveMap()" style="display:none" title="LiveMap" aria-label="LiveMap"><svg viewBox="0 0 24 24"><path d="M12 22s-7-6.1-7-12a7 7 0 0 1 14 0c0 5.9-7 12-7 12z"/><circle cx="12" cy="10" r="2.5"/></svg></button>
       <button class="full-map-lb-download-btn" onclick="downloadFullMap()" title="Descargar PDF" aria-label="Descargar PDF">
         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       </button>
@@ -12067,7 +12067,7 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.77.9: Nuevo experimento "Espaciado del contenido": slider de 10 niveles (predeterminado 2 = espaciado actual).
 // v1.77.8: (1) La dirección en el detalle de una asignación de casa en casa es un poco más grande (solo esa pantalla). (2) El botón de Clima de la asignación ya no abre el sitio del clima. (3) Nuevo ícono de Carritos (Inicio, Mis Turnos, Ajustes > Notificaciones y menú de Predicación). (4) Nuevo experimento "Resolución reducida en medios" para imágenes y PDF. (5) Carga más rápida: pdf.js y QR con defer, preconnect, fuentes con display=swap, decodificación asíncrona de imágenes.
 // v1.77.5: (1) Detalle de un Territorio: el título del encabezado ahora dice "Detalles del territorio" (el número ya aparece en el círculo de color). (2) Más opciones en Inicio incluye "Personalizar Inicio" (el botón al final de Inicio se mantiene). (3) Nuevo experimento "Territorios sin vista previa": las tarjetas de Territorios muestran solo el degradé y el nombre.
-const APP_VERSION = '1.80.2d'; // v1.80.2d — LiveMap: selección múltiple de territorios con Shift + clic para moverlos, rotarlos o cambiarles el tamaño juntos, y Ctrl + Z / Ctrl + Y para deshacer y rehacer en el editor (Administración → LiveMap, solo DEV); v1.80.2 — LiveMap (Experimento): une los mapas SVG de los territorios en un solo mapa de la congregación con ubicación GPS (acople y calibración en Administración → LiveMap, solo DEV; se activa en Experimentos y se abre desde Mapa de la congregación); v1.80.1.5 — Mapa interactivo va con Live (sin interruptor propio) y sin etiqueta sobre el mapa; v1.80.1 — Mapa interactivo: ubicación GPS sobre los mapas PNG de territorio (georreferenciación por el usuario DEV; se activa en Más opciones de la asignación o en Funciones especiales); v1.80 — Reasignar Encargado: el Encargado de una asignación de Casa en casa puede cederle el cargo a otro conductor desde Más Opciones (avisa al nuevo Encargado, a los Administradores de Predicación y al DEV); v1.79.100d — onboarding de bienvenida (por cuenta, controlado por el DEV); v1.79.10 — sin No Pasar nuevos en Para tí; detalle de punto de carrito con Recordatorios (sin Fotos ni búsqueda) y barra superior fija con modo oscuro; filtro de Carritos unificado; Aseo solo a los dos grupos asignados; v1.79.5 — Otros Grupos con títulos como las fechas; botón Volver arriba sobre la NavBar inferior; Más Opciones sin Perfil en la UI nueva; sin saludo emergente; v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
+const APP_VERSION = '1.80.2f'; // v1.80.2f — LiveMap deja de ser experimental y viene activo para todos: el Mapa de la congregación sigue abriéndose en PDF y, al tocar el título «Mapa», se elige entre Mapa en PDF y LiveMap; v1.80.2d — LiveMap: selección múltiple de territorios con Shift + clic para moverlos, rotarlos o cambiarles el tamaño juntos, y Ctrl + Z / Ctrl + Y para deshacer y rehacer en el editor (Administración → LiveMap, solo DEV); v1.80.2 — LiveMap (Experimento): une los mapas SVG de los territorios en un solo mapa de la congregación con ubicación GPS (acople y calibración en Administración → LiveMap, solo DEV; se activa en Experimentos y se abre desde Mapa de la congregación); v1.80.1.5 — Mapa interactivo va con Live (sin interruptor propio) y sin etiqueta sobre el mapa; v1.80.1 — Mapa interactivo: ubicación GPS sobre los mapas PNG de territorio (georreferenciación por el usuario DEV; se activa en Más opciones de la asignación o en Funciones especiales); v1.80 — Reasignar Encargado: el Encargado de una asignación de Casa en casa puede cederle el cargo a otro conductor desde Más Opciones (avisa al nuevo Encargado, a los Administradores de Predicación y al DEV); v1.79.100d — onboarding de bienvenida (por cuenta, controlado por el DEV); v1.79.10 — sin No Pasar nuevos en Para tí; detalle de punto de carrito con Recordatorios (sin Fotos ni búsqueda) y barra superior fija con modo oscuro; filtro de Carritos unificado; Aseo solo a los dos grupos asignados; v1.79.5 — Otros Grupos con títulos como las fechas; botón Volver arriba sobre la NavBar inferior; Más Opciones sin Perfil en la UI nueva; sin saludo emergente; v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -27074,35 +27074,52 @@ async function greRemove() {
   const id = _greTerId; greClose(); greUpdateModalStatus(id);
 }
 
-// ══ v1.80.2: LIVEMAP (Experimento) ═══════════════════════════════════════════════════════════════════════════
+// ══ v1.80.2: LIVEMAP ═══════════════════════════════════════════════════════════════════════════
 // Une los mapas SVG de los territorios (los de los reportes) en un solo mapa de la congregación, sin nombres de calles,
 // y le aplica la misma ubicación GPS del Mapa interactivo. El usuario DEV acopla los mapas (mueve / rota / escala cada
-// uno) y calibra el conjunto con puntos GPS en Administración → FlemingApp → LiveMap. Se activa en Configuración →
-// Experimentos y se abre desde "Mapa de la congregación" (botón circular "LiveMap").
+// uno) y calibra el conjunto con puntos GPS en Administración → FlemingApp → LiveMap. Desde v1.80.2f viene activo para todos
+// (ya no es experimental): el Mapa de la congregación abre en PDF y, al tocar el título "Mapa", se elige entre Mapa en PDF y LiveMap.
 // Se guarda en platform_settings (key 'livemap_layout'):
 //   { v:1, items:[{ id, x, y, s, r, w, h, hidden }], pts:[{ t:<id territorio>, u, v, lat, lng }] }
 //   x,y = centro del mapa del territorio en el lienzo · s = escala · r = rotación (grados) · w,h = viewBox del SVG
 //   Los puntos GPS quedan anclados a un territorio (u,v locales del SVG): si luego se mueve un mapa, la calibración lo sigue.
-const LM_KEY = 'livemap_layout', LM_EXP_KEY = 'fleming_experiment_livemap', LM_LAYOUT_LS = 'fleming_livemap_layout_v1', LM_CACHE = 'fleming-livemap-v1';
+const LM_KEY = 'livemap_layout', LM_LAYOUT_LS = 'fleming_livemap_layout_v1', LM_CACHE = 'fleming-livemap-v1';
 let _lmLayout = null, _lmAssets = {};
 
-function isLiveMapExperimentEnabled() { try { return localStorage.getItem(LM_EXP_KEY) === 'true'; } catch (e) { return false; } }
-function updateLiveMapExperimentUI() {
-  const on = isLiveMapExperimentEnabled(), tr = document.getElementById('livemap-exp-toggle'), th = document.getElementById('livemap-exp-thumb');
-  if (tr) tr.style.background = on ? 'var(--accent)' : 'var(--surface3)';
-  if (th) th.style.left = on ? '21px' : '3px';
+async function lmUpdateEntryButton() { try { await lmGetLayout(); } catch (e) {} } // precarga la configuración (sirve también sin conexión)
+
+// ── Selector de mapa (v1.80.2f) ──
+// El visor del Mapa de la congregación abre siempre en PDF. Al tocar el título ("Mapa" o "LiveMap") sale un menú con las dos opciones.
+// LiveMap se muestra encima del visor PDF: elegir "Mapa en PDF" cierra LiveMap y deja ver el PDF de abajo.
+function lmIsLiveOpen() { const v = document.getElementById('livemap-viewer'); return !!(v && v.classList.contains('open')); }
+let _msBtn = null;
+function _msOutside(e) { const m = document.getElementById('map-switcher'); if (m && !m.contains(e.target) && !(_msBtn && _msBtn.contains(e.target))) mapSwitcherClose(); }
+function _msKey(e) { if (e.key === 'Escape') mapSwitcherClose(); }
+function mapSwitcherClose() {
+  const m = document.getElementById('map-switcher'); if (m) m.classList.remove('open');
+  if (_msBtn) _msBtn.setAttribute('aria-expanded', 'false'); _msBtn = null;
+  document.removeEventListener('pointerdown', _msOutside, true); document.removeEventListener('keydown', _msKey, true); window.removeEventListener('resize', mapSwitcherClose);
 }
-function toggleLiveMapExperiment() {
-  const next = !isLiveMapExperimentEnabled();
-  try { localStorage.setItem(LM_EXP_KEY, String(next)); } catch (e) {}
-  updateLiveMapExperimentUI(); lmUpdateEntryButton();
-  try { trackEvent('livemap_experiment', { enabled: next }); } catch (e) {}
+function mapSwitcherToggle(btn) {
+  const m0 = document.getElementById('map-switcher');
+  if (m0 && m0.classList.contains('open')) { mapSwitcherClose(); return; }
+  let m = m0;
+  if (!m) { m = document.createElement('div'); m.id = 'map-switcher'; m.className = 'map-switcher'; m.setAttribute('role', 'menu'); document.body.appendChild(m); }
+  const live = lmIsLiveOpen(), ready = _lmLayout === null || _lmLayout.items.some(i => !i.hidden);
+  const opt = (kind, icon, name, sub, on) => '<button type="button" role="menuitemradio" aria-checked="' + on + '" class="' + (on ? 'on' : '') + '" onclick="mapSwitcherPick(\'' + kind + '\')"><span class="ms-ico"><svg viewBox="0 0 24 24">' + icon + '</svg></span><span class="ms-txt">' + name + '<span class="ms-sub">' + sub + '</span></span><svg class="ms-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></button>';
+  m.innerHTML =
+    opt('pdf', '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>', 'Mapa en PDF', 'El mapa oficial de la congregación', !live) +
+    opt('live', '<path d="M12 22s-7-6.1-7-12a7 7 0 0 1 14 0c0 5.9-7 12-7 12z"/><circle cx="12" cy="10" r="2.5"/>', 'LiveMap', ready ? 'Tu ubicación en vivo sobre el mapa' : 'Aún no está configurado', live);
+  _msBtn = btn; btn.setAttribute('aria-expanded', 'true'); m.classList.add('open');
+  const r = btn.getBoundingClientRect(), w = m.offsetWidth;
+  m.style.top = (r.bottom + 8) + 'px'; m.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, r.left + r.width / 2 - w / 2)) + 'px';
+  document.addEventListener('pointerdown', _msOutside, true); document.addEventListener('keydown', _msKey, true); window.addEventListener('resize', mapSwitcherClose);
 }
-async function lmUpdateEntryButton() {
-  const b = document.getElementById('fm-livemap-btn'); if (!b) return;
-  if (!isLiveMapExperimentEnabled()) { b.style.display = 'none'; return; }
-  b.style.display = '';
-  try { const L = await lmGetLayout(); b.style.display = (isLiveMapExperimentEnabled() && L.items.length) ? '' : 'none'; } catch (e) {}
+async function mapSwitcherPick(kind) {
+  mapSwitcherClose();
+  if (kind === 'live') { if (!lmIsLiveOpen()) await openLiveMap(); }
+  else if (lmIsLiveOpen()) closeLiveMap();
+  try { trackEvent('map_view', { view: kind }); } catch (e) {}
 }
 
 // ── Datos ──
@@ -27224,7 +27241,6 @@ function _lmZoom() {
   return _lmZ;
 }
 async function openLiveMap() {
-  if (!isLiveMapExperimentEnabled()) return;
   const layout = await lmGetLayout(true);
   if (!layout.items.filter(i => !i.hidden).length) { showToast('LiveMap aún no está configurado: el usuario DEV debe unir los mapas en Administración.', ''); return; }
   _lmView = { layout, b: lmBounds(layout.items, 0.04), fit: lmFitGeoref(layout, lmBounds(layout.items, 0.04)) };
@@ -27233,7 +27249,9 @@ async function openLiveMap() {
   lmStartWatch();
   lmLoadAssets(layout.items.filter(i => !i.hidden).map(i => i.id), lmRenderViewer);
 }
+function closeLiveMapAll() { closeLiveMap(); closeFullMap(); } // la X de LiveMap sale de todo el Mapa de la congregación
 function closeLiveMap() {
+  mapSwitcherClose();
   document.getElementById('livemap-viewer').classList.remove('open');
   lmStopWatch(); _lmView = null; _lmZoom().reset();
 }
@@ -29753,6 +29771,7 @@ function changeFullMapPage(dir) {
 }
 
 function closeFullMap() {
+  mapSwitcherClose();
   document.getElementById('full-map-lightbox').classList.remove('open');
   document.body.style.overflow = '';
   fullMapZoomCtrl.reset();
@@ -38764,7 +38783,6 @@ function isFullscreenExperimentEnabled() {
   try { return localStorage.getItem('fleming_experiment_fullscreen') === 'true'; } catch (e) { return false; }
 }
 function updateFullscreenExperimentUI() {
-  try { updateLiveMapExperimentUI(); } catch (e) {}
   const on = isFullscreenExperimentEnabled();
   const track = document.getElementById('fullscreen-experiment-toggle');
   const thumb = document.getElementById('fullscreen-experiment-thumb');
