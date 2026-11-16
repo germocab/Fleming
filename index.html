@@ -1650,6 +1650,17 @@
   #livemap-viewer .subpage-topbar > .pill-back-btn, #livemap-viewer .subpage-topbar-right .pill-back-btn { pointer-events: auto; }
   #livemap-viewer .subpage-topbar .pill-header-title.fm-title-btn { pointer-events: auto; cursor: pointer; font-family: inherit; gap: 6px; -webkit-tap-highlight-color: transparent; }
   #livemap-viewer .subpage-topbar-right { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 0.85rem); right: 1rem; margin-left: 0; }
+  /* v1.80.4: LiveMap en modo oscuro y etiqueta de ubicación */
+  :root[data-theme="dark"] .lm-canvas { background: #1f1f22; box-shadow: 0 2px 16px rgba(0,0,0,0.65); }
+  :root[data-theme="dark"] .lm-text { color: #e8eaed; text-shadow: 0 0 2px #000, 0 0 3px #000, 0 0 6px #000; }
+  :root[data-theme="dark"] #livemap-viewer .gre-stage, :root[data-theme="dark"] #lm-editor .gre-stage { background: #151517; }
+  @media (prefers-color-scheme: dark) {
+    :root[data-theme="auto"] .lm-canvas { background: #1f1f22; box-shadow: 0 2px 16px rgba(0,0,0,0.65); }
+    :root[data-theme="auto"] .lm-text { color: #e8eaed; text-shadow: 0 0 2px #000, 0 0 3px #000, 0 0 6px #000; }
+    :root[data-theme="auto"] #livemap-viewer .gre-stage, :root[data-theme="auto"] #lm-editor .gre-stage { background: #151517; }
+  }
+  .lm-here { position: absolute; left: 14px; bottom: calc(env(safe-area-inset-bottom, 0px) + 1.1rem); z-index: 5; padding: 7px 13px; border-radius: 999px; background: var(--nav-bg); backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%); -webkit-backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%); border: 1px solid var(--border); box-shadow: var(--shadow); color: var(--text); font: 600 0.8rem var(--font); pointer-events: none; max-width: calc(100% - 90px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #livemap-viewer.sheet-open .lm-here { display: none !important; }
   /* v1.80.3: textos de LiveMap y panel inferior del territorio */
   .lm-text { position: absolute; white-space: pre; text-align: center; line-height: 1.15; font-family: var(--font); font-weight: 700; font-size: calc(var(--cw, 400px) * var(--fsr, 0.02)); color: #1f2937; text-shadow: 0 0 2px #fff, 0 0 3px #fff, 0 0 5px #fff; pointer-events: none; transform-origin: center center; user-select: none; -webkit-user-select: none; }
   #lme-canvas .lm-text { pointer-events: auto; cursor: pointer; }
@@ -11509,6 +11520,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
       <div class="gm-marker gre-test" id="lm-me" style="display:none"><span class="gm-acc"></span><span class="gm-hd"></span><span class="gm-dot"></span></div>
     </div>
     <div class="gm-pill" id="lm-pill" style="display:none"></div>
+    <div class="lm-here" id="lm-here" style="display:none"></div>
     <div class="fm-zoom-stack lm-zoom-stack">
       <button type="button" class="pill-back-btn" id="lm-fit-btn" onclick="lmZoomAction('fit')" title="Ajustar tamaño del mapa para verse completo" aria-label="Ajustar tamaño del mapa para verse completo"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M16 21h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button>
       <button type="button" class="pill-back-btn" id="lm-zoom-in-btn" onclick="lmZoomAction('in')" title="Acercar" aria-label="Acercar"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg></button>
@@ -11780,12 +11792,6 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
       <div class="form-group2">
         <label class="form-label2">Número del grupo</label>
         <input type="number" min="1" class="form-input" id="grupo-numero" placeholder="Ej: 1">
-      </div>
-      <!-- v1.79.50: territorios que el Encargado de este Grupo de Servicio puede agregarse a sí mismo (Reporte simple de los Sábados) -->
-      <div class="form-group2">
-        <label class="form-label2">Territorios permitidos <span style="font-weight:400;color:var(--text3)">(opcional)</span></label>
-        <div id="grupo-ter-chips" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px"></div>
-        <div style="font-size:0.75rem;color:var(--text3);line-height:1.4;margin-top:8px">El Encargado de una asignación de este grupo podrá agregar a su salida cualquiera de estos territorios (por ejemplo, desde el Reporte simple de los Sábados). Sin selección, no podrá agregar territorios por su cuenta.</div>
       </div>
       <div id="grupo-error" class="form-error" style="display:none"></div>
     </div>
@@ -12133,7 +12139,7 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.77.9: Nuevo experimento "Espaciado del contenido": slider de 10 niveles (predeterminado 2 = espaciado actual).
 // v1.77.8: (1) La dirección en el detalle de una asignación de casa en casa es un poco más grande (solo esa pantalla). (2) El botón de Clima de la asignación ya no abre el sitio del clima. (3) Nuevo ícono de Carritos (Inicio, Mis Turnos, Ajustes > Notificaciones y menú de Predicación). (4) Nuevo experimento "Resolución reducida en medios" para imágenes y PDF. (5) Carga más rápida: pdf.js y QR con defer, preconnect, fuentes con display=swap, decodificación asíncrona de imágenes.
 // v1.77.5: (1) Detalle de un Territorio: el título del encabezado ahora dice "Detalles del territorio" (el número ya aparece en el círculo de color). (2) Más opciones en Inicio incluye "Personalizar Inicio" (el botón al final de Inicio se mantiene). (3) Nuevo experimento "Territorios sin vista previa": las tarjetas de Territorios muestran solo el degradé y el nombre.
-const APP_VERSION = '1.80.3'; // v1.80.3 — LiveMap: textos (nombres de calles) que se pueden mover, rotar, cambiar de tamaño y mandar al frente o al fondo; respaldo descargable y restaurable desde archivo; al tocar un territorio se abre un panel inferior con su última realización, su grupo de servicio y sus Direcciones No Pasar (los controles de zoom se ocultan mientras está abierto); v1.80.2g.2 — LiveMap: corrige «JSON object requested, multiple (or no) rows returned» en cuentas de usuario y su barra de título ahora es igual a la de Mapa; v1.80.2g — LiveMap: se vuelve a leer el diseño guardado cada vez que se abre (una copia vacía o vieja ya no se da por buena), el menú no avisa «sin configurar» por su cuenta, mensajes de diagnóstico claros y verificación al guardar; controles Ajustar/Acercar/Alejar abajo a la derecha en ambos mapas; v1.80.2f — LiveMap deja de ser experimental y viene activo para todos: el Mapa de la congregación sigue abriéndose en PDF y, al tocar el título «Mapa», se elige entre Mapa en PDF y LiveMap; v1.80.2d — LiveMap: selección múltiple de territorios con Shift + clic para moverlos, rotarlos o cambiarles el tamaño juntos, y Ctrl + Z / Ctrl + Y para deshacer y rehacer en el editor (Administración → LiveMap, solo DEV); v1.80.2 — LiveMap (Experimento): une los mapas SVG de los territorios en un solo mapa de la congregación con ubicación GPS (acople y calibración en Administración → LiveMap, solo DEV; se activa en Experimentos y se abre desde Mapa de la congregación); v1.80.1.5 — Mapa interactivo va con Live (sin interruptor propio) y sin etiqueta sobre el mapa; v1.80.1 — Mapa interactivo: ubicación GPS sobre los mapas PNG de territorio (georreferenciación por el usuario DEV; se activa en Más opciones de la asignación o en Funciones especiales); v1.80 — Reasignar Encargado: el Encargado de una asignación de Casa en casa puede cederle el cargo a otro conductor desde Más Opciones (avisa al nuevo Encargado, a los Administradores de Predicación y al DEV); v1.79.100d — onboarding de bienvenida (por cuenta, controlado por el DEV); v1.79.10 — sin No Pasar nuevos en Para tí; detalle de punto de carrito con Recordatorios (sin Fotos ni búsqueda) y barra superior fija con modo oscuro; filtro de Carritos unificado; Aseo solo a los dos grupos asignados; v1.79.5 — Otros Grupos con títulos como las fechas; botón Volver arriba sobre la NavBar inferior; Más Opciones sin Perfil en la UI nueva; sin saludo emergente; v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
+const APP_VERSION = '1.80.4'; // v1.80.4 — LiveMap en modo oscuro (fondo oscuro y textos que se adaptan), etiqueta «Estás en el Territorio N» abajo a la izquierda, recuerda el último mapa elegido (Mapa en PDF o LiveMap) y cada Grupo de Servicio tiene su sección «Territorios del grupo» (DEV y Administradores con el módulo Grupos) que alimenta el detalle de los territorios; v1.80.3 — LiveMap: textos (nombres de calles) que se pueden mover, rotar, cambiar de tamaño y mandar al frente o al fondo; respaldo descargable y restaurable desde archivo; al tocar un territorio se abre un panel inferior con su última realización, su grupo de servicio y sus Direcciones No Pasar (los controles de zoom se ocultan mientras está abierto); v1.80.2g.2 — LiveMap: corrige «JSON object requested, multiple (or no) rows returned» en cuentas de usuario y su barra de título ahora es igual a la de Mapa; v1.80.2g — LiveMap: se vuelve a leer el diseño guardado cada vez que se abre (una copia vacía o vieja ya no se da por buena), el menú no avisa «sin configurar» por su cuenta, mensajes de diagnóstico claros y verificación al guardar; controles Ajustar/Acercar/Alejar abajo a la derecha en ambos mapas; v1.80.2f — LiveMap deja de ser experimental y viene activo para todos: el Mapa de la congregación sigue abriéndose en PDF y, al tocar el título «Mapa», se elige entre Mapa en PDF y LiveMap; v1.80.2d — LiveMap: selección múltiple de territorios con Shift + clic para moverlos, rotarlos o cambiarles el tamaño juntos, y Ctrl + Z / Ctrl + Y para deshacer y rehacer en el editor (Administración → LiveMap, solo DEV); v1.80.2 — LiveMap (Experimento): une los mapas SVG de los territorios en un solo mapa de la congregación con ubicación GPS (acople y calibración en Administración → LiveMap, solo DEV; se activa en Experimentos y se abre desde Mapa de la congregación); v1.80.1.5 — Mapa interactivo va con Live (sin interruptor propio) y sin etiqueta sobre el mapa; v1.80.1 — Mapa interactivo: ubicación GPS sobre los mapas PNG de territorio (georreferenciación por el usuario DEV; se activa en Más opciones de la asignación o en Funciones especiales); v1.80 — Reasignar Encargado: el Encargado de una asignación de Casa en casa puede cederle el cargo a otro conductor desde Más Opciones (avisa al nuevo Encargado, a los Administradores de Predicación y al DEV); v1.79.100d — onboarding de bienvenida (por cuenta, controlado por el DEV); v1.79.10 — sin No Pasar nuevos en Para tí; detalle de punto de carrito con Recordatorios (sin Fotos ni búsqueda) y barra superior fija con modo oscuro; filtro de Carritos unificado; Aseo solo a los dos grupos asignados; v1.79.5 — Otros Grupos con títulos como las fechas; botón Volver arriba sobre la NavBar inferior; Más Opciones sin Perfil en la UI nueva; sin saludo emergente; v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -14895,7 +14901,7 @@ function openGrupoAdminPage(gid) {
 function closeGrupoAdminPage() {
   const pg = document.getElementById('page-grupo-admin');
   if (pg) pg.classList.remove('open');
-  _gaId = null;
+  _gaId = null; _gaTerFor = null;
   renderAdminGrupos();
 }
 async function gaQuickAdd(gid, inputEl) {
@@ -14903,12 +14909,67 @@ async function gaQuickAdd(gid, inputEl) {
   const fresh = document.getElementById('ga-quickadd');
   if (fresh) { fresh.value = ''; fresh.focus(); }
 }
+// ── v1.80.4: territorios de cada Grupo de Servicio (DEV y Administradores con el módulo Grupos) ──
+// Se guardan en grupos.territorios_permitidos (la misma lista que usa el Reporte simple de los Sábados) y alimentan el panel de
+// detalle de los territorios en LiveMap. Un territorio pertenece a un solo grupo: al pasarlo a otro se quita del anterior.
+let _gaTerSel = [], _gaTerFor = null;
+function _gaTerOwners(terId, exceptGid) { return grupos.filter(o => o.id !== exceptGid && Array.isArray(o.territorios_permitidos) && o.territorios_permitidos.includes(terId)); }
+function _gaTerDirty() {
+  const g = grupos.find(x => x.id === _gaId); if (!g) return false;
+  const a = (Array.isArray(g.territorios_permitidos) ? g.territorios_permitidos : []).slice().sort().join(','), b = _gaTerSel.slice().sort().join(',');
+  return a !== b;
+}
+function _gaRenderTerChips() {
+  const box = document.getElementById('ga-ter-chips'); if (!box || !_gaId) return;
+  const g = grupos.find(x => x.id === _gaId); if (!g) return;
+  const can = _canManageGruposCover(), list = (territories || []).slice().sort((x, y) => (x.number || 0) - (y.number || 0));
+  if (!list.length) { box.innerHTML = '<span style="font-size:0.8rem;color:var(--text3)">No hay territorios cargados.</span>'; return; }
+  box.innerHTML = list.map(t => {
+    const on = _gaTerSel.includes(t.id), own = on ? [] : _gaTerOwners(t.id, g.id);
+    return `<button type="button" ${can ? `onclick="gaTerToggle('${t.id}')"` : 'disabled'} style="min-width:44px;height:38px;padding:0 12px;border-radius:12px;border:1px solid ${on ? 'var(--accent)' : 'var(--border)'};background:${on ? 'var(--accent)' : 'var(--surface2)'};color:${on ? '#fff' : 'var(--text)'};font:inherit;font-weight:700;cursor:${can ? 'pointer' : 'default'};${own.length ? 'opacity:0.5;' : ''}">${t.number}${own.length ? `<span style="font-size:0.62rem;font-weight:700;margin-left:5px">G${own.map(o => o.numero).join('·')}</span>` : ''}</button>`;
+  }).join('');
+  const cnt = document.getElementById('ga-ter-count'); if (cnt) cnt.textContent = _gaTerSel.length;
+  const sv = document.getElementById('ga-ter-save'); if (sv) sv.disabled = !_gaTerDirty();
+}
+function gaTerToggle(id) {
+  if (!_canManageGruposCover()) return;
+  const g = grupos.find(x => x.id === _gaId), t = territories.find(x => x.id === id); if (!g || !t) return;
+  if (_gaTerSel.includes(id)) _gaTerSel = _gaTerSel.filter(x => x !== id);
+  else {
+    const own = _gaTerOwners(id, g.id);
+    if (own.length && !confirm(terLabel(t.number) + ' ya pertenece al Grupo ' + own.map(o => o.numero).join(' y ') + '. ¿Pasarlo al Grupo ' + g.numero + '?')) return;
+    _gaTerSel = _gaTerSel.concat(id);
+  }
+  _gaRenderTerChips();
+}
+async function gaTerSave() {
+  if (!_canManageGruposCover()) { showToast('No tienes permiso para cambiar los territorios del grupo', 'error'); return; }
+  const g = grupos.find(x => x.id === _gaId); if (!g) return;
+  const btn = document.getElementById('ga-ter-save'); if (btn) { btn.disabled = true; btn.textContent = 'Guardando…'; }
+  const sel = _gaTerSel.slice();
+  try {
+    for (const o of grupos) { // primero se quitan de los otros grupos
+      if (o.id === g.id) continue;
+      const cur = Array.isArray(o.territorios_permitidos) ? o.territorios_permitidos : [], next = cur.filter(x => !sel.includes(x));
+      if (next.length !== cur.length) { const r = await sb.from('grupos').update({ territorios_permitidos: next }).eq('id', o.id); if (r.error) throw r.error; }
+    }
+    const r2 = await sb.from('grupos').update({ territorios_permitidos: sel }).eq('id', g.id); if (r2.error) throw r2.error;
+    showToast('Territorios del Grupo ' + g.numero + ' guardados ✓', 'success');
+    _gaTerFor = null; await loadGrupos(); renderAdminGrupos(); try { renderGruposView(); } catch (e) {}
+  } catch (e) {
+    const m = (e && e.message) || String(e);
+    showToast(/territorios_permitidos/.test(m) ? 'Falta la columna territorios_permitidos (jsonb) en la tabla grupos de Supabase.' : 'No se pudo guardar: ' + m, 'error');
+    if (btn) { btn.textContent = 'Guardar territorios'; btn.disabled = false; }
+  }
+  const b2 = document.getElementById('ga-ter-save'); if (b2) b2.textContent = 'Guardar territorios';
+}
 function _renderGrupoAdminPage() {
   const box = document.getElementById('ga-content');
   if (!box || !_gaId) return;
   const g = grupos.find(x => x.id === _gaId);
   if (!g) { closeGrupoAdminPage(); return; }
   const n = g.miembros.length;
+  if (_gaTerFor !== g.id) { _gaTerFor = g.id; _gaTerSel = Array.isArray(g.territorios_permitidos) ? g.territorios_permitidos.slice() : []; }
   const cover = _grupoCovers[g.id];
   const miembros = sortMiembrosJerarquico(g.miembros);
   document.getElementById('ga-nav-title').textContent = `${t('grupos.grupo-num')} ${g.numero}`;
@@ -14926,6 +14987,7 @@ function _renderGrupoAdminPage() {
       </button>
     </div>`).join('') : `<div style="color:var(--text3);font-size:0.82rem;padding:0.6rem 0">${t('grupos.sinmiembros')}</div>`;
   const camIcon = '<svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>';
+  setTimeout(_gaRenderTerChips, 0);
   box.innerHTML = `
     <div class="grupo-detail-hero ga-hero ${cover ? 'has-cover' : ''}" ${canCover ? 'onclick="gaPickCover()"' : ''}>
       <img class="grupo-detail-cover" ${cover ? `src="${cover}"` : ''} alt="" draggable="false">
@@ -14948,6 +15010,15 @@ function _renderGrupoAdminPage() {
           onkeydown="if(event.key==='Enter'){event.preventDefault();gaQuickAdd('${g.id}', this);}">
         ${membersHtml}
         <button class="btn-secondary" style="margin-top:0.7rem;width:100%" onclick="openAddMiembro('${g.id}')">+ Agregar con rol (encargado, auxiliar, precursor)</button>
+      </div>
+    </div>
+
+    <div class="grupo-section ga-sec">
+      <div class="ga-sec-head"><span class="grupo-section-title" style="border:none;padding:0">Territorios del grupo</span><span class="ga-count" id="ga-ter-count">${_gaTerSel.length}</span></div>
+      <div class="ga-sec-body">
+        <div class="ga-hint" style="margin:0 0 0.7rem">${canCover ? 'Toca un territorio para agregarlo o quitarlo. ' : ''}Cada territorio pertenece a un solo grupo (los de otros grupos aparecen atenuados con su número). Se muestran en el detalle de cada territorio en LiveMap y el Encargado puede agregarlos a su salida en el Reporte simple de los Sábados.</div>
+        <div id="ga-ter-chips" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+        ${canCover ? '<button type="button" class="btn-secondary" id="ga-ter-save" style="margin-top:0.8rem;width:100%" onclick="gaTerSave()" disabled>Guardar territorios</button>' : ''}
       </div>
     </div>
 
@@ -16784,7 +16855,7 @@ async function saveGrupo() {
   const btn = document.getElementById('save-grupo-btn');
   btn.disabled = true; btn.textContent = 'Guardando...';
   let error;
-  const _gPayload = { numero, territorios_permitidos: _grupoTerSel.slice() };
+  const _gPayload = { numero }; // los territorios se asignan en la sección «Territorios del grupo»
   const _gSave = (pl) => editingGrupoId ? sb.from('grupos').update(pl).eq('id', editingGrupoId) : sb.from('grupos').insert(pl);
   ({ error } = await _gSave(_gPayload));
   if (error && /territorios_permitidos/.test(error.message || '')) {
@@ -27183,10 +27254,16 @@ function mapSwitcherToggle(btn) {
 }
 async function mapSwitcherPick(kind) {
   mapSwitcherClose();
-  if (kind === 'live') { if (!lmIsLiveOpen()) await openLiveMap(); }
-  else if (lmIsLiveOpen()) closeLiveMap();
+  if (kind === 'live') { if (!lmIsLiveOpen()) await openLiveMap(); if (lmIsLiveOpen()) lmRememberMap('live'); }
+  else { if (lmIsLiveOpen()) closeLiveMap(); lmRememberMap('pdf'); }
   try { trackEvent('map_view', { view: kind }); } catch (e) {}
 }
+
+// Último mapa elegido en este dispositivo: si fue LiveMap, el Mapa de la congregación vuelve a abrirse en LiveMap.
+const LM_LAST_MAP_KEY = 'fleming_last_map_v1';
+function lmLastMap() { try { return localStorage.getItem(LM_LAST_MAP_KEY) === 'live' ? 'live' : 'pdf'; } catch (e) { return 'pdf'; } }
+function lmRememberMap(kind) { try { localStorage.setItem(LM_LAST_MAP_KEY, kind === 'live' ? 'live' : 'pdf'); } catch (e) {} }
+async function lmAutoOpenLive() { try { if (!lmIsLiveOpen()) await openLiveMap(true); } catch (e) {} }
 
 // ── Datos ──
 function _lmNormLayout(v) {
@@ -27371,9 +27448,9 @@ function _lmZoom() {
   }
   return _lmZ;
 }
-async function openLiveMap() {
+async function openLiveMap(silent) {
   const layout = await lmGetLayout(true);
-  if (!layout.items.filter(i => !i.hidden).length) { showToast(lmDiagMessage(), ''); return; }
+  if (!layout.items.filter(i => !i.hidden).length) { if (!silent) showToast(lmDiagMessage(), ''); return; }
   _lmView = { layout, b: lmBounds(layout.items, 0.04), fit: lmFitGeoref(layout, lmBounds(layout.items, 0.04)) };
   document.getElementById('livemap-viewer').classList.add('open');
   lmRenderViewer(); _lmZoom().reset(); _lmZoom().init(); lmBindTap();
@@ -27382,7 +27459,7 @@ async function openLiveMap() {
 }
 function closeLiveMapAll() { closeLiveMap(); closeFullMap(); } // la X de LiveMap sale de todo el Mapa de la congregación
 function closeLiveMap() {
-  mapSwitcherClose(); lmCloseSheet();
+  mapSwitcherClose(); lmCloseSheet(); lmUpdateHere(null);
   document.getElementById('livemap-viewer').classList.remove('open');
   lmStopWatch(); _lmView = null; _lmZoom().reset();
 }
@@ -27426,13 +27503,28 @@ async function _lmPixelHit(id, u, v) {
 }
 async function lmHitTerritory(cx, cy) {
   const canvas = document.getElementById('lm-canvas'), r = canvas.getBoundingClientRect(), b = _lmView.b;
-  const wx = b.x + (cx - r.left) / r.width * b.w, wy = b.y + (cy - r.top) / r.height * b.h, items = _lmView.layout.items;
+  return lmHitWorld(b.x + (cx - r.left) / r.width * b.w, b.y + (cy - r.top) / r.height * b.h);
+}
+// Territorio que hay en un punto del lienzo (coordenadas del mundo), de arriba hacia abajo; null si es calle o vacío.
+async function lmHitWorld(wx, wy) {
+  const items = _lmView.layout.items;
   for (let i = items.length - 1; i >= 0; i--) { // de arriba hacia abajo
     const it = items[i]; if (it.hidden) continue;
     const l = lmWorldToLocal(it, wx, wy); if (l.u < -0.01 || l.u > 1.01 || l.v < -0.01 || l.v > 1.01) continue;
     if ((await _lmPixelHit(it.id, l.u, l.v)) !== false) return it;
   }
   return null;
+}
+let _lmHereTok = 0;
+async function lmUpdateHere(uv) {
+  const el = document.getElementById('lm-here'); if (!el) return;
+  const tok = ++_lmHereTok, view = _lmView;
+  if (!uv || !view) { el.style.display = 'none'; return; }
+  const it = await lmHitWorld(view.b.x + uv.u * view.b.w, view.b.y + uv.v * view.b.h);
+  if (tok !== _lmHereTok || _lmView !== view) return;
+  const t = it && territories.find(x => x.id === it.id);
+  if (!t) { el.style.display = 'none'; return; }
+  el.textContent = 'Estás en el ' + terLabel(t.number); el.style.display = '';
 }
 function lmBindTap() {
   const stage = document.getElementById('lm-stage'); if (!stage || stage._tb) return; stage._tb = true;
@@ -27463,7 +27555,7 @@ function lmCloseSheet() {
   if (sh) sh.classList.remove('open'); if (v) v.classList.remove('sheet-open');
   _lmSheetTok = (_lmSheetTok || 0) + 1; lmMarkPicked(null);
 }
-let _lmSheetTok = 0;
+let _lmSheetTok = 0, _lmGruposAt = 0;
 function _lmLongDate(iso) {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || ''); if (!m) return '';
   const MES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -27490,7 +27582,7 @@ async function lmOpenSheet(id) {
   render('<span class="lm-dim">Cargando…</span>', '<span class="lm-dim">Cargando…</span>');
   body.scrollTop = 0; sh.classList.add('open'); document.getElementById('livemap-viewer').classList.add('sheet-open');
   let last = '<span class="lm-dim">Sin conexión</span>', grp = '';
-  try { if (!grupos.length) await loadGrupos(); } catch (e) {}
+  try { if (!grupos.length || (isAppOnline() && Date.now() - _lmGruposAt > 45000)) { await loadGrupos(); _lmGruposAt = Date.now(); } } catch (e) {}
   const gs = grupos.filter(g => Array.isArray(g.territorios_permitidos) && g.territorios_permitidos.includes(t.id));
   grp = gs.length ? gs.map(g => 'Grupo ' + _lmEsc(g.numero)).join(' · ') : '<span class="lm-dim">Sin grupo asignado</span>';
   if (isAppOnline()) {
@@ -27542,14 +27634,14 @@ function lmStopWatch() {
 function lmDrawMe() {
   const me = document.getElementById('lm-me'), pill = document.getElementById('lm-pill'), canvas = document.getElementById('lm-canvas');
   if (!me || !pill || !canvas || !_lmView) return;
-  const hide = txt => { me.style.display = 'none'; pill.textContent = txt || ''; pill.style.display = txt ? '' : 'none'; };
+  const hide = txt => { lmUpdateHere(null); me.style.display = 'none'; pill.textContent = txt || ''; pill.style.display = txt ? '' : 'none'; };
   const fit = _lmView.fit, b = _lmView.b;
   if (!fit) return hide('Este mapa aún no está calibrado con puntos GPS.');
   if (_lmErr === 'denied') return hide('Activa el permiso de ubicación');
   if (!_lmFix) return hide('Buscando tu ubicación…');
   const uv = gmToUV(fit.md, _lmFix.lat, _lmFix.lng);
   if (uv.u < -0.03 || uv.u > 1.03 || uv.v < -0.03 || uv.v > 1.03) return hide('Estás fuera del mapa de la congregación');
-  me.style.display = ''; pill.style.display = 'none';
+  me.style.display = ''; pill.style.display = 'none'; lmUpdateHere(uv);
   me.style.left = (uv.u * 100).toFixed(4) + '%'; me.style.top = (uv.v * 100).toFixed(4) + '%';
   me.style.setProperty('--gm-r', Math.min(_lmFix.acc * (canvas.offsetWidth / b.w) / fit.md.mpp, 220).toFixed(1) + 'px');
   const hd = me.querySelector('.gm-hd');
@@ -30048,12 +30140,21 @@ const fullMapZoomCtrl  = createMapZoomController('full-map-lb-canvas', 'full-map
 const lightboxZoomCtrl = createMapZoomController('lightbox-img',    'img-lightbox',     'lightbox-zoom-hint', () => { if (typeof _gmLbActive !== 'undefined' && _gmLbActive) _gmRender(); });
 
 async function openFullMap() {
-  try { lmUpdateEntryButton(); } catch (e) {} // v1.80.2: LiveMap
-  if (!_fullMapPdfDoc) { showToast('El mapa aún no se pudo cargar. Intenta de nuevo en unos segundos.', 'error'); return; }
+  const wantLive = lmLastMap() === 'live'; // v1.80.4: se recuerda el último mapa elegido
+  if (!_fullMapPdfDoc) {
+    if (wantLive) { // sin el PDF todavía, igual se puede abrir LiveMap
+      document.getElementById('full-map-lightbox').classList.add('open'); document.body.style.overflow = 'hidden';
+      await lmAutoOpenLive();
+      if (lmIsLiveOpen()) return;
+      closeFullMap();
+    }
+    showToast('El mapa aún no se pudo cargar. Intenta de nuevo en unos segundos.', 'error'); return;
+  }
   fullMapCurrentPage = 1;
   fullMapZoomCtrl.reset();
   document.getElementById('full-map-lightbox').classList.add('open');
   document.body.style.overflow = 'hidden';
+  if (wantLive) lmAutoOpenLive(); else { try { lmUpdateEntryButton(); } catch (e) {} } // v1.80.2: LiveMap
   await renderFullMapLightboxPage();
   fullMapZoomCtrl.init();
   fullMapZoomCtrl.showHintThenHide();
