@@ -5415,6 +5415,27 @@
     #page-preferencias > div, .pref-subpage > div { padding-left: 1rem; padding-right: 1rem; box-sizing: border-box; }
     #page-preferencias .subpage-topbar, .pref-subpage .subpage-topbar { background: var(--bg); border-radius: 20px 20px 0 0; }
   }
+  /* v1.80.7: en Desktop / pantallas grandes, Mi Perfil también se abre como PopUp centrado (igual que Configuración) */
+  #profile-modal-backdrop { display: none; }
+  @media (min-width: 900px) and (min-height: 560px) {
+    #profile-modal-backdrop {
+      position: fixed; inset: 0; z-index: 249;
+      background: rgba(0,0,0,0.45);
+      -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+      animation: prefBackdropIn 0.2s ease;
+    }
+    body:has(#page-profile.open) #profile-modal-backdrop { display: block; }
+    #page-profile {
+      inset: 0; margin: auto;
+      width: min(720px, calc(100vw - 4rem));
+      height: min(780px, calc(100vh - 4rem));
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      box-shadow: 0 24px 70px rgba(0,0,0,0.35), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    #page-profile > div { padding-left: 1rem; padding-right: 1rem; box-sizing: border-box; }
+    #page-profile .subpage-topbar { background: var(--bg); border-radius: 20px 20px 0 0; }
+  }
   @keyframes prefBackdropIn { from { opacity: 0; } to { opacity: 1; } }
 
   .pref-nav-row { display: flex; align-items: center; gap: 12px; padding: 0.85rem 1rem; border-top: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
@@ -6738,6 +6759,76 @@ html.modo-sencillo-mode .simp-hamburger-btn svg { display: none; }
 html.modo-sencillo-mode .simp-hamburger-text { display: inline; font-family: var(--font); font-size: 1.15rem; font-weight: 800; }
 html.modo-sencillo-mode .simp-title-btn { height: 52px; font-size: 1.15rem; }
 
+/* ── v1.80.7.2: interfaz Sencilla — tarjeta de Evento sin imagen, menú inferior de asignación, sin sugerir No Pasar ── */
+html.modo-sencillo-mode .suggest-np-btn,
+html.modo-sencillo-mode .suggest-np-form { display: none !important; }
+html.modo-sencillo-mode .assignment-card-especial.esp-simple {
+  background: var(--surface); background-image: none; min-height: 0; align-items: center;
+  border: 1px solid var(--border); border-radius: 24px; box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+}
+html.modo-sencillo-mode .assignment-card-especial.esp-simple::before {
+  content: ''; position: absolute; inset: 0 auto 0 0; width: 6px; background: var(--accent);
+}
+html.modo-sencillo-mode .esp-simple .especial-card-body { color: var(--text); padding: 1.05rem 1.2rem 1.05rem 1.55rem; }
+html.modo-sencillo-mode .esp-simple .especial-card-title { font-size: 1.12rem; font-weight: 800; color: var(--text); }
+html.modo-sencillo-mode .esp-simple .especial-card-subtitle { font-size: 0.94rem; font-weight: 500; color: var(--text2); opacity: 1; margin-top: 3px; }
+
+.simp-sheet-overlay {
+  display: none; position: fixed; inset: 0; z-index: 290;
+  background: var(--modal-overlay-bg); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  align-items: flex-end; justify-content: center;
+}
+.simp-sheet-overlay.open { display: flex; animation: fadeIn 0.22s var(--ease-fluid-soft); }
+.simp-sheet {
+  background: var(--surface); width: 100%; max-width: 560px;
+  height: 78vh; height: 78dvh; max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 24px);
+  border-radius: 26px 26px 0 0; display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.18);
+  animation: slideUpPanel 0.38s var(--ease-fluid-soft);
+}
+.simp-sheet.closing { animation: simpSheetOut 0.23s ease-in forwards; }
+@keyframes simpSheetOut { to { transform: translateY(100%); } }
+.simp-sheet-top { flex-shrink: 0; position: relative; display: flex; align-items: center; justify-content: center; min-height: 54px; padding: 0 1rem; }
+.simp-sheet-handle { width: 44px; height: 5px; border-radius: 3px; background: var(--surface3); }
+.simp-sheet-close {
+  position: absolute; right: 0.9rem; top: 7px; height: 40px; padding: 0 16px; border: none; border-radius: 20px;
+  background: var(--surface2); color: var(--text); font-family: var(--font); font-size: 0.98rem; font-weight: 700; cursor: pointer;
+}
+.simp-sheet-close:active { transform: scale(0.96); }
+.simp-sheet-body { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 0.3rem 1.1rem calc(1.5rem + env(safe-area-inset-bottom, 0px)); }
+.simp-sheet-tabs { display: flex; gap: 8px; margin-bottom: 0.8rem; overflow-x: auto; }
+.simp-sheet-tab {
+  display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; height: 46px; padding: 0 16px 0 9px;
+  border: 1.5px solid var(--border); border-radius: 23px; background: var(--surface2);
+  color: var(--text2); font-family: var(--font); font-size: 0.96rem; font-weight: 700; cursor: pointer;
+}
+.simp-sheet-tab.active { border-color: var(--accent); background: var(--surface); color: var(--text); }
+.simp-sheet-tab-num {
+  display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent); color: #fff; font-size: 0.85rem; font-weight: 800;
+}
+.simp-sheet-map {
+  position: relative; border-radius: 18px; overflow: hidden; border: 1px solid var(--border);
+  min-height: 190px; display: flex; align-items: center; justify-content: center;
+}
+.simp-sheet-map img { width: 100%; height: auto; display: block; max-height: 46vh; max-height: 46dvh; object-fit: contain; }
+.simp-sheet-map-msg { padding: 2.2rem 1rem; text-align: center; }
+.simp-sheet-call {
+  display: flex; align-items: center; justify-content: center; width: 100%; height: 58px; margin: 1rem 0 1.5rem;
+  border: none; border-radius: 29px; background: var(--accent); color: #fff;
+  font-family: var(--font); font-size: 1.12rem; font-weight: 800; cursor: pointer; transition: transform 0.15s;
+}
+.simp-sheet-call:active { transform: scale(0.98); }
+.simp-sheet-call:disabled { opacity: 0.45; cursor: default; transform: none; }
+.simp-sheet-np-title { font-size: 1.15rem; font-weight: 800; color: var(--text); margin-bottom: 0.7rem; }
+.simp-sheet-np-empty { font-size: 0.97rem; color: var(--text3); line-height: 1.4; }
+.simp-sheet .no-pasar-item { cursor: default; border-radius: 18px; padding: 0.75rem 1.05rem; margin-bottom: 8px; }
+.simp-sheet .no-pasar-item:hover { background: var(--surface2); }
+.simp-sheet .no-pasar-item:active { transform: none; }
+.simp-sheet .no-pasar-item-addr { font-size: 1rem; font-weight: 600; }
+.simp-sheet .no-pasar-item-date { font-size: 0.78rem; }
+.simp-sheet .no-pasar-item-desc { font-size: 0.85rem; white-space: normal; }
+
   /* ── Voz (v1.57.0-beta) ── */
   .voz-hint{font-size:.76rem;color:var(--text3);margin:4px 0 8px}
   .voz-kind{display:inline-block;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--accent);margin-bottom:4px}
@@ -7862,13 +7953,14 @@ async function renderHome() {
 // se abre el detalle del evento, igual que en Casa en Casa.
 function _homeEventoCard(a) {
   const timeStr = a.time ? a.time.substring(0, 5) : '--:--';
-  const bg = a.especial_foto ? 'style="background-image:url(\'' + a.especial_foto + '\')"' : '';
-  return '<div class="assignment-card-especial" ' + bg + ' onclick="viewAssignment(\'' + a.id + '\')">' +
+  const _sn = typeof isModoSencilloActive === 'function' && isModoSencilloActive(); // v1.80.7.2: sin imagen en la interfaz Sencilla
+  const bg = (!_sn && a.especial_foto) ? 'style="background-image:url(\'' + a.especial_foto + '\')"' : '';
+  return '<div class="assignment-card-especial' + (_sn ? ' esp-simple' : '') + '" ' + bg + ' onclick="viewAssignment(\'' + a.id + '\')">' +
     _homeCountHtml(a.date, 'evento-count') +
     '<div class="especial-card-body">' +
     '<div class="especial-card-title">' + escapeHtml(a.especial_titulo || 'Evento especial') + '</div>' +
     (a.especial_subtitulo ? '<div class="especial-card-subtitle">' + escapeHtml(a.especial_subtitulo) + '</div>' : '') +
-    '<div class="especial-card-time"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' + timeStr + 'hrs</div>' +
+    (_sn ? '' : '<div class="especial-card-time"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' + timeStr + 'hrs</div>') +
     '</div></div>';
 }
 async function renderHomeEventos() {
@@ -10832,8 +10924,8 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
         <div style="padding:0.55rem 0.1rem 0;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="pref.uisize.help">Agranda el texto y los elementos del UI (botones, sliders, tarjetas) en toda la plataforma. Ideal si tienes dificultad para ver bien la pantalla.</div>
       </div>
     </div>
-    <!-- Animaciones: debajo de Apariencia, oficial (antes en Experimentos). Fluidas por defecto (no es un toggle: dos botones separados) -->
-    <div class="profile-section">
+    <!-- Animaciones: debajo de Apariencia, oficial (antes en Experimentos). Fluidas por defecto (no es un toggle: dos botones separados). v1.80.7.1: oculta en la interfaz Sencilla (siempre Reducidas) -->
+    <div class="profile-section" id="pref-animations-restricted">
       <div class="profile-section-title" data-i18n="pref.animaciones">Animaciones</div>
       <div class="pref-theme-row" id="pref-animations-row">
         <button class="pref-theme-opt" id="pref-animations-ultra" onclick="setAnimationsMode('ultra')">
@@ -11127,54 +11219,6 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
           </div>
         </div>
         <div style="padding:0.55rem 0.1rem 0;font-size:0.75rem;color:var(--text3);line-height:1.4" data-i18n="exp.vistaprevia.desc">Así se verán los encabezados y paneles flotantes de la plataforma con estos niveles.</div>
-      </div>
-    </div>
-
-    <div class="profile-section" style="margin-top:1rem">
-      <div class="profile-section-title" data-i18n="exp.terNoPreview.section">Territorios</div>
-      <div class="profile-row" style="cursor:pointer" onclick="toggleTerNoPreview()">
-        <div class="profile-row-icon" style="background:var(--accent-light);color:var(--accent)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="3" x2="21" y2="21"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="exp.terNoPreview.title">Territorios sin vista previa</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.terNoPreview.desc">Quita la imagen del mapa en las tarjetas de Territorios y muestra solo el degradé de color y el nombre.</div>
-        </div>
-        <div id="ter-nopreview-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="ter-nopreview-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="profile-section" style="margin-top:1rem">
-      <div class="profile-section-title" data-i18n="exp.evCdSec.section">Eventos</div>
-      <div class="profile-row" style="cursor:pointer" onclick="toggleEvCdSeconds()">
-        <div class="profile-row-icon" style="background:var(--accent-light);color:var(--accent)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 14.5 14.5"/><line x1="9" y1="2" x2="15" y2="2"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="exp.evCdSec.title">Segundos en la cuenta regresiva</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.evCdSec.desc">Muestra los segundos en la cuenta regresiva dentro de un Evento. Desactívalo para ver solo días, horas y minutos.</div>
-        </div>
-        <div id="ev-cdsec-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="ev-cdsec-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="profile-section" style="margin-top:1rem">
-      <div class="profile-section-title" data-i18n="exp.lowRes.section">Rendimiento</div>
-      <div class="profile-row" style="cursor:pointer" onclick="toggleLowRes()">
-        <div class="profile-row-icon" style="background:var(--accent-light);color:var(--accent)">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-        </div>
-        <div class="profile-row-content">
-          <div class="profile-row-label" data-i18n="exp.lowRes.title">Resolución reducida en medios</div>
-          <div class="profile-row-value" style="font-size:0.8rem" data-i18n="exp.lowRes.desc">Desactiva la resolución máxima en imágenes y PDF (como el Mapa de la congregación) para ahorrar memoria y batería en dispositivos de bajos recursos.</div>
-        </div>
-        <div id="lowres-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
-          <div id="lowres-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
-        </div>
       </div>
     </div>
 
@@ -11703,6 +11747,16 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
     <div class="gre-quality" id="gre-test-info"></div>
   </div>
 </div>
+<!-- v1.80.7.2: menú inferior de la asignación (interfaz Sencilla) -->
+<div class="simp-sheet-overlay" id="simp-assign-sheet" onclick="if(event.target===this)closeSimpAssignSheet()">
+  <div class="simp-sheet" id="simp-assign-sheet-panel" role="dialog" aria-modal="true" aria-label="Territorio de la asignación">
+    <div class="simp-sheet-top">
+      <span class="simp-sheet-handle"></span>
+      <button type="button" class="simp-sheet-close" onclick="closeSimpAssignSheet()">Cerrar</button>
+    </div>
+    <div class="simp-sheet-body" id="simp-sheet-body"></div>
+  </div>
+</div>
 <div class="img-lightbox" id="img-lightbox" onclick="handleLightboxClick(event)">
   <button class="lightbox-close" onclick="closeLightbox()">
     <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -12206,12 +12260,15 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.78: OPTIMIZACIÓN DE REPORTES DE TERRITORIO — estabilidad y rendimiento (sin cambios de diseño). (1) SVG: lectura tolerante (Illustrator/Inkscape), saneado, viewBox garantizado y validación al subir (individual y masiva). (2) Mapas aislados: ya no se pisan ids ni estilos entre territorios y los colores de manzanas funcionan aunque el SVG use clases CSS. (3) Enlaces de reporte: se arman sin errores con # en la URL, se rescatan enlaces antiguos, un fallo de red ya no se muestra como 'Enlace inválido' y hay botón Reintentar. (4) Encargados: el reporte no se borra hasta que el nuevo se guarda; sin duplicados por doble toque; reintentos automáticos. (5) Rendimiento: solo se descargan los territorios/formularios necesarios, caché de mapas y miniaturas, sin re-descargas al abrir un día.
 // v1.77.13: (1) Íconos de Configuración: con acento Azul conservan sus colores; con otro acento adoptan ese color. (2) Reunión Pública (Desktop): Reunión Pública y Conferencias salientes a la misma altura; "Ver responsabilidades para este día" al final y centrado. (3) Las tarjetas ya no tienen degradé del color de acento: el degradé sigue el modo claro/oscuro. (4) Nuevo experimento "Tamaño del texto", independiente del tamaño de la interfaz.
 // v1.77.12: (1) Reunión Pública: en Desktop/pantallas grandes, el programa y "Conferencias salientes" van lado a lado. (2) Portada del Evento sube por detrás del botón Volver y el título en Desktop (Sidebar y PopUp). (3) Se quita el handle superior del detalle en Desktop. (4) Aseo del Salón, Hospitalidad y Responsabilidades: la fecha va arriba de cada tarjeta (móvil y Desktop). (5) Cuenta regresiva de Evento con segundos; se puede desactivar en Experimentos.
+// v1.80.7.2: Interfaz Sencilla = indicadores de territorio en azul de la plataforma (sin el color del territorio) en las tarjetas de Casa en casa; sin sugerir nuevos No Pasar; sin pantalla de detalle de la asignación (menú inferior con mapa, Llamar al Encargado y No Pasar sin Live); tarjeta de Evento sin imagen (solo título y subtítulo).
+// v1.80.7.1: Interfaz Sencilla = territorios sin vista previa, resolución reducida en medios, sin segundos en Eventos, animaciones reducidas y acento Azul fijos (sin interruptores). Clásica y Nueva: lo contrario. Se retiran esos tres experimentos.
+// v1.80.7: En Desktop o pantallas grandes, Mi Perfil se abre en un PopUp centrado, como Configuración. En móvil sigue igual.
 // v1.77.11: En Desktop o pantallas grandes, Configuración se abre en un PopUp centrado (con fondo atenuado) y no como pantalla completa. En móvil sigue igual.
 // v1.77.10: Las tarjetas de la subsección Territorios usan el color de acento de la plataforma en lugar del color de cada territorio.
 // v1.77.9: Nuevo experimento "Espaciado del contenido": slider de 10 niveles (predeterminado 2 = espaciado actual).
 // v1.77.8: (1) La dirección en el detalle de una asignación de casa en casa es un poco más grande (solo esa pantalla). (2) El botón de Clima de la asignación ya no abre el sitio del clima. (3) Nuevo ícono de Carritos (Inicio, Mis Turnos, Ajustes > Notificaciones y menú de Predicación). (4) Nuevo experimento "Resolución reducida en medios" para imágenes y PDF. (5) Carga más rápida: pdf.js y QR con defer, preconnect, fuentes con display=swap, decodificación asíncrona de imágenes.
 // v1.77.5: (1) Detalle de un Territorio: el título del encabezado ahora dice "Detalles del territorio" (el número ya aparece en el círculo de color). (2) Más opciones en Inicio incluye "Personalizar Inicio" (el botón al final de Inicio se mantiene). (3) Nuevo experimento "Territorios sin vista previa": las tarjetas de Territorios muestran solo el degradé y el nombre.
-const APP_VERSION = '1.80.6.5'; // v1.80.6.5 — «Mi Perfil» y «Configuración» vuelven a ser pantallas separadas (como en 1.80.4); más rapidez y estabilidad: los eventos de cambio de tamaño se agrupan por cuadro, el vidrio adaptativo ya no se recalcula en cada cambio del documento ni con la pestaña oculta, el reloj de cuenta regresiva y los oyentes de scroll se alivianan, conexión anticipada a Supabase, respaldo si la librería de Supabase no carga y los fallos de red ya no quedan como errores sin capturar; v1.80.6 — el Onboarding suma dos pantallas después de «Instalar»: Apariencia (Automático por defecto, Claro u Oscuro) e Interfaz (Sencillo, Clásico o Nuevo por defecto), cada una con una vista previa simple y un botón «Saltar» arriba a la derecha que lleva a «Todo listo»; v1.80.5 — «Mi Perfil» y «Configuración» se fusionan en una sola pantalla, «Perfil y Configuración»: arriba la foto, el nombre y el UserID, debajo tus asignaciones (igual que Mi Perfil) y más abajo todos los ajustes de Configuración; «Cerrar sesión» y «Editar foto de perfil» pasan a un nuevo menú «Más opciones» en la parte superior; funciona en Modo Claro y Oscuro; v1.80.4 — LiveMap en modo oscuro (fondo oscuro y textos que se adaptan), etiqueta «Estás en el Territorio N» abajo a la izquierda, recuerda el último mapa elegido (Mapa en PDF o LiveMap) y cada Grupo de Servicio tiene su sección «Territorios del grupo» (DEV y Administradores con el módulo Grupos) que alimenta el detalle de los territorios; v1.80.3 — LiveMap: textos (nombres de calles) que se pueden mover, rotar, cambiar de tamaño y mandar al frente o al fondo; respaldo descargable y restaurable desde archivo; al tocar un territorio se abre un panel inferior con su última realización, su grupo de servicio y sus Direcciones No Pasar (los controles de zoom se ocultan mientras está abierto); v1.80.2g.2 — LiveMap: corrige «JSON object requested, multiple (or no) rows returned» en cuentas de usuario y su barra de título ahora es igual a la de Mapa; v1.80.2g — LiveMap: se vuelve a leer el diseño guardado cada vez que se abre (una copia vacía o vieja ya no se da por buena), el menú no avisa «sin configurar» por su cuenta, mensajes de diagnóstico claros y verificación al guardar; controles Ajustar/Acercar/Alejar abajo a la derecha en ambos mapas; v1.80.2f — LiveMap deja de ser experimental y viene activo para todos: el Mapa de la congregación sigue abriéndose en PDF y, al tocar el título «Mapa», se elige entre Mapa en PDF y LiveMap; v1.80.2d — LiveMap: selección múltiple de territorios con Shift + clic para moverlos, rotarlos o cambiarles el tamaño juntos, y Ctrl + Z / Ctrl + Y para deshacer y rehacer en el editor (Administración → LiveMap, solo DEV); v1.80.2 — LiveMap (Experimento): une los mapas SVG de los territorios en un solo mapa de la congregación con ubicación GPS (acople y calibración en Administración → LiveMap, solo DEV; se activa en Experimentos y se abre desde Mapa de la congregación); v1.80.1.5 — Mapa interactivo va con Live (sin interruptor propio) y sin etiqueta sobre el mapa; v1.80.1 — Mapa interactivo: ubicación GPS sobre los mapas PNG de territorio (georreferenciación por el usuario DEV; se activa en Más opciones de la asignación o en Funciones especiales); v1.80 — Reasignar Encargado: el Encargado de una asignación de Casa en casa puede cederle el cargo a otro conductor desde Más Opciones (avisa al nuevo Encargado, a los Administradores de Predicación y al DEV); v1.79.100d — onboarding de bienvenida (por cuenta, controlado por el DEV); v1.79.10 — sin No Pasar nuevos en Para tí; detalle de punto de carrito con Recordatorios (sin Fotos ni búsqueda) y barra superior fija con modo oscuro; filtro de Carritos unificado; Aseo solo a los dos grupos asignados; v1.79.5 — Otros Grupos con títulos como las fechas; botón Volver arriba sobre la NavBar inferior; Más Opciones sin Perfil en la UI nueva; sin saludo emergente; v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
+const APP_VERSION = '1.80.7.2'; // v1.80.7.2 — en la interfaz Sencilla, los indicadores de territorio de las tarjetas de Casa en casa usan el azul de la plataforma (ya no el color del territorio); no se pueden sugerir nuevos No Pasar; desaparece la pantalla de detalle de la asignación de Casa en casa: al tocar la tarjeta sube un menú inferior (3/4 de pantalla) con solo el mapa del territorio, el botón para llamar al Encargado y las direcciones No Pasar (sin Live); la tarjeta de Evento ya no muestra la imagen, solo título y subtítulo; v1.80.7.1 — las interfaces se diferencian: «Territorios sin vista previa», «Resolución reducida en medios» y «Segundos en la cuenta regresiva» dejan de ser experimentos; la interfaz Sencilla quita la vista previa de los territorios, reduce la resolución de los medios, no muestra segundos en los Eventos, tiene siempre las animaciones reducidas y el color de acento fijo (Azul), sin poder cambiarlos, y la Clásica y la Nueva siempre tienen vista previa, resolución completa y segundos; v1.80.7 — en Desktop o pantallas grandes, «Mi Perfil» se abre en un PopUp centrado (con fondo atenuado), igual que «Configuración»; en móvil no cambia; v1.80.6.5 — «Mi Perfil» y «Configuración» vuelven a ser pantallas separadas (como en 1.80.4); más rapidez y estabilidad: los eventos de cambio de tamaño se agrupan por cuadro, el vidrio adaptativo ya no se recalcula en cada cambio del documento ni con la pestaña oculta, el reloj de cuenta regresiva y los oyentes de scroll se alivianan, conexión anticipada a Supabase, respaldo si la librería de Supabase no carga y los fallos de red ya no quedan como errores sin capturar; v1.80.6 — el Onboarding suma dos pantallas después de «Instalar»: Apariencia (Automático por defecto, Claro u Oscuro) e Interfaz (Sencillo, Clásico o Nuevo por defecto), cada una con una vista previa simple y un botón «Saltar» arriba a la derecha que lleva a «Todo listo»; v1.80.5 — «Mi Perfil» y «Configuración» se fusionan en una sola pantalla, «Perfil y Configuración»: arriba la foto, el nombre y el UserID, debajo tus asignaciones (igual que Mi Perfil) y más abajo todos los ajustes de Configuración; «Cerrar sesión» y «Editar foto de perfil» pasan a un nuevo menú «Más opciones» en la parte superior; funciona en Modo Claro y Oscuro; v1.80.4 — LiveMap en modo oscuro (fondo oscuro y textos que se adaptan), etiqueta «Estás en el Territorio N» abajo a la izquierda, recuerda el último mapa elegido (Mapa en PDF o LiveMap) y cada Grupo de Servicio tiene su sección «Territorios del grupo» (DEV y Administradores con el módulo Grupos) que alimenta el detalle de los territorios; v1.80.3 — LiveMap: textos (nombres de calles) que se pueden mover, rotar, cambiar de tamaño y mandar al frente o al fondo; respaldo descargable y restaurable desde archivo; al tocar un territorio se abre un panel inferior con su última realización, su grupo de servicio y sus Direcciones No Pasar (los controles de zoom se ocultan mientras está abierto); v1.80.2g.2 — LiveMap: corrige «JSON object requested, multiple (or no) rows returned» en cuentas de usuario y su barra de título ahora es igual a la de Mapa; v1.80.2g — LiveMap: se vuelve a leer el diseño guardado cada vez que se abre (una copia vacía o vieja ya no se da por buena), el menú no avisa «sin configurar» por su cuenta, mensajes de diagnóstico claros y verificación al guardar; controles Ajustar/Acercar/Alejar abajo a la derecha en ambos mapas; v1.80.2f — LiveMap deja de ser experimental y viene activo para todos: el Mapa de la congregación sigue abriéndose en PDF y, al tocar el título «Mapa», se elige entre Mapa en PDF y LiveMap; v1.80.2d — LiveMap: selección múltiple de territorios con Shift + clic para moverlos, rotarlos o cambiarles el tamaño juntos, y Ctrl + Z / Ctrl + Y para deshacer y rehacer en el editor (Administración → LiveMap, solo DEV); v1.80.2 — LiveMap (Experimento): une los mapas SVG de los territorios en un solo mapa de la congregación con ubicación GPS (acople y calibración en Administración → LiveMap, solo DEV; se activa en Experimentos y se abre desde Mapa de la congregación); v1.80.1.5 — Mapa interactivo va con Live (sin interruptor propio) y sin etiqueta sobre el mapa; v1.80.1 — Mapa interactivo: ubicación GPS sobre los mapas PNG de territorio (georreferenciación por el usuario DEV; se activa en Más opciones de la asignación o en Funciones especiales); v1.80 — Reasignar Encargado: el Encargado de una asignación de Casa en casa puede cederle el cargo a otro conductor desde Más Opciones (avisa al nuevo Encargado, a los Administradores de Predicación y al DEV); v1.79.100d — onboarding de bienvenida (por cuenta, controlado por el DEV); v1.79.10 — sin No Pasar nuevos en Para tí; detalle de punto de carrito con Recordatorios (sin Fotos ni búsqueda) y barra superior fija con modo oscuro; filtro de Carritos unificado; Aseo solo a los dos grupos asignados; v1.79.5 — Otros Grupos con títulos como las fechas; botón Volver arriba sobre la NavBar inferior; Más Opciones sin Perfil en la UI nueva; sin saludo emergente; v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -13521,15 +13578,6 @@ const I18N = {
   'exp.spacing.title': { es: 'Espaciado del contenido', en: 'Content spacing', nl: 'Inhoudsafstand' },
   'exp.spacing.desc': { es: 'Distancia entre apartados de Inicio, entre días de asignaciones y entre otros elementos de contenido.', en: 'Distance between Home sections, between assignment days and between other content elements.', nl: 'Afstand tussen onderdelen van Start, tussen dagen met opdrachten en andere inhoudselementen.' },
   'exp.spacing.default': { es: '2 = predeterminado', en: '2 = default', nl: '2 = standaard' },
-  'exp.lowRes.section': { es: 'Rendimiento', en: 'Performance', nl: 'Prestaties' },
-  'exp.lowRes.title': { es: 'Resolución reducida en medios', en: 'Reduced media resolution', nl: 'Verlaagde mediaresolutie' },
-  'exp.lowRes.desc': { es: 'Desactiva la resolución máxima en imágenes y PDF (como el Mapa de la congregación) para ahorrar memoria y batería en dispositivos de bajos recursos.', en: 'Turns off maximum resolution for images and PDFs (like the congregation Map) to save memory and battery on low-end devices.', nl: 'Schakelt de maximale resolutie van afbeeldingen en pdf\'s uit (zoals de gemeentekaart) om geheugen en batterij te sparen op eenvoudige apparaten.' },
-  'exp.evCdSec.section': { es: 'Eventos', en: 'Events', nl: 'Evenementen' },
-  'exp.evCdSec.title': { es: 'Segundos en la cuenta regresiva', en: 'Seconds in the countdown', nl: 'Seconden in het aftellen' },
-  'exp.evCdSec.desc': { es: 'Muestra los segundos en la cuenta regresiva dentro de un Evento. Desactívalo para ver solo días, horas y minutos.', en: 'Shows seconds in the countdown inside an Event. Turn it off to see only days, hours and minutes.', nl: 'Toont seconden in het aftellen binnen een evenement. Zet uit om alleen dagen, uren en minuten te zien.' },
-  'exp.terNoPreview.section': { es: 'Territorios', en: 'Territories', nl: 'Gebieden' },
-  'exp.terNoPreview.title': { es: 'Territorios sin vista previa', en: 'Territories without preview', nl: 'Gebieden zonder voorvertoning' },
-  'exp.terNoPreview.desc': { es: 'Quita la imagen del mapa en las tarjetas de Territorios y muestra solo el degradé de color y el nombre.', en: 'Removes the map image from the Territories cards and shows only the color gradient and the name.', nl: 'Verwijdert de kaartafbeelding op de gebiedskaarten en toont alleen het kleurverloop en de naam.' },
   'home.customizeHome': { es: 'Personalizar Inicio', en: 'Customize Home', nl: 'Startpagina aanpassen' },
   'home.today': { es: 'Hoy', en: 'Today', nl: 'Vandaag' },
   'home.tomorrow': { es: 'Mañana', en: 'Tomorrow', nl: 'Morgen' },
@@ -14030,6 +14078,11 @@ let respSelectedDate = null;
 
 const TER_COLORS = ['#64748b','#22c55e','#3b82f6','#a855f7','#f59e0b','#ef4444','#06b6d4','#ec4899','#84cc16','#f97316'];
 // Returns color for a territory — prefers saved `color` field, falls back to auto palette
+// v1.80.7.2: en la interfaz Sencilla los indicadores de territorio de las tarjetas de asignación
+// (el círculo con el número) usan el azul de la plataforma y no el color del territorio.
+function terChipColor(num) {
+  return (typeof isModoSencilloActive === 'function' && isModoSencilloActive()) ? 'var(--accent)' : getTerColor(num);
+}
 function getTerColor(num) {
   const t = territories.find(x => x.number === num);
   return (t && t.color) ? t.color : TER_COLORS[num % TER_COLORS.length];
@@ -14057,13 +14110,13 @@ function visitaBadgeMaxVisible() {
 function renderVisitaTerBadges(visitaTers) {
   if (!visitaTers.length) return '';
   if (visitaTers.length === 1) {
-    return `<div class="ter-badge" style="background:${getTerColor(visitaTers[0].number)}">${visitaTers[0].number}</div>`;
+    return `<div class="ter-badge" style="background:${terChipColor(visitaTers[0].number)}">${visitaTers[0].number}</div>`;
   }
   const maxVisible = Math.max(2, visitaBadgeMaxVisible());
   const shown = visitaTers.slice(0, maxVisible);
   const rest = visitaTers.length - shown.length;
   const sizeClass = shown.length > 2 ? ' ter-badge-trio' : '';
-  const badgesHtml = shown.map(t => `<div class="ter-badge-sm" style="background:${getTerColor(t.number)}">${t.number}</div>`).join('')
+  const badgesHtml = shown.map(t => `<div class="ter-badge-sm" style="background:${terChipColor(t.number)}">${t.number}</div>`).join('')
     + (rest > 0 ? `<div class="ter-badge-sm ter-badge-more">+${rest}</div>` : '');
   return `<div class="ter-badge-duo${sizeClass}">${badgesHtml}</div>`;
 }
@@ -19542,24 +19595,26 @@ function renderSchedule(opts) {
     if (a.type === 'zoom') return `<div class="ter-badge-icon zoom-badge"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="15" height="10" rx="2"/><polygon points="17 9 22 6 22 18 17 15"/></svg></div>`;
     if (a.type === 'telefono') return `<div class="ter-badge-icon phone-badge"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.35 2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>`;
     if (a.type === 'cartas') return `<div class="ter-badge-icon cartas-badge"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>`;
-    if (ter && ter2 && ter3) return `<div class="ter-badge-duo ter-badge-trio"><div class="ter-badge-sm" style="background:${getTerColor(ter.number)}">${ter.number}</div><div class="ter-badge-sm" style="background:${getTerColor(ter2.number)}">${ter2.number}</div><div class="ter-badge-sm" style="background:${getTerColor(ter3.number)}">${ter3.number}</div></div>`;
-    if (ter && ter2) return `<div class="ter-badge-duo"><div class="ter-badge-sm" style="background:${getTerColor(ter.number)}">${ter.number}</div><div class="ter-badge-sm" style="background:${getTerColor(ter2.number)}">${ter2.number}</div></div>`;
-    if (ter) return `<div class="ter-badge" style="background:${getTerColor(ter.number)}">${ter.number}</div>`;
+    if (ter && ter2 && ter3) return `<div class="ter-badge-duo ter-badge-trio"><div class="ter-badge-sm" style="background:${terChipColor(ter.number)}">${ter.number}</div><div class="ter-badge-sm" style="background:${terChipColor(ter2.number)}">${ter2.number}</div><div class="ter-badge-sm" style="background:${terChipColor(ter3.number)}">${ter3.number}</div></div>`;
+    if (ter && ter2) return `<div class="ter-badge-duo"><div class="ter-badge-sm" style="background:${terChipColor(ter.number)}">${ter.number}</div><div class="ter-badge-sm" style="background:${terChipColor(ter2.number)}">${ter2.number}</div></div>`;
+    if (ter) return `<div class="ter-badge" style="background:${terChipColor(ter.number)}">${ter.number}</div>`;
     return '';
   }
 
   // Helper: tarjeta "Especial" (evento a nivel congregación, sin territorio/conductor)
   function _buildEspecialCard(a) {
+    // v1.80.7.2: en la interfaz Sencilla la tarjeta de Evento no muestra la imagen: solo título y subtítulo.
+    const _sn = typeof isModoSencilloActive === 'function' && isModoSencilloActive();
     const timeStr = a.time ? a.time.substring(0,5) : '--:--';
-    const bg = a.especial_foto ? `style="background-image:url('${a.especial_foto}')"` : '';
-    return `<div class="assignment-card-especial" ${bg} onclick="viewAssignment('${a.id}')">
+    const bg = (!_sn && a.especial_foto) ? `style="background-image:url('${a.especial_foto}')"` : '';
+    return `<div class="assignment-card-especial${_sn ? ' esp-simple' : ''}" ${bg} onclick="viewAssignment('${a.id}')">
       <div class="especial-card-body">
         <div class="especial-card-title">${a.especial_titulo || 'Evento especial'}</div>
         ${a.especial_subtitulo ? `<div class="especial-card-subtitle">${a.especial_subtitulo}</div>` : ''}
-        <div class="especial-card-time">
+        ${_sn ? '' : `<div class="especial-card-time">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           ${timeStr}hrs
-        </div>
+        </div>`}
       </div>
     </div>`;
   }
@@ -19613,7 +19668,7 @@ function renderSchedule(opts) {
     const nums = [ter, ter2, ter3].filter(Boolean);
     if (!nums.length) return '';
     const label = nums.length > 1 ? 'Territorios' : 'Territorio';
-    const circles = nums.map(t => `<span class="simp-ter-tag-circle" style="background:${getTerColor(t.number)}">${t.number}</span>`).join('');
+    const circles = nums.map(t => `<span class="simp-ter-tag-circle" style="background:${terChipColor(t.number)}">${t.number}</span>`).join('');
     return `<span class="simp-ter-tag"><span class="simp-ter-tag-label">${label}</span>${circles}</span>`;
   }
 
@@ -19746,7 +19801,7 @@ function renderSchedule(opts) {
           const conductorDisplay = a.conductor || 'Sin conductor';
 
           const terCircles = [ter, ter2, ter3].filter(Boolean).map(t =>
-            `<div class="sabado-grupo-ter-circle" style="background:${getTerColor(t.number)}">${t.number}</div>`
+            `<div class="sabado-grupo-ter-circle" style="background:${terChipColor(t.number)}">${t.number}</div>`
           ).join('');
 
           html += `<div class="sabado-grupo-card" data-assignment-id="${a.id}" onclick="viewAssignment('${a.id}')">
@@ -19983,6 +20038,13 @@ function _evCountdownStart(target) {
   _evCdTimer = setInterval(() => { if (!document.hidden) tick(); }, isEvCountdownSecondsEnabled() ? 1000 : 5000);
 }
 async function viewAssignment(id) {
+  // v1.80.7.2: en la interfaz Sencilla no existe la pantalla de detalle de una asignación de Casa en casa:
+  // se abre un menú inferior con el mapa, el botón Llamar y las direcciones No Pasar.
+  {
+    const _sa = assignments.find(x => x.id === id);
+    if (_sa && typeof isModoSencilloActive === 'function' && isModoSencilloActive() && !window._guestShareMode
+        && (!_sa.type || _sa.type === 'presencial')) { openSimpAssignSheet(_sa); return; }
+  }
   document.getElementById('detail-panel')?.classList.add('assignment-desktop-topbar');
   const a = assignments.find(x => x.id === id);
   if (!a) return;
@@ -20644,7 +20706,113 @@ async function confirmSelfAssignTerritory(territoryId) {
   viewAssignment(a.id);
 }
 
+
+// ══════════════════════════════════════════════════════════════════════════════
+// v1.80.7.2 — Interfaz Sencilla: menú inferior de la asignación de Casa en casa.
+// Sube desde abajo y ocupa ~3/4 de la pantalla. Solo tiene: el mapa del territorio,
+// el botón para llamar al Encargado y la lista de direcciones No Pasar (sin Live y
+// sin sugerencias). Si la asignación tiene 2 o 3 territorios, un selector alterna entre ellos.
+// ══════════════════════════════════════════════════════════════════════════════
+let _simpSheetState = null;
+function _simpSheetTers(a) {
+  return [a.territory_id, a.territory_id_2, a.territory_id_3]
+    .map(id => id ? territories.find(t => t.id === id) : null).filter(Boolean);
+}
+function _simpSheetNpHtml(t) {
+  if (!t) return '<div class="simp-sheet-np-empty">Esta asignación no tiene un territorio asignado.</div>';
+  let entries = [];
+  try { entries = parseNoPasar(t.no_pasar); } catch (e) { entries = []; }
+  if (!entries.length) return '<div class="simp-sheet-np-empty">Este territorio no tiene direcciones No Pasar.</div>';
+  return entries.map(e => `
+    <div class="no-pasar-item">
+      <div class="no-pasar-item-top">
+        <span class="no-pasar-item-addr">${escapeHtml(e.addr)}</span>
+        ${e.date ? `<span class="no-pasar-item-date">${fmtNpDate(e.date)}</span>` : ''}
+      </div>
+      ${e.desc ? `<span class="no-pasar-item-desc">${escapeHtml(e.desc)}</span>` : ''}
+    </div>`).join('');
+}
+function _simpSheetRender(a) {
+  const s = _simpSheetState; if (!s) return;
+  const body = document.getElementById('simp-sheet-body'); if (!body) return;
+  const tabs = s.ters.length > 1 ? `<div class="simp-sheet-tabs">${s.ters.map((t, i) => `
+      <button type="button" class="simp-sheet-tab${i === s.idx ? ' active' : ''}" data-idx="${i}" onclick="simpSheetSwitch(${i})">
+        <span class="simp-sheet-tab-num">${t.number}</span><span>${terLabel(t.number)}</span>
+      </button>`).join('')}</div>` : '';
+  const map = s.ters.length
+    ? `<div class="simp-sheet-map" id="simp-sheet-map"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Territorio</div></div></div>`
+    : '';
+  const hasPhone = !!(a.phone && String(a.phone).trim());
+  body.innerHTML = `${tabs}${map}
+    <button type="button" class="simp-sheet-call" id="simp-sheet-call" ${hasPhone ? '' : 'disabled'} onclick="simpSheetCall()">
+      ${hasPhone ? 'Llamar al Encargado' : 'Encargado sin teléfono registrado'}
+    </button>
+    <div class="simp-sheet-np-title">Direcciones No Pasar</div>
+    <div id="simp-sheet-np-list">${_simpSheetNpHtml(s.ters[s.idx] || null)}</div>`;
+  body.scrollTop = 0;
+}
+function _simpSheetPaintMap() {
+  const s = _simpSheetState; if (!s) return;
+  const box = document.getElementById('simp-sheet-map'); if (!box) return;
+  const t = s.ters[s.idx]; if (!t) { box.style.display = 'none'; return; }
+  box.style.background = _isDarkThemeActive() ? '#191919' : '#ffffff';
+  const src = getActiveTerMapSrc(t);
+  if (src) {
+    box.innerHTML = '<img alt="Mapa del territorio">';
+    box.querySelector('img').src = src;
+    box.style.cursor = 'zoom-in';
+    box.onclick = () => openLightbox(src, ''); // sin botón de sugerir corrección
+  } else if (!s.loaded) {
+    box.onclick = null; box.style.cursor = '';
+    box.innerHTML = '<div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Territorio</div></div>';
+  } else {
+    box.onclick = null; box.style.cursor = '';
+    box.innerHTML = `<div class="simp-sheet-np-empty simp-sheet-map-msg">${isAppOnline() ? 'Mapa no disponible' : 'Mapa no disponible sin conexión'}</div>`;
+  }
+}
+async function openSimpAssignSheet(a) {
+  const ters = _simpSheetTers(a);
+  _simpSheetState = { id: a.id, ters, idx: 0, loaded: false };
+  _simpSheetRender(a);
+  const ov = document.getElementById('simp-assign-sheet');
+  const panel = document.getElementById('simp-assign-sheet-panel');
+  if (!ov || !panel) return;
+  panel.classList.remove('closing');
+  ov.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (!ters.length) return;
+  _simpSheetPaintMap(); // si el mapa ya está en memoria, aparece de inmediato
+  try { if (isAppOnline()) await ensureTerritoryMapsLoaded(); } catch (e) {}
+  if (_simpSheetState && _simpSheetState.id === a.id) { _simpSheetState.loaded = true; _simpSheetPaintMap(); }
+}
+function simpSheetSwitch(i) {
+  const s = _simpSheetState; if (!s || !s.ters[i]) return;
+  s.idx = i;
+  document.querySelectorAll('#simp-sheet-body .simp-sheet-tab').forEach(b => b.classList.toggle('active', +b.dataset.idx === i));
+  _simpSheetPaintMap();
+  const list = document.getElementById('simp-sheet-np-list');
+  if (list) list.innerHTML = _simpSheetNpHtml(s.ters[i]);
+}
+function simpSheetCall() {
+  const s = _simpSheetState; if (!s) return;
+  const a = assignments.find(x => x.id === s.id);
+  if (a && a.phone) window.location.href = 'tel:' + String(a.phone).replace(/\s/g, '');
+}
+function closeSimpAssignSheet() {
+  const ov = document.getElementById('simp-assign-sheet');
+  const panel = document.getElementById('simp-assign-sheet-panel');
+  if (!ov || !ov.classList.contains('open') || (panel && panel.classList.contains('closing'))) return;
+  if (panel) panel.classList.add('closing');
+  setTimeout(() => {
+    ov.classList.remove('open');
+    if (panel) panel.classList.remove('closing');
+    _simpSheetState = null;
+    if (!document.querySelector('.detail-overlay.open, .img-lightbox.open')) document.body.style.overflow = '';
+  }, 230);
+}
+
 function toggleSuggestNpForm() {
+  if (typeof isModoSencilloActive === 'function' && isModoSencilloActive()) return; // v1.80.7.2: sin sugerencias de No Pasar en la interfaz Sencilla
   const form = document.getElementById('suggest-np-form');
   const isOpen = form.classList.toggle('open');
   if (isOpen) {
@@ -20655,6 +20823,7 @@ function toggleSuggestNpForm() {
 }
 
 async function submitSuggestNp() {
+  if (typeof isModoSencilloActive === 'function' && isModoSencilloActive()) return; // v1.80.7.2
   const calle  = document.getElementById('snp-calle').value.trim();
   const numero = document.getElementById('snp-numero').value.trim();
   const motivo = document.getElementById('snp-motivo').value.trim();
@@ -26617,7 +26786,7 @@ function openPrefScreen(name) {
   if (name === 'notificaciones') renderPrefNotifList();
   if (name === 'ayuda') { renderAyudaTipsList(); updateInicioTutorialRow(); }
   if (name === 'preferencias') { updateAnimationsEnabledToggleUI(); updateWeatherToggleUI(); if (typeof updateModoSencilloToggleUI === 'function') updateModoSencilloToggleUI(); updateAccentSwatchesUI(); if (typeof updateHomeExpToggleUI === 'function') updateHomeExpToggleUI(); }
-  if (name === 'experimentos') { updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateNavbarBtnSizeUI(); updateFullscreenExperimentUI(); updateTerNoPreviewUI(); updateEvCdSecondsUI(); updateLowResUI(); updateContentSpacingUI(); updateTextScaleUI(); }
+  if (name === 'experimentos') { updateTransparencyToggleUI(); updateSimplifiedModeToggleUI(); updateNavbarBtnSizeUI(); updateFullscreenExperimentUI(); updateContentSpacingUI(); updateTextScaleUI(); }
   if (name === 'legal-terms') renderPrefLegalTerms();
   if (name === 'legal-privacy') renderPrefLegalPrivacy();
   if (name === 'version') {
@@ -28535,7 +28704,7 @@ function closeEggUnlock() {
 
 function revealAccentSection() {
   const sec = document.getElementById('pref-accent-section');
-  if (sec) { sec.style.display = 'block'; }
+  if (sec) { sec.style.display = isSencillaUI() ? 'none' : 'block'; }
   updateAccentSwatchesUI();
 }
 
@@ -28612,6 +28781,7 @@ function stopConfetti() {
 
 // ── Accent color application ─────────────────────────────────────────────
 function setAccentColor(name) {
+  if (isSencillaUI()) return; // v1.80.7.1: en la interfaz Sencilla el color de acento no se puede cambiar
   localStorage.setItem('fleming_accent', name);
   applyAccentColor(name);
   updateAccentSwatchesUI();
@@ -28658,7 +28828,7 @@ function applyAccentColor(name) {
 
 function initAccentColor() {
   try { localStorage.removeItem('fleming_accent_bg'); } catch {} // v1.51.0.15-alpha: preferencia retirada
-  const saved = localStorage.getItem('fleming_accent') || 'blue';
+  const saved = isSencillaUI() ? 'blue' : (localStorage.getItem('fleming_accent') || 'blue'); // v1.80.7.1: Sencilla siempre usa el Azul
   applyAccentColor(saved);
   if (localStorage.getItem('fleming_egg_unlocked') === '1') {
     revealAccentSection();
@@ -28667,7 +28837,7 @@ function initAccentColor() {
 }
 
 function updateAccentSwatchesUI() {
-  const active = localStorage.getItem('fleming_accent') || 'blue';
+  const active = isSencillaUI() ? 'blue' : (localStorage.getItem('fleming_accent') || 'blue');
   ['blue','green','pink','yellow','purple'].forEach(name => {
     document.getElementById('accent-sw-' + name)?.classList.toggle('active', name === active);
   });
@@ -28689,9 +28859,13 @@ function isFluidAnimEnabled() {
 function isUltraAnimEnabled() {
   return document.documentElement.getAttribute('data-animations') === 'ultra';
 }
+// v1.80.7.1: la interfaz Sencilla siempre usa animaciones reducidas y no se puede cambiar.
+function isSencillaUI() { return typeof isModoSencilloActive === 'function' && isModoSencilloActive(); }
+function getEffectiveAnimationsMode() {
+  return isSencillaUI() ? 'reduced' : (localStorage.getItem('fleming_animations') || 'fluid');
+}
 function initAnimationsMode() {
-  const saved = localStorage.getItem('fleming_animations') || 'fluid';
-  applyAnimationsMode(saved);
+  applyAnimationsMode(getEffectiveAnimationsMode());
 }
 function applyAnimationsMode(mode) {
   const next = ANIMATIONS_MODES.includes(mode) ? mode : 'fluid';
@@ -28699,6 +28873,7 @@ function applyAnimationsMode(mode) {
   updateAnimationsEnabledToggleUI();
 }
 function setAnimationsMode(mode) {
+  if (isSencillaUI()) return; // v1.80.7.1: fijas en Reducidas en la interfaz Sencilla
   const next = ANIMATIONS_MODES.includes(mode) ? mode : 'fluid';
   localStorage.setItem('fleming_animations', next);
   applyAnimationsMode(next);
@@ -28712,7 +28887,7 @@ function setAnimationsMode(mode) {
   if (typeof updateMainSegThumb === 'function') updateMainSegThumb(true);
 }
 function updateAnimationsEnabledToggleUI() {
-  const mode = localStorage.getItem('fleming_animations') || 'fluid';
+  const mode = getEffectiveAnimationsMode();
   document.getElementById('pref-animations-fluid')?.classList.toggle('active', mode === 'fluid');
   document.getElementById('pref-animations-ultra')?.classList.toggle('active', mode === 'ultra');
   document.getElementById('pref-animations-reduced')?.classList.toggle('active', mode === 'reduced');
@@ -29480,7 +29655,7 @@ const PLATFORM_RESET_KEYS = [
   'fleming_navbar_options_avatar', 'fleming_navbar_btn_size', 'fleming_notif_levels', 'fleming_notif_prefs',
   'fleming_notif_templates', 'fleming_simplified_mode', 'fleming_modo_sencillo', 'fleming_theme', 'fleming_tip_font_scale',
   'fleming_transparency', 'fleming_transparency_level', 'fleming_ui_size', 'fleming_weather_enabled',
-  'fleming_experiment_ter_no_preview'
+  'fleming_experiment_ter_no_preview', 'fleming_experiment_ev_countdown_seconds', 'fleming_experiment_low_res'
 ];
 function confirmResetPlatform() {
   if (!confirm('¿Restablecer la plataforma? Se restaurarán todas las preferencias y configuraciones a sus valores predeterminados. Tu sesión y tu perfil no se verán afectados.')) return;
@@ -29765,6 +29940,7 @@ function _backOpenLayers() {
     ['full-map-lightbox', 'open', 'closeFullMap', 0],
     ['home-custom-overlay', 'open', 'closeHomeCustomize', 0],
     ['home-board-custom-overlay', 'open', 'closeHomeBoardCustomize', 0],
+    ['simp-assign-sheet', 'open', 'closeSimpAssignSheet', 0],
     ['detail-overlay', 'open', 'closeDetail', 0],
     ['detail-ct-screen', 'ct-active', 'cartGoBack', 0],
     ['cartTurnDetailScreen', 'ct-turn-active', 'cartCloseTurnDetail', 0.5],
@@ -31613,9 +31789,31 @@ function updateModoSencilloToggleUI() {
   toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)';
   thumb.style.left = on ? '21px' : '3px';
 }
+// v1.80.7.1: lo que cambia según la interfaz. Sencilla: territorios sin vista previa, resolución reducida,
+// sin segundos en Eventos, animaciones reducidas y color de acento fijo (Azul), sin poder cambiarlos.
+// Clásica y Nueva: lo contrario (vista previa, resolución completa, segundos, animaciones y acento a elección).
+let _sencillaProfileApplied = null;
+function applySencillaProfile() {
+  const on = isModoSencilloActive();
+  if (_sencillaProfileApplied === on) return;
+  const first = _sencillaProfileApplied === null;
+  _sencillaProfileApplied = on;
+  try { applyTerNoPreview(); } catch (e) {}
+  try { applyLowRes(); } catch (e) {}
+  try { initAnimationsMode(); } catch (e) {}
+  try { initAccentColor(); } catch (e) {}
+  const accBlock = document.getElementById('pref-accent-restricted');
+  if (accBlock) accBlock.style.display = on ? 'none' : '';
+  const animBlock = document.getElementById('pref-animations-restricted');
+  if (animBlock) animBlock.style.display = on ? 'none' : '';
+  if (first) return;
+  try { if (document.getElementById('territory-map-grid') && typeof renderTerritoryView === 'function') renderTerritoryView(); } catch (e) {}
+  try { if (_evCdTimer) { clearInterval(_evCdTimer); _evCdTimer = null; if (_evCdTarget) _evCountdownStart(_evCdTarget); } } catch (e) {}
+}
 function applyModoSencilloUI() {
   const active = isModoSencilloActive();
   document.documentElement.classList.toggle('modo-sencillo-mode', active);
+  applySencillaProfile();
   if (!active) msCloseOverlay();
   if (typeof applyInicioUI === 'function') applyInicioUI();
   if (typeof applyOwnAvatarToDropdowns === 'function') applyOwnAvatarToDropdowns();
@@ -34229,7 +34427,8 @@ ADMIN_TAB_SECTION['vmc'] = 'reuniones';
 ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
 
 </script>
-<!-- ── Profile fullscreen page ── -->
+<!-- ── Profile fullscreen page (PopUp centrado en pantallas grandes) ── -->
+<div id="profile-modal-backdrop" onclick="closeProfilePage()" aria-hidden="true"></div>
 <div id="page-profile" class="">
   <nav class="subpage-topbar">
     <button class="pill-back-btn" onclick="closeProfilePage()" title="Inicio" data-i18n-title="nav.inicio">
@@ -39275,51 +39474,19 @@ document.addEventListener('click', (e) => {
   document.head.appendChild(style);
 })();
 
-// ── v1.77.12: experimento "Segundos en la cuenta regresiva del Evento" (activado por defecto) ──
+// ── v1.80.7.1: segundos en la cuenta regresiva del Evento — ya no es experimento.
+// Se muestran en todas las interfaces, excepto en la Sencilla (que nunca los muestra). ──
 function isEvCountdownSecondsEnabled() {
-  try { return localStorage.getItem('fleming_experiment_ev_countdown_seconds') !== 'false'; } catch (e) { return true; }
-}
-function updateEvCdSecondsUI() {
-  const on = isEvCountdownSecondsEnabled();
-  const track = document.getElementById('ev-cdsec-toggle');
-  const thumb = document.getElementById('ev-cdsec-thumb');
-  if (track) track.style.background = on ? 'var(--accent)' : 'var(--surface3)';
-  if (thumb) thumb.style.left = on ? '21px' : '3px';
-}
-function toggleEvCdSeconds() {
-  const next = !isEvCountdownSecondsEnabled();
-  try { localStorage.setItem('fleming_experiment_ev_countdown_seconds', String(next)); } catch (e) {}
-  updateEvCdSecondsUI();
-  // Si hay un Evento abierto con la cuenta regresiva activa, se reinicia el temporizador con el nuevo ritmo.
-  try {
-    if (_evCdTimer) {
-      clearInterval(_evCdTimer); _evCdTimer = null;
-      if (_evCdTarget) _evCountdownStart(_evCdTarget);
-    }
-  } catch (e) {}
+  return !(typeof isModoSencilloActive === 'function' && isModoSencilloActive());
 }
 
-// ── v1.77.5: experimento "Territorios sin vista previa" ─────────────────────
+// ── v1.80.7.1: Territorios sin vista previa — ya no es experimento. Solo la interfaz Sencilla
+// quita la imagen del mapa; en la Clásica y la Nueva todos los territorios tienen vista previa. ──
 function isTerNoPreviewEnabled() {
-  try { return localStorage.getItem('fleming_experiment_ter_no_preview') === 'true'; } catch (e) { return false; }
+  return typeof isModoSencilloActive === 'function' && isModoSencilloActive();
 }
 function applyTerNoPreview() {
   document.documentElement.classList.toggle('ter-no-preview', isTerNoPreviewEnabled());
-}
-function updateTerNoPreviewUI() {
-  const on = isTerNoPreviewEnabled();
-  const track = document.getElementById('ter-nopreview-toggle');
-  const thumb = document.getElementById('ter-nopreview-thumb');
-  if (track) track.style.background = on ? 'var(--accent)' : 'var(--surface3)';
-  if (thumb) thumb.style.left = on ? '21px' : '3px';
-}
-function toggleTerNoPreview() {
-  const next = !isTerNoPreviewEnabled();
-  try { localStorage.setItem('fleming_experiment_ter_no_preview', String(next)); } catch (e) {}
-  applyTerNoPreview();
-  updateTerNoPreviewUI();
-  // Si la grilla de Territorios ya está dibujada, se vuelve a renderizar para cargar/quitar las imágenes.
-  try { if (document.getElementById('territory-map-grid') && typeof renderTerritoryView === 'function') renderTerritoryView(); } catch (e) {}
 }
 applyTerNoPreview();
 
@@ -39424,24 +39591,15 @@ if (getTextScale() !== TEXT_SCALE_DEFAULT) {
   else window.addEventListener('load', applyTextScale);
 }
 
-// ── v1.77.8: experimento "Resolución reducida en medios" ─────────────────────
+// ── v1.80.7.1: Resolución reducida en medios — ya no es experimento. Está activa solo en la
+// interfaz Sencilla; en la Clásica y la Nueva siempre está desactivada. ──
 function isLowResEnabled() {
-  try { return localStorage.getItem('fleming_experiment_low_res') === 'true'; } catch (e) { return false; }
+  return typeof isModoSencilloActive === 'function' && isModoSencilloActive();
 }
-function updateLowResUI() {
+function applyLowRes() {
   const on = isLowResEnabled();
-  const track = document.getElementById('lowres-toggle');
-  const thumb = document.getElementById('lowres-thumb');
-  if (track) track.style.background = on ? 'var(--accent)' : 'var(--surface3)';
-  if (thumb) thumb.style.left = on ? '21px' : '3px';
-}
-function toggleLowRes() {
-  const next = !isLowResEnabled();
-  try { localStorage.setItem('fleming_experiment_low_res', String(next)); } catch (e) {}
-  document.documentElement.classList.toggle('low-res-media', next);
-  updateLowResUI();
-  if (next) _lowResScanImages();
-  try { showToast(next ? 'Resolución reducida activada. Se aplica a lo que abras a partir de ahora.' : 'Resolución completa restaurada. Reabre el medio para verla.', ''); } catch (e) {}
+  document.documentElement.classList.toggle('low-res-media', on);
+  if (on) _lowResScanImages();
 }
 document.documentElement.classList.toggle('low-res-media', isLowResEnabled());
 // Reduce imágenes grandes (data URI o mismo origen) a un máximo de 1280 px por lado cuando el experimento está activo.
