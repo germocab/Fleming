@@ -9372,6 +9372,8 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
         <div class="voz-hint">Une los mapas SVG de los territorios (los de los reportes) en un solo mapa de la congregación, sin nombres de calles, y califícalo con puntos GPS para que los usuarios vean su ubicación en todo el territorio. Está activo para todos los usuarios: en Territorios → Mapa de la congregación (que sigue abriéndose en PDF), tocando el título «Mapa» eligen entre Mapa en PDF y LiveMap.</div>
         <div class="gre-quality" id="lm-admin-status" style="margin:.8rem 0"></div>
         <button type="button" class="btn-secondary" onclick="lmOpenEditor()" style="width:100%">Unir, acoplar y calibrar mapas</button>
+        <button type="button" class="btn-secondary" onclick="lmRecoverScan()" style="width:100%;margin-top:8px">Buscar copias guardadas de LiveMap</button>
+        <div id="lm-recover" style="margin-top:10px;font-size:.82rem"></div>
       </div>
 
       <!-- ── Voz (v1.57.0-beta) — Administración → FlemingApp → Voz: define quién puede usarla (solo DEV) ── -->
@@ -27149,6 +27151,14 @@ function _lmNormLayout(v) {
       .map(p => ({ t: p.t, u: +p.u, v: +p.v, lat: +p.lat, lng: +p.lng }))
   };
 }
+// Si hay varias filas con la misma clave (eso causaba «multiple (or no) rows returned»), se usa la que tiene más territorios; en empate, la más reciente.
+function _lmRowItems(r) { return (r && r.value && Array.isArray(r.value.items)) ? _lmNormLayout(r.value).items.length : 0; }
+function _lmRowTime(r) { const t = r && (r.updated_at || r.created_at); return t ? (Date.parse(t) || 0) : 0; }
+function _lmPickRow(rows) {
+  let best = null;
+  (rows || []).forEach(r => { if (!best || _lmRowItems(r) > _lmRowItems(best) || (_lmRowItems(r) === _lmRowItems(best) && _lmRowTime(r) > _lmRowTime(best))) best = r; });
+  return best;
+}
 // Lee el diseño guardado. Una copia en memoria solo se reutiliza si tiene territorios: si está vacía (p. ej. se pidió antes de que
 // el diseño existiera o de que la sesión estuviera lista) se vuelve a consultar. _lmDiag guarda de dónde salió el resultado, para
 // poder explicar con claridad por qué LiveMap aparece vacío.
@@ -27171,9 +27181,9 @@ async function lmGetLayout(force) {
   const local = _lmLocalBest();
   try {
     if (d.online) {
-      const rs = await sb.from('platform_settings').select('value').eq('key', LM_KEY).limit(1);
+      const rs = await sb.from('platform_settings').select('*').eq('key', LM_KEY);
       if (rs.error) throw rs.error;
-      const data = (rs.data && rs.data[0]) || null;
+      const data = _lmPickRow(rs.data); d.rows = (rs.data || []).length;
       d.src = 'db'; d.row = !!(data && data.value); d.raw = (data && data.value && Array.isArray(data.value.items)) ? data.value.items.length : 0;
       const dbL = _lmNormLayout(data && data.value);
       if (local.items.length > dbL.items.length) {
@@ -27388,6 +27398,40 @@ async function lmUpdateAdminStatus() {
   if (!L.items.length) { el.textContent = (_lmDiag && (_lmDiag.err || (_lmDiag.src === 'db' && _lmDiag.row && _lmDiag.raw))) ? lmDiagMessage() : 'Aún no has unido los mapas.'; return; }
   const f = lmFitGeoref(L, lmBounds(L.items, 0.04));
   el.textContent = n + ' territorios acoplados · ' + (f ? ('calibrado con ' + f.used.length + ' puntos · error medio ≈ ' + f.md.rms.toFixed(1) + ' m') : 'sin calibrar (los usuarios verán el mapa pero no su ubicación)');
+}
+
+// ── Recuperación (solo DEV): lista todas las copias de LiveMap que existen en la base y en este dispositivo ──
+let _lmRecRows = [];
+async function lmRecoverScan() {
+  const box = document.getElementById('lm-recover'); if (!box) return;
+  if (currentRole !== 'dev') { box.textContent = 'Solo el usuario DEV puede hacerlo.'; return; }
+  box.textContent = 'Buscando…';
+  const items = [];
+  try {
+    const r = await sb.from('platform_settings').select('*').ilike('key', '%livemap%');
+    if (r.error) throw r.error;
+    (r.data || []).forEach(row => items.push({ label: 'Base de datos · clave «' + row.key + '»' + (row.updated_at ? ' · ' + new Date(row.updated_at).toLocaleString() : ''), value: row.value }));
+  } catch (e) { items.push({ label: 'Base de datos: error — ' + ((e && e.message) || e), value: null }); }
+  [[LM_LAYOUT_LS, 'Este dispositivo (copia actual)'], [LM_LAYOUT_LS + '_bak', 'Este dispositivo (respaldo)']].forEach(([k, name]) => {
+    try { const v = JSON.parse(localStorage.getItem(k) || 'null'); if (v) items.push({ label: name, value: v }); } catch (e) {}
+  });
+  _lmRecRows = items;
+  box.innerHTML = items.length ? items.map((it, i) => {
+    const l = it.value ? _lmNormLayout(it.value) : null, n = l ? l.items.length : 0, pts = l ? l.pts.length : 0;
+    return '<div style="padding:8px 0;border-top:1px solid var(--border)"><div style="font-weight:600">' + it.label.replace(/</g, '&lt;') + '</div><div style="color:var(--text3)">' + (l ? (n + ' territorios · ' + pts + ' puntos GPS') : 'sin datos') + '</div>' +
+      (n ? '<button type="button" class="btn-secondary" style="margin-top:6px" onclick="lmRecoverRestore(' + i + ')">Restaurar esta copia</button>' : '') + '</div>';
+  }).join('') : 'No se encontró ninguna copia.';
+}
+async function lmRecoverRestore(i) {
+  const it = _lmRecRows[i]; if (!it || !it.value) return;
+  const l = _lmNormLayout(it.value); if (!l.items.length) return;
+  if (!confirm('¿Restaurar esta copia (' + l.items.length + ' territorios) como el LiveMap de todos?')) return;
+  try {
+    const { error } = await sb.from('platform_settings').upsert({ key: LM_KEY, value: l });
+    if (error) throw error;
+    _lmLayout = l; _lmLocalStore(l); lmUpdateAdminStatus();
+    showToast('LiveMap restaurado ✓', 'success');
+  } catch (e) { showToast('No se pudo restaurar: ' + ((e && e.message) || e), 'error'); }
 }
 
 // ── Editor: acoplar y calibrar ──
@@ -27802,7 +27846,7 @@ async function lmeSave() {
     try { localStorage.setItem(LM_LAYOUT_LS, JSON.stringify(_lmLayout)); localStorage.setItem(LM_LAYOUT_LS + '_bak', JSON.stringify(_lmLayout)); } catch (e) {}
     // Verificación: se vuelve a leer lo guardado, como lo leería cualquier usuario.
     let n = -1;
-    try { const r = await sb.from('platform_settings').select('value').eq('key', LM_KEY).limit(1); const r0 = r.data && r.data[0]; n = r.error ? -1 : ((r0 && r0.value && Array.isArray(r0.value.items)) ? r0.value.items.length : 0); } catch (e) {}
+    try { const r = await sb.from('platform_settings').select('*').eq('key', LM_KEY); n = r.error ? -1 : _lmRowItems(_lmPickRow(r.data)); } catch (e) {}
     if (_lme) _lme.dirty = false;
     if (n === payload.items.length) showToast('LiveMap guardado ✓', 'success');
     else showToast('Se guardó, pero al volver a leerlo la base de datos devuelve ' + (n < 0 ? 'un error' : n + ' de ' + payload.items.length + ' territorios') + '. Los usuarios no verán LiveMap hasta corregirlo (revisa los permisos de la tabla platform_settings).', 'error');
