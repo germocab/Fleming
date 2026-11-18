@@ -4566,18 +4566,23 @@
   }
   #page-grupo.open { display: flex; }
   /* v1.81: botón circular de Editar el Grupo (arriba a la derecha, Móvil y Desktop) */
+  /* v1.81.0.1: ahora va dentro del flujo del encabezado (a la derecha) para quedar alineado con el botón Atrás y el título */
   .grupo-edit-btn {
-    position: absolute; top: 0; right: 0; z-index: 3;
+    position: relative; margin-left: auto; z-index: 3; flex-shrink: 0;
     width: 40px; height: 40px; border-radius: 50%; padding: 0;
     display: none; align-items: center; justify-content: center; cursor: pointer;
     background: var(--nav-bg); color: var(--text);
-    border: 1px solid var(--border);
+    border: 1px solid var(--border); box-shadow: var(--shadow);
     -webkit-backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%); backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%);
     pointer-events: auto; transition: transform 0.12s;
   }
   .grupo-edit-btn.show { display: flex; }
   .grupo-edit-btn:active { transform: scale(0.94); }
   .grupo-edit-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
+  /* v1.81.0.1: Centro de Administración en Desktop — Asignaciones usa el mismo ancho que el Modo View (.main-content: 860px − padding) */
+  @media (min-width: 900px) {
+    #admin-assignments { max-width: 820px; margin-left: auto; margin-right: auto; }
+  }
   #grupo-modal-backdrop { display: none; }
   /* v1.81: en Desktop / pantallas grandes, el detalle de un Grupo de Servicio se abre como PopUp centrado */
   @media (min-width: 900px) and (min-height: 560px) {
@@ -4597,7 +4602,6 @@
       box-shadow: 0 24px 70px rgba(0,0,0,0.35), 0 4px 18px rgba(0,0,0,0.18);
     }
     #page-grupo .grupo-detail-hero { border-radius: 20px 20px 0 0; }
-    #page-grupo .subpage-topbar > .grupo-edit-btn { right: 1rem; }
   }
 
  
@@ -4664,6 +4668,7 @@
     object-fit: cover; display: none; user-select: none; -webkit-user-drag: none;
   }
   .grupo-detail-hero.has-cover .grupo-detail-cover { display: block; }
+  #grupo-detail-hero.has-cover { cursor: zoom-in; -webkit-tap-highlight-color: transparent; }
   .grupo-detail-hero::after {
     content: ''; position: absolute; inset: 0; pointer-events: none;
     background: linear-gradient(to top, rgba(0,0,0,0.74) 0%, rgba(0,0,0,0.38) 46%, rgba(0,0,0,0.14) 100%);
@@ -5276,6 +5281,32 @@
   }
   .trep-report-ter-box:hover { background: var(--surface2); }
   .trep-report-ter-box:active { transform: scale(0.97); }
+
+
+  /* ── v1.81.0.1: Reportes recibidos — calendario del mes ── */
+  .trep-cal { max-width: 640px; margin: 0 auto 1rem; }
+  .trep-cal-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 0.7rem; }
+  .trep-cal-title { font-size: 1rem; font-weight: 800; letter-spacing: -0.01em; text-transform: capitalize; flex: 1; text-align: center; }
+  .trep-cal-nav { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text); display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; transition: transform 0.12s, background 0.15s; }
+  .trep-cal-nav:hover { background: var(--surface2); }
+  .trep-cal-nav:active { transform: scale(0.92); }
+  .trep-cal-nav svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .trep-cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 0.7rem; }
+  .trep-cal-dow { text-align: center; font-size: 0.68rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.04em; padding: 0.3rem 0; }
+  .trep-cal-cell { position: relative; aspect-ratio: 1 / 1; max-height: 64px; border: 0; background: transparent; border-radius: 14px; font-family: inherit; font-size: 0.92rem; font-weight: 600; color: var(--text); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0; cursor: default; -webkit-tap-highlight-color: transparent; }
+  .trep-cal-cell.empty { visibility: hidden; }
+  .trep-cal-cell.today .trep-cal-num { color: var(--accent); font-weight: 800; }
+  .trep-cal-cell.today { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+  .trep-cal-cell.has-report { cursor: pointer; }
+  .trep-cal-cell.has-report:hover { background: var(--surface2); }
+  .trep-cal-cell.has-report:active { transform: scale(0.94); }
+  .trep-cal-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); display: block; }
+  .trep-cal-dot-spacer { width: 6px; height: 6px; display: block; }
+  .trep-day-panel { max-width: 760px; align-items: stretch; }
+  .trep-day-panel-title { font-weight: 800; font-size: 1.15rem; text-align: center; padding: 0 2.2rem; }
+  .trep-day-panel-sub { font-size: 0.82rem; color: var(--text3); font-weight: 600; text-align: center; margin-bottom: 0.7rem; }
+  #trep-day-overlay { z-index: 1000; }
+  #trep-report-zoom-overlay { z-index: 1010; }
 
   /* ── Zoom de un reporte recibido: mapa grande ── */
   .trep-report-zoom-overlay {
@@ -11667,6 +11698,17 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
 </div>
 
 <!-- Zoom de un reporte de territorio recibido: mapa grande con el detalle de manzanas -->
+<div class="trep-report-zoom-overlay" id="trep-day-overlay" onclick="trepDayOverlayClick(event)">
+  <div class="trep-report-zoom-panel trep-day-panel">
+    <button class="detail-close" style="position:absolute;top:0.9rem;right:0.9rem" onclick="trepCloseDay()">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="trep-day-panel-title" id="trep-day-title">—</div>
+    <div class="trep-day-panel-sub" id="trep-day-sub"></div>
+    <div id="trep-day-body"></div>
+  </div>
+</div>
+
 <div class="trep-report-zoom-overlay" id="trep-report-zoom-overlay" onclick="trepReportZoomOverlayClick(event)">
   <div class="trep-report-zoom-panel">
     <button class="detail-close" style="position:absolute;top:0.9rem;right:0.9rem" onclick="trepCloseReportZoom()">
@@ -12330,7 +12372,7 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.77.8: (1) La dirección en el detalle de una asignación de casa en casa es un poco más grande (solo esa pantalla). (2) El botón de Clima de la asignación ya no abre el sitio del clima. (3) Nuevo ícono de Carritos (Inicio, Mis Turnos, Ajustes > Notificaciones y menú de Predicación). (4) Nuevo experimento "Resolución reducida en medios" para imágenes y PDF. (5) Carga más rápida: pdf.js y QR con defer, preconnect, fuentes con display=swap, decodificación asíncrona de imágenes.
 // v1.77.5: (1) Detalle de un Territorio: el título del encabezado ahora dice "Detalles del territorio" (el número ya aparece en el círculo de color). (2) Más opciones en Inicio incluye "Personalizar Inicio" (el botón al final de Inicio se mantiene). (3) Nuevo experimento "Territorios sin vista previa": las tarjetas de Territorios muestran solo el degradé y el nombre.
 // v1.81: (1) Vida y Ministerio: la fila de canción tiene bordes redondeados y ya no queda pegada a otras secciones. (2) Conferencias salientes muestra todas las fechas futuras. (3) Menú de Compartir unificado (Aseo del Salón y Responsabilidades). (4) Grupo de Servicio: PopUp en Desktop y botón circular de Editar.
-const APP_VERSION = '1.81'; // v1.81 — (1) Vida y Ministerio: la fila de canción ahora tiene bordes redondeados y ya no queda pegada a otras secciones. (2) Reunión Pública: Conferencias salientes muestra todas las conferencias de hoy en adelante, no solo la de la semana actual. (3) El menú de Compartir es idéntico en Aseo del Salón y en Responsabilidades. (4) Detalle de Grupo de Servicio: en Desktop se abre como PopUp; nuevo botón circular de Editar (Superintendente, Auxiliar, Administrador y DEV) en Móvil y Desktop; v1.80.9.20 — v1.80.9.20 — las asignaciones que aparecen en el menú de LiveMap son solo futuras (de hoy en adelante); las pasadas ya no se muestran; v1.80.9.15 — el menú de LiveMap ya no muestra las direcciones No Pasar; ahora muestra si el territorio seleccionado ya fue asignado en algún día: se ve la tarjeta de cada asignación de Casa en casa donde fue asignado y, al presionarla, abre la pantalla de detalles de esa asignación; v1.80.9.10 — en LiveMap todos los territorios (el color de sus manzanas) se ven en un tono suave del color de acento de la plataforma y solo el territorio seleccionado muestra su color original (las etiquetas con el número conservan su color); v1.80.9 — la etiqueta «Estás fuera de este territorio» solo se muestra en el mapa de pantalla completa (ya no sobre el mapa de la asignación); vuelve LiveSnap: mantiene Live en Play hasta reconocer una calle y luego lo pausa (se puede dar Play de nuevo), con un toggle en Más opciones de una asignación de Casa en casa y en Configuración → Funciones especiales; v1.80.8 — las tarjetas de Evento de la interfaz Sencilla ya no muestran ningún color de borde; en la interfaz Clásica y Nueva, en el detalle de una asignación de Casa en casa, el mapa de territorio en pantalla completa tiene un botón «Ver en LiveMap» junto a «Sugerir corrección» que abre LiveMap en el territorio de la asignación; v1.80.7.2 — en la interfaz Sencilla, los indicadores de territorio de las tarjetas de Casa en casa usan el azul de la plataforma (ya no el color del territorio); no se pueden sugerir nuevos No Pasar; desaparece la pantalla de detalle de la asignación de Casa en casa: al tocar la tarjeta sube un menú inferior (3/4 de pantalla) con solo el mapa del territorio, el botón para llamar al Encargado y las direcciones No Pasar (sin Live); la tarjeta de Evento ya no muestra la imagen, solo título y subtítulo; v1.80.7.1 — las interfaces se diferencian: «Territorios sin vista previa», «Resolución reducida en medios» y «Segundos en la cuenta regresiva» dejan de ser experimentos; la interfaz Sencilla quita la vista previa de los territorios, reduce la resolución de los medios, no muestra segundos en los Eventos, tiene siempre las animaciones reducidas y el color de acento fijo (Azul), sin poder cambiarlos, y la Clásica y la Nueva siempre tienen vista previa, resolución completa y segundos; v1.80.7 — en Desktop o pantallas grandes, «Mi Perfil» se abre en un PopUp centrado (con fondo atenuado), igual que «Configuración»; en móvil no cambia; v1.80.6.5 — «Mi Perfil» y «Configuración» vuelven a ser pantallas separadas (como en 1.80.4); más rapidez y estabilidad: los eventos de cambio de tamaño se agrupan por cuadro, el vidrio adaptativo ya no se recalcula en cada cambio del documento ni con la pestaña oculta, el reloj de cuenta regresiva y los oyentes de scroll se alivianan, conexión anticipada a Supabase, respaldo si la librería de Supabase no carga y los fallos de red ya no quedan como errores sin capturar; v1.80.6 — el Onboarding suma dos pantallas después de «Instalar»: Apariencia (Automático por defecto, Claro u Oscuro) e Interfaz (Sencillo, Clásico o Nuevo por defecto), cada una con una vista previa simple y un botón «Saltar» arriba a la derecha que lleva a «Todo listo»; v1.80.5 — «Mi Perfil» y «Configuración» se fusionan en una sola pantalla, «Perfil y Configuración»: arriba la foto, el nombre y el UserID, debajo tus asignaciones (igual que Mi Perfil) y más abajo todos los ajustes de Configuración; «Cerrar sesión» y «Editar foto de perfil» pasan a un nuevo menú «Más opciones» en la parte superior; funciona en Modo Claro y Oscuro; v1.80.4 — LiveMap en modo oscuro (fondo oscuro y textos que se adaptan), etiqueta «Estás en el Territorio N» abajo a la izquierda, recuerda el último mapa elegido (Mapa en PDF o LiveMap) y cada Grupo de Servicio tiene su sección «Territorios del grupo» (DEV y Administradores con el módulo Grupos) que alimenta el detalle de los territorios; v1.80.3 — LiveMap: textos (nombres de calles) que se pueden mover, rotar, cambiar de tamaño y mandar al frente o al fondo; respaldo descargable y restaurable desde archivo; al tocar un territorio se abre un panel inferior con su última realización, su grupo de servicio y sus Direcciones No Pasar (los controles de zoom se ocultan mientras está abierto); v1.80.2g.2 — LiveMap: corrige «JSON object requested, multiple (or no) rows returned» en cuentas de usuario y su barra de título ahora es igual a la de Mapa; v1.80.2g — LiveMap: se vuelve a leer el diseño guardado cada vez que se abre (una copia vacía o vieja ya no se da por buena), el menú no avisa «sin configurar» por su cuenta, mensajes de diagnóstico claros y verificación al guardar; controles Ajustar/Acercar/Alejar abajo a la derecha en ambos mapas; v1.80.2f — LiveMap deja de ser experimental y viene activo para todos: el Mapa de la congregación sigue abriéndose en PDF y, al tocar el título «Mapa», se elige entre Mapa en PDF y LiveMap; v1.80.2d — LiveMap: selección múltiple de territorios con Shift + clic para moverlos, rotarlos o cambiarles el tamaño juntos, y Ctrl + Z / Ctrl + Y para deshacer y rehacer en el editor (Administración → LiveMap, solo DEV); v1.80.2 — LiveMap (Experimento): une los mapas SVG de los territorios en un solo mapa de la congregación con ubicación GPS (acople y calibración en Administración → LiveMap, solo DEV; se activa en Experimentos y se abre desde Mapa de la congregación); v1.80.1.5 — Mapa interactivo va con Live (sin interruptor propio) y sin etiqueta sobre el mapa; v1.80.1 — Mapa interactivo: ubicación GPS sobre los mapas PNG de territorio (georreferenciación por el usuario DEV; se activa en Más opciones de la asignación o en Funciones especiales); v1.80 — Reasignar Encargado: el Encargado de una asignación de Casa en casa puede cederle el cargo a otro conductor desde Más Opciones (avisa al nuevo Encargado, a los Administradores de Predicación y al DEV); v1.79.100d — onboarding de bienvenida (por cuenta, controlado por el DEV); v1.79.10 — sin No Pasar nuevos en Para tí; detalle de punto de carrito con Recordatorios (sin Fotos ni búsqueda) y barra superior fija con modo oscuro; filtro de Carritos unificado; Aseo solo a los dos grupos asignados; v1.79.5 — Otros Grupos con títulos como las fechas; botón Volver arriba sobre la NavBar inferior; Más Opciones sin Perfil en la UI nueva; sin saludo emergente; v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
+const APP_VERSION = '1.81.0.1'; // v1.81.0.1 — (1) Grupo de Servicio: al presionar la portada se abre en pantalla completa. (2) Centro de Administración (Desktop) → Asignaciones: las tarjetas ya no ocupan todo el ancho, igual que en el Modo View. (3) Reportes: calendario del mes; los días con reporte muestran un punto verde y al presionarlos se abre la tarjeta del reporte. (4) Detalle de Grupo: el botón Editar queda alineado con el resto del encabezado; v1.81 — (1) Vida y Ministerio: la fila de canción ahora tiene bordes redondeados y ya no queda pegada a otras secciones. (2) Reunión Pública: Conferencias salientes muestra todas las conferencias de hoy en adelante, no solo la de la semana actual. (3) El menú de Compartir es idéntico en Aseo del Salón y en Responsabilidades. (4) Detalle de Grupo de Servicio: en Desktop se abre como PopUp; nuevo botón circular de Editar (Superintendente, Auxiliar, Administrador y DEV) en Móvil y Desktop; v1.80.9.20 — v1.80.9.20 — las asignaciones que aparecen en el menú de LiveMap son solo futuras (de hoy en adelante); las pasadas ya no se muestran; v1.80.9.15 — el menú de LiveMap ya no muestra las direcciones No Pasar; ahora muestra si el territorio seleccionado ya fue asignado en algún día: se ve la tarjeta de cada asignación de Casa en casa donde fue asignado y, al presionarla, abre la pantalla de detalles de esa asignación; v1.80.9.10 — en LiveMap todos los territorios (el color de sus manzanas) se ven en un tono suave del color de acento de la plataforma y solo el territorio seleccionado muestra su color original (las etiquetas con el número conservan su color); v1.80.9 — la etiqueta «Estás fuera de este territorio» solo se muestra en el mapa de pantalla completa (ya no sobre el mapa de la asignación); vuelve LiveSnap: mantiene Live en Play hasta reconocer una calle y luego lo pausa (se puede dar Play de nuevo), con un toggle en Más opciones de una asignación de Casa en casa y en Configuración → Funciones especiales; v1.80.8 — las tarjetas de Evento de la interfaz Sencilla ya no muestran ningún color de borde; en la interfaz Clásica y Nueva, en el detalle de una asignación de Casa en casa, el mapa de territorio en pantalla completa tiene un botón «Ver en LiveMap» junto a «Sugerir corrección» que abre LiveMap en el territorio de la asignación; v1.80.7.2 — en la interfaz Sencilla, los indicadores de territorio de las tarjetas de Casa en casa usan el azul de la plataforma (ya no el color del territorio); no se pueden sugerir nuevos No Pasar; desaparece la pantalla de detalle de la asignación de Casa en casa: al tocar la tarjeta sube un menú inferior (3/4 de pantalla) con solo el mapa del territorio, el botón para llamar al Encargado y las direcciones No Pasar (sin Live); la tarjeta de Evento ya no muestra la imagen, solo título y subtítulo; v1.80.7.1 — las interfaces se diferencian: «Territorios sin vista previa», «Resolución reducida en medios» y «Segundos en la cuenta regresiva» dejan de ser experimentos; la interfaz Sencilla quita la vista previa de los territorios, reduce la resolución de los medios, no muestra segundos en los Eventos, tiene siempre las animaciones reducidas y el color de acento fijo (Azul), sin poder cambiarlos, y la Clásica y la Nueva siempre tienen vista previa, resolución completa y segundos; v1.80.7 — en Desktop o pantallas grandes, «Mi Perfil» se abre en un PopUp centrado (con fondo atenuado), igual que «Configuración»; en móvil no cambia; v1.80.6.5 — «Mi Perfil» y «Configuración» vuelven a ser pantallas separadas (como en 1.80.4); más rapidez y estabilidad: los eventos de cambio de tamaño se agrupan por cuadro, el vidrio adaptativo ya no se recalcula en cada cambio del documento ni con la pestaña oculta, el reloj de cuenta regresiva y los oyentes de scroll se alivianan, conexión anticipada a Supabase, respaldo si la librería de Supabase no carga y los fallos de red ya no quedan como errores sin capturar; v1.80.6 — el Onboarding suma dos pantallas después de «Instalar»: Apariencia (Automático por defecto, Claro u Oscuro) e Interfaz (Sencillo, Clásico o Nuevo por defecto), cada una con una vista previa simple y un botón «Saltar» arriba a la derecha que lleva a «Todo listo»; v1.80.5 — «Mi Perfil» y «Configuración» se fusionan en una sola pantalla, «Perfil y Configuración»: arriba la foto, el nombre y el UserID, debajo tus asignaciones (igual que Mi Perfil) y más abajo todos los ajustes de Configuración; «Cerrar sesión» y «Editar foto de perfil» pasan a un nuevo menú «Más opciones» en la parte superior; funciona en Modo Claro y Oscuro; v1.80.4 — LiveMap en modo oscuro (fondo oscuro y textos que se adaptan), etiqueta «Estás en el Territorio N» abajo a la izquierda, recuerda el último mapa elegido (Mapa en PDF o LiveMap) y cada Grupo de Servicio tiene su sección «Territorios del grupo» (DEV y Administradores con el módulo Grupos) que alimenta el detalle de los territorios; v1.80.3 — LiveMap: textos (nombres de calles) que se pueden mover, rotar, cambiar de tamaño y mandar al frente o al fondo; respaldo descargable y restaurable desde archivo; al tocar un territorio se abre un panel inferior con su última realización, su grupo de servicio y sus Direcciones No Pasar (los controles de zoom se ocultan mientras está abierto); v1.80.2g.2 — LiveMap: corrige «JSON object requested, multiple (or no) rows returned» en cuentas de usuario y su barra de título ahora es igual a la de Mapa; v1.80.2g — LiveMap: se vuelve a leer el diseño guardado cada vez que se abre (una copia vacía o vieja ya no se da por buena), el menú no avisa «sin configurar» por su cuenta, mensajes de diagnóstico claros y verificación al guardar; controles Ajustar/Acercar/Alejar abajo a la derecha en ambos mapas; v1.80.2f — LiveMap deja de ser experimental y viene activo para todos: el Mapa de la congregación sigue abriéndose en PDF y, al tocar el título «Mapa», se elige entre Mapa en PDF y LiveMap; v1.80.2d — LiveMap: selección múltiple de territorios con Shift + clic para moverlos, rotarlos o cambiarles el tamaño juntos, y Ctrl + Z / Ctrl + Y para deshacer y rehacer en el editor (Administración → LiveMap, solo DEV); v1.80.2 — LiveMap (Experimento): une los mapas SVG de los territorios en un solo mapa de la congregación con ubicación GPS (acople y calibración en Administración → LiveMap, solo DEV; se activa en Experimentos y se abre desde Mapa de la congregación); v1.80.1.5 — Mapa interactivo va con Live (sin interruptor propio) y sin etiqueta sobre el mapa; v1.80.1 — Mapa interactivo: ubicación GPS sobre los mapas PNG de territorio (georreferenciación por el usuario DEV; se activa en Más opciones de la asignación o en Funciones especiales); v1.80 — Reasignar Encargado: el Encargado de una asignación de Casa en casa puede cederle el cargo a otro conductor desde Más Opciones (avisa al nuevo Encargado, a los Administradores de Predicación y al DEV); v1.79.100d — onboarding de bienvenida (por cuenta, controlado por el DEV); v1.79.10 — sin No Pasar nuevos en Para tí; detalle de punto de carrito con Recordatorios (sin Fotos ni búsqueda) y barra superior fija con modo oscuro; filtro de Carritos unificado; Aseo solo a los dos grupos asignados; v1.79.5 — Otros Grupos con títulos como las fechas; botón Volver arriba sobre la NavBar inferior; Más Opciones sin Perfil en la UI nueva; sin saludo emergente; v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -26688,7 +26730,18 @@ function openLightbox(src, terLabel, terId) {
   if (ta) ta.value = '';
   try { _gmOnLightboxOpen(); } catch (e) {} // v1.80.1: Mapa interactivo
 }
+// v1.81.0.1: la portada de un Grupo de Servicio se abre en pantalla completa (mismo visor con zoom que los mapas)
+function openGrupoCoverFullscreen() {
+  const hero = document.getElementById('grupo-detail-hero');
+  const img = document.getElementById('grupo-detail-cover');
+  if (!hero || !img || !hero.classList.contains('has-cover')) return;
+  const src = img.getAttribute('src');
+  if (!src) return;
+  openLightbox(src, '', null);
+  const lb = document.getElementById('lightbox-img'); if (lb) lb.alt = 'Portada del grupo';
+}
 function closeLightbox() {
+  const _lbImg = document.getElementById('lightbox-img'); if (_lbImg) _lbImg.alt = 'Mapa del territorio';
   try { _gmOnLightboxClose(); } catch (e) {}
   document.getElementById('img-lightbox').classList.remove('open');
   document.body.style.overflow = '';
@@ -34775,7 +34828,7 @@ ADMIN_TAB_SECTION['fin-semana'] = 'reuniones';
   </nav>
 
   <!-- Hero -->
-  <div class="grupo-detail-hero" id="grupo-detail-hero">
+  <div class="grupo-detail-hero" id="grupo-detail-hero" onclick="openGrupoCoverFullscreen()">
     <img class="grupo-detail-cover" id="grupo-detail-cover" alt="" draggable="false">
     <div class="grupo-detail-hero-inner">
       <div class="grupo-detail-sub" id="grupo-detail-sub">— integrantes</div>
@@ -38017,8 +38070,8 @@ async function trepLoadReports() {
     if (error) throw error;
     if (!subs || !subs.length) {
       _trepReportsCache.subs = [];
-      container.innerHTML = '<div class="empty-state"><p>Sin reportes aún</p></div>';
-      if (countEl) countEl.textContent = '';
+      _trepReportsCache.subsById = {};
+      trepRenderReports();
       return;
     }
     const formIds = Array.from(new Set(subs.map(s => s.form_id).filter(Boolean)));
@@ -38067,62 +38120,113 @@ function _trepMapHtmlFor(t, s, maxH) {
     : trepBuildPreviewBars(t?.manzanas || [], done, s.all_territory);
 }
 
-// Dibuja desde la caché (abrir/cerrar un día ya no vuelve a pedir todo a Supabase).
+// v1.81.0.1: Reportes recibidos como calendario del mes.
+// Cada día con al menos un reporte muestra un punto verde bajo el número; al presionarlo se abre la tarjeta del reporte.
+let _trepCalY = new Date().getFullYear(), _trepCalM = new Date().getMonth(), _trepDayKeyOpen = null;
+const _TREP_MONTHS = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const _TREP_DOW = ['L','M','M','J','V','S','D'];
+
+function _trepDateKeyOf(s, formMap) {
+  const f = formMap[s.form_id];
+  if (f?.assignment_date) return String(f.assignment_date).slice(0, 10);
+  if (s.submitted_at) {
+    const d = new Date(s.submitted_at);
+    if (!isNaN(d)) return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  return null;
+}
+function _trepGroupByDate() {
+  const subs = _trepReportsCache.subs || [], formMap = _trepReportsCache.formMap || {}, byDate = {};
+  subs.forEach(s => { const k = _trepDateKeyOf(s, formMap); if (k) (byDate[k] = byDate[k] || []).push(s); });
+  return byDate;
+}
+// Tarjetas de un día (un publicador con varios territorios el mismo día va en una sola tarjeta).
+function _trepDayCardsHtml(items) {
+  const terById = _trepReportsCache.terById || {};
+  const byHost = {}, hostOrder = [];
+  items.forEach(s => {
+    const key = s.host_name || '—';
+    if (!byHost[key]) { byHost[key] = []; hostOrder.push(key); }
+    byHost[key].push(s);
+  });
+  return '<div class="trep-reports-grid">' + hostOrder.map(host => {
+    const boxes = byHost[host].map(s => {
+      const t = terById[s.territory_id];
+      const mapHtml = _trepMapHtmlFor(t, s);
+      return '<div class="trep-report-ter-box" onclick="trepOpenReportZoom(\'' + trepEsc(s.id) + '\')">' +
+        '<div class="trep-report-ter-label">Territorio ' + trepEsc(t?.number ?? '?') + '</div>' +
+        (mapHtml ? '<div class="trep-report-mini-map">' + mapHtml + '</div>' : '') +
+        _trepStatusBlock(s, false) +
+        '<button onclick="event.stopPropagation();trepDeleteReport(\'' + trepEsc(s.id) + '\')" class="btn-danger-outline" style="padding:0.25rem 0.7rem;font-size:0.68rem">Eliminar</button>' +
+        '</div>';
+    }).join('');
+    return '<div class="trep-report-card"><div class="trep-report-card-top"><div class="trep-report-card-name">' + trepEsc(host) + '</div>' +
+      '<span class="trep-report-card-sent">✓ Enviado</span></div><div class="trep-report-ter-boxes">' + boxes + '</div></div>';
+  }).join('') + '</div>';
+}
+
 function trepRenderReports() {
   const container = document.getElementById('trep-reports-cards');
   const countEl = document.getElementById('trep-reports-count');
-  const subs = _trepReportsCache.subs || [];
-  const formMap = _trepReportsCache.formMap || {};
-  const terById = _trepReportsCache.terById || {};
   if (!container) return;
-  if (!subs.length) { container.innerHTML = '<div class="empty-state"><p>Sin reportes aún</p></div>'; if (countEl) countEl.textContent = ''; return; }
-  if (countEl) countEl.textContent = subs.length + ' reporte' + (subs.length !== 1 ? 's' : '') + (subs.length >= TREP_REPORTS_LIMIT ? ' (los más recientes)' : '');
+  const subs = _trepReportsCache.subs || [];
+  if (countEl) countEl.textContent = subs.length ? (subs.length + ' reporte' + (subs.length !== 1 ? 's' : '') + (subs.length >= TREP_REPORTS_LIMIT ? ' (los más recientes)' : '')) : '';
 
-  const byDate = {};
-  subs.forEach(s => {
-    const f = formMap[s.form_id];
-    const dk = f?.assignment_date || 'Sin fecha';
-    (byDate[dk] = byDate[dk] || []).push(s);
-  });
-  const sortedDates = Object.keys(byDate).sort((a, b) => a === 'Sin fecha' ? 1 : b === 'Sin fecha' ? -1 : b.localeCompare(a));
+  const byDate = _trepGroupByDate();
+  const y = _trepCalY, m = _trepCalM;
+  const first = new Date(y, m, 1);
+  const lead = (first.getDay() + 6) % 7;            // la semana empieza en lunes
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const now = new Date();
+  const todayKey = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
 
-  container.innerHTML = sortedDates.map((dk, idx) => {
-    const items = byDate[dk];
-    const dateLabel = dk === 'Sin fecha' ? 'Sin fecha' : formatDateEs(dk);
-    // Un publicador que reportó más de un territorio el mismo día va en una sola tarjeta.
-    const byHost = {}, hostOrder = [];
-    items.forEach(s => {
-      const key = s.host_name || '—';
-      if (!byHost[key]) { byHost[key] = []; hostOrder.push(key); }
-      byHost[key].push(s);
-    });
-    const dayKey = 'trep-day-' + idx;
-    const isOpen = items.length <= 4 || _trepOpenDays.has(dayKey);
-    let body;
-    if (isOpen) {
-      body = '<div class="trep-reports-grid">' + hostOrder.map(host => {
-        const boxes = byHost[host].map(s => {
-          const t = terById[s.territory_id];
-          const mapHtml = _trepMapHtmlFor(t, s);
-          return '<div class="trep-report-ter-box" onclick="trepOpenReportZoom(\'' + trepEsc(s.id) + '\')">' +
-            '<div class="trep-report-ter-label">Territorio ' + trepEsc(t?.number ?? '?') + '</div>' +
-            (mapHtml ? '<div class="trep-report-mini-map">' + mapHtml + '</div>' : '') +
-            _trepStatusBlock(s, false) +
-            '<button onclick="event.stopPropagation();trepDeleteReport(\'' + trepEsc(s.id) + '\')" class="btn-danger-outline" style="padding:0.25rem 0.7rem;font-size:0.68rem">Eliminar</button>' +
-            '</div>';
-        }).join('');
-        return '<div class="trep-report-card"><div class="trep-report-card-top"><div class="trep-report-card-name">' + trepEsc(host) + '</div>' +
-          '<span class="trep-report-card-sent">✓ Enviado</span></div><div class="trep-report-ter-boxes">' + boxes + '</div></div>';
-      }).join('') + '</div>';
-    } else {
-      body = '<div class="trep-day-collapsed-hint" onclick="trepToggleDay(\'' + dayKey + '\')">Toca para ver ' + items.length + ' reportes</div>';
-    }
-    return '<div style="margin-bottom:1.1rem">' +
-      '<div class="trep-day-header" onclick="trepToggleDay(\'' + dayKey + '\')">' +
-      '<span class="trep-day-header-title">' + trepEsc(dateLabel) + '</span>' +
-      '<span class="trep-day-header-count">' + items.length + ' reporte' + (items.length !== 1 ? 's' : '') + '</span>' +
-      '<svg class="trep-day-chevron' + (isOpen ? ' open' : '') + '" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>' + body + '</div>';
-  }).join('');
+  let cells = _TREP_DOW.map(d => '<div class="trep-cal-dow">' + d + '</div>').join('');
+  for (let i = 0; i < lead; i++) cells += '<div class="trep-cal-cell empty"></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = y + '-' + String(m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    const n = (byDate[key] || []).length;
+    const cls = 'trep-cal-cell' + (n ? ' has-report' : '') + (key === todayKey ? ' today' : '');
+    cells += n
+      ? '<button type="button" class="' + cls + '" onclick="trepOpenDay(\'' + key + '\')" aria-label="' + d + ' de ' + _TREP_MONTHS[m] + ': ' + n + ' reporte' + (n !== 1 ? 's' : '') + '">' +
+          '<span class="trep-cal-num">' + d + '</span><span class="trep-cal-dot"></span></button>'
+      : '<div class="' + cls + '"><span class="trep-cal-num">' + d + '</span><span class="trep-cal-dot-spacer"></span></div>';
+  }
+  const chevL = '<svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>';
+  const chevR = '<svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>';
+  container.innerHTML = '<div class="trep-cal">' +
+    '<div class="trep-cal-head">' +
+      '<button type="button" class="trep-cal-nav" onclick="trepCalNav(-1)" aria-label="Mes anterior">' + chevL + '</button>' +
+      '<div class="trep-cal-title">' + _TREP_MONTHS[m] + ' ' + y + '</div>' +
+      '<button type="button" class="trep-cal-nav" onclick="trepCalNav(1)" aria-label="Mes siguiente">' + chevR + '</button>' +
+    '</div>' +
+    '<div class="trep-cal-grid">' + cells + '</div></div>';
+
+  if (_trepDayKeyOpen) trepRenderDay();   // si hay un día abierto, se refresca (p. ej. tras eliminar un reporte)
+}
+function trepCalNav(delta) {
+  _trepCalM += delta;
+  if (_trepCalM < 0) { _trepCalM = 11; _trepCalY--; }
+  if (_trepCalM > 11) { _trepCalM = 0; _trepCalY++; }
+  trepRenderReports();
+}
+function trepOpenDay(dayKey) {
+  _trepDayKeyOpen = dayKey;
+  trepRenderDay();
+  document.getElementById('trep-day-overlay').classList.add('open');
+}
+function trepRenderDay() {
+  const items = _trepGroupByDate()[_trepDayKeyOpen] || [];
+  if (!items.length) { trepCloseDay(); return; }
+  document.getElementById('trep-day-title').textContent = formatDateEs(_trepDayKeyOpen);
+  document.getElementById('trep-day-sub').textContent = items.length + ' reporte' + (items.length !== 1 ? 's' : '');
+  document.getElementById('trep-day-body').innerHTML = _trepDayCardsHtml(items);
+}
+function trepCloseDay() {
+  _trepDayKeyOpen = null;
+  document.getElementById('trep-day-overlay')?.classList.remove('open');
+}
+function trepDayOverlayClick(e) {
+  if (e.target.id === 'trep-day-overlay') trepCloseDay();
 }
 
 const _trepOpenDays = new Set();
