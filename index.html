@@ -24838,6 +24838,12 @@ async function openAseoPopupMode(idx) {
   });
   renderScale();
 ` + '<' + `/script>
+</body>
+</html>`);
+  win.document.close();
+}
+
+// ── Capas globales (v1.75 / v1.82): estaban dentro de la plantilla del PopUp por error ──
 
 /* v1.75 — English UI completion layer.
    Translates exact built-in UI strings that predate the I18N dictionary.
@@ -24917,7 +24923,7 @@ function _flemingTranslateUiTree(root) {
 })();
 
 
-<script>
+
 // v1.82: reorganización de Configuración conservando los IDs y handlers existentes.
 (function organizeSettingsV182() {
   function moveSection(selector, target) {
@@ -24964,12 +24970,7 @@ function _flemingTranslateUiTree(root) {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run, { once: true });
   else run();
 })();
-</script>
 
-</body>
-</html>`);
-  win.document.close();
-}
 
 // CSS embebido para la ventana PopUp (usa las mismas variables de color que la plataforma).
 function getAseoPopupCSS() {
