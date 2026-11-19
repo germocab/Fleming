@@ -1779,6 +1779,10 @@
     :root[data-theme="auto"] .lm-text { color: #e8eaed; text-shadow: 0 0 2px #000, 0 0 3px #000, 0 0 6px #000; }
     :root[data-theme="auto"] #livemap-viewer .gre-stage, :root[data-theme="auto"] #lm-editor .gre-stage { background: #151517; }
   }
+  /* v1.84: brújula — con el mapa girado, los textos y los números quedan derechos; el botón se marca cuando la brújula está girando el mapa */
+  #lm-canvas.lm-compass-on .lm-text { transform: translate(-50%, -50%) rotate(calc(var(--lm-rot, 0deg) * -1)) !important; }
+  #livemap-viewer .subpage-topbar-right { gap: 8px; }
+  #livemap-viewer .pill-back-btn.on svg { stroke: var(--accent); }
   .lm-here { position: absolute; left: 14px; bottom: calc(env(safe-area-inset-bottom, 0px) + 1.1rem); z-index: 5; padding: 7px 13px; border-radius: 999px; background: var(--nav-bg); backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%); -webkit-backdrop-filter: blur(var(--ui-blur,34px)) saturate(180%); border: 1px solid var(--border); box-shadow: var(--shadow); color: var(--text); font: 600 0.8rem var(--font); pointer-events: none; max-width: calc(100% - 90px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #livemap-viewer.sheet-open .lm-here { display: none !important; }
   /* v1.80.3: textos de LiveMap y panel inferior del territorio */
@@ -11570,6 +11574,19 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
           <div id="pref-livesnap-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
         </div>
       </div>
+      <!-- v1.84: brújula en LiveMap (giroscopio) -->
+      <div class="profile-row" style="cursor:pointer" onclick="toggleLiveCompassPref()">
+        <div class="profile-row-icon" style="background:var(--ter-1-bg);color:var(--ter-1)">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+        </div>
+        <div class="profile-row-content">
+          <div class="profile-row-label">Brújula en LiveMap</div>
+          <div class="profile-row-value" style="font-size:0.8rem">LiveMap usa el giroscopio para girar el mapa según la dirección en la que vas, sin tener que girarlo con los dedos</div>
+        </div>
+        <div id="pref-livecompass-toggle" style="flex-shrink:0;width:44px;height:26px;border-radius:13px;background:var(--surface3);position:relative;transition:background 0.2s;cursor:pointer">
+          <div id="pref-livecompass-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.25)"></div>
+        </div>
+      </div>
     </div>
     <!-- v1.68: control global de Voz, solo para administradores con permiso Voz. -->
     <div class="profile-section" id="pref-voz-section" style="display:none">
@@ -12196,6 +12213,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
     </button>
     <button type="button" class="pill-header-title fm-title-btn" id="lm-title" onclick="mapSwitcherToggle(this)" aria-haspopup="menu" aria-expanded="false" title="Cambiar de mapa">LiveMap<svg viewBox="0 0 24 24" class="fm-title-chev"><polyline points="6 9 12 15 18 9"/></svg></button>
     <div class="subpage-topbar-right">
+      <button type="button" class="pill-back-btn" id="lm-compass-btn" style="display:none" onclick="lmCompassBtn()" title="Brújula" aria-label="Brújula"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></button>
       <button type="button" class="pill-back-btn" onclick="lmCenterMe()" title="Centrar en mi ubicación" aria-label="Centrar en mi ubicación"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/><line x1="12" y1="1" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="23"/><line x1="1" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="23" y2="12"/></svg></button>
     </div>
   </nav>
@@ -12839,7 +12857,7 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.77.8: (1) La dirección en el detalle de una asignación de casa en casa es un poco más grande (solo esa pantalla). (2) El botón de Clima de la asignación ya no abre el sitio del clima. (3) Nuevo ícono de Carritos (Inicio, Mis Turnos, Ajustes > Notificaciones y menú de Predicación). (4) Nuevo experimento "Resolución reducida en medios" para imágenes y PDF. (5) Carga más rápida: pdf.js y QR con defer, preconnect, fuentes con display=swap, decodificación asíncrona de imágenes.
 // v1.77.5: (1) Detalle de un Territorio: el título del encabezado ahora dice "Detalles del territorio" (el número ya aparece en el círculo de color). (2) Más opciones en Inicio incluye "Personalizar Inicio" (el botón al final de Inicio se mantiene). (3) Nuevo experimento "Territorios sin vista previa": las tarjetas de Territorios muestran solo el degradé y el nombre.
 // v1.81: (1) Vida y Ministerio: la fila de canción tiene bordes redondeados y ya no queda pegada a otras secciones. (2) Conferencias salientes muestra todas las fechas futuras. (3) Menú de Compartir unificado (Aseo del Salón y Responsabilidades). (4) Grupo de Servicio: PopUp en Desktop y botón circular de Editar.
-const APP_VERSION = '1.83.9.2'; // v1.83.9.2 — LiveMap: se quita el glow/destello detrás del territorio seleccionado. // v1.83.9.1 — Manzanas a abarcar de la tarjeta: ahora un solo pill sobre el borde inferior del indicador de territorio (sin tapar el número) y también con 2 o 3 territorios (por territorio). // v1.83.9 — Tarjetas de asignación de Casa en casa: muestran las manzanas a abarcar (mínimo 2, máximo 4) delante del indicador de territorio, en la parte inferior; el detalle las muestra todas. // v1.83.8 — Tarjetas, popups y menús: radio de esquina un poco mayor y Corner Smoothing (~60 %) donde el navegador lo soporta. // v1.83.7 — LiveMap: clic derecho en el editor abre un menú contextual (Enviar al fondo / Traer al frente / Agrupar / Desagrupar); los territorios agrupados se seleccionan y mueven como conjunto; el detalle del territorio muestra el día de la semana de la última vez realizado. // v1.83.5 — Reportes de territorio: en el calendario de «Reportes recibidos», los días pasados con asignación de Casa en casa que nunca se reportó (aunque nunca se abriera su formulario) muestran un punto naranja; al presionar el número del día aparece «Sin reporte» con cada asignación y su botón «Reportar», que abre el reporte de esa asignación pasada a nombre de su Encargado. Al terminar, el calendario se actualiza. // v1.83.2 — (1) Responsabilidades: la imagen que se comparte ahora se ve igual que el apartado del día (mismos íconos y colores, sin la etiqueta «Responsabilidades»; la fecha en Bold y debajo los cargos), con el mismo tamaño de antes. (2) El menú Compartir de las Responsabilidades de un día suma «Recordar» (Administradores): envía una notificación por FlemingApp a todos los asignados (Audio y Video, Micrófonos, Plataforma y Acomodación). // v1.83.1 — Nuevo botón "Centro de Administración" arriba de todos los apartados de Configuración (solo Administradores). // v1.83 — Centro de Administración: cuadrícula de módulos (un cuadro por módulo, sin secciones); cada módulo se abre como pantalla independiente con Back y título (PopUp en Desktop). Admins con un solo módulo entran directo. // v1.82 — (1) Mi Perfil con interfaz Nueva disponible también en Desktop como PopUp centrado. (2) Nueva sección Apariencias: modo Claro/Oscuro/Auto, Color de Acento, Tamaño de la Interfaz, Tipo de Interfaz y Transparencia/Blur. (3) Preferencias reorganizadas: Idioma, Tamaño del Texto, Espaciado, Animaciones, Vista de Contenido y PIN de acceso.  v1.81.57 — (1) Desktop: se restauran los corner radius distintivos de las tarjetas de asignación de predicación y del botón Mapa de la congregación; (2) se mantienen los radios más equilibrados del resto de secciones introducidos en 1.81.50, sin modificar Móvil. v1.81.50 — (1) Desktop: radios más equilibrados en Grupos de Servicio, Eventos, Aseo del Salón, Responsabilidades y Configuración; sin alterar Móvil. (2) NavBar de Desktop completamente redondeada. (3) Notificaciones: el botón abre correctamente el desplegable en pantallas grandes, también en equipos táctiles; (1) LiveMap: los territorios ya no usan el acento; se ven en gris claro con buen contraste con el fondo, también en Modo Oscuro. (2) Desktop y pantallas grandes: nueva NavBar menos alta y con el mismo ancho; las Sub-secciones quedan al lado de las Secciones y la barra se aprovecha completa desde el inicio; el botón DEV queda a la izquierda de Notificaciones; v1.81.7 — v1.81.7 — (1) Desktop: el botón DEV es un poco más grande, ya no tiene el punto azul y su tarjeta usa el color de acento de la plataforma; dice «DEV» y, a un lado, el número de versión; al presionarlo se abre el menú DEV Tools de siempre. (2) Móvil: toda la plataforma ya no muestra la barra desplazadora en la parte derecha; solo existe en Desktop para usar con el mouse; v1.81.5.2 — Mi Perfil (Interfaz Nueva): textos más pequeños y cohesivos con el resto de la plataforma (nombre, UserID, cargos y recuadro modular); el recuadro modular se adapta mejor al ancho de pantalla y los íconos de Anciano/Siervo y Precursor quedan centrados; el título «Mis Asignaciones» es más pequeño y ya no está dentro de un contenedor, y cada asignación tiene su propia tarjeta; v1.81.5 — Mi Perfil (solo Interfaz Nueva): la foto es un poco más grande y con nuevo diseño; al presionarla se abre un menú con Editar o Ver foto en pantalla completa (solo si no son iniciales o íconos); debajo de los datos personales hay un recuadro modular con Grupo de Servicio (con Superintendente/Auxiliar), cargo en la congregación (Anciano o Siervo Ministerial) y cargo de predicación (Precursor Regular o Especial); los cuadros que no aplican no aparecen y el resto se ajusta. Mis Asignaciones sigue debajo; v1.81.0.1 — (1) Grupo de Servicio: al presionar la portada se abre en pantalla completa. (2) Centro de Administración (Desktop) → Asignaciones: las tarjetas ya no ocupan todo el ancho, igual que en el Modo View. (3) Reportes: calendario del mes; los días con reporte muestran un punto verde y al presionarlos se abre la tarjeta del reporte. (4) Detalle de Grupo: el botón Editar queda alineado con el resto del encabezado; v1.81 — (1) Vida y Ministerio: la fila de canción ahora tiene bordes redondeados y ya no queda pegada a otras secciones. (2) Reunión Pública: Conferencias salientes muestra todas las conferencias de hoy en adelante, no solo la de la semana actual. (3) El menú de Compartir es idéntico en Aseo del Salón y en Responsabilidades. (4) Detalle de Grupo de Servicio: en Desktop se abre como PopUp; nuevo botón circular de Editar (Superintendente, Auxiliar, Administrador y DEV) en Móvil y Desktop; v1.80.9.20 — v1.80.9.20 — las asignaciones que aparecen en el menú de LiveMap son solo futuras (de hoy en adelante); las pasadas ya no se muestran; v1.80.9.15 — el menú de LiveMap ya no muestra las direcciones No Pasar; ahora muestra si el territorio seleccionado ya fue asignado en algún día: se ve la tarjeta de cada asignación de Casa en casa donde fue asignado y, al presionarla, abre la pantalla de detalles de esa asignación; v1.80.9.10 — en LiveMap todos los territorios (el color de sus manzanas) se ven en un tono suave del color de acento de la plataforma y solo el territorio seleccionado muestra su color original (las etiquetas con el número conservan su color); v1.80.9 — la etiqueta «Estás fuera de este territorio» solo se muestra en el mapa de pantalla completa (ya no sobre el mapa de la asignación); vuelve LiveSnap: mantiene Live en Play hasta reconocer una calle y luego lo pausa (se puede dar Play de nuevo), con un toggle en Más opciones de una asignación de Casa en casa y en Configuración → Funciones especiales; v1.80.8 — las tarjetas de Evento de la interfaz Sencilla ya no muestran ningún color de borde; en la interfaz Clásica y Nueva, en el detalle de una asignación de Casa en casa, el mapa de territorio en pantalla completa tiene un botón «Ver en LiveMap» junto a «Sugerir corrección» que abre LiveMap en el territorio de la asignación; v1.80.7.2 — en la interfaz Sencilla, los indicadores de territorio de las tarjetas de Casa en casa usan el azul de la plataforma (ya no el color del territorio); no se pueden sugerir nuevos No Pasar; desaparece la pantalla de detalle de la asignación de Casa en casa: al tocar la tarjeta sube un menú inferior (3/4 de pantalla) con solo el mapa del territorio, el botón para llamar al Encargado y las direcciones No Pasar (sin Live); la tarjeta de Evento ya no muestra la imagen, solo título y subtítulo; v1.80.7.1 — las interfaces se diferencian: «Territorios sin vista previa», «Resolución reducida en medios» y «Segundos en la cuenta regresiva» dejan de ser experimentos; la interfaz Sencilla quita la vista previa de los territorios, reduce la resolución de los medios, no muestra segundos en los Eventos, tiene siempre las animaciones reducidas y el color de acento fijo (Azul), sin poder cambiarlos, y la Clásica y la Nueva siempre tienen vista previa, resolución completa y segundos; v1.80.7 — en Desktop o pantallas grandes, «Mi Perfil» se abre en un PopUp centrado (con fondo atenuado), igual que «Configuración»; en móvil no cambia; v1.80.6.5 — «Mi Perfil» y «Configuración» vuelven a ser pantallas separadas (como en 1.80.4); más rapidez y estabilidad: los eventos de cambio de tamaño se agrupan por cuadro, el vidrio adaptativo ya no se recalcula en cada cambio del documento ni con la pestaña oculta, el reloj de cuenta regresiva y los oyentes de scroll se alivianan, conexión anticipada a Supabase, respaldo si la librería de Supabase no carga y los fallos de red ya no quedan como errores sin capturar; v1.80.6 — el Onboarding suma dos pantallas después de «Instalar»: Apariencia (Automático por defecto, Claro u Oscuro) e Interfaz (Sencillo, Clásico o Nuevo por defecto), cada una con una vista previa simple y un botón «Saltar» arriba a la derecha que lleva a «Todo listo»; v1.80.5 — «Mi Perfil» y «Configuración» se fusionan en una sola pantalla, «Perfil y Configuración»: arriba la foto, el nombre y el UserID, debajo tus asignaciones (igual que Mi Perfil) y más abajo todos los ajustes de Configuración; «Cerrar sesión» y «Editar foto de perfil» pasan a un nuevo menú «Más opciones» en la parte superior; funciona en Modo Claro y Oscuro; v1.80.4 — LiveMap en modo oscuro (fondo oscuro y textos que se adaptan), etiqueta «Estás en el Territorio N» abajo a la izquierda, recuerda el último mapa elegido (Mapa en PDF o LiveMap) y cada Grupo de Servicio tiene su sección «Territorios del grupo» (DEV y Administradores con el módulo Grupos) que alimenta el detalle de los territorios; v1.80.3 — LiveMap: textos (nombres de calles) que se pueden mover, rotar, cambiar de tamaño y mandar al frente o al fondo; respaldo descargable y restaurable desde archivo; al tocar un territorio se abre un panel inferior con su última realización, su grupo de servicio y sus Direcciones No Pasar (los controles de zoom se ocultan mientras está abierto); v1.80.2g.2 — LiveMap: corrige «JSON object requested, multiple (or no) rows returned» en cuentas de usuario y su barra de título ahora es igual a la de Mapa; v1.80.2g — LiveMap: se vuelve a leer el diseño guardado cada vez que se abre (una copia vacía o vieja ya no se da por buena), el menú no avisa «sin configurar» por su cuenta, mensajes de diagnóstico claros y verificación al guardar; controles Ajustar/Acercar/Alejar abajo a la derecha en ambos mapas; v1.80.2f — LiveMap deja de ser experimental y viene activo para todos: el Mapa de la congregación sigue abriéndose en PDF y, al tocar el título «Mapa», se elige entre Mapa en PDF y LiveMap; v1.80.2d — LiveMap: selección múltiple de territorios con Shift + clic para moverlos, rotarlos o cambiarles el tamaño juntos, y Ctrl + Z / Ctrl + Y para deshacer y rehacer en el editor (Administración → LiveMap, solo DEV); v1.80.2 — LiveMap (Experimento): une los mapas SVG de los territorios en un solo mapa de la congregación con ubicación GPS (acople y calibración en Administración → LiveMap, solo DEV; se activa en Experimentos y se abre desde Mapa de la congregación); v1.80.1.5 — Mapa interactivo va con Live (sin interruptor propio) y sin etiqueta sobre el mapa; v1.80.1 — Mapa interactivo: ubicación GPS sobre los mapas PNG de territorio (georreferenciación por el usuario DEV; se activa en Más opciones de la asignación o en Funciones especiales); v1.80 — Reasignar Encargado: el Encargado de una asignación de Casa en casa puede cederle el cargo a otro conductor desde Más Opciones (avisa al nuevo Encargado, a los Administradores de Predicación y al DEV); v1.79.100d — onboarding de bienvenida (por cuenta, controlado por el DEV); v1.79.10 — sin No Pasar nuevos en Para tí; detalle de punto de carrito con Recordatorios (sin Fotos ni búsqueda) y barra superior fija con modo oscuro; filtro de Carritos unificado; Aseo solo a los dos grupos asignados; v1.79.5 — Otros Grupos con títulos como las fechas; botón Volver arriba sobre la NavBar inferior; Más Opciones sin Perfil en la UI nueva; sin saludo emergente; v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
+const APP_VERSION = '1.84'; // v1.84 — LiveMap: al seleccionar un territorio se acerca y se centra en el área libre arriba de la hoja de detalles; brújula opcional con el giroscopio (Funciones especiales, desactivada por defecto) que gira el mapa según la dirección. // v1.83.9.2 — LiveMap: se quita el glow/destello detrás del territorio seleccionado. // v1.83.9.1 — Manzanas a abarcar de la tarjeta: ahora un solo pill sobre el borde inferior del indicador de territorio (sin tapar el número) y también con 2 o 3 territorios (por territorio). // v1.83.9 — Tarjetas de asignación de Casa en casa: muestran las manzanas a abarcar (mínimo 2, máximo 4) delante del indicador de territorio, en la parte inferior; el detalle las muestra todas. // v1.83.8 — Tarjetas, popups y menús: radio de esquina un poco mayor y Corner Smoothing (~60 %) donde el navegador lo soporta. // v1.83.7 — LiveMap: clic derecho en el editor abre un menú contextual (Enviar al fondo / Traer al frente / Agrupar / Desagrupar); los territorios agrupados se seleccionan y mueven como conjunto; el detalle del territorio muestra el día de la semana de la última vez realizado. // v1.83.5 — Reportes de territorio: en el calendario de «Reportes recibidos», los días pasados con asignación de Casa en casa que nunca se reportó (aunque nunca se abriera su formulario) muestran un punto naranja; al presionar el número del día aparece «Sin reporte» con cada asignación y su botón «Reportar», que abre el reporte de esa asignación pasada a nombre de su Encargado. Al terminar, el calendario se actualiza. // v1.83.2 — (1) Responsabilidades: la imagen que se comparte ahora se ve igual que el apartado del día (mismos íconos y colores, sin la etiqueta «Responsabilidades»; la fecha en Bold y debajo los cargos), con el mismo tamaño de antes. (2) El menú Compartir de las Responsabilidades de un día suma «Recordar» (Administradores): envía una notificación por FlemingApp a todos los asignados (Audio y Video, Micrófonos, Plataforma y Acomodación). // v1.83.1 — Nuevo botón "Centro de Administración" arriba de todos los apartados de Configuración (solo Administradores). // v1.83 — Centro de Administración: cuadrícula de módulos (un cuadro por módulo, sin secciones); cada módulo se abre como pantalla independiente con Back y título (PopUp en Desktop). Admins con un solo módulo entran directo. // v1.82 — (1) Mi Perfil con interfaz Nueva disponible también en Desktop como PopUp centrado. (2) Nueva sección Apariencias: modo Claro/Oscuro/Auto, Color de Acento, Tamaño de la Interfaz, Tipo de Interfaz y Transparencia/Blur. (3) Preferencias reorganizadas: Idioma, Tamaño del Texto, Espaciado, Animaciones, Vista de Contenido y PIN de acceso.  v1.81.57 — (1) Desktop: se restauran los corner radius distintivos de las tarjetas de asignación de predicación y del botón Mapa de la congregación; (2) se mantienen los radios más equilibrados del resto de secciones introducidos en 1.81.50, sin modificar Móvil. v1.81.50 — (1) Desktop: radios más equilibrados en Grupos de Servicio, Eventos, Aseo del Salón, Responsabilidades y Configuración; sin alterar Móvil. (2) NavBar de Desktop completamente redondeada. (3) Notificaciones: el botón abre correctamente el desplegable en pantallas grandes, también en equipos táctiles; (1) LiveMap: los territorios ya no usan el acento; se ven en gris claro con buen contraste con el fondo, también en Modo Oscuro. (2) Desktop y pantallas grandes: nueva NavBar menos alta y con el mismo ancho; las Sub-secciones quedan al lado de las Secciones y la barra se aprovecha completa desde el inicio; el botón DEV queda a la izquierda de Notificaciones; v1.81.7 — v1.81.7 — (1) Desktop: el botón DEV es un poco más grande, ya no tiene el punto azul y su tarjeta usa el color de acento de la plataforma; dice «DEV» y, a un lado, el número de versión; al presionarlo se abre el menú DEV Tools de siempre. (2) Móvil: toda la plataforma ya no muestra la barra desplazadora en la parte derecha; solo existe en Desktop para usar con el mouse; v1.81.5.2 — Mi Perfil (Interfaz Nueva): textos más pequeños y cohesivos con el resto de la plataforma (nombre, UserID, cargos y recuadro modular); el recuadro modular se adapta mejor al ancho de pantalla y los íconos de Anciano/Siervo y Precursor quedan centrados; el título «Mis Asignaciones» es más pequeño y ya no está dentro de un contenedor, y cada asignación tiene su propia tarjeta; v1.81.5 — Mi Perfil (solo Interfaz Nueva): la foto es un poco más grande y con nuevo diseño; al presionarla se abre un menú con Editar o Ver foto en pantalla completa (solo si no son iniciales o íconos); debajo de los datos personales hay un recuadro modular con Grupo de Servicio (con Superintendente/Auxiliar), cargo en la congregación (Anciano o Siervo Ministerial) y cargo de predicación (Precursor Regular o Especial); los cuadros que no aplican no aparecen y el resto se ajusta. Mis Asignaciones sigue debajo; v1.81.0.1 — (1) Grupo de Servicio: al presionar la portada se abre en pantalla completa. (2) Centro de Administración (Desktop) → Asignaciones: las tarjetas ya no ocupan todo el ancho, igual que en el Modo View. (3) Reportes: calendario del mes; los días con reporte muestran un punto verde y al presionarlos se abre la tarjeta del reporte. (4) Detalle de Grupo: el botón Editar queda alineado con el resto del encabezado; v1.81 — (1) Vida y Ministerio: la fila de canción ahora tiene bordes redondeados y ya no queda pegada a otras secciones. (2) Reunión Pública: Conferencias salientes muestra todas las conferencias de hoy en adelante, no solo la de la semana actual. (3) El menú de Compartir es idéntico en Aseo del Salón y en Responsabilidades. (4) Detalle de Grupo de Servicio: en Desktop se abre como PopUp; nuevo botón circular de Editar (Superintendente, Auxiliar, Administrador y DEV) en Móvil y Desktop; v1.80.9.20 — v1.80.9.20 — las asignaciones que aparecen en el menú de LiveMap son solo futuras (de hoy en adelante); las pasadas ya no se muestran; v1.80.9.15 — el menú de LiveMap ya no muestra las direcciones No Pasar; ahora muestra si el territorio seleccionado ya fue asignado en algún día: se ve la tarjeta de cada asignación de Casa en casa donde fue asignado y, al presionarla, abre la pantalla de detalles de esa asignación; v1.80.9.10 — en LiveMap todos los territorios (el color de sus manzanas) se ven en un tono suave del color de acento de la plataforma y solo el territorio seleccionado muestra su color original (las etiquetas con el número conservan su color); v1.80.9 — la etiqueta «Estás fuera de este territorio» solo se muestra en el mapa de pantalla completa (ya no sobre el mapa de la asignación); vuelve LiveSnap: mantiene Live en Play hasta reconocer una calle y luego lo pausa (se puede dar Play de nuevo), con un toggle en Más opciones de una asignación de Casa en casa y en Configuración → Funciones especiales; v1.80.8 — las tarjetas de Evento de la interfaz Sencilla ya no muestran ningún color de borde; en la interfaz Clásica y Nueva, en el detalle de una asignación de Casa en casa, el mapa de territorio en pantalla completa tiene un botón «Ver en LiveMap» junto a «Sugerir corrección» que abre LiveMap en el territorio de la asignación; v1.80.7.2 — en la interfaz Sencilla, los indicadores de territorio de las tarjetas de Casa en casa usan el azul de la plataforma (ya no el color del territorio); no se pueden sugerir nuevos No Pasar; desaparece la pantalla de detalle de la asignación de Casa en casa: al tocar la tarjeta sube un menú inferior (3/4 de pantalla) con solo el mapa del territorio, el botón para llamar al Encargado y las direcciones No Pasar (sin Live); la tarjeta de Evento ya no muestra la imagen, solo título y subtítulo; v1.80.7.1 — las interfaces se diferencian: «Territorios sin vista previa», «Resolución reducida en medios» y «Segundos en la cuenta regresiva» dejan de ser experimentos; la interfaz Sencilla quita la vista previa de los territorios, reduce la resolución de los medios, no muestra segundos en los Eventos, tiene siempre las animaciones reducidas y el color de acento fijo (Azul), sin poder cambiarlos, y la Clásica y la Nueva siempre tienen vista previa, resolución completa y segundos; v1.80.7 — en Desktop o pantallas grandes, «Mi Perfil» se abre en un PopUp centrado (con fondo atenuado), igual que «Configuración»; en móvil no cambia; v1.80.6.5 — «Mi Perfil» y «Configuración» vuelven a ser pantallas separadas (como en 1.80.4); más rapidez y estabilidad: los eventos de cambio de tamaño se agrupan por cuadro, el vidrio adaptativo ya no se recalcula en cada cambio del documento ni con la pestaña oculta, el reloj de cuenta regresiva y los oyentes de scroll se alivianan, conexión anticipada a Supabase, respaldo si la librería de Supabase no carga y los fallos de red ya no quedan como errores sin capturar; v1.80.6 — el Onboarding suma dos pantallas después de «Instalar»: Apariencia (Automático por defecto, Claro u Oscuro) e Interfaz (Sencillo, Clásico o Nuevo por defecto), cada una con una vista previa simple y un botón «Saltar» arriba a la derecha que lleva a «Todo listo»; v1.80.5 — «Mi Perfil» y «Configuración» se fusionan en una sola pantalla, «Perfil y Configuración»: arriba la foto, el nombre y el UserID, debajo tus asignaciones (igual que Mi Perfil) y más abajo todos los ajustes de Configuración; «Cerrar sesión» y «Editar foto de perfil» pasan a un nuevo menú «Más opciones» en la parte superior; funciona en Modo Claro y Oscuro; v1.80.4 — LiveMap en modo oscuro (fondo oscuro y textos que se adaptan), etiqueta «Estás en el Territorio N» abajo a la izquierda, recuerda el último mapa elegido (Mapa en PDF o LiveMap) y cada Grupo de Servicio tiene su sección «Territorios del grupo» (DEV y Administradores con el módulo Grupos) que alimenta el detalle de los territorios; v1.80.3 — LiveMap: textos (nombres de calles) que se pueden mover, rotar, cambiar de tamaño y mandar al frente o al fondo; respaldo descargable y restaurable desde archivo; al tocar un territorio se abre un panel inferior con su última realización, su grupo de servicio y sus Direcciones No Pasar (los controles de zoom se ocultan mientras está abierto); v1.80.2g.2 — LiveMap: corrige «JSON object requested, multiple (or no) rows returned» en cuentas de usuario y su barra de título ahora es igual a la de Mapa; v1.80.2g — LiveMap: se vuelve a leer el diseño guardado cada vez que se abre (una copia vacía o vieja ya no se da por buena), el menú no avisa «sin configurar» por su cuenta, mensajes de diagnóstico claros y verificación al guardar; controles Ajustar/Acercar/Alejar abajo a la derecha en ambos mapas; v1.80.2f — LiveMap deja de ser experimental y viene activo para todos: el Mapa de la congregación sigue abriéndose en PDF y, al tocar el título «Mapa», se elige entre Mapa en PDF y LiveMap; v1.80.2d — LiveMap: selección múltiple de territorios con Shift + clic para moverlos, rotarlos o cambiarles el tamaño juntos, y Ctrl + Z / Ctrl + Y para deshacer y rehacer en el editor (Administración → LiveMap, solo DEV); v1.80.2 — LiveMap (Experimento): une los mapas SVG de los territorios en un solo mapa de la congregación con ubicación GPS (acople y calibración en Administración → LiveMap, solo DEV; se activa en Experimentos y se abre desde Mapa de la congregación); v1.80.1.5 — Mapa interactivo va con Live (sin interruptor propio) y sin etiqueta sobre el mapa; v1.80.1 — Mapa interactivo: ubicación GPS sobre los mapas PNG de territorio (georreferenciación por el usuario DEV; se activa en Más opciones de la asignación o en Funciones especiales); v1.80 — Reasignar Encargado: el Encargado de una asignación de Casa en casa puede cederle el cargo a otro conductor desde Más Opciones (avisa al nuevo Encargado, a los Administradores de Predicación y al DEV); v1.79.100d — onboarding de bienvenida (por cuenta, controlado por el DEV); v1.79.10 — sin No Pasar nuevos en Para tí; detalle de punto de carrito con Recordatorios (sin Fotos ni búsqueda) y barra superior fija con modo oscuro; filtro de Carritos unificado; Aseo solo a los dos grupos asignados; v1.79.5 — Otros Grupos con títulos como las fechas; botón Volver arriba sobre la NavBar inferior; Más Opciones sin Perfil en la UI nueva; sin saludo emergente; v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -28592,7 +28610,7 @@ function _lmApplyItemStyle(el, it, b) {
   el.style.top = ((it.y - b.y) / b.h * 100).toFixed(4) + '%';
   el.style.width = (it.w * it.s / b.w * 100).toFixed(4) + '%';
   el.style.transform = 'translate(-50%,-50%) rotate(' + it.r + 'deg)';
-  const tg = el.querySelector('.lm-tag'); if (tg) tg.style.transform = 'translate(-50%,-50%) rotate(' + (-it.r) + 'deg) scale(var(--gre-inv,1))';
+  const tg = el.querySelector('.lm-tag'); if (tg) tg.style.transform = 'translate(-50%,-50%) rotate(calc(' + (-it.r) + 'deg - var(--lm-rot,0deg))) scale(var(--gre-inv,1))';
 }
 function _lmEsc(x) { return String(x == null ? '' : x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 function _lmTextCss(t, b) {
@@ -28662,7 +28680,7 @@ function lmSizeCanvas(canvas, stage, b) {
 let _lmZ = null, _lmView = null, _lmWatchId = null, _lmFix = null, _lmErr = null;
 function _lmZoom() {
   if (!_lmZ) {
-    _lmZ = createMapZoomController('lm-canvas', 'lm-stage', null, st => { document.getElementById('lm-canvas')?.style.setProperty('--gre-inv', String(1 / st.scale)); lmUpdateZoomButtons(st); });
+    _lmZ = createMapZoomController('lm-canvas', 'lm-stage', null, st => { const cv = document.getElementById('lm-canvas'); if (cv) { cv.style.setProperty('--gre-inv', String(1 / st.scale)); cv.style.setProperty('--lm-rot', (st.rot || 0) + 'deg'); } lmUpdateZoomButtons(st); });
     _lmZ.getState().maxScale = 14;
   }
   return _lmZ;
@@ -28673,14 +28691,14 @@ async function openLiveMap(silent) {
   _lmView = { layout, b: lmBounds(layout.items, 0.04), fit: lmFitGeoref(layout, lmBounds(layout.items, 0.04)) };
   document.getElementById('livemap-viewer').classList.add('open');
   lmRenderViewer(); _lmZoom().reset(); _lmZoom().init(); lmBindTap();
-  lmStartWatch();
+  lmStartWatch(); lmCmpUpdateBtn(); lmCmpStart();
   lmLoadAssets(layout.items.filter(i => !i.hidden).map(i => i.id), lmRenderViewer);
 }
 function closeLiveMapAll() { closeLiveMap(); closeFullMap(); } // la X de LiveMap sale de todo el Mapa de la congregación
 function closeLiveMap() {
   mapSwitcherClose(); lmCloseSheet(); lmUpdateHere(null);
   document.getElementById('livemap-viewer').classList.remove('open');
-  lmStopWatch(); _lmView = null; _lmZoom().reset();
+  lmStopWatch(); lmCmpStop(); _lmView = null; _lmZoom().reset();
 }
 function lmRenderViewer() {
   if (!_lmView) return;
@@ -28721,8 +28739,11 @@ async function _lmPixelHit(id, u, v) {
   return false;
 }
 async function lmHitTerritory(cx, cy) {
-  const canvas = document.getElementById('lm-canvas'), r = canvas.getBoundingClientRect(), b = _lmView.b;
-  return lmHitWorld(b.x + (cx - r.left) / r.width * b.w, b.y + (cy - r.top) / r.height * b.h);
+  const canvas = document.getElementById('lm-canvas'), r = canvas.getBoundingClientRect(), b = _lmView.b, st = _lmZoom().getState(), th = (st.rot || 0) * Math.PI / 180;
+  // v1.84: se deshace el giro (brújula) alrededor del centro del lienzo para ubicar el toque sobre el mapa sin girar
+  const dx = (cx - (r.left + r.width / 2)) / st.scale, dy = (cy - (r.top + r.height / 2)) / st.scale;
+  const lx = dx * Math.cos(th) + dy * Math.sin(th), ly = -dx * Math.sin(th) + dy * Math.cos(th);
+  return lmHitWorld(b.x + (lx / canvas.offsetWidth + 0.5) * b.w, b.y + (ly / canvas.offsetHeight + 0.5) * b.h);
 }
 // Territorio que hay en un punto del lienzo (coordenadas del mundo), de arriba hacia abajo; null si es calle o vacío.
 async function lmHitWorld(wx, wy) {
@@ -28841,6 +28862,36 @@ function lmOpenAssignment(aid) {
   closeLiveMapAll();
   try { viewAssignment(aid); } catch (e) { showToast('No se pudo abrir la asignación', 'error'); }
 }
+// v1.84: al seleccionar un territorio, el mapa lo acerca y lo centra en el área libre que queda arriba de la hoja de detalles
+// (entre la barra superior y la hoja), para verlo sin distracciones mientras los detalles se leen abajo.
+async function lmFocusTerritory(id) {
+  const view = _lmView; if (!view) return;
+  const it = view.layout.items.find(x => x.id === id), canvas = document.getElementById('lm-canvas'), stage = document.getElementById('lm-stage'), sh = document.getElementById('lm-sheet'), nav = document.querySelector('#livemap-viewer .subpage-topbar');
+  if (!it || !canvas || !stage || !sh) return;
+  const m = await _lmMaskFor(id); if (_lmView !== view) return;
+  const W = canvas.offsetWidth, H = canvas.offsetHeight, b = view.b, toPx = (wx, wy) => [(wx - b.x) / b.w * W - W / 2, (wy - b.y) / b.h * H - H / 2];
+  let pts = null;
+  if (m) { // límites reales del dibujo (sin los márgenes transparentes)
+    let x0 = m.cw, y0 = m.ch, x1 = -1, y1 = -1;
+    for (let y = 0; y < m.ch; y++) for (let x = 0; x < m.cw; x++) {
+      const i = (y * m.cw + x) * 4; if (m.d[i + 3] > 40 && !(m.d[i] > 244 && m.d[i + 1] > 244 && m.d[i + 2] > 244)) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    }
+    if (x1 >= x0 && y1 >= y0) pts = [[x0 / m.cw, y0 / m.ch], [(x1 + 1) / m.cw, y0 / m.ch], [(x1 + 1) / m.cw, (y1 + 1) / m.ch], [x0 / m.cw, (y1 + 1) / m.ch]].map(([u, v]) => { const w = lmLocalToWorld(it, u, v); return toPx(w.x, w.y); });
+  }
+  if (!pts) pts = _lmCorners(it).map(([x, y]) => toPx(x, y));
+  const st = _lmZoom().getState(), th = (st.rot || 0) * Math.PI / 180, c = Math.cos(th), s = Math.sin(th);
+  const rp = pts.map(([x, y]) => [x * c - y * s, x * s + y * c]);
+  const mx0 = Math.min(...rp.map(p => p[0])), mx1 = Math.max(...rp.map(p => p[0])), my0 = Math.min(...rp.map(p => p[1])), my1 = Math.max(...rp.map(p => p[1]));
+  const sr = stage.getBoundingClientRect();
+  const top = (nav ? nav.getBoundingClientRect().bottom : sr.top + 56) + 8, left = sr.left + 16, right = sr.right - 16;
+  const bottom = Math.max(top + 90, sr.bottom - sh.offsetHeight - 12);
+  const scale = Math.max(st.minScale, Math.min(st.maxScale, 8, Math.min((right - left) / Math.max(1, mx1 - mx0), (bottom - top) / Math.max(1, my1 - my0)) * 0.8));
+  st.scale = scale;
+  st.x = (left + right) / 2 - (sr.left + sr.width / 2) - scale * (mx0 + mx1) / 2;
+  st.y = (top + bottom) / 2 - (sr.top + sr.height / 2) - scale * (my0 + my1) / 2;
+  canvas.classList.add('fm-anim'); clearTimeout(_lmAnimTimer); _lmAnimTimer = setTimeout(() => canvas.classList.remove('fm-anim'), 300);
+  _lmZoom().refresh();
+}
 async function lmOpenSheet(id) {
   const t = territories.find(x => x.id === id), sh = document.getElementById('lm-sheet'), body = document.getElementById('lm-sheet-body'); if (!t || !sh || !body) return;
   const tok = ++_lmSheetTok;
@@ -28855,6 +28906,7 @@ async function lmOpenSheet(id) {
   const render = (lastHtml, grpHtml) => { body.innerHTML = card('Última vez realizado', lastHtml) + card('Este territorio forma parte del', grpHtml) + asgHtml; };
   render('<span class="lm-dim">Cargando…</span>', '<span class="lm-dim">Cargando…</span>');
   body.scrollTop = 0; sh.classList.add('open'); document.getElementById('livemap-viewer').classList.add('sheet-open');
+  let _shH = sh.offsetHeight; lmFocusTerritory(id);
   let last = '<span class="lm-dim">Sin conexión</span>', grp = '';
   try { if (!grupos.length || (isAppOnline() && Date.now() - _lmGruposAt > 45000)) { await loadGrupos(); _lmGruposAt = Date.now(); } } catch (e) {}
   const gs = grupos.filter(g => Array.isArray(g.territorios_permitidos) && g.territorios_permitidos.includes(t.id));
@@ -28863,7 +28915,7 @@ async function lmOpenSheet(id) {
     try { const d = await _lmLastDone(t.id); last = d ? _lmLongDate(d, true) : '<span class="lm-dim">Aún sin registro</span>'; }
     catch (e) { last = '<span class="lm-dim">No se pudo consultar</span>'; }
   }
-  if (tok === _lmSheetTok) render(last, grp);
+  if (tok === _lmSheetTok) { render(last, grp); if (Math.abs(sh.offsetHeight - _shH) > 16) lmFocusTerritory(id); } // si la hoja cambió de alto al cargar, se recentra
 }
 function lmUpdateZoomButtons(st) {
   st = st || _lmZoom().getState();
@@ -28884,9 +28936,9 @@ function lmCenterMe() {
   const uv = gmToUV(_lmView.fit.md, _lmFix.lat, _lmFix.lng), c = document.getElementById('lm-canvas'), st = _lmZoom().getState();
   if (uv.u < 0 || uv.u > 1 || uv.v < 0 || uv.v > 1) { showToast('Estás fuera del mapa de la congregación.', ''); return; }
   st.scale = Math.max(st.scale, 3);
-  st.x = -st.scale * (uv.u - 0.5) * c.offsetWidth; st.y = -st.scale * (uv.v - 0.5) * c.offsetHeight;
-  c.style.transform = 'translate(' + st.x + 'px, ' + st.y + 'px) scale(' + st.scale + ')';
-  c.style.setProperty('--gre-inv', String(1 / st.scale));
+  const th = (st.rot || 0) * Math.PI / 180, px = (uv.u - 0.5) * c.offsetWidth, py = (uv.v - 0.5) * c.offsetHeight;
+  st.x = -st.scale * (px * Math.cos(th) - py * Math.sin(th)); st.y = -st.scale * (px * Math.sin(th) + py * Math.cos(th));
+  _lmZoom().refresh();
 }
 function lmOnPos(p) {
   const c = p.coords, now = Date.now(), prev = _lmFix;
@@ -28918,8 +28970,96 @@ function lmDrawMe() {
   me.style.display = ''; pill.style.display = 'none'; lmUpdateHere(uv);
   me.style.left = (uv.u * 100).toFixed(4) + '%'; me.style.top = (uv.v * 100).toFixed(4) + '%';
   me.style.setProperty('--gm-r', Math.min(_lmFix.acc * (canvas.offsetWidth / b.w) / fit.md.mpp, 220).toFixed(1) + 'px');
-  const hd = me.querySelector('.gm-hd');
-  if (_lmFix.hd != null) { hd.style.display = ''; hd.style.transform = 'rotate(' + _gmHeadingDeg(fit.md, _lmFix.hd).toFixed(1) + 'deg) scale(var(--gre-inv,1))'; } else hd.style.display = 'none';
+  const hd = me.querySelector('.gm-hd'), hv = (_lmCmp.on && _lmCmp.h != null) ? _lmCmp.h : _lmFix.hd; // con la brújula activa, la flecha usa el rumbo del giroscopio
+  if (hv != null) { hd.style.display = ''; hd.style.transform = 'rotate(' + _gmHeadingDeg(fit.md, hv).toFixed(1) + 'deg) scale(var(--gre-inv,1))'; } else hd.style.display = 'none';
+}
+// ── v1.84: brújula (giroscopio) — opcional, desactivada por defecto; se activa en Funciones especiales (Experimentos) ──
+// El mapa se gira solo para que la dirección en la que apuntas el teléfono quede hacia arriba. El botón de brújula del visor
+// la pausa (mapa con el norte del dibujo arriba) o la reanuda. Si el dispositivo no entrega rumbo absoluto, el mapa no se gira.
+const LM_COMPASS_KEY = 'fleming_livecompass_enabled';
+let _lmCmp = { on: false, h: null, rot: 0, paused: false, raf: 0 };
+function isLiveCompassEnabled() { try { return localStorage.getItem(LM_COMPASS_KEY) === 'true'; } catch (e) { return false; } }
+function lmCmpSupported() { return typeof window.DeviceOrientationEvent !== 'undefined'; }
+async function lmCmpAskPermission() { // en iPhone el permiso solo se puede pedir desde un toque del usuario
+  const D = window.DeviceOrientationEvent;
+  if (D && typeof D.requestPermission === 'function') { try { return (await D.requestPermission()) === 'granted'; } catch (e) { return false; } }
+  return true;
+}
+function updateLiveCompassToggleUI() {
+  const on = isLiveCompassEnabled(), toggle = document.getElementById('pref-livecompass-toggle'), thumb = document.getElementById('pref-livecompass-thumb');
+  if (toggle && thumb) { toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)'; thumb.style.left = on ? '21px' : '3px'; }
+}
+async function toggleLiveCompassPref() {
+  const next = !isLiveCompassEnabled();
+  if (next) {
+    if (!lmCmpSupported()) { showToast('Este dispositivo no tiene giroscopio / brújula disponible.', 'error'); return; }
+    if (!(await lmCmpAskPermission())) { showToast('Permiso de movimiento y orientación denegado. Actívalo en los ajustes del navegador.', 'error'); return; }
+  }
+  try { localStorage.setItem(LM_COMPASS_KEY, next ? 'true' : 'false'); } catch (e) {}
+  updateLiveCompassToggleUI();
+  try { trackEvent('livecompass_toggle', { enabled: next }); } catch (e) {}
+  if (!next) lmCmpStop(); else if (lmIsLiveOpen()) lmCmpStart();
+  lmCmpUpdateBtn();
+}
+function lmCmpUpdateBtn() {
+  const b = document.getElementById('lm-compass-btn'); if (!b) return;
+  b.style.display = isLiveCompassEnabled() ? '' : 'none';
+  b.classList.toggle('on', _lmCmp.on && !_lmCmp.paused && _lmCmp.h != null);
+  b.title = _lmCmp.paused ? 'Girar el mapa según hacia dónde miro' : 'Dejar el mapa fijo (norte arriba)';
+}
+function lmCmpOnOri(e) {
+  let h = null;
+  if (e.webkitCompassHeading != null && isFinite(e.webkitCompassHeading)) h = e.webkitCompassHeading; // iPhone
+  else if ((e.type === 'deviceorientationabsolute' || e.absolute === true) && e.alpha != null && e.beta != null && e.gamma != null) { // Android: rumbo respecto del norte, compensando la inclinación
+    const d = Math.PI / 180, a = e.alpha * d, b = e.beta * d, g = e.gamma * d;
+    const rA = -Math.cos(a) * Math.sin(g) - Math.sin(a) * Math.sin(b) * Math.cos(g), rB = -Math.sin(a) * Math.sin(g) + Math.cos(a) * Math.sin(b) * Math.cos(g);
+    h = Math.atan2(rA, rB) / d; if (h < 0) h += 360;
+  }
+  if (h == null || !isFinite(h)) return;
+  h = (h + ((screen.orientation && screen.orientation.angle) || 0) + 360) % 360;
+  if (_lmCmp.h == null) _lmCmp.h = h; else _lmCmp.h = (_lmCmp.h + (((h - _lmCmp.h + 540) % 360) - 180) * 0.25 + 360) % 360; // suavizado
+  if (!_lmCmp.raf) _lmCmp.raf = requestAnimationFrame(lmCmpFrame);
+}
+function lmCmpFrame() {
+  _lmCmp.raf = 0; if (!_lmCmp.on || !_lmView) return;
+  const canvas = document.getElementById('lm-canvas'), z = _lmZoom(), active = !_lmCmp.paused && !!_lmView.fit && _lmCmp.h != null;
+  const target = active ? -_gmHeadingDeg(_lmView.fit.md, _lmCmp.h) : 0;
+  const d = ((target - _lmCmp.rot + 540) % 360) - 180;
+  if (Math.abs(d) >= 0.5) { _lmCmp.rot += d; z.setRot(+_lmCmp.rot.toFixed(2)); }
+  if (canvas) canvas.classList.toggle('lm-compass-on', active);
+  lmDrawHeading(); lmCmpUpdateBtn();
+}
+function lmDrawHeading() { // solo la flecha de rumbo (sin recalcular "Estás en…")
+  const me = document.getElementById('lm-me'), hd = me && me.querySelector('.gm-hd'); if (!hd || !_lmView || !_lmView.fit || _lmCmp.h == null || me.style.display === 'none') return;
+  hd.style.display = ''; hd.style.transform = 'rotate(' + _gmHeadingDeg(_lmView.fit.md, _lmCmp.h).toFixed(1) + 'deg) scale(var(--gre-inv,1))';
+}
+function lmCmpStart() {
+  if (_lmCmp.on || !isLiveCompassEnabled() || !lmCmpSupported()) return;
+  _lmCmp.on = true; _lmCmp.h = null; _lmCmp.rot = 0; _lmCmp.paused = false;
+  window.addEventListener('deviceorientationabsolute', lmCmpOnOri, true); window.addEventListener('deviceorientation', lmCmpOnOri, true);
+  lmCmpUpdateBtn();
+}
+function lmCmpStop() {
+  window.removeEventListener('deviceorientationabsolute', lmCmpOnOri, true); window.removeEventListener('deviceorientation', lmCmpOnOri, true);
+  if (_lmCmp.raf) cancelAnimationFrame(_lmCmp.raf);
+  _lmCmp = { on: false, h: null, rot: 0, paused: false, raf: 0 };
+  try { _lmZoom().setRot(0); } catch (e) {}
+  const c = document.getElementById('lm-canvas'); if (c) c.classList.remove('lm-compass-on');
+  lmCmpUpdateBtn();
+}
+async function lmCompassBtn() { // pausa / reanuda; si aún no llegan datos (p. ej. iPhone sin permiso) intenta pedirlos
+  if (!isLiveCompassEnabled()) return;
+  if (!_lmCmp.on || _lmCmp.h == null) {
+    if (!(await lmCmpAskPermission())) { showToast('Permiso de movimiento y orientación denegado.', 'error'); return; }
+    lmCmpStop(); lmCmpStart();
+    if (!_lmCmp.on) showToast('Este dispositivo no entrega la dirección de la brújula.', 'error'); else showToast('Mueve un poco el teléfono para calibrar la brújula.', '');
+    return;
+  }
+  const canvas = document.getElementById('lm-canvas'), z = _lmZoom();
+  _lmCmp.rot = ((_lmCmp.rot + 540) % 360) - 180; z.setRot(+_lmCmp.rot.toFixed(2)); // mismo ángulo, normalizado: el giro de vuelta toma el camino corto
+  _lmCmp.paused = !_lmCmp.paused;
+  if (canvas) { canvas.classList.add('fm-anim'); clearTimeout(_lmAnimTimer); _lmAnimTimer = setTimeout(() => canvas.classList.remove('fm-anim'), 300); }
+  requestAnimationFrame(lmCmpFrame);
 }
 window.addEventListener('resize', () => { if (_lmView) lmRenderViewer(); });
 
@@ -29583,6 +29723,7 @@ function isLiveFeatureEnabled() {
 // ── LiveSnap (v1.80.9): Live se mantiene en play hasta reconocer una calle y entonces se pausa (se puede volver a dar Play) ──
 function isLiveSnapEnabled() { try { return localStorage.getItem('fleming_livesnap_enabled') === 'true'; } catch (e) { return false; } }
 function updateLiveSnapToggleUI() {
+  try { updateLiveCompassToggleUI(); } catch (e) {}
   const on = isLiveSnapEnabled();
   const toggle = document.getElementById('pref-livesnap-toggle'), thumb = document.getElementById('pref-livesnap-thumb');
   if (toggle && thumb) { toggle.style.background = on ? 'var(--accent)' : 'var(--surface3)'; thumb.style.left = on ? '21px' : '3px'; }
@@ -31352,7 +31493,7 @@ async function deleteFullMap() {
 // el mapa completo de la congregación. El zoom solo queda activo mientras
 // el mapa está en pantalla completa (se resetea al abrir/cerrar).
 function createMapZoomController(imgId, refElId, hintId, onChange) {
-  const state = { scale: 1, x: 0, y: 0, minScale: 1, maxScale: 6 };
+  const state = { scale: 1, x: 0, y: 0, minScale: 1, maxScale: 6, rot: 0 }; // v1.84: rot (grados) solo la usa LiveMap con la brújula
   let pointers = new Map();
   let pinchStartDist = 0, pinchStartScale = 1, pinchStartMid = { x: 0, y: 0 }, pinchStartOffset = { x: 0, y: 0 };
   let dragging = false, dragStart = { x: 0, y: 0 }, dragStartOffset = { x: 0, y: 0 };
@@ -31362,7 +31503,7 @@ function createMapZoomController(imgId, refElId, hintId, onChange) {
   function refEl() { return document.getElementById(refElId); }
   function apply() {
     const el = img(); if (!el) return;
-    el.style.transform = `translate(${state.x}px, ${state.y}px) scale(${state.scale})`;
+    el.style.transform = `translate(${state.x}px, ${state.y}px) scale(${state.scale})` + (state.rot ? ` rotate(${state.rot}deg)` : '');
     if (onChange) onChange(state);
   }
   function clamp(s) { return Math.min(state.maxScale, Math.max(state.minScale, s)); }
@@ -31484,7 +31625,7 @@ function createMapZoomController(imgId, refElId, hintId, onChange) {
   }
   // v1.76.7: zoom por pasos (botones), centrado en el medio del visor. mult > 1 acerca, < 1 aleja.
   function step(mult) { zoomBy(state.scale * (mult - 1)); }
-  return { init, reset, step, showHintThenHide, getState: () => state };
+  return { init, reset, step, showHintThenHide, getState: () => state, refresh: apply, setRot: d => { state.rot = d; apply(); } };
 }
 
 const fullMapZoomCtrl  = createMapZoomController('full-map-lb-canvas', 'full-map-lb-wrap', 'full-map-lb-hint', (st) => { fmScheduleHiRes(); fmUpdateZoomButtons(st); });
