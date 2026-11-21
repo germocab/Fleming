@@ -1712,6 +1712,47 @@
   .gre-save { flex: 1 1 auto; padding: 0 1rem; height: 40px; border: 0; border-radius: 12px; background: var(--accent); color: #fff; font: 700 0.88rem var(--font); cursor: pointer; }
   .gre-save:disabled { opacity: 0.45; cursor: default; }
 
+  /* v1.88A: Terrenor Core */
+  .tn-hint { font-size: 0.8rem; color: var(--text3); line-height: 1.45; margin-bottom: 0.9rem; }
+  .tn-small { font-size: 0.76rem; color: var(--text3); line-height: 1.4; }
+  .tn-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.7rem; }
+  .tn-field label { display: block; font-size: 0.7rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+  .tn-field .form-input, .tn-field .form-select { width: 100%; }
+  .tn-run { width: 100%; margin-top: 0.9rem; }
+  .tn-loading { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: var(--text3); padding: 0.4rem 0 0.9rem; }
+  .tn-loading .loader { width: 18px; height: 18px; flex-shrink: 0; }
+  .tn-title { font-size: 0.95rem; font-weight: 700; margin: 1.1rem 0 0.6rem; }
+  .tn-sub { font-size: 0.72rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin: 1.1rem 0 0.5rem; }
+  .tn-banner { background: var(--accent-light); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.65rem 0.85rem; font-size: 0.8rem; line-height: 1.45; margin-bottom: 0.6rem; }
+  .tn-banner.err { background: rgba(255,59,48,0.08); border-color: rgba(255,59,48,0.25); }
+  .tn-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.9rem; margin-bottom: 0.7rem; }
+  .tn-card-head { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.55rem; }
+  .tn-card-t { flex: 1; min-width: 0; font-size: 0.92rem; }
+  .tn-num { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 0.95rem; flex-shrink: 0; }
+  .tn-num.house { background: var(--surface3); color: var(--text); }
+  .tn-pos { font-weight: 800; font-size: 0.8rem; color: var(--text3); }
+  .tn-reasons { margin: 0 0 0.4rem; padding-left: 1.1rem; font-size: 0.8rem; line-height: 1.5; color: var(--text2); }
+  .tn-neigh { margin: 0.3rem 0; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+  .tn-chip { display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--surface3); color: var(--text2); }
+  .tn-chip.warn { background: rgba(255,149,0,0.15); color: var(--orange); }
+  .tn-chip.err { background: rgba(255,59,48,0.14); color: var(--red); }
+  .tn-chip.ok { background: var(--green-light); color: var(--green); }
+  .tn-warns { margin-top: 0.4rem; }
+  .tn-warn { font-size: 0.76rem; color: var(--orange); line-height: 1.4; margin-top: 3px; }
+  .tn-use { width: 100%; margin-top: 0.4rem; }
+  .tn-fold { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.7rem 0.9rem; margin: 0.7rem 0; }
+  .tn-fold > summary { cursor: pointer; font-size: 0.88rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .tn-fold[open] > summary { margin-bottom: 0.6rem; }
+  .tn-row { display: flex; flex-direction: column; gap: 2px; padding: 0.5rem 0; border-top: 1px solid var(--border); font-size: 0.85rem; }
+  .tn-row:first-of-type { border-top: 0; }
+  .tn-row.tn-state { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .tn-row.tn-state .tn-small { flex-basis: 100%; }
+  .tn-diag { border-left: 3px solid var(--border); padding: 0.4rem 0.7rem; margin-bottom: 0.5rem; font-size: 0.85rem; }
+  .tn-diag.error { border-color: var(--red); } .tn-diag.warn { border-color: var(--orange); } .tn-diag.info { border-color: var(--accent); }
+  .tn-crit { display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.55rem 0; border-top: 1px solid var(--border); }
+  .tn-crit-main { flex: 1; display: flex; gap: 0.6rem; align-items: flex-start; font-size: 0.88rem; cursor: pointer; }
+  .tn-crit-main input { margin-top: 3px; }
+  .tn-crit-btns { display: flex; gap: 4px; }
   /* v1.80.2: LiveMap (Experimento) */
   .lm-canvas { position: relative; transform-origin: center center; --gre-inv: 1; background: #fff; border-radius: 6px; box-shadow: 0 2px 14px rgba(0,0,0,0.18); line-height: 0; }
   .lme-label { font: 700 0.72rem var(--font); color: var(--text3); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
@@ -9539,6 +9580,7 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
         <button class="admin-tab active" data-tab="assignments" data-i18n="admin.tab.assignments" onclick="switchAdminTab('assignments')">Asignaciones</button>
         <button class="admin-tab" data-tab="territories" data-i18n="admin.tab.territories" onclick="switchAdminTab('territories')">Territorios</button>
         <button class="admin-tab" data-tab="reports" data-i18n="admin.tab.reports" onclick="switchAdminTab('reports')">Reportes</button>
+        <button class="admin-tab" data-tab="terrenor" onclick="switchAdminTab('terrenor')">Terrenor</button>
         <button class="admin-tab" data-tab="conductores" data-i18n="admin.tab.conductores" onclick="switchAdminTab('conductores')">Conductores</button>
         <button class="admin-tab" data-tab="casas" data-i18n="admin.tab.casas" onclick="switchAdminTab('casas')">Casas</button>
         <button class="admin-tab" data-tab="grupos" data-i18n="admin.tab.grupos" onclick="switchAdminTab('grupos')">Grupos</button>
@@ -9614,6 +9656,25 @@ function homeResetLayout() { _homeParaMem = null; try { localStorage.removeItem(
         </div>
 
         <div id="admin-territories-list"><div class="loader-wrap"><div class="loader"></div><div class="loader-caption">Cargando Territorios</div></div></div>
+      </div>
+      <div class="admin-section" id="admin-terrenor">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:.4rem"><span style="flex:1;font-size:.95rem;font-weight:700">Terrenor</span><button type="button" class="btn-secondary" onclick="tnRefresh()">Actualizar datos</button></div>
+        <div class="tn-hint">Recomienda territorios y casas con el historial de reportes, las manzanas pendientes, la frecuencia de asignación y los límites del LiveMap, y explica cada criterio. Solo lee tus datos: no cambia nada hasta que crees la asignación y la confirmes.</div>
+        <div id="tn-status"></div>
+        <div class="notif-gestor-card">
+          <div class="tn-form">
+            <div class="tn-field"><label for="tn-date">Fecha</label><input type="date" class="form-input" id="tn-date" onchange="tnDateChanged()"></div>
+            <div class="tn-field"><label for="tn-type">Tipo</label><select class="form-select" id="tn-type"><option value="presencial">Presencial</option><option value="zoom">Por Zoom</option><option value="telefono">Telefónico</option><option value="cartas">Cartas</option></select></div>
+            <div class="tn-field" id="tn-grupo-wrap" style="display:none"><label for="tn-grupo">Grupo de Servicio</label><select class="form-select" id="tn-grupo"></select></div>
+            <div class="tn-field"><label for="tn-count">Territorios</label><select class="form-select" id="tn-count"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+            <div class="tn-field"><label for="tn-anchor">Cerca de (opcional)</label><select class="form-select" id="tn-anchor"></select></div>
+          </div>
+          <button type="button" class="btn-primary tn-run" id="tn-run" onclick="tnRun()">Recomendar</button>
+        </div>
+        <div id="tn-result"></div>
+        <details class="tn-fold"><summary>Criterios y desempate</summary><div id="tn-criteria"></div></details>
+        <details class="tn-fold"><summary>Diagnóstico de datos <span id="tn-diag-badge"></span></summary><div id="tn-diag"></div></details>
+        <details class="tn-fold"><summary>Estado de los territorios</summary><div id="tn-states"></div></details>
       </div>
       <div class="admin-section" id="admin-reports">
         <div class="sub-tabs" style="margin-bottom:1.1rem">
@@ -12806,7 +12867,7 @@ async function devSetUserIdRecovery(rowId, on) {
 // v1.77.8: (1) La dirección en el detalle de una asignación de casa en casa es un poco más grande (solo esa pantalla). (2) El botón de Clima de la asignación ya no abre el sitio del clima. (3) Nuevo ícono de Carritos (Inicio, Mis Turnos, Ajustes > Notificaciones y menú de Predicación). (4) Nuevo experimento "Resolución reducida en medios" para imágenes y PDF. (5) Carga más rápida: pdf.js y QR con defer, preconnect, fuentes con display=swap, decodificación asíncrona de imágenes.
 // v1.77.5: (1) Detalle de un Territorio: el título del encabezado ahora dice "Detalles del territorio" (el número ya aparece en el círculo de color). (2) Más opciones en Inicio incluye "Personalizar Inicio" (el botón al final de Inicio se mantiene). (3) Nuevo experimento "Territorios sin vista previa": las tarjetas de Territorios muestran solo el degradé y el nombre.
 // v1.81: (1) Vida y Ministerio: la fila de canción tiene bordes redondeados y ya no queda pegada a otras secciones. (2) Conferencias salientes muestra todas las fechas futuras. (3) Menú de Compartir unificado (Aseo del Salón y Responsabilidades). (4) Grupo de Servicio: PopUp en Desktop y botón circular de Editar.
-const APP_VERSION = '1.87'; // v1.87 — LiveMap propio en Más opciones de Casa en casa; Apariencia con ajustes Sólido/Equilibrado/Ligero; Espaciado de la plataforma en Experimentos. v1.86 — Administrar: un solo módulo va directo, varios abren el Centro de Administración; se quitó la pantalla completa automática. v1.85 — Reportes de Territorios: los formularios incluyen todos los territorios de la salida del día (también los agregados después); LiveMap sin giroscopio y sin fondo plano. v1.84 — LiveMap: al seleccionar un territorio se acerca y se centra en el área libre arriba de la hoja de detalles; brújula opcional con el giroscopio (Funciones especiales, desactivada por defecto) que gira el mapa según la dirección. // v1.83.9.2 — LiveMap: se quita el glow/destello detrás del territorio seleccionado. // v1.83.9.1 — Manzanas a abarcar de la tarjeta: ahora un solo pill sobre el borde inferior del indicador de territorio (sin tapar el número) y también con 2 o 3 territorios (por territorio). // v1.83.9 — Tarjetas de asignación de Casa en casa: muestran las manzanas a abarcar (mínimo 2, máximo 4) delante del indicador de territorio, en la parte inferior; el detalle las muestra todas. // v1.83.8 — Tarjetas, popups y menús: radio de esquina un poco mayor y Corner Smoothing (~60 %) donde el navegador lo soporta. // v1.83.7 — LiveMap: clic derecho en el editor abre un menú contextual (Enviar al fondo / Traer al frente / Agrupar / Desagrupar); los territorios agrupados se seleccionan y mueven como conjunto; el detalle del territorio muestra el día de la semana de la última vez realizado. // v1.83.5 — Reportes de territorio: en el calendario de «Reportes recibidos», los días pasados con asignación de Casa en casa que nunca se reportó (aunque nunca se abriera su formulario) muestran un punto naranja; al presionar el número del día aparece «Sin reporte» con cada asignación y su botón «Reportar», que abre el reporte de esa asignación pasada a nombre de su Encargado. Al terminar, el calendario se actualiza. // v1.83.2 — (1) Responsabilidades: la imagen que se comparte ahora se ve igual que el apartado del día (mismos íconos y colores, sin la etiqueta «Responsabilidades»; la fecha en Bold y debajo los cargos), con el mismo tamaño de antes. (2) El menú Compartir de las Responsabilidades de un día suma «Recordar» (Administradores): envía una notificación por FlemingApp a todos los asignados (Audio y Video, Micrófonos, Plataforma y Acomodación). // v1.83.1 — Nuevo botón "Centro de Administración" arriba de todos los apartados de Configuración (solo Administradores). // v1.83 — Centro de Administración: cuadrícula de módulos (un cuadro por módulo, sin secciones); cada módulo se abre como pantalla independiente con Back y título (PopUp en Desktop). Admins con un solo módulo entran directo. // v1.82 — (1) Mi Perfil con interfaz Nueva disponible también en Desktop como PopUp centrado. (2) Nueva sección Apariencias: modo Claro/Oscuro/Auto, Color de Acento, Tamaño de la Interfaz, Tipo de Interfaz y Transparencia/Blur. (3) Preferencias reorganizadas: Idioma, Tamaño del Texto, Espaciado, Animaciones, Vista de Contenido y PIN de acceso.  v1.81.57 — (1) Desktop: se restauran los corner radius distintivos de las tarjetas de asignación de predicación y del botón Mapa de la congregación; (2) se mantienen los radios más equilibrados del resto de secciones introducidos en 1.81.50, sin modificar Móvil. v1.81.50 — (1) Desktop: radios más equilibrados en Grupos de Servicio, Eventos, Aseo del Salón, Responsabilidades y Configuración; sin alterar Móvil. (2) NavBar de Desktop completamente redondeada. (3) Notificaciones: el botón abre correctamente el desplegable en pantallas grandes, también en equipos táctiles; (1) LiveMap: los territorios ya no usan el acento; se ven en gris claro con buen contraste con el fondo, también en Modo Oscuro. (2) Desktop y pantallas grandes: nueva NavBar menos alta y con el mismo ancho; las Sub-secciones quedan al lado de las Secciones y la barra se aprovecha completa desde el inicio; el botón DEV queda a la izquierda de Notificaciones; v1.81.7 — v1.81.7 — (1) Desktop: el botón DEV es un poco más grande, ya no tiene el punto azul y su tarjeta usa el color de acento de la plataforma; dice «DEV» y, a un lado, el número de versión; al presionarlo se abre el menú DEV Tools de siempre. (2) Móvil: toda la plataforma ya no muestra la barra desplazadora en la parte derecha; solo existe en Desktop para usar con el mouse; v1.81.5.2 — Mi Perfil (Interfaz Nueva): textos más pequeños y cohesivos con el resto de la plataforma (nombre, UserID, cargos y recuadro modular); el recuadro modular se adapta mejor al ancho de pantalla y los íconos de Anciano/Siervo y Precursor quedan centrados; el título «Mis Asignaciones» es más pequeño y ya no está dentro de un contenedor, y cada asignación tiene su propia tarjeta; v1.81.5 — Mi Perfil (solo Interfaz Nueva): la foto es un poco más grande y con nuevo diseño; al presionarla se abre un menú con Editar o Ver foto en pantalla completa (solo si no son iniciales o íconos); debajo de los datos personales hay un recuadro modular con Grupo de Servicio (con Superintendente/Auxiliar), cargo en la congregación (Anciano o Siervo Ministerial) y cargo de predicación (Precursor Regular o Especial); los cuadros que no aplican no aparecen y el resto se ajusta. Mis Asignaciones sigue debajo; v1.81.0.1 — (1) Grupo de Servicio: al presionar la portada se abre en pantalla completa. (2) Centro de Administración (Desktop) → Asignaciones: las tarjetas ya no ocupan todo el ancho, igual que en el Modo View. (3) Reportes: calendario del mes; los días con reporte muestran un punto verde y al presionarlos se abre la tarjeta del reporte. (4) Detalle de Grupo: el botón Editar queda alineado con el resto del encabezado; v1.81 — (1) Vida y Ministerio: la fila de canción ahora tiene bordes redondeados y ya no queda pegada a otras secciones. (2) Reunión Pública: Conferencias salientes muestra todas las conferencias de hoy en adelante, no solo la de la semana actual. (3) El menú de Compartir es idéntico en Aseo del Salón y en Responsabilidades. (4) Detalle de Grupo de Servicio: en Desktop se abre como PopUp; nuevo botón circular de Editar (Superintendente, Auxiliar, Administrador y DEV) en Móvil y Desktop; v1.80.9.20 — v1.80.9.20 — las asignaciones que aparecen en el menú de LiveMap son solo futuras (de hoy en adelante); las pasadas ya no se muestran; v1.80.9.15 — el menú de LiveMap ya no muestra las direcciones No Pasar; ahora muestra si el territorio seleccionado ya fue asignado en algún día: se ve la tarjeta de cada asignación de Casa en casa donde fue asignado y, al presionarla, abre la pantalla de detalles de esa asignación; v1.80.9.10 — en LiveMap todos los territorios (el color de sus manzanas) se ven en un tono suave del color de acento de la plataforma y solo el territorio seleccionado muestra su color original (las etiquetas con el número conservan su color); v1.80.9 — la etiqueta «Estás fuera de este territorio» solo se muestra en el mapa de pantalla completa (ya no sobre el mapa de la asignación); vuelve LiveSnap: mantiene Live en Play hasta reconocer una calle y luego lo pausa (se puede dar Play de nuevo), con un toggle en Más opciones de una asignación de Casa en casa y en Configuración → Funciones especiales; v1.80.8 — las tarjetas de Evento de la interfaz Sencilla ya no muestran ningún color de borde; en la interfaz Clásica y Nueva, en el detalle de una asignación de Casa en casa, el mapa de territorio en pantalla completa tiene un botón «Ver en LiveMap» junto a «Sugerir corrección» que abre LiveMap en el territorio de la asignación; v1.80.7.2 — en la interfaz Sencilla, los indicadores de territorio de las tarjetas de Casa en casa usan el azul de la plataforma (ya no el color del territorio); no se pueden sugerir nuevos No Pasar; desaparece la pantalla de detalle de la asignación de Casa en casa: al tocar la tarjeta sube un menú inferior (3/4 de pantalla) con solo el mapa del territorio, el botón para llamar al Encargado y las direcciones No Pasar (sin Live); la tarjeta de Evento ya no muestra la imagen, solo título y subtítulo; v1.80.7.1 — las interfaces se diferencian: «Territorios sin vista previa», «Resolución reducida en medios» y «Segundos en la cuenta regresiva» dejan de ser experimentos; la interfaz Sencilla quita la vista previa de los territorios, reduce la resolución de los medios, no muestra segundos en los Eventos, tiene siempre las animaciones reducidas y el color de acento fijo (Azul), sin poder cambiarlos, y la Clásica y la Nueva siempre tienen vista previa, resolución completa y segundos; v1.80.7 — en Desktop o pantallas grandes, «Mi Perfil» se abre en un PopUp centrado (con fondo atenuado), igual que «Configuración»; en móvil no cambia; v1.80.6.5 — «Mi Perfil» y «Configuración» vuelven a ser pantallas separadas (como en 1.80.4); más rapidez y estabilidad: los eventos de cambio de tamaño se agrupan por cuadro, el vidrio adaptativo ya no se recalcula en cada cambio del documento ni con la pestaña oculta, el reloj de cuenta regresiva y los oyentes de scroll se alivianan, conexión anticipada a Supabase, respaldo si la librería de Supabase no carga y los fallos de red ya no quedan como errores sin capturar; v1.80.6 — el Onboarding suma dos pantallas después de «Instalar»: Apariencia (Automático por defecto, Claro u Oscuro) e Interfaz (Sencillo, Clásico o Nuevo por defecto), cada una con una vista previa simple y un botón «Saltar» arriba a la derecha que lleva a «Todo listo»; v1.80.5 — «Mi Perfil» y «Configuración» se fusionan en una sola pantalla, «Perfil y Configuración»: arriba la foto, el nombre y el UserID, debajo tus asignaciones (igual que Mi Perfil) y más abajo todos los ajustes de Configuración; «Cerrar sesión» y «Editar foto de perfil» pasan a un nuevo menú «Más opciones» en la parte superior; funciona en Modo Claro y Oscuro; v1.80.4 — LiveMap en modo oscuro (fondo oscuro y textos que se adaptan), etiqueta «Estás en el Territorio N» abajo a la izquierda, recuerda el último mapa elegido (Mapa en PDF o LiveMap) y cada Grupo de Servicio tiene su sección «Territorios del grupo» (DEV y Administradores con el módulo Grupos) que alimenta el detalle de los territorios; v1.80.3 — LiveMap: textos (nombres de calles) que se pueden mover, rotar, cambiar de tamaño y mandar al frente o al fondo; respaldo descargable y restaurable desde archivo; al tocar un territorio se abre un panel inferior con su última realización, su grupo de servicio y sus Direcciones No Pasar (los controles de zoom se ocultan mientras está abierto); v1.80.2g.2 — LiveMap: corrige «JSON object requested, multiple (or no) rows returned» en cuentas de usuario y su barra de título ahora es igual a la de Mapa; v1.80.2g — LiveMap: se vuelve a leer el diseño guardado cada vez que se abre (una copia vacía o vieja ya no se da por buena), el menú no avisa «sin configurar» por su cuenta, mensajes de diagnóstico claros y verificación al guardar; controles Ajustar/Acercar/Alejar abajo a la derecha en ambos mapas; v1.80.2f — LiveMap deja de ser experimental y viene activo para todos: el Mapa de la congregación sigue abriéndose en PDF y, al tocar el título «Mapa», se elige entre Mapa en PDF y LiveMap; v1.80.2d — LiveMap: selección múltiple de territorios con Shift + clic para moverlos, rotarlos o cambiarles el tamaño juntos, y Ctrl + Z / Ctrl + Y para deshacer y rehacer en el editor (Administración → LiveMap, solo DEV); v1.80.2 — LiveMap (Experimento): une los mapas SVG de los territorios en un solo mapa de la congregación con ubicación GPS (acople y calibración en Administración → LiveMap, solo DEV; se activa en Experimentos y se abre desde Mapa de la congregación); v1.80.1.5 — Mapa interactivo va con Live (sin interruptor propio) y sin etiqueta sobre el mapa; v1.80.1 — Mapa interactivo: ubicación GPS sobre los mapas PNG de territorio (georreferenciación por el usuario DEV; se activa en Más opciones de la asignación o en Funciones especiales); v1.80 — Reasignar Encargado: el Encargado de una asignación de Casa en casa puede cederle el cargo a otro conductor desde Más Opciones (avisa al nuevo Encargado, a los Administradores de Predicación y al DEV); v1.79.100d — onboarding de bienvenida (por cuenta, controlado por el DEV); v1.79.10 — sin No Pasar nuevos en Para tí; detalle de punto de carrito con Recordatorios (sin Fotos ni búsqueda) y barra superior fija con modo oscuro; filtro de Carritos unificado; Aseo solo a los dos grupos asignados; v1.79.5 — Otros Grupos con títulos como las fechas; botón Volver arriba sobre la NavBar inferior; Más Opciones sin Perfil en la UI nueva; sin saludo emergente; v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
+const APP_VERSION = '1.88A'; // v1.88A — Terrenor Core: nuevo módulo «Terrenor» en Administración → Predicación (mismo permiso que Asignaciones). Recomienda territorios y casas con el historial de reportes (ciclos de manzanas), frecuencia de asignación, territorios sin terminar, rotación y la cercanía/límites compartidos del LiveMap; explica cada criterio, respeta las restricciones que ya existen (territorio ya asignado ese día, territorios permitidos del Grupo de Servicio, días de la casa, Zoom solo para Zoom) y detecta datos incompletos o contradictorios. Solo lee: crear la asignación abre el formulario de Nueva Asignación precargado. v1.87.1 — LiveMap de Casa en casa siempre visible en Más opciones e independiente de Live. v1.87 — LiveMap propio en Más opciones de Casa en casa; Apariencia con ajustes Sólido/Equilibrado/Ligero; Espaciado de la plataforma en Experimentos. v1.86 — Administrar: un solo módulo va directo, varios abren el Centro de Administración; se quitó la pantalla completa automática. v1.85 — Reportes de Territorios: los formularios incluyen todos los territorios de la salida del día (también los agregados después); LiveMap sin giroscopio y sin fondo plano. v1.84 — LiveMap: al seleccionar un territorio se acerca y se centra en el área libre arriba de la hoja de detalles; brújula opcional con el giroscopio (Funciones especiales, desactivada por defecto) que gira el mapa según la dirección. // v1.83.9.2 — LiveMap: se quita el glow/destello detrás del territorio seleccionado. // v1.83.9.1 — Manzanas a abarcar de la tarjeta: ahora un solo pill sobre el borde inferior del indicador de territorio (sin tapar el número) y también con 2 o 3 territorios (por territorio). // v1.83.9 — Tarjetas de asignación de Casa en casa: muestran las manzanas a abarcar (mínimo 2, máximo 4) delante del indicador de territorio, en la parte inferior; el detalle las muestra todas. // v1.83.8 — Tarjetas, popups y menús: radio de esquina un poco mayor y Corner Smoothing (~60 %) donde el navegador lo soporta. // v1.83.7 — LiveMap: clic derecho en el editor abre un menú contextual (Enviar al fondo / Traer al frente / Agrupar / Desagrupar); los territorios agrupados se seleccionan y mueven como conjunto; el detalle del territorio muestra el día de la semana de la última vez realizado. // v1.83.5 — Reportes de territorio: en el calendario de «Reportes recibidos», los días pasados con asignación de Casa en casa que nunca se reportó (aunque nunca se abriera su formulario) muestran un punto naranja; al presionar el número del día aparece «Sin reporte» con cada asignación y su botón «Reportar», que abre el reporte de esa asignación pasada a nombre de su Encargado. Al terminar, el calendario se actualiza. // v1.83.2 — (1) Responsabilidades: la imagen que se comparte ahora se ve igual que el apartado del día (mismos íconos y colores, sin la etiqueta «Responsabilidades»; la fecha en Bold y debajo los cargos), con el mismo tamaño de antes. (2) El menú Compartir de las Responsabilidades de un día suma «Recordar» (Administradores): envía una notificación por FlemingApp a todos los asignados (Audio y Video, Micrófonos, Plataforma y Acomodación). // v1.83.1 — Nuevo botón "Centro de Administración" arriba de todos los apartados de Configuración (solo Administradores). // v1.83 — Centro de Administración: cuadrícula de módulos (un cuadro por módulo, sin secciones); cada módulo se abre como pantalla independiente con Back y título (PopUp en Desktop). Admins con un solo módulo entran directo. // v1.82 — (1) Mi Perfil con interfaz Nueva disponible también en Desktop como PopUp centrado. (2) Nueva sección Apariencias: modo Claro/Oscuro/Auto, Color de Acento, Tamaño de la Interfaz, Tipo de Interfaz y Transparencia/Blur. (3) Preferencias reorganizadas: Idioma, Tamaño del Texto, Espaciado, Animaciones, Vista de Contenido y PIN de acceso.  v1.81.57 — (1) Desktop: se restauran los corner radius distintivos de las tarjetas de asignación de predicación y del botón Mapa de la congregación; (2) se mantienen los radios más equilibrados del resto de secciones introducidos en 1.81.50, sin modificar Móvil. v1.81.50 — (1) Desktop: radios más equilibrados en Grupos de Servicio, Eventos, Aseo del Salón, Responsabilidades y Configuración; sin alterar Móvil. (2) NavBar de Desktop completamente redondeada. (3) Notificaciones: el botón abre correctamente el desplegable en pantallas grandes, también en equipos táctiles; (1) LiveMap: los territorios ya no usan el acento; se ven en gris claro con buen contraste con el fondo, también en Modo Oscuro. (2) Desktop y pantallas grandes: nueva NavBar menos alta y con el mismo ancho; las Sub-secciones quedan al lado de las Secciones y la barra se aprovecha completa desde el inicio; el botón DEV queda a la izquierda de Notificaciones; v1.81.7 — v1.81.7 — (1) Desktop: el botón DEV es un poco más grande, ya no tiene el punto azul y su tarjeta usa el color de acento de la plataforma; dice «DEV» y, a un lado, el número de versión; al presionarlo se abre el menú DEV Tools de siempre. (2) Móvil: toda la plataforma ya no muestra la barra desplazadora en la parte derecha; solo existe en Desktop para usar con el mouse; v1.81.5.2 — Mi Perfil (Interfaz Nueva): textos más pequeños y cohesivos con el resto de la plataforma (nombre, UserID, cargos y recuadro modular); el recuadro modular se adapta mejor al ancho de pantalla y los íconos de Anciano/Siervo y Precursor quedan centrados; el título «Mis Asignaciones» es más pequeño y ya no está dentro de un contenedor, y cada asignación tiene su propia tarjeta; v1.81.5 — Mi Perfil (solo Interfaz Nueva): la foto es un poco más grande y con nuevo diseño; al presionarla se abre un menú con Editar o Ver foto en pantalla completa (solo si no son iniciales o íconos); debajo de los datos personales hay un recuadro modular con Grupo de Servicio (con Superintendente/Auxiliar), cargo en la congregación (Anciano o Siervo Ministerial) y cargo de predicación (Precursor Regular o Especial); los cuadros que no aplican no aparecen y el resto se ajusta. Mis Asignaciones sigue debajo; v1.81.0.1 — (1) Grupo de Servicio: al presionar la portada se abre en pantalla completa. (2) Centro de Administración (Desktop) → Asignaciones: las tarjetas ya no ocupan todo el ancho, igual que en el Modo View. (3) Reportes: calendario del mes; los días con reporte muestran un punto verde y al presionarlos se abre la tarjeta del reporte. (4) Detalle de Grupo: el botón Editar queda alineado con el resto del encabezado; v1.81 — (1) Vida y Ministerio: la fila de canción ahora tiene bordes redondeados y ya no queda pegada a otras secciones. (2) Reunión Pública: Conferencias salientes muestra todas las conferencias de hoy en adelante, no solo la de la semana actual. (3) El menú de Compartir es idéntico en Aseo del Salón y en Responsabilidades. (4) Detalle de Grupo de Servicio: en Desktop se abre como PopUp; nuevo botón circular de Editar (Superintendente, Auxiliar, Administrador y DEV) en Móvil y Desktop; v1.80.9.20 — v1.80.9.20 — las asignaciones que aparecen en el menú de LiveMap son solo futuras (de hoy en adelante); las pasadas ya no se muestran; v1.80.9.15 — el menú de LiveMap ya no muestra las direcciones No Pasar; ahora muestra si el territorio seleccionado ya fue asignado en algún día: se ve la tarjeta de cada asignación de Casa en casa donde fue asignado y, al presionarla, abre la pantalla de detalles de esa asignación; v1.80.9.10 — en LiveMap todos los territorios (el color de sus manzanas) se ven en un tono suave del color de acento de la plataforma y solo el territorio seleccionado muestra su color original (las etiquetas con el número conservan su color); v1.80.9 — la etiqueta «Estás fuera de este territorio» solo se muestra en el mapa de pantalla completa (ya no sobre el mapa de la asignación); vuelve LiveSnap: mantiene Live en Play hasta reconocer una calle y luego lo pausa (se puede dar Play de nuevo), con un toggle en Más opciones de una asignación de Casa en casa y en Configuración → Funciones especiales; v1.80.8 — las tarjetas de Evento de la interfaz Sencilla ya no muestran ningún color de borde; en la interfaz Clásica y Nueva, en el detalle de una asignación de Casa en casa, el mapa de territorio en pantalla completa tiene un botón «Ver en LiveMap» junto a «Sugerir corrección» que abre LiveMap en el territorio de la asignación; v1.80.7.2 — en la interfaz Sencilla, los indicadores de territorio de las tarjetas de Casa en casa usan el azul de la plataforma (ya no el color del territorio); no se pueden sugerir nuevos No Pasar; desaparece la pantalla de detalle de la asignación de Casa en casa: al tocar la tarjeta sube un menú inferior (3/4 de pantalla) con solo el mapa del territorio, el botón para llamar al Encargado y las direcciones No Pasar (sin Live); la tarjeta de Evento ya no muestra la imagen, solo título y subtítulo; v1.80.7.1 — las interfaces se diferencian: «Territorios sin vista previa», «Resolución reducida en medios» y «Segundos en la cuenta regresiva» dejan de ser experimentos; la interfaz Sencilla quita la vista previa de los territorios, reduce la resolución de los medios, no muestra segundos en los Eventos, tiene siempre las animaciones reducidas y el color de acento fijo (Azul), sin poder cambiarlos, y la Clásica y la Nueva siempre tienen vista previa, resolución completa y segundos; v1.80.7 — en Desktop o pantallas grandes, «Mi Perfil» se abre en un PopUp centrado (con fondo atenuado), igual que «Configuración»; en móvil no cambia; v1.80.6.5 — «Mi Perfil» y «Configuración» vuelven a ser pantallas separadas (como en 1.80.4); más rapidez y estabilidad: los eventos de cambio de tamaño se agrupan por cuadro, el vidrio adaptativo ya no se recalcula en cada cambio del documento ni con la pestaña oculta, el reloj de cuenta regresiva y los oyentes de scroll se alivianan, conexión anticipada a Supabase, respaldo si la librería de Supabase no carga y los fallos de red ya no quedan como errores sin capturar; v1.80.6 — el Onboarding suma dos pantallas después de «Instalar»: Apariencia (Automático por defecto, Claro u Oscuro) e Interfaz (Sencillo, Clásico o Nuevo por defecto), cada una con una vista previa simple y un botón «Saltar» arriba a la derecha que lleva a «Todo listo»; v1.80.5 — «Mi Perfil» y «Configuración» se fusionan en una sola pantalla, «Perfil y Configuración»: arriba la foto, el nombre y el UserID, debajo tus asignaciones (igual que Mi Perfil) y más abajo todos los ajustes de Configuración; «Cerrar sesión» y «Editar foto de perfil» pasan a un nuevo menú «Más opciones» en la parte superior; funciona en Modo Claro y Oscuro; v1.80.4 — LiveMap en modo oscuro (fondo oscuro y textos que se adaptan), etiqueta «Estás en el Territorio N» abajo a la izquierda, recuerda el último mapa elegido (Mapa en PDF o LiveMap) y cada Grupo de Servicio tiene su sección «Territorios del grupo» (DEV y Administradores con el módulo Grupos) que alimenta el detalle de los territorios; v1.80.3 — LiveMap: textos (nombres de calles) que se pueden mover, rotar, cambiar de tamaño y mandar al frente o al fondo; respaldo descargable y restaurable desde archivo; al tocar un territorio se abre un panel inferior con su última realización, su grupo de servicio y sus Direcciones No Pasar (los controles de zoom se ocultan mientras está abierto); v1.80.2g.2 — LiveMap: corrige «JSON object requested, multiple (or no) rows returned» en cuentas de usuario y su barra de título ahora es igual a la de Mapa; v1.80.2g — LiveMap: se vuelve a leer el diseño guardado cada vez que se abre (una copia vacía o vieja ya no se da por buena), el menú no avisa «sin configurar» por su cuenta, mensajes de diagnóstico claros y verificación al guardar; controles Ajustar/Acercar/Alejar abajo a la derecha en ambos mapas; v1.80.2f — LiveMap deja de ser experimental y viene activo para todos: el Mapa de la congregación sigue abriéndose en PDF y, al tocar el título «Mapa», se elige entre Mapa en PDF y LiveMap; v1.80.2d — LiveMap: selección múltiple de territorios con Shift + clic para moverlos, rotarlos o cambiarles el tamaño juntos, y Ctrl + Z / Ctrl + Y para deshacer y rehacer en el editor (Administración → LiveMap, solo DEV); v1.80.2 — LiveMap (Experimento): une los mapas SVG de los territorios en un solo mapa de la congregación con ubicación GPS (acople y calibración en Administración → LiveMap, solo DEV; se activa en Experimentos y se abre desde Mapa de la congregación); v1.80.1.5 — Mapa interactivo va con Live (sin interruptor propio) y sin etiqueta sobre el mapa; v1.80.1 — Mapa interactivo: ubicación GPS sobre los mapas PNG de territorio (georreferenciación por el usuario DEV; se activa en Más opciones de la asignación o en Funciones especiales); v1.80 — Reasignar Encargado: el Encargado de una asignación de Casa en casa puede cederle el cargo a otro conductor desde Más Opciones (avisa al nuevo Encargado, a los Administradores de Predicación y al DEV); v1.79.100d — onboarding de bienvenida (por cuenta, controlado por el DEV); v1.79.10 — sin No Pasar nuevos en Para tí; detalle de punto de carrito con Recordatorios (sin Fotos ni búsqueda) y barra superior fija con modo oscuro; filtro de Carritos unificado; Aseo solo a los dos grupos asignados; v1.79.5 — Otros Grupos con títulos como las fechas; botón Volver arriba sobre la NavBar inferior; Más Opciones sin Perfil en la UI nueva; sin saludo emergente; v1.79.2.5 — precursores con marco degradé Azul→Morado (en lugar de la estrella); Editar perfil: solo Estrella, Corona y Corazón, con Colores e Iniciales/íconos dentro de un contenedor; v1.79 — nuevo Inicio de Sesión; mapas SVG sin borrar PNG; sección Manzanas en Territorios; plataforma más rápida; v1.78 — optimización integral de Reportes de Territorio (SVG robustos, enlaces confiables, reportes sin pérdida ni duplicados, menos datos descargados); v1.77.13 — íconos de Configuración con el acento; Reunión Pública alineada en Desktop; degradés según modo claro/oscuro; experimento Tamaño del texto; v1.77.12 — Reunión Pública en dos columnas en Desktop; portada de Evento tras el encabezado; fechas sobre las tarjetas; segundos en la cuenta regresiva; v1.77.11 — Configuración en PopUp en pantallas grandes; v1.77.10 — tarjetas de Territorios con el degradé del color de acento; v1.77.9 — experimento Espaciado del contenido (slider 1–10, predeterminado 2); v1.77.8 — dirección más grande en el detalle de asignación; Clima ya no abre el sitio web; nuevo ícono de Carritos; experimento de resolución reducida; optimizaciones de carga y rendimiento (base: v1.77.5) — título "Detalles del territorio"; Personalizar Inicio en Más opciones; experimento Territorios sin vista previa (base: v1.77) — Interfaz Sencilla simplificada para personas mayores; degradé de Territorios más suave (base: v1.76.9.2)
 // ═════════════════════════════════════════════════════════════════════════
 // v1.50.0-beta: (1) Voz crea asignaciones de predicación nuevas ("Crea una asignación para el lunes a las 10, asigna el
 // Territorio 17"), reconoce Grupos de Servicio y es mucho más flexible: nunca termina en "no entendí"/"no se encontró",
@@ -19907,7 +19968,7 @@ function _openAdminPageOverlay(targetTab) {
 
 // ── v1.83: Centro de Administración ──────────────────────────────────────────
 let _adminFromHub = false;
-const ADMIN_HUB_ORDER = ['assignments','territories','reports','conductores','casas','grupos','carritos',
+const ADMIN_HUB_ORDER = ['assignments','territories','reports','terrenor','conductores','casas','grupos','carritos',
   'vmc','fin-semana','audiovideo','acomodacion','aseo-salon','hospitalidad',
   'usuarios','notificaciones','tips','monitor','legal','avatares','voz','livemap'];
 const ADMIN_HUB_DEV_ONLY = ['tips','monitor','legal','avatares','livemap'];
@@ -19934,6 +19995,7 @@ const ADMIN_HUB_ICONS = {
   avatares: '<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>',
   voz: '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>',
   livemap: '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+  terrenor: '<circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>',
 };
 
 // Módulos que el usuario actual puede abrir (misma lógica de permisos que el resto del panel).
@@ -19994,7 +20056,7 @@ function adminBack() {
 
 // Mapa centralizado: a qué sección (Predicación/Reuniones) pertenece cada tab de admin.
 const ADMIN_TAB_SECTION = {
-  assignments: 'predicacion', territories: 'predicacion', conductores: 'predicacion',
+  assignments: 'predicacion', territories: 'predicacion', terrenor: 'predicacion', conductores: 'predicacion',
   casas: 'predicacion', grupos: 'predicacion', carritos: 'predicacion', reports: 'predicacion',
   vmc: 'reuniones', 'fin-semana': 'reuniones', audiovideo: 'reuniones', acomodacion: 'reuniones', 'aseo-salon': 'reuniones', hospitalidad: 'reuniones',
   usuarios: 'fleming', notificaciones: 'fleming', tips: 'fleming', monitor: 'fleming', legal: 'fleming', avatares: 'fleming', voz: 'fleming', livemap: 'fleming',
@@ -20112,6 +20174,7 @@ async function switchAdminTab(tab) {
   if (tab === 'avatares') { renderAdminAvatares(); }
   if (tab === 'carritos') { cartOpenAdminSection(); }
   if (tab === 'reports') { trepOpenAdminSection(); }
+  if (tab === 'terrenor') { terrenorOpenAdminSection(); }
   if (tab === 'livemap') { lmOpenAdminSection(); }
 }
 
@@ -20120,7 +20183,7 @@ async function switchAdminTab(tab) {
 // 'notificaciones' (el DEV decide qué Admins pueden gestionar Notificaciones).
 const ADMIN_TAB_PERM_KEY = {
   assignments: 'assignments', territories: 'territories', conductores: 'conductores',
-  casas: 'casas', grupos: 'grupos', carritos: 'carritos', reports: 'territory_reports',
+  casas: 'casas', grupos: 'grupos', carritos: 'carritos', reports: 'territory_reports', terrenor: 'assignments',
   vmc: 'vida_ministerio', 'fin-semana': 'fin_semana', audiovideo: 'audiovideo', acomodacion: 'acomodacion',
   'aseo-salon': 'aseo_salon', hospitalidad: 'hospitalidad', usuarios: 'usuarios', notificaciones: 'notificaciones',
 };
@@ -28023,11 +28086,17 @@ let _gmLbWanted = false, _gmLbActive = false;
 // v1.87: interruptor propio del indicador de ubicación en el mapa de la asignación de Casa en casa (menú Más opciones).
 // Es independiente del LiveMap del Mapa de la congregación (visor lm-*), que no lo consulta. Por defecto: activado.
 const H2H_LIVEMAP_KEY = 'fleming_h2h_livemap_enabled';
-function isH2HLiveMapEnabled() { try { return localStorage.getItem(H2H_LIVEMAP_KEY) !== 'false'; } catch (e) { return true; } }
+function isH2HLiveMapEnabled() {
+  try {
+    const v = localStorage.getItem(H2H_LIVEMAP_KEY);
+    if (v === 'true' || v === 'false') return v === 'true';
+    return localStorage.getItem('fleming_live_enabled') !== 'false'; // sin ajuste propio todavía: conserva lo que ya tenía el usuario con Live
+  } catch (e) { return true; }
+}
 function isGeoMapEnabled() {
   if (typeof isModoSencilloActive === 'function' && isModoSencilloActive()) return false;
   if (typeof isSimplifiedModeActive === 'function' && isSimplifiedModeActive()) return false;
-  return localStorage.getItem('fleming_live_enabled') !== 'false'; // v1.80.1.5: va de la mano con Live (sin conexión sigue funcionando); solo actúa en territorios georreferenciados
+  return isH2HLiveMapEnabled(); // v1.87.1: el indicador depende solo del interruptor LiveMap de la asignación (independiente de Live); solo actúa en territorios georreferenciados
 }
 function _gmValid(g) {
   return !!(g && g.v === 1 && g.w > 0 && g.h > 0 && Array.isArray(g.pts) && g.pts.length >= 2 &&
@@ -28356,6 +28425,592 @@ async function greRemove() {
   if (!(await _greWrite(null))) return;
   showToast('Georreferenciación quitada', 'success');
   const id = _greTerId; greClose(); greUpdateModalStatus(id);
+}
+
+// ══ v1.88A: TERRENOR CORE — motor de análisis ═══════════════════════════════════════════════════════
+// Terrenor recomienda territorios y casas para una asignación de Casa en casa. Es SOLO LECTURA: no escribe en
+// territories, assignments, casas, grupos ni en los reportes. Lo único que guarda es su propia configuración
+// (platform_settings, clave 'terrenor_config') y nunca inventa reglas ni umbrales:
+//   · Restricciones obligatorias = reglas que la plataforma ya tiene (territorio ya asignado ese día, territorios
+//     permitidos del Grupo de Servicio, días de la casa, Zoom solo para Zoom).
+//   · Ordenamiento = cada criterio ordena a los candidatos con los datos tal cual; Terrenor promedia las posiciones
+//     (todos los criterios activos pesan igual) y el orden de criterios solo sirve de desempate. Sin puntajes ni cortes.
+//   · Cercanía/límites = LiveMap: «limítrofe» = los dibujos se tocan o se superponen en el lienzo (misma tolerancia
+//     de toque que ya usa LiveMap); la distancia solo se usa para ordenar, nunca contra un valor fijo.
+const TN_CFG_KEY = 'terrenor_config', TN_CFG_LS = 'fleming_terrenor_config_v1';
+const TN_CRITERIA = [
+  { id: 'rotation',   label: 'Rotación',                 desc: 'Los que llevan más tiempo sin completarse van primero; los que nunca tienen una realización completa registrada, antes que todos.' },
+  { id: 'unfinished', label: 'Territorios sin terminar', desc: 'Los que ya tienen manzanas cubiertas en el ciclo actual (o un reporte simple «sigue con este»); primero a los que menos manzanas les faltan.' },
+  { id: 'frequency',  label: 'Frecuencia de asignación', desc: 'Los que menos veces se asignaron antes de la fecha elegida (cuenta toda asignación con territorio, incluida Visita).' },
+  { id: 'proximity',  label: 'Proximidad',               desc: 'Los más cercanos en LiveMap a los territorios ya elegidos o al ancla; los limítrofes primero. Solo actúa cuando hay un territorio de referencia.' },
+];
+const TN_HOUSE_CRITERIA = [
+  { id: 'affinity', label: 'Historial con el territorio' },
+  { id: 'neighbor', label: 'Historial con territorios limítrofes' },
+  { id: 'rotation', label: 'Rotación de la casa' },
+];
+
+function tnNormCfg(raw) {
+  const ids = TN_CRITERIA.map(c => c.id);
+  const order = [], seen = new Set();
+  ((raw && Array.isArray(raw.order)) ? raw.order : []).forEach(id => { if (ids.includes(id) && !seen.has(id)) { seen.add(id); order.push(id); } });
+  ids.forEach(id => { if (!seen.has(id)) order.push(id); });
+  const off = ((raw && Array.isArray(raw.off)) ? raw.off : []).filter(id => ids.includes(id));
+  return { order, off: Array.from(new Set(off)) };
+}
+
+// ── Utilidades ──
+function tnPad(n) { return String(n).padStart(2, '0'); }
+function tnDateKey(v) {
+  if (!v) return null;
+  const s = String(v).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const d = new Date(s); if (isNaN(d)) return null;
+  return d.getFullYear() + '-' + tnPad(d.getMonth() + 1) + '-' + tnPad(d.getDate());
+}
+function tnNormM(m) { return String(m == null ? '' : m).trim().toLowerCase(); }
+function tnList(v) {
+  if (Array.isArray(v)) return v;
+  if (typeof v === 'string' && v.trim()) { try { const x = JSON.parse(v); if (Array.isArray(x)) return x; } catch (e) {} return v.split(',').map(s => s.trim()).filter(Boolean); }
+  return [];
+}
+function tnFmtDate(k) {
+  if (!k) return '—';
+  const M = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  const [y, m, d] = k.split('-').map(Number); return d + ' ' + M[m - 1] + ' ' + y;
+}
+function tnDow(k) { return new Date(k + 'T12:00:00').getDay(); }
+const TN_DAY_KEYS = ['dom', 'lun', 'mar', 'mie', 'jue', 'vie', 'sab'];
+function tnCasaDias(c) { try { const x = JSON.parse((c && c.dias) || '[]'); return Array.isArray(x) ? x : []; } catch (e) { return []; } }
+function tnCasaAvailable(c, dateKey) { const d = tnCasaDias(c); if (!d.length || !dateKey) return true; return d.includes(TN_DAY_KEYS[tnDow(dateKey)]); }
+const tnCmpNum = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+function tnNumCmp(a, b) { const x = parseFloat(a), y = parseFloat(b); if (isFinite(x) && isFinite(y) && x !== y) return x - y; return String(a).localeCompare(String(b), 'es', { numeric: true }); }
+function tnTerIdsOfAssignment(a) {
+  const out = [];
+  [a.territory_id, a.territory_id_2, a.territory_id_3].forEach(id => { if (id && !out.includes(id)) out.push(id); });
+  tnList(a.visita_territorios).forEach(id => { if (id && !out.includes(id)) out.push(id); });
+  return out;
+}
+
+// ── Modelo: historial por territorio, ciclos de manzanas, asignaciones y casas ──
+function tnBuildModel(raw) {
+  const today = raw.today;
+  const T = {}, order = [];
+  (raw.territories || []).forEach(t => {
+    if (!t || !t.id || T[t.id]) return;
+    const mans = tnList(t.manzanas).map(m => String(m).trim()).filter(Boolean);
+    const mset = new Set(mans.map(tnNormM));
+    T[t.id] = { id: t.id, number: t.number, color: t.color || null, manzanas: mans, mset, total: mset.size,
+      done: new Set(), lastCompleted: null, completions: 0, lastReportDate: null, continueFlag: false, reports: 0,
+      unknownMans: new Set(), totalMismatch: 0, assignDates: [], assignCount: 0, notReported: 0 };
+    order.push(t.id);
+  });
+  const diag = [];
+  const D = (level, code, title, detail, ids) => diag.push({ level, code, title, detail: detail || '', ids: ids || [] });
+  (raw.errors || []).forEach(e => D('error', 'load', 'No se pudieron cargar algunos datos', e));
+
+  // Reportes → ciclos
+  const forms = {}; (raw.forms || []).forEach(f => { if (f && f.id) forms[f.id] = f; });
+  const latest = new Map(); let dupes = 0;
+  (raw.subs || []).forEach(s => {
+    if (!s) return;
+    const k = s.form_id ? s.form_id + '|' + s.territory_id : 'x|' + (s.id || Math.random());
+    const cur = latest.get(k);
+    if (!cur) latest.set(k, s);
+    else { dupes++; if (String(s.submitted_at || '') >= String(cur.submitted_at || '')) latest.set(k, s); }
+  });
+  const events = [], orphanSubs = new Set(), noDate = [];
+  latest.forEach(s => {
+    const f = forms[s.form_id];
+    const date = tnDateKey(f && f.assignment_date) || tnDateKey(s.submitted_at);
+    if (!T[s.territory_id]) { orphanSubs.add(s.territory_id); return; }
+    if (!date) { noDate.push(s.territory_id); return; }
+    events.push({ s, date, at: String(s.submitted_at || '') });
+  });
+  events.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : (a.at < b.at ? -1 : a.at > b.at ? 1 : 0)));
+  const conflictSub = new Set();
+  events.forEach(({ s, date }) => {
+    const st = T[s.territory_id];
+    st.reports++; st.lastReportDate = date;
+    if (s.not_covered && s.all_territory) conflictSub.add(st.id);
+    if (s.total_manzanas != null && s.total_manzanas !== st.total && st.total > 0) st.totalMismatch++;
+    if (s.not_covered) return;
+    const arr = tnList(s.manzanas_done).map(tnNormM).filter(Boolean);
+    arr.forEach(m => { if (!st.mset.has(m)) st.unknownMans.add(m); });
+    let complete = !!s.all_territory;
+    if (s.simple_status === 'continue') st.continueFlag = true;
+    if (!complete) {
+      arr.forEach(m => { if (st.mset.has(m)) st.done.add(m); });
+      if (st.total > 0 && [...st.mset].every(m => st.done.has(m))) complete = true;
+    }
+    if (complete) { st.lastCompleted = date; st.completions++; st.done = new Set(); st.continueFlag = false; }
+  });
+
+  // Asignaciones
+  const casaById = {}; (raw.casas || []).forEach(c => { if (c && c.id) casaById[c.id] = c; });
+  const C = {}; (raw.casas || []).forEach(c => { if (c && c.id) C[c.id] = { c, dates: [], pairs: {} }; });
+  const reportDates = {};
+  events.forEach(e => { (reportDates[e.s.territory_id] = reportDates[e.s.territory_id] || new Set()).add(e.date); });
+  const asgs = (raw.assignments || []).filter(a => a && a.type !== 'especial' && a.date);
+  const sameDay = {};
+  const orphanAsgTer = new Set(), orphanAsgCasa = new Set(), badMans = new Set();
+  asgs.forEach(a => {
+    const date = tnDateKey(a.date); if (!date) return;
+    const ids = tnTerIdsOfAssignment(a);
+    ids.forEach(id => {
+      const st = T[id];
+      if (!st) { orphanAsgTer.add(id); return; }
+      st.assignDates.push(date);
+      (sameDay[date + '|' + id] = sameDay[date + '|' + id] || []).push(a);
+      if (date < today && !(reportDates[id] && reportDates[id].has(date))) st.notReported++;
+    });
+    [['manzanas_asignadas', a.territory_id], ['manzanas_asignadas_2', a.territory_id_2], ['manzanas_asignadas_3', a.territory_id_3]].forEach(([f, id]) => {
+      const st = id && T[id]; if (!st || st.total === 0) return;
+      tnList(a[f]).forEach(m => { if (!st.mset.has(tnNormM(m))) badMans.add(st.id); });
+    });
+    if (a.casa_id) {
+      if (!C[a.casa_id]) { orphanAsgCasa.add(a.casa_id); return; }
+      C[a.casa_id].dates.push(date);
+      ids.forEach(id => { C[a.casa_id].pairs[id] = (C[a.casa_id].pairs[id] || []).concat(date); });
+    }
+  });
+  Object.values(T).forEach(st => { st.assignDates.sort(); st.assignCount = st.assignDates.length; });
+  Object.values(C).forEach(h => h.dates.sort());
+
+  // Diagnóstico
+  const num = ids => ids.map(id => T[id] ? 'T' + T[id].number : '?').join(', ');
+  const noMans = order.filter(id => T[id].total === 0);
+  if (noMans.length) D('warn', 'no-manzanas', 'Territorios sin manzanas registradas', 'El progreso no puede calcularse: ' + num(noMans) + '.', noMans);
+  const geo = raw.geo || null;
+  if (!geo || !geo.layoutCount) D('error', 'no-livemap', 'LiveMap sin configurar', 'Sin LiveMap no hay límites compartidos ni cercanía: el criterio de Proximidad no puede usarse.');
+  else {
+    const out = order.filter(id => !geo.ids.has(id));
+    if (out.length) D('warn', 'no-geometry', 'Territorios sin geometría en LiveMap', 'No están en el LiveMap, están ocultos o su SVG no cargó: ' + num(out) + '. No se pueden comparar por cercanía.', out);
+    if (geo.orphanLayout && geo.orphanLayout.length) D('warn', 'layout-orphan', 'LiveMap con mapas de territorios que ya no existen', geo.orphanLayout.length + ' mapa(s).', []);
+    if (geo.duplicateLayout && geo.duplicateLayout.length) D('warn', 'layout-dup', 'Territorio repetido en LiveMap', num(geo.duplicateLayout), geo.duplicateLayout);
+  }
+  if (orphanSubs.size) D('warn', 'orphan-report', 'Reportes de territorios que ya no existen', orphanSubs.size + ' territorio(s) borrados con reportes guardados.', []);
+  if (orphanAsgTer.size) D('warn', 'orphan-asg-ter', 'Asignaciones con territorios que ya no existen', orphanAsgTer.size + ' territorio(s).', []);
+  if (orphanAsgCasa.size) D('warn', 'orphan-asg-casa', 'Asignaciones con casas que ya no existen', orphanAsgCasa.size + ' casa(s).', []);
+  const unk = order.filter(id => T[id].unknownMans.size);
+  if (unk.length) D('warn', 'unknown-manzanas', 'Reportes con manzanas que el territorio no tiene', 'Se ignoraron en el progreso: ' + unk.map(id => 'T' + T[id].number + ' (' + [...T[id].unknownMans].join(', ') + ')').join('; ') + '.', unk);
+  const mism = order.filter(id => T[id].totalMismatch);
+  if (mism.length) D('warn', 'manzanas-changed', 'Las manzanas del territorio cambiaron desde algunos reportes', 'El historial puede no ser comparable: ' + num(mism) + '.', mism);
+  if (conflictSub.size) D('warn', 'report-conflict', 'Reportes contradictorios (completo y «no abarcado» a la vez)', num([...conflictSub]), [...conflictSub]);
+  if (dupes) D('info', 'dup-reports', 'Reportes repetidos para un mismo formulario y territorio', 'Se usó el más reciente (' + dupes + ').', []);
+  if (noDate.length) D('warn', 'report-no-date', 'Reportes sin fecha utilizable', 'No entran en el historial: ' + num([...new Set(noDate)]), [...new Set(noDate)]);
+  if (badMans.size) D('warn', 'asg-bad-manzanas', 'Asignaciones con manzanas que el territorio no tiene', num([...badMans]), [...badMans]);
+  const dupAsg = Object.keys(sameDay).filter(k => sameDay[k].length > 1);
+  if (dupAsg.length) D('warn', 'same-day-dup', 'Mismo territorio asignado dos veces el mismo día', dupAsg.map(k => { const [d, id] = k.split('|'); return 'T' + (T[id] ? T[id].number : '?') + ' el ' + tnFmtDate(d); }).join('; ') + '.', dupAsg.map(k => k.split('|')[1]));
+  const unrep = order.filter(id => T[id].notReported);
+  if (unrep.length) D('info', 'unreported', 'Asignaciones pasadas sin reporte', unrep.map(id => 'T' + T[id].number + ' (' + T[id].notReported + ')').join(', ') + '. Si se trabajaron, su avance no está en el historial.', unrep);
+  const noAddr = (raw.casas || []).filter(c => c && c.tipo !== 'zoom' && !String(c.direccion || '').trim());
+  if (noAddr.length) D('warn', 'casa-no-address', 'Casas sin dirección', noAddr.length + ' casa(s).', []);
+  const gNo = (raw.grupos || []).filter(g => !(Array.isArray(g.territorios_permitidos) && g.territorios_permitidos.length));
+  if (gNo.length) D('info', 'grupo-sin-territorios', 'Grupos de Servicio sin territorios permitidos', 'Grupo ' + gNo.map(g => g.numero).join(', ') + ': Terrenor no puede restringir sus territorios.', []);
+  const owners = {};
+  (raw.grupos || []).forEach(g => (Array.isArray(g.territorios_permitidos) ? g.territorios_permitidos : []).forEach(id => { (owners[id] = owners[id] || []).push(g); }));
+  const multi = Object.keys(owners).filter(id => owners[id].length > 1);
+  if (multi.length) D('warn', 'ter-multi-grupo', 'Territorios permitidos en más de un Grupo', multi.map(id => 'T' + (T[id] ? T[id].number : '?') + ' (Grupos ' + owners[id].map(g => g.numero).join(', ') + ')').join('; ') + '.', multi);
+  const lvl = { error: 0, warn: 1, info: 2 }; diag.sort((a, b) => lvl[a.level] - lvl[b.level]);
+
+  return { today, T, order, C, casaById, grupos: raw.grupos || [], casas: raw.casas || [], assignments: asgs, geo, diag, owners };
+}
+
+// ── Estado de un territorio ──
+function tnStatus(st) {
+  const doneN = st.done.size, remaining = st.total > 0 ? st.total - doneN : null;
+  const partial = doneN > 0 || st.continueFlag;
+  const left = st.total > 0 ? st.manzanas.filter(m => !st.done.has(tnNormM(m))) : [];
+  return { doneN, remaining, partial, left };
+}
+function tnDistance(geo, a, b) {
+  if (a === b) return 0;
+  if (!geo || !geo.ids || !geo.ids.has(a) || !geo.ids.has(b)) return null;
+  if (geo.contact[a] && geo.contact[a].includes(b)) return 0;
+  const d = geo.dist[a] && geo.dist[a][b]; return d == null ? null : d;
+}
+
+// ── Posiciones por criterio (promedio de posiciones, sin pesos) ──
+function tnPositions(items, cmp) {
+  const n = items.length, idx = items.map((_, i) => i).sort((a, b) => cmp(items[a], items[b]) || a - b);
+  const pos = new Array(n), rankNo = new Array(n); let i = 0;
+  while (i < n) {
+    let j = i; while (j + 1 < n && cmp(items[idx[j + 1]], items[idx[i]]) === 0) j++;
+    const avg = (i + j) / 2; for (let k = i; k <= j; k++) { pos[idx[k]] = n > 1 ? avg / (n - 1) : 0; rankNo[idx[k]] = i + 1; }
+    i = j + 1;
+  }
+  return { pos, rankNo };
+}
+function tnRankSet(items, crits, tieOrder, tieKey) {
+  const per = {};
+  crits.forEach(c => { per[c.id] = tnPositions(items, c.cmp); });
+  const rows = items.map((it, i) => ({ it, i, score: crits.length ? crits.reduce((s, c) => s + per[c.id].pos[i], 0) / crits.length : 0 }));
+  rows.sort((a, b) => {
+    if (a.score !== b.score) return a.score - b.score;
+    for (const id of tieOrder) { if (!per[id]) continue; const d = per[id].pos[a.i] - per[id].pos[b.i]; if (d) return d; }
+    return tieKey(a.it, b.it);
+  });
+  return { rows, per };
+}
+
+// ── Territorios ──
+function tnFlags(model, st, p) {
+  const w = [], geo = model.geo, s = tnStatus(st);
+  if (st.total === 0) w.push('Sin manzanas registradas: el progreso no puede calcularse.');
+  if (geo && geo.layoutCount && !geo.ids.has(st.id)) w.push('Sin geometría en LiveMap: no se puede medir cercanía ni límites.');
+  if (st.continueFlag && st.done.size === 0) w.push('Un reporte simple dice «sigue con este territorio», sin detalle de manzanas.');
+  if (st.unknownMans.size) w.push('Hay reportes con manzanas que el territorio ya no tiene.');
+  if (st.totalMismatch) w.push('Las manzanas del territorio cambiaron desde algunos reportes.');
+  const after = st.assignDates.filter(d => d > p.date).sort()[0];
+  if (after) w.push('Ya tiene una asignación posterior el ' + tnFmtDate(after) + '.');
+  if (st.notReported) w.push(st.notReported + ' asignación(es) pasada(s) sin reporte: su avance no se conoce.');
+  return w;
+}
+function tnEligibility(model, p) {
+  const eligible = [], excluded = [];
+  const dayAsg = new Set(); model.assignments.forEach(a => { if (tnDateKey(a.date) === p.date) tnTerIdsOfAssignment(a).forEach(id => dayAsg.add(id)); });
+  const grupo = p.grupoId ? model.grupos.find(g => g.id === p.grupoId) : null;
+  const allowed = grupo && Array.isArray(grupo.territorios_permitidos) && grupo.territorios_permitidos.length ? new Set(grupo.territorios_permitidos) : null;
+  model.order.forEach(id => {
+    const st = model.T[id], why = [];
+    if (dayAsg.has(id)) why.push('Ya está asignado el ' + tnFmtDate(p.date) + '.');
+    if (allowed && !allowed.has(id)) why.push('No está entre los territorios permitidos del Grupo ' + grupo.numero + '.');
+    (why.length ? excluded : eligible).push(why.length ? { st, why } : st);
+  });
+  const notes = [];
+  if (grupo && !allowed) notes.push('El Grupo ' + grupo.numero + ' no tiene territorios permitidos definidos: no se aplicó ninguna restricción de grupo.');
+  return { eligible, excluded, notes };
+}
+function tnCriteriaFor(model, p, cfg, anchors, mode) {
+  const off = new Set(cfg.off), out = [];
+  cfg.order.forEach(id => {
+    if (off.has(id)) return;
+    if (id === 'rotation') out.push({ id, cmp: (a, b) => tnCmpNum(a.lastCompleted ? Date.parse(a.lastCompleted) : -Infinity, b.lastCompleted ? Date.parse(b.lastCompleted) : -Infinity) });
+    else if (id === 'unfinished') out.push({ id, cmp: (a, b) => {
+      const x = tnStatus(a), y = tnStatus(b), ka = x.partial ? 0 : 1, kb = y.partial ? 0 : 1;
+      return ka - kb || (x.partial ? tnCmpNum(x.remaining == null ? Infinity : x.remaining, y.remaining == null ? Infinity : y.remaining) : 0);
+    } });
+    else if (id === 'frequency') out.push({ id, cmp: (a, b) => tnCmpNum(a.assignDates.filter(d => d < p.date).length, b.assignDates.filter(d => d < p.date).length) });
+    else if (id === 'proximity' && anchors.length) out.push({ id, cmp: (a, b) => {
+      const f = st => { const ds = anchors.map(an => tnDistance(model.geo, st.id, an)).filter(d => d != null); return ds.length ? Math.min(...ds) : Infinity; };
+      return tnCmpNum(f(a), f(b));
+    } });
+  });
+  return out;
+}
+function tnReasons(model, st, p, anchors, per, i, n) {
+  const out = [], s = tnStatus(st), tag = id => per[id] ? ' (#' + per[id].rankNo[i] + ' de ' + n + ')' : '';
+  if (per.rotation) out.push({ c: 'rotation', t: 'Rotación' + tag('rotation') + ': ' + (st.lastCompleted ? 'última vez completo el ' + tnFmtDate(st.lastCompleted) + ' (' + st.completions + ' realización/es completa/s).' : (st.lastReportDate ? 'sin realización completa registrada; último reporte el ' + tnFmtDate(st.lastReportDate) + '.' : 'sin ningún reporte registrado.')) });
+  if (per.unfinished) out.push({ c: 'unfinished', t: 'Sin terminar' + tag('unfinished') + ': ' + (s.partial ? (st.total > 0 ? s.doneN + ' de ' + st.total + ' manzanas cubiertas en el ciclo actual; faltan ' + (s.left.length ? s.left.join(', ') : 'las restantes') + '.' : 'ciclo en curso sin detalle de manzanas.') : 'sin progreso en el ciclo actual.') });
+  if (per.frequency) { const prev = st.assignDates.filter(d => d < p.date); out.push({ c: 'frequency', t: 'Frecuencia' + tag('frequency') + ': ' + prev.length + ' asignación/es antes de esa fecha' + (prev.length ? '; la última el ' + tnFmtDate(prev[prev.length - 1]) + '.' : '.') }); }
+  if (per.proximity) {
+    const parts = anchors.map(an => { const d = tnDistance(model.geo, st.id, an), a = model.T[an]; return d == null ? 'sin geometría para comparar con T' + a.number : (d === 0 && an !== st.id ? 'limítrofe con T' + a.number : 'a una distancia relativa de ' + Math.round(d) + ' de T' + a.number); });
+    out.push({ c: 'proximity', t: 'Proximidad' + tag('proximity') + ': ' + parts.join('; ') + '.' });
+  }
+  return out;
+}
+function tnNeighbors(model, st) {
+  const geo = model.geo; if (!geo || !geo.contact[st.id]) return [];
+  return geo.contact[st.id].map(id => model.T[id]).filter(Boolean).sort((a, b) => tnNumCmp(a.number, b.number)).map(n => { const s = tnStatus(n); return { number: n.number, id: n.id, state: s.partial ? 'partial' : 'idle' }; });
+}
+function tnRecommend(model, p, cfgRaw) {
+  const cfg = tnNormCfg(cfgRaw), { eligible, excluded, notes } = tnEligibility(model, p);
+  let pool = eligible.slice(); const picks = []; const anchors0 = p.anchorId && model.T[p.anchorId] ? [p.anchorId] : [];
+  const n = Math.max(1, Math.min(3, p.count || 1));
+  for (let k = 0; k < n && pool.length; k++) {
+    const anchors = anchors0.concat(picks.map(x => x.st.id));
+    const crits = tnCriteriaFor(model, p, cfg, anchors, 'ter');
+    const { rows, per } = tnRankSet(pool, crits, cfg.order, (a, b) => tnNumCmp(a.number, b.number));
+    const best = rows[0];
+    picks.push({ st: best.it, score: best.score, reasons: tnReasons(model, best.it, p, anchors, per, best.i, pool.length), warnings: tnFlags(model, best.it, p), neighbors: tnNeighbors(model, best.it), status: tnStatus(best.it), pool: pool.length, criteriaUsed: crits.map(c => c.id) });
+    pool = pool.filter(x => x !== best.it);
+  }
+  if (picks.length < n) notes.push('Solo hay ' + picks.length + ' territorio(s) elegible(s) para esa fecha.');
+  if (cfg.off.length === TN_CRITERIA.length) notes.push('Todos los criterios están desactivados: los territorios se listan por número.');
+  return { cfg, picks, excluded, notes };
+}
+
+// ── Casas ──
+function tnRecommendHouses(model, p, picks, cfgRaw) {
+  const cfg = tnNormCfg(cfgRaw), ids = picks.map(x => x.st.id), notes = [];
+  const neigh = new Set(); picks.forEach(x => x.neighbors.forEach(nb => { if (!ids.includes(nb.id)) neigh.add(nb.id); }));
+  const cand = [], out = [];
+  (model.casas || []).forEach(c => {
+    if (!c || !model.C[c.id]) return;
+    const zoom = c.tipo === 'zoom', why = [];
+    if (zoom && p.type !== 'zoom') why.push('Es una reunión Zoom y la asignación no es por Zoom.');
+    if (!zoom && p.type === 'zoom') why.push('La asignación es por Zoom y esta casa es presencial.');
+    if (!tnCasaAvailable(c, p.date)) why.push('No está disponible los ' + ({ dom: 'domingos', lun: 'lunes', mar: 'martes', mie: 'miércoles', jue: 'jueves', vie: 'viernes', sab: 'sábados' })[TN_DAY_KEYS[tnDow(p.date)]] + '.');
+    if (why.length) out.push({ casa: c, why }); else cand.push(c);
+  });
+  if (!cand.length) { notes.push('Ninguna casa cumple las restricciones para esa fecha y tipo.'); return { ranked: [], unavailable: out, notes }; }
+  const H = c => model.C[c.id];
+  const aff = c => ids.reduce((s, id) => s + ((H(c).pairs[id] || []).filter(d => d < p.date).length), 0);
+  const nbr = c => [...neigh].reduce((s, id) => s + ((H(c).pairs[id] || []).filter(d => d < p.date).length), 0);
+  const last = c => { const d = H(c).dates.filter(x => x < p.date); return d.length ? Date.parse(d[d.length - 1]) : -Infinity; };
+  const crits = [
+    { id: 'affinity', cmp: (a, b) => tnCmpNum(aff(b), aff(a)) },
+    { id: 'neighbor', cmp: (a, b) => tnCmpNum(nbr(b), nbr(a)) },
+    { id: 'rotation', cmp: (a, b) => tnCmpNum(last(a), last(b)) },
+  ];
+  const { rows, per } = tnRankSet(cand, crits, ['affinity', 'neighbor', 'rotation'], (a, b) => String(a.direccion || '').localeCompare(String(b.direccion || ''), 'es', { numeric: true }));
+  const anyHist = cand.some(c => aff(c) > 0 || nbr(c) > 0);
+  if (!anyHist) notes.push('Ninguna casa tiene historial con estos territorios ni con sus limítrofes. Las casas no tienen ubicación registrada, así que Terrenor no puede estimar cercanía física: las ordena solo por rotación.');
+  const dayCount = c => model.assignments.filter(a => tnDateKey(a.date) === p.date && a.casa_id === c.id).length;
+  const ranked = rows.map((r, k) => {
+    const c = r.it, h = H(c), a = aff(c), b = nbr(c), prev = h.dates.filter(d => d < p.date), w = [];
+    if (!String(c.direccion || '').trim() && c.tipo !== 'zoom') w.push('La casa no tiene dirección registrada.');
+    if (dayCount(c)) w.push('Ya tiene ' + dayCount(c) + ' asignación/es ese día.');
+    return { casa: c, score: r.score, warnings: w, reasons: [
+      'Historial con estos territorios (#' + per.affinity.rankNo[r.i] + ' de ' + cand.length + '): ' + a + ' vez/veces.',
+      'Historial con territorios limítrofes (#' + per.neighbor.rankNo[r.i] + ' de ' + cand.length + '): ' + b + ' vez/veces.',
+      'Rotación (#' + per.rotation.rankNo[r.i] + ' de ' + cand.length + '): ' + (prev.length ? 'última vez usada el ' + tnFmtDate(prev[prev.length - 1]) + '.' : 'nunca usada antes de esa fecha.'),
+    ] };
+  });
+  return { ranked, unavailable: out, notes };
+}
+
+// ── Geometría (LiveMap) ──
+// env: { layout, getMask(id) → {cw,ch,d}|null, localToWorld(it,u,v), worldToLocal(it,x,y), corners(it), tick() }
+async function tnComputeGeometry(env, territoryIds) {
+  const TOL = 3, NB = 400, ND = 120;   // TOL = misma tolerancia de toque que _lmPixelHit; NB/ND = muestreo técnico (no regla de negocio)
+  const items = env.layout.items.filter(i => !i.hidden), ids = new Set(), contact = {}, dist = {};
+  const seen = new Set(), dupl = [];
+  items.forEach(i => { if (seen.has(i.id)) dupl.push(i.id); seen.add(i.id); });
+  const known = new Set(territoryIds);
+  const orphanLayout = env.layout.items.filter(i => !known.has(i.id)).map(i => i.id);
+  const op = (m, x, y) => { if (x < 0 || y < 0 || x >= m.cw || y >= m.ch) return false; const i = (y * m.cw + x) * 4; return m.d[i + 3] > 40 && !(m.d[i] > 244 && m.d[i + 1] > 244 && m.d[i + 2] > 244); };
+  const hit = (m, u, v) => { const px = Math.round(u * (m.cw - 1)), py = Math.round(v * (m.ch - 1)); for (let dy = -TOL; dy <= TOL; dy++) for (let dx = -TOL; dx <= TOL; dx++) if (op(m, px + dx, py + dy)) return true; return false; };
+  const E = [];
+  for (const it of items) {
+    if (!known.has(it.id)) continue;
+    const m = await env.getMask(it.id); if (!m) continue;
+    const edge = [];
+    for (let y = 0; y < m.ch; y++) for (let x = 0; x < m.cw; x++) if (op(m, x, y) && (!op(m, x - 1, y) || !op(m, x + 1, y) || !op(m, x, y - 1) || !op(m, x, y + 1))) edge.push([x, y]);
+    if (!edge.length) continue;
+    const pick = (arr, k) => { if (arr.length <= k) return arr; const out = []; for (let j = 0; j < k; j++) out.push(arr[Math.floor(j * arr.length / k)]); return out; };
+    const toW = ([x, y]) => env.localToWorld(it, x / (m.cw - 1), y / (m.ch - 1));
+    const pts = pick(edge, NB).map(toW), dpts = pick(pts, ND);
+    const cs = env.corners(it), pad = TOL * Math.max(it.w * it.s / m.cw, it.h * it.s / m.ch);
+    E.push({ it, m, pts, dpts, x0: Math.min(...cs.map(c => c[0])) - pad, x1: Math.max(...cs.map(c => c[0])) + pad, y0: Math.min(...cs.map(c => c[1])) - pad, y1: Math.max(...cs.map(c => c[1])) + pad });
+    ids.add(it.id); contact[it.id] = []; dist[it.id] = {};
+  }
+  const touch = (A, B) => A.pts.some(q => { const l = env.worldToLocal(B.it, q.x, q.y); return l.u >= -0.01 && l.u <= 1.01 && l.v >= -0.01 && l.v <= 1.01 && hit(B.m, l.u, l.v); });
+  for (let i = 0; i < E.length; i++) {
+    for (let j = i + 1; j < E.length; j++) {
+      const A = E[i], B = E[j]; if (A.it.id === B.it.id) continue;
+      let dmin = Infinity;
+      for (const p of A.dpts) for (const q of B.dpts) { const d = Math.hypot(p.x - q.x, p.y - q.y); if (d < dmin) dmin = d; }
+      dist[A.it.id][B.it.id] = dist[B.it.id][A.it.id] = dmin;
+      const ov = !(A.x1 < B.x0 || B.x1 < A.x0 || A.y1 < B.y0 || B.y1 < A.y0);
+      if (ov && (touch(A, B) || touch(B, A))) { contact[A.it.id].push(B.it.id); contact[B.it.id].push(A.it.id); dist[A.it.id][B.it.id] = dist[B.it.id][A.it.id] = 0; }
+    }
+    if (env.tick) await env.tick(i + 1, E.length);
+  }
+  return { ids, contact, dist, layoutCount: items.length, orphanLayout, duplicateLayout: dupl };
+}
+
+// (exportación solo para pruebas en Node)
+if (false) module.exports = { tnNormCfg, tnBuildModel, tnRecommend, tnRecommendHouses, tnComputeGeometry, tnStatus, tnDateKey, TN_CRITERIA };
+
+// ══ v1.88A: TERRENOR CORE — datos, pantalla y acciones ═══════════════════════════════════════════════
+// Módulo del Centro de Administración (Predicación → Terrenor). Lee historial de reportes, asignaciones, casas, grupos y
+// el LiveMap; recomienda territorios y casas y explica cada criterio. No escribe en esas tablas: «Crear asignación» solo
+// abre el formulario de Nueva Asignación ya existente, con los datos precargados, y no se guarda nada hasta que se confirme.
+let _tn = { raw: null, model: null, loading: null, geo: null, geoSig: null, cfg: null, last: null, blocked: false };
+
+function tnEsc(x) { return String(x == null ? '' : x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function tnTodayKey() { const d = new Date(); return d.getFullYear() + '-' + tnPad(d.getMonth() + 1) + '-' + tnPad(d.getDate()); }
+function tnEl(id) { return document.getElementById(id); }
+function tnSetStatus(html) { const e = tnEl('tn-status'); if (e) e.innerHTML = html || ''; }
+
+// ── Configuración (orden de desempate y criterios activos) ──
+async function tnLoadCfg() {
+  let raw = null;
+  try { raw = JSON.parse(localStorage.getItem(TN_CFG_LS) || 'null'); } catch (e) {}
+  try {
+    if (isAppOnline()) {
+      const { data, error } = await sb.from('platform_settings').select('value').eq('key', TN_CFG_KEY).maybeSingle();
+      if (!error && data && data.value) { raw = data.value; try { localStorage.setItem(TN_CFG_LS, JSON.stringify(raw)); } catch (e) {} }
+    }
+  } catch (e) {}
+  _tn.cfg = tnNormCfg(raw);
+  return _tn.cfg;
+}
+async function tnSaveCfg() {
+  const cfg = tnNormCfg(_tn.cfg);
+  try { localStorage.setItem(TN_CFG_LS, JSON.stringify(cfg)); } catch (e) {}
+  try {
+    const { error } = await sb.from('platform_settings').upsert({ key: TN_CFG_KEY, value: cfg });
+    if (error) throw error;
+    showToast('Criterios de Terrenor guardados', 'success');
+  } catch (e) { showToast('Se guardó solo en este dispositivo: ' + ((e && e.message) || 'sin permiso'), 'error'); }
+}
+function tnRenderCriteria() {
+  const box = tnEl('tn-criteria'); if (!box) return;
+  const cfg = tnNormCfg(_tn.cfg), off = new Set(cfg.off);
+  box.innerHTML =
+    '<div class="tn-small">Cada criterio activo ordena a todos los candidatos con los datos reales. Terrenor promedia las posiciones: <b>todos los criterios activos pesan igual</b>. El orden de abajo solo se usa para desempatar (y se muestra en cada explicación). No hay puntajes ni cortes fijos.</div>' +
+    cfg.order.map((id, i) => {
+      const c = TN_CRITERIA.find(x => x.id === id);
+      return '<div class="tn-crit"><label class="tn-crit-main"><input type="checkbox" ' + (off.has(id) ? '' : 'checked') + ' onchange="tnToggleCrit(\'' + id + '\',this.checked)"><span><b>' + tnEsc(c.label) + '</b><br><span class="tn-small">' + tnEsc(c.desc) + '</span></span></label>' +
+        '<span class="tn-crit-btns"><button type="button" class="btn-sm" ' + (i === 0 ? 'disabled' : '') + ' onclick="tnMoveCrit(\'' + id + '\',-1)" aria-label="Subir">▲</button><button type="button" class="btn-sm" ' + (i === cfg.order.length - 1 ? 'disabled' : '') + ' onclick="tnMoveCrit(\'' + id + '\',1)" aria-label="Bajar">▼</button></span></div>';
+    }).join('') +
+    '<div style="display:flex;gap:8px;margin-top:.7rem"><button type="button" class="btn-secondary" onclick="tnResetCfg()">Restablecer</button></div>';
+}
+async function tnToggleCrit(id, on) { const cfg = tnNormCfg(_tn.cfg), s = new Set(cfg.off); on ? s.delete(id) : s.add(id); _tn.cfg = { order: cfg.order, off: [...s] }; tnRenderCriteria(); await tnSaveCfg(); }
+async function tnMoveCrit(id, dir) { const cfg = tnNormCfg(_tn.cfg), i = cfg.order.indexOf(id), j = i + dir; if (j < 0 || j >= cfg.order.length) return; const o = cfg.order.slice(); [o[i], o[j]] = [o[j], o[i]]; _tn.cfg = { order: o, off: cfg.off }; tnRenderCriteria(); await tnSaveCfg(); }
+async function tnResetCfg() { _tn.cfg = tnNormCfg(null); tnRenderCriteria(); await tnSaveCfg(); }
+
+// ── Carga de datos (todo paginado; si algo falla NO se recomienda con datos parciales) ──
+async function tnFetchAll(table, cols, orderCol) {
+  const out = [], PAGE = 1000;
+  for (let from = 0; ; from += PAGE) {
+    const res = await trepRetry(() => sb.from(table).select(cols).order(orderCol).range(from, from + PAGE - 1));
+    if (res.error) throw res.error;
+    out.push(...(res.data || []));
+    if (!res.data || res.data.length < PAGE) break;
+  }
+  return out;
+}
+async function tnLoadGeo(terIds) {
+  const empty = { ids: new Set(), contact: {}, dist: {}, layoutCount: 0, orphanLayout: [], duplicateLayout: [] };
+  try {
+    const layout = await lmGetLayout(false);
+    if (!layout || !layout.items.length) return empty;
+    await lmLoadAssets(layout.items.map(i => i.id));
+    const sig = layout.items.map(i => [i.id, i.x, i.y, i.s, i.r, i.w, i.h, i.hidden ? 1 : 0, (_lmAssets[i.id] || {}).sig || ''].join(',')).join('|') + '#' + terIds.join(',');
+    if (_tn.geo && _tn.geoSig === sig) return _tn.geo;
+    const env = {
+      layout, getMask: id => _lmMaskFor(id), localToWorld: lmLocalToWorld, worldToLocal: lmWorldToLocal, corners: _lmCorners,
+      tick: async (i, n) => { tnSetStatus('<div class="tn-loading"><div class="loader"></div><span>Analizando límites en LiveMap… ' + i + ' de ' + n + '</span></div>'); await new Promise(r => setTimeout(r, 0)); },
+    };
+    const geo = await tnComputeGeometry(env, terIds);
+    _tn.geo = geo; _tn.geoSig = sig; return geo;
+  } catch (e) { console.warn('Terrenor LiveMap:', e && e.message); return null; }
+}
+async function tnLoad() {
+  if (_tn.loading) return _tn.loading;
+  _tn.loading = (async () => {
+    tnSetStatus('<div class="tn-loading"><div class="loader"></div><span>Leyendo reportes, asignaciones y casas…</span></div>');
+    const errors = [];
+    const safe = async (label, fn, fb) => { try { return await fn(); } catch (e) { errors.push(label + ': ' + ((e && e.message) || e)); return fb; } };
+    const subCols = 'id,form_id,territory_id,manzanas_done,all_territory,not_covered,total_manzanas,submitted_at';
+    const [terr, asg, forms, subs, cas, gr] = await Promise.all([
+      safe('territorios', () => tnFetchAll('territories', 'id,number,color,manzanas', 'id'), []),
+      safe('asignaciones', () => tnFetchAll('assignments', 'id,date,type,territory_id,territory_id_2,territory_id_3,visita_territorios,casa_id,grupo_id,manzanas_asignadas,manzanas_asignadas_2,manzanas_asignadas_3', 'id'), []),
+      safe('formularios de reporte', () => tnFetchAll('territory_report_forms', 'id,assignment_date', 'id'), []),
+      safe('reportes', async () => { try { return await tnFetchAll('territory_report_submissions', subCols + ',simple_status', 'id'); } catch (e) { if (/simple_status/.test((e && e.message) || '')) return await tnFetchAll('territory_report_submissions', subCols, 'id'); throw e; } }, []),
+      safe('casas', () => tnFetchAll('casas', '*', 'id'), []),
+      safe('grupos', () => tnFetchAll('grupos', '*', 'id'), []),
+    ]);
+    const geo = await tnLoadGeo(terr.map(t => t.id));
+    _tn.raw = { today: tnTodayKey(), territories: terr, assignments: asg, forms, subs, casas: cas, grupos: gr, geo, errors };
+    _tn.model = tnBuildModel(_tn.raw);
+    _tn.blocked = errors.length > 0;
+    tnSetStatus(errors.length ? '<div class="tn-banner err"><b>No se pudo cargar todo el historial.</b> Para no recomendar con datos incompletos, Terrenor se detuvo.<br><span class="tn-small">' + errors.map(tnEsc).join('<br>') + '</span><br><button type="button" class="btn-secondary" style="margin-top:.5rem" onclick="tnRefresh()">Reintentar</button></div>' : '');
+    tnRenderAux();
+  })().finally(() => { _tn.loading = null; });
+  return _tn.loading;
+}
+async function tnRefresh() { _tn.model = null; tnEl('tn-result').innerHTML = ''; await tnLoad(); }
+
+// ── Formulario ──
+function tnInitForm() {
+  const d = tnEl('tn-date'); if (d && !d.value) d.value = tnTodayKey();
+  const g = tnEl('tn-grupo');
+  if (g) { const cur = g.value; g.innerHTML = '<option value="">Semana (todos los grupos)</option>' + (typeof grupos !== 'undefined' ? grupos : []).map(x => '<option value="' + tnEsc(x.id) + '">Grupo ' + tnEsc(x.numero) + '</option>').join(''); g.value = cur; }
+  const a = tnEl('tn-anchor');
+  if (a) { const cur = a.value; a.innerHTML = '<option value="">Sin referencia</option>' + (territories || []).slice().sort((x, y) => tnNumCmp(x.number, y.number)).map(t => '<option value="' + tnEsc(t.id) + '">Territorio ' + tnEsc(t.number) + '</option>').join(''); a.value = cur; }
+  tnDateChanged();
+}
+function tnDateChanged() {
+  const d = tnEl('tn-date') && tnEl('tn-date').value, w = tnEl('tn-grupo-wrap');
+  if (w) w.style.display = (d && tnDow(d) === 6) ? '' : 'none';
+  if (!(d && tnDow(d) === 6) && tnEl('tn-grupo')) tnEl('tn-grupo').value = '';
+}
+async function terrenorOpenAdminSection() {
+  _tn.cfg = _tn.cfg || tnNormCfg(null);
+  tnInitForm(); tnRenderCriteria();
+  await tnLoadCfg(); tnRenderCriteria();
+  _tn.model = null; await tnLoad();
+}
+
+// ── Recomendar ──
+async function tnRun() {
+  const date = tnEl('tn-date').value;
+  if (!date) { showToast('Elige la fecha de la asignación', 'error'); return; }
+  const btn = tnEl('tn-run'); btn.disabled = true;
+  try {
+    if (!_tn.model) await tnLoad();
+    if (_tn.blocked || !_tn.model) { tnEl('tn-result').innerHTML = ''; return; }
+    const p = { date, type: tnEl('tn-type').value, grupoId: tnEl('tn-grupo-wrap').style.display === 'none' ? null : (tnEl('tn-grupo').value || null), count: parseInt(tnEl('tn-count').value, 10) || 1, anchorId: tnEl('tn-anchor').value || null };
+    const rec = tnRecommend(_tn.model, p, _tn.cfg);
+    const houses = tnRecommendHouses(_tn.model, p, rec.picks, _tn.cfg);
+    if (date < _tn.model.today) rec.notes.unshift('La fecha ya pasó: el progreso de manzanas se calcula con todos los reportes registrados hasta hoy.');
+    _tn.last = { p, rec, houses };
+    tnRenderResult();
+  } finally { btn.disabled = false; }
+}
+function tnStateChip(s, st) {
+  if (s.partial) return '<span class="tn-chip warn">' + (st.total > 0 ? 'En curso · ' + s.doneN + '/' + st.total : 'En curso') + '</span>';
+  return '<span class="tn-chip">' + (st.lastCompleted ? 'Sin progreso' : 'Sin realización registrada') + '</span>';
+}
+function tnWarnHtml(arr) { return arr.length ? '<div class="tn-warns">' + arr.map(w => '<div class="tn-warn">⚠ ' + tnEsc(w) + '</div>').join('') + '</div>' : ''; }
+function tnRenderResult() {
+  const L = _tn.last, box = tnEl('tn-result'); if (!L) { box.innerHTML = ''; return; }
+  const { p, rec, houses } = L, M = _tn.model;
+  const head = '<div class="tn-title">Recomendación para el ' + tnEsc(tnFmtDate(p.date)) + '</div>';
+  const notes = rec.notes.concat(houses.notes).map(n => '<div class="tn-banner">' + tnEsc(n) + '</div>').join('');
+  if (!rec.picks.length) { box.innerHTML = head + notes + tnExcludedHtml(rec); return; }
+  const picks = rec.picks.map((x, i) => {
+    const st = x.st, col = st.color || 'var(--accent)';
+    return '<div class="tn-card"><div class="tn-card-head"><span class="tn-num" style="background:' + tnEsc(col) + '">' + tnEsc(st.number) + '</span><div class="tn-card-t"><b>Territorio ' + tnEsc(st.number) + '</b><div>' + tnStateChip(x.status, st) + '</div></div><span class="tn-pos">#' + (i + 1) + '</span></div>' +
+      '<ul class="tn-reasons">' + x.reasons.map(r => '<li>' + tnEsc(r.t) + '</li>').join('') + (x.reasons.length ? '' : '<li>Sin criterios activos: se ordenó por número.</li>') + '</ul>' +
+      (x.neighbors.length ? '<div class="tn-neigh"><span class="tn-small">Limítrofes en LiveMap:</span> ' + x.neighbors.map(n => '<span class="tn-chip ' + (n.state === 'partial' ? 'warn' : '') + '">T' + tnEsc(n.number) + '</span>').join(' ') + '</div>' : '') +
+      tnWarnHtml(x.warnings) + '</div>';
+  }).join('');
+  const hs = houses.ranked, shown = hs.slice(0, 3), more = hs.slice(3);
+  const houseCard = (h, i) => '<div class="tn-card"><div class="tn-card-head"><span class="tn-num house">' + (h.casa.tipo === 'zoom' ? 'Z' : (i + 1)) + '</span><div class="tn-card-t"><b>' + tnEsc(h.casa.tipo === 'zoom' ? 'Reunión Zoom' : (h.casa.direccion || 'Sin dirección')) + '</b><div class="tn-small">' + tnEsc(h.casa.amo || '') + '</div></div></div>' +
+    '<ul class="tn-reasons">' + h.reasons.map(r => '<li>' + tnEsc(r) + '</li>').join('') + '</ul>' + tnWarnHtml(h.warnings) +
+    '<button type="button" class="btn-secondary tn-use" onclick="tnApply(\'' + tnEsc(h.casa.id) + '\')">Crear asignación con esta casa</button></div>';
+  const housesHtml = hs.length ? shown.map(houseCard).join('') + (more.length ? '<details class="tn-fold"><summary>Ver las otras ' + more.length + ' casa(s) disponibles</summary>' + more.map((h, i) => houseCard(h, i + 3)).join('') + '</details>' : '') : '<div class="tn-banner">No hay casas que recomendar para esa fecha y tipo.</div>';
+  const unav = houses.unavailable.length ? '<details class="tn-fold"><summary>Casas descartadas (' + houses.unavailable.length + ')</summary>' + houses.unavailable.map(u => '<div class="tn-row"><b>' + tnEsc(u.casa.tipo === 'zoom' ? 'Reunión Zoom' : (u.casa.direccion || 'Sin dirección')) + '</b><span class="tn-small">' + tnEsc(u.why.join(' ')) + '</span></div>').join('') + '</details>' : '';
+  box.innerHTML = head + notes +
+    '<div class="tn-sub">Territorios</div>' + picks + tnExcludedHtml(rec) +
+    '<div class="tn-sub">Casas</div>' + housesHtml + unav +
+    '<div style="margin-top:.9rem"><button type="button" class="btn-secondary" onclick="tnApply(\'\')">Crear asignación sin casa</button></div>' +
+    '<div class="tn-small" style="margin-top:.5rem">Se abre el formulario de Nueva Asignación con estos datos. No se guarda nada hasta que lo confirmes.</div>';
+}
+function tnExcludedHtml(rec) {
+  if (!rec.excluded.length) return '';
+  return '<details class="tn-fold"><summary>Territorios descartados (' + rec.excluded.length + ')</summary>' + rec.excluded.map(x => '<div class="tn-row"><b>Territorio ' + tnEsc(x.st.number) + '</b><span class="tn-small">' + tnEsc(x.why.join(' ')) + '</span></div>').join('') + '</details>';
+}
+
+// ── Diagnóstico y estado de territorios ──
+function tnRenderAux() {
+  const M = _tn.model; if (!M) return;
+  const cnt = l => M.diag.filter(d => d.level === l).length, e = cnt('error'), w = cnt('warn'), i = cnt('info');
+  const badge = tnEl('tn-diag-badge'); if (badge) badge.innerHTML = (e ? '<span class="tn-chip err">' + e + ' error(es)</span> ' : '') + (w ? '<span class="tn-chip warn">' + w + ' aviso(s)</span> ' : '') + (i ? '<span class="tn-chip">' + i + ' info</span>' : '') + (!e && !w && !i ? '<span class="tn-chip ok">Sin problemas</span>' : '');
+  const dg = tnEl('tn-diag');
+  if (dg) dg.innerHTML = M.diag.length ? M.diag.map(d => '<div class="tn-diag ' + d.level + '"><b>' + tnEsc(d.title) + '</b>' + (d.detail ? '<div class="tn-small">' + tnEsc(d.detail) + '</div>' : '') + '</div>').join('') : '<div class="tn-small">No se detectaron datos incompletos ni contradictorios.</div>';
+  const sb2 = tnEl('tn-states');
+  if (sb2) sb2.innerHTML = M.order.slice().sort((a, b) => tnNumCmp(M.T[a].number, M.T[b].number)).map(id => {
+    const st = M.T[id], s = tnStatus(st), nb = M.geo && M.geo.contact[id] ? M.geo.contact[id].length : null;
+    return '<div class="tn-row tn-state"><b>T' + tnEsc(st.number) + '</b>' + tnStateChip(s, st) + '<span class="tn-small">Última completa: ' + tnEsc(tnFmtDate(st.lastCompleted)) + ' · ' + st.completions + ' ciclo(s) · ' + st.assignCount + ' asignación/es' + (nb == null ? ' · sin LiveMap' : ' · ' + nb + ' limítrofe(s)') + '</span></div>';
+  }).join('') || '<div class="tn-small">Sin territorios.</div>';
+}
+
+// ── Crear asignación (abre el formulario existente con los datos precargados) ──
+function tnApply(casaId) {
+  const L = _tn.last; if (!L || !L.rec.picks.length) return;
+  const ids = L.rec.picks.map(x => x.st.id);
+  openAssignmentModal({ date: L.p.date, type: L.p.type, territory_id: ids[0] || null, territory_id_2: ids[1] || null, territory_id_3: ids[2] || null, casa_id: casaId || null, grupo_id: L.p.grupoId || null });
+  // Es un borrador, no la edición de una asignación existente.
+  editingAssignmentId = null;
+  const t = document.getElementById('assignment-modal-title'); if (t) t.textContent = 'Nueva Asignación';
+  const del = document.getElementById('as-delete-btn'); if (del) del.style.display = 'none';
 }
 
 // ══ v1.80.2: LIVEMAP ═══════════════════════════════════════════════════════════════════════════
@@ -40697,7 +41352,7 @@ function detailRenderMoreMenu() {
   const snapOn=(typeof isLiveSnapEnabled==='function') && isLiveSnapEnabled(); // v1.80.9
   if(!_msn) h+=`<button type="button" class="dam-toggle-row" role="switch" aria-checked="${snapOn}" onclick="detailMoreAction('livesnap')">${_DAM_ICON.snap}<span class="dam-label">LiveSnap</span><span class="dam-switch${snapOn?' on':''}"><span class="dam-thumb"></span></span></button>`;
   const lmapOn=(typeof isH2HLiveMapEnabled==='function') && isH2HLiveMapEnabled(); // v1.87: LiveMap solo de esta asignación (no afecta al Mapa de la congregación)
-  if(!_msn && liveOn) h+=`<button type="button" class="dam-toggle-row" role="switch" aria-checked="${lmapOn}" onclick="detailMoreAction('livemap')">${_DAM_ICON.lmap}<span class="dam-label">LiveMap</span><span class="dam-switch${lmapOn?' on':''}"><span class="dam-thumb"></span></span></button>`;
+  if(!_msn) h+=`<button type="button" class="dam-toggle-row" role="switch" aria-checked="${lmapOn}" onclick="detailMoreAction('livemap')">${_DAM_ICON.lmap}<span class="dam-label">LiveMap</span><span class="dam-switch${lmapOn?' on':''}"><span class="dam-thumb"></span></span></button>`;
   if(!_msn) h+=`<button type="button" class="dam-toggle-row" role="switch" aria-checked="${on}" onclick="detailMoreAction('weather')">${_DAM_ICON.weather}<span class="dam-label">Clima</span><span class="dam-switch${on?' on':''}"><span class="dam-thumb"></span></span></button>`;
   h+=`<button type="button" onclick="detailMoreAction('share')">${_DAM_ICON.share}Compartir</button>`;
   if (window.innerWidth >= 640) {
