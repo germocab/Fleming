@@ -7801,6 +7801,17 @@ html.modo-sencillo-mode .esp-simple .especial-card-subtitle { font-size: 0.94rem
 .home-section { margin-bottom: 1.6rem; }
 .home-section-title { font-size: 1.35rem; font-weight: 800; color: var(--text); margin: 0.1rem 0.3rem 0.85rem; letter-spacing: -0.02em; } /* v1.89g: mismo tamaño y espaciado que el título «Para tí» (.pt-head) */
 .home-card-list { display: flex; flex-direction: column; gap: 10px; }
+/* v1.97.4: Accesos directos en Inicio (máx. 2) */
+.sc-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.sc-row.single { grid-template-columns: 1fr; }
+.sc-tile { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 0.8rem 0.85rem; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); cursor: pointer; transition: transform 0.15s; font: inherit; color: var(--text); text-align: left; -webkit-tap-highlight-color: transparent; }
+.sc-tile:active { transform: scale(0.97); }
+.sc-name { flex: 1; min-width: 0; font-size: 0.92rem; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; overflow-wrap: anywhere; }
+.sc-empty { background: var(--surface); border: 1px dashed var(--border); border-radius: 18px; padding: 0.9rem 1rem; color: var(--text2, var(--text)); font-size: 0.9rem; cursor: pointer; text-align: center; }
+.home-custom-row.sc-pick { cursor: pointer; }
+.sc-check { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; color: transparent; }
+.sc-check svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.home-custom-row.sc-pick.on .sc-check { background: var(--accent); border-color: var(--accent); color: #fff; }
 .home-card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 0.8rem 0.95rem; box-shadow: var(--shadow); cursor: pointer; transition: transform 0.15s; }
 .home-card:active { transform: scale(0.98); }
 .home-card { display: flex; align-items: center; gap: 12px; }
@@ -7990,6 +8001,12 @@ const _HI = {
   star: '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>',
   map: '<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>',
   clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+  info: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
+  shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  heart: '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',
+  pin: '<path d="M12 22s-7-6.1-7-12a7 7 0 0 1 14 0c0 5.9-7 12-7 12z"/><circle cx="12" cy="10" r="2.5"/>',
+  bolt: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
 };
 const _HC = {
   blue: ['var(--accent)', 'var(--accent-light)'], green: ['#34c759', 'rgba(52,199,89,0.12)'], red: ['var(--red)', 'rgba(255,59,48,0.12)'],
@@ -8007,6 +8024,7 @@ const HOME_SECTIONS = {
   tips:     { title: 'Tips', i18n: 'home.tips', icon: 'bulb', col: 'yellow' },
   para:     { title: 'Para tí', i18n: 'home.forYou', icon: 'star', col: 'blue' },
   eventos:  { title: 'Próximos Eventos', i18n: 'home.upcomingEvents', icon: 'cal', col: 'purple' },
+  atajos:   { title: 'Accesos directos', i18n: 'home.shortcuts', icon: 'bolt', col: 'orange' }, // v1.97.4: opcional, no está en el diseño por defecto
 };
 function _homeSectionTitle(k) { const sec = HOME_SECTIONS[k]; return sec ? _homeLang(sec.i18n || '') || sec.title : ''; }
 const HOME_DEFAULT_LAYOUT = ['para', 'hoy', 'eventos', 'resp']; // v1.74.10: Para ti, Predicación de hoy, Eventos y Mis responsabilidades
@@ -8421,6 +8439,81 @@ function homeNavGo(tab) {
 }
 window.addEventListener('resize', () => { try { applyInicioUI(); } catch {} });
 
+// ── v1.97.4: Accesos directos en Inicio ─────────────────────────────────────
+// Apartado opcional (no forma parte del diseño por defecto). Cada usuario fija como máximo 2 accesos directos a otras
+// instancias de la plataforma; la elección se guarda por usuario en este dispositivo, igual que el resto de Inicio.
+const HOME_SHORTCUT_MAX = 2;
+const HOME_SHORTCUTS = {
+  livemap:           { icon: 'pin',    col: 'blue',   n: { es: 'LiveMap', en: 'LiveMap', nl: 'LiveMap' } },
+  grupos:            { icon: 'users',  col: 'teal',   n: { es: 'Grupos de Servicio', en: 'Service Groups', nl: 'Dienstgroepen' } },
+  hospitalidad:      { icon: 'heart',  col: 'red',    n: { es: 'Hospitalidad', en: 'Hospitality', nl: 'Gastvrijheid' } },
+  responsabilidades: { icon: 'star',   col: 'purple', n: { es: 'Responsabilidades', en: 'Responsibilities', nl: 'Verantwoordelijkheden' } },
+  config:            { icon: 'gear',   col: 'blue',   n: { es: 'Configuración', en: 'Settings', nl: 'Instellingen' } },
+  aseo:              { icon: 'house',  col: 'orange', n: { es: 'Aseo del Salón', en: 'Hall Cleaning', nl: 'Zaalschoonmaak' } },
+  version:           { icon: 'info',   col: 'green',  n: { es: 'Versión de la plataforma', en: 'Platform version', nl: 'Platformversie' } },
+  admin:             { icon: 'shield', col: 'yellow', n: { es: 'Administración', en: 'Administration', nl: 'Beheer' }, adminOnly: true },
+};
+function _homeShortcutName(k) { const d = HOME_SHORTCUTS[k]; return d ? (d.n[currentLang] || d.n.es) : ''; }
+function _homeShortcutAllowed(k) {
+  const d = HOME_SHORTCUTS[k]; if (!d) return false;
+  return !d.adminOnly || (typeof currentRole !== 'undefined' && (currentRole === 'dev' || currentRole === 'admin'));
+}
+function _homeShortcutsKey() { return 'fleming_home_shortcuts:' + ((typeof currentUser !== 'undefined' && currentUser && currentUser.name) || '').trim().toLowerCase(); }
+var _homeShortcutsMem = null; // respaldo en memoria si el almacenamiento del navegador no está disponible
+function getHomeShortcuts() {
+  let raw = _homeShortcutsMem;
+  if (raw == null) { try { raw = JSON.parse(localStorage.getItem(_homeShortcutsKey())); } catch (e) { raw = null; } }
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((k, i) => HOME_SHORTCUTS[k] && raw.indexOf(k) === i && _homeShortcutAllowed(k)).slice(0, HOME_SHORTCUT_MAX);
+}
+function saveHomeShortcuts(arr) {
+  _homeShortcutsMem = arr.slice(0, HOME_SHORTCUT_MAX);
+  try { localStorage.setItem(_homeShortcutsKey(), JSON.stringify(_homeShortcutsMem)); } catch (e) {}
+}
+function homeShortcutToggle(k) {
+  if (!HOME_SHORTCUTS[k] || !_homeShortcutAllowed(k)) return;
+  const cur = getHomeShortcuts();
+  if (cur.includes(k)) saveHomeShortcuts(cur.filter(x => x !== k));
+  else {
+    if (cur.length >= HOME_SHORTCUT_MAX) { showToast(_homeLang('home.shortcutsMax'), 'error'); return; }
+    saveHomeShortcuts(cur.concat(k));
+  }
+  renderHomeCustomize();
+}
+async function homeShortcutGo(k) {
+  if (!_homeShortcutAllowed(k)) return;
+  try { trackEvent('home_shortcut', { to: k }); } catch (e) {}
+  try {
+    if (k === 'livemap') { try { lmRememberMap('live'); } catch (e) {} await openFullMap(); }
+    else if (k === 'grupos') inicioGoTo('predicacion', 'grupos');
+    else if (k === 'hospitalidad' || k === 'responsabilidades') inicioGoTo('reuniones', k);
+    else if (k === 'aseo') inicioGoTo('reuniones', 'aseo-salon');
+    else if (k === 'config') await openPreferencias();
+    else if (k === 'version') { await openPreferencias(); openPrefScreen('version'); }
+    else if (k === 'admin') await goAdminShortcut();
+  } catch (e) { console.warn('Acceso directo:', e); }
+}
+function _homeShortcutsHtml() {
+  const sel = getHomeShortcuts();
+  if (!sel.length) return '<div class="sc-empty" onclick="openHomeCustomize()">' + escapeHtml(_homeLang('home.shortcutsEmpty')) + '</div>';
+  return '<div class="sc-row' + (sel.length === 1 ? ' single' : '') + '">' + sel.map(k => {
+    const d = HOME_SHORTCUTS[k];
+    return '<button type="button" class="sc-tile" onclick="homeShortcutGo(\'' + k + '\')">' + _homeIcoBox(d.icon, d.col, '') +
+      '<span class="sc-name">' + escapeHtml(_homeShortcutName(k)) + '</span></button>';
+  }).join('') + '</div>';
+}
+function _homeShortcutsPickerHtml() {
+  const sel = getHomeShortcuts();
+  let h = '<div class="home-custom-h">' + escapeHtml(_homeLang('home.shortcutsPickTitle')) + ' · ' + sel.length + '/' + HOME_SHORTCUT_MAX + '</div>';
+  Object.keys(HOME_SHORTCUTS).filter(_homeShortcutAllowed).forEach(k => {
+    const d = HOME_SHORTCUTS[k], on = sel.includes(k);
+    h += '<div class="home-custom-row sc-pick' + (on ? ' on' : '') + '" role="checkbox" aria-checked="' + on + '" onclick="homeShortcutToggle(\'' + k + '\')">' +
+      _homeIcoBox(d.icon, d.col, 'home-custom-ico') + '<div class="home-custom-name">' + escapeHtml(_homeShortcutName(k)) + '</div>' +
+      '<span class="sc-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span></div>';
+  });
+  return h;
+}
+
 // ── Layout (apartados elegidos y su orden) ──
 function _homeLayoutKey() { return 'fleming_home_layout:' + ((typeof currentUser !== 'undefined' && currentUser && currentUser.name) || '').trim().toLowerCase(); }
 function getHomeLayout() {
@@ -8733,6 +8826,7 @@ async function renderHome() {
     if (k === 'para') { if (_homeParaAll.length) html += '<div class="home-section" id="home-para"></div>'; return; } // v1.61.0-beta
     if (k === 'hoy') { html += '<div class="home-section" id="home-hoy"></div>'; return; }
     if (k === 'eventos') { html += '<div class="home-section" id="home-eventos"></div>'; return; } // v1.60.8-beta
+    if (k === 'atajos') { html += _homeSection(_homeSectionTitle(k), _homeShortcutsHtml()); return; } // v1.97.4
     let cards = [];
     if (k === 'carritos' && (sec('carritos')?.items || []).length) {
       html += _homeSection(_homeSectionTitle(k), '<div class="home-card-list">' + sec('carritos').items.map(it => msCardHtml({ punto: it.label, dia: it.dia, hora: it.hora, nombres: it.nombres, onclick: 'homeAct(' + (_homeActions.push(it.onClick || null) - 1) + ')' })).join('') + '</div>');
@@ -8991,6 +9085,7 @@ function renderHomeCustomize() {
     h += '<div class="home-custom-h">Agregar</div>';
     avail.forEach(k => { h += '<div class="home-custom-row">' + _homeIcoBox(HOME_SECTIONS[k].icon, HOME_SECTIONS[k].col, 'home-custom-ico') + '<div class="home-custom-name">' + escapeHtml(_homeSectionTitle(k)) + '</div>' + _homeIco('plus', 'add', "homeAdd('" + k + "')") + '</div>'; });
   }
+  if (layout.includes('atajos')) h += _homeShortcutsPickerHtml(); // v1.97.4
   const nHid = Object.keys(_homeHiddenLoad()).length;
   if (nHid) h += '<button class="home-custom-reset" onclick="homeRestoreHidden()">Restaurar tarjetas quitadas de "Para tí" (' + nHid + ')</button>';
   h += '<button class="home-custom-reset" onclick="homeResetLayout()">Restablecer por defecto</button>';
@@ -14632,6 +14727,10 @@ const I18N = {
   'exp.textSize.title': { es: 'Tamaño del texto', en: 'Text size', nl: 'Tekstgrootte' },
   'exp.textSize.desc': { es: 'Cambia solo el tamaño de las letras, sin modificar el tamaño de la interfaz ni de los elementos.', en: 'Changes only the size of the letters, without changing the size of the interface or its elements.', nl: 'Wijzigt alleen de lettergrootte, zonder de grootte van de interface of elementen te wijzigen.' },
   'exp.textSize.default': { es: '100% = predeterminado', en: '100% = default', nl: '100% = standaard' },
+  'home.shortcuts': { es: 'Accesos directos', en: 'Shortcuts', nl: 'Snelkoppelingen' },
+  'home.shortcutsEmpty': { es: 'Toca aquí para elegir tus accesos directos', en: 'Tap here to choose your shortcuts', nl: 'Tik hier om je snelkoppelingen te kiezen' },
+  'home.shortcutsPickTitle': { es: 'Accesos directos (máximo 2)', en: 'Shortcuts (max. 2)', nl: 'Snelkoppelingen (max. 2)' },
+  'home.shortcutsMax': { es: 'Solo puedes fijar 2 accesos directos. Quita uno para elegir otro.', en: 'You can pin only 2 shortcuts. Remove one to choose another.', nl: 'Je kunt maximaal 2 snelkoppelingen vastzetten. Verwijder er een om een andere te kiezen.' },
   'home.customizeHome': { es: 'Personalizar Inicio', en: 'Customize Home', nl: 'Startpagina aanpassen' },
   'home.today': { es: 'Hoy', en: 'Today', nl: 'Vandaag' },
   'home.tomorrow': { es: 'Mañana', en: 'Tomorrow', nl: 'Morgen' },
