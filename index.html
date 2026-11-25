@@ -17529,9 +17529,11 @@ async function openProfilePageMorph(srcEl) {
   const from = srcEl.getBoundingClientRect();
   if (!from.width || !from.height) return openProfilePage();
   let clone = null;
-  big.style.visibility = 'hidden';
+  const page = document.getElementById('page-profile');
+  // La página queda invisible hasta que la foto ya viaja: primero la foto, luego la página.
+  big.style.visibility = 'hidden'; page.style.animation = 'none'; page.style.opacity = '0';
   try {
-    await Promise.race([openProfilePage(), new Promise(r => setTimeout(r, 700))]);
+    await Promise.race([openProfilePage(), new Promise(r => setTimeout(r, 250))]);
     const to = big.getBoundingClientRect();
     if (!to.width || !to.height) return;
     clone = big.cloneNode(true);
@@ -17539,19 +17541,22 @@ async function openProfilePageMorph(srcEl) {
     Object.assign(clone.style, { position: 'fixed', left: to.left + 'px', top: to.top + 'px', width: to.width + 'px', height: to.height + 'px', margin: '0', zIndex: '10050', pointerEvents: 'none', visibility: 'visible', transformOrigin: '0 0', willChange: 'transform' });
     document.body.appendChild(clone);
     const dx = from.left - to.left, dy = from.top - to.top, sx = from.width / to.width, sy = from.height / to.height;
+    page.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 260, easing: 'ease-out', fill: 'both' });
+    page.style.opacity = '';
     const anim = clone.animate(
       [{ transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})` }, { transform: 'translate(0, 0) scale(1, 1)' }],
       { duration: 520, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'both' }
     );
     await anim.finished.catch(() => {});
   } finally {
-    big.style.visibility = '';
+    big.style.visibility = ''; page.style.opacity = '';
     if (clone) clone.remove();
   }
 }
 
 function closeProfilePage() {
   document.getElementById('page-profile').classList.remove('open');
+  document.getElementById('page-profile').style.animation = '';
   document.body.style.overflow = '';
 }
 
